@@ -31,7 +31,7 @@ classes:
     is_a: Information
     attributes:
       resources:
-        description: The datasets in this collection.
+        description: List of datasets in this collection.
         slot_uri: schema:hasPart
         range: MinimalDataset
         multivalued: true

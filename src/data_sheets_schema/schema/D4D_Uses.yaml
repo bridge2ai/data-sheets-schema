@@ -51,17 +51,19 @@ classes:
 
 
   UseRepository:
-    description: >
-      Is there a repository that links to any or all papers or systems
-      that use the dataset? If so, provide a link or other access point.
+    description: >-
+      A repository or registry of known uses of this dataset by third parties. Documents where the dataset has been applied, enabling discoverability of downstream use cases and impact tracking.
     is_a: DatasetProperty
     attributes:
       repository_url:
         description: "URL to a repository of known dataset uses."
         range: uri
+        annotations:
+          "d4d:docExample": "https://example.org/dataset/known-uses"
       repository_details:
         description: >
-          Details on the repository of known dataset uses.
+          Free-text description of the repository of known dataset uses, including
+          how it is maintained and how to contribute new use cases.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -74,7 +76,8 @@ classes:
     attributes:
       task_details:
         description: >
-          Details on other potential tasks the dataset could be used for.
+          Free-text description of other potential tasks the dataset could support,
+          including any prerequisites or limitations for those uses.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -92,7 +95,9 @@ classes:
     attributes:
       impact_details:
         description: >
-          Details on potential impacts, risks, and mitigation strategies.
+          Free-text description of potential future impacts or risks arising from the
+          dataset's composition or collection (e.g., unfair treatment, privacy violations,
+          legal or financial risks), and any recommended mitigation strategies.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -105,7 +110,9 @@ classes:
     attributes:
       discouragement_details:
         description: >
-          Details on tasks for which the dataset should not be used.
+          Free-text description of tasks or applications for which the dataset is
+          not recommended, with explanation of why (e.g., out-of-scope, risk of harm,
+          poor coverage).
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -127,11 +134,11 @@ classes:
         multivalued: true
       usage_notes:
         description: >-
-          Notes or caveats about using the dataset for intended purposes.
+          A note or caveat about using the dataset for its intended purposes.
         range: string
       use_category:
         description: >-
-          Category of intended use (e.g., research, clinical, educational,
+          One or more categories of intended use (e.g., research, clinical, educational,
           commercial, policy).
         slot_uri: d4d:useCategory
         range: string
@@ -148,7 +155,7 @@ classes:
     attributes:
       prohibition_reason:
         description: >-
-          Reason why this use is prohibited (e.g., license restriction,
+          One or more reasons why this use is prohibited (e.g., license restriction,
           ethical concern, privacy risk, legal constraint).
         slot_uri: d4d:prohibitionReason
         range: string

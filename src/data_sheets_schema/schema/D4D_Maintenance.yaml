@@ -50,7 +50,8 @@ classes:
         slot_uri: schema:maintainer
       maintainer_details:
         description: >
-          Details on who will support, host, or maintain the dataset.
+          Free-text description of the organization, team, or individual responsible for
+          maintaining the dataset, including contact information and hosting arrangements.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -63,11 +64,14 @@ classes:
     attributes:
       erratum_url:
         description: "URL or access point for the erratum."
-        slot_uri: dcat:accessURL
+        slot_uri: d4d:erratumURL
         range: uri
+        annotations:
+          "d4d:docExample": "https://example.org/dataset/errata/2024-01-15"
       erratum_details:
         description: >
-          Details on any errata or corrections to the dataset.
+          Free-text description of the error, its scope, the affected data or records,
+          and the correction applied.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -88,7 +92,8 @@ classes:
         range: string
       update_details:
         description: >
-          Details on update plans, responsible parties, and communication methods.
+          Free-text description of planned update types (e.g., corrections, additions,
+          deletions), responsible parties, and how updates will be communicated to users.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -108,7 +113,9 @@ classes:
         range: string
       retention_details:
         description: >
-          Details on data retention limits and enforcement procedures.
+          Free-text description of applicable retention limits, legal or ethical basis
+          for those limits, and how they will be enforced (e.g., automated deletion,
+          anonymization after the retention period).
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -121,9 +128,9 @@ classes:
     is_a: DatasetProperty
     attributes:
       latest_version_doi:
-        description: "DOI or URL of the latest dataset version."
-        slot_uri: schema:identifier
-        range: string
+        description: "DOI or URL identifying the latest version of this dataset (e.g., '10.5281/zenodo.1234567' for a DOI or 'https://doi.org/10.5281/zenodo.1234567' for a full URL). Use CURIE format for DOIs (e.g., 'doi:10.5281/zenodo.1234567')."
+        slot_uri: dcterms:hasVersion
+        range: uriorcurie
       versions_available:
         description: "List of available versions with metadata."
         slot_uri: d4d:versionsAvailable
@@ -131,7 +138,8 @@ classes:
         multivalued: true
       version_details:
         description: >
-          Details on version support policies and obsolescence communication.
+          Free-text description of version support policies, how long older versions will
+          be hosted, and how dataset consumers will be notified when versions become obsolete.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -146,11 +154,15 @@ classes:
     attributes:
       contribution_url:
         description: "URL for contribution guidelines or process."
-        slot_uri: dcat:landingPage
+        slot_uri: d4d:contributionURL
         range: uri
+        annotations:
+          "d4d:docExample": "https://example.org/dataset/contributing"
       extension_details:
         description: >
-          Details on extension mechanisms, contribution validation, and communication.
+          Free-text description of how third parties can contribute to the dataset,
+          how contributions are validated (e.g., peer review, automated tests),
+          and how accepted contributions will be communicated to the community.
         range: string
         multivalued: true
         slot_uri: dcterms:description

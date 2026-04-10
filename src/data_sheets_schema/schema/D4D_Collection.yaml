@@ -38,24 +38,33 @@ classes:
       (e.g., directly observed, reported by subjects, inferred).
     attributes:
       was_directly_observed:
-        description: Whether the data was directly observed
+        description: >-
+          True if the data was directly observed by a researcher or instrument;
+          false if it was obtained through other means (e.g., reported, inferred).
         slot_uri: d4d:wasDirectlyObserved
         range: boolean
       was_reported_by_subjects:
-        description: Whether the data was reported directly by the subjects themselves
+        description: >-
+          True if the data was self-reported directly by the subjects themselves
+          (e.g., survey responses, questionnaires); false otherwise.
         slot_uri: d4d:wasReportedBySubjects
         range: boolean
       was_inferred_derived:
-        description: Whether the data was inferred or derived from other data
+        description: >-
+          True if the data was computationally inferred or derived from other data
+          (e.g., model outputs, imputed values); false otherwise.
         slot_uri: d4d:wasInferred
         range: boolean
       was_validated_verified:
-        description: Whether the data was validated or verified in any way
+        description: >-
+          True if the data underwent a validation or verification process
+          (e.g., expert review, cross-checking with ground truth); false otherwise.
         slot_uri: d4d:wasValidated
         range: boolean
       acquisition_details:
         description: >
-          Details on how data was acquired for each instance.
+          Free-text description of how data was acquired for each instance, including
+          instruments, protocols, and any manual steps involved.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -71,7 +80,9 @@ classes:
     attributes:
       mechanism_details:
         description: >
-          Details on mechanisms or procedures used to collect the data.
+          Free-text description of the specific mechanisms or procedures used to collect
+          the data (e.g., hardware model, software API, manual curation process),
+          including how those mechanisms were validated.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -84,12 +95,14 @@ classes:
       and how they were compensated.
     attributes:
       role:
-        description: Role of the data collector (e.g., researcher, crowdworker)
+        description: Role of the data collector (e.g., researcher, crowdworker).
         slot_uri: schema:roleName
         range: string
       collector_details:
         description: >
-          Details on who collected the data and their compensation.
+          Free-text description of who was involved in data collection (e.g., students,
+          crowdworkers, contractors), their training or qualifications, and how they
+          were compensated.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -104,16 +117,18 @@ classes:
       - rai:dataCollectionTimeframe
     attributes:
       start_date:
-        description: Start date of data collection
+        description: Start date of data collection.
         slot_uri: schema:startDate
         range: date
       end_date:
-        description: End date of data collection
+        description: End date of data collection.
         slot_uri: schema:endDate
         range: date
       timeframe_details:
         description: >
-          Details on the collection timeframe and relationship to data creation dates.
+          Free-text description of the data collection period and whether this timeframe
+          matches the creation timeframe of the underlying data (e.g., historical records,
+          prospective collection).
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -126,12 +141,13 @@ classes:
       or obtained via third parties/other sources.
     attributes:
       is_direct:
-        description: Whether collection was direct from individuals
+        description: Whether collection was direct from individuals.
         slot_uri: d4d:isDirect
         range: boolean
       collection_details:
         description: >
-          Details on direct vs. indirect collection methods and sources.
+          Free-text description of whether data was collected directly from individuals
+          or obtained via third parties or other indirect sources, and what those sources are.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -161,8 +177,8 @@ classes:
         multivalued: true
       handling_strategy:
         description: >
-          Strategy used to handle missing data (e.g., deletion, imputation,
-          flagging, multiple imputation).
+          The primary strategy used to handle missing data (e.g., listwise deletion,
+          mean imputation, multiple imputation, flagging with sentinel values).
         slot_uri: d4d:handlingStrategy
         range: string
 
@@ -184,10 +200,12 @@ classes:
         required: true
       source_type:
         description: >
-          Type of raw source (sensor, database, user input, web scraping, etc.).
-        slot_uri: dcterms:type
+          One or more types of raw source (e.g., sensor, database, user input, web scraping).
+        slot_uri: d4d:sourceType
         range: string
         multivalued: true
+        broad_mappings:
+          - dcterms:type
       access_details:
         description: >
           Information on how to access or retrieve the raw source data.
@@ -195,7 +213,7 @@ classes:
         range: string
       raw_data_format:
         description: >
-          Format of the raw data before any preprocessing.
+          One or more formats of the raw data before any preprocessing (e.g., CSV, DICOM, JSON).
         slot_uri: d4d:rawDataFormat
         range: string
         multivalued: true

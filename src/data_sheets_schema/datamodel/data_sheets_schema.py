@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-04-07T13:03:28
+# Generation date: 2026-04-09T10:17:09
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -247,7 +247,7 @@ class Software(NamedThing):
     id: Union[str, SoftwareId] = None
     version: Optional[str] = None
     license: Optional[str] = None
-    url: Optional[str] = None
+    url: Optional[Union[str, URI]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -261,8 +261,8 @@ class Software(NamedThing):
         if self.license is not None and not isinstance(self.license, str):
             self.license = str(self.license)
 
-        if self.url is not None and not isinstance(self.url, str):
-            self.url = str(self.url)
+        if self.url is not None and not isinstance(self.url, URI):
+            self.url = URI(self.url)
 
         super().__post_init__(**kwargs)
 
@@ -469,11 +469,17 @@ class Dataset(Information):
     content_warnings: Optional[Union[Union[dict, "ContentWarning"], list[Union[dict, "ContentWarning"]]]] = empty_list()
     subpopulations: Optional[Union[Union[dict, "Subpopulation"], list[Union[dict, "Subpopulation"]]]] = empty_list()
     sensitive_elements: Optional[Union[Union[dict, "SensitiveElement"], list[Union[dict, "SensitiveElement"]]]] = empty_list()
+    relationships: Optional[Union[Union[dict, "Relationships"], list[Union[dict, "Relationships"]]]] = empty_list()
+    splits: Optional[Union[Union[dict, "Splits"], list[Union[dict, "Splits"]]]] = empty_list()
     acquisition_methods: Optional[Union[Union[dict, "InstanceAcquisition"], list[Union[dict, "InstanceAcquisition"]]]] = empty_list()
     collection_mechanisms: Optional[Union[Union[dict, "CollectionMechanism"], list[Union[dict, "CollectionMechanism"]]]] = empty_list()
     sampling_strategies: Optional[Union[Union[dict, "SamplingStrategy"], list[Union[dict, "SamplingStrategy"]]]] = empty_list()
     data_collectors: Optional[Union[Union[dict, "DataCollector"], list[Union[dict, "DataCollector"]]]] = empty_list()
     collection_timeframes: Optional[Union[Union[dict, "CollectionTimeframe"], list[Union[dict, "CollectionTimeframe"]]]] = empty_list()
+    direct_collection: Optional[Union[Union[dict, "DirectCollection"], list[Union[dict, "DirectCollection"]]]] = empty_list()
+    collection_notifications: Optional[Union[Union[dict, "CollectionNotification"], list[Union[dict, "CollectionNotification"]]]] = empty_list()
+    collection_consents: Optional[Union[Union[dict, "CollectionConsent"], list[Union[dict, "CollectionConsent"]]]] = empty_list()
+    consent_revocations: Optional[Union[Union[dict, "ConsentRevocation"], list[Union[dict, "ConsentRevocation"]]]] = empty_list()
     missing_data_documentation: Optional[Union[Union[dict, "MissingDataDocumentation"], list[Union[dict, "MissingDataDocumentation"]]]] = empty_list()
     raw_data_sources: Optional[Union[Union[dict, "RawDataSource"], list[Union[dict, "RawDataSource"]]]] = empty_list()
     ethical_reviews: Optional[Union[Union[dict, "EthicalReview"], list[Union[dict, "EthicalReview"]]]] = empty_list()
@@ -499,6 +505,7 @@ class Dataset(Information):
     prohibited_uses: Optional[Union[Union[dict, "ProhibitedUse"], list[Union[dict, "ProhibitedUse"]]]] = empty_list()
     distribution_formats: Optional[Union[Union[dict, "DistributionFormat"], list[Union[dict, "DistributionFormat"]]]] = empty_list()
     distribution_dates: Optional[Union[Union[dict, "DistributionDate"], list[Union[dict, "DistributionDate"]]]] = empty_list()
+    third_party_sharing: Optional[Union[Union[dict, "ThirdPartySharing"], list[Union[dict, "ThirdPartySharing"]]]] = empty_list()
     license_and_use_terms: Optional[Union[dict, "LicenseAndUseTerms"]] = None
     ip_restrictions: Optional[Union[dict, "IPRestrictions"]] = None
     regulatory_restrictions: Optional[Union[dict, "ExportControlRegulatoryRestrictions"]] = None
@@ -589,6 +596,14 @@ class Dataset(Information):
             self.sensitive_elements = [self.sensitive_elements] if self.sensitive_elements is not None else []
         self.sensitive_elements = [v if isinstance(v, SensitiveElement) else SensitiveElement(**as_dict(v)) for v in self.sensitive_elements]
 
+        if not isinstance(self.relationships, list):
+            self.relationships = [self.relationships] if self.relationships is not None else []
+        self.relationships = [v if isinstance(v, Relationships) else Relationships(**as_dict(v)) for v in self.relationships]
+
+        if not isinstance(self.splits, list):
+            self.splits = [self.splits] if self.splits is not None else []
+        self.splits = [v if isinstance(v, Splits) else Splits(**as_dict(v)) for v in self.splits]
+
         if not isinstance(self.acquisition_methods, list):
             self.acquisition_methods = [self.acquisition_methods] if self.acquisition_methods is not None else []
         self.acquisition_methods = [v if isinstance(v, InstanceAcquisition) else InstanceAcquisition(**as_dict(v)) for v in self.acquisition_methods]
@@ -608,6 +623,22 @@ class Dataset(Information):
         if not isinstance(self.collection_timeframes, list):
             self.collection_timeframes = [self.collection_timeframes] if self.collection_timeframes is not None else []
         self.collection_timeframes = [v if isinstance(v, CollectionTimeframe) else CollectionTimeframe(**as_dict(v)) for v in self.collection_timeframes]
+
+        if not isinstance(self.direct_collection, list):
+            self.direct_collection = [self.direct_collection] if self.direct_collection is not None else []
+        self.direct_collection = [v if isinstance(v, DirectCollection) else DirectCollection(**as_dict(v)) for v in self.direct_collection]
+
+        if not isinstance(self.collection_notifications, list):
+            self.collection_notifications = [self.collection_notifications] if self.collection_notifications is not None else []
+        self.collection_notifications = [v if isinstance(v, CollectionNotification) else CollectionNotification(**as_dict(v)) for v in self.collection_notifications]
+
+        if not isinstance(self.collection_consents, list):
+            self.collection_consents = [self.collection_consents] if self.collection_consents is not None else []
+        self.collection_consents = [v if isinstance(v, CollectionConsent) else CollectionConsent(**as_dict(v)) for v in self.collection_consents]
+
+        if not isinstance(self.consent_revocations, list):
+            self.consent_revocations = [self.consent_revocations] if self.consent_revocations is not None else []
+        self.consent_revocations = [v if isinstance(v, ConsentRevocation) else ConsentRevocation(**as_dict(v)) for v in self.consent_revocations]
 
         if not isinstance(self.missing_data_documentation, list):
             self.missing_data_documentation = [self.missing_data_documentation] if self.missing_data_documentation is not None else []
@@ -707,6 +738,10 @@ class Dataset(Information):
             self.distribution_dates = [self.distribution_dates] if self.distribution_dates is not None else []
         self.distribution_dates = [v if isinstance(v, DistributionDate) else DistributionDate(**as_dict(v)) for v in self.distribution_dates]
 
+        if not isinstance(self.third_party_sharing, list):
+            self.third_party_sharing = [self.third_party_sharing] if self.third_party_sharing is not None else []
+        self.third_party_sharing = [v if isinstance(v, ThirdPartySharing) else ThirdPartySharing(**as_dict(v)) for v in self.third_party_sharing]
+
         if self.license_and_use_terms is not None and not isinstance(self.license_and_use_terms, LicenseAndUseTerms):
             self.license_and_use_terms = LicenseAndUseTerms(**as_dict(self.license_and_use_terms))
 
@@ -792,7 +827,7 @@ class DataSubset(Dataset):
 @dataclass(repr=False)
 class FormatDialect(YAMLRoot):
     """
-    Additional format information for a file
+    Additional format information for a file.
     """
     _inherited_slots: ClassVar[list[str]] = []
 
@@ -1060,30 +1095,27 @@ class SamplingStrategy(DatasetProperty):
     class_name: ClassVar[str] = "SamplingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.SamplingStrategy
 
-    is_sample: Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]] = empty_list()
-    is_random: Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]] = empty_list()
+    is_sample: Optional[Union[bool, Bool]] = None
+    is_random: Optional[Union[bool, Bool]] = None
     source_data: Optional[Union[str, list[str]]] = empty_list()
-    is_representative: Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]] = empty_list()
+    is_representative: Optional[Union[bool, Bool]] = None
     representative_verification: Optional[Union[str, list[str]]] = empty_list()
     why_not_representative: Optional[Union[str, list[str]]] = empty_list()
     strategies: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if not isinstance(self.is_sample, list):
-            self.is_sample = [self.is_sample] if self.is_sample is not None else []
-        self.is_sample = [v if isinstance(v, Bool) else Bool(v) for v in self.is_sample]
+        if self.is_sample is not None and not isinstance(self.is_sample, Bool):
+            self.is_sample = Bool(self.is_sample)
 
-        if not isinstance(self.is_random, list):
-            self.is_random = [self.is_random] if self.is_random is not None else []
-        self.is_random = [v if isinstance(v, Bool) else Bool(v) for v in self.is_random]
+        if self.is_random is not None and not isinstance(self.is_random, Bool):
+            self.is_random = Bool(self.is_random)
 
         if not isinstance(self.source_data, list):
             self.source_data = [self.source_data] if self.source_data is not None else []
         self.source_data = [v if isinstance(v, str) else str(v) for v in self.source_data]
 
-        if not isinstance(self.is_representative, list):
-            self.is_representative = [self.is_representative] if self.is_representative is not None else []
-        self.is_representative = [v if isinstance(v, Bool) else Bool(v) for v in self.is_representative]
+        if self.is_representative is not None and not isinstance(self.is_representative, Bool):
+            self.is_representative = Bool(self.is_representative)
 
         if not isinstance(self.representative_verification, list):
             self.representative_verification = [self.representative_verification] if self.representative_verification is not None else []
@@ -1278,7 +1310,7 @@ class ExternalResource(DatasetProperty):
 
     external_resources: Optional[Union[str, list[str]]] = empty_list()
     future_guarantees: Optional[Union[str, list[str]]] = empty_list()
-    archival: Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]] = empty_list()
+    archival: Optional[Union[bool, Bool]] = None
     restrictions: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
@@ -1290,9 +1322,8 @@ class ExternalResource(DatasetProperty):
             self.future_guarantees = [self.future_guarantees] if self.future_guarantees is not None else []
         self.future_guarantees = [v if isinstance(v, str) else str(v) for v in self.future_guarantees]
 
-        if not isinstance(self.archival, list):
-            self.archival = [self.archival] if self.archival is not None else []
-        self.archival = [v if isinstance(v, Bool) else Bool(v) for v in self.archival]
+        if self.archival is not None and not isinstance(self.archival, Bool):
+            self.archival = Bool(self.archival)
 
         if not isinstance(self.restrictions, list):
             self.restrictions = [self.restrictions] if self.restrictions is not None else []
@@ -1757,7 +1788,7 @@ class LabelingStrategy(DatasetProperty):
     class_name: ClassVar[str] = "LabelingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.LabelingStrategy
 
-    data_annotation_platform: Optional[str] = None
+    data_annotation_platform: Optional[Union[str, list[str]]] = empty_list()
     data_annotation_protocol: Optional[Union[str, list[str]]] = empty_list()
     annotations_per_item: Optional[int] = None
     inter_annotator_agreement: Optional[str] = None
@@ -1765,8 +1796,9 @@ class LabelingStrategy(DatasetProperty):
     labeling_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self.data_annotation_platform is not None and not isinstance(self.data_annotation_platform, str):
-            self.data_annotation_platform = str(self.data_annotation_platform)
+        if not isinstance(self.data_annotation_platform, list):
+            self.data_annotation_platform = [self.data_annotation_platform] if self.data_annotation_platform is not None else []
+        self.data_annotation_platform = [v if isinstance(v, str) else str(v) for v in self.data_annotation_platform]
 
         if not isinstance(self.data_annotation_protocol, list):
             self.data_annotation_protocol = [self.data_annotation_protocol] if self.data_annotation_protocol is not None else []
@@ -1951,8 +1983,8 @@ class ExistingUse(DatasetProperty):
 @dataclass(repr=False)
 class UseRepository(DatasetProperty):
     """
-    Is there a repository that links to any or all papers or systems that use the dataset? If so, provide a link or
-    other access point.
+    A repository or registry of known uses of this dataset by third parties. Documents where the dataset has been
+    applied, enabling discoverability of downstream use cases and impact tracking.
     """
     _inherited_slots: ClassVar[list[str]] = []
 
@@ -2131,12 +2163,12 @@ class DistributionFormat(DatasetProperty):
     class_name: ClassVar[str] = "DistributionFormat"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DistributionFormat
 
-    access_urls: Optional[Union[str, list[str]]] = empty_list()
+    access_urls: Optional[Union[Union[str, URI], list[Union[str, URI]]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if not isinstance(self.access_urls, list):
             self.access_urls = [self.access_urls] if self.access_urls is not None else []
-        self.access_urls = [v if isinstance(v, str) else str(v) for v in self.access_urls]
+        self.access_urls = [v if isinstance(v, URI) else URI(v) for v in self.access_urls]
 
         super().__post_init__(**kwargs)
 
@@ -2283,13 +2315,13 @@ class VersionAccess(DatasetProperty):
     class_name: ClassVar[str] = "VersionAccess"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.VersionAccess
 
-    latest_version_doi: Optional[str] = None
+    latest_version_doi: Optional[Union[str, URIorCURIE]] = None
     versions_available: Optional[Union[str, list[str]]] = empty_list()
     version_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self.latest_version_doi is not None and not isinstance(self.latest_version_doi, str):
-            self.latest_version_doi = str(self.latest_version_doi)
+        if self.latest_version_doi is not None and not isinstance(self.latest_version_doi, URIorCURIE):
+            self.latest_version_doi = URIorCURIE(self.latest_version_doi)
 
         if not isinstance(self.versions_available, list):
             self.versions_available = [self.versions_available] if self.versions_available is not None else []
@@ -2948,164 +2980,368 @@ class FileCollection(Information):
 
 # Enumerations
 class FormatEnum(EnumDefinitionImpl):
-
-    CSV = PermissibleValue(text="CSV")
-    TSV = PermissibleValue(text="TSV")
-    XML = PermissibleValue(text="XML")
-    JSON = PermissibleValue(text="JSON")
-    JSONL = PermissibleValue(text="JSONL")
-    YAML = PermissibleValue(text="YAML")
-    HTML = PermissibleValue(text="HTML")
-    PDF = PermissibleValue(text="PDF")
-    DOCX = PermissibleValue(text="DOCX")
-    XLSX = PermissibleValue(text="XLSX")
-    PPTX = PermissibleValue(text="PPTX")
-    TXT = PermissibleValue(text="TXT")
-    MD = PermissibleValue(text="MD")
-    ZIP = PermissibleValue(text="ZIP")
-    TAR = PermissibleValue(text="TAR")
-    GZ = PermissibleValue(text="GZ")
-    BZ2 = PermissibleValue(text="BZ2")
-    XZ = PermissibleValue(text="XZ")
+    """
+    Common file format extensions for data files and documents.
+    """
+    CSV = PermissibleValue(
+        text="CSV",
+        description="Comma-Separated Values - tabular data format.")
+    TSV = PermissibleValue(
+        text="TSV",
+        description="Tab-Separated Values - tabular data format with tab delimiters.")
+    XML = PermissibleValue(
+        text="XML",
+        description="Extensible Markup Language - structured markup format.")
+    JSON = PermissibleValue(
+        text="JSON",
+        description="JavaScript Object Notation - structured data interchange format.")
+    JSONL = PermissibleValue(
+        text="JSONL",
+        description="JSON Lines - newline-delimited JSON format.")
+    YAML = PermissibleValue(
+        text="YAML",
+        description="YAML Ain't Markup Language - human-readable data serialization format.")
+    HTML = PermissibleValue(
+        text="HTML",
+        description="HyperText Markup Language - web page markup format.")
+    PDF = PermissibleValue(
+        text="PDF",
+        description="Portable Document Format - fixed-layout document format.")
+    DOCX = PermissibleValue(
+        text="DOCX",
+        description="Microsoft Word Open XML Document - word processing document.")
+    XLSX = PermissibleValue(
+        text="XLSX",
+        description="Microsoft Excel Open XML Spreadsheet - spreadsheet format.")
+    PPTX = PermissibleValue(
+        text="PPTX",
+        description="Microsoft PowerPoint Open XML Presentation - presentation format.")
+    TXT = PermissibleValue(
+        text="TXT",
+        description="Plain text file.")
+    MD = PermissibleValue(
+        text="MD",
+        description="Markdown - lightweight markup language.")
+    ZIP = PermissibleValue(
+        text="ZIP",
+        description="ZIP archive - compressed file container.")
+    TAR = PermissibleValue(
+        text="TAR",
+        description="Tape Archive - file archive format.")
+    GZ = PermissibleValue(
+        text="GZ",
+        description="Gzip compressed file.")
+    BZ2 = PermissibleValue(
+        text="BZ2",
+        description="Bzip2 compressed file.")
+    XZ = PermissibleValue(
+        text="XZ",
+        description="XZ compressed file.")
 
     _defn = EnumDefinition(
         name="FormatEnum",
+        description="Common file format extensions for data files and documents.",
     )
 
 class MediaTypeEnum(EnumDefinitionImpl):
-
+    """
+    MIME media types (Internet Media Types) for file content identification.
+    """
     _defn = EnumDefinition(
         name="MediaTypeEnum",
+        description="MIME media types (Internet Media Types) for file content identification.",
     )
 
     @classmethod
     def _addvals(cls):
         setattr(cls, "text/csv",
-            PermissibleValue(text="text/csv"))
+            PermissibleValue(
+                text="text/csv",
+                description="MIME type for CSV (Comma-Separated Values) files."))
         setattr(cls, "text/tab-separated-values",
-            PermissibleValue(text="text/tab-separated-values"))
+            PermissibleValue(
+                text="text/tab-separated-values",
+                description="MIME type for TSV (Tab-Separated Values) files."))
         setattr(cls, "application/json",
-            PermissibleValue(text="application/json"))
+            PermissibleValue(
+                text="application/json",
+                description="MIME type for JSON (JavaScript Object Notation) files."))
         setattr(cls, "application/xml",
-            PermissibleValue(text="application/xml"))
+            PermissibleValue(
+                text="application/xml",
+                description="MIME type for XML (Extensible Markup Language) files."))
         setattr(cls, "text/xml",
-            PermissibleValue(text="text/xml"))
+            PermissibleValue(
+                text="text/xml",
+                description="Alternative MIME type for XML files (text variant)."))
         setattr(cls, "application/yaml",
-            PermissibleValue(text="application/yaml"))
+            PermissibleValue(
+                text="application/yaml",
+                description="MIME type for YAML files."))
         setattr(cls, "text/yaml",
-            PermissibleValue(text="text/yaml"))
+            PermissibleValue(
+                text="text/yaml",
+                description="Alternative MIME type for YAML files (text variant)."))
         setattr(cls, "text/html",
-            PermissibleValue(text="text/html"))
+            PermissibleValue(
+                text="text/html",
+                description="MIME type for HTML (HyperText Markup Language) files."))
         setattr(cls, "application/pdf",
-            PermissibleValue(text="application/pdf"))
+            PermissibleValue(
+                text="application/pdf",
+                description="MIME type for PDF (Portable Document Format) files."))
         setattr(cls, "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            PermissibleValue(text="application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+            PermissibleValue(
+                text="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                description="MIME type for Microsoft Word DOCX files."))
         setattr(cls, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            PermissibleValue(text="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+            PermissibleValue(
+                text="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                description="MIME type for Microsoft Excel XLSX files."))
         setattr(cls, "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            PermissibleValue(text="application/vnd.openxmlformats-officedocument.presentationml.presentation"))
+            PermissibleValue(
+                text="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                description="MIME type for Microsoft PowerPoint PPTX files."))
         setattr(cls, "text/plain",
-            PermissibleValue(text="text/plain"))
+            PermissibleValue(
+                text="text/plain",
+                description="MIME type for plain text files."))
         setattr(cls, "text/markdown",
-            PermissibleValue(text="text/markdown"))
+            PermissibleValue(
+                text="text/markdown",
+                description="MIME type for Markdown files."))
         setattr(cls, "application/zip",
-            PermissibleValue(text="application/zip"))
+            PermissibleValue(
+                text="application/zip",
+                description="MIME type for ZIP archive files."))
         setattr(cls, "application/x-tar",
-            PermissibleValue(text="application/x-tar"))
+            PermissibleValue(
+                text="application/x-tar",
+                description="MIME type for TAR archive files."))
         setattr(cls, "application/gzip",
-            PermissibleValue(text="application/gzip"))
+            PermissibleValue(
+                text="application/gzip",
+                description="MIME type for Gzip compressed files."))
         setattr(cls, "application/x-bzip2",
-            PermissibleValue(text="application/x-bzip2"))
+            PermissibleValue(
+                text="application/x-bzip2",
+                description="MIME type for Bzip2 compressed files."))
         setattr(cls, "application/x-xz",
-            PermissibleValue(text="application/x-xz"))
+            PermissibleValue(
+                text="application/x-xz",
+                description="MIME type for XZ compressed files."))
 
 class CompressionEnum(EnumDefinitionImpl):
-
-    gzip = PermissibleValue(text="gzip")
-    bzip2 = PermissibleValue(text="bzip2")
-    zip = PermissibleValue(text="zip")
-    tar = PermissibleValue(text="tar")
-    xz = PermissibleValue(text="xz")
-    lzma = PermissibleValue(text="lzma")
-    compress = PermissibleValue(text="compress")
+    """
+    Compression algorithms and formats for file compression.
+    """
+    gzip = PermissibleValue(
+        text="gzip",
+        description="GNU zip compression (commonly used with .gz extension).")
+    bzip2 = PermissibleValue(
+        text="bzip2",
+        description="Burrows-Wheeler block-sorting compression (commonly used with .bz2 extension).")
+    zip = PermissibleValue(
+        text="zip",
+        description="ZIP archive compression format.")
+    tar = PermissibleValue(
+        text="tar",
+        description="Tape Archive format (typically combined with gzip or bzip2).")
+    xz = PermissibleValue(
+        text="xz",
+        description="XZ Utils compression using LZMA2 algorithm.")
+    lzma = PermissibleValue(
+        text="lzma",
+        description="Lempel-Ziv-Markov chain algorithm compression.")
+    compress = PermissibleValue(
+        text="compress",
+        description="Unix compress utility (LZW compression).")
 
     _defn = EnumDefinition(
         name="CompressionEnum",
+        description="Compression algorithms and formats for file compression.",
     )
 
 class EncodingEnum(EnumDefinitionImpl):
-
-    ASCII = PermissibleValue(text="ASCII")
-    Big5 = PermissibleValue(text="Big5")
-    GB2312 = PermissibleValue(text="GB2312")
-    Shift_JIS = PermissibleValue(text="Shift_JIS")
+    """
+    Character encoding schemes for text representation in different languages and scripts.
+    """
+    ASCII = PermissibleValue(
+        text="ASCII",
+        description="American Standard Code for Information Interchange (7-bit, English characters only).")
+    Big5 = PermissibleValue(
+        text="Big5",
+        description="Traditional Chinese character encoding (primarily Taiwan and Hong Kong).")
+    GB2312 = PermissibleValue(
+        text="GB2312",
+        description="Simplified Chinese character encoding standard.")
+    Shift_JIS = PermissibleValue(
+        text="Shift_JIS",
+        description="Japanese character encoding (Microsoft and other systems).")
 
     _defn = EnumDefinition(
         name="EncodingEnum",
+        description="Character encoding schemes for text representation in different languages and scripts.",
     )
 
     @classmethod
     def _addvals(cls):
         setattr(cls, "EUC-JP",
-            PermissibleValue(text="EUC-JP"))
+            PermissibleValue(
+                text="EUC-JP",
+                description="Extended Unix Code for Japanese."))
         setattr(cls, "EUC-KR",
-            PermissibleValue(text="EUC-KR"))
+            PermissibleValue(
+                text="EUC-KR",
+                description="Extended Unix Code for Korean."))
         setattr(cls, "EUC-TW",
-            PermissibleValue(text="EUC-TW"))
+            PermissibleValue(
+                text="EUC-TW",
+                description="Extended Unix Code for Traditional Chinese."))
         setattr(cls, "HZ-GB-2312",
-            PermissibleValue(text="HZ-GB-2312"))
+            PermissibleValue(
+                text="HZ-GB-2312",
+                description="7-bit encoding for Simplified Chinese (GB2312)."))
         setattr(cls, "ISO-2022-CN-EXT",
-            PermissibleValue(text="ISO-2022-CN-EXT"))
+            PermissibleValue(
+                text="ISO-2022-CN-EXT",
+                description="Extended ISO-2022 encoding for Chinese (includes both Simplified and Traditional)."))
         setattr(cls, "ISO-2022-CN",
-            PermissibleValue(text="ISO-2022-CN"))
+            PermissibleValue(
+                text="ISO-2022-CN",
+                description="ISO-2022 encoding for Chinese."))
         setattr(cls, "ISO-2022-JP-2",
-            PermissibleValue(text="ISO-2022-JP-2"))
+            PermissibleValue(
+                text="ISO-2022-JP-2",
+                description="Extended ISO-2022 encoding for Japanese (includes additional character sets)."))
         setattr(cls, "ISO-2022-JP",
-            PermissibleValue(text="ISO-2022-JP"))
+            PermissibleValue(
+                text="ISO-2022-JP",
+                description="ISO-2022 encoding for Japanese."))
         setattr(cls, "ISO-2022-KR",
-            PermissibleValue(text="ISO-2022-KR"))
+            PermissibleValue(
+                text="ISO-2022-KR",
+                description="ISO-2022 encoding for Korean."))
         setattr(cls, "ISO-8859-10",
-            PermissibleValue(text="ISO-8859-10"))
+            PermissibleValue(
+                text="ISO-8859-10",
+                description="Latin-6 (Nordic languages - Danish, Norwegian, Swedish, Icelandic)."))
         setattr(cls, "ISO-8859-11",
-            PermissibleValue(text="ISO-8859-11"))
+            PermissibleValue(
+                text="ISO-8859-11",
+                description="Latin/Thai encoding."))
         setattr(cls, "ISO-8859-13",
-            PermissibleValue(text="ISO-8859-13"))
+            PermissibleValue(
+                text="ISO-8859-13",
+                description="Latin-7 (Baltic Rim languages)."))
         setattr(cls, "ISO-8859-14",
-            PermissibleValue(text="ISO-8859-14"))
+            PermissibleValue(
+                text="ISO-8859-14",
+                description="Latin-8 (Celtic languages)."))
         setattr(cls, "ISO-8859-15",
-            PermissibleValue(text="ISO-8859-15"))
+            PermissibleValue(
+                text="ISO-8859-15",
+                description="Latin-9 (Western European with Euro sign)."))
         setattr(cls, "ISO-8859-16",
-            PermissibleValue(text="ISO-8859-16"))
+            PermissibleValue(
+                text="ISO-8859-16",
+                description="Latin-10 (South-Eastern European languages)."))
         setattr(cls, "ISO-8859-1",
-            PermissibleValue(text="ISO-8859-1"))
+            PermissibleValue(
+                text="ISO-8859-1",
+                description="Latin-1 (Western European languages)."))
         setattr(cls, "ISO-8859-2",
-            PermissibleValue(text="ISO-8859-2"))
+            PermissibleValue(
+                text="ISO-8859-2",
+                description="Latin-2 (Central European languages)."))
         setattr(cls, "ISO-8859-3",
-            PermissibleValue(text="ISO-8859-3"))
+            PermissibleValue(
+                text="ISO-8859-3",
+                description="Latin-3 (South European languages - Turkish, Maltese, Esperanto)."))
         setattr(cls, "ISO-8859-4",
-            PermissibleValue(text="ISO-8859-4"))
+            PermissibleValue(
+                text="ISO-8859-4",
+                description="Latin-4 (North European languages)."))
         setattr(cls, "ISO-8859-5",
-            PermissibleValue(text="ISO-8859-5"))
+            PermissibleValue(
+                text="ISO-8859-5",
+                description="Latin/Cyrillic encoding."))
         setattr(cls, "ISO-8859-6",
-            PermissibleValue(text="ISO-8859-6"))
+            PermissibleValue(
+                text="ISO-8859-6",
+                description="Latin/Arabic encoding."))
         setattr(cls, "ISO-8859-7",
-            PermissibleValue(text="ISO-8859-7"))
+            PermissibleValue(
+                text="ISO-8859-7",
+                description="Latin/Greek encoding."))
         setattr(cls, "ISO-8859-8",
-            PermissibleValue(text="ISO-8859-8"))
+            PermissibleValue(
+                text="ISO-8859-8",
+                description="Latin/Hebrew encoding."))
         setattr(cls, "ISO-8859-9",
-            PermissibleValue(text="ISO-8859-9"))
+            PermissibleValue(
+                text="ISO-8859-9",
+                description="Latin-5 (Turkish)."))
         setattr(cls, "KOI8-R",
-            PermissibleValue(text="KOI8-R"))
+            PermissibleValue(
+                text="KOI8-R",
+                description="Russian character encoding (Kod Obmena Informatsiey)."))
         setattr(cls, "KOI8-U",
-            PermissibleValue(text="KOI8-U"))
+            PermissibleValue(
+                text="KOI8-U",
+                description="Ukrainian character encoding."))
         setattr(cls, "UTF-16",
-            PermissibleValue(text="UTF-16"))
+            PermissibleValue(
+                text="UTF-16",
+                description="Unicode Transformation Format 16-bit (variable-width encoding)."))
         setattr(cls, "UTF-32",
-            PermissibleValue(text="UTF-32"))
+            PermissibleValue(
+                text="UTF-32",
+                description="Unicode Transformation Format 32-bit (fixed-width encoding)."))
         setattr(cls, "UTF-7",
-            PermissibleValue(text="UTF-7"))
+            PermissibleValue(
+                text="UTF-7",
+                description="Unicode Transformation Format 7-bit (for 7-bit channels)."))
         setattr(cls, "UTF-8",
-            PermissibleValue(text="UTF-8"))
+            PermissibleValue(
+                text="UTF-8",
+                description="Unicode Transformation Format 8-bit (variable-width, most common Unicode encoding)."))
+        setattr(cls, "Windows-1250",
+            PermissibleValue(
+                text="Windows-1250",
+                description="Windows code page for Central European languages."))
+        setattr(cls, "Windows-1251",
+            PermissibleValue(
+                text="Windows-1251",
+                description="Windows code page for Cyrillic script."))
+        setattr(cls, "Windows-1252",
+            PermissibleValue(
+                text="Windows-1252",
+                description="Windows code page for Western European languages."))
+        setattr(cls, "Windows-1253",
+            PermissibleValue(
+                text="Windows-1253",
+                description="Windows code page for Greek."))
+        setattr(cls, "Windows-1254",
+            PermissibleValue(
+                text="Windows-1254",
+                description="Windows code page for Turkish."))
+        setattr(cls, "Windows-1255",
+            PermissibleValue(
+                text="Windows-1255",
+                description="Windows code page for Hebrew."))
+        setattr(cls, "Windows-1256",
+            PermissibleValue(
+                text="Windows-1256",
+                description="Windows code page for Arabic."))
+        setattr(cls, "Windows-1257",
+            PermissibleValue(
+                text="Windows-1257",
+                description="Windows code page for Baltic languages."))
+        setattr(cls, "Windows-1258",
+            PermissibleValue(
+                text="Windows-1258",
+                description="Windows code page for Vietnamese."))
 
 class CRediTRoleEnum(EnumDefinitionImpl):
     """
@@ -3113,46 +3349,46 @@ class CRediTRoleEnum(EnumDefinitionImpl):
     """
     conceptualization = PermissibleValue(
         text="conceptualization",
-        description="Ideas; formulation or evolution of overarching research goals and aims")
+        description="Ideas; formulation or evolution of overarching research goals and aims.")
     methodology = PermissibleValue(
         text="methodology",
-        description="Development or design of methodology; creation of models")
+        description="Development or design of methodology; creation of models.")
     software = PermissibleValue(
         text="software",
-        description="Programming, software development; designing computer programs")
+        description="Programming, software development; designing computer programs.")
     validation = PermissibleValue(
         text="validation",
-        description="Verification of the overall replication/reproducibility of results")
+        description="Verification of the overall replication/reproducibility of results.")
     formal_analysis = PermissibleValue(
         text="formal_analysis",
-        description="Application of statistical, mathematical, or other formal techniques")
+        description="Application of statistical, mathematical, or other formal techniques.")
     investigation = PermissibleValue(
         text="investigation",
-        description="Conducting the research and investigation process")
+        description="Conducting the research and investigation process.")
     resources = PermissibleValue(
         text="resources",
         description="Provision of study materials, reagents, patients, laboratory samples, etc.")
     data_curation = PermissibleValue(
         text="data_curation",
-        description="Management activities to annotate, scrub data and maintain research data")
+        description="Management activities to annotate, scrub data and maintain research data.")
     writing_original_draft = PermissibleValue(
         text="writing_original_draft",
-        description="Preparation, creation and/or presentation of the published work")
+        description="Preparation, creation and/or presentation of the published work.")
     writing_review_editing = PermissibleValue(
         text="writing_review_editing",
-        description="Critical review, commentary or revision of the work")
+        description="Critical review, commentary or revision of the work.")
     visualization = PermissibleValue(
         text="visualization",
-        description="Preparation, creation and/or presentation of visualizations/data presentation")
+        description="Preparation, creation and/or presentation of visualizations/data presentation.")
     supervision = PermissibleValue(
         text="supervision",
-        description="Oversight and leadership responsibility for the research activity")
+        description="Oversight and leadership responsibility for the research activity.")
     project_administration = PermissibleValue(
         text="project_administration",
-        description="Management and coordination responsibility for the research activity")
+        description="Management and coordination responsibility for the research activity.")
     funding_acquisition = PermissibleValue(
         text="funding_acquisition",
-        description="Acquisition of the financial support for the project")
+        description="Acquisition of the financial support for the project.")
 
     _defn = EnumDefinition(
         name="CRediTRoleEnum",
@@ -3239,39 +3475,18 @@ class VersionTypeEnum(EnumDefinitionImpl):
     """
     MAJOR = PermissibleValue(
         text="MAJOR",
-        description="Incompatible changes, breaking backward compatibility")
+        description="Incompatible changes, breaking backward compatibility.")
     MINOR = PermissibleValue(
         text="MINOR",
-        description="Backward-compatible new functionality or enhancements")
+        description="Backward-compatible new functionality or enhancements.")
     PATCH = PermissibleValue(
         text="PATCH",
-        description="Backward-compatible bug fixes or minor corrections")
+        description="Backward-compatible bug fixes or minor corrections.")
 
     _defn = EnumDefinition(
         name="VersionTypeEnum",
         description="Type of version change using semantic versioning principles. See https://semver.org/",
     )
-
-    @classmethod
-    def _addvals(cls):
-        setattr(cls, "Windows-1250",
-            PermissibleValue(text="Windows-1250"))
-        setattr(cls, "Windows-1251",
-            PermissibleValue(text="Windows-1251"))
-        setattr(cls, "Windows-1252",
-            PermissibleValue(text="Windows-1252"))
-        setattr(cls, "Windows-1253",
-            PermissibleValue(text="Windows-1253"))
-        setattr(cls, "Windows-1254",
-            PermissibleValue(text="Windows-1254"))
-        setattr(cls, "Windows-1255",
-            PermissibleValue(text="Windows-1255"))
-        setattr(cls, "Windows-1256",
-            PermissibleValue(text="Windows-1256"))
-        setattr(cls, "Windows-1257",
-            PermissibleValue(text="Windows-1257"))
-        setattr(cls, "Windows-1258",
-            PermissibleValue(text="Windows-1258"))
 
 class CreatorOrMaintainerEnum(EnumDefinitionImpl):
     """
@@ -3318,19 +3533,25 @@ class CreatorOrMaintainerEnum(EnumDefinitionImpl):
     )
 
 class Boolean(EnumDefinitionImpl):
-
+    """
+    Three-valued boolean logic supporting true, false, and unknown states.
+    """
     true = PermissibleValue(
         text="true",
-        title="True")
+        title="True",
+        description="Affirmative or positive value.")
     false = PermissibleValue(
         text="false",
-        title="False")
+        title="False",
+        description="Negative or false value.")
     unknown = PermissibleValue(
         text="unknown",
-        title="Unknown")
+        title="Unknown",
+        description="Unknown, uncertain, or not applicable value.")
 
     _defn = EnumDefinition(
         name="Boolean",
+        description="Three-valued boolean logic supporting true, false, and unknown states.",
     )
 
 class DatasetRelationshipTypeEnum(EnumDefinitionImpl):
@@ -3446,91 +3667,91 @@ class DataUsePermissionEnum(EnumDefinitionImpl):
     """
     no_restriction = PermissibleValue(
         text="no_restriction",
-        description="No restriction on data use",
+        description="No restriction on data use.",
         meaning=DUO["0000004"])
     general_research_use = PermissibleValue(
         text="general_research_use",
-        description="Data available for any research purpose (GRU)",
+        description="Data available for any research purpose (GRU).",
         meaning=DUO["0000042"])
     health_medical_biomedical_research = PermissibleValue(
         text="health_medical_biomedical_research",
-        description="Data limited to health, medical, or biomedical research (HMB)",
+        description="Data limited to health, medical, or biomedical research (HMB).",
         meaning=DUO["0000006"])
     disease_specific_research = PermissibleValue(
         text="disease_specific_research",
-        description="Data limited to research on specified disease(s) (DS)",
+        description="Data limited to research on specified disease(s) (DS).",
         meaning=DUO["0000007"])
     population_origins_ancestry_research = PermissibleValue(
         text="population_origins_ancestry_research",
-        description="Data limited to population origins or ancestry research (POA)",
+        description="Data limited to population origins or ancestry research (POA).",
         meaning=DUO["0000011"])
     clinical_care_use = PermissibleValue(
         text="clinical_care_use",
-        description="Data available for clinical care and applications (CC)",
+        description="Data available for clinical care and applications (CC).",
         meaning=DUO["0000043"])
     no_commercial_use = PermissibleValue(
         text="no_commercial_use",
-        description="Data use limited to non-commercial purposes (NCU)",
+        description="Data use limited to non-commercial purposes (NCU).",
         meaning=DUO["0000046"])
     non_profit_use_only = PermissibleValue(
         text="non_profit_use_only",
-        description="Data use limited to not-for-profit organizations (NPU)",
+        description="Data use limited to not-for-profit organizations (NPU).",
         meaning=DUO["0000045"])
     non_profit_use_and_non_commercial_use = PermissibleValue(
         text="non_profit_use_and_non_commercial_use",
-        description="Data limited to not-for-profit organizations and non-commercial use (NPUNCU)",
+        description="Data limited to not-for-profit organizations and non-commercial use (NPUNCU).",
         meaning=DUO["0000018"])
     no_methods_development = PermissibleValue(
         text="no_methods_development",
-        description="Data cannot be used for methods or software development (NMDS)",
+        description="Data cannot be used for methods or software development (NMDS).",
         meaning=DUO["0000015"])
     genetic_studies_only = PermissibleValue(
         text="genetic_studies_only",
-        description="Data limited to genetic studies only (GSO)",
+        description="Data limited to genetic studies only (GSO).",
         meaning=DUO["0000016"])
     ethics_approval_required = PermissibleValue(
         text="ethics_approval_required",
-        description="Ethics approval (e.g., IRB/ERB) required for data use (IRB)",
+        description="Ethics approval (e.g., IRB/ERB) required for data use (IRB).",
         meaning=DUO["0000021"])
     collaboration_required = PermissibleValue(
         text="collaboration_required",
-        description="Collaboration with primary investigator required (COL)",
+        description="Collaboration with primary investigator required (COL).",
         meaning=DUO["0000020"])
     publication_required = PermissibleValue(
         text="publication_required",
-        description="Results must be published/shared with research community (PUB)",
+        description="Results must be published/shared with research community (PUB).",
         meaning=DUO["0000019"])
     geographic_restriction = PermissibleValue(
         text="geographic_restriction",
-        description="Data use limited to specific geographic region (GS)",
+        description="Data use limited to specific geographic region (GS).",
         meaning=DUO["0000022"])
     institution_specific = PermissibleValue(
         text="institution_specific",
-        description="Data use limited to approved institutions (IS)",
+        description="Data use limited to approved institutions (IS).",
         meaning=DUO["0000028"])
     project_specific = PermissibleValue(
         text="project_specific",
-        description="Data use limited to approved project(s) (PS)",
+        description="Data use limited to approved project(s) (PS).",
         meaning=DUO["0000027"])
     user_specific = PermissibleValue(
         text="user_specific",
-        description="Data use limited to approved users (US)",
+        description="Data use limited to approved users (US).",
         meaning=DUO["0000026"])
     time_limit = PermissibleValue(
         text="time_limit",
-        description="Data use approved for limited time period (TS)",
+        description="Data use approved for limited time period (TS).",
         meaning=DUO["0000025"])
     return_to_database = PermissibleValue(
         text="return_to_database",
-        description="Derived data must be returned to database/resource (RTN)",
+        description="Derived data must be returned to database/resource (RTN).",
         meaning=DUO["0000029"])
     publication_moratorium = PermissibleValue(
         text="publication_moratorium",
-        description="Publication restricted until specified date (MOR)",
+        description="Publication restricted until specified date (MOR).",
         meaning=DUO["0000024"])
     no_population_ancestry_research = PermissibleValue(
         text="no_population_ancestry_research",
-        description="Population/ancestry research prohibited (NPOA)",
+        description="Population/ancestry research prohibited (NPOA).",
         meaning=DUO["0000044"])
 
     _defn = EnumDefinition(
@@ -3594,39 +3815,39 @@ class FileTypeEnum(EnumDefinitionImpl):
     """
     data_file = PermissibleValue(
         text="data_file",
-        description="A data file containing dataset content",
+        description="A data file containing dataset content.",
         meaning=SCHEMA["DataDownload"])
     code_file = PermissibleValue(
         text="code_file",
-        description="A source code or script file",
+        description="A source code or script file.",
         meaning=SCHEMA["SoftwareSourceCode"])
     documentation_file = PermissibleValue(
         text="documentation_file",
-        description="A documentation file (README, guide, etc.)",
+        description="A documentation file (README, guide, etc.).",
         meaning=SCHEMA["Documentation"])
     metadata_file = PermissibleValue(
         text="metadata_file",
-        description="A metadata or annotation file",
+        description="A metadata or annotation file.",
         meaning=DCAT["CatalogRecord"])
     configuration_file = PermissibleValue(
         text="configuration_file",
-        description="A configuration or settings file",
+        description="A configuration or settings file.",
         meaning=D4D["ConfigurationFile"])
     notebook_file = PermissibleValue(
         text="notebook_file",
-        description="A computational notebook file (Jupyter, R Markdown, etc.)",
+        description="A computational notebook file (Jupyter, R Markdown, etc.).",
         meaning=D4D["NotebookFile"])
     image_file = PermissibleValue(
         text="image_file",
-        description="An image or visualization file",
+        description="An image or visualization file.",
         meaning=SCHEMA["ImageObject"])
     archive_file = PermissibleValue(
         text="archive_file",
-        description="An archive or compressed file",
+        description="An archive or compressed file.",
         meaning=D4D["ArchiveFile"])
     other = PermissibleValue(
         text="other",
-        description="Other file type",
+        description="Other file type.",
         meaning=D4D["OtherFile"])
 
     _defn = EnumDefinition(
@@ -3640,43 +3861,43 @@ class FileCollectionTypeEnum(EnumDefinitionImpl):
     """
     raw_data = PermissibleValue(
         text="raw_data",
-        description="Raw, unprocessed data files",
+        description="Raw, unprocessed data files.",
         meaning=D4D["RawData"])
     processed_data = PermissibleValue(
         text="processed_data",
-        description="Cleaned, processed, or transformed data files",
+        description="Cleaned, processed, or transformed data files.",
         meaning=D4D["ProcessedData"])
     training_split = PermissibleValue(
         text="training_split",
-        description="Files designated for model training",
+        description="Files designated for model training.",
         meaning=D4D["TrainingSplit"])
     test_split = PermissibleValue(
         text="test_split",
-        description="Files designated for model testing",
+        description="Files designated for model testing.",
         meaning=D4D["TestSplit"])
     validation_split = PermissibleValue(
         text="validation_split",
-        description="Files designated for model validation",
+        description="Files designated for model validation.",
         meaning=D4D["ValidationSplit"])
     documentation = PermissibleValue(
         text="documentation",
-        description="Documentation files (README, codebook, etc.)",
+        description="Documentation files (README, codebook, etc.).",
         meaning=SCHEMA["Documentation"])
     metadata = PermissibleValue(
         text="metadata",
-        description="Metadata or annotation files",
+        description="Metadata or annotation files.",
         meaning=DCAT["CatalogRecord"])
     code = PermissibleValue(
         text="code",
-        description="Code or script files",
+        description="Code or script files.",
         meaning=SCHEMA["SoftwareSourceCode"])
     supplementary = PermissibleValue(
         text="supplementary",
-        description="Supplementary materials",
+        description="Supplementary materials.",
         meaning=SCHEMA["SupplementalMaterial"])
     other = PermissibleValue(
         text="other",
-        description="Other file collection type",
+        description="Other file collection type.",
         meaning=D4D["OtherFileCollection"])
 
     _defn = EnumDefinition(
@@ -3724,7 +3945,7 @@ slots.download_url = Slot(uri=DCAT.downloadURL, name="download_url", curie=DCAT.
 slots.format = Slot(uri=DCTERMS.format, name="format", curie=DCTERMS.curie('format'),
                    model_uri=DATA_SHEETS_SCHEMA.format, domain=None, range=Optional[Union[str, "FormatEnum"]])
 
-slots.encoding = Slot(uri=DCAT.mediaType, name="encoding", curie=DCAT.curie('mediaType'),
+slots.encoding = Slot(uri=D4D.characterEncoding, name="encoding", curie=D4D.curie('characterEncoding'),
                    model_uri=DATA_SHEETS_SCHEMA.encoding, domain=None, range=Optional[Union[str, "EncodingEnum"]])
 
 slots.compression = Slot(uri=DCAT.compressFormat, name="compression", curie=DCAT.curie('compressFormat'),
@@ -3733,22 +3954,22 @@ slots.compression = Slot(uri=DCAT.compressFormat, name="compression", curie=DCAT
 slots.media_type = Slot(uri=DCAT.mediaType, name="media_type", curie=DCAT.curie('mediaType'),
                    model_uri=DATA_SHEETS_SCHEMA.media_type, domain=None, range=Optional[Union[str, "MediaTypeEnum"]])
 
-slots.hash = Slot(uri=DCTERMS.identifier, name="hash", curie=DCTERMS.curie('identifier'),
+slots.hash = Slot(uri=D4D.hashValue, name="hash", curie=D4D.curie('hashValue'),
                    model_uri=DATA_SHEETS_SCHEMA.hash, domain=None, range=Optional[str])
 
-slots.md5 = Slot(uri=DCTERMS.identifier, name="md5", curie=DCTERMS.curie('identifier'),
+slots.md5 = Slot(uri=D4D.md5Checksum, name="md5", curie=D4D.curie('md5Checksum'),
                    model_uri=DATA_SHEETS_SCHEMA.md5, domain=None, range=Optional[str])
 
-slots.sha256 = Slot(uri=DCTERMS.identifier, name="sha256", curie=DCTERMS.curie('identifier'),
+slots.sha256 = Slot(uri=SCHEMA.sha256, name="sha256", curie=SCHEMA.curie('sha256'),
                    model_uri=DATA_SHEETS_SCHEMA.sha256, domain=None, range=Optional[str])
 
 slots.conforms_to = Slot(uri=DCTERMS.conformsTo, name="conforms_to", curie=DCTERMS.curie('conformsTo'),
                    model_uri=DATA_SHEETS_SCHEMA.conforms_to, domain=None, range=Optional[str])
 
-slots.conforms_to_schema = Slot(uri=DCTERMS.conformsTo, name="conforms_to_schema", curie=DCTERMS.curie('conformsTo'),
+slots.conforms_to_schema = Slot(uri=D4D.conformsToSchema, name="conforms_to_schema", curie=D4D.curie('conformsToSchema'),
                    model_uri=DATA_SHEETS_SCHEMA.conforms_to_schema, domain=None, range=Optional[str])
 
-slots.conforms_to_class = Slot(uri=DCTERMS.conformsTo, name="conforms_to_class", curie=DCTERMS.curie('conformsTo'),
+slots.conforms_to_class = Slot(uri=D4D.conformsToClass, name="conforms_to_class", curie=D4D.curie('conformsToClass'),
                    model_uri=DATA_SHEETS_SCHEMA.conforms_to_class, domain=None, range=Optional[str])
 
 slots.license = Slot(uri=DCTERMS.license, name="license", curie=DCTERMS.curie('license'),
@@ -3757,7 +3978,7 @@ slots.license = Slot(uri=DCTERMS.license, name="license", curie=DCTERMS.curie('l
 slots.keywords = Slot(uri=DCAT.keyword, name="keywords", curie=DCAT.curie('keyword'),
                    model_uri=DATA_SHEETS_SCHEMA.keywords, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.version = Slot(uri=DCTERMS.hasVersion, name="version", curie=DCTERMS.curie('hasVersion'),
+slots.version = Slot(uri=SCHEMA.version, name="version", curie=SCHEMA.curie('version'),
                    model_uri=DATA_SHEETS_SCHEMA.version, domain=None, range=Optional[str])
 
 slots.created_by = Slot(uri=DCTERMS.creator, name="created_by", curie=DCTERMS.curie('creator'),
@@ -3772,13 +3993,13 @@ slots.last_updated_on = Slot(uri=DCTERMS.modified, name="last_updated_on", curie
 slots.modified_by = Slot(uri=DCTERMS.contributor, name="modified_by", curie=DCTERMS.curie('contributor'),
                    model_uri=DATA_SHEETS_SCHEMA.modified_by, domain=None, range=Optional[str])
 
-slots.status = Slot(uri=DCTERMS.type, name="status", curie=DCTERMS.curie('type'),
+slots.status = Slot(uri=D4D.publicationStatus, name="status", curie=D4D.curie('publicationStatus'),
                    model_uri=DATA_SHEETS_SCHEMA.status, domain=None, range=Optional[str])
 
 slots.was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="was_derived_from", curie=PROV.curie('wasDerivedFrom'),
                    model_uri=DATA_SHEETS_SCHEMA.was_derived_from, domain=None, range=Optional[str])
 
-slots.doi = Slot(uri=DCTERMS.identifier, name="doi", curie=DCTERMS.curie('identifier'),
+slots.doi = Slot(uri=D4D.doiIdentifier, name="doi", curie=D4D.curie('doiIdentifier'),
                    model_uri=DATA_SHEETS_SCHEMA.doi, domain=None, range=Optional[str],
                    pattern=re.compile(r'10\.\d{4,}\/.+'))
 
@@ -3812,7 +4033,7 @@ slots.dataset__creators = Slot(uri=SCHEMA.creator, name="dataset__creators", cur
 slots.dataset__funders = Slot(uri=SCHEMA.funder, name="dataset__funders", curie=SCHEMA.curie('funder'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__funders, domain=None, range=Optional[Union[Union[dict, FundingMechanism], list[Union[dict, FundingMechanism]]]])
 
-slots.dataset__subsets = Slot(uri=DCAT.distribution, name="dataset__subsets", curie=DCAT.curie('distribution'),
+slots.dataset__subsets = Slot(uri=D4D.dataSubset, name="dataset__subsets", curie=D4D.curie('dataSubset'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__subsets, domain=None, range=Optional[Union[dict[Union[str, DataSubsetId], Union[dict, DataSubset]], list[Union[dict, DataSubset]]]])
 
 slots.dataset__instances = Slot(uri=D4D.instances, name="dataset__instances", curie=D4D.curie('instances'),
@@ -3839,6 +4060,12 @@ slots.dataset__subpopulations = Slot(uri=D4D.subpopulations, name="dataset__subp
 slots.dataset__sensitive_elements = Slot(uri=D4D.sensitiveElements, name="dataset__sensitive_elements", curie=D4D.curie('sensitiveElements'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__sensitive_elements, domain=None, range=Optional[Union[Union[dict, SensitiveElement], list[Union[dict, SensitiveElement]]]])
 
+slots.dataset__relationships = Slot(uri=D4D.relationships, name="dataset__relationships", curie=D4D.curie('relationships'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__relationships, domain=None, range=Optional[Union[Union[dict, Relationships], list[Union[dict, Relationships]]]])
+
+slots.dataset__splits = Slot(uri=D4D.splits, name="dataset__splits", curie=D4D.curie('splits'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__splits, domain=None, range=Optional[Union[Union[dict, Splits], list[Union[dict, Splits]]]])
+
 slots.dataset__acquisition_methods = Slot(uri=D4D.acquisitionMethods, name="dataset__acquisition_methods", curie=D4D.curie('acquisitionMethods'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__acquisition_methods, domain=None, range=Optional[Union[Union[dict, InstanceAcquisition], list[Union[dict, InstanceAcquisition]]]])
 
@@ -3853,6 +4080,18 @@ slots.dataset__data_collectors = Slot(uri=D4D.dataCollectors, name="dataset__dat
 
 slots.dataset__collection_timeframes = Slot(uri=D4D.collectionTimeframes, name="dataset__collection_timeframes", curie=D4D.curie('collectionTimeframes'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__collection_timeframes, domain=None, range=Optional[Union[Union[dict, CollectionTimeframe], list[Union[dict, CollectionTimeframe]]]])
+
+slots.dataset__direct_collection = Slot(uri=D4D.directCollection, name="dataset__direct_collection", curie=D4D.curie('directCollection'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__direct_collection, domain=None, range=Optional[Union[Union[dict, DirectCollection], list[Union[dict, DirectCollection]]]])
+
+slots.dataset__collection_notifications = Slot(uri=D4D.collectionNotifications, name="dataset__collection_notifications", curie=D4D.curie('collectionNotifications'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__collection_notifications, domain=None, range=Optional[Union[Union[dict, CollectionNotification], list[Union[dict, CollectionNotification]]]])
+
+slots.dataset__collection_consents = Slot(uri=D4D.collectionConsents, name="dataset__collection_consents", curie=D4D.curie('collectionConsents'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__collection_consents, domain=None, range=Optional[Union[Union[dict, CollectionConsent], list[Union[dict, CollectionConsent]]]])
+
+slots.dataset__consent_revocations = Slot(uri=D4D.consentRevocations, name="dataset__consent_revocations", curie=D4D.curie('consentRevocations'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__consent_revocations, domain=None, range=Optional[Union[Union[dict, ConsentRevocation], list[Union[dict, ConsentRevocation]]]])
 
 slots.dataset__missing_data_documentation = Slot(uri=D4D.missingDataDocumentation, name="dataset__missing_data_documentation", curie=D4D.curie('missingDataDocumentation'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__missing_data_documentation, domain=None, range=Optional[Union[Union[dict, MissingDataDocumentation], list[Union[dict, MissingDataDocumentation]]]])
@@ -3929,6 +4168,9 @@ slots.dataset__distribution_formats = Slot(uri=D4D.distributionFormats, name="da
 slots.dataset__distribution_dates = Slot(uri=D4D.distributionDates, name="dataset__distribution_dates", curie=D4D.curie('distributionDates'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__distribution_dates, domain=None, range=Optional[Union[Union[dict, DistributionDate], list[Union[dict, DistributionDate]]]])
 
+slots.dataset__third_party_sharing = Slot(uri=D4D.thirdPartySharing, name="dataset__third_party_sharing", curie=D4D.curie('thirdPartySharing'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__third_party_sharing, domain=None, range=Optional[Union[Union[dict, ThirdPartySharing], list[Union[dict, ThirdPartySharing]]]])
+
 slots.dataset__license_and_use_terms = Slot(uri=SCHEMA.license, name="dataset__license_and_use_terms", curie=SCHEMA.curie('license'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__license_and_use_terms, domain=None, range=Optional[Union[dict, LicenseAndUseTerms]])
 
@@ -3950,7 +4192,7 @@ slots.dataset__updates = Slot(uri=D4D.updates, name="dataset__updates", curie=D4
 slots.dataset__retention_limit = Slot(uri=D4D.retentionLimit, name="dataset__retention_limit", curie=D4D.curie('retentionLimit'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__retention_limit, domain=None, range=Optional[Union[dict, RetentionLimits]])
 
-slots.dataset__version_access = Slot(uri=DCAT.accessURL, name="dataset__version_access", curie=DCAT.curie('accessURL'),
+slots.dataset__version_access = Slot(uri=D4D.versionAccess, name="dataset__version_access", curie=D4D.curie('versionAccess'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__version_access, domain=None, range=Optional[Union[dict, VersionAccess]])
 
 slots.dataset__extension_mechanism = Slot(uri=D4D.extensionMechanism, name="dataset__extension_mechanism", curie=D4D.curie('extensionMechanism'),
@@ -3962,7 +4204,7 @@ slots.dataset__variables = Slot(uri=SCHEMA.variableMeasured, name="dataset__vari
 slots.dataset__is_deidentified = Slot(uri=D4D.isDeidentified, name="dataset__is_deidentified", curie=D4D.curie('isDeidentified'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__is_deidentified, domain=None, range=Optional[Union[dict, Deidentification]])
 
-slots.dataset__is_tabular = Slot(uri=SCHEMA.encodingFormat, name="dataset__is_tabular", curie=SCHEMA.curie('encodingFormat'),
+slots.dataset__is_tabular = Slot(uri=D4D.isTabular, name="dataset__is_tabular", curie=D4D.curie('isTabular'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__is_tabular, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.dataset__citation = Slot(uri=SCHEMA.citation, name="dataset__citation", curie=SCHEMA.curie('citation'),
@@ -4008,7 +4250,7 @@ slots.software__license = Slot(uri=SCHEMA.license, name="software__license", cur
                    model_uri=DATA_SHEETS_SCHEMA.software__license, domain=None, range=Optional[str])
 
 slots.software__url = Slot(uri=SCHEMA.url, name="software__url", curie=SCHEMA.curie('url'),
-                   model_uri=DATA_SHEETS_SCHEMA.software__url, domain=None, range=Optional[str])
+                   model_uri=DATA_SHEETS_SCHEMA.software__url, domain=None, range=Optional[Union[str, URI]])
 
 slots.person__affiliation = Slot(uri=SCHEMA.affiliation, name="person__affiliation", curie=SCHEMA.curie('affiliation'),
                    model_uri=DATA_SHEETS_SCHEMA.person__affiliation, domain=None, range=Optional[Union[Union[str, OrganizationId], list[Union[str, OrganizationId]]]])
@@ -4016,7 +4258,7 @@ slots.person__affiliation = Slot(uri=SCHEMA.affiliation, name="person__affiliati
 slots.person__email = Slot(uri=SCHEMA.email, name="person__email", curie=SCHEMA.curie('email'),
                    model_uri=DATA_SHEETS_SCHEMA.person__email, domain=None, range=Optional[str])
 
-slots.person__orcid = Slot(uri=SCHEMA.identifier, name="person__orcid", curie=SCHEMA.curie('identifier'),
+slots.person__orcid = Slot(uri=D4D.orcidIdentifier, name="person__orcid", curie=D4D.curie('orcidIdentifier'),
                    model_uri=DATA_SHEETS_SCHEMA.person__orcid, domain=None, range=Optional[str],
                    pattern=re.compile(r'^\d{4}-\d{4}-\d{4}-\d{3}[0-9X]$'))
 
@@ -4035,19 +4277,19 @@ slots.formatDialect__header = Slot(uri=DATA_SHEETS_SCHEMA.header, name="formatDi
 slots.formatDialect__quote_char = Slot(uri=DATA_SHEETS_SCHEMA.quote_char, name="formatDialect__quote_char", curie=DATA_SHEETS_SCHEMA.curie('quote_char'),
                    model_uri=DATA_SHEETS_SCHEMA.formatDialect__quote_char, domain=None, range=Optional[str])
 
-slots.purpose__response = Slot(uri=DCTERMS.description, name="purpose__response", curie=DCTERMS.curie('description'),
+slots.purpose__response = Slot(uri=D4D.questionResponse, name="purpose__response", curie=D4D.curie('questionResponse'),
                    model_uri=DATA_SHEETS_SCHEMA.purpose__response, domain=None, range=Optional[str])
 
-slots.task__response = Slot(uri=DCTERMS.description, name="task__response", curie=DCTERMS.curie('description'),
+slots.task__response = Slot(uri=D4D.questionResponse, name="task__response", curie=D4D.curie('questionResponse'),
                    model_uri=DATA_SHEETS_SCHEMA.task__response, domain=None, range=Optional[str])
 
-slots.addressingGap__response = Slot(uri=DCTERMS.description, name="addressingGap__response", curie=DCTERMS.curie('description'),
+slots.addressingGap__response = Slot(uri=D4D.questionResponse, name="addressingGap__response", curie=D4D.curie('questionResponse'),
                    model_uri=DATA_SHEETS_SCHEMA.addressingGap__response, domain=None, range=Optional[str])
 
-slots.creator__principal_investigator = Slot(uri=DCTERMS.creator, name="creator__principal_investigator", curie=DCTERMS.curie('creator'),
+slots.creator__principal_investigator = Slot(uri=D4D.principalInvestigator, name="creator__principal_investigator", curie=D4D.curie('principalInvestigator'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__principal_investigator, domain=None, range=Optional[Union[str, PersonId]])
 
-slots.creator__affiliations = Slot(uri=SCHEMA.affiliation, name="creator__affiliations", curie=SCHEMA.curie('affiliation'),
+slots.creator__affiliations = Slot(uri=D4D.teamAffiliation, name="creator__affiliations", curie=D4D.curie('teamAffiliation'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__affiliations, domain=None, range=Optional[Union[dict[Union[str, OrganizationId], Union[dict, Organization]], list[Union[dict, Organization]]]])
 
 slots.creator__credit_roles = Slot(uri=D4D.creditRoles, name="creator__credit_roles", curie=D4D.curie('creditRoles'),
@@ -4059,16 +4301,16 @@ slots.fundingMechanism__grantor = Slot(uri=SCHEMA.funder, name="fundingMechanism
 slots.fundingMechanism__grants = Slot(uri=SCHEMA.funding, name="fundingMechanism__grants", curie=SCHEMA.curie('funding'),
                    model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grants, domain=None, range=Optional[Union[dict[Union[str, GrantId], Union[dict, Grant]], list[Union[dict, Grant]]]])
 
-slots.grant__grant_number = Slot(uri=SCHEMA.identifier, name="grant__grant_number", curie=SCHEMA.curie('identifier'),
+slots.grant__grant_number = Slot(uri=D4D.grantIdentifier, name="grant__grant_number", curie=D4D.curie('grantIdentifier'),
                    model_uri=DATA_SHEETS_SCHEMA.grant__grant_number, domain=None, range=Optional[str])
 
 slots.instance__data_topic = Slot(uri=DCAT.theme, name="instance__data_topic", curie=DCAT.curie('theme'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__data_topic, domain=None, range=Optional[Union[str, URIorCURIE]])
 
-slots.instance__instance_type = Slot(uri=DCTERMS.type, name="instance__instance_type", curie=DCTERMS.curie('type'),
+slots.instance__instance_type = Slot(uri=D4D.instanceType, name="instance__instance_type", curie=D4D.curie('instanceType'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__instance_type, domain=None, range=Optional[str])
 
-slots.instance__data_substrate = Slot(uri=DCTERMS.format, name="instance__data_substrate", curie=DCTERMS.curie('format'),
+slots.instance__data_substrate = Slot(uri=DCTERMS.type, name="instance__data_substrate", curie=DCTERMS.curie('type'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__data_substrate, domain=None, range=Optional[Union[str, URIorCURIE]])
 
 slots.instance__counts = Slot(uri=SCHEMA.numberOfItems, name="instance__counts", curie=SCHEMA.curie('numberOfItems'),
@@ -4077,7 +4319,7 @@ slots.instance__counts = Slot(uri=SCHEMA.numberOfItems, name="instance__counts",
 slots.instance__label = Slot(uri=D4D.hasLabel, name="instance__label", curie=D4D.curie('hasLabel'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__label, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.instance__label_description = Slot(uri=SCHEMA.description, name="instance__label_description", curie=SCHEMA.curie('description'),
+slots.instance__label_description = Slot(uri=D4D.labelPattern, name="instance__label_description", curie=D4D.curie('labelPattern'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__label_description, domain=None, range=Optional[str])
 
 slots.instance__sampling_strategies = Slot(uri=D4D.samplingStrategies, name="instance__sampling_strategies", curie=D4D.curie('samplingStrategies'),
@@ -4087,18 +4329,18 @@ slots.instance__missing_information = Slot(uri=D4D.missingInformation, name="ins
                    model_uri=DATA_SHEETS_SCHEMA.instance__missing_information, domain=None, range=Optional[Union[Union[dict, MissingInfo], list[Union[dict, MissingInfo]]]])
 
 slots.samplingStrategy__is_sample = Slot(uri=D4D.isSample, name="samplingStrategy__is_sample", curie=D4D.curie('isSample'),
-                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_sample, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_sample, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.samplingStrategy__is_random = Slot(uri=D4D.isRandom, name="samplingStrategy__is_random", curie=D4D.curie('isRandom'),
-                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_random, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_random, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.samplingStrategy__source_data = Slot(uri=D4D.sourceData, name="samplingStrategy__source_data", curie=D4D.curie('sourceData'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__source_data, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.samplingStrategy__is_representative = Slot(uri=D4D.isRepresentative, name="samplingStrategy__is_representative", curie=D4D.curie('isRepresentative'),
-                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_representative, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_representative, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.samplingStrategy__representative_verification = Slot(uri=SCHEMA.description, name="samplingStrategy__representative_verification", curie=SCHEMA.curie('description'),
+slots.samplingStrategy__representative_verification = Slot(uri=D4D.verificationDescription, name="samplingStrategy__representative_verification", curie=D4D.curie('verificationDescription'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__representative_verification, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.samplingStrategy__why_not_representative = Slot(uri=D4D.whyNotRepresentative, name="samplingStrategy__why_not_representative", curie=D4D.curie('whyNotRepresentative'),
@@ -4107,10 +4349,10 @@ slots.samplingStrategy__why_not_representative = Slot(uri=D4D.whyNotRepresentati
 slots.samplingStrategy__strategies = Slot(uri=D4D.strategies, name="samplingStrategy__strategies", curie=D4D.curie('strategies'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__strategies, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.missingInfo__missing = Slot(uri=DCTERMS.description, name="missingInfo__missing", curie=DCTERMS.curie('description'),
+slots.missingInfo__missing = Slot(uri=D4D.missingDataDescription, name="missingInfo__missing", curie=D4D.curie('missingDataDescription'),
                    model_uri=DATA_SHEETS_SCHEMA.missingInfo__missing, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.missingInfo__why_missing = Slot(uri=DCTERMS.description, name="missingInfo__why_missing", curie=DCTERMS.curie('description'),
+slots.missingInfo__why_missing = Slot(uri=D4D.missingDataCause, name="missingInfo__why_missing", curie=D4D.curie('missingDataCause'),
                    model_uri=DATA_SHEETS_SCHEMA.missingInfo__why_missing, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.relationships__relationship_details = Slot(uri=DCTERMS.description, name="relationships__relationship_details", curie=DCTERMS.curie('description'),
@@ -4119,7 +4361,7 @@ slots.relationships__relationship_details = Slot(uri=DCTERMS.description, name="
 slots.splits__split_details = Slot(uri=DCTERMS.description, name="splits__split_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.splits__split_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.dataAnomaly__anomaly_details = Slot(uri=DCTERMS.description, name="dataAnomaly__anomaly_details", curie=DCTERMS.curie('description'),
+slots.dataAnomaly__anomaly_details = Slot(uri=D4D.anomalyDetails, name="dataAnomaly__anomaly_details", curie=D4D.curie('anomalyDetails'),
                    model_uri=DATA_SHEETS_SCHEMA.dataAnomaly__anomaly_details, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.datasetBias__bias_type = Slot(uri=D4D.biasType, name="datasetBias__bias_type", curie=D4D.curie('biasType'),
@@ -4146,13 +4388,13 @@ slots.datasetLimitation__scope_impact = Slot(uri=D4D.scopeImpact, name="datasetL
 slots.datasetLimitation__recommended_mitigation = Slot(uri=D4D.recommendedMitigation, name="datasetLimitation__recommended_mitigation", curie=D4D.curie('recommendedMitigation'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetLimitation__recommended_mitigation, domain=None, range=Optional[str])
 
-slots.externalResource__future_guarantees = Slot(uri=DCTERMS.description, name="externalResource__future_guarantees", curie=DCTERMS.curie('description'),
+slots.externalResource__future_guarantees = Slot(uri=D4D.availabilityGuarantee, name="externalResource__future_guarantees", curie=D4D.curie('availabilityGuarantee'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__future_guarantees, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.externalResource__archival = Slot(uri=SCHEMA.archivedAt, name="externalResource__archival", curie=SCHEMA.curie('archivedAt'),
-                   model_uri=DATA_SHEETS_SCHEMA.externalResource__archival, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
+slots.externalResource__archival = Slot(uri=D4D.hasArchivalVersion, name="externalResource__archival", curie=D4D.curie('hasArchivalVersion'),
+                   model_uri=DATA_SHEETS_SCHEMA.externalResource__archival, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.externalResource__restrictions = Slot(uri=DCTERMS.accessRights, name="externalResource__restrictions", curie=DCTERMS.curie('accessRights'),
+slots.externalResource__restrictions = Slot(uri=D4D.externalResourceRestrictions, name="externalResource__restrictions", curie=D4D.curie('externalResourceRestrictions'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__restrictions, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.confidentiality__confidential_elements_present = Slot(uri=D4D.confidential_elements_present, name="confidentiality__confidential_elements_present", curie=D4D.curie('confidential_elements_present'),
@@ -4170,10 +4412,10 @@ slots.contentWarning__warnings = Slot(uri=DCTERMS.description, name="contentWarn
 slots.subpopulation__subpopulation_elements_present = Slot(uri=D4D.subpopulationElementsPresent, name="subpopulation__subpopulation_elements_present", curie=D4D.curie('subpopulationElementsPresent'),
                    model_uri=DATA_SHEETS_SCHEMA.subpopulation__subpopulation_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.subpopulation__identification = Slot(uri=DCTERMS.description, name="subpopulation__identification", curie=DCTERMS.curie('description'),
+slots.subpopulation__identification = Slot(uri=D4D.subpopulationIdentification, name="subpopulation__identification", curie=D4D.curie('subpopulationIdentification'),
                    model_uri=DATA_SHEETS_SCHEMA.subpopulation__identification, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.subpopulation__distribution = Slot(uri=DCTERMS.description, name="subpopulation__distribution", curie=DCTERMS.curie('description'),
+slots.subpopulation__distribution = Slot(uri=D4D.subpopulationDistribution, name="subpopulation__distribution", curie=D4D.curie('subpopulationDistribution'),
                    model_uri=DATA_SHEETS_SCHEMA.subpopulation__distribution, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.deidentification__identifiable_elements_present = Slot(uri=D4D.identifiableElementsPresent, name="deidentification__identifiable_elements_present", curie=D4D.curie('identifiableElementsPresent'),
@@ -4182,7 +4424,7 @@ slots.deidentification__identifiable_elements_present = Slot(uri=D4D.identifiabl
 slots.deidentification__method = Slot(uri=D4DCOMPOSITION.method, name="deidentification__method", curie=D4DCOMPOSITION.curie('method'),
                    model_uri=DATA_SHEETS_SCHEMA.deidentification__method, domain=None, range=Optional[str])
 
-slots.deidentification__identifiers_removed = Slot(uri=SCHEMA.identifier, name="deidentification__identifiers_removed", curie=SCHEMA.curie('identifier'),
+slots.deidentification__identifiers_removed = Slot(uri=D4D.removedIdentifierTypes, name="deidentification__identifiers_removed", curie=D4D.curie('removedIdentifierTypes'),
                    model_uri=DATA_SHEETS_SCHEMA.deidentification__identifiers_removed, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.deidentification__deidentification_details = Slot(uri=DCTERMS.description, name="deidentification__deidentification_details", curie=DCTERMS.curie('description'),
@@ -4194,7 +4436,7 @@ slots.sensitiveElement__sensitive_elements_present = Slot(uri=D4D.sensitive_elem
 slots.sensitiveElement__sensitivity_details = Slot(uri=DCTERMS.description, name="sensitiveElement__sensitivity_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__sensitivity_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.datasetRelationship__target_dataset = Slot(uri=SCHEMA.identifier, name="datasetRelationship__target_dataset", curie=SCHEMA.curie('identifier'),
+slots.datasetRelationship__target_dataset = Slot(uri=DCTERMS.relation, name="datasetRelationship__target_dataset", curie=DCTERMS.curie('relation'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__target_dataset, domain=None, range=str)
 
 slots.datasetRelationship__relationship_type = Slot(uri=SCHEMA.additionalType, name="datasetRelationship__relationship_type", curie=SCHEMA.curie('additionalType'),
@@ -4254,7 +4496,7 @@ slots.missingDataDocumentation__handling_strategy = Slot(uri=D4D.handlingStrateg
 slots.rawDataSource__source_description = Slot(uri=DCTERMS.description, name="rawDataSource__source_description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.rawDataSource__source_description, domain=None, range=str)
 
-slots.rawDataSource__source_type = Slot(uri=DCTERMS.type, name="rawDataSource__source_type", curie=DCTERMS.curie('type'),
+slots.rawDataSource__source_type = Slot(uri=D4D.sourceType, name="rawDataSource__source_type", curie=D4D.curie('sourceType'),
                    model_uri=DATA_SHEETS_SCHEMA.rawDataSource__source_type, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.rawDataSource__access_details = Slot(uri=D4D.accessDetails, name="rawDataSource__access_details", curie=D4D.curie('accessDetails'),
@@ -4269,8 +4511,8 @@ slots.preprocessingStrategy__preprocessing_details = Slot(uri=DCTERMS.descriptio
 slots.cleaningStrategy__cleaning_details = Slot(uri=DCTERMS.description, name="cleaningStrategy__cleaning_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.cleaningStrategy__cleaning_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.labelingStrategy__data_annotation_platform = Slot(uri=SCHEMA.instrument, name="labelingStrategy__data_annotation_platform", curie=SCHEMA.curie('instrument'),
-                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__data_annotation_platform, domain=None, range=Optional[str])
+slots.labelingStrategy__data_annotation_platform = Slot(uri=RAI.dataAnnotationPlatform, name="labelingStrategy__data_annotation_platform", curie=RAI.curie('dataAnnotationPlatform'),
+                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__data_annotation_platform, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.labelingStrategy__data_annotation_protocol = Slot(uri=D4D.dataAnnotationProtocol, name="labelingStrategy__data_annotation_protocol", curie=D4D.curie('dataAnnotationProtocol'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__data_annotation_protocol, domain=None, range=Optional[Union[str, list[str]]])
@@ -4287,7 +4529,7 @@ slots.labelingStrategy__annotator_demographics = Slot(uri=D4D.annotatorDemograph
 slots.labelingStrategy__labeling_details = Slot(uri=DCTERMS.description, name="labelingStrategy__labeling_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__labeling_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.rawData__access_url = Slot(uri=DCAT.accessURL, name="rawData__access_url", curie=DCAT.curie('accessURL'),
+slots.rawData__access_url = Slot(uri=D4D.rawDataAccessURL, name="rawData__access_url", curie=D4D.curie('rawDataAccessURL'),
                    model_uri=DATA_SHEETS_SCHEMA.rawData__access_url, domain=None, range=Optional[Union[str, URI]])
 
 slots.rawData__raw_data_details = Slot(uri=DCTERMS.description, name="rawData__raw_data_details", curie=DCTERMS.curie('description'),
@@ -4320,7 +4562,7 @@ slots.annotationAnalysis__disagreement_patterns = Slot(uri=D4D.disagreementPatte
 slots.annotationAnalysis__annotation_quality_details = Slot(uri=D4D.annotationQualityDetails, name="annotationAnalysis__annotation_quality_details", curie=D4D.curie('annotationQualityDetails'),
                    model_uri=DATA_SHEETS_SCHEMA.annotationAnalysis__annotation_quality_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.machineAnnotationTools__tools = Slot(uri=SCHEMA.name, name="machineAnnotationTools__tools", curie=SCHEMA.curie('name'),
+slots.machineAnnotationTools__tools = Slot(uri=D4D.toolNames, name="machineAnnotationTools__tools", curie=D4D.curie('toolNames'),
                    model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tools, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.machineAnnotationTools__tool_descriptions = Slot(uri=D4D.toolDescriptions, name="machineAnnotationTools__tool_descriptions", curie=D4D.curie('toolDescriptions'),
@@ -4359,11 +4601,11 @@ slots.intendedUse__use_category = Slot(uri=D4D.useCategory, name="intendedUse__u
 slots.prohibitedUse__prohibition_reason = Slot(uri=D4D.prohibitionReason, name="prohibitedUse__prohibition_reason", curie=D4D.curie('prohibitionReason'),
                    model_uri=DATA_SHEETS_SCHEMA.prohibitedUse__prohibition_reason, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.thirdPartySharing__is_shared = Slot(uri=DCTERMS.accessRights, name="thirdPartySharing__is_shared", curie=DCTERMS.curie('accessRights'),
+slots.thirdPartySharing__is_shared = Slot(uri=D4D.isExternallyShared, name="thirdPartySharing__is_shared", curie=D4D.curie('isExternallyShared'),
                    model_uri=DATA_SHEETS_SCHEMA.thirdPartySharing__is_shared, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.distributionFormat__access_urls = Slot(uri=DCAT.accessURL, name="distributionFormat__access_urls", curie=DCAT.curie('accessURL'),
-                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__access_urls, domain=None, range=Optional[Union[str, list[str]]])
+                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__access_urls, domain=None, range=Optional[Union[Union[str, URI], list[Union[str, URI]]]])
 
 slots.distributionDate__release_dates = Slot(uri=DCTERMS.available, name="distributionDate__release_dates", curie=DCTERMS.curie('available'),
                    model_uri=DATA_SHEETS_SCHEMA.distributionDate__release_dates, domain=None, range=Optional[Union[str, list[str]]])
@@ -4374,7 +4616,7 @@ slots.maintainer__role = Slot(uri=SCHEMA.maintainer, name="maintainer__role", cu
 slots.maintainer__maintainer_details = Slot(uri=DCTERMS.description, name="maintainer__maintainer_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.maintainer__maintainer_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.erratum__erratum_url = Slot(uri=DCAT.accessURL, name="erratum__erratum_url", curie=DCAT.curie('accessURL'),
+slots.erratum__erratum_url = Slot(uri=D4D.erratumURL, name="erratum__erratum_url", curie=D4D.curie('erratumURL'),
                    model_uri=DATA_SHEETS_SCHEMA.erratum__erratum_url, domain=None, range=Optional[Union[str, URI]])
 
 slots.erratum__erratum_details = Slot(uri=DCTERMS.description, name="erratum__erratum_details", curie=DCTERMS.curie('description'),
@@ -4392,8 +4634,8 @@ slots.retentionLimits__retention_period = Slot(uri=D4D.retentionPeriod, name="re
 slots.retentionLimits__retention_details = Slot(uri=DCTERMS.description, name="retentionLimits__retention_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.retentionLimits__retention_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.versionAccess__latest_version_doi = Slot(uri=SCHEMA.identifier, name="versionAccess__latest_version_doi", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.versionAccess__latest_version_doi, domain=None, range=Optional[str])
+slots.versionAccess__latest_version_doi = Slot(uri=DCTERMS.hasVersion, name="versionAccess__latest_version_doi", curie=DCTERMS.curie('hasVersion'),
+                   model_uri=DATA_SHEETS_SCHEMA.versionAccess__latest_version_doi, domain=None, range=Optional[Union[str, URIorCURIE]])
 
 slots.versionAccess__versions_available = Slot(uri=D4D.versionsAvailable, name="versionAccess__versions_available", curie=D4D.curie('versionsAvailable'),
                    model_uri=DATA_SHEETS_SCHEMA.versionAccess__versions_available, domain=None, range=Optional[Union[str, list[str]]])
@@ -4401,13 +4643,13 @@ slots.versionAccess__versions_available = Slot(uri=D4D.versionsAvailable, name="
 slots.versionAccess__version_details = Slot(uri=DCTERMS.description, name="versionAccess__version_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.versionAccess__version_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.extensionMechanism__contribution_url = Slot(uri=DCAT.landingPage, name="extensionMechanism__contribution_url", curie=DCAT.curie('landingPage'),
+slots.extensionMechanism__contribution_url = Slot(uri=D4D.contributionURL, name="extensionMechanism__contribution_url", curie=D4D.curie('contributionURL'),
                    model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__contribution_url, domain=None, range=Optional[Union[str, URI]])
 
 slots.extensionMechanism__extension_details = Slot(uri=DCTERMS.description, name="extensionMechanism__extension_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__extension_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.ethicalReview__contact_person = Slot(uri=SCHEMA.contactPoint, name="ethicalReview__contact_person", curie=SCHEMA.curie('contactPoint'),
+slots.ethicalReview__contact_person = Slot(uri=D4D.ethicsContactPoint, name="ethicalReview__contact_person", curie=D4D.curie('ethicsContactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.ethicalReview__contact_person, domain=None, range=Optional[Union[str, PersonId]])
 
 slots.ethicalReview__reviewing_organization = Slot(uri=SCHEMA.provider, name="ethicalReview__reviewing_organization", curie=SCHEMA.curie('provider'),
@@ -4494,13 +4736,13 @@ slots.atRiskPopulations__assent_procedures = Slot(uri=D4D.assentProcedures, name
 slots.atRiskPopulations__guardian_consent = Slot(uri=D4D.guardianConsent, name="atRiskPopulations__guardian_consent", curie=D4D.curie('guardianConsent'),
                    model_uri=DATA_SHEETS_SCHEMA.atRiskPopulations__guardian_consent, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.licenseAndUseTerms__license_terms = Slot(uri=DCTERMS.license, name="licenseAndUseTerms__license_terms", curie=DCTERMS.curie('license'),
+slots.licenseAndUseTerms__license_terms = Slot(uri=D4D.licenseDescription, name="licenseAndUseTerms__license_terms", curie=D4D.curie('licenseDescription'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__license_terms, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.licenseAndUseTerms__data_use_permission = Slot(uri=DUO['0000001'], name="licenseAndUseTerms__data_use_permission", curie=DUO.curie('0000001'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__data_use_permission, domain=None, range=Optional[Union[Union[str, "DataUsePermissionEnum"], list[Union[str, "DataUsePermissionEnum"]]]])
 
-slots.licenseAndUseTerms__contact_person = Slot(uri=SCHEMA.contactPoint, name="licenseAndUseTerms__contact_person", curie=SCHEMA.curie('contactPoint'),
+slots.licenseAndUseTerms__contact_person = Slot(uri=D4D.licenseContactPoint, name="licenseAndUseTerms__contact_person", curie=D4D.curie('licenseContactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__contact_person, domain=None, range=Optional[Union[str, PersonId]])
 
 slots.iPRestrictions__restrictions = Slot(uri=DCTERMS.rights, name="iPRestrictions__restrictions", curie=DCTERMS.curie('rights'),
@@ -4518,10 +4760,10 @@ slots.exportControlRegulatoryRestrictions__other_compliance = Slot(uri=D4D.other
 slots.exportControlRegulatoryRestrictions__confidentiality_level = Slot(uri=D4D.confidentialityLevel, name="exportControlRegulatoryRestrictions__confidentiality_level", curie=D4D.curie('confidentialityLevel'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__confidentiality_level, domain=None, range=Optional[Union[str, "ConfidentialityLevelEnum"]])
 
-slots.exportControlRegulatoryRestrictions__governance_committee_contact = Slot(uri=SCHEMA.contactPoint, name="exportControlRegulatoryRestrictions__governance_committee_contact", curie=SCHEMA.curie('contactPoint'),
+slots.exportControlRegulatoryRestrictions__governance_committee_contact = Slot(uri=D4D.governanceContactPoint, name="exportControlRegulatoryRestrictions__governance_committee_contact", curie=D4D.curie('governanceContactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__governance_committee_contact, domain=None, range=Optional[Union[str, PersonId]])
 
-slots.variableMetadata__variable_name = Slot(uri=SCHEMA.name, name="variableMetadata__variable_name", curie=SCHEMA.curie('name'),
+slots.variableMetadata__variable_name = Slot(uri=D4D.variableName, name="variableMetadata__variable_name", curie=D4D.curie('variableName'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__variable_name, domain=None, range=str)
 
 slots.variableMetadata__data_type = Slot(uri=SCHEMA.DataType, name="variableMetadata__data_type", curie=SCHEMA.curie('DataType'),
@@ -4545,7 +4787,7 @@ slots.variableMetadata__categories = Slot(uri=SCHEMA.valueReference, name="varia
 slots.variableMetadata__examples = Slot(uri=SKOS.example, name="variableMetadata__examples", curie=SKOS.curie('example'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__examples, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.variableMetadata__is_identifier = Slot(uri=SCHEMA.identifier, name="variableMetadata__is_identifier", curie=SCHEMA.curie('identifier'),
+slots.variableMetadata__is_identifier = Slot(uri=D4D.isIdentifier, name="variableMetadata__is_identifier", curie=D4D.curie('isIdentifier'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__is_identifier, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.variableMetadata__is_sensitive = Slot(uri=D4D.isSensitive, name="variableMetadata__is_sensitive", curie=D4D.curie('isSensitive'),
@@ -4560,7 +4802,7 @@ slots.variableMetadata__measurement_technique = Slot(uri=SCHEMA.measurementTechn
 slots.variableMetadata__derivation = Slot(uri=DCTERMS.provenance, name="variableMetadata__derivation", curie=DCTERMS.curie('provenance'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__derivation, domain=None, range=Optional[str])
 
-slots.variableMetadata__quality_notes = Slot(uri=DCTERMS.description, name="variableMetadata__quality_notes", curie=DCTERMS.curie('description'),
+slots.variableMetadata__quality_notes = Slot(uri=D4D.qualityNotes, name="variableMetadata__quality_notes", curie=D4D.curie('qualityNotes'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__quality_notes, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.file__file_type = Slot(uri=D4D.fileType, name="file__file_type", curie=D4D.curie('fileType'),

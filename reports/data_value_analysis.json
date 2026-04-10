@@ -1,0 +1,2299 @@
+{
+  "metadata": {
+    "tool": "data_value_analyzer",
+    "total_fields": 142,
+    "total_issues": 43
+  },
+  "summary": {
+    "fields_analyzed": 142,
+    "boolean_fields": 5,
+    "enum_candidates": 75,
+    "multivalued_fields": 38
+  },
+  "issues": [
+    {
+      "field": "id",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "https://chorus4ai.org/",
+        "https://doi.org/10.13026/37yb-1t42",
+        "https://doi.org/10.18130/V3/DXWOS5",
+        "https://fairhub.io/datasets/2"
+      ]
+    },
+    {
+      "field": "name",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "AI-READI",
+        "Bridge2AI-Voice",
+        "CHoRUS",
+        "CM4AI"
+      ]
+    },
+    {
+      "field": "title",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI)",
+        "Bridge2AI-Voice - An ethically-sourced, diverse voice dataset linked to health information",
+        "Cell Maps for Artificial Intelligence (CM4AI)",
+        "Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI"
+      ]
+    },
+    {
+      "field": "description",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "CHoRUS for Equitable AI is a Bridge2AI data generation project developing the most diverse, high-resolution, ethically sourced, AI-ready critical care dataset to answer the grand challenge of improving recovery from acute illness. The project spans 20 academic centers (14 data acquisition centers) and creates a publicly available dataset of over 100,000 critically ill patients with multi-modal data including structured EHR, waveform telemetry, medical imaging, EEG, and clinical notes. All data is standardized to the OMOP Common Data Model with additional formats (DICOM, WFDB, OHNLP tokenization) and includes comprehensive metadata schemas. Patient-focused efforts determine ethical and legal approaches to manage privacy and bias while accounting for Social Determinants of Health. A visualization and annotation environment labels data with targets important for prediction. The project emphasizes skills and workforce development for a next generation of diverse academic and community AI scientists through training programs and partnerships with AIM-AHEAD. As of November 2024, the dataset covers 14 different hospitals with 23,400 unique admissions.\n",
+        "CM4AI is the Functional Genomics Data Generation Project in the U.S. National Institutes of Health's (NIH) Bridge to Artificial Intelligence (Bridge2AI) program. Its overarching mission is to produce ethical, AI-ready datasets of cell architecture, inferred from multimodal data collected for human cell lines, to enable transformative biomedical AI research. The project delivers machine-readable hierarchical maps of cell architecture as AI-Ready data produced from multimodal interrogation of 100 chromatin modifiers and 100 metabolic enzymes involved in cancer, neuropsychiatric, and cardiac disorders in disease-relevant cell lines under perturbed and unperturbed conditions. Data streams include immunofluorescence (IF) subcellular microscopy for spatial proteomics, affinity purification mass spectroscopy (AP-MS) and size exclusion mass spectroscopy (SEC-MS) for protein-protein interaction (PPI) data, and single-cell CRISPR-Cas perturbation screens by cell type. Input data streams are integrated via the Multi-Scale Integrated Cell (MuSIC) software pipeline employing deep learning models and community detection algorithms, and output cell maps are packaged with provenance graphs and rich metadata as AI-Ready datasets in RO-Crate format using the FAIRSCAPE framework.\n",
+        "The AI-READI is a flagship dataset consisting of multimodal data collected from 4,000 individuals with and without Type 2 Diabetes Mellitus (T2DM), harmonized across 3 data collection sites (Birmingham, Alabama; San Diego, California; Seattle, Washington). The dataset was designed with future AI/Machine Learning studies in mind, including recruitment sampling procedures aimed at achieving approximately equal distribution of participants across diabetes severity (triple-balanced by race/ethnicity, biological sex, and T2DM severity), as well as a multi-domain data acquisition protocol (survey data, physical measurements, clinical data, imaging data, wearable device data, environmental sensors, biospecimens) to enable downstream AI/ML analyses that may not be feasible with existing data sources such as claims or electronic health records data. The goal is to better understand salutogenesis (the pathway from disease to health) in T2DM. The study follows FAIR principles and incorporates ethical and equitable data collection and management practices.\n",
+        "The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. This comprehensive collection provides voice recordings with corresponding clinical information from participants selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The dataset is designed to fuel voice AI research, establish data standards, and promote ethical and trustworthy AI/ML development for voice biomarkers of health. Data collection occurs through a multi-institutional collaborative effort using standardized protocols, custom smartphone applications, and rigorous ethical oversight. The initial release (v1.0) provides 12,523 recordings for 306 participants collected across five sites in North America, with derived features such as spectrograms, MFCCs, acoustic features, and clinical phenotype data. Raw audio data is available through controlled access to protect participant privacy.\n"
+      ]
+    },
+    {
+      "field": "page",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "https://chorus4ai.org/",
+        "https://docs.b2ai-voice.org",
+        "https://fairhub.io/datasets/2",
+        "https://www.cm4ai.org"
+      ]
+    },
+    {
+      "field": "keywords",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "purposes",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "tasks",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "addressing_gaps",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "creators",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "funders",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "instances",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "subsets",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "sampling_strategies",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "subpopulations",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "collection_mechanisms",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "acquisition_methods",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "preprocessing_strategies",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "cleaning_strategies",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "intended_uses",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "discouraged_uses",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "license",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "Bridge2AI Voice Registered Access License",
+        "CC BY-NC 4.0",
+        "CC BY-NC-SA 4.0",
+        "Controlled Access with Data Use Agreement"
+      ]
+    },
+    {
+      "field": "license_and_use_terms.name",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "Bridge2AI Voice Registered Access License",
+        "CHoRUS Controlled Access License",
+        "Creative Commons Attribution Non-Commercial",
+        "Creative Commons Attribution Non-Commercial Share-Alike"
+      ]
+    },
+    {
+      "field": "license_and_use_terms.description",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "Data licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required to the copyright holders and the Cell Maps for Artificial Intelligence project. Any publications referencing this data or derived products should cite the bioRxiv article (Clark T, et al. Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. BioRXiv, May 2024. doi:10.1101/2024.05.21.589311) and directly cite the data collection. Commercial use requires separate license negotiation with copyright holder (UCSD, Stanford, and/or UCSF depending upon specific data package). A Data Access Committee will supervise ethical matters related to dataset distribution and potential dual licensing for commercial use. Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University.\n",
+        "Dataset distributed under controlled access requiring institutional email registration and signed licensing agreement. Access granted after review and approval process. Participants must complete registration form with name, email (institutional, not personal), and institution. Once approved, users receive email with access instructions to CHoRUS secure enclave. Contact for access requests: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org.\n",
+        "Public access data distributed under Creative Commons Attribution Non-Commercial (CC BY-NC 4.0) license. Permits others to distribute, remix, adapt, build upon this work non-commercially, and license their derivative works on different terms, provided the original work is properly cited, appropriate credit is given, any changes made indicated, and the use is non-commercial. Controlled access data requires data use agreement. See http://creativecommons.org/licenses/by-nc/4.0/ for full license terms.\n",
+        "Public access dataset distributed through PhysioNet under Bridge2AI Voice Registered Access License. Only registered users who sign the specified Data Use Agreement (Bridge2AI Voice Registered Access Agreement) can access files. Data covered under Certificate of Confidentiality which must be asserted against compulsory legal demands. Raw audio data available through controlled access only via Data Access Compliance Office (DACO) requiring distinct application. Recipient must adhere to PhysioNet requirements managed by MIT Laboratory for Computational Physiology, supported by NIBIB under grant R01EB030362.\n"
+      ]
+    },
+    {
+      "field": "license_and_use_terms.license_terms",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "distribution_formats",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "maintainers",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "updates.name",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "Ongoing data collection and expansion",
+        "Periodic data releases and maintenance plan",
+        "Quarterly Data Releases and Maintenance Plan",
+        "Versioned releases with ongoing data collection"
+      ]
+    },
+    {
+      "field": "updates.description",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "Dataset regularly updated and augmented through end of project in November 2026. Beta releases on quarterly basis with periodic data augmentation. Initial alpha release (v0.5) provided as supplemental data. March 2025 Beta (V1.4) includes perturb-seq in KOLF2.1J iPSCs, SEC-MS in iPSCs and derivatives, and IF images in MDA-MB-468 under three conditions. June 2025 Beta (V2.1) revision adds RGB IF images, ro-crate metadata corrections, and naming convention changes. Future releases will include computed cell maps and complete integration of all data streams. Long-term preservation in University of Virginia Dataverse with committed institutional support.\n",
+        "Dataset updated continuously as data collection progresses at 14 acquisition centers. As of November 2024, covers 14 hospitals with 23,400 unique admissions. Target exceeds 100,000 critically ill patients. Project timeline extends through November 30, 2026 (with approved no-cost extension). Regular status updates tracked through GitHub project management system. Sites provide updates via GitHub interface or Google Form submissions.\n",
+        "Dataset updated periodically as enrollment progresses toward target of 4,000 participants by November 2026. Version-specific documentation maintained for each release. Biorepository maintained at UAB CCTS with long-term storage protocols. Data sharing policies under ongoing development by Data Access Committee. Pilot data released May 2024; all data through July 31, 2024 released November 2024.\n",
+        "Dataset updated with versioned releases as data collection progresses. Initial release v1.0 published January 17, 2025 with 12,523 recordings from 306 participants. v1.1 released January 17, 2025 adding MFCC features. v2.0.0 released April 16, 2025. v2.0.1 released August 18, 2025. Latest version available at https://doi.org/10.13026/37yb-1t42. Data collection ongoing through November 30, 2026. Version-specific documentation maintained. As of v1.1, only adult cohort data available; pediatric cohort data planned for future releases with additional privacy precautions.\n"
+      ]
+    },
+    {
+      "field": "updates.frequency",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "Continuous updates through November 2026",
+        "Periodic releases with ongoing enrollment; final release planned for late 2026",
+        "Periodic versioned releases during data collection period (2022-2026)",
+        "Quarterly updates through November 2026; long-term preservation thereafter"
+      ]
+    },
+    {
+      "field": "updates.update_details",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "retention_limit.name",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "Data and biospecimen retention",
+        "Data retention and disposition",
+        "Long-Term Preservation Plan",
+        "Long-term dataset retention"
+      ]
+    },
+    {
+      "field": "retention_limit.description",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "Data Transfer and Use Agreement specifies retention requirements. Upon termination or expiration of agreement (two years after start date, project completion, or ethics approval expiration), data shall be destroyed per provider instructions with written certification required within 30 days. Recipient may retain one copy to extent necessary to comply with records retention requirements under law, regulation, institutional policy, and for research integrity and verification purposes. Restrictions apply to archival copies as long as recipient holds data.\n",
+        "Digital data maintained according to NIH data sharing policies and institutional requirements. Controlled access model ensures long-term availability for research while protecting patient privacy.\n",
+        "Digital data maintained according to NIH data sharing policies with long-term preservation in University of Virginia's LibraData repository supported by committed institutional funds. No planned sunset for data availability. Archived RO-Crates with persistent identifiers (ARK, future DOIs) ensure long-term accessibility and citability.\n",
+        "Digital data maintained according to NIH data sharing policies. Biospecimen retention subject to institutional policies and consent agreements. Finite number of biospecimen samples available for distribution.\n"
+      ]
+    },
+    {
+      "field": "retention_limit.retention_details",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "human_subject_research.name",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "AI-READI Human Subjects Research",
+        "Bridge2AI-Voice Human Subjects Research",
+        "CHoRUS Human Subjects Research",
+        "CM4AI Non-Human Subjects Research"
+      ]
+    },
+    {
+      "field": "human_subject_research.description",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 4 distinct values (enum candidate)",
+      "sample_values": [
+        "CM4AI data are distinctive within Bridge2AI in that they are non-clinical data from tissue cultures and are considered to be de-identified as they cannot be matched, with current knowledge, to a human subject. Both cell lines (MDA-MB-468 and KOLF2.1J) are commercially available, ethically sourced, de-identified cell lines. MDA-MB-468 available from ATCC. KOLF2.1J available from HipSci resource for non-profit organizations via simple MTA. Ethics team developed comprehensive plan for ethical preparation, licensing, dissemination, and data access supervision balancing openness with IP protection and commercialization monitoring.\n",
+        "Data collection and sharing approved by University of South Florida Institutional Review Board. Participants provided written informed consent for data collection initiative and data sharing. Consent process includes authorization for voice data collection, access to medical information through EHR platforms for gold standard validation, and permission to share research data. Bioethics guidance integrated throughout study design and conduct. Ethics module develops new guidelines for consenting to voice data collection, voice data sharing, and utilization in context of voice AI technology. Project addresses ethical and trustworthy issues from voice data generation and AI/ML research through clinical adoption and downstream health decisions.\n",
+        "Retrospective data collection from critically ill patients approved through institutional review processes. Community-facing ethics focus groups conducted to determine what data is appropriate for public sharing. Legal framework established for collecting data at scale. Patient-focused efforts determine ethical and legal approaches to manage privacy and bias while accounting for Social Determinants of Health. Project draws expertise from law, ethics, health services, biomedical science, engineering, and scientific journal publications disciplines.\n",
+        "Study approved by Institutional Review Board (IRB) of University of Washington (approval number STUDY00016228), with reliance agreements from IRBs of University of Alabama at Birmingham and University of California, San Diego. Written informed consent provided by all participants. Bioethics guidance integrated throughout study design. Community Advisory Board of 11 persons with diversity in race and ethnicity contributes to protocol development. Ethical and equitable data collection and management practices implemented.\n"
+      ]
+    },
+    {
+      "field": "human_subject_research.involves_human_subjects",
+      "issue_type": "string_could_be_enum",
+      "severity": "MEDIUM",
+      "description": "String field with only 2 distinct values (enum candidate)",
+      "sample_values": [
+        false,
+        true
+      ]
+    },
+    {
+      "field": "human_subject_research.irb_approval",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "human_subject_research.ethics_review_board",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "human_subject_research.special_populations",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "sensitive_elements",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "external_resources",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    },
+    {
+      "field": "labeling_strategies",
+      "issue_type": "multivalued_in_data",
+      "severity": "INFO",
+      "description": "Field contains lists in data - verify schema has multivalued: true",
+      "sample_values": []
+    }
+  ],
+  "field_analyses": {
+    "acquisition_methods": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "acquisition_methods[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 27,
+      "sample_values": [
+        "12-lead ECG data collected using Philips Pagewriter TC30 Cardiograph during study visit with participant sitting in reclining chair or lying supine at recorded position (0\u00b0, 30\u00b0, 60\u00b0, or 90\u00b0 relative to supine).\n",
+        "Bedside monitor waveform data acquired through gateway/middleware systems. Stored in WFDB format with controlled access and published PhysioNet schema (extended) metadata.\n",
+        "Clinical notes extracted and tokenized using OHNLP (Open Health Natural Language Processing) toolkit. Stored locally except tokens. Controlled access planned with OHNLP open source schema metadata.\n",
+        "Complete blood count (CBC) from fresh whole blood at local CLIA-certified labs. Central lab testing at UW Nutrition and Obesity Research Center (NORC) for EDTA plasma tests (NT-proBNP, Troponin-T, C-peptide, insulin), serum tests (CRP-HS, lipid panel, glucose, kidney and liver function markers), whole blood tests (HbA1c), and urine tests (creatinine, albumin, other markers).\n",
+        "Custom-designed environmental sensor (Karalis Johnson Retina Center, UW) capturing ambient temperature, relative humidity, nitrogen oxides (NO and NO2), volatile organic compounds, particulate matter (PM1.0, PM2.5, PM4, PM10), and multi-spectral light intensity (11 measurements) for 10 days. Data in CSV format.\n",
+        "Demographics, medication administration, procedures, nursing flowsheets, and diagnoses acquired from electronic health records and standardized to OMOP Common Data Model. Controlled access with published OMOP schema metadata.\n",
+        "Dexcom G6 Continuous Glucose Monitor capturing blood glucose measurements (mg/dL) every 5 minutes for 10 days. Data exported in CSV format.\n",
+        "Dosing information time-stamped upon each infusion change or dose administration. Stored in OMOP format with controlled access and OMOP schema metadata.\n",
+        "EEG recordings from hospital databases in EDF+ and Persyst formats. Extraction in process. Planned controlled access with open source EDF+ and Persyst schema metadata.\n",
+        "Electronic health record (EHR) access for participants who consent, permitting investigators to access medical information through EHR platforms to perform gold standard validation of diagnoses and symptoms. Linkage to multimodal health biomarkers including radiomics and genomics.\n"
+      ]
+    },
+    "acquisition_methods[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 12,
+      "sample_values": [
+        "acquisition-001",
+        "acquisition-002",
+        "acquisition-003",
+        "acquisition-004",
+        "acquisition-005",
+        "acquisition-006",
+        "acquisition-007",
+        "acquisition-008",
+        "acquisition-009",
+        "acquisition-010"
+      ]
+    },
+    "acquisition_methods[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 24,
+      "sample_values": [
+        "Biospecimen collection",
+        "Clinical laboratory testing",
+        "Clinical notes (tokenized)",
+        "Cognitive function testing",
+        "Confocal Microscopy for Subcellular Imaging",
+        "Continuous glucose monitoring",
+        "EEG waveforms",
+        "Electrocardiogram (ECG)",
+        "Environmental monitoring",
+        "High-frequency nursing flowsheets"
+      ]
+    },
+    "addressing_gaps": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "addressing_gaps[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 10,
+      "sample_values": [
+        "Address demographic inequities in T2DM research by recruiting equal proportions across four race/ethnic groups (Asian, Black, Hispanic, White) and both biological sexes, improving upon many previous epidemiological studies and clinical trials that lacked diversity.\n",
+        "Address ethical and legal challenges in AI through patient-focused efforts that determine approaches to manage privacy and bias while accounting for Social Determinants of Health and performing community-facing ethics focus groups.\n",
+        "Address the absence of large-scale, diverse, high-resolution multi-center datasets for critical care AI/ML by creating a dataset spanning 20 academic centers with 100,000+ critically ill patients and ensuring balanced, diverse cohorts through federated access and sampling methods.\n",
+        "Address the limitation that machine learning models in genomics and precision medicine are typically difficult-to-interpret \"black boxes\" by providing hierarchical cell maps that enable visible machine learning systems built directly on knowledge maps of cell and tissue architecture.\n",
+        "Bridge the gap in diverse AI/ML workforce through comprehensive educational approaches, training programs (including AIM-AHEAD partnership), and cultivation of expertise in lay and scientific communities to improve AI literacy and utilization.\n",
+        "Create a model for future AI-ready medical datasets through comprehensive metadata, standardized data formats, FAIR compliance, and ethical data governance practices that can be replicated for other health conditions.\n",
+        "Create integrated datasets combining protein localization (spatial proteomics), protein-protein interactions (AP-MS and SEC-MS), and transcriptional states (CRISPR perturbation screens) at multiple scales, enabling complex multi-modal AI analyses not feasible with single data types.\n",
+        "Overcome the lack of unified standards in critical care data by harmonizing multi-modal EHR, waveform, imaging, and text data to OMOP Common Data Model and other international standards (DICOM, WFDB, OHNLP).\n",
+        "Provide a large-scale, harmonized, multi-site, multi-domain dataset enabling AI/ML analyses not feasible with existing sources (e.g., claims or EHR alone). With 4,000 participants and over 10 variable domains, this is the largest publicly accessible dataset of its kind for T2DM research.\n",
+        "Provide fully provenanced, ethically validated, and FAIR-compliant AI-ready datasets with machine-readable provenance graphs, complete schemas, validation procedures, and data sheets that can be reliably processed by AI applications with full explainability.\n"
+      ]
+    },
+    "addressing_gaps[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "gap-001",
+        "gap-002",
+        "gap-003",
+        "gap-004"
+      ]
+    },
+    "addressing_gaps[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 10,
+      "sample_values": [
+        "AI-readiness of medical datasets",
+        "Black Box AI Models in Genomic Medicine",
+        "Demographic underrepresentation",
+        "Insufficient data standardization",
+        "Integration of Multimodal Cellular Data",
+        "Lack of AI-Ready Biomedical Datasets with Provenance",
+        "Lack of diverse multi-center critical care datasets",
+        "Lack of multimodal T2DM datasets",
+        "Limited AI workforce diversity",
+        "Privacy and bias concerns in AI"
+      ]
+    },
+    "addressing_gaps[item].response": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "Address the lack of large, high quality, multi-institutional and diverse voice databases linked to multimodal health biomarkers (demographics, imaging, genomics, risk factors) necessary to fuel voice AI research and answer tangible clinical questions.\n",
+        "Establish missing standards for voice data collection, acoustic analysis, and ethical frameworks for consenting to voice data collection, sharing, and utilization in the context of voice AI technology development and clinical adoption.\n",
+        "Fill the gap in pediatric voice and speech analysis research, which is sparser partly due to ethical concerns and challenges in data acquisition for this cohort, particularly for autism and speech delay detection.\n",
+        "Overcome limitations in existing voice and psychiatric disorder research that has relied on small datasets with limited demographic diversity reporting, lack of standardized data collection protocols precluding meta-analysis, and possible confounders limiting external validity and clinical usability.\n"
+      ]
+    },
+    "cleaning_strategies": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "cleaning_strategies[item].cleaning_details": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "cleaning_strategies[item].cleaning_details[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 43,
+      "sample_values": [
+        "18 identifier categories removed",
+        "ARK persistent identifier assignment",
+        "AlphaFoldDB structure integration",
+        "Audio waveforms excluded from public release",
+        "Biometric identifiers removed",
+        "Clinical validation SOP for mappings",
+        "Common smartphone application",
+        "Controlled vocabulary mapping for all keywords",
+        "Cross-site data quality checks",
+        "Cross-site harmonization procedures"
+      ]
+    },
+    "cleaning_strategies[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 9,
+      "sample_values": [
+        "All data modalities validated against published metadata schemas (OMOP, DICOM, WFDB, OHNLP, EDF+, Persyst) to ensure compliance and data quality.\n",
+        "All datasets packaged using FAIRSCAPE framework which creates RO-Crate packages with datasets, metadata, provenance graphs, and software. FAIRSCAPE-CLI validates inputs and creates output RO-Crate packages. FAIRSCAPE server assigns persistent resolvable globally unique identifiers (ARK scheme), decomposes RO-Crates into components, and computes end-to-end provenance entailments using EVI Evidence Graph Ontology.\n",
+        "Bioinformatics pipeline developed for annotating MuSIC communities with available structural information from PDB, AlphaFoldDB, crosslinking mass spectrometry, and prediction of disordered sequence segments. Communities ranked by structural information amount as proxy for integrative modeling feasibility.\n",
+        "Data from 14 acquisition centers harmonized through validated semantic mappings and standard operating protocols (SOPs). Ensures consistency and interoperability across diverse institutional EHR systems and clinical practices.\n",
+        "Data mapped to applicable standards and ontologies including Gene Ontology (GO), Reactome, Protein Data Bank (PDB), AlphaFold Protein Structure Database, Schema.org, and EVI Evidence Graph Ontology. Keywords mapped to controlled vocabularies from NCI Thesaurus, BioAssay Ontology, Cell Ontology, CHEBI, and other ontologies.\n",
+        "Data standardization across multi-institutional sites through use of standardized protocols, common data collection application, and REDCap data management system. Ensures consistency and quality across five collection sites.\n",
+        "HIPAA Safe Harbor de-identification applied. Identifiers removed include: names, geographic locators (state/province removed, country retained), dates at resolution finer than years, phone/fax numbers, email addresses, IP addresses, Social Security Numbers, medical record numbers, health plan beneficiary numbers, device identifiers, license numbers, account numbers, vehicle identifiers, website URLs, full face photos, biometric identifiers, and any unique identifiers.\n",
+        "Privacy protection measures for public release - Audio waveforms omitted from public dataset, only derived features (spectrograms, MFCCs, acoustic features) made available. Free speech transcripts removed. Raw audio available only through controlled access with DACO approval.\n",
+        "Standardized protocols and procedures across all three data collection sites ensure data consistency and quality. Common equipment, training, and REDCap data management system used to maintain FAIR principles compliance.\n"
+      ]
+    },
+    "cleaning_strategies[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 3,
+      "sample_values": [
+        "cleaning-001",
+        "cleaning-002",
+        "cleaning-003"
+      ]
+    },
+    "cleaning_strategies[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 6,
+      "sample_values": [
+        "Data Standard Mapping",
+        "FAIRSCAPE AI-Readiness Packaging",
+        "Integrative Structure Modeling Annotation",
+        "Metadata schema validation",
+        "Multi-center data harmonization",
+        "Multi-site harmonization"
+      ]
+    },
+    "collection_mechanisms": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "collection_mechanisms[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 17,
+      "sample_values": [
+        "Automated fixation and permeabilization protocols using pipetting robot for MDA-MB-468 and KOLF2.1J cell lines. Immunofluorescence-based staining (ICC-IF) with confocal microscopy to capture spatial subcellular organization. Completed spatial proteomics mapping of 100 chromatin regulators in MDA-MB-468 cells under three conditions (untreated, paclitaxel, vorinostat), with 500 additional proteins pending from genetic perturbations and PPI results. Antibodies from Human Protein Atlas resource. Generated by Lundberg Lab at Stanford University.\n",
+        "Blood (53 mL) and urine collected during study visit. Local processing for plasma, serum, buffy coats at all sites. Centralized biobanking at UAB CCTS. Standardized operating procedures ensure consistent handling.\n",
+        "Continuous glucose monitoring (Dexcom G6, 5-minute intervals), physical activity monitoring (Garmin VivoSmart 5), and environmental sensor monitoring (temperature, humidity, air quality) conducted at participants' homes over 10-day monitoring periods.\n",
+        "Continuous waveform telemetry data captured from bedside monitors through gateway/middleware systems. Stored in WFDB (WaveForm DataBase) format following PhysioNet schema (extended).\n",
+        "Data collection conducted using a custom smartphone application on tablet with headset used when possible. Standardized protocol for data collection adopted across all sites. Single session sufficient for most participants, though subset required multiple sessions resulting in more than one session per participant in dataset.\n",
+        "Data collection protocol involved: (1) demographic information collection, (2) health questionnaires, (3) targeted questionnaires about known voice confounders, (4) disease- specific information, (5) voice recording tasks such as sustained phonation of vowel sounds, (6) conventional acoustic tasks including respiratory sounds, cough sounds, and free speech prompts. Data exported and converted from REDCap using open source b2aiprep library.\n",
+        "Electroencephalography recordings extracted from hospital EEG databases in EDF+ and Persyst formats with metadata following open source schemas.\n",
+        "Endogenous tagging of genes in cell lines followed by affinity purification mass spectrometry (AP-MS) to map protein-protein interactions. 17 genes endogenously tagged in MDA-MB-468 with AP-MS data acquired under three conditions (untreated, paclitaxel, vorinostat). 34 additional genes currently in tagging process. Orthogonal approach to SEC-MS for comprehensive PPI mapping.\n",
+        "Medical imaging data acquired from hospital PACS (Picture Archiving and Communication System) and stored in DICOM format with comprehensive metadata following DICOM schema.\n",
+        "Multi-center network capabilities to acquire, standardize, tokenize, store, visualize, and label data. All structured clinical data transformed to OMOP Common Data Model. Clinical notes tokenized using OHNLP toolkit. Imaging converted to DICOM. Waveforms standardized to WFDB format.\n"
+      ]
+    },
+    "collection_mechanisms[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 5,
+      "sample_values": [
+        "collection-001",
+        "collection-002",
+        "collection-003",
+        "collection-004",
+        "collection-005"
+      ]
+    },
+    "collection_mechanisms[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 14,
+      "sample_values": [
+        "Affinity Purification Mass Spectrometry",
+        "Biospecimen collection and biobanking",
+        "CRISPR Perturbation Screens",
+        "EEG recording extraction",
+        "Electronic health record screening",
+        "Home-based wearable monitoring",
+        "Immunofluorescence Spatial Proteomics Imaging",
+        "In-person data collection visits",
+        "Medical imaging acquisition",
+        "Retrospective EHR extraction"
+      ]
+    },
+    "creators": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "creators[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 38,
+      "sample_values": [
+        "Co-Investigator",
+        "Co-Investigator, AI-READI Consortium",
+        "Co-Investigator, AI-READI Consortium (Bioethics)",
+        "Co-Investigator, Simon Fraser University, Ethics Module Leader",
+        "Co-Investigator, Stanford University, Data Acquisition Module (Spatial Proteomics)",
+        "Co-Investigator, University of Alabama",
+        "Co-Investigator, University of Alabama at Birmingham, Department of Medicine",
+        "Co-Investigator, University of Alabama at Birmingham, Departments of Ophthalmology and Epidemiology",
+        "Co-Investigator, University of Alabama at Birmingham, Teaming Module",
+        "Co-Investigator, University of California San Diego, Data Acquisition Module (Genetic Perturbations)"
+      ]
+    },
+    "creators[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 20,
+      "sample_values": [
+        "creator-001",
+        "creator-002",
+        "creator-003",
+        "creator-004",
+        "creator-005",
+        "creator-006",
+        "creator-007",
+        "creator-008",
+        "creator-009",
+        "creator-010"
+      ]
+    },
+    "creators[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 65,
+      "sample_values": [
+        "Aaron Lee",
+        "Alexandros Sigaras",
+        "Alistair Johnson",
+        "Aliyah Geer",
+        "Alvin Y. Liu",
+        "Anais Rameau",
+        "Andrej Sali",
+        "Andrew Ewing Williams",
+        "Andrew Williams",
+        "Ashley Cordes"
+      ]
+    },
+    "description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "CHoRUS for Equitable AI is a Bridge2AI data generation project developing the most diverse, high-resolution, ethically sourced, AI-ready critical care dataset to answer the grand challenge of improving recovery from acute illness. The project spans 20 academic centers (14 data acquisition centers) and creates a publicly available dataset of over 100,000 critically ill patients with multi-modal data including structured EHR, waveform telemetry, medical imaging, EEG, and clinical notes. All data is standardized to the OMOP Common Data Model with additional formats (DICOM, WFDB, OHNLP tokenization) and includes comprehensive metadata schemas. Patient-focused efforts determine ethical and legal approaches to manage privacy and bias while accounting for Social Determinants of Health. A visualization and annotation environment labels data with targets important for prediction. The project emphasizes skills and workforce development for a next generation of diverse academic and community AI scientists through training programs and partnerships with AIM-AHEAD. As of November 2024, the dataset covers 14 different hospitals with 23,400 unique admissions.\n",
+        "CM4AI is the Functional Genomics Data Generation Project in the U.S. National Institutes of Health's (NIH) Bridge to Artificial Intelligence (Bridge2AI) program. Its overarching mission is to produce ethical, AI-ready datasets of cell architecture, inferred from multimodal data collected for human cell lines, to enable transformative biomedical AI research. The project delivers machine-readable hierarchical maps of cell architecture as AI-Ready data produced from multimodal interrogation of 100 chromatin modifiers and 100 metabolic enzymes involved in cancer, neuropsychiatric, and cardiac disorders in disease-relevant cell lines under perturbed and unperturbed conditions. Data streams include immunofluorescence (IF) subcellular microscopy for spatial proteomics, affinity purification mass spectroscopy (AP-MS) and size exclusion mass spectroscopy (SEC-MS) for protein-protein interaction (PPI) data, and single-cell CRISPR-Cas perturbation screens by cell type. Input data streams are integrated via the Multi-Scale Integrated Cell (MuSIC) software pipeline employing deep learning models and community detection algorithms, and output cell maps are packaged with provenance graphs and rich metadata as AI-Ready datasets in RO-Crate format using the FAIRSCAPE framework.\n",
+        "The AI-READI is a flagship dataset consisting of multimodal data collected from 4,000 individuals with and without Type 2 Diabetes Mellitus (T2DM), harmonized across 3 data collection sites (Birmingham, Alabama; San Diego, California; Seattle, Washington). The dataset was designed with future AI/Machine Learning studies in mind, including recruitment sampling procedures aimed at achieving approximately equal distribution of participants across diabetes severity (triple-balanced by race/ethnicity, biological sex, and T2DM severity), as well as a multi-domain data acquisition protocol (survey data, physical measurements, clinical data, imaging data, wearable device data, environmental sensors, biospecimens) to enable downstream AI/ML analyses that may not be feasible with existing data sources such as claims or electronic health records data. The goal is to better understand salutogenesis (the pathway from disease to health) in T2DM. The study follows FAIR principles and incorporates ethical and equitable data collection and management practices.\n",
+        "The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. This comprehensive collection provides voice recordings with corresponding clinical information from participants selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The dataset is designed to fuel voice AI research, establish data standards, and promote ethical and trustworthy AI/ML development for voice biomarkers of health. Data collection occurs through a multi-institutional collaborative effort using standardized protocols, custom smartphone applications, and rigorous ethical oversight. The initial release (v1.0) provides 12,523 recordings for 306 participants collected across five sites in North America, with derived features such as spectrograms, MFCCs, acoustic features, and clinical phenotype data. Raw audio data is available through controlled access to protect participant privacy.\n"
+      ]
+    },
+    "discouraged_uses": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "discouraged_uses[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 13,
+      "sample_values": [
+        "As data collection continues through November 2026 and quality assurance processes are ongoing, early dataset versions should be used with awareness of completeness limitations and ongoing expansion.\n",
+        "As enrollment is ongoing until November 2026, pilot data releases and periodic updates may not have achieved balanced distribution across all groups. Early versions should be used with awareness of this limitation.\n",
+        "Attempts to re-identify participants from de-identified data violate ethical principles and data use agreements.\n",
+        "Attempts to re-identify patients from de-identified data violate ethical principles, data use agreements, and legal frameworks established for privacy protection.\n",
+        "Dataset is for research purposes. Any AI/ML models developed should undergo appropriate clinical validation before use in patient care or clinical decision-making.\n",
+        "Dataset is for research purposes. Any AI/ML models developed should undergo appropriate clinical validation, regulatory approval, and institutional review before use in patient care or clinical decision-making.\n",
+        "Datasets require domain expertise for meaningful analysis and interpretation. Not suitable for use without understanding of functional genomics, proteomics, cell biology, and AI/ML methodologies. Training resources available through CM4AI Skills and Workforce Development module.\n",
+        "Development of surveillance technologies or applications that could be used for discrimination, bias amplification, or harm to vulnerable populations. Voice data contains sensitive health information and could encode biases that require careful ethical consideration.\n",
+        "Direct clinical decision-making without appropriate validation. Dataset is for research purposes. Any AI/ML models developed should undergo appropriate clinical validation, regulatory approval, and testing before use in patient care or clinical decision support.\n",
+        "Laboratory data from cell lines are not to be used in clinical decision-making or any context involving patient care without appropriate regulatory oversight and approval. Requires domain expertise and clinical validation before any clinical applications.\n"
+      ]
+    },
+    "discouraged_uses[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "discouraged-001",
+        "discouraged-002",
+        "discouraged-003",
+        "discouraged-004"
+      ]
+    },
+    "discouraged_uses[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 7,
+      "sample_values": [
+        "Analysis Without Domain Expertise",
+        "Clinical Decision-Making Without Validation",
+        "Clinical decision-making without validation",
+        "Re-identification attempts",
+        "Use During Incomplete Data Release",
+        "Uses during ongoing data collection",
+        "Uses during ongoing enrollment"
+      ]
+    },
+    "distribution_formats": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "distribution_formats[item].access_urls": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "distribution_formats[item].access_urls[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 15,
+      "sample_values": [
+        "Contact DACO@b2ai-voice.org",
+        "LibraData University of Virginia",
+        "MassIVE Repository (human cancer cells)",
+        "MassIVE Repository (human iPSCs)",
+        "NCBI BioProject",
+        "Sequence Read Archive (SRA)",
+        "https://chorus4ai.org/",
+        "https://docs.aireadi.org/",
+        "https://doi.org/10.18130/V3/B35XWX",
+        "https://doi.org/10.18130/V3/DXWOS5"
+      ]
+    },
+    "distribution_formats[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 19,
+      "sample_values": [
+        "All CM4AI output data packaged as Research Object Crate (RO-Crate) packages containing datasets, metadata, provenance graphs, and software (or resolvable references). RO-Crates assigned persistent globally unique identifiers (ARK scheme, DOIs planned for publishable work) that resolve to machine- and human-readable landing pages with metadata in JSON-LD using Schema.org and EVI vocabularies.\n",
+        "Archived RO-Crates available in University of Virginia's LibraData data archive (instance of Harvard's Dataverse, an NIH-approved generalist repository). Long-term preservation supported by committed institutional funds. Quarterly updates through November 2026.\n",
+        "Cell maps shared via Network Data Exchange (NDEx) for visualization and access. Maps can be visualized in web browser or accessed via tools such as Cytoscape, HiView, and Python ndex2 library.\n",
+        "Clinical notes distributed as OHNLP-tokenized text following open source schema. Stored locally at sites except tokens, planned for controlled access.\n",
+        "EEG waveform data distributed in EDF+ (European Data Format) and Persyst formats following open source schemas. Extraction in process, planned for controlled access.\n",
+        "Mass spectrometry data deposited to MassIVE Repository (Proteomics community-supported repository). Separate depositions for human iPSC data and human cancer cell data. Data will be uploaded to Pride when available.\n",
+        "Medical imaging data distributed in DICOM format with comprehensive metadata. De-identification in process, planned for controlled access in secure enclave.\n",
+        "Mel-frequency cepstral coefficients stored in Parquet format (mfcc.parquet). Contains 60xN dimension MFCC arrays derived from spectrograms. Compatible with Python datasets library and common data science tools.\n",
+        "Metadata and data dictionaries provided through REDCap system documentation for survey and study coordination data.\n",
+        "Original raw audio waveforms available through controlled access only. Interested users contact DACO@b2ai-voice.org for application process. Disseminated through Data Access Compliance Office with formal vetting and approval process.\n"
+      ]
+    },
+    "distribution_formats[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 5,
+      "sample_values": [
+        "format-001",
+        "format-002",
+        "format-003",
+        "format-004",
+        "format-005"
+      ]
+    },
+    "distribution_formats[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 19,
+      "sample_values": [
+        "CSV for tabular and time-series data",
+        "DICOM for imaging",
+        "DICOM imaging format",
+        "EDF+ and Persyst EEG formats",
+        "Hierarchical Cell Maps in NDEx",
+        "Mass Spectrometry Data in MassIVE",
+        "OHNLP tokenized text",
+        "OMOP Common Data Model",
+        "Parquet for MFCCs",
+        "Parquet for spectrograms"
+      ]
+    },
+    "external_resources": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "external_resources[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 38,
+      "sample_values": [
+        "AI-readiness framework documentation, tutorial, and installation instructions",
+        "Additional dataset documentation and resources",
+        "Additional dataset documentation and software releases",
+        "Alternative data repository platform",
+        "BMJ Open publication describing study design and protocol",
+        "Centralized standard operating protocol documentation site with interactive workflow diagrams",
+        "Clark T, et al. Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. BioRXiv, May 2024.\n",
+        "Collaboration partner for data curation and integration",
+        "Comprehensive GitHub organization with 28 repositories including software, documentation, and SOPs",
+        "Comprehensive dataset documentation with version-specific guides"
+      ]
+    },
+    "external_resources[item].external_resources": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "external_resources[item].external_resources[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 50,
+      "sample_values": [
+        "AIM-AHEAD Connect platform (mentorship)",
+        "AIM-AHEAD Consortium website",
+        "CHoRUS developer repository (chorus-developer)",
+        "MassIVE Repository",
+        "NCBI BioProject",
+        "OHDSI website and tool stack",
+        "OMOP Common Data Model documentation",
+        "Package status page (maintained by CHoRUS)",
+        "Sequence Read Archive (SRA)",
+        "Training program informational materials"
+      ]
+    },
+    "external_resources[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 12,
+      "sample_values": [
+        "resource-001",
+        "resource-002",
+        "resource-003",
+        "resource-004",
+        "resource-005",
+        "resource-006",
+        "resource-007",
+        "resource-008",
+        "resource-009",
+        "resource-010"
+      ]
+    },
+    "external_resources[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 35,
+      "sample_values": [
+        "AI-READI Dataset Documentation",
+        "AI-READI Project Website",
+        "AIM-AHEAD Training Partnership",
+        "Bridge2AI Program",
+        "Bridge2AI-Voice GitHub Repository",
+        "Bridge2AI-Voice Project Documentation",
+        "CHoRUS Developer Documentation",
+        "CHoRUS GitHub Organization",
+        "CHoRUS Project Website",
+        "CM4AI Project Website"
+      ]
+    },
+    "funders": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "funders[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 5,
+      "sample_values": [
+        "Funded through National Institutes of Health grant 1OT2OD032701-01, administered by NIH Office of the Director. Opportunity Number: OTA-21-008. Study Section: Data Coordination, Mapping, and Modeling [DCMM]. Fiscal Year 2022. Total funding in 2022: $5,880,300 (all direct costs). Project dates: September 1, 2022 to November 30, 2026 (with no-cost extension approved).\n",
+        "Funded through National Institutes of Health grant 1OT2OD032742-01 (Bridge2AI Functional Genomics) and 5U54HG012513-02 (Bridge2AI Bridge Center), administered by NIH Office of the Director. Opportunity Number: OTA-21-008. Project dates: September 1, 2022 to August 31, 2026. FY 2025 funding: $5,289,382 (Direct: $4,632,095, Indirect: $657,287). Additional funding from the Frederick Thomas Fund of the University of Virginia.\n",
+        "Funded through National Institutes of Health grant 3OT2OD032720-01S3 (Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before). Opportunity Number: OTA-21-008. Project dates: September 1, 2022 to November 30, 2026. Total funding in 2025: $4,660,942 (Direct Costs: $4,072,321, Indirect Costs: $588,621). Administered by NIH Office of the Director through the Bridge2AI Program. Study Section: Data Coordination, Mapping, and Modeling [DCMM].\n",
+        "Funded through National Institutes of Health grant OT2OD032644, administered by NIH Office of the Director. Additional support from grants P30DK035816 (Nutrition and Obesity Research Center), UL1TR003096, and Research to Prevent Blindness. Total funding in 2022: $5,026,499. Opportunity Number: OTA-21-008. Project dates: September 1, 2022 to August 31, 2025.\n",
+        "NIBIB supports PhysioNet managed by MIT Laboratory for Computational Physiology under NIH grant number R01EB030362, which serves as a distribution platform for the Bridge2AI-Voice dataset.\n"
+      ]
+    },
+    "funders[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 2,
+      "sample_values": [
+        "funder-001",
+        "funder-002"
+      ]
+    },
+    "funders[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 3,
+      "sample_values": [
+        "NIH Common Fund Bridge2AI Program",
+        "NIH Office of the Director",
+        "National Institute of Biomedical Imaging and Bioengineering"
+      ]
+    },
+    "human_subject_research.description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "CM4AI data are distinctive within Bridge2AI in that they are non-clinical data from tissue cultures and are considered to be de-identified as they cannot be matched, with current knowledge, to a human subject. Both cell lines (MDA-MB-468 and KOLF2.1J) are commercially available, ethically sourced, de-identified cell lines. MDA-MB-468 available from ATCC. KOLF2.1J available from HipSci resource for non-profit organizations via simple MTA. Ethics team developed comprehensive plan for ethical preparation, licensing, dissemination, and data access supervision balancing openness with IP protection and commercialization monitoring.\n",
+        "Data collection and sharing approved by University of South Florida Institutional Review Board. Participants provided written informed consent for data collection initiative and data sharing. Consent process includes authorization for voice data collection, access to medical information through EHR platforms for gold standard validation, and permission to share research data. Bioethics guidance integrated throughout study design and conduct. Ethics module develops new guidelines for consenting to voice data collection, voice data sharing, and utilization in context of voice AI technology. Project addresses ethical and trustworthy issues from voice data generation and AI/ML research through clinical adoption and downstream health decisions.\n",
+        "Retrospective data collection from critically ill patients approved through institutional review processes. Community-facing ethics focus groups conducted to determine what data is appropriate for public sharing. Legal framework established for collecting data at scale. Patient-focused efforts determine ethical and legal approaches to manage privacy and bias while accounting for Social Determinants of Health. Project draws expertise from law, ethics, health services, biomedical science, engineering, and scientific journal publications disciplines.\n",
+        "Study approved by Institutional Review Board (IRB) of University of Washington (approval number STUDY00016228), with reliance agreements from IRBs of University of Alabama at Birmingham and University of California, San Diego. Written informed consent provided by all participants. Bioethics guidance integrated throughout study design. Community Advisory Board of 11 persons with diversity in race and ethnicity contributes to protocol development. Ethical and equitable data collection and management practices implemented.\n"
+      ]
+    },
+    "human_subject_research.ethics_review_board": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "human_subject_research.ethics_review_board[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 12,
+      "sample_values": [
+        "Bridge2AI Ethics Working Group participation",
+        "CM4AI Ethics Module (Vardit Ravitsky, Jean-Christophe B\u00e9lisle-Pipon)",
+        "Community Advisory Board with 11 members representing diverse race and ethnicity",
+        "Community-facing ethics focus groups",
+        "Data Access Committee (Jillian Parker)",
+        "Institutional review boards at 14 data acquisition centers",
+        "Legal and ethical advisory teams",
+        "Privacy and accountability review processes",
+        "University of Alabama at Birmingham Institutional Review Board (reliance agreement)",
+        "University of California San Diego Institutional Review Board (reliance agreement)"
+      ]
+    },
+    "human_subject_research.id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 1,
+      "sample_values": [
+        "hsr-001"
+      ]
+    },
+    "human_subject_research.involves_human_subjects": {
+      "inferred_type": "bool",
+      "is_boolean": true,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 2,
+      "sample_values": [
+        false,
+        true
+      ]
+    },
+    "human_subject_research.irb_approval": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "human_subject_research.irb_approval[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 5,
+      "sample_values": [
+        "Not applicable - de-identified cell lines from commercial sources",
+        "University of Alabama at Birmingham IRB reliance agreement",
+        "University of California San Diego IRB reliance agreement",
+        "University of South Florida Institutional Review Board approval",
+        "University of Washington IRB approval number STUDY00016228"
+      ]
+    },
+    "human_subject_research.name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "AI-READI Human Subjects Research",
+        "Bridge2AI-Voice Human Subjects Research",
+        "CHoRUS Human Subjects Research",
+        "CM4AI Non-Human Subjects Research"
+      ]
+    },
+    "human_subject_research.special_populations": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "human_subject_research.special_populations[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 7,
+      "sample_values": [
+        "Asian populations",
+        "Black populations",
+        "Hispanic populations",
+        "KOLF2.1J derived from healthy male Northern European donor (de-identified)",
+        "MDA-MB-468 derived from 51-year-old black female (de-identified)",
+        "Recruitment targeted to include racial and ethnic minorities disproportionately affected by T2DM",
+        "Tribal consultation planned for Native American cohort participation"
+      ]
+    },
+    "id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "https://chorus4ai.org/",
+        "https://doi.org/10.13026/37yb-1t42",
+        "https://doi.org/10.18130/V3/DXWOS5",
+        "https://fairhub.io/datasets/2"
+      ]
+    },
+    "instances": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "instances[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 7,
+      "sample_values": [
+        "Adult participants presenting at specialty clinics and institutions across five sites in North America. Participants were selected based on membership to five predetermined disease cohort groups: Respiratory disorders, Voice disorders, Neurological disorders, Mood disorders, and Pediatric. As of v1.1, only data from the adult cohort is available. The initial release (v1.0) provides 306 participants with 12,523 recordings collected through standardized protocols.\n",
+        "Human induced pluripotent stem cell (iPSC) line (RRID:CVCL_B5P3) derived from a healthy male Northern European donor, available from the Human Induced Pluripotent Stem Cells Initiative (HipSci) resource. Available for access by non-for-profit organizations via a simple MTA. Analyzed in undifferentiated state and after differentiation into neurons and cardiomyocytes.\n",
+        "Individual critically ill patients requiring acute or critical care admitted to intensive care units or similar hospital settings across 14 data acquisition centers. As of November 2024, dataset covers 14 different hospitals with 23,400 unique admissions. Target enrollment exceeds 100,000 critically ill patients. Retrospective data collection from patients with acute or critical illness.\n",
+        "Individual participants aged 40 and older with and without Type 2 Diabetes Mellitus (T2DM). Target enrollment is 4,000 people, triple-balanced by self-reported race/ethnicity (Asian, Black, Hispanic, White), T2DM severity (no diabetes, pre-diabetes/lifestyle-controlled diabetes, diabetes treated with oral medications or non-insulin injections, insulin-controlled diabetes), and biological sex (male, female). Participants must speak, read, and understand English. Exclusion criteria include pregnancy and type 1 diabetes.\n",
+        "Near-comprehensive set of chromatin regulators encoded by the human genome analyzed via AP-MS, SEC-MS, IF imaging, and CRISPR perturbation screens across different cell states and treatment conditions. 17 genes endogenously tagged in MDA-MB-468 with AP-MS data under three conditions, with 34 additional genes in process. SEC-MS identified 72/100 chromatin modifiers, with 52 being integral components of protein complexes.\n",
+        "Set of metabolic enzymes involved in cancer, neuropsychiatric, and cardiac disorders analyzed via multimodal interrogation including mass spectrometry, imaging, and perturbation screens.\n",
+        "Triple negative breast cancer cell line (RRID:CVCL_0419) established from a metastatic site pleural effusion of a 51-year-old black female with a metastatic mammary adenocarcinoma, available from ATCC. This cell line has been extensively used to study triple-negative breast cancer and is well characterized with transcriptomic, mutational profile, and whole-genome sequencing data available. Cells are analyzed under three conditions: untreated, paclitaxel-treated, and vorinostat-treated.\n"
+      ]
+    },
+    "instances[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "instance-001",
+        "instance-002",
+        "instance-003",
+        "instance-004"
+      ]
+    },
+    "instances[item].instance_type": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 6,
+      "sample_values": [
+        "Cultured cell line from de-identified human tissue, ethically sourced from ATCC",
+        "Cultured cell line from de-identified human tissue, ethically sourced from HipSci",
+        "Human participants recruited from specialty clinics at multi-institutional sites. Data collection conducted between 2022 and 2026 through IRB-approved protocols with informed consent.\n",
+        "Human participants recruited from three health system sites (University of Alabama at Birmingham, University of California San Diego, University of Washington) between 2022 and 2026.\n",
+        "Human subjects - critically ill patients admitted to participating hospitals between data collection timeframe (specific dates vary by site, ongoing collection through November 2026).\n",
+        "Protein targets for multi-modal analysis"
+      ]
+    },
+    "instances[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 6,
+      "sample_values": [
+        "100 Chromatin Regulators",
+        "100 Metabolic Enzymes",
+        "Critically ill patients",
+        "Individual participants",
+        "KOLF2.1J Induced Pluripotent Stem Cells",
+        "MDA-MB-468 Breast Cancer Cell Line"
+      ]
+    },
+    "intended_uses": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "intended_uses[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 21,
+      "sample_values": [
+        "Analysis of cellular responses to drug treatments (paclitaxel, vorinostat) to predict drug response and synergy. Cell maps under different treatment conditions enable visible machine learning for drug discovery and personalized medicine applications.\n",
+        "Development of visible neural networks (VNNs) that use hierarchical cell maps as interpretable model architectures. Unlike black box models, VNNs built on cell maps allow interrogation of how protein assemblies affect cell-level phenotypes, enabling interpretation of genetic variants and mutations in the context of cellular mechanisms.\n",
+        "Discovery of novel biomarkers for T2DM progression, complications, and salutogenesis using biospecimens from the biorepository.\n",
+        "Model dataset for ethical AI development in healthcare, demonstrating integration of bioethics guidance, ethical data collection practices, informed consent processes, privacy protection through federated learning, and trustworthy AI/ML development from data generation through clinical adoption.\n",
+        "Multimodal health research combining voice data with EHR information, radiomics, genomics, and other health biomarkers to understand complex disease relationships and improve diagnostic accuracy.\n",
+        "Primary intended use is development and training of artificial intelligence and machine learning models to characterize acute and critical care illness, predict complications, and measure treatment response in critically ill patients.\n",
+        "Primary intended use is development and training of artificial intelligence and machine learning models to study Type 2 Diabetes Mellitus, disease trajectories, and salutogenesis (pathways to health resilience). Designed for pseudotime manifold analysis to predict disease progression.\n",
+        "Primary intended use is development and validation of AI/ML models for voice as a biomarker of health, supporting screening, diagnosis, and treatment of voice disorders, neurological disorders, mood disorders, respiratory disorders, and pediatric speech disorders.\n",
+        "Primary intended use is training and development of artificial intelligence and machine learning models for functional genomics research. AI-ready datasets with full provenance, metadata, and validation enable immediate use in AI/ML pipelines without reformatting.\n",
+        "Provision of holdout test set accessible for model external validation to aid marketplace adoption of AI-developed models for implementation in acute and critical care settings.\n"
+      ]
+    },
+    "intended_uses[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 6,
+      "sample_values": [
+        "use-001",
+        "use-002",
+        "use-003",
+        "use-004",
+        "use-005",
+        "use-006"
+      ]
+    },
+    "intended_uses[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 16,
+      "sample_values": [
+        "AI Model Training for Functional Genomics",
+        "AI/ML model development for T2DM",
+        "AI/ML model development for critical care",
+        "Biomarker discovery",
+        "Clinical care improvement research",
+        "Disease Mechanism Research",
+        "Drug Response and Synergy Prediction",
+        "Educational and training purposes",
+        "External validation of AI models",
+        "Genotype-Phenotype Mapping Research"
+      ]
+    },
+    "keywords": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "keywords[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 104,
+      "sample_values": [
+        "AI-READI",
+        "AI-Ready Data",
+        "AI-ready dataset",
+        "ALS",
+        "AP-MS",
+        "Alzheimer's disease",
+        "Artificial Intelligence",
+        "Breast Cancer",
+        "Bridge2AI",
+        "CARE principles"
+      ]
+    },
+    "labeling_strategies": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "labeling_strategies[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 1,
+      "sample_values": [
+        "Custom visualization and annotation environment developed to label data with targets important for prediction tasks in critical care AI applications.\n"
+      ]
+    },
+    "labeling_strategies[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 1,
+      "sample_values": [
+        "labeling-001"
+      ]
+    },
+    "labeling_strategies[item].labeling_details": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "labeling_strategies[item].labeling_details[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 5,
+      "sample_values": [
+        "Annotation interface for clinical experts",
+        "Documentation of labeling protocols",
+        "Interactive visualization tools",
+        "Labeling of prediction targets",
+        "Quality control of annotations"
+      ]
+    },
+    "labeling_strategies[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 1,
+      "sample_values": [
+        "Visualization and annotation environment"
+      ]
+    },
+    "language": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 1,
+      "sample_values": [
+        "en"
+      ]
+    },
+    "license": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "Bridge2AI Voice Registered Access License",
+        "CC BY-NC 4.0",
+        "CC BY-NC-SA 4.0",
+        "Controlled Access with Data Use Agreement"
+      ]
+    },
+    "license_and_use_terms.description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "Data licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required to the copyright holders and the Cell Maps for Artificial Intelligence project. Any publications referencing this data or derived products should cite the bioRxiv article (Clark T, et al. Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. BioRXiv, May 2024. doi:10.1101/2024.05.21.589311) and directly cite the data collection. Commercial use requires separate license negotiation with copyright holder (UCSD, Stanford, and/or UCSF depending upon specific data package). A Data Access Committee will supervise ethical matters related to dataset distribution and potential dual licensing for commercial use. Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University.\n",
+        "Dataset distributed under controlled access requiring institutional email registration and signed licensing agreement. Access granted after review and approval process. Participants must complete registration form with name, email (institutional, not personal), and institution. Once approved, users receive email with access instructions to CHoRUS secure enclave. Contact for access requests: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org.\n",
+        "Public access data distributed under Creative Commons Attribution Non-Commercial (CC BY-NC 4.0) license. Permits others to distribute, remix, adapt, build upon this work non-commercially, and license their derivative works on different terms, provided the original work is properly cited, appropriate credit is given, any changes made indicated, and the use is non-commercial. Controlled access data requires data use agreement. See http://creativecommons.org/licenses/by-nc/4.0/ for full license terms.\n",
+        "Public access dataset distributed through PhysioNet under Bridge2AI Voice Registered Access License. Only registered users who sign the specified Data Use Agreement (Bridge2AI Voice Registered Access Agreement) can access files. Data covered under Certificate of Confidentiality which must be asserted against compulsory legal demands. Raw audio data available through controlled access only via Data Access Compliance Office (DACO) requiring distinct application. Recipient must adhere to PhysioNet requirements managed by MIT Laboratory for Computational Physiology, supported by NIBIB under grant R01EB030362.\n"
+      ]
+    },
+    "license_and_use_terms.id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 1,
+      "sample_values": [
+        "license-001"
+      ]
+    },
+    "license_and_use_terms.license_terms": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "license_and_use_terms.license_terms[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 28,
+      "sample_values": [
+        "Appropriate administrative, technical, physical safeguards required",
+        "Attribution required to copyright holders and authors",
+        "Certificate of Confidentiality protections apply",
+        "Changes must be indicated",
+        "Compliance with applicable laws, rules, regulations, professional standards",
+        "Compliance with ethical and legal requirements",
+        "Controlled access data requires separate data use agreement",
+        "Controlled access through secure enclave",
+        "Data Access Committee oversight for ethical distribution",
+        "Data Use Agreement signature mandatory"
+      ]
+    },
+    "license_and_use_terms.name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "Bridge2AI Voice Registered Access License",
+        "CHoRUS Controlled Access License",
+        "Creative Commons Attribution Non-Commercial",
+        "Creative Commons Attribution Non-Commercial Share-Alike"
+      ]
+    },
+    "maintainers": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "maintainers[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 6,
+      "sample_values": [
+        "Active GitHub organization (chorus-ai) housing repositories for software, semantic mappings, standard operating protocols, and project management. 28 repositories with comprehensive documentation and community support.\n",
+        "Multi-institutional consortium managing dataset maintenance including data acquisition centers, coordinating teams, and infrastructure development.\n",
+        "Multidisciplinary consortium managing dataset maintenance including University of California San Diego (lead), University of California San Francisco, Stanford University, University of Virginia, Yale University, University of Alabama at Birmingham, Simon Fraser University, and The Hastings Center. Data Governance Committee led by Jillian Parker. Ethical Review by Vardit Ravitsky and Jean-Christophe Belisle-Pipon.\n",
+        "Multidisciplinary consortium managing dataset maintenance including data collection sites, coordinating centers, and data governance committees.\n",
+        "Multidisciplinary consortium responsible for dataset maintenance including data collection, curation, standards development, ethics oversight, and distribution. Led by University of South Florida with multi-institutional partnerships.\n",
+        "PhysioNet platform managed by MIT Laboratory for Computational Physiology serves as primary distribution mechanism for public access dataset. Supported by NIBIB under NIH grant R01EB030362.\n"
+      ]
+    },
+    "maintainers[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 2,
+      "sample_values": [
+        "maintainer-001",
+        "maintainer-002"
+      ]
+    },
+    "maintainers[item].maintainer_details": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "maintainers[item].maintainer_details[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 37,
+      "sample_values": [
+        "14 data acquisition centers across United States",
+        "Bioethics and social science teams",
+        "Chorus_SOP repository (centralized documentation)",
+        "Community discussions and issue tracking",
+        "Data Access Committee (access policies)",
+        "Data Access Compliance Office (DACO) for controlled access",
+        "Data Acquisition team (extraction and contribution)",
+        "Data Governance Committee (Jillian Parker)",
+        "Documentation team (version-specific guides at https://docs.aireadi.org/)",
+        "GitHub organization: https://github.com/chorus-ai"
+      ]
+    },
+    "maintainers[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 6,
+      "sample_values": [
+        "AI-READI Consortium",
+        "Bridge2AI-Voice Consortium",
+        "CHoRUS Consortium",
+        "CHoRUS GitHub Organization",
+        "CM4AI Consortium",
+        "PhysioNet / MIT Laboratory for Computational Physiology"
+      ]
+    },
+    "name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "AI-READI",
+        "Bridge2AI-Voice",
+        "CHoRUS",
+        "CM4AI"
+      ]
+    },
+    "page": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "https://chorus4ai.org/",
+        "https://docs.b2ai-voice.org",
+        "https://fairhub.io/datasets/2",
+        "https://www.cm4ai.org"
+      ]
+    },
+    "preprocessing_strategies": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "preprocessing_strategies[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 22,
+      "sample_values": [
+        "Acoustic feature extraction using OpenSMILE (Speech and Music Interpretation by Large-space Extraction), capturing temporal dynamics and acoustic characteristics. Features provided in static_features.tsv with one row per unique recording.\n",
+        "All data mapped to applicable data standard formats such as Observational Medical Outcomes Partnership Common Data Model for clinical data and DICOM format for retinal imaging. Data stored and shared as 'AI-ready' enabling immediate AI/ML research without reformatting.\n",
+        "All structured electronic health record data standardized to the OMOP (Observational Medical Outcomes Partnership) Common Data Model. Ensures interoperability and enables use of OHDSI (Observational Health Data Sciences and Informatics) tool stack for analysis.\n",
+        "Clinical notes processed using OHNLP (Open Health Natural Language Processing) toolkit for extraction and tokenization. Protects patient privacy while enabling natural language processing and analysis.\n",
+        "Community detection performed on co-embedding space using multiscale community detection algorithms implemented in Cytoscape. Produces hierarchical directed acyclic graphs (DAG) of protein assemblies at multiple resolutions, with 10 layers of depth representing communities from large cell compartments to small protein complexes.\n",
+        "DICOM imaging data undergoing de-identification process to remove patient identifiable information while preserving clinical utility and metadata.\n",
+        "Data export and conversion from REDCap using open source b2aiprep library developed by the team. Phenotype data merged into tab-delimited format with data dictionary (phenotype.json) providing column descriptions.\n",
+        "Data harmonized across three collection sites (Birmingham, San Diego, Seattle) using standardized operating procedures, common protocols, and centralized data management through REDCap. Ensures consistency and comparability across sites.\n",
+        "Data transformed using approaches that limit re-identification while maintaining analytical utility. Multiple preprocessing strategies employed to protect patient privacy across all data modalities.\n",
+        "Mel-frequency cepstral coefficients (MFCC) extraction - 60 MFCCs extracted from spectrograms. MFCCs capture perceptually-relevant spectral envelope characteristics important for voice analysis. Output dimension 60xN.\n"
+      ]
+    },
+    "preprocessing_strategies[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 7,
+      "sample_values": [
+        "preproc-001",
+        "preproc-002",
+        "preproc-003",
+        "preproc-004",
+        "preproc-005",
+        "preproc-006",
+        "preproc-007"
+      ]
+    },
+    "preprocessing_strategies[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 15,
+      "sample_values": [
+        "Biospecimen processing",
+        "Cell Map Annotation",
+        "Clinical note tokenization",
+        "Data mapping to standards",
+        "Data re-identification limitation",
+        "Data standardization and harmonization",
+        "Deep Learning Embedding Generation",
+        "Hierarchical Community Detection",
+        "Image format conversion",
+        "Medical imaging de-identification"
+      ]
+    },
+    "preprocessing_strategies[item].preprocessing_details": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "preprocessing_strategies[item].preprocessing_details[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 96,
+      "sample_values": [
+        "10-layer depth hierarchy from compartments to complexes",
+        "10ms hop length",
+        "512-point FFT",
+        "60 MFCC coefficients extracted",
+        "Acoustic characteristics quantified",
+        "Alignment to Gene Ontology for functional annotation",
+        "Alignment to Reactome pathways for pathway annotation",
+        "All-by-all similarity computation in co-embedding space",
+        "Application of de-identification algorithms",
+        "Automated protocols for consistency"
+      ]
+    },
+    "purposes": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "purposes[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 10,
+      "sample_values": [
+        "Address the grand challenge of interpretable genotype-phenotype learning in genomics and precision medicine. Machine learning models are often \"black boxes\" predicting phenotypes from genotypes without understanding the mechanisms. CM4AI enables \"visible\" machine learning systems informed by multi-scale cell and tissue architecture, allowing AI tools to interrogate how protein assemblies in the cell affect cell-level phenotype predictions.\n",
+        "Address the lack of racial and ethnic diversity in T2DM research by creating a dataset that is triple-balanced across race/ethnicity (Asian, Black, Hispanic, White), biological sex (male, female), and diabetes severity (no diabetes, pre-diabetes/lifestyle-controlled, medication-controlled, insulin-controlled).\n",
+        "Answer the grand challenge of improving recovery from acute illness by developing high-resolution multi-center datasets as a critical first step towards actionable and trustworthy AI in critical care. Address the urgent need for infrastructure to support artificial intelligence and machine learning (AI/ML) in critical care settings.\n",
+        "Better understand salutogenesis (the pathway from disease to health) in Type 2 Diabetes Mellitus using a hypothesis-agnostic, harmonized, multi-domain dataset designed specifically for AI/ML research. The dataset aims to provide critical insights into how individuals can transition from diabetes toward health resilience through pseudotime manifold analysis.\n",
+        "Deliver machine-readable hierarchical maps of cell architecture as AI-Ready data from multimodal interrogation of disease-relevant cell lines to enable transformative biomedical AI research. CM4AI produces integrated cell maps from spatial proteomics, protein-protein interactions, and genetic perturbations using state-of-the-art mass spectrometry, cell imaging, and CRISPR technologies.\n",
+        "Develop a publicly available, AI-ready critical care dataset from more than 100,000 critically ill patients while ensuring methods promote privacy, accountability, and clinical benefit. Generate the most diverse, high-resolution, ethically sourced dataset for AI/ML applications in acute and critical care.\n",
+        "Ensure comprehensive sets of patient conditions and clinical treatment strategies with appropriate contextual factors such as geographic distance to nearest hospital and Social Determinants of Health. Develop the skills and workforce for a next generation of diverse academic and community AI scientists through comprehensive training and education programs.\n",
+        "Establish standards, best practices, and guidelines for collection, preparation, and sharing of medical/health data sets targeted for AI/ML applications. This includes guidance from bioethicists on ethical and equitable data collection and management practices, with adherence to FAIR principles.\n",
+        "Establish standards, best practices, and guidelines for ethical AI-readiness in biomedical data. This includes implementing FAIR principles, computing machine-readable provenance graphs, characterizing and validating all datasets with JSON-Schema mini-data-dictionaries, and mapping data elements to public ontology vocabularies where appropriate.\n",
+        "Unify standards to harmonize multi-modal EHR, waveform, imaging, and text data. Develop software and tooling to interact with and extract insight from clinical data in diverse formats. Create validated semantic mappings for connecting clinical data in various source formats to international standards (OMOP Common Data Model).\n"
+      ]
+    },
+    "purposes[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "purpose-001",
+        "purpose-002",
+        "purpose-003",
+        "purpose-004"
+      ]
+    },
+    "purposes[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 10,
+      "sample_values": [
+        "AI-Ready Cell Architecture Maps for Biomedical AI",
+        "Addressing demographic inequities in T2DM research",
+        "Create AI-ready critical care dataset",
+        "Establish data standards and tools",
+        "Establishing AI-Readiness Standards for Biomedical Data",
+        "Establishing AI/ML data standards",
+        "Improve recovery from acute illness",
+        "Interpretable Genotype-Phenotype Learning",
+        "Promote diversity and health equity",
+        "Understanding T2DM salutogenesis"
+      ]
+    },
+    "purposes[item].response": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 3,
+      "sample_values": [
+        "Create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health, addressing the pressing need for large, high quality, multi-institutional and diverse voice databases linked to other health biomarkers.\n",
+        "Establish standards, best practices, and guidelines for voice data collection and analysis to advance the field of acoustic biomarkers by developing new standards that are AI/ML friendly and enable voice to emerge as a biomarker of health.\n",
+        "Integrate the use of voice as a biomarker of health in clinical care by generating a substantial multi-institutional, ethically sourced, and diverse voice database linked to multimodal health biomarkers to fuel voice AI research and build predictive models to assist in screening, diagnosis, and treatment of a broad range of diseases.\n"
+      ]
+    },
+    "retention_limit.description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "Data Transfer and Use Agreement specifies retention requirements. Upon termination or expiration of agreement (two years after start date, project completion, or ethics approval expiration), data shall be destroyed per provider instructions with written certification required within 30 days. Recipient may retain one copy to extent necessary to comply with records retention requirements under law, regulation, institutional policy, and for research integrity and verification purposes. Restrictions apply to archival copies as long as recipient holds data.\n",
+        "Digital data maintained according to NIH data sharing policies and institutional requirements. Controlled access model ensures long-term availability for research while protecting patient privacy.\n",
+        "Digital data maintained according to NIH data sharing policies with long-term preservation in University of Virginia's LibraData repository supported by committed institutional funds. No planned sunset for data availability. Archived RO-Crates with persistent identifiers (ARK, future DOIs) ensure long-term accessibility and citability.\n",
+        "Digital data maintained according to NIH data sharing policies. Biospecimen retention subject to institutional policies and consent agreements. Finite number of biospecimen samples available for distribution.\n"
+      ]
+    },
+    "retention_limit.id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 1,
+      "sample_values": [
+        "retention-001"
+      ]
+    },
+    "retention_limit.name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "Data and biospecimen retention",
+        "Data retention and disposition",
+        "Long-Term Preservation Plan",
+        "Long-term dataset retention"
+      ]
+    },
+    "retention_limit.retention_details": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "retention_limit.retention_details[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 21,
+      "sample_values": [
+        "Biospecimen retention per institutional policies at UAB CCTS",
+        "Consent agreements specify retention terms",
+        "Controlled access model for privacy protection",
+        "Data destruction required upon termination unless retention justified",
+        "Finite biospecimen availability",
+        "Institutional requirements at participating centers",
+        "Long-term maintenance through CHoRUS Consortium",
+        "Machine-readable metadata for long-term discoverability",
+        "NIH data sharing policies govern digital data retention",
+        "NIH data sharing policies govern retention"
+      ]
+    },
+    "sampling_strategies": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "sampling_strategies[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "Federated access enables sampling methods to ensure a balanced and diverse cohort across 20 academic centers (14 data acquisition centers). Legal framework established for collecting data at scale with sampling to ensure comprehensive sets of patient conditions and clinical treatment strategies.\n",
+        "Patients presenting at specialty clinics and institutions were screened for inclusion and exclusion criteria prior to their visit by project investigators. Participants were selected based on membership to five predetermined disease cohort groups to ensure representation across conditions affecting voice: (1) Voice Disorders - laryngeal cancers, vocal fold paralysis, benign laryngeal lesions; (2) Neurological and Neurodegenerative Disorders - Alzheimer's, Parkinson's, stroke, ALS; (3) Mood and Psychiatric Disorders - depression, schizophrenia, bipolar disorders; (4) Respiratory disorders - pneumonia, COPD, heart failure, obstructive sleep apnea; (5) Pediatric diseases - autism, speech delay.\n",
+        "Purposive selection of two disease-relevant cell lines: MDA-MB-468 triple negative breast cancer cell line for cancer research, and KOLF2.1J iPSCs for neuropsychiatric and cardiac disorder research. Both cell lines ethically sourced and well-characterized in the literature.\n",
+        "Recruitment sampling procedures aimed at achieving approximately equal distribution of participants across three dimensions: (1) race/ethnicity (Asian, Black, Hispanic, White), (2) T2DM severity (no diabetes, pre-diabetes/lifestyle-controlled, medication-controlled, insulin-controlled), and (3) biological sex (male, female). This balanced design is critical for developing unbiased machine learning models.\n"
+      ]
+    },
+    "sampling_strategies[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 1,
+      "sample_values": [
+        "sampling-001"
+      ]
+    },
+    "sampling_strategies[item].is_random": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "sampling_strategies[item].is_random[item]": {
+      "inferred_type": "bool",
+      "is_boolean": true,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 1,
+      "sample_values": [
+        false
+      ]
+    },
+    "sampling_strategies[item].is_representative": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "sampling_strategies[item].is_representative[item]": {
+      "inferred_type": "bool",
+      "is_boolean": true,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 2,
+      "sample_values": [
+        false,
+        true
+      ]
+    },
+    "sampling_strategies[item].is_sample": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "sampling_strategies[item].is_sample[item]": {
+      "inferred_type": "bool",
+      "is_boolean": true,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 2,
+      "sample_values": [
+        false,
+        true
+      ]
+    },
+    "sampling_strategies[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 3,
+      "sample_values": [
+        "Disease-Relevant Cell Line Selection",
+        "Multi-center federated sampling",
+        "Triple-balanced recruitment"
+      ]
+    },
+    "sampling_strategies[item].strategies": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "sampling_strategies[item].strategies[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 17,
+      "sample_values": [
+        "Both cell lines have extensive existing characterization data",
+        "Community-facing ethics focus groups to determine appropriate data for public sharing",
+        "Federated multi-center data collection across 14 hospitals",
+        "Inclusion of contextual factors (geographic distance to hospital, Social Determinants of Health)",
+        "KOLF2.1J chosen as reference iPSC line for large-scale collaborative studies",
+        "Legal framework for data collection at scale",
+        "MDA-MB-468 chosen for triple-negative breast cancer research applications",
+        "Multi-institutional enrollment across five sites in North America",
+        "Personalized invitation letters and emails with REDCap recruitment interface",
+        "Recruitment from electronic health records screening using ICD-10 codes (R73.09 for pre-diabetes, E11.X for T2DM)"
+      ]
+    },
+    "sensitive_elements": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "sensitive_elements[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 12,
+      "sample_values": [
+        "5-digit zip code, detailed race, ethnicity, and sex information available in controlled access dataset only. Public dataset contains de-identified data.\n",
+        "Complete electronic health records including demographics, diagnoses, procedures, medications, nursing documentation, and clinical notes for critically ill patients. Contains protected health information subject to HIPAA and institutional privacy requirements.\n",
+        "Contextual factors including geographic information (distance to hospital) and social determinants of health data. Collected to support health equity research while maintaining patient privacy.\n",
+        "Continuous waveform telemetry and EEG recordings capturing detailed physiological states of critically ill patients. May reveal sensitive health conditions and treatment responses.\n",
+        "Dataset covered under Certificate of Confidentiality which must be asserted against compulsory legal demands such as court orders and subpoenas for identifying information or characteristics of research participants. Provides additional legal protections beyond standard de-identification.\n",
+        "Demographic information and geographic data collected but de-identified for public release. State and province removed, only country retained. Protected by HIPAA Safe Harbor de-identification standards.\n",
+        "Diagnostic imaging studies in DICOM format. Undergoing de-identification to remove embedded patient information while preserving clinical utility.\n",
+        "Electronic health record (EHR) data accessed with participant consent for gold standard validation of diagnoses and symptoms. Medical information linked to voice data provides sensitive health information requiring protection.\n",
+        "Genomic DNA extracted from buffy coats, blood derivatives, and urine samples stored with potential for future genetic analyses. Available in controlled access dataset only.\n",
+        "Past health records, medications, traffic and accident reports available in controlled access dataset only.\n"
+      ]
+    },
+    "sensitive_elements[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "sensitive-001",
+        "sensitive-002",
+        "sensitive-003",
+        "sensitive-004"
+      ]
+    },
+    "sensitive_elements[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 8,
+      "sample_values": [
+        "Cell Line Origin Metadata",
+        "Clinical and medical data",
+        "Genetic and biospecimen data",
+        "Geographic and demographic identifiers",
+        "Medical history and records",
+        "Medical imaging",
+        "Physiological monitoring data",
+        "Social Determinants of Health"
+      ]
+    },
+    "sensitive_elements[item].sensitive_elements_present": {
+      "inferred_type": "bool",
+      "is_boolean": true,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 2,
+      "sample_values": [
+        false,
+        true
+      ]
+    },
+    "sensitive_elements[item].sensitivity_details": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "sensitive_elements[item].sensitivity_details[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 49,
+      "sample_values": [
+        "5-digit zip code",
+        "Biological sex",
+        "Blood derivatives and urine biospecimens",
+        "CT scans and X-rays",
+        "Cannot be matched to individuals with current knowledge",
+        "Certificate of Confidentiality coverage",
+        "Clinical notes (tokenized for privacy)",
+        "Contextual factors for equity research",
+        "Continuous cardiac waveforms",
+        "Controlled access required for raw audio"
+      ]
+    },
+    "subpopulations": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "subpopulations[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 22,
+      "sample_values": [
+        "KOLF2.1J iPSCs differentiated into cardiomyocytes",
+        "KOLF2.1J iPSCs differentiated into neural progenitor cells",
+        "KOLF2.1J iPSCs differentiated into neurons",
+        "KOLF2.1J induced pluripotent stem cells in undifferentiated/naive state",
+        "MDA-MB-468 breast cancer cells in control/untreated condition",
+        "MDA-MB-468 breast cancer cells treated with paclitaxel chemotherapy",
+        "MDA-MB-468 breast cancer cells treated with vorinostat chemotherapy",
+        "Participants with conditions such as Alzheimer's disease, Parkinson's disease, stroke, and ALS exhibiting voice and speech changes including slowed speech, low frequency, monotonous speech, vocal tremor, dysarthria, and aphasia.\n",
+        "Participants with depression, schizophrenia, bipolar disorders, and anxiety disorders showing vocal changes such as decreased fundamental frequency, monotonous speech, and anxiety-related increases in F0.\n",
+        "Participants with diabetes treated with oral medications or non-insulin injections, target ~1,000 participants (25% of sample)"
+      ]
+    },
+    "subpopulations[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 8,
+      "sample_values": [
+        "subpop-001",
+        "subpop-002",
+        "subpop-003",
+        "subpop-004",
+        "subpop-005",
+        "subpop-006",
+        "subpop-007",
+        "subpop-008"
+      ]
+    },
+    "subpopulations[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 22,
+      "sample_values": [
+        "Asian participants",
+        "Black participants",
+        "Critically ill patients by hospital",
+        "Hispanic participants",
+        "Insulin-controlled diabetes",
+        "KOLF2.1J Undifferentiated iPSCs",
+        "KOLF2.1J iPSC-Derived Cardiomyocytes",
+        "KOLF2.1J iPSC-Derived Neural Progenitor Cells (NPCs)",
+        "KOLF2.1J iPSC-Derived Neurons",
+        "MDA-MB-468 Paclitaxel-Treated"
+      ]
+    },
+    "subsets": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "subsets[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 15,
+      "sample_values": [
+        "Affinity purification mass spectrometry (AP-MS) data on endogenously tagged cell lines mapping protein-protein interactions of chromatin regulators. 17 genes endogenously tagged in MDA-MB-468 with data acquired under three conditions (untreated, paclitaxel, vorinostat). Orthogonal approach to SEC-MS for PPI mapping.\n",
+        "Biobanked samples stored at UAB Center for Clinical and Translational Science (CCTS), including plasma, serum, buffy coats, peripheral blood mononuclear cells (PBMCs), PAXgene RNA, and urine. Available to researchers for future ancillary studies according to procedures and policies in development. Finite number of samples available.\n",
+        "Clinical notes extracted and tokenized using OHNLP (Open Health Natural Language Processing) toolkit. Stored locally at contributing sites (except tokens) with planned controlled access. Uses OHNLP open source schema for standardization.\n",
+        "Contains derived features from voice recordings including spectrograms, MFCCs, acoustic features (OpenSMILE), phonetic and prosodic features (Parselmouth and Praat), and transcriptions (OpenAI Whisper). Also includes phenotype data with demographics, acoustic confounders, and responses to validated questionnaires. Available through PhysioNet with registered access requiring data use agreement. HIPAA Safe Harbor identifiers removed, state/province removed, country retained. Audio waveforms omitted, only derived features available. Free speech transcripts removed to protect privacy.\n",
+        "Electroencephalography (EEG) waveform data from hospital databases. Stored in EDF+ (European Data Format) and Persyst formats. Extraction in process as of November 2024, planned for controlled access. Open source EDF+ and Persyst schema available.\n",
+        "Genome-scale CRISPRi perturbation cell atlas in undifferentiated KOLF2.1J human induced pluripotent stem cells (hiPSCs) mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes. Single-cell CRISPR screens performed using 10x Genomics 3'HT kit with CRISPR lentiviral library targeting 100 chromatin factors with 6 guide RNAs per gene. Screens conducted in MDA-MB-468 cells under 3 conditions (no treatment, paclitaxel, vorinostat) and KOLF2.1J iPSC in undifferentiated state. Includes raw sequence data and processed cell atlas data.\n",
+        "Imaging data from PACS (Picture Archiving and Communication System) in DICOM format. De-identification in process as of November 2024, planned for controlled access. DICOM schema metadata available.\n",
+        "Immunofluorescence-based staining (ICC-IF) and confocal microscopy images displaying spatial localization of 563 proteins of interest in MDA-MB-468 breast cancer cells under three conditions: untreated, paclitaxel-treated, and vorinostat-treated. Nuclei stained with DAPI (blue channel), endoplasmic reticulum with calreticulin antibody (yellow channel), microtubules with tubulin antibody (red channel), and antibody against protein of interest (green channel). Generated by Lundberg Lab at Stanford University using automated fixation and permeabilization protocols.\n",
+        "Includes data not considered sensitive personal health information, available to the public for download upon agreement with a license. Contains survey data, blood and urine lab results, fitness activity levels, clinical measurements (e.g., monofilament and cognitive function testing), retinal images, ECG, blood glucose levels, and environmental variables such as home air quality. Available at https://fairhub.io/datasets/2.\n",
+        "Includes sensitive data accessible by entering into a data use agreement. Contains 5-digit zip code, sex, race, ethnicity, genetic sequencing data (from buffy coats), past health records, medications, and traffic and accident reports. Access requirements are being developed by the Data Access Committee.\n"
+      ]
+    },
+    "subsets[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 5,
+      "sample_values": [
+        "subset-001",
+        "subset-002",
+        "subset-003",
+        "subset-004",
+        "subset-005"
+      ]
+    },
+    "subsets[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 14,
+      "sample_values": [
+        "Biorepository",
+        "CRISPR Perturbation Cell Atlas",
+        "Clinical Notes (Tokenized)",
+        "Controlled Access Dataset",
+        "Controlled Access Raw Audio Dataset",
+        "EEG Waveforms",
+        "Hierarchical Cell Maps via MuSIC",
+        "Medical Imaging",
+        "Protein-Protein Interaction AP-MS Data",
+        "Protein-Protein Interaction SEC-MS Data"
+      ]
+    },
+    "tasks": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "tasks[item].description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 12,
+      "sample_values": [
+        "Characterize cell architecture and protein interactions in disease-relevant cell lines including treated and untreated MDA-MB-468 breast cancer cells (with paclitaxel and vorinostat) and differentiated and naive KOLF2.1J induced pluripotent stem cells (iPSCs) differentiated into neurons and cardiomyocytes.\n",
+        "Develop ethical AI frameworks and governance structures for biomedical data, including Value-Sensitive Design methodologies, axiological repositories, CM4AI Life Cycle framework, and guidelines for responsible design of datasets and AI technologies.\n",
+        "Enable development of visible neural networks (VNNs) and visible machine learning tools that use hierarchical cell maps as interpretable structures for AI model architectures, allowing interrogation of how protein assemblies affect cell-level phenotypes and interpretation of genetic variants and mutations.\n",
+        "Enable downstream AI/ML analyses across survey, clinical, imaging, wearable device, environmental, and biospecimen domains related to T2DM that may not be feasible with existing data sources such as claims or electronic health records data alone. The multimodal nature of the data supports complex machine learning model development.\n",
+        "Enable prediction of complications among patients with acute or critical illness using multi-modal data including structured EHR, waveforms, imaging, and clinical notes.\n",
+        "Generate data for ML/AI applications aimed at characterizing acute and critical care illness patterns, progression, and outcomes across diverse patient populations and hospital settings.\n",
+        "Integrate multimodal data streams (spatial proteomics via IF imaging, protein-protein interactions via AP-MS and SEC-MS, and genetic perturbations via CRISPR screens) using the Multi-Scale Integrated Cell (MuSIC) software pipeline employing deep learning models and community detection algorithms to produce hierarchical cell maps.\n",
+        "Provision a holdout test set accessible for model external validation to aid marketplace adoption of AI-developed models for implementation in acute and critical care settings.\n",
+        "Study disease trajectories and salutogenesis pathways in T2DM through cross-sectional analysis of participants at different disease stages, enabling pseudotime manifold analysis to predict disease progression and paths to health resilience.\n",
+        "Support measurement and analysis of treatment response among critically ill patients through high-frequency documentation, medication administration records, and clinical outcomes data.\n"
+      ]
+    },
+    "tasks[item].id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 6,
+      "sample_values": [
+        "task-001",
+        "task-002",
+        "task-003",
+        "task-004",
+        "task-005",
+        "task-006"
+      ]
+    },
+    "tasks[item].name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 12,
+      "sample_values": [
+        "Characterize acute and critical care illness",
+        "Develop unbiased AI/ML models",
+        "Disease-Relevant Cell Line Characterization",
+        "Enable multi-domain AI/ML analyses for T2DM",
+        "Ethical AI Framework Development",
+        "External validation for marketplace adoption",
+        "Label data for prediction targets",
+        "Measure treatment response",
+        "Multi-Scale Cell Mapping via MuSIC Pipeline",
+        "Predict complications in critically ill patients"
+      ]
+    },
+    "tasks[item].response": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 6,
+      "sample_values": [
+        "Build AI models for pediatric voice and speech disorder detection including autism spectrum disorder and speech delays, addressing the relative scarcity of pediatric voice data and associated ethical challenges.\n",
+        "Create machine learning models for respiratory disorder screening and therapeutic monitoring using respiratory sounds, cough sounds, and voice, applicable to conditions such as pneumonia, COPD, heart failure, and obstructive sleep apnea.\n",
+        "Develop AI algorithms for mood and psychiatric disorder detection including depression, schizophrenia, and bipolar disorders, identifying vocal markers such as decreased fundamental frequency, monotonous speech patterns, and anxiety-related increases in F0.\n",
+        "Enable development of AI/ML predictive models for screening, diagnosis, and treatment of voice disorders including laryngeal cancers, vocal fold paralysis, and benign laryngeal lesions, leveraging acoustic changes in phonation resulting from changes in vocal fold vibratory function.\n",
+        "Promote application of AI/ML for voice research through workforce development, curriculum creation, and fostering collaborations especially with researchers from underserved communities, building bridges between medical voice research, acoustic engineers, and the AI/ML community.\n",
+        "Support machine learning models for neurological and neurodegenerative disorders including Alzheimer's disease, Parkinson's disease, stroke, and ALS, detecting voice and speech changes such as slowed speech, low frequency, monotonous speech, vocal tremor, dysarthria, and aphasia.\n"
+      ]
+    },
+    "title": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI)",
+        "Bridge2AI-Voice - An ethically-sourced, diverse voice dataset linked to health information",
+        "Cell Maps for Artificial Intelligence (CM4AI)",
+        "Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI"
+      ]
+    },
+    "updates.description": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "Dataset regularly updated and augmented through end of project in November 2026. Beta releases on quarterly basis with periodic data augmentation. Initial alpha release (v0.5) provided as supplemental data. March 2025 Beta (V1.4) includes perturb-seq in KOLF2.1J iPSCs, SEC-MS in iPSCs and derivatives, and IF images in MDA-MB-468 under three conditions. June 2025 Beta (V2.1) revision adds RGB IF images, ro-crate metadata corrections, and naming convention changes. Future releases will include computed cell maps and complete integration of all data streams. Long-term preservation in University of Virginia Dataverse with committed institutional support.\n",
+        "Dataset updated continuously as data collection progresses at 14 acquisition centers. As of November 2024, covers 14 hospitals with 23,400 unique admissions. Target exceeds 100,000 critically ill patients. Project timeline extends through November 30, 2026 (with approved no-cost extension). Regular status updates tracked through GitHub project management system. Sites provide updates via GitHub interface or Google Form submissions.\n",
+        "Dataset updated periodically as enrollment progresses toward target of 4,000 participants by November 2026. Version-specific documentation maintained for each release. Biorepository maintained at UAB CCTS with long-term storage protocols. Data sharing policies under ongoing development by Data Access Committee. Pilot data released May 2024; all data through July 31, 2024 released November 2024.\n",
+        "Dataset updated with versioned releases as data collection progresses. Initial release v1.0 published January 17, 2025 with 12,523 recordings from 306 participants. v1.1 released January 17, 2025 adding MFCC features. v2.0.0 released April 16, 2025. v2.0.1 released August 18, 2025. Latest version available at https://doi.org/10.13026/37yb-1t42. Data collection ongoing through November 30, 2026. Version-specific documentation maintained. As of v1.1, only adult cohort data available; pediatric cohort data planned for future releases with additional privacy precautions.\n"
+      ]
+    },
+    "updates.frequency": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "Continuous updates through November 2026",
+        "Periodic releases with ongoing enrollment; final release planned for late 2026",
+        "Periodic versioned releases during data collection period (2022-2026)",
+        "Quarterly updates through November 2026; long-term preservation thereafter"
+      ]
+    },
+    "updates.id": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 1,
+      "sample_values": [
+        "updates-001"
+      ]
+    },
+    "updates.name": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": true,
+      "is_multivalued": false,
+      "value_count": 4,
+      "sample_values": [
+        "Ongoing data collection and expansion",
+        "Periodic data releases and maintenance plan",
+        "Quarterly Data Releases and Maintenance Plan",
+        "Versioned releases with ongoing data collection"
+      ]
+    },
+    "updates.update_details": {
+      "inferred_type": "unknown",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": true,
+      "value_count": 0,
+      "sample_values": []
+    },
+    "updates.update_details[item]": {
+      "inferred_type": "str",
+      "is_boolean": false,
+      "could_be_enum": false,
+      "is_multivalued": false,
+      "value_count": 31,
+      "sample_values": [
+        "Alpha release v0.5 (supplemental data)",
+        "Current status: 23,400 unique admissions (as of November 2024)",
+        "DOI for latest version vs version-specific DOIs",
+        "Dataset versioning implemented",
+        "Documentation updates in Chorus_SOP repository",
+        "Final dataset expected after completion of 4,000 participant enrollment by November 2026",
+        "Final release expected November 2026",
+        "Future releases planned with additional participants and pediatric cohort",
+        "Future releases to include computed cell maps",
+        "GitHub project tracking for deliverables"
+      ]
+    }
+  }
+}

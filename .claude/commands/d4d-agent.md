@@ -70,7 +70,9 @@ For each project (AI_READI, CM4AI, VOICE, CHORUS):
    - For each class you'll use (Purpose, Task, Creator, etc.), extract EXACT field names
    - **Critical**: Do NOT invent field names based on semantics
 
-4. **Common Field Name Mistakes to AVOID**:
+4. **Schema `d4d:docExample` annotations are illustrations, NOT defaults**: The schema YAML may contain `annotations: {"d4d:docExample": "..."}` on fields. These are documentation only — do NOT copy them into D4D records. All values in generated D4D YAML must come from the source documents.
+
+5. **Common Field Name Mistakes to AVOID**:
    ```yaml
    # ❌ WRONG - Semantic field names (not in schema)
    purposes:

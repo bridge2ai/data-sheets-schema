@@ -120,73 +120,77 @@ classes:
         description: Number of files in this collection.
         range: integer
         slot_uri: d4d:fileCount
+        annotations:
+          "d4d:docExample": "47"
       total_bytes:
-        description: Total size of all files in bytes.
+        description: "Total size of all files in this collection, in bytes (integer). Maps to dcat:byteSize."
         range: integer
         slot_uri: dcat:byteSize
+        annotations:
+          "d4d:docExample": "1073741824 (1 GiB = 1024³ bytes)"
 
 enums:
   FileTypeEnum:
     description: Types of individual files within datasets.
     permissible_values:
       data_file:
-        description: A data file containing dataset content
+        description: A data file containing dataset content.
         meaning: schema:DataDownload
       code_file:
-        description: A source code or script file
+        description: A source code or script file.
         meaning: schema:SoftwareSourceCode
       documentation_file:
-        description: A documentation file (README, guide, etc.)
+        description: A documentation file (README, guide, etc.).
         meaning: schema:Documentation
       metadata_file:
-        description: A metadata or annotation file
+        description: A metadata or annotation file.
         meaning: dcat:CatalogRecord
       configuration_file:
-        description: A configuration or settings file
+        description: A configuration or settings file.
         meaning: d4d:ConfigurationFile
       notebook_file:
-        description: A computational notebook file (Jupyter, R Markdown, etc.)
+        description: A computational notebook file (Jupyter, R Markdown, etc.).
         meaning: d4d:NotebookFile
       image_file:
-        description: An image or visualization file
+        description: An image or visualization file.
         meaning: schema:ImageObject
       archive_file:
-        description: An archive or compressed file
+        description: An archive or compressed file.
         meaning: d4d:ArchiveFile
       other:
-        description: Other file type
+        description: Other file type.
         meaning: d4d:OtherFile
 
   FileCollectionTypeEnum:
     description: Types of file collections within datasets.
     permissible_values:
       raw_data:
-        description: Raw, unprocessed data files
+        description: Raw, unprocessed data files.
         meaning: d4d:RawData
       processed_data:
-        description: Cleaned, processed, or transformed data files
+        description: Cleaned, processed, or transformed data files.
         meaning: d4d:ProcessedData
       training_split:
-        description: Files designated for model training
+        description: Files designated for model training.
         meaning: d4d:TrainingSplit
       test_split:
-        description: Files designated for model testing
+        description: Files designated for model testing.
         meaning: d4d:TestSplit
       validation_split:
-        description: Files designated for model validation
+        description: Files designated for model validation.
         meaning: d4d:ValidationSplit
       documentation:
-        description: Documentation files (README, codebook, etc.)
+        description: Documentation files (README, codebook, etc.).
         meaning: schema:Documentation
       metadata:
-        description: Metadata or annotation files
+        description: Metadata or annotation files.
         meaning: dcat:CatalogRecord
       code:
-        description: Code or script files
+        description: Code or script files.
         meaning: schema:SoftwareSourceCode
       supplementary:
-        description: Supplementary materials
+        description: Supplementary materials.
         meaning: schema:SupplementalMaterial
       other:
-        description: Other file collection type
+        description: Other file collection type.
         meaning: d4d:OtherFileCollection

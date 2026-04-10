@@ -96,6 +96,8 @@ classes:
         slot_uri: schema:identifier
         range: uriorcurie
         description: A unique identifier for a thing.
+        annotations:
+          "d4d:docExample": "https://example.org/dataset/my-dataset-001"
       name:
         slot_uri: schema:name
         description: A human-readable name for a thing.
@@ -121,6 +123,8 @@ classes:
         slot_uri: schema:identifier
         range: uriorcurie
         description: An optional identifier for this property.
+        annotations:
+          "d4d:docExample": "https://example.org/dataset/property-001"
       name:
         slot_uri: schema:name
         description: A human-readable name for this property.
@@ -144,13 +148,17 @@ classes:
       - schema:SoftwareApplication
     attributes:
       version:
+        description: The version identifier of the software (e.g., "1.0.0", "2.3.1-beta").
         range: string
         slot_uri: schema:softwareVersion
       license:
+        description: >-
+          The license under which the software is distributed (e.g., "MIT", "Apache-2.0", "GPL-3.0").
         range: string
         slot_uri: schema:license
       url:
-        range: string
+        description: URL where the software can be found (e.g., homepage, repository, or documentation).
+        range: uri
         slot_uri: schema:url
 
   Person:
@@ -184,8 +192,10 @@ classes:
           Use this for stable cross-dataset identification.
         range: string
         pattern: "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$"
-        slot_uri: schema:identifier
-        exact_mappings:
+        slot_uri: d4d:orcidIdentifier
+        annotations:
+          "d4d:docExample": "0000-0001-2345-6789"
+        broad_mappings:
           - schema:identifier
 
   Information:
@@ -217,13 +227,24 @@ classes:
 
   # From linkml Datasets schema
   FormatDialect:
-    description: Additional format information for a file
+    description: Additional format information for a file.
     attributes:
       comment_prefix:
+        description: Character(s) used to indicate comment lines (e.g., "#" for CSV comments).
       delimiter:
+        description: Field delimiter character (e.g., "," for CSV, "\t" for TSV).
       double_quote:
+        description: >-
+          Whether quotes within quoted fields are escaped by doubling them.
+          Expected values: "true" or "false" (as strings per CSV dialect specification).
+          Follows the W3C CSV-on-the-Web dialect specification.
       header:
+        description: >-
+          Whether the first row of the file contains column headers.
+          Expected values: "true" or "false" (as strings per CSV dialect specification).
+          Follows the W3C CSV-on-the-Web dialect specification.
       quote_char:
+        description: Character used for quoting fields (e.g., '"' for CSV).
 
 ## SHARED SLOTS ##
 slots:
@@ -233,24 +254,29 @@ slots:
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
 
   title:
-    description: the official title of the element
+    description: The official title of the element.
     slot_uri: dcterms:title
 
   language:
-    description: language in which the information is expressed
+    description: Language in which the information is expressed.
     slot_uri: dcterms:language
     exact_mappings:
       - schema:inLanguage
 
   publisher:
+    description: The organization or entity responsible for making the resource available.
     slot_uri: dcterms:publisher
     range: uriorcurie
+    annotations:
+      "d4d:docExample": "ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name"
 
   issued:
+    description: Date of formal issuance or publication of the resource.
     slot_uri: dcterms:issued
     range: datetime
 
   page:
+    description: A landing page or web page providing access to or information about the resource.
     slot_uri: dcat:landingPage
 
   dialect:
@@ -263,6 +289,7 @@ slots:
     slot_uri: dcat:byteSize
 
   path:
+    description: The file path or URL where the content is located.
     slot_uri: schema:contentUrl
 
   download_url:
@@ -283,13 +310,12 @@ slots:
     slot_uri: dcterms:format
 
   encoding:
-    description: the character encoding of the data
+    description: The character encoding of the data.
     range: EncodingEnum
-    slot_uri: dcat:mediaType
+    slot_uri: d4d:characterEncoding
 
   compression:
-    description: >-
-      compression format used, if any. e.g., gzip, bzip2, zip
+    description: Compression format used, if any (e.g., gzip, bzip2, zip).
     range: CompressionEnum
     slot_uri: dcat:compressFormat
 
@@ -302,62 +328,90 @@ slots:
       - schema:encodingFormat
 
   hash:
-    description: hash of the data
-    slot_uri: dcterms:identifier
+    description: >-
+      Cryptographic hash value of the data for integrity verification
+      (e.g., SHA-256: 'e3b0c44298fc1c149afb...', MD5: 'd41d8cd98f00b204e9800998ecf8427e').
+    slot_uri: d4d:hashValue
+    broad_mappings:
+      - dcterms:identifier
 
   md5:
-    description: md5 hash of the data
-    slot_uri: dcterms:identifier
+    description: MD5 hash value of the data (128-bit cryptographic hash).
+    slot_uri: d4d:md5Checksum
+    broad_mappings:
+      - dcterms:identifier
 
   sha256:
-    description: sha256 hash of the data
-    slot_uri: dcterms:identifier
+    description: SHA-256 hash value of the data (256-bit cryptographic hash, recommended).
+    slot_uri: schema:sha256
 
   conforms_to:
+    description: An established standard, specification, or schema to which the resource conforms.
     slot_uri: dcterms:conformsTo
 
   conforms_to_schema:
-    slot_uri: dcterms:conformsTo
+    description: The schema or data model to which the resource conforms.
+    slot_uri: d4d:conformsToSchema
+    broad_mappings:
+      - dcterms:conformsTo
 
   conforms_to_class:
-    slot_uri: dcterms:conformsTo
+    description: The specific class or type within a schema to which the resource conforms.
+    slot_uri: d4d:conformsToClass
+    broad_mappings:
+      - dcterms:conformsTo
 
   license:
+    description: The legal license under which the resource is made available (e.g., "MIT", "CC-BY-4.0").
     slot_uri: dcterms:license
 
   keywords:
+    description: Keywords or tags describing the resource for discovery and classification.
     multivalued: true
     slot_uri: dcat:keyword
 
   version:
-    slot_uri: dcterms:hasVersion
+    description: The version identifier of the resource (e.g., "1.0", "2.3.1").
+    slot_uri: schema:version
 
   created_by:
+    description: The person or organization primarily responsible for creating the resource.
     slot_uri: dcterms:creator
 
   created_on:
+    description: The date and time when the resource was created.
     slot_uri: dcterms:created
     range: datetime
 
   last_updated_on:
+    description: The date and time when the resource was most recently modified or updated.
     slot_uri: dcterms:modified
     range: datetime
 
   modified_by:
+    description: A person or organization that contributed to modifying or updating the resource.
     slot_uri: dcterms:contributor
 
   status:
-    slot_uri: dcterms:type
+    description: The status of the resource (e.g., draft, published, deprecated).
+    slot_uri: d4d:publicationStatus
 
   was_derived_from:
+    description: A resource from which this resource was derived, in whole or in part.
     slot_uri: prov:wasDerivedFrom
     exact_mappings:
       - dcterms:source
 
   doi:
-    description: digital object identifier
-    slot_uri: dcterms:identifier
+    description: >-
+      Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification
+      (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
+    slot_uri: d4d:doiIdentifier
     pattern: "10\\.\\d{4,}\\/.+"
+    broad_mappings:
+      - dcterms:identifier
+    exact_mappings:
+      - schema:identifier
 
   external_resources:
     description: >-
@@ -380,94 +434,194 @@ slots:
 enums:
 
   FormatEnum:
+    description: Common file format extensions for data files and documents.
     permissible_values:
       CSV:
+        description: Comma-Separated Values - tabular data format.
       TSV:
+        description: Tab-Separated Values - tabular data format with tab delimiters.
       XML:
+        description: Extensible Markup Language - structured markup format.
       JSON:
+        description: JavaScript Object Notation - structured data interchange format.
       JSONL:
+        description: JSON Lines - newline-delimited JSON format.
       YAML:
+        description: YAML Ain't Markup Language - human-readable data serialization format.
       HTML:
+        description: HyperText Markup Language - web page markup format.
       PDF:
+        description: Portable Document Format - fixed-layout document format.
       DOCX:
+        description: Microsoft Word Open XML Document - word processing document.
       XLSX:
+        description: Microsoft Excel Open XML Spreadsheet - spreadsheet format.
       PPTX:
+        description: Microsoft PowerPoint Open XML Presentation - presentation format.
       TXT:
+        description: Plain text file.
       MD:
+        description: Markdown - lightweight markup language.
       ZIP:
+        description: ZIP archive - compressed file container.
       TAR:
+        description: Tape Archive - file archive format.
       GZ:
+        description: Gzip compressed file.
       BZ2:
+        description: Bzip2 compressed file.
       XZ:
+        description: XZ compressed file.
 
   MediaTypeEnum:
+    description: MIME media types (Internet Media Types) for file content identification.
     permissible_values:
       text/csv:
+        description: MIME type for CSV (Comma-Separated Values) files.
       text/tab-separated-values:
+        description: MIME type for TSV (Tab-Separated Values) files.
       application/json:
+        description: MIME type for JSON (JavaScript Object Notation) files.
       application/xml:
+        description: MIME type for XML (Extensible Markup Language) files.
       text/xml:
+        description: Alternative MIME type for XML files (text variant).
       application/yaml:
+        description: MIME type for YAML files.
       text/yaml:
+        description: Alternative MIME type for YAML files (text variant).
       text/html:
+        description: MIME type for HTML (HyperText Markup Language) files.
       application/pdf:
+        description: MIME type for PDF (Portable Document Format) files.
       application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+        description: MIME type for Microsoft Word DOCX files.
       application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+        description: MIME type for Microsoft Excel XLSX files.
       application/vnd.openxmlformats-officedocument.presentationml.presentation:
+        description: MIME type for Microsoft PowerPoint PPTX files.
       text/plain:
+        description: MIME type for plain text files.
       text/markdown:
+        description: MIME type for Markdown files.
       application/zip:
+        description: MIME type for ZIP archive files.
       application/x-tar:
+        description: MIME type for TAR archive files.
       application/gzip:
+        description: MIME type for Gzip compressed files.
       application/x-bzip2:
+        description: MIME type for Bzip2 compressed files.
       application/x-xz:
+        description: MIME type for XZ compressed files.
 
   CompressionEnum:
+    description: Compression algorithms and formats for file compression.
     permissible_values:
       gzip:
+        description: GNU zip compression (commonly used with .gz extension).
       bzip2:
+        description: Burrows-Wheeler block-sorting compression (commonly used with .bz2 extension).
       zip:
+        description: ZIP archive compression format.
       tar:
+        description: Tape Archive format (typically combined with gzip or bzip2).
       xz:
+        description: XZ Utils compression using LZMA2 algorithm.
       lzma:
+        description: Lempel-Ziv-Markov chain algorithm compression.
       compress:
+        description: Unix compress utility (LZW compression).
 
   EncodingEnum:
+    description: Character encoding schemes for text representation in different languages and scripts.
     permissible_values:
       ASCII:
+        description: American Standard Code for Information Interchange (7-bit, English characters only).
       Big5:
+        description: Traditional Chinese character encoding (primarily Taiwan and Hong Kong).
       EUC-JP:
+        description: Extended Unix Code for Japanese.
       EUC-KR:
+        description: Extended Unix Code for Korean.
       EUC-TW:
+        description: Extended Unix Code for Traditional Chinese.
       GB2312:
+        description: Simplified Chinese character encoding standard.
       HZ-GB-2312:
+        description: 7-bit encoding for Simplified Chinese (GB2312).
       ISO-2022-CN-EXT:
+        description: Extended ISO-2022 encoding for Chinese (includes both Simplified and Traditional).
       ISO-2022-CN:
+        description: ISO-2022 encoding for Chinese.
       ISO-2022-JP-2:
+        description: Extended ISO-2022 encoding for Japanese (includes additional character sets).
       ISO-2022-JP:
+        description: ISO-2022 encoding for Japanese.
       ISO-2022-KR:
+        description: ISO-2022 encoding for Korean.
       ISO-8859-10:
+        description: Latin-6 (Nordic languages - Danish, Norwegian, Swedish, Icelandic).
       ISO-8859-11:
+        description: Latin/Thai encoding.
       ISO-8859-13:
+        description: Latin-7 (Baltic Rim languages).
       ISO-8859-14:
+        description: Latin-8 (Celtic languages).
       ISO-8859-15:
+        description: Latin-9 (Western European with Euro sign).
       ISO-8859-16:
+        description: Latin-10 (South-Eastern European languages).
       ISO-8859-1:
+        description: Latin-1 (Western European languages).
       ISO-8859-2:
+        description: Latin-2 (Central European languages).
       ISO-8859-3:
+        description: Latin-3 (South European languages - Turkish, Maltese, Esperanto).
       ISO-8859-4:
+        description: Latin-4 (North European languages).
       ISO-8859-5:
+        description: Latin/Cyrillic encoding.
       ISO-8859-6:
+        description: Latin/Arabic encoding.
       ISO-8859-7:
+        description: Latin/Greek encoding.
       ISO-8859-8:
+        description: Latin/Hebrew encoding.
       ISO-8859-9:
+        description: Latin-5 (Turkish).
       KOI8-R:
+        description: Russian character encoding (Kod Obmena Informatsiey).
       KOI8-U:
+        description: Ukrainian character encoding.
       Shift_JIS:
+        description: Japanese character encoding (Microsoft and other systems).
       UTF-16:
+        description: Unicode Transformation Format 16-bit (variable-width encoding).
       UTF-32:
+        description: Unicode Transformation Format 32-bit (fixed-width encoding).
       UTF-7:
+        description: Unicode Transformation Format 7-bit (for 7-bit channels).
       UTF-8:
+        description: Unicode Transformation Format 8-bit (variable-width, most common Unicode encoding).
+      Windows-1250:
+        description: Windows code page for Central European languages.
+      Windows-1251:
+        description: Windows code page for Cyrillic script.
+      Windows-1252:
+        description: Windows code page for Western European languages.
+      Windows-1253:
+        description: Windows code page for Greek.
+      Windows-1254:
+        description: Windows code page for Turkish.
+      Windows-1255:
+        description: Windows code page for Hebrew.
+      Windows-1256:
+        description: Windows code page for Arabic.
+      Windows-1257:
+        description: Windows code page for Baltic languages.
+      Windows-1258:
+        description: Windows code page for Vietnamese.
 
   CRediTRoleEnum:
     description: >-
@@ -475,33 +629,33 @@ enums:
       See https://credit.niso.org/
     permissible_values:
       conceptualization:
-        description: Ideas; formulation or evolution of overarching research goals and aims
+        description: Ideas; formulation or evolution of overarching research goals and aims.
       methodology:
-        description: Development or design of methodology; creation of models
+        description: Development or design of methodology; creation of models.
       software:
-        description: Programming, software development; designing computer programs
+        description: Programming, software development; designing computer programs.
       validation:
-        description: Verification of the overall replication/reproducibility of results
+        description: Verification of the overall replication/reproducibility of results.
       formal_analysis:
-        description: Application of statistical, mathematical, or other formal techniques
+        description: Application of statistical, mathematical, or other formal techniques.
       investigation:
-        description: Conducting the research and investigation process
+        description: Conducting the research and investigation process.
       resources:
         description: Provision of study materials, reagents, patients, laboratory samples, etc.
       data_curation:
-        description: Management activities to annotate, scrub data and maintain research data
+        description: Management activities to annotate, scrub data and maintain research data.
       writing_original_draft:
-        description: Preparation, creation and/or presentation of the published work
+        description: Preparation, creation and/or presentation of the published work.
       writing_review_editing:
-        description: Critical review, commentary or revision of the work
+        description: Critical review, commentary or revision of the work.
       visualization:
-        description: Preparation, creation and/or presentation of visualizations/data presentation
+        description: Preparation, creation and/or presentation of visualizations/data presentation.
       supervision:
-        description: Oversight and leadership responsibility for the research activity
+        description: Oversight and leadership responsibility for the research activity.
       project_administration:
-        description: Management and coordination responsibility for the research activity
+        description: Management and coordination responsibility for the research activity.
       funding_acquisition:
-        description: Acquisition of the financial support for the project
+        description: Acquisition of the financial support for the project.
 
   BiasTypeEnum:
     description: >-
@@ -603,20 +757,11 @@ enums:
       See https://semver.org/
     permissible_values:
       MAJOR:
-        description: Incompatible changes, breaking backward compatibility
+        description: Incompatible changes, breaking backward compatibility.
       MINOR:
-        description: Backward-compatible new functionality or enhancements
+        description: Backward-compatible new functionality or enhancements.
       PATCH:
-        description: Backward-compatible bug fixes or minor corrections
-      Windows-1250:
-      Windows-1251:
-      Windows-1252:
-      Windows-1253:
-      Windows-1254:
-      Windows-1255:
-      Windows-1256:
-      Windows-1257:
-      Windows-1258:
+        description: Backward-compatible bug fixes or minor corrections.
 
   CreatorOrMaintainerEnum:
     description: >-
@@ -668,10 +813,14 @@ enums:
         description: Other type of creator or maintainer not listed.
 
   Boolean:
+    description: Three-valued boolean logic supporting true, false, and unknown states.
     permissible_values:
       "true":
         title: "True"
+        description: Affirmative or positive value.
       "false":
         title: "False"
+        description: Negative or false value.
       "unknown":
         title: "Unknown"
+        description: Unknown, uncertain, or not applicable value.

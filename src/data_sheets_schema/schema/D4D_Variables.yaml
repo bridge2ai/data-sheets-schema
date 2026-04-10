@@ -44,9 +44,10 @@ classes:
           The name or identifier of the variable as it appears in the data files.
         range: string
         required: true
-        slot_uri: schema:name
-        exact_mappings:
+        slot_uri: d4d:variableName
+        broad_mappings:
           - schema:name
+          - schema:identifier
 
       data_type:
         description: >-
@@ -81,16 +82,20 @@ classes:
           The minimum value that the variable can take. Applicable to numeric variables.
         range: float
         slot_uri: schema:minValue
+        annotations:
+          "d4d:docExample": "0.0"
 
       maximum_value:
         description: >-
           The maximum value that the variable can take. Applicable to numeric variables.
         range: float
         slot_uri: schema:maxValue
+        annotations:
+          "d4d:docExample": "100.0"
 
       categories:
         description: >-
-          The permitted categories or values for a categorical variable.
+          One or more permitted categories or values for a categorical variable.
           Each entry should describe a possible value and its meaning.
         range: string
         multivalued: true
@@ -108,7 +113,7 @@ classes:
           Indicates whether this variable serves as a unique identifier or key
           for records in the dataset.
         range: boolean
-        slot_uri: schema:identifier
+        slot_uri: d4d:isIdentifier
 
       is_sensitive:
         description: >-
@@ -122,6 +127,8 @@ classes:
           The precision or number of decimal places for numeric variables.
         slot_uri: schema:valuePrecision
         range: integer
+        annotations:
+          "d4d:docExample": "2 (two decimal places, e.g., 3.14)"
 
       measurement_technique:
         description: >-
@@ -141,9 +148,11 @@ classes:
         description: >-
           Notes about data quality, reliability, or known issues specific
           to this variable.
-        slot_uri: dcterms:description
+        slot_uri: d4d:qualityNotes
         range: string
         multivalued: true
+        broad_mappings:
+          - dcterms:description
 
 enums:
 

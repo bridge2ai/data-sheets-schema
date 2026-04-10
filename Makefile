@@ -341,6 +341,7 @@ SSSOM_SCRIPT = src/alignment/generate_sssom_mapping.py
 SSSOM_URI_SCRIPT = src/alignment/generate_sssom_uri_mapping.py
 SSSOM_URI_COMPREHENSIVE_SCRIPT = src/alignment/generate_comprehensive_sssom_uri.py
 SSSOM_COMPREHENSIVE_SCRIPT = src/alignment/generate_comprehensive_sssom.py
+SSSOM_STRUCTURAL_SCRIPT = src/alignment/generate_structural_mapping.py
 SKOS_ALIGNMENT = src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl
 ROCRATE_JSON = data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json
 INTERFACE_MAPPING = data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
@@ -351,12 +352,13 @@ SSSOM_SUBSET = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping_subset
 SSSOM_URI = src/data_sheets_schema/alignment/d4d_rocrate_sssom_uri_mapping.tsv
 SSSOM_URI_COMPREHENSIVE = src/data_sheets_schema/alignment/d4d_rocrate_sssom_uri_comprehensive.tsv
 SSSOM_COMPREHENSIVE = src/data_sheets_schema/alignment/d4d_rocrate_sssom_comprehensive.tsv
+SSSOM_STRUCTURAL = data/mappings/d4d_rocrate_structural_mapping.sssom.tsv
 
-.PHONY: gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-all clean-sssom
+.PHONY: gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural gen-sssom-all clean-sssom
 
 gen-sssom: gen-sssom-full gen-sssom-subset ## Generate SSSOM property-level mappings (full and subset)
 
-gen-sssom-all: gen-sssom gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive ## Generate all SSSOM mappings (property + URI + comprehensive)
+gen-sssom-all: gen-sssom gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural ## Generate all SSSOM mappings (property + URI + comprehensive + structural)
 
 gen-sssom-full: $(SSSOM_FULL) ## Generate full SSSOM mapping from SKOS alignment
 
@@ -404,8 +406,15 @@ $(SSSOM_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATION
 		--recommendations $(URI_RECOMMENDATIONS) \
 		--output $(SSSOM_COMPREHENSIVE)
 
+gen-sssom-structural: $(SSSOM_STRUCTURAL) ## Generate structure-aware D4D ↔ RO-Crate SSSOM mapping
+
+$(SSSOM_STRUCTURAL): $(D4D_SCHEMA_ALL) $(ROCRATE_JSON) $(SSSOM_STRUCTURAL_SCRIPT)
+	@echo "Generating structural SSSOM mapping..."
+	$(RUN) python $(SSSOM_STRUCTURAL_SCRIPT)
+	@echo "✓ Structural mapping: $(SSSOM_STRUCTURAL)"
+
 clean-sssom: ## Remove generated SSSOM files
-	rm -f $(SSSOM_FULL) $(SSSOM_SUBSET) $(SSSOM_URI) $(SSSOM_URI_COMPREHENSIVE) $(SSSOM_COMPREHENSIVE)
+	rm -f $(SSSOM_FULL) $(SSSOM_SUBSET) $(SSSOM_URI) $(SSSOM_URI_COMPREHENSIVE) $(SSSOM_COMPREHENSIVE) $(SSSOM_STRUCTURAL)
 
 ## ------------------------------------------------------------------
 ## FAIRSCAPE ↔ D4D Bidirectional Conversion
@@ -445,6 +454,40 @@ fairscape-to-d4d: ## Convert FAIRSCAPE RO-Crate to D4D YAML (INPUT=, OUTPUT=)
 		--input $(INPUT) \
 		--output $(OUTPUT) \
 		--sssom $(SSSOM_FULL)
+
+## ------------------------------------------------------------------
+## Semantic Review Tools
+## ------------------------------------------------------------------
+
+.PHONY: semantic-review semantic-review-conflicts semantic-review-ranges semantic-review-data semantic-review-report
+
+semantic-review: semantic-review-conflicts semantic-review-ranges semantic-review-data semantic-review-report ## Run full semantic review
+
+semantic-review-conflicts: ## Detect slot_uri conflicts
+	@echo "Detecting slot_uri conflicts..."
+	$(RUN) python scripts/slot_uri_conflict_detector.py --output reports/slot_uri_conflicts.json || true
+	@echo "✓ Conflicts report: reports/slot_uri_conflicts.json"
+
+semantic-review-ranges: ## Check range-description alignment
+	@echo "Checking range-description alignment..."
+	$(RUN) python scripts/range_description_checker.py --output reports/range_mismatches.json || true
+	@echo "✓ Range mismatches report: reports/range_mismatches.json"
+
+semantic-review-data: ## Analyze actual data values
+	@echo "Analyzing actual D4D data values..."
+	$(RUN) python scripts/data_value_analyzer.py --output reports/data_value_analysis.json
+	@echo "✓ Data analysis report: reports/data_value_analysis.json"
+
+semantic-review-report: reports/slot_uri_conflicts.json reports/range_mismatches.json reports/data_value_analysis.json ## Generate consolidated report
+	@echo "Generating comprehensive semantic review report..."
+	$(RUN) python scripts/generate_semantic_review_report.py \
+		reports/slot_uri_conflicts.json \
+		reports/range_mismatches.json \
+		reports/data_value_analysis.json
+	@echo "✓ Semantic review report: reports/semantic_review_report.md"
+	@echo ""
+	@echo "Summary:"
+	@grep -A 5 "Executive Summary" reports/semantic_review_report.md || true
 
 ## ------------------------------------------------------------------
 

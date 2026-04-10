@@ -1,0 +1,3130 @@
+{
+  "summary": {
+    "total_issues": 307,
+    "by_type": {
+      "CONSIDER_EXAMPLE": 239,
+      "MISSING_PERIOD": 50,
+      "TOO_BRIEF": 18
+    },
+    "by_priority": {
+      "LOW": 299,
+      "MEDIUM": 8
+    }
+  },
+  "modules": [
+    {
+      "module": "D4D_Base_import",
+      "issues": [
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "NamedThing.id",
+          "location": "D4D_Base_import::classes::NamedThing::attributes::id",
+          "description": "A unique identifier for a thing.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "NamedThing.name",
+          "location": "D4D_Base_import::classes::NamedThing::attributes::name",
+          "description": "A human-readable name for a thing.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "NamedThing.description",
+          "location": "D4D_Base_import::classes::NamedThing::attributes::description",
+          "description": "A human-readable description for a thing.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetProperty.id",
+          "location": "D4D_Base_import::classes::DatasetProperty::attributes::id",
+          "description": "An optional identifier for this property.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetProperty.name",
+          "location": "D4D_Base_import::classes::DatasetProperty::attributes::name",
+          "description": "A human-readable name for this property.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetProperty.description",
+          "location": "D4D_Base_import::classes::DatasetProperty::attributes::description",
+          "description": "A human-readable description for this property.",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "DatasetProperty.used_software",
+          "location": "D4D_Base_import::classes::DatasetProperty::attributes::used_software",
+          "description": "What software was used as part of this dataset property?",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetProperty.used_software",
+          "location": "D4D_Base_import::classes::DatasetProperty::attributes::used_software",
+          "description": "What software was used as part of this dataset property?",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Person.affiliation",
+          "location": "D4D_Base_import::classes::Person::attributes::affiliation",
+          "description": "The organization(s) to which the person belongs in the context of this dataset. May vary across datasets; multivalued to support multiple affiliations.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Person.email",
+          "location": "D4D_Base_import::classes::Person::attributes::email",
+          "description": "The email address of the person. Represents current/preferred contact information in the context of this dataset.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Person.orcid",
+          "location": "D4D_Base_import::classes::Person::attributes::orcid",
+          "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4). Use this for stable cross-dataset identification.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "FormatDialect.double_quote",
+          "location": "D4D_Base_import::classes::FormatDialect::attributes::double_quote",
+          "description": "Whether quotes within quoted fields are escaped by doubling them.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "FormatDialect.header",
+          "location": "D4D_Base_import::classes::FormatDialect::attributes::header",
+          "description": "Whether the first row contains column headers (true/false).",
+          "priority": "LOW"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum_value",
+          "element_name": "EncodingEnum.ISO-8859-11",
+          "location": "D4D_Base_import::enums::EncodingEnum::permissible_values::ISO-8859-11",
+          "description": "Latin/Thai encoding",
+          "priority": "LOW"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum_value",
+          "element_name": "EncodingEnum.ISO-8859-5",
+          "location": "D4D_Base_import::enums::EncodingEnum::permissible_values::ISO-8859-5",
+          "description": "Latin/Cyrillic encoding",
+          "priority": "LOW"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum_value",
+          "element_name": "EncodingEnum.ISO-8859-6",
+          "location": "D4D_Base_import::enums::EncodingEnum::permissible_values::ISO-8859-6",
+          "description": "Latin/Arabic encoding",
+          "priority": "LOW"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum_value",
+          "element_name": "EncodingEnum.ISO-8859-7",
+          "location": "D4D_Base_import::enums::EncodingEnum::permissible_values::ISO-8859-7",
+          "description": "Latin/Greek encoding",
+          "priority": "LOW"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum_value",
+          "element_name": "EncodingEnum.ISO-8859-8",
+          "location": "D4D_Base_import::enums::EncodingEnum::permissible_values::ISO-8859-8",
+          "description": "Latin/Hebrew encoding",
+          "priority": "LOW"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum_value",
+          "element_name": "EncodingEnum.ISO-8859-9",
+          "location": "D4D_Base_import::enums::EncodingEnum::permissible_values::ISO-8859-9",
+          "description": "Latin-5 (Turkish)",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 7,
+          "with_examples": 1,
+          "with_examples_pct": 14.285714285714285,
+          "complete_sentences": 5,
+          "complete_sentences_pct": 71.42857142857143,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 18,
+          "with_examples": 6,
+          "with_examples_pct": 33.33333333333333,
+          "complete_sentences": 18,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "slot": {
+          "total": 31,
+          "with_examples": 5,
+          "with_examples_pct": 16.129032258064516,
+          "complete_sentences": 31,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "enum": {
+          "total": 10,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 7,
+          "complete_sentences_pct": 70.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "enum_value": {
+          "total": 134,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 66,
+          "complete_sentences_pct": 49.25373134328358,
+          "too_brief": 24,
+          "too_brief_pct": 17.91044776119403
+        }
+      }
+    },
+    {
+      "module": "D4D_Collection",
+      "issues": [
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "InstanceAcquisition.was_directly_observed",
+          "location": "D4D_Collection::classes::InstanceAcquisition::attributes::was_directly_observed",
+          "description": "Whether the data was directly observed",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InstanceAcquisition.was_directly_observed",
+          "location": "D4D_Collection::classes::InstanceAcquisition::attributes::was_directly_observed",
+          "description": "Whether the data was directly observed",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "InstanceAcquisition.was_reported_by_subjects",
+          "location": "D4D_Collection::classes::InstanceAcquisition::attributes::was_reported_by_subjects",
+          "description": "Whether the data was reported directly by the subjects themselves",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InstanceAcquisition.was_reported_by_subjects",
+          "location": "D4D_Collection::classes::InstanceAcquisition::attributes::was_reported_by_subjects",
+          "description": "Whether the data was reported directly by the subjects themselves",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "InstanceAcquisition.was_inferred_derived",
+          "location": "D4D_Collection::classes::InstanceAcquisition::attributes::was_inferred_derived",
+          "description": "Whether the data was inferred or derived from other data",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InstanceAcquisition.was_inferred_derived",
+          "location": "D4D_Collection::classes::InstanceAcquisition::attributes::was_inferred_derived",
+          "description": "Whether the data was inferred or derived from other data",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "InstanceAcquisition.was_validated_verified",
+          "location": "D4D_Collection::classes::InstanceAcquisition::attributes::was_validated_verified",
+          "description": "Whether the data was validated or verified in any way",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InstanceAcquisition.was_validated_verified",
+          "location": "D4D_Collection::classes::InstanceAcquisition::attributes::was_validated_verified",
+          "description": "Whether the data was validated or verified in any way",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InstanceAcquisition.acquisition_details",
+          "location": "D4D_Collection::classes::InstanceAcquisition::attributes::acquisition_details",
+          "description": "Details on how data was acquired for each instance.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CollectionMechanism.mechanism_details",
+          "location": "D4D_Collection::classes::CollectionMechanism::attributes::mechanism_details",
+          "description": "Details on mechanisms or procedures used to collect the data.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "DataCollector.role",
+          "location": "D4D_Collection::classes::DataCollector::attributes::role",
+          "description": "Role of the data collector (e.g., researcher, crowdworker)",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DataCollector.collector_details",
+          "location": "D4D_Collection::classes::DataCollector::attributes::collector_details",
+          "description": "Details on who collected the data and their compensation.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "CollectionTimeframe.start_date",
+          "location": "D4D_Collection::classes::CollectionTimeframe::attributes::start_date",
+          "description": "Start date of data collection",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CollectionTimeframe.start_date",
+          "location": "D4D_Collection::classes::CollectionTimeframe::attributes::start_date",
+          "description": "Start date of data collection",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "CollectionTimeframe.end_date",
+          "location": "D4D_Collection::classes::CollectionTimeframe::attributes::end_date",
+          "description": "End date of data collection",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CollectionTimeframe.end_date",
+          "location": "D4D_Collection::classes::CollectionTimeframe::attributes::end_date",
+          "description": "End date of data collection",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CollectionTimeframe.timeframe_details",
+          "location": "D4D_Collection::classes::CollectionTimeframe::attributes::timeframe_details",
+          "description": "Details on the collection timeframe and relationship to data creation dates.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "DirectCollection.is_direct",
+          "location": "D4D_Collection::classes::DirectCollection::attributes::is_direct",
+          "description": "Whether collection was direct from individuals",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DirectCollection.is_direct",
+          "location": "D4D_Collection::classes::DirectCollection::attributes::is_direct",
+          "description": "Whether collection was direct from individuals",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DirectCollection.collection_details",
+          "location": "D4D_Collection::classes::DirectCollection::attributes::collection_details",
+          "description": "Details on direct vs. indirect collection methods and sources.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "RawDataSource.source_type",
+          "location": "D4D_Collection::classes::RawDataSource::attributes::source_type",
+          "description": "Type of raw source (sensor, database, user input, web scraping, etc.).\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "RawDataSource.access_details",
+          "location": "D4D_Collection::classes::RawDataSource::attributes::access_details",
+          "description": "Information on how to access or retrieve the raw source data.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "RawDataSource.raw_data_format",
+          "location": "D4D_Collection::classes::RawDataSource::attributes::raw_data_format",
+          "description": "Format of the raw data before any preprocessing.\n",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 7,
+          "with_examples": 3,
+          "with_examples_pct": 42.857142857142854,
+          "complete_sentences": 7,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 20,
+          "with_examples": 5,
+          "with_examples_pct": 25.0,
+          "complete_sentences": 14,
+          "complete_sentences_pct": 70.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        }
+      }
+    },
+    {
+      "module": "D4D_Composition",
+      "issues": [
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "Instance.counts",
+          "location": "D4D_Composition::classes::Instance::attributes::counts",
+          "description": "How many instances are there in total (of each type, if appropriate)?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Instance.counts",
+          "location": "D4D_Composition::classes::Instance::attributes::counts",
+          "description": "How many instances are there in total (of each type, if appropriate)?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "Instance.label",
+          "location": "D4D_Composition::classes::Instance::attributes::label",
+          "description": "Is there a label or target associated with each instance?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Instance.label",
+          "location": "D4D_Composition::classes::Instance::attributes::label",
+          "description": "Is there a label or target associated with each instance?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "Instance.label_description",
+          "location": "D4D_Composition::classes::Instance::attributes::label_description",
+          "description": "If labeled, what pattern or format do labels follow?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Instance.label_description",
+          "location": "D4D_Composition::classes::Instance::attributes::label_description",
+          "description": "If labeled, what pattern or format do labels follow?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Instance.sampling_strategies",
+          "location": "D4D_Composition::classes::Instance::attributes::sampling_strategies",
+          "description": "References to one or more SamplingStrategy objects.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Instance.missing_information",
+          "location": "D4D_Composition::classes::Instance::attributes::missing_information",
+          "description": "References to one or more MissingInfo objects describing missing data.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "SamplingStrategy.is_sample",
+          "location": "D4D_Composition::classes::SamplingStrategy::attributes::is_sample",
+          "description": "Indicates whether it is a sample of a larger set.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "SamplingStrategy.is_random",
+          "location": "D4D_Composition::classes::SamplingStrategy::attributes::is_random",
+          "description": "Indicates whether the sample is random.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "SamplingStrategy.source_data",
+          "location": "D4D_Composition::classes::SamplingStrategy::attributes::source_data",
+          "description": "Description of the larger set from which the sample was drawn, if any.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "SamplingStrategy.is_representative",
+          "location": "D4D_Composition::classes::SamplingStrategy::attributes::is_representative",
+          "description": "Indicates whether the sample is representative of the larger set.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "SamplingStrategy.representative_verification",
+          "location": "D4D_Composition::classes::SamplingStrategy::attributes::representative_verification",
+          "description": "Explanation of how representativeness was validated or verified.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "SamplingStrategy.why_not_representative",
+          "location": "D4D_Composition::classes::SamplingStrategy::attributes::why_not_representative",
+          "description": "Explanation of why the sample is not representative, if applicable.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "SamplingStrategy.strategies",
+          "location": "D4D_Composition::classes::SamplingStrategy::attributes::strategies",
+          "description": "Description of the sampling strategy (deterministic, probabilistic, etc.).\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "MissingInfo.missing",
+          "location": "D4D_Composition::classes::MissingInfo::attributes::missing",
+          "description": "Description of the missing data fields or elements.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "MissingInfo.why_missing",
+          "location": "D4D_Composition::classes::MissingInfo::attributes::why_missing",
+          "description": "Explanation of why each piece of data is missing.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Splits.split_details",
+          "location": "D4D_Composition::classes::Splits::attributes::split_details",
+          "description": "Details on recommended data splits and their rationale.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DataAnomaly.anomaly_details",
+          "location": "D4D_Composition::classes::DataAnomaly::attributes::anomaly_details",
+          "description": "Details on errors, noise sources, or redundancies in the dataset.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetBias.bias_type",
+          "location": "D4D_Composition::classes::DatasetBias::attributes::bias_type",
+          "description": "The type of bias identified, using standardized categories from the Artificial Intelligence Ontology (AIO).\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetBias.bias_description",
+          "location": "D4D_Composition::classes::DatasetBias::attributes::bias_description",
+          "description": "Detailed description of how this bias manifests in the dataset, including affected populations, features, or outcomes.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetBias.mitigation_strategy",
+          "location": "D4D_Composition::classes::DatasetBias::attributes::mitigation_strategy",
+          "description": "Steps taken or recommended to mitigate this bias.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetBias.affected_subsets",
+          "location": "D4D_Composition::classes::DatasetBias::attributes::affected_subsets",
+          "description": "Specific subsets or features of the dataset affected by this bias.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetLimitation.limitation_description",
+          "location": "D4D_Composition::classes::DatasetLimitation::attributes::limitation_description",
+          "description": "Detailed description of the limitation and its implications.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetLimitation.scope_impact",
+          "location": "D4D_Composition::classes::DatasetLimitation::attributes::scope_impact",
+          "description": "How this limitation affects the scope or applicability of the dataset.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetLimitation.recommended_mitigation",
+          "location": "D4D_Composition::classes::DatasetLimitation::attributes::recommended_mitigation",
+          "description": "Recommended approaches for users to address this limitation.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ExternalResource.future_guarantees",
+          "location": "D4D_Composition::classes::ExternalResource::attributes::future_guarantees",
+          "description": "Explanation of any commitments that external resources will remain available and stable over time.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ExternalResource.archival",
+          "location": "D4D_Composition::classes::ExternalResource::attributes::archival",
+          "description": "Indication whether official archival versions of external resources are included.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ExternalResource.restrictions",
+          "location": "D4D_Composition::classes::ExternalResource::attributes::restrictions",
+          "description": "Description of any restrictions or fees associated with external resources.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Confidentiality.confidential_elements_present",
+          "location": "D4D_Composition::classes::Confidentiality::attributes::confidential_elements_present",
+          "description": "Indicates whether any confidential data elements are present.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Confidentiality.confidentiality_details",
+          "location": "D4D_Composition::classes::Confidentiality::attributes::confidentiality_details",
+          "description": "Details on confidential data elements and handling procedures.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ContentWarning.content_warnings_present",
+          "location": "D4D_Composition::classes::ContentWarning::attributes::content_warnings_present",
+          "description": "Indicates whether any content warnings are needed.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Subpopulation.subpopulation_elements_present",
+          "location": "D4D_Composition::classes::Subpopulation::attributes::subpopulation_elements_present",
+          "description": "Indicates whether any subpopulations are explicitly identified.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Subpopulation.distribution",
+          "location": "D4D_Composition::classes::Subpopulation::attributes::distribution",
+          "description": "The distribution of instances across identified subpopulations, including counts, percentages, or proportions for each subgroup.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Deidentification.identifiable_elements_present",
+          "location": "D4D_Composition::classes::Deidentification::attributes::identifiable_elements_present",
+          "description": "Indicates whether data subjects can be identified.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Deidentification.identifiers_removed",
+          "location": "D4D_Composition::classes::Deidentification::attributes::identifiers_removed",
+          "description": "List of identifier types removed during de-identification.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Deidentification.deidentification_details",
+          "location": "D4D_Composition::classes::Deidentification::attributes::deidentification_details",
+          "description": "Details on de-identification procedures and residual risks.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "SensitiveElement.sensitive_elements_present",
+          "location": "D4D_Composition::classes::SensitiveElement::attributes::sensitive_elements_present",
+          "description": "Indicates whether sensitive data elements are present.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "SensitiveElement.sensitivity_details",
+          "location": "D4D_Composition::classes::SensitiveElement::attributes::sensitivity_details",
+          "description": "Details on sensitive data elements present and handling procedures.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetRelationship.target_dataset",
+          "location": "D4D_Composition::classes::DatasetRelationship::attributes::target_dataset",
+          "description": "The dataset that this relationship points to. Can be specified by identifier, URL, or Dataset object.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DatasetRelationship.description",
+          "location": "D4D_Composition::classes::DatasetRelationship::attributes::description",
+          "description": "Free-text description providing additional context about the relationship.",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 15,
+          "with_examples": 9,
+          "with_examples_pct": 60.0,
+          "complete_sentences": 14,
+          "complete_sentences_pct": 93.33333333333333,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 47,
+          "with_examples": 9,
+          "with_examples_pct": 19.148936170212767,
+          "complete_sentences": 47,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "enum": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 0,
+          "complete_sentences_pct": 0.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "enum_value": {
+          "total": 14,
+          "with_examples": 3,
+          "with_examples_pct": 21.428571428571427,
+          "complete_sentences": 14,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        }
+      }
+    },
+    {
+      "module": "D4D_Data_Governance",
+      "issues": [
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "LicenseAndUseTerms.license_terms",
+          "location": "D4D_Data_Governance::classes::LicenseAndUseTerms::attributes::license_terms",
+          "description": "Description of the dataset's license and terms of use (including links, costs, or usage constraints).\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "LicenseAndUseTerms.data_use_permission",
+          "location": "D4D_Data_Governance::classes::LicenseAndUseTerms::attributes::data_use_permission",
+          "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "LicenseAndUseTerms.contact_person",
+          "location": "D4D_Data_Governance::classes::LicenseAndUseTerms::attributes::contact_person",
+          "description": "Contact person for licensing questions. Provides structured contact information including name, email, affiliation, and optional ORCID. This person can answer questions about licensing terms, usage restrictions, fees, and permissions.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "IPRestrictions.restrictions",
+          "location": "D4D_Data_Governance::classes::IPRestrictions::attributes::restrictions",
+          "description": "Explanation of third-party IP restrictions.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ExportControlRegulatoryRestrictions.regulatory_restrictions",
+          "location": "D4D_Data_Governance::classes::ExportControlRegulatoryRestrictions::attributes::regulatory_restrictions",
+          "description": "Export or regulatory restrictions on the dataset.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ExportControlRegulatoryRestrictions.hipaa_compliant",
+          "location": "D4D_Data_Governance::classes::ExportControlRegulatoryRestrictions::attributes::hipaa_compliant",
+          "description": "Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA). HIPAA applies to protected health information in the United States.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ExportControlRegulatoryRestrictions.confidentiality_level",
+          "location": "D4D_Data_Governance::classes::ExportControlRegulatoryRestrictions::attributes::confidentiality_level",
+          "description": "Confidentiality classification of the dataset indicating level of access restrictions and sensitivity.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ExportControlRegulatoryRestrictions.governance_committee_contact",
+          "location": "D4D_Data_Governance::classes::ExportControlRegulatoryRestrictions::attributes::governance_committee_contact",
+          "description": "Contact person for data governance committee. This person can answer questions about data governance policies, access procedures, and oversight mechanisms.",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 3,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 3,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 9,
+          "with_examples": 2,
+          "with_examples_pct": 22.22222222222222,
+          "complete_sentences": 8,
+          "complete_sentences_pct": 88.88888888888889,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "enum": {
+          "total": 3,
+          "with_examples": 1,
+          "with_examples_pct": 33.33333333333333,
+          "complete_sentences": 2,
+          "complete_sentences_pct": 66.66666666666666,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "enum_value": {
+          "total": 30,
+          "with_examples": 1,
+          "with_examples_pct": 3.3333333333333335,
+          "complete_sentences": 10,
+          "complete_sentences_pct": 33.33333333333333,
+          "too_brief": 1,
+          "too_brief_pct": 3.3333333333333335
+        }
+      }
+    },
+    {
+      "module": "D4D_Distribution",
+      "issues": [
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ThirdPartySharing.is_shared",
+          "location": "D4D_Distribution::classes::ThirdPartySharing::attributes::is_shared",
+          "description": "Boolean indicating whether the dataset is distributed to parties external to the dataset-creating entity.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DistributionFormat.access_urls",
+          "location": "D4D_Distribution::classes::DistributionFormat::attributes::access_urls",
+          "description": "Details of the distribution channel(s) or format(s).",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DistributionDate.release_dates",
+          "location": "D4D_Distribution::classes::DistributionDate::attributes::release_dates",
+          "description": "Dates or timeframe for dataset release. Could be a one-time release date or multiple scheduled releases.\n",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 3,
+          "with_examples": 2,
+          "with_examples_pct": 66.66666666666666,
+          "complete_sentences": 3,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 3,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 3,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        }
+      }
+    },
+    {
+      "module": "D4D_Ethics",
+      "issues": [
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EthicalReview.contact_person",
+          "location": "D4D_Ethics::classes::EthicalReview::attributes::contact_person",
+          "description": "Contact person for questions about ethical review. Provides structured contact information including name, email, affiliation, and optional ORCID.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EthicalReview.review_details",
+          "location": "D4D_Ethics::classes::EthicalReview::attributes::review_details",
+          "description": "Details on ethical review processes, outcomes, and supporting documentation.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DataProtectionImpact.impact_details",
+          "location": "D4D_Ethics::classes::DataProtectionImpact::attributes::impact_details",
+          "description": "Details on data protection impact analysis, outcomes, and documentation.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CollectionNotification.notification_details",
+          "location": "D4D_Ethics::classes::CollectionNotification::attributes::notification_details",
+          "description": "Details on how individuals were notified about data collection.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CollectionConsent.consent_details",
+          "location": "D4D_Ethics::classes::CollectionConsent::attributes::consent_details",
+          "description": "Details on how consent was requested, provided, and documented.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ConsentRevocation.revocation_details",
+          "location": "D4D_Ethics::classes::ConsentRevocation::attributes::revocation_details",
+          "description": "Details on consent revocation mechanisms and procedures.\n",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 5,
+          "with_examples": 2,
+          "with_examples_pct": 40.0,
+          "complete_sentences": 5,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 7,
+          "with_examples": 1,
+          "with_examples_pct": 14.285714285714285,
+          "complete_sentences": 7,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        }
+      }
+    },
+    {
+      "module": "D4D_Evaluation_Summary",
+      "issues": [
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.rubric_type",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::rubric_type",
+          "description": "Type of rubric used (rubric10 or rubric20)",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.rubric_type",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::rubric_type",
+          "description": "Type of rubric used (rubric10 or rubric20)",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.rubric_description",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::rubric_description",
+          "description": "Description of rubric structure and scoring",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.rubric_description",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::rubric_description",
+          "description": "Description of rubric structure and scoring",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.total_files_evaluated",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::total_files_evaluated",
+          "description": "Total number of D4D files evaluated",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.total_files_evaluated",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::total_files_evaluated",
+          "description": "Total number of D4D files evaluated",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.concatenated_file_count",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::concatenated_file_count",
+          "description": "Number of concatenated D4D files",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.concatenated_file_count",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::concatenated_file_count",
+          "description": "Number of concatenated D4D files",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.individual_file_count",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::individual_file_count",
+          "description": "Number of individual D4D files",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.individual_file_count",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::individual_file_count",
+          "description": "Number of individual D4D files",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.overall_performance",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::overall_performance",
+          "description": "Summary statistics of evaluation performance across all D4D files.",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.method_comparison",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::method_comparison",
+          "description": "Performance comparison across generation methods",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.method_comparison",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::method_comparison",
+          "description": "Performance comparison across generation methods",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.project_comparison",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::project_comparison",
+          "description": "Performance comparison across Bridge2AI projects",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.project_comparison",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::project_comparison",
+          "description": "Performance comparison across Bridge2AI projects",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.top_performers",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::top_performers",
+          "description": "List of top performing D4D files",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.top_performers",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::top_performers",
+          "description": "List of top performing D4D files",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.element_performance",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::element_performance",
+          "description": "Performance by rubric element (rubric10 only)",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.element_performance",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::element_performance",
+          "description": "Performance by rubric element (rubric10 only)",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.category_performance",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::category_performance",
+          "description": "Performance by category (rubric20 only)",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.category_performance",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::category_performance",
+          "description": "Performance by category (rubric20 only)",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.common_weaknesses",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::common_weaknesses",
+          "description": "Common weaknesses across all evaluations",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.common_weaknesses",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::common_weaknesses",
+          "description": "Common weaknesses across all evaluations",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.common_strengths",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::common_strengths",
+          "description": "Common strengths across all evaluations",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.common_strengths",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::common_strengths",
+          "description": "Common strengths across all evaluations",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.key_insights",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::key_insights",
+          "description": "Key analytical insights from evaluation",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.key_insights",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::key_insights",
+          "description": "Key analytical insights from evaluation",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.input_type_comparison",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::input_type_comparison",
+          "description": "Concatenated vs individual file performance",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.input_type_comparison",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::input_type_comparison",
+          "description": "Concatenated vs individual file performance",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.files_generated",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::files_generated",
+          "description": "Output files generated by evaluation",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "EvaluationSummary.files_generated",
+          "location": "D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::files_generated",
+          "description": "Output files generated by evaluation",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "OverallPerformance.average_score",
+          "location": "D4D_Evaluation_Summary::classes::OverallPerformance::attributes::average_score",
+          "description": "Average score across all files",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "OverallPerformance.average_score",
+          "location": "D4D_Evaluation_Summary::classes::OverallPerformance::attributes::average_score",
+          "description": "Average score across all files",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "OverallPerformance.average_percentage",
+          "location": "D4D_Evaluation_Summary::classes::OverallPerformance::attributes::average_percentage",
+          "description": "Average score expressed as a percentage of maximum possible score.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "OverallPerformance.max_score",
+          "location": "D4D_Evaluation_Summary::classes::OverallPerformance::attributes::max_score",
+          "description": "Maximum possible score for the rubric being evaluated.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "OverallPerformance.best_score",
+          "location": "D4D_Evaluation_Summary::classes::OverallPerformance::attributes::best_score",
+          "description": "Highest score achieved across all evaluated D4D files.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "OverallPerformance.best_percentage",
+          "location": "D4D_Evaluation_Summary::classes::OverallPerformance::attributes::best_percentage",
+          "description": "Highest score expressed as a percentage of maximum possible score.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "OverallPerformance.best_performer",
+          "location": "D4D_Evaluation_Summary::classes::OverallPerformance::attributes::best_performer",
+          "description": "Identifier of the project, method, or file type that achieved the best score.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "OverallPerformance.worst_score",
+          "location": "D4D_Evaluation_Summary::classes::OverallPerformance::attributes::worst_score",
+          "description": "Lowest score achieved across all evaluated D4D files.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "OverallPerformance.worst_percentage",
+          "location": "D4D_Evaluation_Summary::classes::OverallPerformance::attributes::worst_percentage",
+          "description": "Lowest score expressed as a percentage of maximum possible score.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "OverallPerformance.worst_performer",
+          "location": "D4D_Evaluation_Summary::classes::OverallPerformance::attributes::worst_performer",
+          "description": "Identifier of the project, method, or file type that achieved the worst score.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "MethodPerformance.input_type",
+          "location": "D4D_Evaluation_Summary::classes::MethodPerformance::attributes::input_type",
+          "description": "Type of input files used for generation (concatenated or individual source documents).",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "MethodPerformance.file_count",
+          "location": "D4D_Evaluation_Summary::classes::MethodPerformance::attributes::file_count",
+          "description": "Number of D4D files evaluated using this generation method.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "MethodPerformance.average_score",
+          "location": "D4D_Evaluation_Summary::classes::MethodPerformance::attributes::average_score",
+          "description": "Mean score achieved across all files generated with this method.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "MethodPerformance.average_percentage",
+          "location": "D4D_Evaluation_Summary::classes::MethodPerformance::attributes::average_percentage",
+          "description": "Mean score expressed as a percentage of maximum possible for this method.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "MethodPerformance.max_score",
+          "location": "D4D_Evaluation_Summary::classes::MethodPerformance::attributes::max_score",
+          "description": "Maximum possible score for the rubric being evaluated.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "MethodPerformance.best_score",
+          "location": "D4D_Evaluation_Summary::classes::MethodPerformance::attributes::best_score",
+          "description": "Highest score achieved by any file using this method.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "MethodPerformance.worst_score",
+          "location": "D4D_Evaluation_Summary::classes::MethodPerformance::attributes::worst_score",
+          "description": "Lowest score achieved by any file using this method.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "MethodPerformance.rank",
+          "location": "D4D_Evaluation_Summary::classes::MethodPerformance::attributes::rank",
+          "description": "Ranking position of this method among all methods (1 = best performing).",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ProjectPerformance.file_count",
+          "location": "D4D_Evaluation_Summary::classes::ProjectPerformance::attributes::file_count",
+          "description": "Number of D4D files evaluated for this specific Bridge2AI project.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ProjectPerformance.average_score",
+          "location": "D4D_Evaluation_Summary::classes::ProjectPerformance::attributes::average_score",
+          "description": "Mean score achieved across all D4D files for this project.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ProjectPerformance.average_percentage",
+          "location": "D4D_Evaluation_Summary::classes::ProjectPerformance::attributes::average_percentage",
+          "description": "Mean score expressed as a percentage of maximum possible for this project.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ProjectPerformance.max_score",
+          "location": "D4D_Evaluation_Summary::classes::ProjectPerformance::attributes::max_score",
+          "description": "Maximum possible score for the rubric being evaluated.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ProjectPerformance.rank",
+          "location": "D4D_Evaluation_Summary::classes::ProjectPerformance::attributes::rank",
+          "description": "Ranking position of this project among all projects (1 = best performing).",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "TopPerformer.rank",
+          "location": "D4D_Evaluation_Summary::classes::TopPerformer::attributes::rank",
+          "description": "Position in the top performers list (1 = highest score).",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "TopPerformer.project",
+          "location": "D4D_Evaluation_Summary::classes::TopPerformer::attributes::project",
+          "description": "The Bridge2AI project associated with this top-performing datasheet.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "TopPerformer.method",
+          "location": "D4D_Evaluation_Summary::classes::TopPerformer::attributes::method",
+          "description": "The D4D generation method used to create this top-performing file.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "TopPerformer.input_type",
+          "location": "D4D_Evaluation_Summary::classes::TopPerformer::attributes::input_type",
+          "description": "Type of input used for generation (concatenated or individual source documents).",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "TopPerformer.score",
+          "location": "D4D_Evaluation_Summary::classes::TopPerformer::attributes::score",
+          "description": "Raw score achieved by this D4D file on the rubric.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "TopPerformer.percentage",
+          "location": "D4D_Evaluation_Summary::classes::TopPerformer::attributes::percentage",
+          "description": "Score expressed as a percentage of the maximum possible score.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "TopPerformer.max_score",
+          "location": "D4D_Evaluation_Summary::classes::TopPerformer::attributes::max_score",
+          "description": "Maximum possible score for the rubric being evaluated.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "TopPerformer.elements_passing",
+          "location": "D4D_Evaluation_Summary::classes::TopPerformer::attributes::elements_passing",
+          "description": "Number of rubric elements that met or exceeded the passing threshold (rubric10 only).",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "TopPerformer.file_name",
+          "location": "D4D_Evaluation_Summary::classes::TopPerformer::attributes::file_name",
+          "description": "Filename of the top-performing D4D datasheet.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ElementPerformance.element_id",
+          "location": "D4D_Evaluation_Summary::classes::ElementPerformance::attributes::element_id",
+          "description": "Numeric identifier of the rubric element being evaluated (1-10 for rubric10).",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ElementPerformance.max_score",
+          "location": "D4D_Evaluation_Summary::classes::ElementPerformance::attributes::max_score",
+          "description": "Maximum possible score for this specific rubric element.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ElementPerformance.average_score",
+          "location": "D4D_Evaluation_Summary::classes::ElementPerformance::attributes::average_score",
+          "description": "Mean score achieved for this element across all evaluated files.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ElementPerformance.average_percentage",
+          "location": "D4D_Evaluation_Summary::classes::ElementPerformance::attributes::average_percentage",
+          "description": "Mean score for this element expressed as a percentage of maximum possible.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ElementPerformance.strength_level",
+          "location": "D4D_Evaluation_Summary::classes::ElementPerformance::attributes::strength_level",
+          "description": "Qualitative assessment of performance level for this element (strongest, strong, weak, weakest).",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "ElementPerformance.description",
+          "location": "D4D_Evaluation_Summary::classes::ElementPerformance::attributes::description",
+          "description": "Description of what this element measures",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ElementPerformance.description",
+          "location": "D4D_Evaluation_Summary::classes::ElementPerformance::attributes::description",
+          "description": "Description of what this element measures",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CategoryPerformance.category_id",
+          "location": "D4D_Evaluation_Summary::classes::CategoryPerformance::attributes::category_id",
+          "description": "Numeric identifier of the rubric category being evaluated (1-4 for rubric20).",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CategoryPerformance.max_score",
+          "location": "D4D_Evaluation_Summary::classes::CategoryPerformance::attributes::max_score",
+          "description": "Maximum possible score for all questions within this category.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CategoryPerformance.average_score",
+          "location": "D4D_Evaluation_Summary::classes::CategoryPerformance::attributes::average_score",
+          "description": "Mean score achieved for this category across all evaluated files.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CategoryPerformance.average_percentage",
+          "location": "D4D_Evaluation_Summary::classes::CategoryPerformance::attributes::average_percentage",
+          "description": "Mean score for this category expressed as a percentage of maximum possible.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CategoryPerformance.rank",
+          "location": "D4D_Evaluation_Summary::classes::CategoryPerformance::attributes::rank",
+          "description": "Ranking position of this category among all categories (1 = best performing).",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CategoryPerformance.question_count",
+          "location": "D4D_Evaluation_Summary::classes::CategoryPerformance::attributes::question_count",
+          "description": "Total number of evaluation questions within this category.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CommonWeakness.weakness_type",
+          "location": "D4D_Evaluation_Summary::classes::CommonWeakness::attributes::weakness_type",
+          "description": "Classification of the weakness observed across multiple D4D files.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CommonWeakness.description",
+          "location": "D4D_Evaluation_Summary::classes::CommonWeakness::attributes::description",
+          "description": "Detailed explanation of the weakness pattern and its manifestation.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CommonWeakness.frequency",
+          "location": "D4D_Evaluation_Summary::classes::CommonWeakness::attributes::frequency",
+          "description": "How frequently this weakness appears across the evaluated dataset.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CommonWeakness.affected_element_or_question",
+          "location": "D4D_Evaluation_Summary::classes::CommonWeakness::attributes::affected_element_or_question",
+          "description": "Specific rubric element or question where this weakness commonly occurs.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CommonWeakness.typical_score",
+          "location": "D4D_Evaluation_Summary::classes::CommonWeakness::attributes::typical_score",
+          "description": "Representative score typically achieved in areas affected by this weakness.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CommonStrength.strength_type",
+          "location": "D4D_Evaluation_Summary::classes::CommonStrength::attributes::strength_type",
+          "description": "Classification of the strength pattern observed across multiple D4D files.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CommonStrength.description",
+          "location": "D4D_Evaluation_Summary::classes::CommonStrength::attributes::description",
+          "description": "Detailed explanation of the strength pattern and its positive impact.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CommonStrength.frequency",
+          "location": "D4D_Evaluation_Summary::classes::CommonStrength::attributes::frequency",
+          "description": "How frequently this strength appears across the evaluated dataset.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CommonStrength.affected_element_or_question",
+          "location": "D4D_Evaluation_Summary::classes::CommonStrength::attributes::affected_element_or_question",
+          "description": "Specific rubric element or question where this strength commonly occurs.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CommonStrength.typical_score",
+          "location": "D4D_Evaluation_Summary::classes::CommonStrength::attributes::typical_score",
+          "description": "Representative score typically achieved in areas demonstrating this strength.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "KeyInsight.title",
+          "location": "D4D_Evaluation_Summary::classes::KeyInsight::attributes::title",
+          "description": "Concise summary title capturing the essence of the insight.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "KeyInsight.description",
+          "location": "D4D_Evaluation_Summary::classes::KeyInsight::attributes::description",
+          "description": "Comprehensive explanation of the insight and its implications.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "KeyInsight.supporting_data",
+          "location": "D4D_Evaluation_Summary::classes::KeyInsight::attributes::supporting_data",
+          "description": "Quantitative or qualitative evidence supporting this analytical insight.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InputTypeComparison.concatenated_performance",
+          "location": "D4D_Evaluation_Summary::classes::InputTypeComparison::attributes::concatenated_performance",
+          "description": "Performance metrics for D4D files generated from concatenated source documents.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InputTypeComparison.individual_performance",
+          "location": "D4D_Evaluation_Summary::classes::InputTypeComparison::attributes::individual_performance",
+          "description": "Performance metrics for D4D files generated from individual source documents.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InputTypeComparison.synthesis_advantage",
+          "location": "D4D_Evaluation_Summary::classes::InputTypeComparison::attributes::synthesis_advantage",
+          "description": "Explanation of the multi-document synthesis advantage demonstrated by concatenated files.",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "InputTypePerformance.input_type",
+          "location": "D4D_Evaluation_Summary::classes::InputTypePerformance::attributes::input_type",
+          "description": "Type of input (concatenated or individual)",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InputTypePerformance.input_type",
+          "location": "D4D_Evaluation_Summary::classes::InputTypePerformance::attributes::input_type",
+          "description": "Type of input (concatenated or individual)",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "InputTypePerformance.file_count",
+          "location": "D4D_Evaluation_Summary::classes::InputTypePerformance::attributes::file_count",
+          "description": "Number of files of this type",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InputTypePerformance.file_count",
+          "location": "D4D_Evaluation_Summary::classes::InputTypePerformance::attributes::file_count",
+          "description": "Number of files of this type",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "InputTypePerformance.average_score",
+          "location": "D4D_Evaluation_Summary::classes::InputTypePerformance::attributes::average_score",
+          "description": "Average score for this input type",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InputTypePerformance.average_score",
+          "location": "D4D_Evaluation_Summary::classes::InputTypePerformance::attributes::average_score",
+          "description": "Average score for this input type",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "InputTypePerformance.average_percentage",
+          "location": "D4D_Evaluation_Summary::classes::InputTypePerformance::attributes::average_percentage",
+          "description": "Average percentage for this input type",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InputTypePerformance.average_percentage",
+          "location": "D4D_Evaluation_Summary::classes::InputTypePerformance::attributes::average_percentage",
+          "description": "Average percentage for this input type",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InputTypePerformance.score_range",
+          "location": "D4D_Evaluation_Summary::classes::InputTypePerformance::attributes::score_range",
+          "description": "Range of scores observed for this input type (minimum to maximum values).",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InputTypePerformance.best_method",
+          "location": "D4D_Evaluation_Summary::classes::InputTypePerformance::attributes::best_method",
+          "description": "Generation method that achieved the highest performance for this input type.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "GeneratedFile.file_path",
+          "location": "D4D_Evaluation_Summary::classes::GeneratedFile::attributes::file_path",
+          "description": "Filesystem path to the generated evaluation output file.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "GeneratedFile.file_type",
+          "location": "D4D_Evaluation_Summary::classes::GeneratedFile::attributes::file_type",
+          "description": "File format type of the generated output (CSV, JSON, or Markdown).",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "GeneratedFile.description",
+          "location": "D4D_Evaluation_Summary::classes::GeneratedFile::attributes::description",
+          "description": "Explanation of the file contents and what data it contains.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "GeneratedFile.row_count",
+          "location": "D4D_Evaluation_Summary::classes::GeneratedFile::attributes::row_count",
+          "description": "Number of data rows or entries in the file (applicable to CSV and JSON formats).",
+          "priority": "LOW"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum",
+          "element_name": "RubricTypeEnum",
+          "location": "D4D_Evaluation_Summary::enums::RubricTypeEnum",
+          "description": "Types of evaluation rubrics",
+          "priority": "MEDIUM"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum",
+          "element_name": "GenerationMethodEnum",
+          "location": "D4D_Evaluation_Summary::enums::GenerationMethodEnum",
+          "description": "D4D generation methods",
+          "priority": "MEDIUM"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum",
+          "element_name": "Bridge2AIProjectEnum",
+          "location": "D4D_Evaluation_Summary::enums::Bridge2AIProjectEnum",
+          "description": "Bridge2AI Grand Challenge projects",
+          "priority": "MEDIUM"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum",
+          "element_name": "StrengthLevelEnum",
+          "location": "D4D_Evaluation_Summary::enums::StrengthLevelEnum",
+          "description": "Assessment of element/category strength",
+          "priority": "MEDIUM"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum",
+          "element_name": "WeaknessTypeEnum",
+          "location": "D4D_Evaluation_Summary::enums::WeaknessTypeEnum",
+          "description": "Types of common weaknesses",
+          "priority": "MEDIUM"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum",
+          "element_name": "StrengthTypeEnum",
+          "location": "D4D_Evaluation_Summary::enums::StrengthTypeEnum",
+          "description": "Types of common strengths",
+          "priority": "MEDIUM"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum",
+          "element_name": "FrequencyEnum",
+          "location": "D4D_Evaluation_Summary::enums::FrequencyEnum",
+          "description": "Frequency of occurrence",
+          "priority": "MEDIUM"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum",
+          "element_name": "InsightTypeEnum",
+          "location": "D4D_Evaluation_Summary::enums::InsightTypeEnum",
+          "description": "Types of analytical insights",
+          "priority": "MEDIUM"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 13,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 4,
+          "complete_sentences_pct": 30.76923076923077,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 91,
+          "with_examples": 6,
+          "with_examples_pct": 6.593406593406594,
+          "complete_sentences": 81,
+          "complete_sentences_pct": 89.01098901098901,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "enum": {
+          "total": 10,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 9,
+          "complete_sentences_pct": 90.0,
+          "too_brief": 8,
+          "too_brief_pct": 80.0
+        },
+        "enum_value": {
+          "total": 38,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 26,
+          "complete_sentences_pct": 68.42105263157895,
+          "too_brief": 18,
+          "too_brief_pct": 47.368421052631575
+        }
+      }
+    },
+    {
+      "module": "D4D_FileCollection",
+      "issues": [
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "FileCollection.file_count",
+          "location": "D4D_FileCollection::classes::FileCollection::attributes::file_count",
+          "description": "Number of files in this collection.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "FileCollection.total_bytes",
+          "location": "D4D_FileCollection::classes::FileCollection::attributes::total_bytes",
+          "description": "Total size of all files in bytes.",
+          "priority": "LOW"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum_value",
+          "element_name": "FileCollectionTypeEnum.supplementary",
+          "location": "D4D_FileCollection::enums::FileCollectionTypeEnum::permissible_values::supplementary",
+          "description": "Supplementary materials",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 2,
+          "with_examples": 1,
+          "with_examples_pct": 50.0,
+          "complete_sentences": 2,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 4,
+          "with_examples": 2,
+          "with_examples_pct": 50.0,
+          "complete_sentences": 4,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "enum": {
+          "total": 2,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 2,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "enum_value": {
+          "total": 19,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 14,
+          "complete_sentences_pct": 73.68421052631578,
+          "too_brief": 6,
+          "too_brief_pct": 31.57894736842105
+        }
+      }
+    },
+    {
+      "module": "D4D_Human",
+      "issues": [
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "HumanSubjectResearch.involves_human_subjects",
+          "location": "D4D_Human::classes::HumanSubjectResearch::attributes::involves_human_subjects",
+          "description": "Does this dataset involve human subjects research?",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "HumanSubjectResearch.involves_human_subjects",
+          "location": "D4D_Human::classes::HumanSubjectResearch::attributes::involves_human_subjects",
+          "description": "Does this dataset involve human subjects research?",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "HumanSubjectResearch.irb_approval",
+          "location": "D4D_Human::classes::HumanSubjectResearch::attributes::irb_approval",
+          "description": "Was Institutional Review Board (IRB) approval obtained? Include approval number and institution if applicable.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "HumanSubjectResearch.ethics_review_board",
+          "location": "D4D_Human::classes::HumanSubjectResearch::attributes::ethics_review_board",
+          "description": "What ethics review board(s) reviewed this research? Include institution names and approval details.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "HumanSubjectResearch.special_populations",
+          "location": "D4D_Human::classes::HumanSubjectResearch::attributes::special_populations",
+          "description": "Does the research involve any special populations that require additional protections (e.g., minors, pregnant women, prisoners)?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "HumanSubjectResearch.regulatory_compliance",
+          "location": "D4D_Human::classes::HumanSubjectResearch::attributes::regulatory_compliance",
+          "description": "What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, HIPAA)?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "InformedConsent.consent_obtained",
+          "location": "D4D_Human::classes::InformedConsent::attributes::consent_obtained",
+          "description": "Was informed consent obtained from all participants?",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InformedConsent.consent_obtained",
+          "location": "D4D_Human::classes::InformedConsent::attributes::consent_obtained",
+          "description": "Was informed consent obtained from all participants?",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "InformedConsent.consent_type",
+          "location": "D4D_Human::classes::InformedConsent::attributes::consent_type",
+          "description": "What type of consent was obtained (e.g., written, verbal, electronic, implied through participation)?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InformedConsent.consent_documentation",
+          "location": "D4D_Human::classes::InformedConsent::attributes::consent_documentation",
+          "description": "How is consent documented? Include references to consent forms or procedures used.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "InformedConsent.withdrawal_mechanism",
+          "location": "D4D_Human::classes::InformedConsent::attributes::withdrawal_mechanism",
+          "description": "How can participants withdraw their consent? What procedures are in place for data deletion upon withdrawal?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InformedConsent.withdrawal_mechanism",
+          "location": "D4D_Human::classes::InformedConsent::attributes::withdrawal_mechanism",
+          "description": "How can participants withdraw their consent? What procedures are in place for data deletion upon withdrawal?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "InformedConsent.consent_scope",
+          "location": "D4D_Human::classes::InformedConsent::attributes::consent_scope",
+          "description": "What specific uses did participants consent to? Are there limitations on data use based on consent?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "InformedConsent.consent_scope",
+          "location": "D4D_Human::classes::InformedConsent::attributes::consent_scope",
+          "description": "What specific uses did participants consent to? Are there limitations on data use based on consent?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ParticipantPrivacy.anonymization_method",
+          "location": "D4D_Human::classes::ParticipantPrivacy::attributes::anonymization_method",
+          "description": "What methods were used to anonymize or de-identify participant data? Include technical details of privacy-preserving techniques.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "ParticipantPrivacy.reidentification_risk",
+          "location": "D4D_Human::classes::ParticipantPrivacy::attributes::reidentification_risk",
+          "description": "What is the assessed risk of re-identification? What measures were taken to minimize this risk?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ParticipantPrivacy.reidentification_risk",
+          "location": "D4D_Human::classes::ParticipantPrivacy::attributes::reidentification_risk",
+          "description": "What is the assessed risk of re-identification? What measures were taken to minimize this risk?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "ParticipantPrivacy.privacy_techniques",
+          "location": "D4D_Human::classes::ParticipantPrivacy::attributes::privacy_techniques",
+          "description": "What privacy-preserving techniques were applied (e.g., differential privacy, k-anonymity, data masking)?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "ParticipantPrivacy.data_linkage",
+          "location": "D4D_Human::classes::ParticipantPrivacy::attributes::data_linkage",
+          "description": "Can this dataset be linked to other datasets in ways that might compromise participant privacy?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ParticipantPrivacy.data_linkage",
+          "location": "D4D_Human::classes::ParticipantPrivacy::attributes::data_linkage",
+          "description": "Can this dataset be linked to other datasets in ways that might compromise participant privacy?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "HumanSubjectCompensation.compensation_provided",
+          "location": "D4D_Human::classes::HumanSubjectCompensation::attributes::compensation_provided",
+          "description": "Were participants compensated for their participation?",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "HumanSubjectCompensation.compensation_provided",
+          "location": "D4D_Human::classes::HumanSubjectCompensation::attributes::compensation_provided",
+          "description": "Were participants compensated for their participation?",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "HumanSubjectCompensation.compensation_type",
+          "location": "D4D_Human::classes::HumanSubjectCompensation::attributes::compensation_type",
+          "description": "What type of compensation was provided (e.g., monetary payment, gift cards, course credit, other incentives)?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "HumanSubjectCompensation.compensation_amount",
+          "location": "D4D_Human::classes::HumanSubjectCompensation::attributes::compensation_amount",
+          "description": "What was the amount or value of compensation provided? Include currency or equivalent value.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "HumanSubjectCompensation.compensation_rationale",
+          "location": "D4D_Human::classes::HumanSubjectCompensation::attributes::compensation_rationale",
+          "description": "What was the rationale for the compensation structure? How was the amount determined to be appropriate?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "HumanSubjectCompensation.compensation_rationale",
+          "location": "D4D_Human::classes::HumanSubjectCompensation::attributes::compensation_rationale",
+          "description": "What was the rationale for the compensation structure? How was the amount determined to be appropriate?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "AtRiskPopulations.at_risk_groups_included",
+          "location": "D4D_Human::classes::AtRiskPopulations::attributes::at_risk_groups_included",
+          "description": "Are any at-risk populations included (e.g., children, pregnant women, prisoners, cognitively impaired individuals)?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "AtRiskPopulations.special_protections",
+          "location": "D4D_Human::classes::AtRiskPopulations::attributes::special_protections",
+          "description": "What additional protections were implemented for at-risk populations? Include safeguards, modified procedures, or additional oversight.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "AtRiskPopulations.assent_procedures",
+          "location": "D4D_Human::classes::AtRiskPopulations::attributes::assent_procedures",
+          "description": "For research involving minors, what assent procedures were used? How was developmentally appropriate assent obtained?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "AtRiskPopulations.assent_procedures",
+          "location": "D4D_Human::classes::AtRiskPopulations::attributes::assent_procedures",
+          "description": "For research involving minors, what assent procedures were used? How was developmentally appropriate assent obtained?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "MISSING_PERIOD",
+          "element_type": "attribute",
+          "element_name": "AtRiskPopulations.guardian_consent",
+          "location": "D4D_Human::classes::AtRiskPopulations::attributes::guardian_consent",
+          "description": "For participants unable to provide their own consent, how was guardian or surrogate consent obtained?\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "AtRiskPopulations.guardian_consent",
+          "location": "D4D_Human::classes::AtRiskPopulations::attributes::guardian_consent",
+          "description": "For participants unable to provide their own consent, how was guardian or surrogate consent obtained?\n",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 5,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 5,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 22,
+          "with_examples": 6,
+          "with_examples_pct": 27.27272727272727,
+          "complete_sentences": 22,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        }
+      }
+    },
+    {
+      "module": "D4D_Maintenance",
+      "issues": [
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Maintainer.maintainer_details",
+          "location": "D4D_Maintenance::classes::Maintainer::attributes::maintainer_details",
+          "description": "Details on who will support, host, or maintain the dataset.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Erratum.erratum_url",
+          "location": "D4D_Maintenance::classes::Erratum::attributes::erratum_url",
+          "description": "URL or access point for the erratum.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Erratum.erratum_details",
+          "location": "D4D_Maintenance::classes::Erratum::attributes::erratum_details",
+          "description": "Details on any errata or corrections to the dataset.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "UpdatePlan.update_details",
+          "location": "D4D_Maintenance::classes::UpdatePlan::attributes::update_details",
+          "description": "Details on update plans, responsible parties, and communication methods.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "RetentionLimits.retention_period",
+          "location": "D4D_Maintenance::classes::RetentionLimits::attributes::retention_period",
+          "description": "Time period for data retention.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "RetentionLimits.retention_details",
+          "location": "D4D_Maintenance::classes::RetentionLimits::attributes::retention_details",
+          "description": "Details on data retention limits and enforcement procedures.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VersionAccess.latest_version_doi",
+          "location": "D4D_Maintenance::classes::VersionAccess::attributes::latest_version_doi",
+          "description": "DOI or URL of the latest dataset version.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VersionAccess.versions_available",
+          "location": "D4D_Maintenance::classes::VersionAccess::attributes::versions_available",
+          "description": "List of available versions with metadata.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VersionAccess.version_details",
+          "location": "D4D_Maintenance::classes::VersionAccess::attributes::version_details",
+          "description": "Details on version support policies and obsolescence communication.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ExtensionMechanism.contribution_url",
+          "location": "D4D_Maintenance::classes::ExtensionMechanism::attributes::contribution_url",
+          "description": "URL for contribution guidelines or process.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ExtensionMechanism.extension_details",
+          "location": "D4D_Maintenance::classes::ExtensionMechanism::attributes::extension_details",
+          "description": "Details on extension mechanisms, contribution validation, and communication.\n",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 6,
+          "with_examples": 2,
+          "with_examples_pct": 33.33333333333333,
+          "complete_sentences": 6,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 13,
+          "with_examples": 2,
+          "with_examples_pct": 15.384615384615385,
+          "complete_sentences": 13,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        }
+      }
+    },
+    {
+      "module": "D4D_Metadata",
+      "issues": [],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        }
+      }
+    },
+    {
+      "module": "D4D_Minimal",
+      "issues": [
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "MinimalDatasetCollection.resources",
+          "location": "D4D_Minimal::classes::MinimalDatasetCollection::attributes::resources",
+          "description": "The datasets in this collection.",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 2,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 2,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        }
+      }
+    },
+    {
+      "module": "D4D_Motivation",
+      "issues": [
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Purpose.response",
+          "location": "D4D_Motivation::classes::Purpose::attributes::response",
+          "description": "Short explanation describing the primary purpose of creating the dataset.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Task.response",
+          "location": "D4D_Motivation::classes::Task::attributes::response",
+          "description": "Short explanation describing the specific task or tasks for which this dataset was created.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "AddressingGap.response",
+          "location": "D4D_Motivation::classes::AddressingGap::attributes::response",
+          "description": "Short explanation of the knowledge or resource gap that this dataset was intended to address.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Creator.principal_investigator",
+          "location": "D4D_Motivation::classes::Creator::attributes::principal_investigator",
+          "description": "A key individual (Principal Investigator) responsible for or overseeing dataset creation.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Creator.affiliations",
+          "location": "D4D_Motivation::classes::Creator::attributes::affiliations",
+          "description": "Organizations with which the creator or team is affiliated.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "FundingMechanism.grantor",
+          "location": "D4D_Motivation::classes::FundingMechanism::attributes::grantor",
+          "description": "Name/identifier of the organization providing monetary or resource support.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "FundingMechanism.grants",
+          "location": "D4D_Motivation::classes::FundingMechanism::attributes::grants",
+          "description": "Grant mechanisms supporting dataset creation. Multiple grants may fund a single dataset.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "Grant.grant_number",
+          "location": "D4D_Motivation::classes::Grant::attributes::grant_number",
+          "description": "The alphanumeric identifier for the grant.",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 7,
+          "with_examples": 1,
+          "with_examples_pct": 14.285714285714285,
+          "complete_sentences": 7,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 9,
+          "with_examples": 1,
+          "with_examples_pct": 11.11111111111111,
+          "complete_sentences": 9,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        }
+      }
+    },
+    {
+      "module": "D4D_Preprocessing",
+      "issues": [
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "PreprocessingStrategy.preprocessing_details",
+          "location": "D4D_Preprocessing::classes::PreprocessingStrategy::attributes::preprocessing_details",
+          "description": "Details on preprocessing steps applied to the data.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "CleaningStrategy.cleaning_details",
+          "location": "D4D_Preprocessing::classes::CleaningStrategy::attributes::cleaning_details",
+          "description": "Details on data cleaning procedures applied.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "LabelingStrategy.data_annotation_protocol",
+          "location": "D4D_Preprocessing::classes::LabelingStrategy::attributes::data_annotation_protocol",
+          "description": "Annotation methodology, tasks, and protocols followed during labeling. Includes annotation guidelines, quality control procedures, and task definitions.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "LabelingStrategy.annotations_per_item",
+          "location": "D4D_Preprocessing::classes::LabelingStrategy::attributes::annotations_per_item",
+          "description": "Number of annotations collected per data item. Multiple annotations per item enable calculation of inter-annotator agreement.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "LabelingStrategy.labeling_details",
+          "location": "D4D_Preprocessing::classes::LabelingStrategy::attributes::labeling_details",
+          "description": "Details on labeling/annotation procedures and quality metrics.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "RawData.access_url",
+          "location": "D4D_Preprocessing::classes::RawData::attributes::access_url",
+          "description": "URL or access point for the raw data.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "RawData.raw_data_details",
+          "location": "D4D_Preprocessing::classes::RawData::attributes::raw_data_details",
+          "description": "Details on raw data availability and access procedures.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ImputationProtocol.imputation_method",
+          "location": "D4D_Preprocessing::classes::ImputationProtocol::attributes::imputation_method",
+          "description": "Specific imputation technique used (mean, median, mode, forward fill, backward fill, interpolation, model-based imputation, etc.).\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ImputationProtocol.imputed_fields",
+          "location": "D4D_Preprocessing::classes::ImputationProtocol::attributes::imputed_fields",
+          "description": "Fields or columns where imputation was applied.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ImputationProtocol.imputation_rationale",
+          "location": "D4D_Preprocessing::classes::ImputationProtocol::attributes::imputation_rationale",
+          "description": "Justification for the imputation approach chosen, including assumptions made about missing data mechanisms.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ImputationProtocol.imputation_validation",
+          "location": "D4D_Preprocessing::classes::ImputationProtocol::attributes::imputation_validation",
+          "description": "Methods used to validate imputation quality (if any).\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "AnnotationAnalysis.agreement_metric",
+          "location": "D4D_Preprocessing::classes::AnnotationAnalysis::attributes::agreement_metric",
+          "description": "Type of agreement metric used (Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percentage agreement, etc.).\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "AnnotationAnalysis.analysis_method",
+          "location": "D4D_Preprocessing::classes::AnnotationAnalysis::attributes::analysis_method",
+          "description": "Methodology used to assess annotation quality and resolve disagreements.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "AnnotationAnalysis.annotation_quality_details",
+          "location": "D4D_Preprocessing::classes::AnnotationAnalysis::attributes::annotation_quality_details",
+          "description": "Additional details on annotation quality assessment and findings.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "MachineAnnotationTools.tool_descriptions",
+          "location": "D4D_Preprocessing::classes::MachineAnnotationTools::attributes::tool_descriptions",
+          "description": "Descriptions of what each tool does in the annotation process and what types of annotations it produces. Should correspond to the tools list.\n",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 7,
+          "with_examples": 3,
+          "with_examples_pct": 42.857142857142854,
+          "complete_sentences": 7,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 22,
+          "with_examples": 7,
+          "with_examples_pct": 31.818181818181817,
+          "complete_sentences": 22,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        }
+      }
+    },
+    {
+      "module": "D4D_Uses",
+      "issues": [
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "ExistingUse.examples",
+          "location": "D4D_Uses::classes::ExistingUse::attributes::examples",
+          "description": "List of examples of known/previous uses of the dataset.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "UseRepository.repository_url",
+          "location": "D4D_Uses::classes::UseRepository::attributes::repository_url",
+          "description": "URL to a repository of known dataset uses.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "UseRepository.repository_details",
+          "location": "D4D_Uses::classes::UseRepository::attributes::repository_details",
+          "description": "Details on the repository of known dataset uses.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "OtherTask.task_details",
+          "location": "D4D_Uses::classes::OtherTask::attributes::task_details",
+          "description": "Details on other potential tasks the dataset could be used for.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "FutureUseImpact.impact_details",
+          "location": "D4D_Uses::classes::FutureUseImpact::attributes::impact_details",
+          "description": "Details on potential impacts, risks, and mitigation strategies.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "DiscouragedUse.discouragement_details",
+          "location": "D4D_Uses::classes::DiscouragedUse::attributes::discouragement_details",
+          "description": "Details on tasks for which the dataset should not be used.\n",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "IntendedUse.examples",
+          "location": "D4D_Uses::classes::IntendedUse::attributes::examples",
+          "description": "List of example intended uses for this dataset.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "IntendedUse.usage_notes",
+          "location": "D4D_Uses::classes::IntendedUse::attributes::usage_notes",
+          "description": "Notes or caveats about using the dataset for intended purposes.",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 7,
+          "with_examples": 1,
+          "with_examples_pct": 14.285714285714285,
+          "complete_sentences": 7,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 10,
+          "with_examples": 2,
+          "with_examples_pct": 20.0,
+          "complete_sentences": 10,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        }
+      }
+    },
+    {
+      "module": "D4D_Variables",
+      "issues": [
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VariableMetadata.variable_name",
+          "location": "D4D_Variables::classes::VariableMetadata::attributes::variable_name",
+          "description": "The name or identifier of the variable as it appears in the data files.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VariableMetadata.unit",
+          "location": "D4D_Variables::classes::VariableMetadata::attributes::unit",
+          "description": "The unit of measurement for the variable, preferably using QUDT units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VariableMetadata.missing_value_code",
+          "location": "D4D_Variables::classes::VariableMetadata::attributes::missing_value_code",
+          "description": "Code(s) used to represent missing values for this variable. Examples: \"NA\", \"-999\", \"null\", \"\". Multiple codes may be specified.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VariableMetadata.minimum_value",
+          "location": "D4D_Variables::classes::VariableMetadata::attributes::minimum_value",
+          "description": "The minimum value that the variable can take. Applicable to numeric variables.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VariableMetadata.maximum_value",
+          "location": "D4D_Variables::classes::VariableMetadata::attributes::maximum_value",
+          "description": "The maximum value that the variable can take. Applicable to numeric variables.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VariableMetadata.categories",
+          "location": "D4D_Variables::classes::VariableMetadata::attributes::categories",
+          "description": "The permitted categories or values for a categorical variable. Each entry should describe a possible value and its meaning.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VariableMetadata.examples",
+          "location": "D4D_Variables::classes::VariableMetadata::attributes::examples",
+          "description": "Example values for this variable to illustrate typical data.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VariableMetadata.is_identifier",
+          "location": "D4D_Variables::classes::VariableMetadata::attributes::is_identifier",
+          "description": "Indicates whether this variable serves as a unique identifier or key for records in the dataset.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VariableMetadata.precision",
+          "location": "D4D_Variables::classes::VariableMetadata::attributes::precision",
+          "description": "The precision or number of decimal places for numeric variables.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VariableMetadata.measurement_technique",
+          "location": "D4D_Variables::classes::VariableMetadata::attributes::measurement_technique",
+          "description": "The technique or method used to measure this variable. Examples: \"mass spectrometry\", \"self-report survey\", \"GPS coordinates\".",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VariableMetadata.derivation",
+          "location": "D4D_Variables::classes::VariableMetadata::attributes::derivation",
+          "description": "Description of how this variable was derived or calculated from other variables, if applicable.",
+          "priority": "LOW"
+        },
+        {
+          "type": "CONSIDER_EXAMPLE",
+          "element_type": "attribute",
+          "element_name": "VariableMetadata.quality_notes",
+          "location": "D4D_Variables::classes::VariableMetadata::attributes::quality_notes",
+          "description": "Notes about data quality, reliability, or known issues specific to this variable.",
+          "priority": "LOW"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum_value",
+          "element_name": "VariableTypeEnum.integer",
+          "location": "D4D_Variables::enums::VariableTypeEnum::permissible_values::integer",
+          "description": "Whole numbers.",
+          "priority": "LOW"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum_value",
+          "element_name": "VariableTypeEnum.string",
+          "location": "D4D_Variables::enums::VariableTypeEnum::permissible_values::string",
+          "description": "Text strings.",
+          "priority": "LOW"
+        },
+        {
+          "type": "TOO_BRIEF",
+          "element_type": "enum_value",
+          "element_name": "VariableTypeEnum.boolean",
+          "location": "D4D_Variables::enums::VariableTypeEnum::permissible_values::boolean",
+          "description": "True/false values.",
+          "priority": "LOW"
+        }
+      ],
+      "stats": {},
+      "quality_metrics": {
+        "module": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "class": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 1,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "attribute": {
+          "total": 14,
+          "with_examples": 2,
+          "with_examples_pct": 14.285714285714285,
+          "complete_sentences": 14,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "enum": {
+          "total": 1,
+          "with_examples": 0,
+          "with_examples_pct": 0.0,
+          "complete_sentences": 0,
+          "complete_sentences_pct": 0.0,
+          "too_brief": 0,
+          "too_brief_pct": 0.0
+        },
+        "enum_value": {
+          "total": 13,
+          "with_examples": 1,
+          "with_examples_pct": 7.6923076923076925,
+          "complete_sentences": 13,
+          "complete_sentences_pct": 100.0,
+          "too_brief": 8,
+          "too_brief_pct": 61.53846153846154
+        }
+      }
+    }
+  ]
+}
