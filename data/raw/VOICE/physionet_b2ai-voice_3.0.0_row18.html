@@ -1,0 +1,2205 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information v3.0.0</title>
+    
+  <!-- wfdb-python: <p>Version: 3.0.0</p> -->
+  
+    <meta name="description" content="A dataset of features from voice recordings and metadata to enable the development, benchmarking, and validation of clinically applicable machine-learning models for diagnosing a wide range of health conditions.">
+  
+
+    
+<link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap.css"/>
+<link rel="stylesheet" type="text/css" href="/static/font-awesome/css/all.css"/>
+<link rel="stylesheet" type="text/css" href="/static/custom/css/physionet.css"/>
+    
+  <link rel="stylesheet" type="text/css" href="/static/project/css/project-content.css"/>
+  <link rel="stylesheet" type="text/css" href="/static/highlight/css/default.min.css"/>
+
+    
+<script src="/static/jquery/jquery.min.js"></script>
+<script src="/static/popper/popper.min.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-87592301-7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-87592301-7');
+</script>
+    
+  <script src="/static/mathjax/MathJax.js?config=MML_HTMLorMML"></script>
+  <script src="/static/highlight/js/highlight.min.js"></script>
+  <script src="/static/custom/js/copy-to-clipboard.js"></script>
+
+    <link rel="shortcut icon" type="image/png" href="/static/favicon.ico"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/bootstrap/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/fonts/inter-local.css">
+    <link rel="stylesheet" type="text/css" href="/static/custom/css/style.css?v=2">
+  </head>
+
+  
+  <body class="flexbody">
+    
+
+
+
+
+<div class="modern-ui nav-wrapper">
+  <nav class="nav">
+    <div class="container my-0 h-100 d-flex justify-content-between align-items-center">
+      <button type="button" class="nav__hamburger circle-button mr-2"
+              popovertarget="nav__hamburger_popup"
+              title="Menu">
+        <i class="nav__hamburger__list bi bi-list"></i>
+        <i class="nav__hamburger__x bi bi-x"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <a href="/">
+        
+          <img src="/static/images/physionet-logo.svg" width="200px" alt="PhysioNet">
+        
+      </a>
+      <div class="nav__links align-items-center">
+        
+          
+            <a href="/about/publish/" class="nav-link">Share</a>
+          
+        
+          
+            <a href="/about/" class="nav-link">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <a href="/about/faqs/" class="nav-link">FAQs</a>
+          
+        
+
+        <div>
+          <button type="button" class="nav-link nav-link--expandable"
+                  popovertarget="nav__explore_popup">
+            Explore <i class="bi bi-chevron-down ml-2"></i>
+          </button>
+          <dialog class="nav-link__popup" id="nav__explore_popup" popover
+                  aria-label="Explore">
+            <div class="nav-sublinks">
+              
+                <a class="nav-sublink" href="/about/database/">
+                  <div class="nav-sublink__icon">
+                    
+                      <img src="/static/images/icons/data.png" alt="" height="32px">
+                    
+                  </div>
+                  <div class="nav-sublink__text">
+                    <span class="nav-sublink__title">Data</span>
+                    <span class="nav-sublink__description">View datasets</span>
+                  </div>
+                </a>
+              
+                <a class="nav-sublink" href="/about/software/">
+                  <div class="nav-sublink__icon">
+                    
+                      <img src="/static/images/icons/software.png" alt="" height="32px">
+                    
+                  </div>
+                  <div class="nav-sublink__text">
+                    <span class="nav-sublink__title">Software</span>
+                    <span class="nav-sublink__description">View software</span>
+                  </div>
+                </a>
+              
+                <a class="nav-sublink" href="/about/challenge/">
+                  <div class="nav-sublink__icon">
+                    
+                      <img src="/static/images/icons/challenges.png" alt="" height="32px">
+                    
+                  </div>
+                  <div class="nav-sublink__text">
+                    <span class="nav-sublink__title">Challenges</span>
+                    <span class="nav-sublink__description">View challenges</span>
+                  </div>
+                </a>
+              
+                <a class="nav-sublink" href="/about/tutorial/">
+                  <div class="nav-sublink__icon">
+                    
+                      <img src="/static/images/icons/tutorials.png" alt="" height="32px">
+                    
+                  </div>
+                  <div class="nav-sublink__text">
+                    <span class="nav-sublink__title">Tutorials</span>
+                    <span class="nav-sublink__description">View tutorials</span>
+                  </div>
+                </a>
+              
+              </div>
+          </dialog>
+        </div>
+      </div>
+      <div class="nav__actions d-flex ml-md-4">
+        <form action="/content/" class="mr-2">
+          <div class="nav__search">
+            <input type="text" name="topic" placeholder="Search for anything...">
+            <div class="nav__search__actions">
+              <button type="button" class="nav__search__close mr-2"
+                      title="Cancel">
+                <i class="bi bi-x"></i>
+                <span class="visually-hidden">Cancel</span>
+              </button>
+              <button type="submit" class="circle-button">Search</button>
+            </div>
+          </div>
+        </form>
+        <button type="button" class="nav__search__open circle-button mr-md-2"
+                title="Search PhysioNet">
+          <i class="bi bi-search"></i>
+          <span class="visually-hidden">Search PhysioNet</span>
+        </button>
+        
+          <a class="nav__user" href="/login/"
+             title="Log in">
+            <i class="bi bi-person"></i>
+            <span class="visually-hidden">Log in</span>
+          </a>
+        
+      </div>
+    </div>
+
+    <dialog class="nav__mobile" id="nav__hamburger_popup" popover
+            aria-label="Menu">
+      
+        
+          <a href="/about/publish/" class="nav-link">Share</a>
+        
+      
+        
+          <a href="/about/" class="nav-link">About</a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+          <a href="/about/faqs/" class="nav-link">FAQs</a>
+        
+      
+      <hr>
+      <div class="nav-sublinks">
+        
+          <a class="nav-sublink" href="/about/database/">
+            <div class="nav-sublink__icon">
+              
+                <img src="/static/images/icons/data.png" alt="" height="32px">
+              
+              </div>
+            <div class="nav-sublink__text">
+              <span class="nav-sublink__title">Data</span>
+              <span class="nav-sublink__description">View datasets</span>
+            </div>
+          </a>
+        
+          <a class="nav-sublink" href="/about/software/">
+            <div class="nav-sublink__icon">
+              
+                <img src="/static/images/icons/software.png" alt="" height="32px">
+              
+              </div>
+            <div class="nav-sublink__text">
+              <span class="nav-sublink__title">Software</span>
+              <span class="nav-sublink__description">View software</span>
+            </div>
+          </a>
+        
+          <a class="nav-sublink" href="/about/challenge/">
+            <div class="nav-sublink__icon">
+              
+                <img src="/static/images/icons/challenges.png" alt="" height="32px">
+              
+              </div>
+            <div class="nav-sublink__text">
+              <span class="nav-sublink__title">Challenges</span>
+              <span class="nav-sublink__description">View challenges</span>
+            </div>
+          </a>
+        
+          <a class="nav-sublink" href="/about/tutorial/">
+            <div class="nav-sublink__icon">
+              
+                <img src="/static/images/icons/tutorials.png" alt="" height="32px">
+              
+              </div>
+            <div class="nav-sublink__text">
+              <span class="nav-sublink__title">Tutorials</span>
+              <span class="nav-sublink__description">View tutorials</span>
+            </div>
+          </a>
+        
+      </div>
+    </dialog>
+  </nav>
+</div>
+
+    <div class="nav-spacer"></div>
+
+    <main>
+  <div class="container">
+    
+
+    <p>
+      <span class="badge badge-dark"><i class="fa fa-database"></i> Database</span>
+      <span class="badge badge-danger"><i class="fas fa-lock"></i> Credentialed Access</span>
+    </p>
+    <h1 class="form-signin-heading">Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information</h1>
+    <p>
+      <strong>
+      
+        <a class="author">Yael Bensoussan</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/yaelbensoussan target=_blank>yaelbensoussan</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Alexandros Sigaras</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Weill Cornell Medicine&lt;br&gt;Englander Institute for Precision Medicine - Weill Cornell Medicine&lt;br&gt;Institute for Computational Biomedicine - Weill Cornell Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/alexsigaras target=_blank>alexsigaras</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Anais Rameau</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Weill Cornell Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/anaisrameau target=_blank>anaisrameau</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Olivier Elemento</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Weill Cornell Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/oelemento target=_blank>oelemento</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Maria Powell</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Vanderbilt University Medical Center&lt;/p&gt;<p><b>Profile</b><br><a href=/users/mepowell target=_blank>mepowell</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">David Dorr</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;OHSU&lt;/p&gt;<p><b>Profile</b><br><a href=/users/davedorr9 target=_blank>davedorr9</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Philip Payne</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Washington University in St. Louis, School of Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/prpayne5 target=_blank>prpayne5</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Vardit Ravitsky</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;The Hastings Center&lt;/p&gt;<p><b>Profile</b><br><a href=/users/vardit target=_blank>vardit</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Jean-Christophe Bélisle-Pipon</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jcbp target=_blank>jcbp</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Ruth Bahr</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/rbahrv target=_blank>rbahrv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Stephanie Watts</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/srandall1v target=_blank>srandall1v</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Donald Bolser</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/bolserv target=_blank>bolserv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Jennifer Siu</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Hospital for Sick Children&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jennifer.siuv target=_blank>jennifer.siuv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Jordan Lerner-Ellis</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of Toronto&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jordan.lerner-ellisv target=_blank>jordan.lerner-ellisv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Frank Rudzicz</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Dalhousie University; Vector Institute&lt;/p&gt;<p><b>Profile</b><br><a href=/users/frankv target=_blank>frankv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Micah Boyer</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/micahboyerv target=_blank>micahboyerv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Yassmeen Abdel-Aty</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/yassmeenav target=_blank>yassmeenav</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Toufeeq Ahmed Syed</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;UT Health, Houston&lt;/p&gt;<p><b>Profile</b><br><a href=/users/toufeeq.a.syedv target=_blank>toufeeq.a.syedv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">James Anibal</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Affiliation not provided&lt;/p&gt;<p><b>Profile</b><br><a href=/users/anibaljt target=_blank>anibaljt</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Dona Amraei</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University, Burnaby, BC, Canada&lt;/p&gt;<p><b>Profile</b><br><a href=/users/donaamraei target=_blank>donaamraei</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Stephen Aradi</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/saradiv target=_blank>saradiv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Kirollos Armosh</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida, Tampa, FL, USA&lt;/p&gt;<p><b>Profile</b><br><a href=/users/kirollosarmosh target=_blank>kirollosarmosh</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Ana Sophia Martinez</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/anasophia.avilav target=_blank>anasophia.avilav</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Shaheen Awan</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of Central Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/shaheen.awanv target=_blank>shaheen.awanv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Steven Bedrick</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Affiliation not provided&lt;/p&gt;<p><b>Profile</b><br><a href=/users/bedricks target=_blank>bedricks</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Helena Beltran</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;br&gt;William Carey University College of Osteopathic Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/helenabeltran9 target=_blank>helenabeltran9</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Alexander Bernier</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/abernier target=_blank>abernier</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Moroni Berrios</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/moronib target=_blank>moronib</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Isaac Bevers</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Massachusetts Institute of Technology&lt;/p&gt;<p><b>Profile</b><br><a href=/users/isaacbv target=_blank>isaacbv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Alden Blatter</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/aldenblatter target=_blank>aldenblatter</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Rahul Brito</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Affiliation not provided&lt;/p&gt;<p><b>Profile</b><br><a href=/users/rfbrito target=_blank>rfbrito</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Amy Brown</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Vanderbilt University Medical Center&lt;/p&gt;<p><b>Profile</b><br><a href=/users/browa29 target=_blank>browa29</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Johnathan Brown</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida, Tampa, FL, USA&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jbrown154 target=_blank>jbrown154</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Léo Cadillac</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Faculty of Health Sciences, Simon Fraser University.&lt;/p&gt;<p><b>Profile</b><br><a href=/users/leocadillac target=_blank>leocadillac</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Selina Casalino</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Mount Sinai Hospital, Sinai Health&lt;/p&gt;<p><b>Profile</b><br><a href=/users/selina.casalinov target=_blank>selina.casalinov</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">John Costello</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Boston Chilren&amp;#x27;s Hospital&lt;/p&gt;<p><b>Profile</b><br><a href=/users/john.costellov target=_blank>john.costellov</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Abhijeet Dalal</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Oregon Health and Science University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/dalala target=_blank>dalala</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Iris De Santiago</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/idesantiagov target=_blank>idesantiagov</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Enrique Diaz-Ocampo</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;CENIDET&lt;/p&gt;<p><b>Profile</b><br><a href=/users/enriquediaz-ocampo target=_blank>enriquediaz-ocampo</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Amanda Doherty-Kirby</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/dohertykirbya target=_blank>dohertykirbya</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Mohamed Ebraheem</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/mohamedusamav target=_blank>mohamedusamav</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Ellie Eiseman</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/eeisemanv target=_blank>eeisemanv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Mahmoud Elmahdy</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/elmahdyv target=_blank>elmahdyv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Renee English</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University (SFU)&lt;/p&gt;<p><b>Profile</b><br><a href=/users/renglish target=_blank>renglish</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Emily Evangelista</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/emilygevangelistav target=_blank>emilygevangelistav</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Kenneth Fletcher</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Vanderbilt University Medical Center&lt;/p&gt;<p><b>Profile</b><br><a href=/users/kenneth.c.fletcherv target=_blank>kenneth.c.fletcherv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Hortense Gallois</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University&lt;br&gt;Université de Montréal&lt;/p&gt;<p><b>Profile</b><br><a href=/users/hgallois target=_blank>hgallois</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Gaelyn Garrett</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Vanderbilt University Medical Center&lt;/p&gt;<p><b>Profile</b><br><a href=/users/gaelyng target=_blank>gaelyng</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Alexander Gelbard</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Vanderbilt University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/alexander.gelbardv target=_blank>alexander.gelbardv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Anna Goldenberg</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Sick Kids&lt;/p&gt;<p><b>Profile</b><br><a href=/users/anna.goldenbergv target=_blank>anna.goldenbergv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Karim Hanna</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/khannav target=_blank>khannav</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">William Hersh</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Affiliation not provided&lt;/p&gt;<p><b>Profile</b><br><a href=/users/hersh target=_blank>hersh</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Jennifer Jain</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jdsinger target=_blank>jdsinger</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Lochana Jayachandran</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Sinai Health&lt;/p&gt;<p><b>Profile</b><br><a href=/users/lochana.jayachandranv target=_blank>lochana.jayachandranv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Kaley Jenney</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Massachusetts Institute of Technology&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jenneykv target=_blank>jenneykv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Kathy Jenkins</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Boston Children&amp;#x27;s Hospital&lt;/p&gt;<p><b>Profile</b><br><a href=/users/kathy.jenkinsv target=_blank>kathy.jenkinsv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Stacy Jo</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Boston Children&amp;#x27;s Hospital&lt;/p&gt;<p><b>Profile</b><br><a href=/users/stacy.jov target=_blank>stacy.jov</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Alistair Johnson</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Massachusetts Institute of Technology&lt;/p&gt;<p><b>Profile</b><br><a href=/users/alistairewj target=_blank>alistairewj</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Ayush Kalia</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/ayushkaliav target=_blank>ayushkaliav</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Megha Kalia</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/meghakalia target=_blank>meghakalia</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Zoha Khawa</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/zohakhawaja target=_blank>zohakhawaja</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Cindy Kostelnik</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida, Tampa, FL, USA&lt;/p&gt;<p><b>Profile</b><br><a href=/users/cindykostelnik target=_blank>cindykostelnik</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Alisa Krause</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/alisakrause target=_blank>alisakrause</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Andrea Krussel</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Affiliation not provided&lt;/p&gt;<p><b>Profile</b><br><a href=/users/andrea-k target=_blank>andrea-k</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Elisa Lapadula</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Sinai Health&lt;/p&gt;<p><b>Profile</b><br><a href=/users/elisa.lapadulav target=_blank>elisa.lapadulav</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Genelle Leo</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/gleo0812 target=_blank>gleo0812</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Justin Levinsky</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;The Hospital for Sick Children&lt;/p&gt;<p><b>Profile</b><br><a href=/users/justinlevinsky target=_blank>justinlevinsky</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Chloe Loewith</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/chloe_loewithv target=_blank>chloe_loewithv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Radhika Mahajan</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Mount Sinai Hospital, Sinai Health, Toronto; Lunenfeld-Tanenbaum Research Institute, Sinai Health, Toronto&lt;/p&gt;<p><b>Profile</b><br><a href=/users/radhika.mahajanv target=_blank>radhika.mahajanv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Vrishni Maharaj</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/sanjanaa1v target=_blank>sanjanaa1v</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Siyu Miao</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Sick Kids&lt;/p&gt;<p><b>Profile</b><br><a href=/users/siyu.miaov target=_blank>siyu.miaov</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">LeAnn Michaels</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Oregon Health &amp;amp; Science University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/michaell target=_blank>michaell</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Matthew Mifsud</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/mmifsudv target=_blank>mmifsudv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Marian Mikhael</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/marianmv target=_blank>marianmv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Elijah Moothedan</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Florida Atlantic University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/emoothedan2022v target=_blank>emoothedan2022v</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Yosef Nafii</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Affiliation not provided&lt;/p&gt;<p><b>Profile</b><br><a href=/users/yosef target=_blank>yosef</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Tempestt Neal</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/tjnealv target=_blank>tjnealv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Karlee Newberry</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/kvnewberryv target=_blank>kvnewberryv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Evan Ng</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;The Hospital for Sick Children&lt;/p&gt;<p><b>Profile</b><br><a href=/users/evan8456 target=_blank>evan8456</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Christopher Nickel</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/cnickelv target=_blank>cnickelv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Amanda Peltier</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Vanderbilt University Medical Center&lt;/p&gt;<p><b>Profile</b><br><a href=/users/peltieac target=_blank>peltieac</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Trevor Pharr</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/pharrv target=_blank>pharrv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Michaela Pnacekova</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/pnaci target=_blank>pnaci</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Matthew Pontell</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Department of Plastic Surgery, Monroe Carell Jr. Children&amp;#x27;s Hospital at Vanderbilt, Vanderbilt University Medical Center, US&lt;/p&gt;<p><b>Profile</b><br><a href=/users/mpontellmd target=_blank>mpontellmd</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Claire Premi-Bortolotto</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/claire_bortolottov target=_blank>claire_bortolottov</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Parnaz Rafatjou</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida, Tampa, FL, USA&lt;/p&gt;<p><b>Profile</b><br><a href=/users/parnazpn target=_blank>parnazpn</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">JM Rahman</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jmrahmanv target=_blank>jmrahmanv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">John Ramos</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Weill Cornell Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jmr4003 target=_blank>jmr4003</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Sarah Rohde</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Vanderbilt University Medical Center&lt;/p&gt;<p><b>Profile</b><br><a href=/users/sarah.rohdev target=_blank>sarah.rohdev</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Michael de Riesthal</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Vanderbilt University Medical Center&lt;/p&gt;<p><b>Profile</b><br><a href=/users/mderiesthal target=_blank>mderiesthal</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Jillian Rossi</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida, Tampa, FL, USA&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jprossi18 target=_blank>jprossi18</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Laurie Russell</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Sick Kids&lt;/p&gt;<p><b>Profile</b><br><a href=/users/laurie.russellv target=_blank>laurie.russellv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Samantha Salvi Cruz</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Vanderbilt University Medical Center&lt;/p&gt;<p><b>Profile</b><br><a href=/users/ssalvicruz target=_blank>ssalvicruz</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Joyce Samuel</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;The Hospital for Sick Children&lt;/p&gt;<p><b>Profile</b><br><a href=/users/joycesamuel target=_blank>joycesamuel</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Suketu Shah</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/suketushahv target=_blank>suketushahv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Ahmed Shawkat</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/shawkatav target=_blank>shawkatav</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Elizabeth Silberholz</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Boston Children&amp;#x27;s Hospital&lt;/p&gt;<p><b>Profile</b><br><a href=/users/elizabeth.silberholzv target=_blank>elizabeth.silberholzv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">John Stark</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;USF&lt;/p&gt;<p><b>Profile</b><br><a href=/users/johnstark1 target=_blank>johnstark1</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Lala Su</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Sickkids&lt;/p&gt;<p><b>Profile</b><br><a href=/users/lalasu target=_blank>lalasu</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Shrramana Ganesh Sudhakar</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/shrramana target=_blank>shrramana</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Duncan Sutherland</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Affiliation not provided&lt;/p&gt;<p><b>Profile</b><br><a href=/users/d.r.j.sutherlandv target=_blank>d.r.j.sutherlandv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Venkata Swarna Mukhi</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Oregon Health &amp;amp; Science University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/talluriv target=_blank>talluriv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Jeffrey Tang</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Weill Cornell Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jmt2007v target=_blank>jmt2007v</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Luka Taylor</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/lukaht target=_blank>lukaht</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Jamie Toghranegar</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jamietoghranegarv target=_blank>jamietoghranegarv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Julie Tu</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Mount Sinai Hospital, Sinai Health System&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jultu target=_blank>jultu</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Megan Urbano</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Department of Otolaryngology Head &amp;amp; Neck Surgery, University of South Florida, US&lt;/p&gt;<p><b>Profile</b><br><a href=/users/meganurbano target=_blank>meganurbano</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Gavin Victor</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Faculty of Health Sciences, Simon Fraser University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/gavinvictor target=_blank>gavinvictor</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Kimberly Vinson</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Vanderbilt University Medical Center&lt;/p&gt;<p><b>Profile</b><br><a href=/users/kimberly.n.vinsonv target=_blank>kimberly.n.vinsonv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Jordan Wilke</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Massachusetts Institute of Technology&lt;br&gt;McGovern Institute for Brain Research&lt;/p&gt;<p><b>Profile</b><br><a href=/users/wilke0818 target=_blank>wilke0818</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Claire Wilson</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/claire_wilson_3v target=_blank>claire_wilson_3v</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Madeleine Zanin</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Mount Sinai Hospital&lt;/p&gt;<p><b>Profile</b><br><a href=/users/madeleine.zaninv target=_blank>madeleine.zaninv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Xijie Zeng</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Dalhousie University &amp;amp; Vector Institute&lt;/p&gt;<p><b>Profile</b><br><a href=/users/xijie.zengv target=_blank>xijie.zengv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Theresa Zesiewicz</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/tzesiewiv target=_blank>tzesiewiv</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Robin Zhao</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Weill Cornell Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/zhaorobin33v target=_blank>zhaorobin33v</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Pantelis Zisimopoulos</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Weill Cornell Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/paz2010v target=_blank>paz2010v</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Satrajit Ghosh</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Massachusetts Institute of Technology&lt;/p&gt;<p><b>Profile</b><br><a href=/users/satra target=_blank>satra</a></p>" data-html="true" style="cursor: pointer;"></i>
+        
+      
+      </strong>
+    </p>
+
+    <p>Published: Dec. 16, 2025. Version:
+      3.0.0
+    </p>
+
+    
+    <hr>
+
+    <!-- Latest news and announcements -->
+    
+      <div class="alert alert-primary" role="alert">
+        
+        
+          <p>
+            <strong>Raw Audio Data Access for Bridge2AI Voice Adult Cohort is via Synapse</strong>
+            <em>(March 9, 2026, 10:11 a.m.)</em>
+            <p>The published Bridge2AI-Voice Adult Dataset contains derived features from the audio waveforms. This PhysioNet project does not contain raw audios.</p>
+<p><span>Accessing raw audio is a more involved process and requires institutional sign off. Please reach out to the access committee if you are interested in access: DACO@b2ai-voice.org</span></p>
+<p><span>Data will be made available via Synapse: <a href="https://www.synapse.org/Synapse:syn72370534/">https://www.synapse.org/Synapse:syn72370534/</a></span></p>
+<p><span>For questions regarding the dataset itself, please contact the corresponding author, listed on the sidebar.</span></p>
+<p><span>Note that the Bridge2AI-Voice&nbsp;Pediatric Dataset is also available on PhysioNet:&nbsp;<a href="../../../../content/b2ai-voice-pediatric/">https://physionet.org/content/b2ai-voice-pediatric/</a></span></p>
+            
+          </p>
+          
+        
+          <p>
+            <strong>Bridge2AI Raw Audio Data Access</strong>
+            <em>(Sept. 11, 2025, 3:47 p.m.)</em>
+            <p>The published Bridge2AI-Voice dataset contains derived features from the audio waveforms. Interested users can request access to the original raw audio data by contacting: DACO@b2ai-voice.org</p>
+<p><span>The raw audio data will be disseminated through controlled access only to protect participant's privacy.</span></p>
+            
+          </p>
+          
+          
+      </div>
+    
+
+    <div class="row">
+      <!-- Main column -->
+      <div class="col-md-8">
+        
+          <div class="alert alert-secondary">
+
+  
+    
+      <p>
+        <strong>When using this resource, please cite: </strong>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="modal" data-target="#citationModal" title="View citation formats"><i class="bi bi-quote"></i> Cite</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary ml-1" title="Copy BibTeX" onclick="copyToClipboard(document.getElementById('bibtex-data-2').value); this.innerHTML='<i class=\'bi bi-check\'></i> Copied'; var btn=this; setTimeout(function(){ btn.innerHTML='<i class=\'bi bi-clipboard\'></i> Copy BibTeX'; }, 2000);"><i class="bi bi-clipboard"></i> Copy BibTeX</button>
+        <br><span>Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., Bélisle-Pipon, J., Bahr, R., Watts, S., Bolser, D., Siu, J., Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., ... Ghosh, S. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.0.0). <i>PhysioNet</i>. RRID:SCR_007345. <a href="https://doi.org/10.13026/k81f-qr68">https://doi.org/10.13026/k81f-qr68</a></span>
+      </p>
+      <textarea id="bibtex-data-2" style="display:none;">@article{PhysioNet-b2ai-voice-3.0.0,
+  author = {Bensoussan, Yael and Sigaras, Alexandros and Rameau, Anais and Elemento, Olivier and Powell, Maria and Dorr, David and Payne, Philip and Ravitsky, Vardit and Bélisle-Pipon, Jean-Christophe and Bahr, Ruth and Watts, Stephanie and Bolser, Donald and Siu, Jennifer and Lerner-Ellis, Jordan and Rudzicz, Frank and Boyer, Micah and Abdel-Aty, Yassmeen and {Ahmed Syed}, Toufeeq and Anibal, James and Amraei, Dona and Aradi, Stephen and Armosh, Kirollos and Martinez, Ana Sophia and Awan, Shaheen and Bedrick, Steven and Beltran, Helena and Bernier, Alexander and Berrios, Moroni and Bevers, Isaac and Blatter, Alden and Brito, Rahul and Brown, Amy and Brown, Johnathan and Cadillac, Léo and Casalino, Selina and Costello, John and Dalal, Abhijeet and {De Santiago}, Iris and Diaz-Ocampo, Enrique and Doherty-Kirby, Amanda and Ebraheem, Mohamed and Eiseman, Ellie and Elmahdy, Mahmoud and English, Renee and Evangelista, Emily and Fletcher, Kenneth and Gallois, Hortense and Garrett, Gaelyn and Gelbard, Alexander and Goldenberg, Anna and Hanna, Karim and Hersh, William and Jain, Jennifer and Jayachandran, Lochana and Jenney, Kaley and Jenkins, Kathy and Jo, Stacy and Johnson, Alistair and Kalia, Ayush and Kalia, Megha and Khawa, Zoha and Kostelnik, Cindy and Krause, Alisa and Krussel, Andrea and Lapadula, Elisa and Leo, Genelle and Levinsky, Justin and Loewith, Chloe and Mahajan, Radhika and Maharaj, Vrishni and Miao, Siyu and Michaels, LeAnn and Mifsud, Matthew and Mikhael, Marian and Moothedan, Elijah and Nafii, Yosef and Neal, Tempestt and Newberry, Karlee and Ng, Evan and Nickel, Christopher and Peltier, Amanda and Pharr, Trevor and Pnacekova, Michaela and Pontell, Matthew and Premi-Bortolotto, Claire and Rafatjou, Parnaz and Rahman, JM and Ramos, John and Rohde, Sarah and {de Riesthal}, Michael and Rossi, Jillian and Russell, Laurie and {Salvi Cruz}, Samantha and Samuel, Joyce and Shah, Suketu and Shawkat, Ahmed and Silberholz, Elizabeth and Stark, John and Su, Lala and Sudhakar, Shrramana Ganesh and Sutherland, Duncan and {Swarna Mukhi}, Venkata and Tang, Jeffrey and Taylor, Luka and Toghranegar, Jamie and Tu, Julie and Urbano, Megan and Victor, Gavin and Vinson, Kimberly and Wilke, Jordan and Wilson, Claire and Zanin, Madeleine and Zeng, Xijie and Zesiewicz, Theresa and Zhao, Robin and Zisimopoulos, Pantelis and Ghosh, Satrajit},
+  title = {{Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information}},
+  journal = {{PhysioNet}},
+  year = {2025},
+  month = dec,
+  note = {Version 3.0.0},
+  doi = {10.13026/k81f-qr68},
+  url = {https://doi.org/10.13026/k81f-qr68}
+}</textarea>
+
+      <div class="modal fade" id="citationModal">
+  <div class="modal-dialog citation" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+      <table><tbody>
+        
+          
+          <tr>
+            <th>MLA</th>
+            <td>Bensoussan, Yael, et al. "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information" (version 3.0.0). <i>PhysioNet</i> (2025). RRID:SCR_007345. <a href="https://doi.org/10.13026/k81f-qr68">https://doi.org/10.13026/k81f-qr68</a></td>
+          </tr>
+          
+        
+          
+          <tr>
+            <th>APA</th>
+            <td>Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., Bélisle-Pipon, J., Bahr, R., Watts, S., Bolser, D., Siu, J., Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., ... Ghosh, S. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.0.0). <i>PhysioNet</i>. RRID:SCR_007345. <a href="https://doi.org/10.13026/k81f-qr68">https://doi.org/10.13026/k81f-qr68</a></td>
+          </tr>
+          
+        
+          
+          <tr>
+            <th>Chicago</th>
+            <td>Bensoussan, Yael, Sigaras, Alexandros, Rameau, Anais, Elemento, Olivier, Powell, Maria, Dorr, David, Payne, Philip, Ravitsky, Vardit, Bélisle-Pipon, Jean-Christophe, Bahr, Ruth, Watts, Stephanie, Bolser, Donald, Siu, Jennifer, Lerner-Ellis, Jordan, Rudzicz, Frank, Boyer, Micah, Abdel-Aty, Yassmeen, Ahmed Syed, Toufeeq, Anibal, James, Amraei, Dona, Aradi, Stephen, Armosh, Kirollos, Martinez, Ana Sophia, Awan, Shaheen, Bedrick, Steven, Beltran, Helena, Bernier, Alexander, Berrios, Moroni, Bevers, Isaac, Blatter, Alden, Brito, Rahul, Brown, Amy, Brown, Johnathan, Cadillac, Léo, Casalino, Selina, Costello, John, Dalal, Abhijeet, De Santiago, Iris, Diaz-Ocampo, Enrique, Doherty-Kirby, Amanda, Ebraheem, Mohamed, Eiseman, Ellie, Elmahdy, Mahmoud, English, Renee, Evangelista, Emily, Fletcher, Kenneth, Gallois, Hortense, Garrett, Gaelyn, Gelbard, Alexander, Goldenberg, Anna, Hanna, Karim, Hersh, William, Jain, Jennifer, Jayachandran, Lochana, Jenney, Kaley, Jenkins, Kathy, Jo, Stacy, Johnson, Alistair, Kalia, Ayush, Kalia, Megha, Khawa, Zoha, Kostelnik, Cindy, Krause, Alisa, Krussel, Andrea, Lapadula, Elisa, Leo, Genelle, Levinsky, Justin, Loewith, Chloe, Mahajan, Radhika, Maharaj, Vrishni, Miao, Siyu, Michaels, LeAnn, Mifsud, Matthew, Mikhael, Marian, Moothedan, Elijah, Nafii, Yosef, Neal, Tempestt, Newberry, Karlee, Ng, Evan, Nickel, Christopher, Peltier, Amanda, Pharr, Trevor, Pnacekova, Michaela, Pontell, Matthew, Premi-Bortolotto, Claire, Rafatjou, Parnaz, Rahman, JM, Ramos, John, Rohde, Sarah, de Riesthal, Michael, Rossi, Jillian, Russell, Laurie, Salvi Cruz, Samantha, Samuel, Joyce, Shah, Suketu, Shawkat, Ahmed, Silberholz, Elizabeth, Stark, John, Su, Lala, Sudhakar, Shrramana Ganesh, Sutherland, Duncan, Swarna Mukhi, Venkata, Tang, Jeffrey, Taylor, Luka, Toghranegar, Jamie, Tu, Julie, Urbano, Megan, Victor, Gavin, Vinson, Kimberly, Wilke, Jordan, Wilson, Claire, Zanin, Madeleine, Zeng, Xijie, Zesiewicz, Theresa, Zhao, Robin, Zisimopoulos, Pantelis, and Satrajit Ghosh. "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information" (version 3.0.0). <i>PhysioNet</i> (2025). RRID:SCR_007345. <a href="https://doi.org/10.13026/k81f-qr68">https://doi.org/10.13026/k81f-qr68</a></td>
+          </tr>
+          
+        
+          
+          <tr>
+            <th>Harvard</th>
+            <td>Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., Bélisle-Pipon, J., Bahr, R., Watts, S., Bolser, D., Siu, J., Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., Amraei, D., Aradi, S., Armosh, K., Martinez, A. S., Awan, S., Bedrick, S., Beltran, H., Bernier, A., Berrios, M., Bevers, I., Blatter, A., Brito, R., Brown, A., Brown, J., Cadillac, L., Casalino, S., Costello, J., Dalal, A., De Santiago, I., Diaz-Ocampo, E., Doherty-Kirby, A., Ebraheem, M., Eiseman, E., Elmahdy, M., English, R., Evangelista, E., Fletcher, K., Gallois, H., Garrett, G., Gelbard, A., Goldenberg, A., Hanna, K., Hersh, W., Jain, J., Jayachandran, L., Jenney, K., Jenkins, K., Jo, S., Johnson, A., Kalia, A., Kalia, M., Khawa, Z., Kostelnik, C., Krause, A., Krussel, A., Lapadula, E., Leo, G., Levinsky, J., Loewith, C., Mahajan, R., Maharaj, V., Miao, S., Michaels, L., Mifsud, M., Mikhael, M., Moothedan, E., Nafii, Y., Neal, T., Newberry, K., Ng, E., Nickel, C., Peltier, A., Pharr, T., Pnacekova, M., Pontell, M., Premi-Bortolotto, C., Rafatjou, P., Rahman, J., Ramos, J., Rohde, S., de Riesthal, M., Rossi, J., Russell, L., Salvi Cruz, S., Samuel, J., Shah, S., Shawkat, A., Silberholz, E., Stark, J., Su, L., Sudhakar, S. G., Sutherland, D., Swarna Mukhi, V., Tang, J., Taylor, L., Toghranegar, J., Tu, J., Urbano, M., Victor, G., Vinson, K., Wilke, J., Wilson, C., Zanin, M., Zeng, X., Zesiewicz, T., Zhao, R., Zisimopoulos, P., and Ghosh, S. (2025) 'Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information' (version 3.0.0), <i>PhysioNet</i>. RRID:SCR_007345. Available at: <a href='https://doi.org/10.13026/k81f-qr68'>https://doi.org/10.13026/k81f-qr68</a></td>
+          </tr>
+          
+        
+          
+          <tr>
+            <th>Vancouver</th>
+            <td>Bensoussan Y, Sigaras A, Rameau A, Elemento O, Powell M, Dorr D, Payne P, Ravitsky V, Bélisle-Pipon J, Bahr R, Watts S, Bolser D, Siu J, Lerner-Ellis J, Rudzicz F, Boyer M, Abdel-Aty Y, Ahmed Syed T, Anibal J, Amraei D, Aradi S, Armosh K, Martinez A S, Awan S, Bedrick S, Beltran H, Bernier A, Berrios M, Bevers I, Blatter A, Brito R, Brown A, Brown J, Cadillac L, Casalino S, Costello J, Dalal A, De Santiago I, Diaz-Ocampo E, Doherty-Kirby A, Ebraheem M, Eiseman E, Elmahdy M, English R, Evangelista E, Fletcher K, Gallois H, Garrett G, Gelbard A, Goldenberg A, Hanna K, Hersh W, Jain J, Jayachandran L, Jenney K, Jenkins K, Jo S, Johnson A, Kalia A, Kalia M, Khawa Z, Kostelnik C, Krause A, Krussel A, Lapadula E, Leo G, Levinsky J, Loewith C, Mahajan R, Maharaj V, Miao S, Michaels L, Mifsud M, Mikhael M, Moothedan E, Nafii Y, Neal T, Newberry K, Ng E, Nickel C, Peltier A, Pharr T, Pnacekova M, Pontell M, Premi-Bortolotto C, Rafatjou P, Rahman J, Ramos J, Rohde S, de Riesthal M, Rossi J, Russell L, Salvi Cruz S, Samuel J, Shah S, Shawkat A, Silberholz E, Stark J, Su L, Sudhakar S G, Sutherland D, Swarna Mukhi V, Tang J, Taylor L, Toghranegar J, Tu J, Urbano M, Victor G, Vinson K, Wilke J, Wilson C, Zanin M, Zeng X, Zesiewicz T, Zhao R, Zisimopoulos P, Ghosh S. Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.0.0). PhysioNet. 2025. RRID:SCR_007345. Available from: <a href="https://doi.org/10.13026/k81f-qr68">https://doi.org/10.13026/k81f-qr68</a></td>
+          </tr>
+          
+        
+          
+        
+      </tbody></table>
+      
+      <div class="mt-3">
+        <strong>BibTeX</strong>
+        <button class="btn btn-sm btn-outline-secondary ml-2" onclick="copyToClipboard(document.getElementById('bibtex-data-2').value); var btn=this; btn.textContent='Copied!'; setTimeout(function(){ btn.textContent='Copy'; }, 2000)">Copy</button>
+        <pre id="bibtex-citation-2" class="mt-2 p-2 border rounded" style="white-space: pre-wrap; background-color: #f8f9fa;">@article{PhysioNet-b2ai-voice-3.0.0,
+  author = {Bensoussan, Yael and Sigaras, Alexandros and Rameau, Anais and Elemento, Olivier and Powell, Maria and Dorr, David and Payne, Philip and Ravitsky, Vardit and Bélisle-Pipon, Jean-Christophe and Bahr, Ruth and Watts, Stephanie and Bolser, Donald and Siu, Jennifer and Lerner-Ellis, Jordan and Rudzicz, Frank and Boyer, Micah and Abdel-Aty, Yassmeen and {Ahmed Syed}, Toufeeq and Anibal, James and Amraei, Dona and Aradi, Stephen and Armosh, Kirollos and Martinez, Ana Sophia and Awan, Shaheen and Bedrick, Steven and Beltran, Helena and Bernier, Alexander and Berrios, Moroni and Bevers, Isaac and Blatter, Alden and Brito, Rahul and Brown, Amy and Brown, Johnathan and Cadillac, Léo and Casalino, Selina and Costello, John and Dalal, Abhijeet and {De Santiago}, Iris and Diaz-Ocampo, Enrique and Doherty-Kirby, Amanda and Ebraheem, Mohamed and Eiseman, Ellie and Elmahdy, Mahmoud and English, Renee and Evangelista, Emily and Fletcher, Kenneth and Gallois, Hortense and Garrett, Gaelyn and Gelbard, Alexander and Goldenberg, Anna and Hanna, Karim and Hersh, William and Jain, Jennifer and Jayachandran, Lochana and Jenney, Kaley and Jenkins, Kathy and Jo, Stacy and Johnson, Alistair and Kalia, Ayush and Kalia, Megha and Khawa, Zoha and Kostelnik, Cindy and Krause, Alisa and Krussel, Andrea and Lapadula, Elisa and Leo, Genelle and Levinsky, Justin and Loewith, Chloe and Mahajan, Radhika and Maharaj, Vrishni and Miao, Siyu and Michaels, LeAnn and Mifsud, Matthew and Mikhael, Marian and Moothedan, Elijah and Nafii, Yosef and Neal, Tempestt and Newberry, Karlee and Ng, Evan and Nickel, Christopher and Peltier, Amanda and Pharr, Trevor and Pnacekova, Michaela and Pontell, Matthew and Premi-Bortolotto, Claire and Rafatjou, Parnaz and Rahman, JM and Ramos, John and Rohde, Sarah and {de Riesthal}, Michael and Rossi, Jillian and Russell, Laurie and {Salvi Cruz}, Samantha and Samuel, Joyce and Shah, Suketu and Shawkat, Ahmed and Silberholz, Elizabeth and Stark, John and Su, Lala and Sudhakar, Shrramana Ganesh and Sutherland, Duncan and {Swarna Mukhi}, Venkata and Tang, Jeffrey and Taylor, Luka and Toghranegar, Jamie and Tu, Julie and Urbano, Megan and Victor, Gavin and Vinson, Kimberly and Wilke, Jordan and Wilson, Claire and Zanin, Madeleine and Zeng, Xijie and Zesiewicz, Theresa and Zhao, Robin and Zisimopoulos, Pantelis and Ghosh, Satrajit},
+  title = {{Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information}},
+  journal = {{PhysioNet}},
+  year = {2025},
+  month = dec,
+  note = {Version 3.0.0},
+  doi = {10.13026/k81f-qr68},
+  url = {https://doi.org/10.13026/k81f-qr68}
+}</pre>
+      </div>
+      
+            </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  
+    
+      <p>
+        <strong>Please include the standard citation for PhysioNet:</strong>
+        <a href="#citationModalPlatform" data-toggle="modal">(show more options)</a>
+          <br><span>Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... &amp; Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.</span>
+      </p>
+    
+
+  <div class="modal fade" id="citationModalPlatform">
+  <div class="modal-dialog citation" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+  <table><tbody>
+    
+        
+          <tr>
+            <th>APA</th>
+            <td>Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... &amp; Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.</td>
+          </tr>
+        
+    
+        
+          <tr>
+            <th>MLA</th>
+            <td>Goldberger, A., et al. &quot;PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220.&quot; (2000). RRID:SCR_007345.</td>
+          </tr>
+        
+    
+        
+          <tr>
+            <th>CHICAGO</th>
+            <td>Goldberger, A., L. Amaral, L. Glass, J. Hausdorff, P. C. Ivanov, R. Mark, J. E. Mietus, G. B. Moody, C. K. Peng, and H. E. Stanley. &quot;PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220.&quot; (2000). RRID:SCR_007345.</td>
+          </tr>
+        
+    
+        
+          <tr>
+            <th>HARVARD</th>
+            <td>Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P.C., Mark, R., Mietus, J.E., Moody, G.B., Peng, C.K. and Stanley, H.E., 2000. PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.</td>
+          </tr>
+        
+    
+        
+          <tr>
+            <th>VANCOUVER</th>
+            <td>Goldberger A, Amaral L, Glass L, Hausdorff J, Ivanov PC, Mark R, Mietus JE, Moody GB, Peng CK, Stanley HE. PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.</td>
+          </tr>
+        
+    
+  </tbody></table>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+        
+
+        
+          
+  
+    <h2 id="abstract">Abstract</h2>
+    <p>The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. Here we present Bridge2AI-Voice, a comprehensive collection of data derived from voice recordings with corresponding clinical information.</p>
+<p>Bridge2AI-Voice v3.0 contains data for 833 participants across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.</p>
+    <hr>
+  
+
+  
+    <h2 id="background">Background</h2>
+    <p>The production of human voice involves the complex interaction among respiration, phonation, resonation, and articulation. The respiratory system provides the air flow and pressure to initiate and maintain vocal fold vibration. The vocal folds generate the sound source which is then modified within the vocal tract by the oral and nasal cavities and the articulators involved in speech production. Each of these processes is influenced by the speaker&rsquo;s ability to adjust and shape these interacting systems.</p>
+<p>Although many use the terms voice and speech interchangeably, it is important to understand the distinction between the different terms used to describe human sounds:</p>
+<p><strong>Voice:</strong> In the voice research field, refers to sound production and is the phonatory aspect of speech. In other words, it is the sound produced by the larynx and the resonators. For example, voice can be assessed by asking someone to do a prolonged vowel sound like /e/.</p>
+<p><strong>Speech:</strong> Speech is the result of the voice being modified by the articulators and is produced with intonation and prosody. For example, a patient having a stroke can have abnormal speech production due to difficulty with articulating words but have a normal voice. For this project, the term Voice as a Biomarker of Health will include speech in its definition.</p>
+<p>For voice to emerge as a <strong><em>biomarker of health</em></strong>, there is a pressing need for large, high quality, multi-institutional and diverse voice database linked to other health biomarkers from various data of different modality (demographics, imaging, genomics, risk factors, etc.) to fuel voice AI research and answer tangible clinical questions. Such an endeavor is only achievable through multi-institutional collaborations between voice experts and AI engineers, supported by bioethicists and social scientists to ensure the creation of ethically sourced voice databases representing our populations.</p>
+<p>Based on the existing literature and ongoing research in different fields of voice research, our group identified <strong><em>5 disease cohort categories</em></strong> for which voice changes have been associated to specific diseases with well-recognized unmet needs. These categories were:</p>
+<ol>
+<li><strong><em>Voice Disorders: </em></strong>Laryngeal disorders are the most studied pathologies linked to vocal changes. Benign and malignant lesions can affect the shape, mass, density, and tension of the vocal folds resulting in changes in vibratory function resulting in changes in phonation.</li>
+<li><strong><em>Neurological and Neurodegenerative Disorders: </em></strong>Changes in voice have been linked to depression, and other mood disorders. Individuals with depression have been found to have decreased fundamental frequency (f0) as well as a monotonous speech, while individuals with anxiety disorders have a significant increase in F0. Regrettably, much of the literature examining the intersection of voice and speech changes in psychiatric conditions have used small datasets with limited demographic diversity reporting, lack of standardized data collection protocol precluding meta-analysis and possible confounders, all limiting external validity and clinical usability.</li>
+<li><strong><em>Mood and Psychiatric Disorders: </em></strong>Voice and speech are altered in many neurological and neurodegenerative conditions. Acute strokes can present with slurred speech (Dysarthria) or expressive deficits speech (Aphasia). Voice and speech changes can be the presenting symptoms of many neurodegenerative conditions, such as Parkinson&rsquo;s and ALS with changes such as slowed, low frequency, monotonous speech as well as vocal tremor.</li>
+<li><strong><em>Respiratory disorders: </em></strong>Respiratory sounds, including breath, cough and voice have long been used for diagnostic purposes. For instance, pediatric croup can be suspected based on the presence of barking cough, stridor and dysphonia. With advances in acoustic recording and analysis in the second half on the twentieth century, increasing interest has emerged in the use of respiratory sounds for disease screening and therapeutic monitoring, especially with cough sounds.</li>
+<li><strong><em>Pediatric Voice and Speech Disorders: </em></strong>The literature is sparser in terms of pediatric voice and speech analysis partly due to ethical concerns and challenges in data acquisition for this cohort. However, many studies have investigated the use of machine learning models for voice and speech analysis for detection of Autism and Speech Delays in the pediatric population.</li>
+</ol>
+<p>The protocols used for data collection in this study have been extensively described [1].</p>
+    <hr>
+  
+
+  
+    <h2 id="methods">Methods</h2>
+    <p>Patients presenting at specialty clinics and institutions were considered for enrollment. Patients were selected based on membership to five predetermined groups (Respiratory disorders, Voice disorders, Neurological disorders, Mood disorders, Pediatric). Patients presenting at the given clinic were screened for inclusion and exclusion criteria prior to their visit by the project investigators. If eligible for enrollment, patient consent was sought for the data collection initiative and to share the acquired research data. Once consented, a standardized protocol for data collection was adopted. This protocol involved the collection of demographic information, health questionnaires, targeted questionnaires inquiring about known confounders for voice, disease specific information, and voice recording tasks such as sustained phonation of a vowel sound. Data collection was conducted using a custom application on a tablet with a headset used for data collection when possible. For most participants a single session was sufficient to collect all relevant data. However, a subset of participants required multiple sessions to complete the data collection. As a result, there may be more than one session per participant in the current dataset. Data were exported and converted from RedCap using an open source library developed by our team [2].</p>
+<p>Raw audio was preprocessed by converting to monaural and resampling to 16 kHz with a Butterworth anti-aliasing filter applied. From this standardized audio, we extracted five types of derived data:</p>
+<ul>
+<li>Spectrograms - Time-frequency representations were computed using the short-time Fast Fourier Transform (FFT) with a 25ms window size, 10ms hop length, and a 400-point FFT. Spectrograms were further downsampled by a factor of two in the time domain after derivation.</li>
+<li>Mel-frequency cepstral coefficients (MFCC) - 60 MFCCs were extracted using the above spectrograms.</li>
+<li>Mel Spectrogram - a combination of the above two computed with the same parameters (25ms window size, 10ms hop length, a 400-point FFT, and 60 Mels).</li>
+<li>Articulatory features - using the Speech Articulatory Coding (sparc) package, we generate the kinematic traces of vocal tract articulators and source features as well as measures of loudness, periodicity, and pitch. All features were gathered at 50Hz.</li>
+<li>Acoustic features were extracted using OpenSMILE, capturing temporal dynamics and acoustic characteristics.</li>
+<li>Phonetic and prosodic features were computed using Parselmouth and Praat, providing measures of fundamental frequency, formants, and voice quality.</li>
+<li>Phonetic Posteriorgrams (ppgs) - time-varying categorical distribution over acoustic units of speech (e.g., phonemes) at 100Hz were generated via the ppgs package [10].</li>
+<li>Transcriptions were generated using OpenAI's Whisper Large model.</li>
+</ul>
+<p>The following de-identification steps were taken in the process of preparing the dataset:</p>
+<ul>
+<li>HIPAA Safe Harbor identifiers were removed.
+<ul>
+<li>While not all relevant to this dataset, these identifiers include: names, geographic locators, date information (at resolution finer than years), phone/fax numbers, email addresses, IP addresses, Social Security Numbers, medical record numbers, health plan beneficiary numbers, device identifiers, license numbers, account numbers, vehicle identifiers, website URLs, full face photos, biometric identifiers, and any unique identifiers.
+<ul>
+<li>State and province were removed. Country of data collection was retained.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Spectrograms and similar features were excluded if the audio contained free speech. Static and other features which do not encode the sensitive information were retained.</li>
+</ul>
+    <hr>
+  
+
+  
+    <h2 id="description">Data Description</h2>
+    <p>The dataset contains both derived audio data features (under features) and phenotypic information acquired during data collection.&nbsp;</p>
+<h3>Features</h3>
+<p>Binary files are made available as Parquet, an open-source <span>column-oriented data file format. </span>The following dense binary files are available in the features subfolder:</p>
+<ul>
+<li>ppgs.parquet</li>
+<li>sparc_ema.parquet</li>
+<li>sparc_loudness.parquet</li>
+<li>sparc_periodicity.parquet</li>
+<li>sparc_pitch.parquet</li>
+<li>torchaudio_spectrogram.parquet</li>
+<li>torchaudio_mfcc.parquet</li>
+<li>torchaudio_pitch.parquet</li>
+<li>torchaudio_mel_spectrogram.parquet</li>
+</ul>
+<p>In addition to these files, the features folder contains the following plain-text files:</p>
+<ul>
+<li>static_features.tsv - Features derived from the raw audio, with one feature per audio recording.</li>
+</ul>
+<p>All of the above files are associated with a data dictionary file which has the same file stem and a JSON suffixes (e.g. torch_spectrogram.json). These data dictionary files contain a description of the feature and detail on the processing done to prepare the feature.</p>
+<p>Each of the parquet files is formatted similarly. Each element of the parquet formatted dataset contains a unique identifier for the participant (participant_id), a unique identifier for the recording session (session_id), the task performed (task_name), the number of time frames associated with that feature (n_frames) and the tensor data for that associated feature which are described in more detail below where the feature is after the software used to extract it:</p>
+<ul>
+<li>torchaudio_spectrograms.parquet (n=29020) contains spectrograms of dimension 201xT generated using the short-time Fast Fourier Transform (FFT) with a 25ms window size, 10ms hop length, and a 400-point FFT.</li>
+<li>torchaudio_mel_spectrograms.parquet (n=29020) contains Mel spectrograms of dimension 60xT generated with a 25ms window size, 10ms hop length, a 400-point FFT and 60 Mel bins.</li>
+<li>torchaudio_mfcc.parquet (n=29020) contains Mel-frequency cepstrum coefficients of dimension 60xT using the same parameters as the mel spectrograms.</li>
+<li>torchaudio_pitch.parquet (n=32236) contains the detected pitch (fundamental frequency) over time and is of dimension T with a min and max pitch of 80 and 500 respectively.</li>
+<li>sparc_ema.parquet (n=31616) contains the estimated electromagnetic articulography (EMA) using a deep learning model with dimensions Tx12 where the 12 correspond to X/Y positions of six articulators: tongue dorsum (TD), tongue body (TB), tongue tip (TT), lower incisor (LI), upper lip (UL), lower lip (LL), respectively.</li>
+<li>sparc_loudness.parquet (n=31616) contains the estimated loudness based on the average absolute amplitude of the audio waveform of size T, using 20ms windows.</li>
+<li>sparc_periodicity.parquet (n=31633) contains the estimated periodicity (confidence of pitch presence) derived from the audio using 20ms windows of dimension T.</li>
+<li>sparc_pitch.parquet (n=31633) contains the estimated fundamental frequency (F0) of the audio signal using a different algorithm than before with a range of 50-550Hz and dimension T.</li>
+<li>ppgs.parquet (n=29031) contains the phonetic posteriorgram probabilities across 40 phoneme categories giving a dimension of 40xT with a frame rate of 100Hz.</li>
+</ul>
+<p>Spectrograms, Mel Spectrograms, MFC coefficients, PPGs, and EMAs for sensitive records and audio checks have been removed from v3.0. Additionally, some files, whether due to length or other issues, could not generate certain features and so are not included in the bundled data.</p>
+<p>Features derived from the open-source Speech and Music Interpretation by Large-space Extraction (openSMILE [3]), Praat [4], parselmouth [5], and torchaudio [6, 7] are provided. Each feature is present in the static_features.tsv file, with the data dictionary providing a description of each feature, and one row per unique recording.</p>
+<h3>Phenotype</h3>
+<p>The phenotype subfolder contains organized information collected from the participant or other individual during their encounter:</p>
+<pre>.<br>├── confounders<br>│ &nbsp; ├── confounders.json<br>│ &nbsp; └── confounders.tsv<br>├── demographics<br>│ &nbsp; ├── demographics.json<br>│ &nbsp; └── demographics.tsv<br>├── diagnosis<br>│ &nbsp; ├── adhd_adult.json<br>│ &nbsp; ├── adhd_adult.tsv<br>│ &nbsp; ├── airway_stenosis.json<br>│ &nbsp; ├── airway_stenosis.tsv<br>│ &nbsp; ├── amyotrophic_lateral_sclerosis.json<br>│ &nbsp; ├── amyotrophic_lateral_sclerosis.tsv<br>│ &nbsp; ├── anxiety.json<br>│ &nbsp; ├── anxiety.tsv<br>│ &nbsp; ├── benign_lesions.json<br>│ &nbsp; ├── benign_lesions.tsv<br>│ &nbsp; ├── bipolar_disorder.json<br>│ &nbsp; ├── bipolar_disorder.tsv<br>│ &nbsp; ├── cognitive_impairment.json<br>│ &nbsp; ├── cognitive_impairment.tsv<br>│ &nbsp; ├── control.json<br>│ &nbsp; ├── control.tsv<br>│ &nbsp; ├── copd_and_asthma.json<br>│ &nbsp; ├── copd_and_asthma.tsv<br>│ &nbsp; ├── depression.json<br>│ &nbsp; ├── depression.tsv<br>│ &nbsp; ├── glottic_insufficiency.json<br>│ &nbsp; ├── glottic_insufficiency.tsv<br>│ &nbsp; ├── laryngeal_cancer.json<br>│ &nbsp; ├── laryngeal_cancer.tsv<br>│ &nbsp; ├── laryngeal_dystonia.json<br>│ &nbsp; ├── laryngeal_dystonia.tsv<br>│ &nbsp; ├── laryngitis.json<br>│ &nbsp; ├── laryngitis.tsv<br>│ &nbsp; ├── muscle_tension_dysphonia.json<br>│ &nbsp; ├── muscle_tension_dysphonia.tsv<br>│ &nbsp; ├── parkinsons_disease.json<br>│ &nbsp; ├── parkinsons_disease.tsv<br>│ &nbsp; ├── precancerous_lesions.json<br>│ &nbsp; ├── precancerous_lesions.tsv<br>│ &nbsp; ├── psychiatric_history.json<br>│ &nbsp; ├── psychiatric_history.tsv<br>│ &nbsp; ├── ptsd_adult.json<br>│ &nbsp; ├── ptsd_adult.tsv<br>│ &nbsp; ├── unexplained_chronic_cough.json<br>│ &nbsp; ├── unexplained_chronic_cough.tsv<br>│ &nbsp; ├── unilateral_vocal_fold_paralysis.json<br>│ &nbsp; └── unilateral_vocal_fold_paralysis.tsv<br>├── enrollment<br>│ &nbsp; ├── eligibility.json<br>│ &nbsp; ├── eligibility.tsv<br>│ &nbsp; ├── enrollment_form.json<br>│ &nbsp; ├── enrollment_form.tsv<br>│ &nbsp; ├── participant.json<br>│ &nbsp; └── participant.tsv<br>├── questionnaire<br>│ &nbsp; ├── custom_affect_scale.json<br>│ &nbsp; ├── custom_affect_scale.tsv<br>│ &nbsp; ├── dsm5_adult.json<br>│ &nbsp; ├── dsm5_adult.tsv<br>│ &nbsp; ├── dyspnea_index.json<br>│ &nbsp; ├── dyspnea_index.tsv<br>│ &nbsp; ├── gad7_anxiety.json<br>│ &nbsp; ├── gad7_anxiety.tsv<br>│ &nbsp; ├── leicester_cough_questionnaire.json<br>│ &nbsp; ├── leicester_cough_questionnaire.tsv<br>│ &nbsp; ├── panas.json<br>│ &nbsp; ├── panas.tsv<br>│ &nbsp; ├── phq9.json<br>│ &nbsp; ├── phq9.tsv<br>│ &nbsp; ├── productive_vocabulary.json<br>│ &nbsp; ├── productive_vocabulary.tsv<br>│ &nbsp; ├── vhi10.json<br>│ &nbsp; ├── vhi10.tsv<br>│ &nbsp; ├── voice_perception.json<br>│ &nbsp; └── voice_perception.tsv<br>└── task<br>&nbsp; &nbsp; ├── acoustic_task.json<br>&nbsp; &nbsp; ├── acoustic_task.tsv<br>&nbsp; &nbsp; ├── harvard_sentences.json<br>&nbsp; &nbsp; ├── harvard_sentences.tsv<br>&nbsp; &nbsp; ├── random_item_generation.json<br>&nbsp; &nbsp; ├── random_item_generation.tsv<br>&nbsp; &nbsp; ├── recording.json<br>&nbsp; &nbsp; ├── recording.tsv<br>&nbsp; &nbsp; ├── session.json<br>&nbsp; &nbsp; ├── session.tsv<br>&nbsp; &nbsp; ├── stroop.json<br>&nbsp; &nbsp; ├── stroop.tsv<br>&nbsp; &nbsp; ├── voice_perception.json<br>&nbsp; &nbsp; ├── voice_perception.tsv<br>&nbsp; &nbsp; ├── voice_problem_severity.json<br>&nbsp; &nbsp; ├── voice_problem_severity.tsv<br>&nbsp; &nbsp; ├── winograd.json<br>&nbsp; &nbsp; └── winograd.tsv</pre>
+<p>Phenotype data files only contain rows for a participant if at least one column is not missing. As visible, all of the TSV data files have a data dictionary available with the data file. The data dictionary has the same file stem but a distinct suffix: json. For phenotype data, dictionary files have keys with the same name as the column names in the associated data file. The values for each element provide detail of the column, including a description field which provides a one sentence summary of the respective column, the question (if any) that was asked the participant to prompt the answer, and the data type of the response.</p>
+<p>Note that as participants may have repeated visits in order to collect data, there may be more than one row per participant in the data files. Furthermore, there is no requirement the participant provide the same response for each visit. As a result, participant information for the same data element may vary across the data file.</p>
+<p>The code used to process the raw audio into the above features and to merge the source data into the phenotype files has been made open source in the <a href="https://github.com/sensein/b2aiprep">b2aiprep library</a> [8]. This release was generated with b2aiprep v3.0.0.</p>
+    <hr>
+  
+
+  
+    <h2 id="usage-notes">Usage Notes</h2>
+    <p>If using Python, the parquet dataset can be loaded in with any library that supports parquet. For example, the HuggingFace Datasets library can be used to load in the spectrograms:</p>
+<pre>from datasets import Dataset
+ds = Dataset.from_parquet("torchaudio_spectrogram.parquet")
+</pre>
+<p>A spectrogram can be plotted in decibels by converting it from its original power representation:</p>
+<pre>import librosa
+spectrogram = librosa.power_to_db(np.asarray(ds[0]['spectrogram']))
+plt.figure(figsize=(10, 4))
+plt.imshow(spectrogram, aspect='auto', origin='lower')
+plt.title('Spectrogram')
+plt.xlabel('Time')
+plt.ylabel('Frequency')
+plt.colorbar()
+</pre>
+<p>The phenotype file can be loaded with any statistical analysis tool. For example, the pandas library in Python can read the data:</p>
+<pre>import pandas as pd
+df = pd.read_csv("demographics.tsv", sep="\t", header=0)
+</pre>
+    <hr>
+  
+
+  
+    <h2 id="release-notes">Release Notes</h2>
+    <p><strong>b2ai-voice v3.0.0:</strong> A major update with new data for an additional 391 participants. The single phenotype data file has been separated into more user-friendly and intuitive individual files. Additional features were provided from the Speech Articulatory Coding (sparc) package as well as Phonetic Posteriorgrams from the ppgs package. The files have been reorganized.</p>
+<p><strong>b2ai-voice v2.0.1:</strong> Corrections in the authorship list.</p>
+<p><strong>b2ai-voice v2.0:&nbsp;</strong>This release provides data for an additional 136 new participants. Spectrograms were reprocessed to fix some minor issues identified in the previous release. All spectograms and Mel-frequency cepstral coefficients from free speech related files have been removed.</p>
+<p><strong>b2ai-voice v1.1: </strong>This release added Mel-frequency cepstral coefficients (MFCCs).</p>
+<p><strong>b2ai-voice v1.0: </strong>This was the first release of the Bridge2AI voice as a biomarker of health dataset [9].</p>
+    <hr>
+  
+
+  
+    <h2 id="ethics">Ethics</h2>
+    <p>Data collection and sharing was approved by the University of South Florida Institutional Review Board.</p>
+    <hr>
+  
+
+  
+    <h2 id="acknowledgements">Acknowledgements</h2>
+    <p>This release would not be possible without the graceful contribution of data from all the participants of the study.</p>
+<p>This project was funded by NIH project number 3OT2OD032720-01S1: Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before. We would also like to thank the NIH for their continued support of the project.</p>
+    <hr>
+  
+
+  
+    <h2 id="conflicts-of-interest">Conflicts of Interest</h2>
+    <p>None to declare.</p>
+    <hr>
+  
+
+
+
+  <h2 id="references">References</h2>
+  <ol>
+  
+    <li>Rameau, A., Ghosh, S., Sigaras, A., Elemento, O., Belisle-Pipon, J.-C., Ravitsky, V., Powell, M., Johnson, A., Dorr, D., Payne, P., Boyer, M., Watts, S., Bahr, R., Rudzicz, F., Lerner-Ellis, J., Awan, S., Bolser, D., Bensoussan, Y. (2024) Developing Multi-Disorder Voice Protocols: A team science approach involving clinical expertise, bioethics, standards, and DEI.. Proc. Interspeech 2024, 1445-1449, doi: 10.21437/Interspeech.2024-1926</li>
+  
+    <li>Bensoussan, Y., Ghosh, S. S., Rameau, A., Boyer, M., Bahr, R., Watts, S., Rudzicz, F., Bolser, D., Lerner-Ellis, J., Awan, S., Powell, M. E., Belisle-Pipon, J.-C., Ravitsky, V., Johnson, A., Zisimopoulos, P., Tang, J., Sigaras, A., Elemento, O., Dorr, D., … Bridge2AIVoice. (2024). Bridge2AI Voice REDCap (v3.23.0). Zenodo. <a href="https://zenodo.org/records/14989503">https://zenodo.org/records/14989503</a></li>
+  
+    <li>Florian Eyben, Martin Wöllmer, Björn Schuller: &quot;openSMILE - The Munich Versatile and Fast Open-Source Audio Feature Extractor&quot;, Proc. ACM Multimedia (MM), ACM, Florence, Italy, ISBN 978-1-60558-933-6, pp. 1459-1462, 25.-29.10.2010.</li>
+  
+    <li>Boersma P, Van Heuven V. Speak and unSpeak with PRAAT. Glot International. 2001 Nov;5(9/10):341-7.</li>
+  
+    <li>Jadoul Y, Thompson B, De Boer B. Introducing parselmouth: A python interface to praat. Journal of Phonetics. 2018 Nov 1;71:1-5.</li>
+  
+    <li>Hwang, J., Hira, M., Chen, C., Zhang, X., Ni, Z., Sun, G., Ma, P., Huang, R., Pratap, V., Zhang, Y., Kumar, A., Yu, C.-Y., Zhu, C., Liu, C., Kahn, J., Ravanelli, M., Sun, P., Watanabe, S., Shi, Y., Tao, T., Scheibler, R., Cornell, S., Kim, S., &amp; Petridis, S. (2023). TorchAudio 2.1: Advancing speech recognition, self-supervised learning, and audio processing components for PyTorch. arXiv preprint arXiv:2310.17864</li>
+  
+    <li>Yang, Y.-Y., Hira, M., Ni, Z., Chourdia, A., Astafurov, A., Chen, C., Yeh, C.-F., Puhrsch, C., Pollack, D., Genzel, D., Greenberg, D., Yang, E. Z., Lian, J., Mahadeokar, J., Hwang, J., Chen, J., Goldsborough, P., Roy, P., Narenthiran, S., Watanabe, S., Chintala, S., Quenneville-Bélair, V, &amp; Shi, Y. (2021). TorchAudio: Building Blocks for Audio and Speech Processing. arXiv preprint arXiv:2110.15018.</li>
+  
+    <li>Bevers, I., Ghosh, S., Johnson, A., Brito, R., Bedrick, S., Catania, F., &amp; Ng, E. (2017). b2aiprep library (Version 3.0.0) [Computer software]. <a href="https://github.com/sensein/b2aiprep">https://github.com/sensein/b2aiprep</a></li>
+  
+    <li>Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., &amp; Bensoussan, Y. (2024). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.0). Health Data Nexus. <a href="https://doi.org/10.57764/qb6h-em84">https://doi.org/10.57764/qb6h-em84</a></li>
+  
+    <li>C. Churchwell, M. Morrison, and B. Pardo, &quot;High-Fidelity Neural Phonetic Posteriorgrams,&quot; ICASSP 2024 Workshop on Explainable Machine Learning for Speech and Audio, April 2024.</li>
+  
+</ol>
+
+  <hr>
+
+
+        
+      </div>
+      <!-- /.main column -->
+
+      <!-- Sidebar Column -->
+      <div class="col-md-4">
+        
+        
+        <div class="card" style="border: 0">
+          <button class="btn btn-secondary dropdown-toggle btn-rsp btn-right" type="button"
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Contents
+          </button>
+          <div class="dropdown-menu">
+            
+              
+                <a class="dropdown-item" href="#abstract">Abstract</a>
+              
+            
+              
+                <a class="dropdown-item" href="#background">Background</a>
+              
+            
+              
+                <a class="dropdown-item" href="#methods">Methods</a>
+              
+            
+              
+                <a class="dropdown-item" href="#description">Data Description</a>
+              
+            
+              
+                <a class="dropdown-item" href="#usage-notes">Usage Notes</a>
+              
+            
+              
+                <a class="dropdown-item" href="#release-notes">Release Notes</a>
+              
+            
+              
+                <a class="dropdown-item" href="#ethics">Ethics</a>
+              
+            
+              
+                <a class="dropdown-item" href="#acknowledgements">Acknowledgements</a>
+              
+            
+              
+                <a class="dropdown-item" href="#conflicts-of-interest">Conflicts of Interest</a>
+              
+            
+            
+              <a class="dropdown-item" href="#references">References</a>
+            
+            <a class="dropdown-item" href="#files">Files</a>
+          </div>
+        </div>
+        
+
+        
+
+        <div class="card my-4">
+          <h5 class="card-header">Share</h5>
+          <div class="card-body">
+            <a class="btn btn-sm share-email sharebtn"
+              href="mailto:?subject=Bridge2AI-Voice%3A%20An%20ethically-sourced%2C%20diverse%20voice%20dataset%20linked%20to%20health%20information&body=https://physionet.org/content/b2ai-voice/3.0.0/"
+              role="button" title="Share with email"><i class="far fa-envelope"></i></a>
+            <a class="btn btn-sm facebook sharebtn"
+              href="http://www.facebook.com/sharer.php?u=https://physionet.org/content/b2ai-voice/3.0.0/" role="button"
+              title="Share on Facebook"><i class="fab fa-facebook"></i></a>
+            <a class="btn btn-sm linkedin sharebtn"
+              href="https://www.linkedin.com/shareArticle?url=https://physionet.org/content/b2ai-voice/3.0.0/"
+              role="button" title="Share on LinkedIn"><i class="fab fa-linkedin"></i></a>
+            <a class="btn btn-sm reddit sharebtn"
+              href="https://www.reddit.com/submit?url=https://physionet.org/content/b2ai-voice/3.0.0/&title=Bridge2AI-Voice%3A%20An%20ethically-sourced%2C%20diverse%20voice%20dataset%20linked%20to%20health%20information"
+              role="button" title="Share on Reddit"><i class="fab fa-reddit"></i></a>
+            <a class="btn btn-sm twitter sharebtn"
+              href="https://twitter.com/intent/tweet?text=Bridge2AI-Voice%3A%20An%20ethically-sourced%2C%20diverse%20voice%20dataset%20linked%20to%20health%20information. https://physionet.org/content/b2ai-voice/3.0.0/"
+              role="button" title="Share on Twitter"><i class="fab fa-twitter"></i></a>
+          </div>
+        </div>
+
+        <div class="card my-4">
+          <h5 class="card-header">Access</h5>
+          <div class="card-body">
+            <p>
+              <strong>Access Policy:</strong>
+              <br>
+              Only credentialed users who sign the DUA can access the files.
+            </p>
+            <p>
+              <strong>License (for files):</strong>
+              <br>
+              <a href="/content/b2ai-voice/view-license/3.0.0/">Bridge2AI Voice Registered Access License</a>
+            </p>
+            
+              <p>
+                <strong>Data Use Agreement:</strong>
+                <br>
+                <a href="/content/b2ai-voice/view-dua/3.0.0/">Bridge2AI Voice Registered Access Agreement</a>
+              </p>
+            
+
+            
+              <p>
+                <strong>Required training:</strong>
+                
+                  <br>No training required
+                
+              </p>
+            
+          </div>
+        </div>
+        <div class="card my-4">
+          <h5 class="card-header">Discovery</h5>
+          <div class="card-body">
+            
+              <p><strong>DOI (version 3.0.0):</strong>
+                <br>
+                <a href="https://doi.org/10.13026/k81f-qr68">https://doi.org/10.13026/k81f-qr68</a>
+              </p>
+            
+
+            
+              <p><strong>DOI (latest version):</strong>
+                <br>
+                <a href="https://doi.org/10.13026/37yb-1t42">https://doi.org/10.13026/37yb-1t42</a>
+              </p>
+            
+
+            
+
+            
+              <p><strong>Topics:</strong>
+                <br>
+                
+                  <a href="/content/?topic=voice"><span class="badge badge-pn">voice</span></a>
+                
+                  <a href="/content/?topic=bridge2ai"><span class="badge badge-pn">bridge2ai</span></a>
+                
+              </p>
+            
+
+            
+              <p><strong>Project Website:</strong>
+                <br>
+                <a href="https://b2ai-voice.org/"><i
+                  class="fas fa-external-link-alt"></i> https://b2ai-voice.org/</a>
+              </p>
+            
+          </div>
+        </div>
+
+        <div class="card my-4">
+          <h5 class="card-header">Project Views</h5>
+          <div class="card-body text-center">
+            <div class="d-flex justify-content-around mb-2">
+              <div>
+                <h3 class="mb-0">142</h3>
+                <small class="text-muted">Current Version</small>
+              </div>
+              <div>
+                <h3 class="mb-0">683</h3>
+                <small class="text-muted">All Versions</small>
+              </div>
+            </div>
+            <small class="text-muted mb-0"><em>Project Views by Unique Registered Users</em></small>
+            <div class="mt-2">
+              <a href="/content/b2ai-voice/metrics/3.0.0/" class="btn btn-sm btn-outline-secondary">View Details</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card my-4">
+          <h5 class="card-header">Corresponding Author</h5>
+          <div class="card-body">
+            
+              <em>You must be logged in to view the contact information.</em>
+            
+          </div>
+        </div>
+
+        <div class="card my-4">
+  <h5 class="card-header">Versions</h5>
+  <ul class="list-group list-group-flush project-version-list">
+    
+      <li class="list-group-item">
+        <a href="/content/b2ai-voice/1.1/">
+          <span class="project-version">1.1</span>
+          <time datetime="2025-01-17">
+            Jan. 17, 2025
+          </time>
+        </a>
+      </li>
+    
+      <li class="list-group-item">
+        <a href="/content/b2ai-voice/2.0.0/">
+          <span class="project-version">2.0.0</span>
+          <time datetime="2025-04-16">
+            April 16, 2025
+          </time>
+        </a>
+      </li>
+    
+      <li class="list-group-item">
+        <a href="/content/b2ai-voice/2.0.1/">
+          <span class="project-version">2.0.1</span>
+          <time datetime="2025-08-18">
+            Aug. 18, 2025
+          </time>
+        </a>
+      </li>
+    
+      <li class="list-group-item">
+        <a href="/content/b2ai-voice/3.0.0/">
+          <span class="project-version">3.0.0</span>
+          <time datetime="2025-12-16">
+            Dec. 16, 2025
+          </time>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+      </div>
+      <!-- /.sidebar -->
+    </div>
+    <h2 id="files">Files</h2>
+    
+      
+        <div class="alert alert-danger col-md-8" role="alert">
+  
+    This is a restricted-access resource. To access the files, you must fulfill all of the following requirements:
+    <ul>
+      
+        
+          <li>be a <a href="/settings/credentialing/">credentialed user</a></li>
+        
+        
+        
+          <li>
+            <a href="/sign-dua/b2ai-voice/3.0.0/">sign the data use agreement</a> for the project
+          </li>
+        
+      
+    </ul>
+  
+</div>
+
+      
+    
+    <br>
+    
+</div>
+
+
+
+</main>
+
+    
+<link rel="stylesheet" type="text/css" href="/static/custom/css/footer.css"/>
+
+<div class="modern-ui">
+  <footer class="footer w-100 secondary-bg py-5">
+    <div class="container my-0 py-0 py-md-5">
+      
+        <img src="/static/images/physionet-logo-white.svg" width="180px" alt="PhysioNet" class="pb-2" />
+      
+      <div class="footer__columns light-text">
+        <div>
+          
+            <p class="dark-light-text mb-2">Maintained by the MIT Laboratory for Computational Physiology</p>
+          
+          
+            <p class="dark-light-text mb-2">Supported by the National Institute of Biomedical Imaging and Bioengineering (NIBIB), National Heart Lung and Blood Institute (NHLBI), and NIH Office of the Director under NIH grant numbers U24EB037545 and R01EB030362</p>
+          
+        </div>
+        <div class="d-flex flex-column pl-0 pl-md-5 pt-4 pt-md-0">
+          <h2 class="text-white font-weight-bold">Navigation</h2>
+          <a href="/content" class="pb-3 dark-light-text">Discover Data</a>
+          <a href="/about/publish" class="pb-3 dark-light-text">Share Data</a>
+          <a href="/about" class="pb-3 dark-light-text">About</a>
+          <a href="/news" class="pb-3 dark-light-text">News</a>
+        </div>
+        <div class="d-flex flex-column pt-4 pt-md-0">
+          <h2 class="text-white font-weight-bold">Explore</h2>
+          
+            <a href="/about/database/" class="pb-3 dark-light-text">Data</a>
+          
+            <a href="/about/software/" class="pb-3 dark-light-text">Software</a>
+          
+            <a href="/about/challenge/" class="pb-3 dark-light-text">Challenges</a>
+          
+            <a href="/about/tutorial/" class="pb-3 dark-light-text">Tutorials</a>
+          
+        </div>
+        <!-- <div class="d-flex flex-column flex-grow">
+          <h2 class="text-white font-weight-bold">Subscribe to our Newsletter</h2>
+          <input type="email" class="form-control mb-2" placeholder="Your email">
+          <button type="button" class="primary-button">Subscribe Now</button>
+        </div> -->
+      </div>
+      <hr >
+      <div class="d-flex flex-column align-items-center justify-content-between flex-md-row">
+        <div class="d-flex pt-2 pt-md-0">
+          
+            <a class="mr-3" href="https://github.com/MIT-LCP/physionet-build/"><img src="/static/images/icons/github.png" height="18px"></a>
+          
+          
+          
+            <a class="mr-3" href="http://linkedin.com/company/physionet"><img src="/static/images/icons/linkedin.png" height="18px"></a>
+          
+          
+        </div>
+        <div class="pt-4 pt-md-0">
+          
+          
+          
+             <a class="dark-light-text" href="https://accessibility.mit.edu/">Accessibility</a>
+          
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+
+    
+<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+<script src="/static/bootstrap/js/ie10-viewport-bug-workaround.js"></script>
+<script src="/static/custom/js/navbar.js"></script>
+
+    
+  <script src="/static/project/js/dynamic-files-panel.js"></script>
+  <script src="/static/custom/js/enable-popover.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+    
+  <!-- https://schema.org/ metadata for discovery -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Dataset",
+  "name": "Bridge2AI\u002DVoice: An ethically\u002Dsourced, diverse voice dataset linked to health information",
+  "description": "The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost\u002Deffective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI\u002DVoice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. Here we present Bridge2AI\u002DVoice, a comprehensive collection of data derived from voice recordings with corresponding clinical information.\u000ABridge2AI\u002DVoice v3.0 contains data for 833 participants across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.",
+  "version": "3.0.0",
+  "license": "https://physionet.org/about/duas/bridge2ai\u002Dvoice\u002Dregistered\u002Daccess\u002Dagreement/",
+  "datePublished" : "Dec. 16, 2025",
+  "url": "https://physionet.org/content/b2ai-voice/3.0.0/",
+  
+  "identifier": "https://doi.org/10.13026/k81f\u002Dqr68",
+  
+  "creator": [
+  
+    {
+      "@type": "Person",
+      "givenName": "Yael",
+      "familyName": "Bensoussan",
+      "name": "Yael Bensoussan"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Alexandros",
+      "familyName": "Sigaras",
+      "name": "Alexandros Sigaras"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Anais",
+      "familyName": "Rameau",
+      "name": "Anais Rameau"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Olivier",
+      "familyName": "Elemento",
+      "name": "Olivier Elemento"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Maria",
+      "familyName": "Powell",
+      "name": "Maria Powell"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "David",
+      "familyName": "Dorr",
+      "name": "David Dorr"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Philip",
+      "familyName": "Payne",
+      "name": "Philip Payne"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Vardit",
+      "familyName": "Ravitsky",
+      "name": "Vardit Ravitsky"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Jean\u002DChristophe",
+      "familyName": "Bélisle\u002DPipon",
+      "name": "Jean\u002DChristophe Bélisle\u002DPipon"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Ruth",
+      "familyName": "Bahr",
+      "name": "Ruth Bahr"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Stephanie",
+      "familyName": "Watts",
+      "name": "Stephanie Watts"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Donald",
+      "familyName": "Bolser",
+      "name": "Donald Bolser"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Jennifer",
+      "familyName": "Siu",
+      "name": "Jennifer Siu"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Jordan",
+      "familyName": "Lerner\u002DEllis",
+      "name": "Jordan Lerner\u002DEllis"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Frank",
+      "familyName": "Rudzicz",
+      "name": "Frank Rudzicz"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Micah",
+      "familyName": "Boyer",
+      "name": "Micah Boyer"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Yassmeen",
+      "familyName": "Abdel\u002DAty",
+      "name": "Yassmeen Abdel\u002DAty"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Toufeeq",
+      "familyName": "Ahmed Syed",
+      "name": "Toufeeq Ahmed Syed"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "James",
+      "familyName": "Anibal",
+      "name": "James Anibal"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Dona",
+      "familyName": "Amraei",
+      "name": "Dona Amraei"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Stephen",
+      "familyName": "Aradi",
+      "name": "Stephen Aradi"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Kirollos",
+      "familyName": "Armosh",
+      "name": "Kirollos Armosh"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Ana Sophia",
+      "familyName": "Martinez",
+      "name": "Ana Sophia Martinez"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Shaheen",
+      "familyName": "Awan",
+      "name": "Shaheen Awan"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Steven",
+      "familyName": "Bedrick",
+      "name": "Steven Bedrick"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Helena",
+      "familyName": "Beltran",
+      "name": "Helena Beltran"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Alexander",
+      "familyName": "Bernier",
+      "name": "Alexander Bernier"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Moroni",
+      "familyName": "Berrios",
+      "name": "Moroni Berrios"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Isaac",
+      "familyName": "Bevers",
+      "name": "Isaac Bevers"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Alden",
+      "familyName": "Blatter",
+      "name": "Alden Blatter"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Rahul",
+      "familyName": "Brito",
+      "name": "Rahul Brito"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Amy",
+      "familyName": "Brown",
+      "name": "Amy Brown"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Johnathan",
+      "familyName": "Brown",
+      "name": "Johnathan Brown"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Léo",
+      "familyName": "Cadillac",
+      "name": "Léo Cadillac"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Selina",
+      "familyName": "Casalino",
+      "name": "Selina Casalino"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "John",
+      "familyName": "Costello",
+      "name": "John Costello"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Abhijeet",
+      "familyName": "Dalal",
+      "name": "Abhijeet Dalal"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Iris",
+      "familyName": "De Santiago",
+      "name": "Iris De Santiago"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Enrique",
+      "familyName": "Diaz\u002DOcampo",
+      "name": "Enrique Diaz\u002DOcampo"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Amanda",
+      "familyName": "Doherty\u002DKirby",
+      "name": "Amanda Doherty\u002DKirby"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Mohamed",
+      "familyName": "Ebraheem",
+      "name": "Mohamed Ebraheem"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Ellie",
+      "familyName": "Eiseman",
+      "name": "Ellie Eiseman"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Mahmoud",
+      "familyName": "Elmahdy",
+      "name": "Mahmoud Elmahdy"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Renee",
+      "familyName": "English",
+      "name": "Renee English"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Emily",
+      "familyName": "Evangelista",
+      "name": "Emily Evangelista"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Kenneth",
+      "familyName": "Fletcher",
+      "name": "Kenneth Fletcher"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Hortense",
+      "familyName": "Gallois",
+      "name": "Hortense Gallois"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Gaelyn",
+      "familyName": "Garrett",
+      "name": "Gaelyn Garrett"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Alexander",
+      "familyName": "Gelbard",
+      "name": "Alexander Gelbard"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Anna",
+      "familyName": "Goldenberg",
+      "name": "Anna Goldenberg"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Karim",
+      "familyName": "Hanna",
+      "name": "Karim Hanna"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "William",
+      "familyName": "Hersh",
+      "name": "William Hersh"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Jennifer",
+      "familyName": "Jain",
+      "name": "Jennifer Jain"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Lochana",
+      "familyName": "Jayachandran",
+      "name": "Lochana Jayachandran"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Kaley",
+      "familyName": "Jenney",
+      "name": "Kaley Jenney"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Kathy",
+      "familyName": "Jenkins",
+      "name": "Kathy Jenkins"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Stacy",
+      "familyName": "Jo",
+      "name": "Stacy Jo"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Alistair",
+      "familyName": "Johnson",
+      "name": "Alistair Johnson"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Ayush",
+      "familyName": "Kalia",
+      "name": "Ayush Kalia"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Megha",
+      "familyName": "Kalia",
+      "name": "Megha Kalia"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Zoha",
+      "familyName": "Khawa",
+      "name": "Zoha Khawa"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Cindy",
+      "familyName": "Kostelnik",
+      "name": "Cindy Kostelnik"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Alisa",
+      "familyName": "Krause",
+      "name": "Alisa Krause"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Andrea",
+      "familyName": "Krussel",
+      "name": "Andrea Krussel"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Elisa",
+      "familyName": "Lapadula",
+      "name": "Elisa Lapadula"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Genelle",
+      "familyName": "Leo",
+      "name": "Genelle Leo"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Justin",
+      "familyName": "Levinsky",
+      "name": "Justin Levinsky"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Chloe",
+      "familyName": "Loewith",
+      "name": "Chloe Loewith"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Radhika",
+      "familyName": "Mahajan",
+      "name": "Radhika Mahajan"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Vrishni",
+      "familyName": "Maharaj",
+      "name": "Vrishni Maharaj"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Siyu",
+      "familyName": "Miao",
+      "name": "Siyu Miao"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "LeAnn",
+      "familyName": "Michaels",
+      "name": "LeAnn Michaels"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Matthew",
+      "familyName": "Mifsud",
+      "name": "Matthew Mifsud"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Marian",
+      "familyName": "Mikhael",
+      "name": "Marian Mikhael"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Elijah",
+      "familyName": "Moothedan",
+      "name": "Elijah Moothedan"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Yosef",
+      "familyName": "Nafii",
+      "name": "Yosef Nafii"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Tempestt",
+      "familyName": "Neal",
+      "name": "Tempestt Neal"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Karlee",
+      "familyName": "Newberry",
+      "name": "Karlee Newberry"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Evan",
+      "familyName": "Ng",
+      "name": "Evan Ng"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Christopher",
+      "familyName": "Nickel",
+      "name": "Christopher Nickel"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Amanda",
+      "familyName": "Peltier",
+      "name": "Amanda Peltier"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Trevor",
+      "familyName": "Pharr",
+      "name": "Trevor Pharr"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Michaela",
+      "familyName": "Pnacekova",
+      "name": "Michaela Pnacekova"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Matthew",
+      "familyName": "Pontell",
+      "name": "Matthew Pontell"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Claire",
+      "familyName": "Premi\u002DBortolotto",
+      "name": "Claire Premi\u002DBortolotto"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Parnaz",
+      "familyName": "Rafatjou",
+      "name": "Parnaz Rafatjou"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "JM",
+      "familyName": "Rahman",
+      "name": "JM Rahman"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "John",
+      "familyName": "Ramos",
+      "name": "John Ramos"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Sarah",
+      "familyName": "Rohde",
+      "name": "Sarah Rohde"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Michael",
+      "familyName": "de Riesthal",
+      "name": "Michael de Riesthal"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Jillian",
+      "familyName": "Rossi",
+      "name": "Jillian Rossi"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Laurie",
+      "familyName": "Russell",
+      "name": "Laurie Russell"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Samantha",
+      "familyName": "Salvi Cruz",
+      "name": "Samantha Salvi Cruz"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Joyce",
+      "familyName": "Samuel",
+      "name": "Joyce Samuel"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Suketu",
+      "familyName": "Shah",
+      "name": "Suketu Shah"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Ahmed",
+      "familyName": "Shawkat",
+      "name": "Ahmed Shawkat"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Elizabeth",
+      "familyName": "Silberholz",
+      "name": "Elizabeth Silberholz"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "John",
+      "familyName": "Stark",
+      "name": "John Stark"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Lala",
+      "familyName": "Su",
+      "name": "Lala Su"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Shrramana Ganesh",
+      "familyName": "Sudhakar",
+      "name": "Shrramana Ganesh Sudhakar"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Duncan",
+      "familyName": "Sutherland",
+      "name": "Duncan Sutherland"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Venkata",
+      "familyName": "Swarna Mukhi",
+      "name": "Venkata Swarna Mukhi"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Jeffrey",
+      "familyName": "Tang",
+      "name": "Jeffrey Tang"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Luka",
+      "familyName": "Taylor",
+      "name": "Luka Taylor"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Jamie",
+      "familyName": "Toghranegar",
+      "name": "Jamie Toghranegar"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Julie",
+      "familyName": "Tu",
+      "name": "Julie Tu"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Megan",
+      "familyName": "Urbano",
+      "name": "Megan Urbano"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Gavin",
+      "familyName": "Victor",
+      "name": "Gavin Victor"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Kimberly",
+      "familyName": "Vinson",
+      "name": "Kimberly Vinson"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Jordan",
+      "familyName": "Wilke",
+      "name": "Jordan Wilke"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Claire",
+      "familyName": "Wilson",
+      "name": "Claire Wilson"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Madeleine",
+      "familyName": "Zanin",
+      "name": "Madeleine Zanin"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Xijie",
+      "familyName": "Zeng",
+      "name": "Xijie Zeng"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Theresa",
+      "familyName": "Zesiewicz",
+      "name": "Theresa Zesiewicz"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Robin",
+      "familyName": "Zhao",
+      "name": "Robin Zhao"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Pantelis",
+      "familyName": "Zisimopoulos",
+      "name": "Pantelis Zisimopoulos"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Satrajit",
+      "familyName": "Ghosh",
+      "name": "Satrajit Ghosh"
+    }
+  
+    ],
+  "includedInDataCatalog":{
+     "@type": "DataCatalog",
+     "name": "physionet.org"
+  },
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "contentUrl": "https://physionet.org/content/b2ai-voice/3.0.0/#files"
+    }
+  ]
+}
+</script>
+
+  </body>
+  
+</html>

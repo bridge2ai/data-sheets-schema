@@ -1,0 +1,1003 @@
+
+
+
+
+Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information v3.0.0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Menu
+
+
+
+
+
+Share
+About
+FAQs
+
+
+            Explore 
+
+
+
+
+
+
+
+
+Data
+View datasets
+
+
+
+
+
+
+
+Software
+View software
+
+
+
+
+
+
+
+Challenges
+View challenges
+
+
+
+
+
+
+
+Tutorials
+View tutorials
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cancel
+
+Search
+
+
+
+
+
+Search PhysioNet
+
+
+
+Log in
+
+
+
+
+Share
+About
+FAQs
+
+
+
+
+
+
+
+Data
+View datasets
+
+
+
+
+
+
+
+Software
+View software
+
+
+
+
+
+
+
+Challenges
+View challenges
+
+
+
+
+
+
+
+Tutorials
+View tutorials
+
+
+
+
+
+
+
+
+
+
+ Database
+ Credentialed Access
+
+Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information
+
+
+Yael Bensoussan 
+        , 
+      
+        Alexandros Sigaras 
+        , 
+      
+        Anais Rameau 
+        , 
+      
+        Olivier Elemento 
+        , 
+      
+        Maria Powell 
+        , 
+      
+        David Dorr 
+        , 
+      
+        Philip Payne 
+        , 
+      
+        Vardit Ravitsky 
+        , 
+      
+        Jean-Christophe Bélisle-Pipon 
+        , 
+      
+        Ruth Bahr 
+        , 
+      
+        Stephanie Watts 
+        , 
+      
+        Donald Bolser 
+        , 
+      
+        Jennifer Siu 
+        , 
+      
+        Jordan Lerner-Ellis 
+        , 
+      
+        Frank Rudzicz 
+        , 
+      
+        Micah Boyer 
+        , 
+      
+        Yassmeen Abdel-Aty 
+        , 
+      
+        Toufeeq Ahmed Syed 
+        , 
+      
+        James Anibal 
+        , 
+      
+        Dona Amraei 
+        , 
+      
+        Stephen Aradi 
+        , 
+      
+        Kirollos Armosh 
+        , 
+      
+        Ana Sophia Martinez 
+        , 
+      
+        Shaheen Awan 
+        , 
+      
+        Steven Bedrick 
+        , 
+      
+        Helena Beltran 
+        , 
+      
+        Alexander Bernier 
+        , 
+      
+        Moroni Berrios 
+        , 
+      
+        Isaac Bevers 
+        , 
+      
+        Alden Blatter 
+        , 
+      
+        Rahul Brito 
+        , 
+      
+        Amy Brown 
+        , 
+      
+        Johnathan Brown 
+        , 
+      
+        Léo Cadillac 
+        , 
+      
+        Selina Casalino 
+        , 
+      
+        John Costello 
+        , 
+      
+        Abhijeet Dalal 
+        , 
+      
+        Iris De Santiago 
+        , 
+      
+        Enrique Diaz-Ocampo 
+        , 
+      
+        Amanda Doherty-Kirby 
+        , 
+      
+        Mohamed Ebraheem 
+        , 
+      
+        Ellie Eiseman 
+        , 
+      
+        Mahmoud Elmahdy 
+        , 
+      
+        Renee English 
+        , 
+      
+        Emily Evangelista 
+        , 
+      
+        Kenneth Fletcher 
+        , 
+      
+        Hortense Gallois 
+        , 
+      
+        Gaelyn Garrett 
+        , 
+      
+        Alexander Gelbard 
+        , 
+      
+        Anna Goldenberg 
+        , 
+      
+        Karim Hanna 
+        , 
+      
+        William Hersh 
+        , 
+      
+        Jennifer Jain 
+        , 
+      
+        Lochana Jayachandran 
+        , 
+      
+        Kaley Jenney 
+        , 
+      
+        Kathy Jenkins 
+        , 
+      
+        Stacy Jo 
+        , 
+      
+        Alistair Johnson 
+        , 
+      
+        Ayush Kalia 
+        , 
+      
+        Megha Kalia 
+        , 
+      
+        Zoha Khawa 
+        , 
+      
+        Cindy Kostelnik 
+        , 
+      
+        Alisa Krause 
+        , 
+      
+        Andrea Krussel 
+        , 
+      
+        Elisa Lapadula 
+        , 
+      
+        Genelle Leo 
+        , 
+      
+        Justin Levinsky 
+        , 
+      
+        Chloe Loewith 
+        , 
+      
+        Radhika Mahajan 
+        , 
+      
+        Vrishni Maharaj 
+        , 
+      
+        Siyu Miao 
+        , 
+      
+        LeAnn Michaels 
+        , 
+      
+        Matthew Mifsud 
+        , 
+      
+        Marian Mikhael 
+        , 
+      
+        Elijah Moothedan 
+        , 
+      
+        Yosef Nafii 
+        , 
+      
+        Tempestt Neal 
+        , 
+      
+        Karlee Newberry 
+        , 
+      
+        Evan Ng 
+        , 
+      
+        Christopher Nickel 
+        , 
+      
+        Amanda Peltier 
+        , 
+      
+        Trevor Pharr 
+        , 
+      
+        Michaela Pnacekova 
+        , 
+      
+        Matthew Pontell 
+        , 
+      
+        Claire Premi-Bortolotto 
+        , 
+      
+        Parnaz Rafatjou 
+        , 
+      
+        JM Rahman 
+        , 
+      
+        John Ramos 
+        , 
+      
+        Sarah Rohde 
+        , 
+      
+        Michael de Riesthal 
+        , 
+      
+        Jillian Rossi 
+        , 
+      
+        Laurie Russell 
+        , 
+      
+        Samantha Salvi Cruz 
+        , 
+      
+        Joyce Samuel 
+        , 
+      
+        Suketu Shah 
+        , 
+      
+        Ahmed Shawkat 
+        , 
+      
+        Elizabeth Silberholz 
+        , 
+      
+        John Stark 
+        , 
+      
+        Lala Su 
+        , 
+      
+        Shrramana Ganesh Sudhakar 
+        , 
+      
+        Duncan Sutherland 
+        , 
+      
+        Venkata Swarna Mukhi 
+        , 
+      
+        Jeffrey Tang 
+        , 
+      
+        Luka Taylor 
+        , 
+      
+        Jamie Toghranegar 
+        , 
+      
+        Julie Tu 
+        , 
+      
+        Megan Urbano 
+        , 
+      
+        Gavin Victor 
+        , 
+      
+        Kimberly Vinson 
+        , 
+      
+        Jordan Wilke 
+        , 
+      
+        Claire Wilson 
+        , 
+      
+        Madeleine Zanin 
+        , 
+      
+        Xijie Zeng 
+        , 
+      
+        Theresa Zesiewicz 
+        , 
+      
+        Robin Zhao 
+        , 
+      
+        Pantelis Zisimopoulos 
+        , 
+      
+        Satrajit Ghosh 
+
+
+Published: Dec. 16, 2025. Version:
+      3.0.0
+    
+
+
+
+
+Raw Audio Data Access for Bridge2AI Voice Adult Cohort is via Synapse
+(March 9, 2026, 10:11 a.m.)
+The published Bridge2AI-Voice Adult Dataset contains derived features from the audio waveforms. This PhysioNet project does not contain raw audios.
+Accessing raw audio is a more involved process and requires institutional sign off. Please reach out to the access committee if you are interested in access: DACO@b2ai-voice.org
+Data will be made available via Synapse: https://www.synapse.org/Synapse:syn72370534/
+For questions regarding the dataset itself, please contact the corresponding author, listed on the sidebar.
+Note that the Bridge2AI-Voice Pediatric Dataset is also available on PhysioNet: https://physionet.org/content/b2ai-voice-pediatric/
+
+
+Bridge2AI Raw Audio Data Access
+(Sept. 11, 2025, 3:47 p.m.)
+The published Bridge2AI-Voice dataset contains derived features from the audio waveforms. Interested users can request access to the original raw audio data by contacting: DACO@b2ai-voice.org
+The raw audio data will be disseminated through controlled access only to protect participant's privacy.
+
+
+
+
+
+
+
+When using this resource, please cite: 
+ Cite
+ Copy BibTeX
+Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., Bélisle-Pipon, J., Bahr, R., Watts, S., Bolser, D., Siu, J., Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., ... Ghosh, S. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.0.0). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/k81f-qr68
+
+@article{PhysioNet-b2ai-voice-3.0.0,
+  author = {Bensoussan, Yael and Sigaras, Alexandros and Rameau, Anais and Elemento, Olivier and Powell, Maria and Dorr, David and Payne, Philip and Ravitsky, Vardit and Bélisle-Pipon, Jean-Christophe and Bahr, Ruth and Watts, Stephanie and Bolser, Donald and Siu, Jennifer and Lerner-Ellis, Jordan and Rudzicz, Frank and Boyer, Micah and Abdel-Aty, Yassmeen and {Ahmed Syed}, Toufeeq and Anibal, James and Amraei, Dona and Aradi, Stephen and Armosh, Kirollos and Martinez, Ana Sophia and Awan, Shaheen and Bedrick, Steven and Beltran, Helena and Bernier, Alexander and Berrios, Moroni and Bevers, Isaac and Blatter, Alden and Brito, Rahul and Brown, Amy and Brown, Johnathan and Cadillac, Léo and Casalino, Selina and Costello, John and Dalal, Abhijeet and {De Santiago}, Iris and Diaz-Ocampo, Enrique and Doherty-Kirby, Amanda and Ebraheem, Mohamed and Eiseman, Ellie and Elmahdy, Mahmoud and English, Renee and Evangelista, Emily and Fletcher, Kenneth and Gallois, Hortense and Garrett, Gaelyn and Gelbard, Alexander and Goldenberg, Anna and Hanna, Karim and Hersh, William and Jain, Jennifer and Jayachandran, Lochana and Jenney, Kaley and Jenkins, Kathy and Jo, Stacy and Johnson, Alistair and Kalia, Ayush and Kalia, Megha and Khawa, Zoha and Kostelnik, Cindy and Krause, Alisa and Krussel, Andrea and Lapadula, Elisa and Leo, Genelle and Levinsky, Justin and Loewith, Chloe and Mahajan, Radhika and Maharaj, Vrishni and Miao, Siyu and Michaels, LeAnn and Mifsud, Matthew and Mikhael, Marian and Moothedan, Elijah and Nafii, Yosef and Neal, Tempestt and Newberry, Karlee and Ng, Evan and Nickel, Christopher and Peltier, Amanda and Pharr, Trevor and Pnacekova, Michaela and Pontell, Matthew and Premi-Bortolotto, Claire and Rafatjou, Parnaz and Rahman, JM and Ramos, John and Rohde, Sarah and {de Riesthal}, Michael and Rossi, Jillian and Russell, Laurie and {Salvi Cruz}, Samantha and Samuel, Joyce and Shah, Suketu and Shawkat, Ahmed and Silberholz, Elizabeth and Stark, John and Su, Lala and Sudhakar, Shrramana Ganesh and Sutherland, Duncan and {Swarna Mukhi}, Venkata and Tang, Jeffrey and Taylor, Luka and Toghranegar, Jamie and Tu, Julie and Urbano, Megan and Victor, Gavin and Vinson, Kimberly and Wilke, Jordan and Wilson, Claire and Zanin, Madeleine and Zeng, Xijie and Zesiewicz, Theresa and Zhao, Robin and Zisimopoulos, Pantelis and Ghosh, Satrajit},
+  title = {{Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information}},
+  journal = {{PhysioNet}},
+  year = {2025},
+  month = dec,
+  note = {Version 3.0.0},
+  doi = {10.13026/k81f-qr68},
+  url = {https://doi.org/10.13026/k81f-qr68}
+}
+
+
+
+
+Cite
+
+×
+
+
+
+
+
+MLA
+Bensoussan, Yael, et al. "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information" (version 3.0.0). PhysioNet (2025). RRID:SCR_007345. https://doi.org/10.13026/k81f-qr68
+
+
+APA
+Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., Bélisle-Pipon, J., Bahr, R., Watts, S., Bolser, D., Siu, J., Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., ... Ghosh, S. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.0.0). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/k81f-qr68
+
+
+Chicago
+Bensoussan, Yael, Sigaras, Alexandros, Rameau, Anais, Elemento, Olivier, Powell, Maria, Dorr, David, Payne, Philip, Ravitsky, Vardit, Bélisle-Pipon, Jean-Christophe, Bahr, Ruth, Watts, Stephanie, Bolser, Donald, Siu, Jennifer, Lerner-Ellis, Jordan, Rudzicz, Frank, Boyer, Micah, Abdel-Aty, Yassmeen, Ahmed Syed, Toufeeq, Anibal, James, Amraei, Dona, Aradi, Stephen, Armosh, Kirollos, Martinez, Ana Sophia, Awan, Shaheen, Bedrick, Steven, Beltran, Helena, Bernier, Alexander, Berrios, Moroni, Bevers, Isaac, Blatter, Alden, Brito, Rahul, Brown, Amy, Brown, Johnathan, Cadillac, Léo, Casalino, Selina, Costello, John, Dalal, Abhijeet, De Santiago, Iris, Diaz-Ocampo, Enrique, Doherty-Kirby, Amanda, Ebraheem, Mohamed, Eiseman, Ellie, Elmahdy, Mahmoud, English, Renee, Evangelista, Emily, Fletcher, Kenneth, Gallois, Hortense, Garrett, Gaelyn, Gelbard, Alexander, Goldenberg, Anna, Hanna, Karim, Hersh, William, Jain, Jennifer, Jayachandran, Lochana, Jenney, Kaley, Jenkins, Kathy, Jo, Stacy, Johnson, Alistair, Kalia, Ayush, Kalia, Megha, Khawa, Zoha, Kostelnik, Cindy, Krause, Alisa, Krussel, Andrea, Lapadula, Elisa, Leo, Genelle, Levinsky, Justin, Loewith, Chloe, Mahajan, Radhika, Maharaj, Vrishni, Miao, Siyu, Michaels, LeAnn, Mifsud, Matthew, Mikhael, Marian, Moothedan, Elijah, Nafii, Yosef, Neal, Tempestt, Newberry, Karlee, Ng, Evan, Nickel, Christopher, Peltier, Amanda, Pharr, Trevor, Pnacekova, Michaela, Pontell, Matthew, Premi-Bortolotto, Claire, Rafatjou, Parnaz, Rahman, JM, Ramos, John, Rohde, Sarah, de Riesthal, Michael, Rossi, Jillian, Russell, Laurie, Salvi Cruz, Samantha, Samuel, Joyce, Shah, Suketu, Shawkat, Ahmed, Silberholz, Elizabeth, Stark, John, Su, Lala, Sudhakar, Shrramana Ganesh, Sutherland, Duncan, Swarna Mukhi, Venkata, Tang, Jeffrey, Taylor, Luka, Toghranegar, Jamie, Tu, Julie, Urbano, Megan, Victor, Gavin, Vinson, Kimberly, Wilke, Jordan, Wilson, Claire, Zanin, Madeleine, Zeng, Xijie, Zesiewicz, Theresa, Zhao, Robin, Zisimopoulos, Pantelis, and Satrajit Ghosh. "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information" (version 3.0.0). PhysioNet (2025). RRID:SCR_007345. https://doi.org/10.13026/k81f-qr68
+
+
+Harvard
+Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., Bélisle-Pipon, J., Bahr, R., Watts, S., Bolser, D., Siu, J., Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., Amraei, D., Aradi, S., Armosh, K., Martinez, A. S., Awan, S., Bedrick, S., Beltran, H., Bernier, A., Berrios, M., Bevers, I., Blatter, A., Brito, R., Brown, A., Brown, J., Cadillac, L., Casalino, S., Costello, J., Dalal, A., De Santiago, I., Diaz-Ocampo, E., Doherty-Kirby, A., Ebraheem, M., Eiseman, E., Elmahdy, M., English, R., Evangelista, E., Fletcher, K., Gallois, H., Garrett, G., Gelbard, A., Goldenberg, A., Hanna, K., Hersh, W., Jain, J., Jayachandran, L., Jenney, K., Jenkins, K., Jo, S., Johnson, A., Kalia, A., Kalia, M., Khawa, Z., Kostelnik, C., Krause, A., Krussel, A., Lapadula, E., Leo, G., Levinsky, J., Loewith, C., Mahajan, R., Maharaj, V., Miao, S., Michaels, L., Mifsud, M., Mikhael, M., Moothedan, E., Nafii, Y., Neal, T., Newberry, K., Ng, E., Nickel, C., Peltier, A., Pharr, T., Pnacekova, M., Pontell, M., Premi-Bortolotto, C., Rafatjou, P., Rahman, J., Ramos, J., Rohde, S., de Riesthal, M., Rossi, J., Russell, L., Salvi Cruz, S., Samuel, J., Shah, S., Shawkat, A., Silberholz, E., Stark, J., Su, L., Sudhakar, S. G., Sutherland, D., Swarna Mukhi, V., Tang, J., Taylor, L., Toghranegar, J., Tu, J., Urbano, M., Victor, G., Vinson, K., Wilke, J., Wilson, C., Zanin, M., Zeng, X., Zesiewicz, T., Zhao, R., Zisimopoulos, P., and Ghosh, S. (2025) 'Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information' (version 3.0.0), PhysioNet. RRID:SCR_007345. Available at: https://doi.org/10.13026/k81f-qr68
+
+
+Vancouver
+Bensoussan Y, Sigaras A, Rameau A, Elemento O, Powell M, Dorr D, Payne P, Ravitsky V, Bélisle-Pipon J, Bahr R, Watts S, Bolser D, Siu J, Lerner-Ellis J, Rudzicz F, Boyer M, Abdel-Aty Y, Ahmed Syed T, Anibal J, Amraei D, Aradi S, Armosh K, Martinez A S, Awan S, Bedrick S, Beltran H, Bernier A, Berrios M, Bevers I, Blatter A, Brito R, Brown A, Brown J, Cadillac L, Casalino S, Costello J, Dalal A, De Santiago I, Diaz-Ocampo E, Doherty-Kirby A, Ebraheem M, Eiseman E, Elmahdy M, English R, Evangelista E, Fletcher K, Gallois H, Garrett G, Gelbard A, Goldenberg A, Hanna K, Hersh W, Jain J, Jayachandran L, Jenney K, Jenkins K, Jo S, Johnson A, Kalia A, Kalia M, Khawa Z, Kostelnik C, Krause A, Krussel A, Lapadula E, Leo G, Levinsky J, Loewith C, Mahajan R, Maharaj V, Miao S, Michaels L, Mifsud M, Mikhael M, Moothedan E, Nafii Y, Neal T, Newberry K, Ng E, Nickel C, Peltier A, Pharr T, Pnacekova M, Pontell M, Premi-Bortolotto C, Rafatjou P, Rahman J, Ramos J, Rohde S, de Riesthal M, Rossi J, Russell L, Salvi Cruz S, Samuel J, Shah S, Shawkat A, Silberholz E, Stark J, Su L, Sudhakar S G, Sutherland D, Swarna Mukhi V, Tang J, Taylor L, Toghranegar J, Tu J, Urbano M, Victor G, Vinson K, Wilke J, Wilson C, Zanin M, Zeng X, Zesiewicz T, Zhao R, Zisimopoulos P, Ghosh S. Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.0.0). PhysioNet. 2025. RRID:SCR_007345. Available from: https://doi.org/10.13026/k81f-qr68
+
+
+
+BibTeX
+Copy
+@article{PhysioNet-b2ai-voice-3.0.0,
+  author = {Bensoussan, Yael and Sigaras, Alexandros and Rameau, Anais and Elemento, Olivier and Powell, Maria and Dorr, David and Payne, Philip and Ravitsky, Vardit and Bélisle-Pipon, Jean-Christophe and Bahr, Ruth and Watts, Stephanie and Bolser, Donald and Siu, Jennifer and Lerner-Ellis, Jordan and Rudzicz, Frank and Boyer, Micah and Abdel-Aty, Yassmeen and {Ahmed Syed}, Toufeeq and Anibal, James and Amraei, Dona and Aradi, Stephen and Armosh, Kirollos and Martinez, Ana Sophia and Awan, Shaheen and Bedrick, Steven and Beltran, Helena and Bernier, Alexander and Berrios, Moroni and Bevers, Isaac and Blatter, Alden and Brito, Rahul and Brown, Amy and Brown, Johnathan and Cadillac, Léo and Casalino, Selina and Costello, John and Dalal, Abhijeet and {De Santiago}, Iris and Diaz-Ocampo, Enrique and Doherty-Kirby, Amanda and Ebraheem, Mohamed and Eiseman, Ellie and Elmahdy, Mahmoud and English, Renee and Evangelista, Emily and Fletcher, Kenneth and Gallois, Hortense and Garrett, Gaelyn and Gelbard, Alexander and Goldenberg, Anna and Hanna, Karim and Hersh, William and Jain, Jennifer and Jayachandran, Lochana and Jenney, Kaley and Jenkins, Kathy and Jo, Stacy and Johnson, Alistair and Kalia, Ayush and Kalia, Megha and Khawa, Zoha and Kostelnik, Cindy and Krause, Alisa and Krussel, Andrea and Lapadula, Elisa and Leo, Genelle and Levinsky, Justin and Loewith, Chloe and Mahajan, Radhika and Maharaj, Vrishni and Miao, Siyu and Michaels, LeAnn and Mifsud, Matthew and Mikhael, Marian and Moothedan, Elijah and Nafii, Yosef and Neal, Tempestt and Newberry, Karlee and Ng, Evan and Nickel, Christopher and Peltier, Amanda and Pharr, Trevor and Pnacekova, Michaela and Pontell, Matthew and Premi-Bortolotto, Claire and Rafatjou, Parnaz and Rahman, JM and Ramos, John and Rohde, Sarah and {de Riesthal}, Michael and Rossi, Jillian and Russell, Laurie and {Salvi Cruz}, Samantha and Samuel, Joyce and Shah, Suketu and Shawkat, Ahmed and Silberholz, Elizabeth and Stark, John and Su, Lala and Sudhakar, Shrramana Ganesh and Sutherland, Duncan and {Swarna Mukhi}, Venkata and Tang, Jeffrey and Taylor, Luka and Toghranegar, Jamie and Tu, Julie and Urbano, Megan and Victor, Gavin and Vinson, Kimberly and Wilke, Jordan and Wilson, Claire and Zanin, Madeleine and Zeng, Xijie and Zesiewicz, Theresa and Zhao, Robin and Zisimopoulos, Pantelis and Ghosh, Satrajit},
+  title = {{Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information}},
+  journal = {{PhysioNet}},
+  year = {2025},
+  month = dec,
+  note = {Version 3.0.0},
+  doi = {10.13026/k81f-qr68},
+  url = {https://doi.org/10.13026/k81f-qr68}
+}
+
+
+
+Close
+
+
+
+
+
+Please include the standard citation for PhysioNet:
+(show more options)
+Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... & Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+
+
+
+
+
+Cite
+
+×
+
+
+
+
+
+APA
+Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... & Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+
+
+MLA
+Goldberger, A., et al. "PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220." (2000). RRID:SCR_007345.
+
+
+CHICAGO
+Goldberger, A., L. Amaral, L. Glass, J. Hausdorff, P. C. Ivanov, R. Mark, J. E. Mietus, G. B. Moody, C. K. Peng, and H. E. Stanley. "PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220." (2000). RRID:SCR_007345.
+
+
+HARVARD
+Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P.C., Mark, R., Mietus, J.E., Moody, G.B., Peng, C.K. and Stanley, H.E., 2000. PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+
+
+VANCOUVER
+Goldberger A, Amaral L, Glass L, Hausdorff J, Ivanov PC, Mark R, Mietus JE, Moody GB, Peng CK, Stanley HE. PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+
+
+
+
+Close
+
+
+
+
+
+Abstract
+The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. Here we present Bridge2AI-Voice, a comprehensive collection of data derived from voice recordings with corresponding clinical information.
+Bridge2AI-Voice v3.0 contains data for 833 participants across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.
+
+Background
+The production of human voice involves the complex interaction among respiration, phonation, resonation, and articulation. The respiratory system provides the air flow and pressure to initiate and maintain vocal fold vibration. The vocal folds generate the sound source which is then modified within the vocal tract by the oral and nasal cavities and the articulators involved in speech production. Each of these processes is influenced by the speaker’s ability to adjust and shape these interacting systems.
+Although many use the terms voice and speech interchangeably, it is important to understand the distinction between the different terms used to describe human sounds:
+Voice: In the voice research field, refers to sound production and is the phonatory aspect of speech. In other words, it is the sound produced by the larynx and the resonators. For example, voice can be assessed by asking someone to do a prolonged vowel sound like /e/.
+Speech: Speech is the result of the voice being modified by the articulators and is produced with intonation and prosody. For example, a patient having a stroke can have abnormal speech production due to difficulty with articulating words but have a normal voice. For this project, the term Voice as a Biomarker of Health will include speech in its definition.
+For voice to emerge as a biomarker of health, there is a pressing need for large, high quality, multi-institutional and diverse voice database linked to other health biomarkers from various data of different modality (demographics, imaging, genomics, risk factors, etc.) to fuel voice AI research and answer tangible clinical questions. Such an endeavor is only achievable through multi-institutional collaborations between voice experts and AI engineers, supported by bioethicists and social scientists to ensure the creation of ethically sourced voice databases representing our populations.
+Based on the existing literature and ongoing research in different fields of voice research, our group identified 5 disease cohort categories for which voice changes have been associated to specific diseases with well-recognized unmet needs. These categories were:
+
+Voice Disorders: Laryngeal disorders are the most studied pathologies linked to vocal changes. Benign and malignant lesions can affect the shape, mass, density, and tension of the vocal folds resulting in changes in vibratory function resulting in changes in phonation.
+Neurological and Neurodegenerative Disorders: Changes in voice have been linked to depression, and other mood disorders. Individuals with depression have been found to have decreased fundamental frequency (f0) as well as a monotonous speech, while individuals with anxiety disorders have a significant increase in F0. Regrettably, much of the literature examining the intersection of voice and speech changes in psychiatric conditions have used small datasets with limited demographic diversity reporting, lack of standardized data collection protocol precluding meta-analysis and possible confounders, all limiting external validity and clinical usability.
+Mood and Psychiatric Disorders: Voice and speech are altered in many neurological and neurodegenerative conditions. Acute strokes can present with slurred speech (Dysarthria) or expressive deficits speech (Aphasia). Voice and speech changes can be the presenting symptoms of many neurodegenerative conditions, such as Parkinson’s and ALS with changes such as slowed, low frequency, monotonous speech as well as vocal tremor.
+Respiratory disorders: Respiratory sounds, including breath, cough and voice have long been used for diagnostic purposes. For instance, pediatric croup can be suspected based on the presence of barking cough, stridor and dysphonia. With advances in acoustic recording and analysis in the second half on the twentieth century, increasing interest has emerged in the use of respiratory sounds for disease screening and therapeutic monitoring, especially with cough sounds.
+Pediatric Voice and Speech Disorders: The literature is sparser in terms of pediatric voice and speech analysis partly due to ethical concerns and challenges in data acquisition for this cohort. However, many studies have investigated the use of machine learning models for voice and speech analysis for detection of Autism and Speech Delays in the pediatric population.
+
+The protocols used for data collection in this study have been extensively described [1].
+
+Methods
+Patients presenting at specialty clinics and institutions were considered for enrollment. Patients were selected based on membership to five predetermined groups (Respiratory disorders, Voice disorders, Neurological disorders, Mood disorders, Pediatric). Patients presenting at the given clinic were screened for inclusion and exclusion criteria prior to their visit by the project investigators. If eligible for enrollment, patient consent was sought for the data collection initiative and to share the acquired research data. Once consented, a standardized protocol for data collection was adopted. This protocol involved the collection of demographic information, health questionnaires, targeted questionnaires inquiring about known confounders for voice, disease specific information, and voice recording tasks such as sustained phonation of a vowel sound. Data collection was conducted using a custom application on a tablet with a headset used for data collection when possible. For most participants a single session was sufficient to collect all relevant data. However, a subset of participants required multiple sessions to complete the data collection. As a result, there may be more than one session per participant in the current dataset. Data were exported and converted from RedCap using an open source library developed by our team [2].
+Raw audio was preprocessed by converting to monaural and resampling to 16 kHz with a Butterworth anti-aliasing filter applied. From this standardized audio, we extracted five types of derived data:
+
+Spectrograms - Time-frequency representations were computed using the short-time Fast Fourier Transform (FFT) with a 25ms window size, 10ms hop length, and a 400-point FFT. Spectrograms were further downsampled by a factor of two in the time domain after derivation.
+Mel-frequency cepstral coefficients (MFCC) - 60 MFCCs were extracted using the above spectrograms.
+Mel Spectrogram - a combination of the above two computed with the same parameters (25ms window size, 10ms hop length, a 400-point FFT, and 60 Mels).
+Articulatory features - using the Speech Articulatory Coding (sparc) package, we generate the kinematic traces of vocal tract articulators and source features as well as measures of loudness, periodicity, and pitch. All features were gathered at 50Hz.
+Acoustic features were extracted using OpenSMILE, capturing temporal dynamics and acoustic characteristics.
+Phonetic and prosodic features were computed using Parselmouth and Praat, providing measures of fundamental frequency, formants, and voice quality.
+Phonetic Posteriorgrams (ppgs) - time-varying categorical distribution over acoustic units of speech (e.g., phonemes) at 100Hz were generated via the ppgs package [10].
+Transcriptions were generated using OpenAI's Whisper Large model.
+
+The following de-identification steps were taken in the process of preparing the dataset:
+
+HIPAA Safe Harbor identifiers were removed.
+
+While not all relevant to this dataset, these identifiers include: names, geographic locators, date information (at resolution finer than years), phone/fax numbers, email addresses, IP addresses, Social Security Numbers, medical record numbers, health plan beneficiary numbers, device identifiers, license numbers, account numbers, vehicle identifiers, website URLs, full face photos, biometric identifiers, and any unique identifiers.
+
+State and province were removed. Country of data collection was retained.
+
+
+
+
+Spectrograms and similar features were excluded if the audio contained free speech. Static and other features which do not encode the sensitive information were retained.
+
+
+Data Description
+The dataset contains both derived audio data features (under features) and phenotypic information acquired during data collection. 
+Features
+Binary files are made available as Parquet, an open-source column-oriented data file format. The following dense binary files are available in the features subfolder:
+
+ppgs.parquet
+sparc_ema.parquet
+sparc_loudness.parquet
+sparc_periodicity.parquet
+sparc_pitch.parquet
+torchaudio_spectrogram.parquet
+torchaudio_mfcc.parquet
+torchaudio_pitch.parquet
+torchaudio_mel_spectrogram.parquet
+
+In addition to these files, the features folder contains the following plain-text files:
+
+static_features.tsv - Features derived from the raw audio, with one feature per audio recording.
+
+All of the above files are associated with a data dictionary file which has the same file stem and a JSON suffixes (e.g. torch_spectrogram.json). These data dictionary files contain a description of the feature and detail on the processing done to prepare the feature.
+Each of the parquet files is formatted similarly. Each element of the parquet formatted dataset contains a unique identifier for the participant (participant_id), a unique identifier for the recording session (session_id), the task performed (task_name), the number of time frames associated with that feature (n_frames) and the tensor data for that associated feature which are described in more detail below where the feature is after the software used to extract it:
+
+torchaudio_spectrograms.parquet (n=29020) contains spectrograms of dimension 201xT generated using the short-time Fast Fourier Transform (FFT) with a 25ms window size, 10ms hop length, and a 400-point FFT.
+torchaudio_mel_spectrograms.parquet (n=29020) contains Mel spectrograms of dimension 60xT generated with a 25ms window size, 10ms hop length, a 400-point FFT and 60 Mel bins.
+torchaudio_mfcc.parquet (n=29020) contains Mel-frequency cepstrum coefficients of dimension 60xT using the same parameters as the mel spectrograms.
+torchaudio_pitch.parquet (n=32236) contains the detected pitch (fundamental frequency) over time and is of dimension T with a min and max pitch of 80 and 500 respectively.
+sparc_ema.parquet (n=31616) contains the estimated electromagnetic articulography (EMA) using a deep learning model with dimensions Tx12 where the 12 correspond to X/Y positions of six articulators: tongue dorsum (TD), tongue body (TB), tongue tip (TT), lower incisor (LI), upper lip (UL), lower lip (LL), respectively.
+sparc_loudness.parquet (n=31616) contains the estimated loudness based on the average absolute amplitude of the audio waveform of size T, using 20ms windows.
+sparc_periodicity.parquet (n=31633) contains the estimated periodicity (confidence of pitch presence) derived from the audio using 20ms windows of dimension T.
+sparc_pitch.parquet (n=31633) contains the estimated fundamental frequency (F0) of the audio signal using a different algorithm than before with a range of 50-550Hz and dimension T.
+ppgs.parquet (n=29031) contains the phonetic posteriorgram probabilities across 40 phoneme categories giving a dimension of 40xT with a frame rate of 100Hz.
+
+Spectrograms, Mel Spectrograms, MFC coefficients, PPGs, and EMAs for sensitive records and audio checks have been removed from v3.0. Additionally, some files, whether due to length or other issues, could not generate certain features and so are not included in the bundled data.
+Features derived from the open-source Speech and Music Interpretation by Large-space Extraction (openSMILE [3]), Praat [4], parselmouth [5], and torchaudio [6, 7] are provided. Each feature is present in the static_features.tsv file, with the data dictionary providing a description of each feature, and one row per unique recording.
+Phenotype
+The phenotype subfolder contains organized information collected from the participant or other individual during their encounter:
+.├── confounders│   ├── confounders.json│   └── confounders.tsv├── demographics│   ├── demographics.json│   └── demographics.tsv├── diagnosis│   ├── adhd_adult.json│   ├── adhd_adult.tsv│   ├── airway_stenosis.json│   ├── airway_stenosis.tsv│   ├── amyotrophic_lateral_sclerosis.json│   ├── amyotrophic_lateral_sclerosis.tsv│   ├── anxiety.json│   ├── anxiety.tsv│   ├── benign_lesions.json│   ├── benign_lesions.tsv│   ├── bipolar_disorder.json│   ├── bipolar_disorder.tsv│   ├── cognitive_impairment.json│   ├── cognitive_impairment.tsv│   ├── control.json│   ├── control.tsv│   ├── copd_and_asthma.json│   ├── copd_and_asthma.tsv│   ├── depression.json│   ├── depression.tsv│   ├── glottic_insufficiency.json│   ├── glottic_insufficiency.tsv│   ├── laryngeal_cancer.json│   ├── laryngeal_cancer.tsv│   ├── laryngeal_dystonia.json│   ├── laryngeal_dystonia.tsv│   ├── laryngitis.json│   ├── laryngitis.tsv│   ├── muscle_tension_dysphonia.json│   ├── muscle_tension_dysphonia.tsv│   ├── parkinsons_disease.json│   ├── parkinsons_disease.tsv│   ├── precancerous_lesions.json│   ├── precancerous_lesions.tsv│   ├── psychiatric_history.json│   ├── psychiatric_history.tsv│   ├── ptsd_adult.json│   ├── ptsd_adult.tsv│   ├── unexplained_chronic_cough.json│   ├── unexplained_chronic_cough.tsv│   ├── unilateral_vocal_fold_paralysis.json│   └── unilateral_vocal_fold_paralysis.tsv├── enrollment│   ├── eligibility.json│   ├── eligibility.tsv│   ├── enrollment_form.json│   ├── enrollment_form.tsv│   ├── participant.json│   └── participant.tsv├── questionnaire│   ├── custom_affect_scale.json│   ├── custom_affect_scale.tsv│   ├── dsm5_adult.json│   ├── dsm5_adult.tsv│   ├── dyspnea_index.json│   ├── dyspnea_index.tsv│   ├── gad7_anxiety.json│   ├── gad7_anxiety.tsv│   ├── leicester_cough_questionnaire.json│   ├── leicester_cough_questionnaire.tsv│   ├── panas.json│   ├── panas.tsv│   ├── phq9.json│   ├── phq9.tsv│   ├── productive_vocabulary.json│   ├── productive_vocabulary.tsv│   ├── vhi10.json│   ├── vhi10.tsv│   ├── voice_perception.json│   └── voice_perception.tsv└── task    ├── acoustic_task.json    ├── acoustic_task.tsv    ├── harvard_sentences.json    ├── harvard_sentences.tsv    ├── random_item_generation.json    ├── random_item_generation.tsv    ├── recording.json    ├── recording.tsv    ├── session.json    ├── session.tsv    ├── stroop.json    ├── stroop.tsv    ├── voice_perception.json    ├── voice_perception.tsv    ├── voice_problem_severity.json    ├── voice_problem_severity.tsv    ├── winograd.json    └── winograd.tsv
+Phenotype data files only contain rows for a participant if at least one column is not missing. As visible, all of the TSV data files have a data dictionary available with the data file. The data dictionary has the same file stem but a distinct suffix: json. For phenotype data, dictionary files have keys with the same name as the column names in the associated data file. The values for each element provide detail of the column, including a description field which provides a one sentence summary of the respective column, the question (if any) that was asked the participant to prompt the answer, and the data type of the response.
+Note that as participants may have repeated visits in order to collect data, there may be more than one row per participant in the data files. Furthermore, there is no requirement the participant provide the same response for each visit. As a result, participant information for the same data element may vary across the data file.
+The code used to process the raw audio into the above features and to merge the source data into the phenotype files has been made open source in the b2aiprep library [8]. This release was generated with b2aiprep v3.0.0.
+
+Usage Notes
+If using Python, the parquet dataset can be loaded in with any library that supports parquet. For example, the HuggingFace Datasets library can be used to load in the spectrograms:
+from datasets import Dataset
+ds = Dataset.from_parquet("torchaudio_spectrogram.parquet")
+
+A spectrogram can be plotted in decibels by converting it from its original power representation:
+import librosa
+spectrogram = librosa.power_to_db(np.asarray(ds[0]['spectrogram']))
+plt.figure(figsize=(10, 4))
+plt.imshow(spectrogram, aspect='auto', origin='lower')
+plt.title('Spectrogram')
+plt.xlabel('Time')
+plt.ylabel('Frequency')
+plt.colorbar()
+
+The phenotype file can be loaded with any statistical analysis tool. For example, the pandas library in Python can read the data:
+import pandas as pd
+df = pd.read_csv("demographics.tsv", sep="\t", header=0)
+
+
+Release Notes
+b2ai-voice v3.0.0: A major update with new data for an additional 391 participants. The single phenotype data file has been separated into more user-friendly and intuitive individual files. Additional features were provided from the Speech Articulatory Coding (sparc) package as well as Phonetic Posteriorgrams from the ppgs package. The files have been reorganized.
+b2ai-voice v2.0.1: Corrections in the authorship list.
+b2ai-voice v2.0: This release provides data for an additional 136 new participants. Spectrograms were reprocessed to fix some minor issues identified in the previous release. All spectograms and Mel-frequency cepstral coefficients from free speech related files have been removed.
+b2ai-voice v1.1: This release added Mel-frequency cepstral coefficients (MFCCs).
+b2ai-voice v1.0: This was the first release of the Bridge2AI voice as a biomarker of health dataset [9].
+
+Ethics
+Data collection and sharing was approved by the University of South Florida Institutional Review Board.
+
+Acknowledgements
+This release would not be possible without the graceful contribution of data from all the participants of the study.
+This project was funded by NIH project number 3OT2OD032720-01S1: Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before. We would also like to thank the NIH for their continued support of the project.
+
+Conflicts of Interest
+None to declare.
+
+References
+
+Rameau, A., Ghosh, S., Sigaras, A., Elemento, O., Belisle-Pipon, J.-C., Ravitsky, V., Powell, M., Johnson, A., Dorr, D., Payne, P., Boyer, M., Watts, S., Bahr, R., Rudzicz, F., Lerner-Ellis, J., Awan, S., Bolser, D., Bensoussan, Y. (2024) Developing Multi-Disorder Voice Protocols: A team science approach involving clinical expertise, bioethics, standards, and DEI.. Proc. Interspeech 2024, 1445-1449, doi: 10.21437/Interspeech.2024-1926
+Bensoussan, Y., Ghosh, S. S., Rameau, A., Boyer, M., Bahr, R., Watts, S., Rudzicz, F., Bolser, D., Lerner-Ellis, J., Awan, S., Powell, M. E., Belisle-Pipon, J.-C., Ravitsky, V., Johnson, A., Zisimopoulos, P., Tang, J., Sigaras, A., Elemento, O., Dorr, D., … Bridge2AIVoice. (2024). Bridge2AI Voice REDCap (v3.23.0). Zenodo. https://zenodo.org/records/14989503
+Florian Eyben, Martin Wöllmer, Björn Schuller: "openSMILE - The Munich Versatile and Fast Open-Source Audio Feature Extractor", Proc. ACM Multimedia (MM), ACM, Florence, Italy, ISBN 978-1-60558-933-6, pp. 1459-1462, 25.-29.10.2010.
+Boersma P, Van Heuven V. Speak and unSpeak with PRAAT. Glot International. 2001 Nov;5(9/10):341-7.
+Jadoul Y, Thompson B, De Boer B. Introducing parselmouth: A python interface to praat. Journal of Phonetics. 2018 Nov 1;71:1-5.
+Hwang, J., Hira, M., Chen, C., Zhang, X., Ni, Z., Sun, G., Ma, P., Huang, R., Pratap, V., Zhang, Y., Kumar, A., Yu, C.-Y., Zhu, C., Liu, C., Kahn, J., Ravanelli, M., Sun, P., Watanabe, S., Shi, Y., Tao, T., Scheibler, R., Cornell, S., Kim, S., & Petridis, S. (2023). TorchAudio 2.1: Advancing speech recognition, self-supervised learning, and audio processing components for PyTorch. arXiv preprint arXiv:2310.17864
+Yang, Y.-Y., Hira, M., Ni, Z., Chourdia, A., Astafurov, A., Chen, C., Yeh, C.-F., Puhrsch, C., Pollack, D., Genzel, D., Greenberg, D., Yang, E. Z., Lian, J., Mahadeokar, J., Hwang, J., Chen, J., Goldsborough, P., Roy, P., Narenthiran, S., Watanabe, S., Chintala, S., Quenneville-Bélair, V, & Shi, Y. (2021). TorchAudio: Building Blocks for Audio and Speech Processing. arXiv preprint arXiv:2110.15018.
+Bevers, I., Ghosh, S., Johnson, A., Brito, R., Bedrick, S., Catania, F., & Ng, E. (2017). b2aiprep library (Version 3.0.0) [Computer software]. https://github.com/sensein/b2aiprep
+Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., & Bensoussan, Y. (2024). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.0). Health Data Nexus. https://doi.org/10.57764/qb6h-em84
+C. Churchwell, M. Morrison, and B. Pardo, "High-Fidelity Neural Phonetic Posteriorgrams," ICASSP 2024 Workshop on Explainable Machine Learning for Speech and Audio, April 2024.
+
+
+
+
+
+
+
+
+          Contents
+          
+
+Abstract
+Background
+Methods
+Data Description
+Usage Notes
+Release Notes
+Ethics
+Acknowledgements
+Conflicts of Interest
+References
+Files
+
+
+
+Share
+
+
+
+
+
+
+
+
+
+Access
+
+
+Access Policy:
+
+              Only credentialed users who sign the DUA can access the files.
+            
+
+License (for files):
+
+Bridge2AI Voice Registered Access License
+
+
+Data Use Agreement:
+
+Bridge2AI Voice Registered Access Agreement
+
+
+Required training:
+No training required
+                
+              
+
+
+
+Discovery
+
+DOI (version 3.0.0):
+
+https://doi.org/10.13026/k81f-qr68
+
+DOI (latest version):
+
+https://doi.org/10.13026/37yb-1t42
+
+Topics:
+
+voice
+bridge2ai
+
+Project Website:
+
+ https://b2ai-voice.org/
+
+
+
+
+Project Views
+
+
+
+142
+Current Version
+
+
+683
+All Versions
+
+
+Project Views by Unique Registered Users
+
+View Details
+
+
+
+
+Corresponding Author
+
+You must be logged in to view the contact information.
+
+
+
+Versions
+
+
+
+1.1
+
+            Jan. 17, 2025
+          
+
+
+
+
+2.0.0
+
+            April 16, 2025
+          
+
+
+
+
+2.0.1
+
+            Aug. 18, 2025
+          
+
+
+
+
+3.0.0
+
+            Dec. 16, 2025
+          
+
+
+
+
+
+
+
+Files
+
+  
+    This is a restricted-access resource. To access the files, you must fulfill all of the following requirements:
+    
+be a credentialed user
+
+sign the data use agreement for the project
+          
+
+
+
+
+
+
+
+
+
+
+
+
+Maintained by the MIT Laboratory for Computational Physiology
+Supported by the National Institute of Biomedical Imaging and Bioengineering (NIBIB), National Heart Lung and Blood Institute (NHLBI), and NIH Office of the Director under NIH grant numbers U24EB037545 and R01EB030362
+
+
+Navigation
+Discover Data
+Share Data
+About
+News
+
+
+Explore
+Data
+Software
+Challenges
+Tutorials
+
+
+
+
+
+
+
+
+
+
+Accessibility
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

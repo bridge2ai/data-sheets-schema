@@ -323,6 +323,12 @@ class D4DEvaluator:
                 elif method == "claudecode":
                     file_path = base_dir / "d4d_concatenated" / \
                         "claudecode" / f"{project}_d4d.yaml"
+                elif method == "claudecode_agent":
+                    file_path = base_dir / "d4d_concatenated" / \
+                        "claudecode_agent" / f"{project}_d4d.yaml"
+                elif method == "claudecode_agent_core":
+                    file_path = base_dir / "d4d_concatenated" / \
+                        "claudecode_agent_core" / f"{project}_d4d_core.yaml"
                 else:
                     print(f"Unknown method: {method}")
                     continue

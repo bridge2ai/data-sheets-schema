@@ -6,12 +6,14 @@ Handles:
 - .txt, .json, .md: Copy as-is (already text)
 - .pdf: Extract text using pdfminer
 - .html: Extract text using BeautifulSoup (if no .txt version exists)
+- .docx: Extract text using python-docx
 """
 import argparse
 import shutil
 from pathlib import Path
 from pdfminer.high_level import extract_text
 from bs4 import BeautifulSoup
+from docx import Document
 
 from data_sheets_schema.constants import PROJECTS
 
@@ -47,9 +49,26 @@ def extract_html_text(html_path: Path) -> str:
         return ""
 
 
+def extract_docx_text(docx_path: Path) -> str:
+    """Extract text from DOCX using python-docx."""
+    try:
+        doc = Document(str(docx_path))
+        paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+        # Also extract text from tables
+        for table in doc.tables:
+            for row in table.rows:
+                row_text = '\t'.join(cell.text.strip() for cell in row.cells if cell.text.strip())
+                if row_text:
+                    paragraphs.append(row_text)
+        return '\n'.join(paragraphs)
+    except Exception as e:
+        print(f"    ⚠️  Error extracting DOCX {docx_path.name}: {e}")
+        return ""
+
+
 def preprocess_project(src_dir: Path, dst_dir: Path) -> dict:
     """Preprocess all files in a project directory."""
-    stats = {"copied": 0, "pdf_extracted": 0, "html_extracted": 0, "skipped": 0, "errors": 0}
+    stats = {"copied": 0, "pdf_extracted": 0, "html_extracted": 0, "docx_extracted": 0, "skipped": 0, "errors": 0}
 
     if not src_dir.exists():
         print(f"  ⚠️  Source directory not found: {src_dir}")
@@ -84,6 +103,21 @@ def preprocess_project(src_dir: Path, dst_dir: Path) -> dict:
             if text.strip():
                 dst_file.write_text(text, encoding="utf-8")
                 stats["pdf_extracted"] += 1
+            else:
+                print(f"    ⚠️  Empty extraction for {src_file.name}")
+                stats["errors"] += 1
+
+        # Extract text from DOCX
+        elif suffix == ".docx":
+            txt_name = src_file.stem + ".txt"
+            dst_file = dst_dir / txt_name
+
+            print(f"    📝 DOCX: {src_file.name} → {txt_name}")
+            text = extract_docx_text(src_file)
+
+            if text.strip():
+                dst_file.write_text(text, encoding="utf-8")
+                stats["docx_extracted"] += 1
             else:
                 print(f"    ⚠️  Empty extraction for {src_file.name}")
                 stats["errors"] += 1
@@ -168,7 +202,7 @@ def main():
     print(f"Output: {args.output_dir}")
     print()
 
-    total_stats = {"copied": 0, "pdf_extracted": 0, "html_extracted": 0, "skipped": 0, "errors": 0}
+    total_stats = {"copied": 0, "pdf_extracted": 0, "html_extracted": 0, "docx_extracted": 0, "skipped": 0, "errors": 0}
 
     for project in args.projects:
         print(f"\n📁 {project}")
@@ -180,7 +214,7 @@ def main():
         for key in total_stats:
             total_stats[key] += stats.get(key, 0)
 
-        print(f"    Summary: {stats['copied']} copied, {stats['pdf_extracted']} PDFs, {stats['html_extracted']} HTMLs extracted")
+        print(f"    Summary: {stats['copied']} copied, {stats['pdf_extracted']} PDFs, {stats['html_extracted']} HTMLs, {stats['docx_extracted']} DOCXs extracted")
 
     print("\n" + "=" * 60)
     print("  Total Summary")
@@ -188,6 +222,7 @@ def main():
     print(f"  Copied:         {total_stats['copied']} files (.txt, .json, .md)")
     print(f"  PDF extracted:  {total_stats['pdf_extracted']} files")
     print(f"  HTML extracted: {total_stats['html_extracted']} files")
+    print(f"  DOCX extracted: {total_stats['docx_extracted']} files")
     print(f"  Skipped:        {total_stats['skipped']} files")
     print(f"  Errors:         {total_stats['errors']} files")
     print()

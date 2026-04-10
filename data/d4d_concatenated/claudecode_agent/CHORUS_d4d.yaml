@@ -1,8 +1,8 @@
-# D4D Datasheet for CHoRUS Dataset
+# D4D Datasheet for CHORUS Dataset
 # Generation Method: Claude Code Agent Deterministic
-# Source: data/preprocessed/concatenated/CHORUS_preprocessed.txt (79K, 7 source files)
+# Source: data/preprocessed/concatenated/CHORUS_preprocessed.txt
 # Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
-# Generated: 2025-12-20
+# Generated: 2026-04-10
 
 id: https://chorus4ai.org/
 name: CHoRUS
@@ -11,18 +11,22 @@ description: >
   CHoRUS for Equitable AI is a Bridge2AI data generation project developing the most diverse,
   high-resolution, ethically sourced, AI-ready critical care dataset to answer the grand
   challenge of improving recovery from acute illness. The project spans 20 academic centers
-  (14 data acquisition centers) and creates a publicly available dataset of over 100,000
-  critically ill patients with multi-modal data including structured EHR, waveform telemetry,
-  medical imaging, EEG, and clinical notes. All data is standardized to the OMOP Common Data
-  Model with additional formats (DICOM, WFDB, OHNLP tokenization) and includes comprehensive
-  metadata schemas. Patient-focused efforts determine ethical and legal approaches to manage
-  privacy and bias while accounting for Social Determinants of Health. A visualization and
-  annotation environment labels data with targets important for prediction. The project
-  emphasizes skills and workforce development for a next generation of diverse academic and
-  community AI scientists through training programs and partnerships with AIM-AHEAD. As of
-  November 2024, the dataset covers 14 different hospitals with 23,400 unique admissions.
+  (14 data acquisition centers) and is building a publicly available dataset targeting over
+  100,000 critically ill patients with multi-modal data including structured EHR, waveform
+  telemetry, medical imaging, EEG, and clinical notes. All structured data is standardized
+  to the OMOP Common Data Model with additional formats (DICOM, WFDB, OHNLP tokenization)
+  and comprehensive metadata schemas. Patient-focused efforts determine ethical and legal
+  approaches to manage privacy and bias while accounting for Social Determinants of Health.
+  A visualization and annotation environment labels data with targets important for prediction.
+  The project emphasizes skills and workforce development for a next generation of diverse
+  academic and community AI scientists through training programs and partnerships with
+  AIM-AHEAD. As of August 2025, the dataset covers 14 different hospitals with over 45,000
+  unique admissions and includes 50,000 patient admissions from ICU, PICU, and NICU, 1.6
+  billion rows of EHR OMOP data, 7,642 admissions with radiology data, and 23 TB of
+  waveform data.
 page: https://chorus4ai.org/
 language: en
+license: Controlled Access - Data Use Agreement Required (OT2OD032701)
 keywords:
   - CHoRUS
   - Bridge2AI
@@ -49,90 +53,95 @@ keywords:
   - data standardization
   - privacy preservation
   - bias mitigation
+  - ICU
+  - intensive care
 
 # Motivation
 purposes:
-  - id: purpose-001
+  - id: chorus:purpose:1
     name: Improve recovery from acute illness
     description: >
       Answer the grand challenge of improving recovery from acute illness by developing
       high-resolution multi-center datasets as a critical first step towards actionable
       and trustworthy AI in critical care. Address the urgent need for infrastructure to
       support artificial intelligence and machine learning (AI/ML) in critical care settings.
-  - id: purpose-002
+  - id: chorus:purpose:2
     name: Create AI-ready critical care dataset
     description: >
       Develop a publicly available, AI-ready critical care dataset from more than 100,000
       critically ill patients while ensuring methods promote privacy, accountability, and
       clinical benefit. Generate the most diverse, high-resolution, ethically sourced dataset
-      for AI/ML applications in acute and critical care.
-  - id: purpose-003
+      for AI/ML applications in acute and critical care, expanding AI and Machine Learning
+      to improve recovery from acute illness.
+  - id: chorus:purpose:3
     name: Establish data standards and tools
     description: >
       Unify standards to harmonize multi-modal EHR, waveform, imaging, and text data.
       Develop software and tooling to interact with and extract insight from clinical data
       in diverse formats. Create validated semantic mappings for connecting clinical data
-      in various source formats to international standards (OMOP Common Data Model).
-  - id: purpose-004
+      in various source formats to international standards (OMOP Common Data Model, DICOM,
+      WFDB, OHNLP).
+  - id: chorus:purpose:4
     name: Promote diversity and health equity
     description: >
       Ensure comprehensive sets of patient conditions and clinical treatment strategies with
       appropriate contextual factors such as geographic distance to nearest hospital and
       Social Determinants of Health. Develop the skills and workforce for a next generation
       of diverse academic and community AI scientists through comprehensive training and
-      education programs.
+      education programs in partnership with AIM-AHEAD.
 
 tasks:
-  - id: task-001
+  - id: chorus:task:1
     name: Characterize acute and critical care illness
     description: >
       Generate data for ML/AI applications aimed at characterizing acute and critical care
       illness patterns, progression, and outcomes across diverse patient populations and
       hospital settings.
-  - id: task-002
+  - id: chorus:task:2
     name: Predict complications in critically ill patients
     description: >
       Enable prediction of complications among patients with acute or critical illness using
       multi-modal data including structured EHR, waveforms, imaging, and clinical notes.
-  - id: task-003
+  - id: chorus:task:3
     name: Measure treatment response
     description: >
       Support measurement and analysis of treatment response among critically ill patients
       through high-frequency documentation, medication administration records, and clinical
       outcomes data.
-  - id: task-004
-    name: External validation for marketplace adoption
+  - id: chorus:task:4
+    name: External validation for AI model marketplace adoption
     description: >
       Provision a holdout test set accessible for model external validation to aid marketplace
       adoption of AI-developed models for implementation in acute and critical care settings.
-  - id: task-005
+  - id: chorus:task:5
     name: Label data for prediction targets
     description: >
       Utilize visualization and annotation environment to label data with targets important
       for prediction tasks in critical care AI applications.
 
 addressing_gaps:
-  - id: gap-001
+  - id: chorus:gap:1
     name: Lack of diverse multi-center critical care datasets
     description: >
       Address the absence of large-scale, diverse, high-resolution multi-center datasets
       for critical care AI/ML by creating a dataset spanning 20 academic centers with
       100,000+ critically ill patients and ensuring balanced, diverse cohorts through
-      federated access and sampling methods.
-  - id: gap-002
-    name: Insufficient data standardization
+      federated access and sampling methods across 14 data acquisition centers.
+  - id: chorus:gap:2
+    name: Insufficient data standardization in critical care
     description: >
       Overcome the lack of unified standards in critical care data by harmonizing multi-modal
       EHR, waveform, imaging, and text data to OMOP Common Data Model and other international
       standards (DICOM, WFDB, OHNLP).
-  - id: gap-003
-    name: Privacy and bias concerns in AI
+  - id: chorus:gap:3
+    name: Privacy and bias concerns in clinical AI
     description: >
       Address ethical and legal challenges in AI through patient-focused efforts that determine
       approaches to manage privacy and bias while accounting for Social Determinants of Health
-      and performing community-facing ethics focus groups.
-  - id: gap-004
-    name: Limited AI workforce diversity
+      and performing community-facing ethics focus groups to determine what data is appropriate
+      for public sharing.
+  - id: chorus:gap:4
+    name: Limited diversity in AI/ML workforce
     description: >
       Bridge the gap in diverse AI/ML workforce through comprehensive educational approaches,
       training programs (including AIM-AHEAD partnership), and cultivation of expertise in
@@ -140,431 +149,522 @@ addressing_gaps:
 
 # Creators and Contributors
 creators:
-  - id: creator-001
+  - id: chorus:creator:1
     name: Eric S. Rosenthal
     description: Contact PI/Project Leader, Massachusetts General Hospital (MGH), Director of MGH Neurosciences ICU
-  - id: creator-002
+  - id: chorus:creator:2
     name: Azra Bihorac
     description: Principal Investigator, University of Florida (UF)
-  - id: creator-003
+  - id: chorus:creator:3
     name: Ashley Cordes
     description: Principal Investigator, CHoRUS Consortium
-  - id: creator-004
+  - id: chorus:creator:4
     name: Gilles Clermont
     description: Principal Investigator, CHoRUS Consortium
-  - id: creator-005
+  - id: chorus:creator:5
     name: Gari David Clifford
     description: Principal Investigator, CHoRUS Consortium
-  - id: creator-006
+  - id: chorus:creator:6
     name: Barbara J. Evans
     description: Principal Investigator, CHoRUS Consortium
-  - id: creator-007
+  - id: chorus:creator:7
     name: Xiao Hu
     description: Principal Investigator, CHoRUS Consortium
-  - id: creator-008
+  - id: chorus:creator:8
     name: Rishikesan Kamaleswaran
     description: Principal Investigator, CHoRUS Consortium
-  - id: creator-009
+  - id: chorus:creator:9
     name: Yulia A. Levites Strekalova
     description: Principal Investigator, University of Florida (UF)
-  - id: creator-010
+  - id: chorus:creator:10
     name: Parisa Rashidi
     description: Principal Investigator, University of Florida (UF)
-  - id: creator-011
+  - id: chorus:creator:11
     name: Cynthia Rudin
     description: Principal Investigator, CHoRUS Consortium
-  - id: creator-012
+  - id: chorus:creator:12
     name: Ishan Canty Williams
     description: Principal Investigator, CHoRUS Consortium
-  - id: creator-013
+  - id: chorus:creator:13
     name: Andrew Ewing Williams
     description: Principal Investigator, Tufts Medicine
-  - id: creator-014
+  - id: chorus:creator:14
     name: Xiaoqian Jiang
-    description: Program Lead, UT Health Science Center
-  - id: creator-015
+    description: Program Lead, UT Health Science Center (UTHealth Houston)
+  - id: chorus:creator:15
     name: Morteza Zabihi
     description: Lecturer (Machine Learning Basics), Massachusetts General Hospital
-  - id: creator-016
+  - id: chorus:creator:16
     name: Zhenhong Hu
-    description: Instructor (Python & Version Control), University of Florida
-  - id: creator-017
+    description: Instructor (Python and Version Control), University of Florida
+  - id: chorus:creator:17
     name: Debora Simmons
     description: Lecturer (Ethics of AI in Clinical Practice), UT Health Science Center
-  - id: creator-018
-    name: Andrew Williams
-    description: Lecturer (EHR Data for Research), Tufts Medicine
-  - id: creator-019
+  - id: chorus:creator:18
     name: Aliyah Geer
     description: Workshop Lead (Data Schemas in Clinical Cloud), Massachusetts General Hospital
+  - id: chorus:creator:19
+    name: Ciera McCrary
+    description: Program Manager, Massachusetts General Hospital (MGH)
 
 funders:
-  - id: funder-001
+  - id: chorus:funder:1
     name: NIH Common Fund Bridge2AI Program
     description: >
-      Funded through National Institutes of Health grant 1OT2OD032701-01, administered by
-      NIH Office of the Director. Opportunity Number: OTA-21-008. Study Section: Data
-      Coordination, Mapping, and Modeling [DCMM]. Fiscal Year 2022. Total funding in
-      2022: $5,880,300 (all direct costs). Project dates: September 1, 2022 to
-      November 30, 2026 (with no-cost extension approved).
+      Funded through National Institutes of Health grant OT2OD032701 (project number
+      1OT2OD032701-01), administered by NIH Office of the Director. Opportunity Number:
+      OTA-21-008. Study Section: Data Coordination, Mapping, and Modeling (DCMM).
+      Fiscal Year 2022. Total funding in 2022: $5,880,300 (all direct costs). Project
+      dates: September 1, 2022 to November 30, 2026 (with approved no-cost extension).
+      Award notice date: September 1, 2022. Assistance Listing Number: 93.310.
 
 # Composition
 instances:
-  - id: instance-001
-    name: Critically ill patients
+  - id: chorus:instance:1
+    name: Critically ill patients in ICU settings
     description: >
       Individual critically ill patients requiring acute or critical care admitted to
-      intensive care units or similar hospital settings across 14 data acquisition centers.
-      As of November 2024, dataset covers 14 different hospitals with 23,400 unique admissions.
-      Target enrollment exceeds 100,000 critically ill patients. Retrospective data collection
+      intensive care units (ICU), pediatric intensive care units (PICU), or neonatal
+      intensive care units (NICU) across 14 data acquisition centers. As of August 2025,
+      the dataset covers 14 different hospitals with over 45,000 unique admissions, with
+      50,000 patient admissions from ICU, PICU, and NICU currently released. Target
+      enrollment exceeds 100,000 critically ill patients. Retrospective data collection
       from patients with acute or critical illness.
     instance_type: >
-      Human subjects - critically ill patients admitted to participating hospitals between
-      data collection timeframe (specific dates vary by site, ongoing collection through
-      November 2026).
+      Human subjects - critically ill patients admitted to participating hospitals
+      (retrospective data collection, ongoing collection through November 2026).
 
 subsets:
-  - id: subset-001
-    name: Controlled Access Dataset
+  - id: chorus:subset:1
+    name: Controlled Access Structured EHR Dataset (OMOP)
     description: >
       Primary dataset with controlled access requiring data use agreement and licensing.
-      Includes OMOP-standardized structured EHR data, waveform telemetry, and associated
-      metadata. As of November 2024, OMOP and telemetry data available in secure enclave.
-      Registration required with institution email, and all participants must sign licensing
-      agreement.
-  - id: subset-002
-    name: Clinical Notes (Tokenized)
+      Includes OMOP-standardized structured EHR data comprising demographics, medication
+      administration (dosing time-stamped upon each infusion change or dose administration),
+      procedures, nursing flowsheets (high-frequency documentation), and diagnoses.
+      Available in secure enclave. As of August 2025, contains 1.6 billion rows of EHR
+      OMOP data. Registration required with institutional email; all participants must
+      sign licensing agreement.
+  - id: chorus:subset:2
+    name: Waveform Telemetry Dataset (WFDB)
+    description: >
+      Waveform telemetry data from bedside monitors (gateway/middleware) standardized to
+      WFDB (WaveForm DataBase) format following extended PhysioNet schema. Available in
+      secure enclave with controlled access. As of August 2025, contains 23 TB of waveform
+      data. Published metadata schema: PhysioNet schema (extended).
+  - id: chorus:subset:3
+    name: Medical Imaging Dataset (DICOM)
+    description: >
+      Imaging data from hospital PACS (Picture Archiving and Communication System) in
+      DICOM format with comprehensive metadata following DICOM schema. As of August 2025,
+      1,000 images are available with de-identification in process for the larger cohort.
+      7,642 admissions have radiology data. Controlled access planned.
+  - id: chorus:subset:4
+    name: Clinical Notes Dataset (OHNLP Tokenized)
     description: >
       Clinical notes extracted and tokenized using OHNLP (Open Health Natural Language
-      Processing) toolkit. Stored locally at contributing sites (except tokens) with planned
-      controlled access. Uses OHNLP open source schema for standardization.
-  - id: subset-003
-    name: Medical Imaging
+      Processing) toolkit following open source OHNLP schema. Stored locally at contributing
+      sites (except tokens). Controlled access planned. De-identification achieved through
+      tokenization approach.
+  - id: chorus:subset:5
+    name: EEG Waveform Dataset (EDF+ and Persyst)
     description: >
-      Imaging data from PACS (Picture Archiving and Communication System) in DICOM format.
-      De-identification in process as of November 2024, planned for controlled access. DICOM
-      schema metadata available.
-  - id: subset-004
-    name: EEG Waveforms
+      Electroencephalography (EEG) waveform data from hospital databases in EDF+ (European
+      Data Format) and Persyst formats. Open source EDF+ and Persyst schema metadata
+      available. Extraction in process, planned for controlled access.
+  - id: chorus:subset:6
+    name: Training and Publication Subset
     description: >
-      Electroencephalography (EEG) waveform data from hospital databases. Stored in EDF+
-      (European Data Format) and Persyst formats. Extraction in process as of November 2024,
-      planned for controlled access. Open source EDF+ and Persyst schema available.
-  - id: subset-005
-    name: Training and Publication Datasets
-    description: >
-      Subsets of the dataset currently being used for training activities and publications
-      as the dataset undergoes expansion and quality assurance processes.
+      Subsets of the dataset currently being used for training activities (AIM-AHEAD
+      Bridge2AI for Clinical Care Training Program) and publications as the dataset
+      undergoes expansion and quality assurance processes.
 
 sampling_strategies:
-  - id: sampling-001
+  - id: chorus:sampling:1
     name: Multi-center federated sampling
     description: >
       Federated access enables sampling methods to ensure a balanced and diverse cohort
       across 20 academic centers (14 data acquisition centers). Legal framework established
       for collecting data at scale with sampling to ensure comprehensive sets of patient
-      conditions and clinical treatment strategies.
-    is_sample:
-      - true
-    is_random:
-      - false
-    is_representative:
-      - true
-    strategies:
-      - Federated multi-center data collection across 14 hospitals
-      - Sampling for balanced and diverse patient populations
-      - Inclusion of contextual factors (geographic distance to hospital, Social Determinants of Health)
-      - Community-facing ethics focus groups to determine appropriate data for public sharing
-      - Legal framework for data collection at scale
+      conditions and clinical treatment strategies. Community-facing ethics focus groups
+      conducted to determine what data is appropriate for public sharing.
+    is_sample: true
+    is_random: false
+    is_representative: true
+    source_data:
+      - >-
+        Critically ill patients in ICU, PICU, and NICU settings at 14 data acquisition
+        centers across 20 academic centers in the United States
+    representative_verification:
+      - >-
+        Federated multi-center data collection across 14 hospitals ensures geographic and
+        institutional diversity; sampling for balanced and diverse patient populations;
+        inclusion of Social Determinants of Health contextual factors
 
 subpopulations:
-  - id: subpop-001
+  - id: chorus:subpop:1
     name: Critically ill patients by hospital
     description: >
-      Patients distributed across 14 different hospitals within the CHoRUS network, ensuring
-      geographic and institutional diversity in critical care settings.
-  - id: subpop-002
-    name: Patients with complete multi-modal data
+      Patients distributed across 14 different hospitals within the CHoRUS network spanning
+      20 academic centers in the United States, ensuring geographic and institutional
+      diversity in critical care settings.
+  - id: chorus:subpop:2
+    name: ICU, PICU, and NICU patients
     description: >
-      Subset of patients with complete data across multiple modalities: structured EHR,
-      waveform telemetry, imaging, clinical notes, and EEG (availability varies).
+      Patients admitted to intensive care units (ICU), pediatric intensive care units (PICU),
+      and neonatal intensive care units (NICU) across contributing hospitals, with 50,000
+      patient admissions in the current released dataset.
+
+sensitive_elements:
+  - id: chorus:sensitive:1
+    name: Protected health information - clinical EHR data
+    description: >
+      Complete electronic health records including demographics, diagnoses, procedures,
+      medications, nursing documentation, and clinical notes for critically ill patients.
+      Contains protected health information subject to HIPAA and institutional privacy
+      requirements. De-identified before release through OMOP transformation and privacy
+      scanning tools.
+    sensitive_elements_present: true
+    sensitivity_details:
+      - Demographics and patient identifiers (de-identified before controlled access release)
+      - Diagnoses and medical conditions (OMOP standardized)
+      - Medication administration records with dosing timestamps (OMOP standardized)
+      - Procedures and clinical interventions documented by providers (OMOP standardized)
+      - Clinical notes (tokenized using OHNLP toolkit for privacy protection)
+      - Nursing flowsheet documentation at high frequency (OMOP with extensions)
+  - id: chorus:sensitive:2
+    name: Physiological monitoring and EEG waveform data
+    description: >
+      Continuous waveform telemetry from bedside monitors and EEG recordings capturing
+      detailed physiological states of critically ill patients. May reveal sensitive health
+      conditions and treatment responses. Stored in WFDB format (telemetry) and EDF+/Persyst
+      formats (EEG) with controlled access.
+    sensitive_elements_present: true
+    sensitivity_details:
+      - Continuous cardiac waveforms from bedside monitors (WFDB format, 23 TB)
+      - Respiratory monitoring and hemodynamic measurement data
+      - Electroencephalography (EEG) recordings from hospital databases
+      - High-frequency physiological parameters
+  - id: chorus:sensitive:3
+    name: Medical imaging data
+    description: >
+      Diagnostic imaging studies in DICOM format from hospital PACS systems. De-identification
+      in process to remove embedded patient information while preserving clinical utility.
+      As of August 2025, 1,000 images available with de-id in process for larger cohort
+      (7,642 admissions with radiology data total).
+    sensitive_elements_present: true
+    sensitivity_details:
+      - Radiology images (CT scans, X-rays, MRI and other modalities) in DICOM format
+      - DICOM metadata (de-identification in process)
+      - Embedded patient information being removed through de-identification pipeline
+  - id: chorus:sensitive:4
+    name: Social Determinants of Health data
+    description: >
+      Contextual factors including geographic information (distance to hospital) and social
+      determinants of health data. Collected to support health equity research while
+      maintaining patient privacy through privacy-preserving transformations.
+    sensitive_elements_present: true
+    sensitivity_details:
+      - Geographic location information (distance to nearest hospital)
+      - Social determinants of health variables
+      - Contextual equity factors with privacy-preserving transformations applied
 
 # Collection Process
 collection_mechanisms:
-  - id: collection-001
+  - id: chorus:collection:1
     name: Retrospective EHR extraction
     description: >
       Retrospective data collection from electronic health record systems at 14 data acquisition
-      centers. Data extracted includes demographics, medication administration (dosing time-stamped
-      upon each infusion change or dose administration), procedures, nursing flowsheets (high-frequency
-      documentation), diagnoses, and clinical notes.
-  - id: collection-002
+      centers. Data extracted includes demographics, medication administration (dosing
+      time-stamped upon each infusion change or dose administration), procedures, nursing
+      flowsheets (high-frequency documentation), diagnoses, and clinical notes. Standardized
+      to OMOP Common Data Model.
+  - id: chorus:collection:2
     name: Waveform telemetry capture
     description: >
-      Continuous waveform telemetry data captured from bedside monitors through gateway/middleware
-      systems. Stored in WFDB (WaveForm DataBase) format following PhysioNet schema (extended).
-  - id: collection-003
-    name: Medical imaging acquisition
+      Continuous waveform telemetry data captured from bedside monitors through gateway and
+      middleware systems at each contributing hospital. Stored in WFDB (WaveForm DataBase)
+      format following extended PhysioNet schema. Contains 23 TB of waveform data as of
+      August 2025.
+  - id: chorus:collection:3
+    name: Medical imaging acquisition from PACS
     description: >
-      Medical imaging data acquired from hospital PACS (Picture Archiving and Communication
-      System) and stored in DICOM format with comprehensive metadata following DICOM schema.
-  - id: collection-004
+      Medical imaging data acquired from hospital Picture Archiving and Communication Systems
+      (PACS) and stored in DICOM format with comprehensive metadata following DICOM schema.
+      7,642 admissions have radiology data; 1,000 images currently available.
+  - id: chorus:collection:4
     name: EEG recording extraction
     description: >
-      Electroencephalography recordings extracted from hospital EEG databases in EDF+ and
-      Persyst formats with metadata following open source schemas.
-  - id: collection-005
-    name: Standardized data transformation
-    description: >
-      Multi-center network capabilities to acquire, standardize, tokenize, store, visualize,
-      and label data. All structured clinical data transformed to OMOP Common Data Model.
-      Clinical notes tokenized using OHNLP toolkit. Imaging converted to DICOM. Waveforms
-      standardized to WFDB format.
+      Electroencephalography recordings extracted from hospital EEG databases in EDF+
+      (European Data Format) and Persyst formats with metadata following open source schemas.
+      Extraction in process as of August 2025.
 
 acquisition_methods:
-  - id: acquisition-001
-    name: Structured EHR data (OMOP)
+  - id: chorus:acquisition:1
+    name: Structured EHR data via OMOP transformation
     description: >
-      Demographics, medication administration, procedures, nursing flowsheets, and diagnoses
-      acquired from electronic health records and standardized to OMOP Common Data Model.
-      Controlled access with published OMOP schema metadata.
-  - id: acquisition-002
-    name: Medication administration records
+      Demographics, medication administration (dosing time-stamped upon each infusion
+      change or dose administration), procedures, nursing flowsheets (high-frequency
+      documentation), and diagnoses acquired from electronic health records and
+      standardized to OMOP Common Data Model. Controlled access with published OMOP
+      schema metadata. Contains 1.6 billion rows of OMOP data as of August 2025.
+  - id: chorus:acquisition:2
+    name: Clinical notes via OHNLP tokenization
     description: >
-      Dosing information time-stamped upon each infusion change or dose administration.
-      Stored in OMOP format with controlled access and OMOP schema metadata.
-  - id: acquisition-003
-    name: Provider documentation
+      Clinical notes extracted from EHR systems and tokenized using OHNLP (Open Health
+      Natural Language Processing) toolkit. Stored locally at sites except for tokens.
+      Controlled access planned with OHNLP open source schema metadata.
+  - id: chorus:acquisition:3
+    name: Medical imaging via DICOM from PACS
     description: >
-      Procedures and diagnoses documented by healthcare providers. Stored in OMOP format
-      with controlled access and OMOP schema metadata.
-  - id: acquisition-004
-    name: High-frequency nursing flowsheets
+      Imaging data acquired from hospital PACS systems in DICOM format. De-identification
+      in process. Planned controlled access with published DICOM schema metadata.
+  - id: chorus:acquisition:4
+    name: Waveform telemetry via WFDB from bedside monitors
     description: >
-      Nursing documentation captured at high frequency intervals. Stored in OMOP format
-      with controlled access and OMOP schema with extensions for high-frequency data.
-  - id: acquisition-005
-    name: Clinical notes (tokenized)
-    description: >
-      Clinical notes extracted and tokenized using OHNLP (Open Health Natural Language
-      Processing) toolkit. Stored locally except tokens. Controlled access planned with
-      OHNLP open source schema metadata.
-  - id: acquisition-006
-    name: Medical imaging (DICOM)
-    description: >
-      Imaging data from PACS systems in DICOM format. De-identification in process. Planned
-      controlled access with published DICOM schema metadata.
-  - id: acquisition-007
-    name: Waveform telemetry (WFDB)
-    description: >
-      Bedside monitor waveform data acquired through gateway/middleware systems. Stored in
-      WFDB format with controlled access and published PhysioNet schema (extended) metadata.
-  - id: acquisition-008
-    name: EEG waveforms
+      Bedside monitor waveform data acquired through gateway and middleware systems. Stored
+      in WFDB format with controlled access and published PhysioNet schema (extended) metadata.
+      23 TB available as of August 2025.
+  - id: chorus:acquisition:5
+    name: EEG waveforms from hospital databases
     description: >
       EEG recordings from hospital databases in EDF+ and Persyst formats. Extraction in
       process. Planned controlled access with open source EDF+ and Persyst schema metadata.
 
 # Preprocessing, Cleaning, and Labeling
 preprocessing_strategies:
-  - id: preproc-001
+  - id: chorus:preproc:1
     name: OMOP Common Data Model transformation
     description: >
       All structured electronic health record data standardized to the OMOP (Observational
       Medical Outcomes Partnership) Common Data Model. Ensures interoperability and enables
-      use of OHDSI (Observational Health Data Sciences and Informatics) tool stack for analysis.
+      use of OHDSI (Observational Health Data Sciences and Informatics) tool stack for
+      analysis. Data from all 14 acquisition centers unified through this transformation.
     preprocessing_details:
-      - Transformation of source EHR data to OMOP CDM
-      - Standardization of terminology and codes
-      - Mapping to OMOP vocabulary standards
-      - Quality assurance of transformed data
-      - Integration with OHDSI tools for analysis
-  - id: preproc-002
-    name: Clinical note tokenization
+      - Transformation of source EHR data from diverse institutional formats to OMOP CDM
+      - Standardization of terminology and clinical codes to OMOP vocabulary standards
+      - Mapping to OMOP vocabulary standards using validated semantic mappings
+      - Quality assurance of transformed data against OMOP schema specifications
+      - Integration with OHDSI tools for downstream analysis and characterization
+      - Generation of characterization reports returned to contributing sites via CHoRUSReports
+  - id: chorus:preproc:2
+    name: Clinical note tokenization via OHNLP
     description: >
       Clinical notes processed using OHNLP (Open Health Natural Language Processing) toolkit
-      for extraction and tokenization. Protects patient privacy while enabling natural language
-      processing and analysis.
+      for extraction and tokenization. Protects patient privacy while enabling natural
+      language processing and analysis of clinical text data.
     preprocessing_details:
-      - Text extraction from clinical notes
-      - OHNLP tokenization pipeline
-      - De-identification of sensitive information
-      - Standardization to OHNLP schema
-      - Local storage (except tokens)
-  - id: preproc-003
-    name: Waveform standardization
+      - Text extraction from clinical notes in source EHR systems
+      - OHNLP tokenization pipeline applied to free-text clinical documentation
+      - De-identification of sensitive information through tokenization approach
+      - Standardization to OHNLP open source schema
+      - Local storage of full notes at sites; only tokens available in enclave
+  - id: chorus:preproc:3
+    name: Waveform standardization to WFDB format
     description: >
       Waveform telemetry data from diverse bedside monitoring systems standardized to WFDB
-      (WaveForm DataBase) format following extended PhysioNet schema.
+      (WaveForm DataBase) format following extended PhysioNet schema. Scripts available
+      in chorus_waveform repository.
     preprocessing_details:
-      - Conversion from proprietary monitor formats
-      - Standardization to WFDB format
-      - Metadata extraction and schema compliance
-      - Quality checks for waveform integrity
-      - Synchronization with clinical events
-  - id: preproc-004
+      - Conversion from proprietary bedside monitor formats using gateway/middleware systems
+      - Standardization to WFDB format per extended PhysioNet schema
+      - Metadata extraction and schema compliance verification
+      - Quality checks for waveform integrity and completeness
+      - Synchronization with clinical events from OMOP EHR data
+  - id: chorus:preproc:4
     name: Medical imaging de-identification
     description: >
       DICOM imaging data undergoing de-identification process to remove patient identifiable
-      information while preserving clinical utility and metadata.
+      information from image metadata while preserving clinical utility and image quality.
     preprocessing_details:
-      - DICOM header de-identification
-      - Removal of embedded patient information
-      - Preservation of clinically relevant metadata
-      - DICOM schema compliance verification
-      - Quality assurance of de-identified images
-  - id: preproc-005
-    name: Data re-identification limitation
+      - DICOM header de-identification to remove embedded patient information
+      - Preservation of clinically relevant imaging metadata
+      - DICOM schema compliance verification after de-identification
+      - Quality assurance of de-identified images for clinical utility
+      - Privacy scan tool (privacy_scan_tool) used for medical records privacy scanning
+  - id: chorus:preproc:5
+    name: Re-identification limitation transformations
     description: >
       Data transformed using approaches that limit re-identification while maintaining
       analytical utility. Multiple preprocessing strategies employed to protect patient
-      privacy across all data modalities.
+      privacy across all data modalities per HIPAA and institutional requirements.
     preprocessing_details:
-      - Application of de-identification algorithms
-      - Privacy-preserving transformations
-      - Risk assessment for re-identification
-      - Compliance with ethical and legal requirements
-      - Community ethics focus group input
+      - Application of de-identification algorithms across all data modalities
+      - Privacy-preserving transformations for EHR and imaging data
+      - Geocoding via DeGauss (UF-Geocoding tool) for OMOP Location entities
+      - Risk assessment and compliance with ethical and legal requirements
+      - Community ethics focus group input on appropriate data for public sharing
 
 cleaning_strategies:
-  - id: cleaning-001
-    name: Multi-center data harmonization
+  - id: chorus:cleaning:1
+    name: Multi-center data harmonization with validated semantic mappings
     description: >
-      Data from 14 acquisition centers harmonized through validated semantic mappings and
-      standard operating protocols (SOPs). Ensures consistency and interoperability across
-      diverse institutional EHR systems and clinical practices.
+      Data from 14 acquisition centers harmonized through validated semantic mappings
+      and standard operating protocols (SOPs). Ensures consistency and interoperability
+      across diverse institutional EHR systems and clinical practices. Mappings maintained
+      in chorus-mapping repository with clinical validation SOP.
     cleaning_details:
-      - Semantic mapping validation by clinical experts
-      - Standard operating protocol implementation
-      - Cross-site data quality checks
-      - Resolution of institutional variations
-      - Clinical validation SOP for mappings
-  - id: cleaning-002
-    name: Metadata schema validation
+      - Semantic mapping validation by clinical experts using chorus-mapping repository
+      - Standard operating protocol (SOP) implementation per Chorus_SOP documentation
+      - Cross-site data quality checks through CHoRUSReports characterization reports
+      - Resolution of institutional variations in coding and clinical terminology
+      - Clinical validation SOP for contributing to mapping efforts
+      - Site status tracking via GitHub interface and Google Form submissions
+  - id: chorus:cleaning:2
+    name: Schema compliance validation across all modalities
     description: >
       All data modalities validated against published metadata schemas (OMOP, DICOM, WFDB,
-      OHNLP, EDF+, Persyst) to ensure compliance and data quality.
+      OHNLP, EDF+, Persyst) to ensure compliance and data quality across the multi-modal
+      dataset.
     cleaning_details:
-      - Schema compliance verification
-      - Metadata completeness checks
-      - Validation against published standards
-      - Error detection and correction
-      - Documentation of schema extensions
+      - Schema compliance verification against OMOP CDM specifications
+      - DICOM schema metadata validation for imaging data
+      - WFDB/PhysioNet schema validation for waveform data
+      - OHNLP open source schema validation for tokenized clinical notes
+      - EDF+ and Persyst schema validation for EEG data
+      - Documentation of schema extensions for OMOP high-frequency nursing flowsheets
 
 labeling_strategies:
-  - id: labeling-001
-    name: Visualization and annotation environment
+  - id: chorus:labeling:1
+    name: Visualization and annotation environment for prediction targets
     description: >
       Custom visualization and annotation environment developed to label data with targets
-      important for prediction tasks in critical care AI applications.
-    labeling_details:
-      - Interactive visualization tools
-      - Annotation interface for clinical experts
-      - Labeling of prediction targets
-      - Quality control of annotations
-      - Documentation of labeling protocols
+      important for prediction tasks in critical care AI applications. Supports labeling
+      for characterizing acute illness, predicting complications, and measuring treatment
+      response.
+    data_annotation_protocol:
+      - Interactive visualization tools for clinical data exploration
+      - Annotation interface for clinical expert labeling of prediction targets
+      - Labeling of targets for characterization, prediction, and treatment response tasks
+      - Quality control of annotations through review processes
+      - Documentation of labeling protocols per Chorus_SOP standard operating procedures
 
 # Uses
 intended_uses:
-  - id: use-001
+  - id: chorus:use:1
     name: AI/ML model development for critical care
     description: >
       Primary intended use is development and training of artificial intelligence and machine
       learning models to characterize acute and critical care illness, predict complications,
-      and measure treatment response in critically ill patients.
-  - id: use-002
+      and measure treatment response in critically ill patients across diverse hospital settings.
+    examples:
+      - Characterizing acute and critical care illness patterns using multi-modal data
+      - Predicting complications (e.g., sepsis, respiratory failure) in critically ill patients
+      - Measuring treatment response in ICU patients using medication and waveform data
+      - Developing clinical deep learning models for critical care AI applications
+  - id: chorus:use:2
     name: External validation of AI models
     description: >
       Provision of holdout test set accessible for model external validation to aid marketplace
       adoption of AI-developed models for implementation in acute and critical care settings.
-  - id: use-003
-    name: Research on health equity and disparities
+    examples:
+      - External validation of sepsis prediction models developed at other institutions
+      - Benchmarking AI algorithms for critical care across diverse patient populations
+  - id: chorus:use:3
+    name: Health equity and disparities research
     description: >
       Studies examining health equity, social determinants of health, and disparities in
-      critical care outcomes across diverse patient populations and hospital settings.
-  - id: use-004
-    name: Clinical care improvement research
-    description: >
-      Research aimed at improving clinical care delivery, treatment protocols, and patient
-      outcomes in acute and critical care settings through data-driven insights.
-  - id: use-005
-    name: Educational and training purposes
+      critical care outcomes across diverse patient populations and hospital settings. Dataset
+      includes contextual factors such as geographic distance to nearest hospital.
+    examples:
+      - Analysis of disparities in critical care outcomes by race, ethnicity, and geography
+      - Research on social determinants of health in ICU patient populations
+  - id: chorus:use:4
+    name: Educational and training purposes for AI scientists
     description: >
       Training and education of next generation of diverse academic and community AI scientists
-      through hands-on experience with real-world critical care datasets. Integration with
-      AIM-AHEAD training programs.
+      through hands-on experience with real-world critical care datasets. Integrated with
+      AIM-AHEAD Bridge2AI for Clinical Care Training Program (Cohorts 1 and 2).
+    examples:
+      - "AIM-AHEAD training program for underrepresented trainees (Cohort 1: 2024-2025, Cohort 2: 2025-2026)"
+      - Foundational hands-on training using Jupyter Notebooks with Bridge2AI CHoRUS ecosystem
+      - Workshops on OHDSI/OMOP common data model and clinical AI
+      - Development of practical use cases for AI/ML in clinical care
 
 discouraged_uses:
-  - id: discouraged-001
-    name: Uses during ongoing data collection
+  - id: chorus:discouraged:1
+    name: Clinical decision-making without proper validation and regulatory approval
     description: >
-      As data collection continues through November 2026 and quality assurance processes are
-      ongoing, early dataset versions should be used with awareness of completeness limitations
-      and ongoing expansion.
-  - id: discouraged-002
-    name: Clinical decision-making without validation
-    description: >
-      Dataset is for research purposes. Any AI/ML models developed should undergo appropriate
+      Dataset is for research purposes only. AI/ML models developed should undergo appropriate
       clinical validation, regulatory approval, and institutional review before use in patient
       care or clinical decision-making.
-  - id: discouraged-003
+    discouragement_details:
+      - Models trained on CHoRUS data must undergo independent clinical validation
+      - Regulatory approval processes (e.g., FDA clearance) required for clinical use
+      - Institutional review board approval needed for clinical deployment
+  - id: chorus:discouraged:2
     name: Re-identification attempts
     description: >
       Attempts to re-identify patients from de-identified data violate ethical principles,
-      data use agreements, and legal frameworks established for privacy protection.
+      data use agreements, and legal frameworks established for privacy protection under
+      HIPAA and institutional requirements.
+    discouragement_details:
+      - Re-identification attempts violate the signed data use agreement
+      - Prohibited under HIPAA and applicable institutional data privacy regulations
+      - Data use agreement explicitly prohibits re-identification efforts
+  - id: chorus:discouraged:3
+    name: Use without awareness of ongoing data collection limitations
+    description: >
+      As data collection continues through November 2026 and quality assurance processes
+      are ongoing, early dataset versions should be used with awareness of completeness
+      limitations and ongoing expansion (from 45K to target 100K+ admissions).
+    discouragement_details:
+      - Dataset is actively growing; cohort coverage varies by data modality
+      - EEG extraction and full imaging de-identification still in process as of 2025
+      - Clinical notes stored locally at sites; only tokens available in enclave
 
 # Distribution
-license: Controlled Access with Data Use Agreement
 license_and_use_terms:
-  id: license-001
-  name: CHoRUS Controlled Access License
+  id: chorus:license:1
+  name: CHoRUS Controlled Access License with Data Use Agreement
   description: >
     Dataset distributed under controlled access requiring institutional email registration
     and signed licensing agreement. Access granted after review and approval process.
-    Participants must complete registration form with name, email (institutional, not
-    personal), and institution. Once approved, users receive email with access instructions
-    to CHoRUS secure enclave. Contact for access requests: dbold@emory.edu or
-    jared.houghtaling@tuftsmedicine.org.
+    Participants must complete registration form with name, institutional email (not personal),
+    and institution. Once approved, users receive email with access instructions to CHoRUS
+    secure enclave. For training program access, program administrators assist with licensing.
   license_terms:
-    - Institutional email required for registration
-    - Signed licensing agreement required
-    - Controlled access through secure enclave
-    - Data use agreement specifies permitted uses
-    - Prohibition on re-identification attempts
-    - Compliance with ethical and legal requirements
+    - Institutional (.edu) email required for registration
+    - All participants must sign a licensing agreement before gaining access to the dataset
+    - Controlled access through secure enclave (Azure-based infrastructure)
+    - Data use agreement specifies permitted research uses and prohibits re-identification
+    - Access request contacts - dbold@emory.edu or jared.houghtaling@tuftsmedicine.org
+    - Funded under NIH award OT2OD032701; content is solely responsibility of authors
 
 distribution_formats:
-  - id: format-001
-    name: OMOP Common Data Model
+  - id: chorus:format:1
+    name: OMOP Common Data Model (structured EHR data)
     description: >
-      Structured electronic health record data distributed in OMOP Common Data Model format.
-      Enables use of OHDSI tool stack for analysis. Available in secure enclave with controlled
-      access.
+      Structured electronic health record data distributed in OMOP Common Data Model format
+      enabling use of OHDSI tool stack for analysis. Contains 1.6 billion rows. Available
+      in secure enclave with controlled access. Published OMOP schema metadata available.
     access_urls:
       - https://chorus4ai.org/
-  - id: format-002
-    name: WFDB waveform format
+  - id: chorus:format:2
+    name: WFDB waveform format (bedside monitor telemetry)
     description: >
-      Waveform telemetry data distributed in WFDB (WaveForm DataBase) format following
-      extended PhysioNet schema. Available in secure enclave with controlled access.
+      Waveform telemetry data (23 TB) distributed in WFDB (WaveForm DataBase) format
+      following extended PhysioNet schema. Available in secure enclave with controlled
+      access. Published PhysioNet schema (extended) metadata available.
     access_urls:
       - https://chorus4ai.org/
-  - id: format-003
-    name: DICOM imaging format
+  - id: chorus:format:3
+    name: DICOM format (medical imaging)
     description: >
-      Medical imaging data distributed in DICOM format with comprehensive metadata. De-identification
-      in process, planned for controlled access in secure enclave.
+      Medical imaging data (7,642 admissions with radiology; 1,000 images currently
+      available) distributed in DICOM format with comprehensive metadata following DICOM
+      schema. De-identification in process for larger cohort. Planned controlled access.
     access_urls:
       - https://chorus4ai.org/
-  - id: format-004
-    name: OHNLP tokenized text
+  - id: chorus:format:4
+    name: OHNLP tokenized format (clinical notes)
     description: >
-      Clinical notes distributed as OHNLP-tokenized text following open source schema. Stored
-      locally at sites except tokens, planned for controlled access.
+      Clinical notes distributed as OHNLP-tokenized text following open source OHNLP schema.
+      Stored locally at contributing sites (except tokens). Controlled access planned.
     access_urls:
       - https://chorus4ai.org/
-  - id: format-005
-    name: EDF+ and Persyst EEG formats
+  - id: chorus:format:5
+    name: EDF+ and Persyst formats (EEG waveforms)
     description: >
       EEG waveform data distributed in EDF+ (European Data Format) and Persyst formats
       following open source schemas. Extraction in process, planned for controlled access.
@@ -573,197 +673,146 @@ distribution_formats:
 
 # Maintenance
 maintainers:
-  - id: maintainer-001
+  - id: chorus:maintainer:1
     name: CHoRUS Consortium
     description: >
-      Multi-institutional consortium managing dataset maintenance including data acquisition
-      centers, coordinating teams, and infrastructure development.
+      Multi-institutional consortium managing dataset maintenance including 14 data acquisition
+      centers, coordinating teams at Massachusetts General Hospital (lead), University of
+      Florida, UT Health Science Center, and Tufts Medicine, plus infrastructure development
+      team. Standards, Data Acquisition, and Tooling sub-teams manage ongoing data delivery
+      and quality. Contact: cmccrary@mgh.harvard.edu (Ciera McCrary, Program Manager, MGH).
     maintainer_details:
-      - Massachusetts General Hospital (lead institution)
-      - University of Florida (data acquisition and coordination)
-      - UT Health Science Center (data acquisition and coordination)
-      - Tufts Medicine (data acquisition and coordination)
-      - 14 data acquisition centers across United States
-      - Standards team (semantic mappings and validation)
-      - Data Acquisition team (extraction and contribution)
-      - Tooling team (software development)
-      - Project management via GitHub organization (chorus-ai)
-  - id: maintainer-002
-    name: CHoRUS GitHub Organization
+      - Massachusetts General Hospital (lead institution, Contact PI Eric S. Rosenthal)
+      - University of Florida (data acquisition and coordination, Azra Bihorac, Parisa Rashidi, Yulia Strekalova)
+      - UT Health Science Center / UTHealth Houston (Xiaoqian Jiang)
+      - Tufts Medicine (Andrew Ewing Williams, Manlik Kwong, Jared Houghtaling)
+      - 14 data acquisition centers across United States contributing clinical data extracts
+      - Standards team (semantic mappings and validation via chorus-mapping repository)
+      - Data Acquisition team (extraction and contribution per Chorus_SOP)
+      - Tooling team (software development across chorus-ai GitHub organization)
+      - Project management via GitHub organization (chorus-ai) with 28 active repositories
+  - id: chorus:maintainer:2
+    name: CHoRUS GitHub Organization (chorus-ai)
     description: >
-      Active GitHub organization (chorus-ai) housing repositories for software, semantic
-      mappings, standard operating protocols, and project management. 28 repositories with
-      comprehensive documentation and community support.
+      Active GitHub organization housing repositories for software, semantic mappings,
+      standard operating protocols, and project management. 28 repositories with comprehensive
+      documentation and community support. Licensed under MIT License (GitHub organization).
     maintainer_details:
-      - "GitHub organization: https://github.com/chorus-ai"
-      - Chorus_SOP repository (centralized documentation)
-      - chorus-container-apps (Azure deployment)
-      - chorus-mapping (semantic mappings)
-      - chorus_waveform (waveform tools)
-      - privacy_scan_tool (privacy protection)
-      - Community discussions and issue tracking
+      - GitHub organization at https://github.com/chorus-ai
+      - Chorus_SOP repository - centralized SOP documentation site (Apache-2.0 license)
+      - chorus-container-apps - Azure deployment infrastructure (JavaScript)
+      - chorus-mapping - semantic mappings repository
+      - chorus_waveform - waveform documentation and conversion scripts (MIT license)
+      - privacy_scan_tool - privacy scan tool for medical records (Python)
+      - CHoRUSReports - characterization reports returned to contributing sites (R)
+      - chorus-extract-upload - tools to create and upload CHoRUS data extract (MIT license)
+      - UF-Geocoding - open source code to geocode OMOP Location entities via DeGauss
+      - Community discussions and issue tracking for Standards and Data Acquisition teams
 
 updates:
-  id: updates-001
-  name: Ongoing data collection and expansion
+  id: chorus:updates:1
+  name: Ongoing data collection and continuous expansion
   description: >
     Dataset updated continuously as data collection progresses at 14 acquisition centers.
-    As of November 2024, covers 14 hospitals with 23,400 unique admissions. Target exceeds
-    100,000 critically ill patients. Project timeline extends through November 30, 2026
-    (with approved no-cost extension). Regular status updates tracked through GitHub project
-    management system. Sites provide updates via GitHub interface or Google Form submissions.
-  frequency: Continuous updates through November 2026
+    As of August 2025, covers 14 hospitals with over 45,000 unique admissions; current
+    released dataset includes 50,000 patient admissions (ICU, PICU, NICU) and 1.6 billion
+    rows of EHR OMOP data. Target exceeds 100,000 critically ill patients. Project timeline
+    extends through November 30, 2026 (approved no-cost extension). Regular status updates
+    tracked through GitHub project management system via GitHub interface or Google Form
+    submissions. Sites statuses tracked in Standards Project and Data Acquisition Project.
+  frequency: Continuous updates through November 30, 2026
   update_details:
-    - Ongoing retrospective data collection at 14 sites
-    - "Current status: 23,400 unique admissions (as of November 2024)"
-    - "Target: 100,000+ critically ill patients"
-    - Regular site status updates via GitHub/Google Forms
-    - GitHub project tracking for deliverables
-    - Documentation updates in Chorus_SOP repository
-    - Software and tooling continuous development
-    - Semantic mapping validation and expansion
+    - Ongoing retrospective data collection at 14 sites through project end date
+    - Current status (August 2025) - 45K+ unique admissions; 50K released (ICU, PICU, NICU)
+    - Target - 100,000+ critically ill patients across 9 data modalities
+    - Regular site status updates via GitHub interface or Google Form submissions
+    - GitHub project tracking for deliverables and task dependencies
+    - Documentation updates maintained in Chorus_SOP repository
+    - Software and tooling continuous development across chorus-ai GitHub organization
+    - Semantic mapping validation and expansion via chorus-mapping repository
+    - EEG extraction and full imaging de-identification in progress
 
 retention_limit:
-  id: retention-001
-  name: Long-term dataset retention
+  id: chorus:retention:1
+  name: Long-term dataset retention per NIH data sharing policies
   description: >
     Digital data maintained according to NIH data sharing policies and institutional
-    requirements. Controlled access model ensures long-term availability for research
-    while protecting patient privacy.
+    requirements at participating centers. Controlled access model ensures long-term
+    availability for research while protecting patient privacy. Funded under NIH award
+    OT2OD032701 with project end date of November 30, 2026.
   retention_details:
-    - NIH data sharing policies govern retention
-    - Institutional requirements at participating centers
-    - Controlled access model for privacy protection
-    - Secure enclave infrastructure for data storage
-    - Long-term maintenance through CHoRUS Consortium
+    - NIH data sharing policies govern long-term retention requirements
+    - Institutional requirements at 14 participating data acquisition centers apply
+    - Controlled access model via secure enclave for ongoing privacy protection
+    - Long-term maintenance through CHoRUS Consortium and associated institutions
 
 # Ethics and Human Subjects
 human_subject_research:
-  id: hsr-001
+  id: chorus:hsr:1
   name: CHoRUS Human Subjects Research
   description: >
-    Retrospective data collection from critically ill patients approved through institutional
-    review processes. Community-facing ethics focus groups conducted to determine what data
-    is appropriate for public sharing. Legal framework established for collecting data at
-    scale. Patient-focused efforts determine ethical and legal approaches to manage privacy
-    and bias while accounting for Social Determinants of Health. Project draws expertise
-    from law, ethics, health services, biomedical science, engineering, and scientific
-    journal publications disciplines.
+    Retrospective data collection from critically ill patients (ICU, PICU, NICU) approved
+    through institutional review processes at 14 data acquisition centers. Community-facing
+    ethics focus groups conducted to determine what data is appropriate for public sharing.
+    Legal framework established for collecting data at scale. Patient-focused efforts
+    determine ethical and legal approaches to manage privacy and bias while accounting for
+    Social Determinants of Health. Project includes expertise from law, ethics, health
+    services, biomedical science, engineering, and scientific journal publications disciplines.
+    Ethics of AI component addressed through AIM-AHEAD training curriculum (safety, risk,
+    and legal considerations; IRB, HIPAA/GDPR compliance for OMOP/FHIR data).
   involves_human_subjects: true
   ethics_review_board:
-    - Institutional review boards at 14 data acquisition centers
-    - Community-facing ethics focus groups
-    - Legal and ethical advisory teams
-    - Privacy and accountability review processes
+    - Institutional review boards at 14 data acquisition centers across United States
+    - Community-facing ethics focus groups determining appropriate data for public sharing
+    - Legal and ethical advisory teams including law and ethics discipline experts
+    - Privacy and accountability review processes per project three-pillar structure (Data, Ethics, People)
+  regulatory_compliance:
+    - HIPAA (Health Insurance Portability and Accountability Act) compliance for protected health information
+    - 45 CFR 46 (Common Rule) for human subjects research protections
+    - Institutional data privacy regulations at each of the 14 contributing sites
+    - NIH Common Fund Bridge2AI program ethical and trustworthy AI requirements
+    - IRB protocol drafting and HIPAA/GDPR compliance guidance provided in training curriculum
 
-sensitive_elements:
-  - id: sensitive-001
-    name: Clinical and medical data
-    description: >
-      Complete electronic health records including demographics, diagnoses, procedures,
-      medications, nursing documentation, and clinical notes for critically ill patients.
-      Contains protected health information subject to HIPAA and institutional privacy
-      requirements.
-    sensitive_elements_present: true
-    sensitivity_details:
-      - Demographics and patient identifiers (de-identified)
-      - Diagnoses and medical conditions
-      - Medication administration records
-      - Procedures and interventions
-      - Clinical notes (tokenized for privacy)
-      - Nursing flowsheet documentation
-  - id: sensitive-002
-    name: Physiological monitoring data
-    description: >
-      Continuous waveform telemetry and EEG recordings capturing detailed physiological
-      states of critically ill patients. May reveal sensitive health conditions and
-      treatment responses.
-    sensitive_elements_present: true
-    sensitivity_details:
-      - Continuous cardiac waveforms
-      - Respiratory monitoring data
-      - Hemodynamic measurements
-      - Electroencephalography recordings
-      - High-frequency physiological parameters
-  - id: sensitive-003
-    name: Medical imaging
-    description: >
-      Diagnostic imaging studies in DICOM format. Undergoing de-identification to remove
-      embedded patient information while preserving clinical utility.
-    sensitive_elements_present: true
-    sensitivity_details:
-      - CT scans and X-rays
-      - MRI and other imaging modalities
-      - DICOM metadata (de-identified)
-      - Embedded patient information (removed)
-  - id: sensitive-004
-    name: Social Determinants of Health
-    description: >
-      Contextual factors including geographic information (distance to hospital) and social
-      determinants of health data. Collected to support health equity research while
-      maintaining patient privacy.
-    sensitive_elements_present: true
-    sensitivity_details:
-      - Geographic location information
-      - Social determinants of health variables
-      - Contextual factors for equity research
-      - Privacy-preserving transformations applied
-
-# Data Governance and External Resources
+# External Resources
 external_resources:
-  - id: resource-001
+  - id: chorus:resource:1
     name: CHoRUS Project Website
-    description: Official project website with overview, dataset information, and contact details
+    description: Official project website with dataset overview, team information, project components, and access instructions
     external_resources:
       - https://chorus4ai.org/
-      - https://bridge2ai.org/chorus
-  - id: resource-002
+  - id: chorus:resource:2
     name: CHoRUS GitHub Organization
-    description: Comprehensive GitHub organization with 28 repositories including software, documentation, and SOPs
+    description: Comprehensive GitHub organization with 28 repositories including software, documentation, SOPs, and tooling
     external_resources:
       - https://github.com/chorus-ai
-  - id: resource-003
-    name: Chorus_SOP Documentation
-    description: Centralized standard operating protocol documentation site with interactive workflow diagrams
+  - id: chorus:resource:3
+    name: Chorus_SOP Documentation Site
+    description: Centralized standard operating protocol documentation with interactive workflow diagrams for data extraction and contribution
     external_resources:
       - https://github.com/chorus-ai/Chorus_SOP
-  - id: resource-004
-    name: CHoRUS Developer Documentation
-    description: Web guide for contributors and users of CHoRUS software packages with package status page
-    external_resources:
-      - CHoRUS developer repository (chorus-developer)
-      - Package status page (maintained by CHoRUS)
-  - id: resource-005
+  - id: chorus:resource:4
     name: NIH RePORTER Project Details
-    description: Federal grant information and project details from NIH Research Portfolio Online Reporting Tools
+    description: Federal grant information and project details from NIH Research Portfolio Online Reporting Tools for grant 1OT2OD032701-01
     external_resources:
       - https://reporter.nih.gov/project-details/10472824
-  - id: resource-006
+  - id: chorus:resource:5
     name: Bridge2AI Program
-    description: Parent NIH Common Fund program supporting AI-ready biomedical datasets
+    description: Parent NIH Common Fund program supporting AI-ready biomedical datasets across four data generation projects
     external_resources:
       - https://bridge2ai.org/
-  - id: resource-007
-    name: AIM-AHEAD Training Partnership
-    description: Partnership with AIM-AHEAD for Bridge2AI Clinical Care Training Program
+      - https://bridge2ai.org/chorus
+  - id: chorus:resource:6
+    name: AIM-AHEAD Bridge2AI Training Program
+    description: Partnership with AIM-AHEAD for Bridge2AI Clinical Care Training Program (Cohort 1 and Cohort 2) providing AI/ML training for underrepresented trainees
     external_resources:
-      - AIM-AHEAD Consortium website
-      - AIM-AHEAD Connect platform (mentorship)
-      - Training program informational materials
-  - id: resource-008
-    name: OHDSI Community
-    description: Observational Health Data Sciences and Informatics community supporting OMOP CDM
+      - https://aim-ahead.net/
+  - id: chorus:resource:7
+    name: OHDSI Community and OMOP CDM
+    description: Observational Health Data Sciences and Informatics community supporting OMOP Common Data Model used for CHoRUS structured EHR data
     external_resources:
-      - OHDSI website and tool stack
-      - OMOP Common Data Model documentation
-  - id: resource-009
-    name: Published Research
-    description: Peer-reviewed publication documenting CHoRUS dataset and methodology
+      - https://www.ohdsi.org/
+  - id: chorus:resource:8
+    name: Published Research (Neurocritical Care)
+    description: Peer-reviewed publication documenting CHoRUS dataset methodology and design in Neurocritical Care journal
     external_resources:
-      - http://doi:10.1007/s12028-024-02007
-  - id: resource-010
-    name: Contact for Access
-    description: Email contacts for requesting dataset access
-    external_resources:
-      - dbold@emory.edu
-      - jared.houghtaling@tuftsmedicine.org
+      - https://doi.org/10.1007/s12028-024-02007
