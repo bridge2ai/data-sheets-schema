@@ -1,0 +1,755 @@
+---
+id: https://w3id.org/bridge2ai/data-sheets-schema/core
+name: D4D-Core
+title: Datasheets for Datasets – Core Exchange Schema Module
+description: >-
+  Module defining the Core exchange schema for Datasheets for Datasets.
+  CoreDataset is restricted to the 95 fields from the curated SKOS semantic
+  exchange layer alignment (mapped to schema.org, RAI, EVI, and DCAT).
+  This is the primary datasheet format for cross-system interoperability.
+  The full D4D schema (data_sheets_schema.yaml) is the extended reservoir.
+license: MIT
+see_also:
+  - https://bridge2ai.github.io/data-sheets-schema
+  - src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl
+
+prefixes:
+  d4d: https://w3id.org/bridge2ai/data-sheets-schema/
+  d4dcore: https://w3id.org/bridge2ai/data-sheets-schema/core#
+  dcat: http://www.w3.org/ns/dcat#
+  dcterms: http://purl.org/dc/terms/
+  evi: https://w3id.org/EVI#
+  linkml: https://w3id.org/linkml/
+  prov: http://www.w3.org/ns/prov#
+  rai: http://mlcommons.org/croissant/RAI/
+  schema: http://schema.org/
+  skos: http://www.w3.org/2004/02/skos/core#
+
+default_prefix: d4dcore
+default_range: string
+
+imports:
+  - linkml:types
+  - D4D_Base_import
+  - D4D_Motivation
+  - D4D_Composition
+  - D4D_Collection
+  - D4D_Preprocessing
+  - D4D_Uses
+  - D4D_Distribution
+  - D4D_Maintenance
+  - D4D_Ethics
+  - D4D_Human
+  - D4D_Data_Governance
+  - D4D_Variables
+
+## CLASSES ##
+
+classes:
+
+  # ---------------------------------------------------------------------------
+  # CoreDistribution — slot→class promotion for file-level properties
+  # ---------------------------------------------------------------------------
+  # In the full schema, bytes/hash/path/format/encoding/media_type are shared
+  # slots used by MinimalDataset and FileCollection.  The SKOS exchange layer
+  # treats these as Dataset-level properties.  CoreDistribution groups them
+  # into one class (DCAT Distribution / schema:DataDownload) so they can be
+  # documented with ontology grounding and appear at the dataset level.
+  # ---------------------------------------------------------------------------
+
+  CoreDistribution:
+    description: >-
+      A distribution or file-level representation of a dataset, grouping
+      physical access properties such as format, size, checksums, and
+      download path.  Corresponds to a dcat:Distribution or
+      schema:DataDownload.  Used in CoreDataset.distributions to bring
+      file-level properties to the dataset level in the exchange schema.
+    is_a: DatasetProperty
+    class_uri: dcat:Distribution
+    exact_mappings:
+      - schema:DataDownload
+    close_mappings:
+      - dcat:Distribution
+    slots:
+      - bytes
+      - hash
+      - md5
+      - sha256
+      - path
+      - format
+      - encoding
+      - compression
+      - media_type
+
+  # ---------------------------------------------------------------------------
+  # CoreDatasetCollection — tree root for core exchange datasheets
+  # ---------------------------------------------------------------------------
+
+  CoreDatasetCollection:
+    description: >-
+      A collection of datasets documented with the D4D Core exchange schema.
+      Acts as the tree root for YAML files that use CoreDataset records.
+      Corresponds to a dcat:Catalog.
+    tree_root: true
+    is_a: Information
+    class_uri: dcat:Catalog
+    exact_mappings:
+      - dcat:Catalog
+    close_mappings:
+      - schema:DataCatalog
+    attributes:
+      resources:
+        description: >-
+          The CoreDataset records in this collection.
+        range: CoreDataset
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: schema:hasPart
+
+  # ---------------------------------------------------------------------------
+  # CoreDataset — the primary exchange-layer datasheet class
+  # ---------------------------------------------------------------------------
+  # Inherits from Information which provides all Group 1 scalar slots:
+  #   title, description, doi, keywords, language, license, issued,
+  #   created_on, created_by, download_url, version, page, last_updated_on,
+  #   modified_by, status, conforms_to, conforms_to_schema, conforms_to_class,
+  #   was_derived_from, compression, same_as
+  # ---------------------------------------------------------------------------
+
+  CoreDataset:
+    description: >-
+      A dataset documented using the D4D Core (semantic exchange layer) schema.
+      Includes the 95 fields from the curated SKOS alignment with schema.org,
+      RAI, EVI, and DCAT, enabling cross-system interoperability.  Fields not
+      in the exchange layer mapping (e.g., file_collections, relationships,
+      splits, consent workflow) are intentionally excluded; use the full
+      data_sheets_schema.yaml for those.
+    is_a: Information
+    class_uri: dcat:Dataset
+    exact_mappings:
+      - schema:Dataset
+    close_mappings:
+      - dcat:Dataset
+
+    attributes:
+
+      # -----------------------------------------------------------------------
+      # Group 4 — file-level distribution (slot→class promotion)
+      # -----------------------------------------------------------------------
+
+      distributions:
+        description: >-
+          Physical distributions of this dataset (files, downloads).
+          Groups file-level properties (format, size, checksums, path) into
+          CoreDistribution objects.  Replaces the full schema's file_collections
+          for the exchange layer.
+        range: CoreDistribution
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: dcat:distribution
+        exact_mappings:
+          - dcat:distribution
+
+      # -----------------------------------------------------------------------
+      # Group 2 — class-valued attributes (reuse existing D4D module classes)
+      # -----------------------------------------------------------------------
+
+      # Motivation module
+      purposes:
+        description: >-
+          Purposes for which the dataset was created.
+        range: Purpose
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:purposes
+        broad_mappings:
+          - rai:dataUseCases
+
+      tasks:
+        description: >-
+          Tasks the dataset is intended to support.
+        range: Task
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:tasks
+        broad_mappings:
+          - rai:dataUseCases
+
+      addressing_gaps:
+        description: >-
+          Research or practical gaps this dataset addresses.
+        range: AddressingGap
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:addressingGaps
+
+      creators:
+        description: >-
+          Individuals or organizations who created the dataset.
+        range: Creator
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: schema:creator
+        exact_mappings:
+          - schema:author
+
+      funders:
+        description: >-
+          Funding mechanisms that supported dataset creation.
+        range: FundingMechanism
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: schema:funder
+
+      # Composition module
+      subsets:
+        description: >-
+          Subsets or splits of this dataset (e.g., train/test/validation splits
+          or demographic subgroups), each documented as a CoreDataset.
+        range: CoreDataset
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:dataSubset
+        broad_mappings:
+          - schema:hasPart
+
+      instances:
+        description: >-
+          Individual data instances or records in the dataset.
+        range: Instance
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:instances
+        broad_mappings:
+          - schema:variableMeasured
+
+      anomalies:
+        description: >-
+          Known data quality issues, errors, or irregularities in the dataset.
+        range: DataAnomaly
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:anomalies
+
+      known_biases:
+        description: >-
+          Known biases present in the dataset.
+        range: DatasetBias
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:known_biases
+        broad_mappings:
+          - rai:dataBiases
+
+      known_limitations:
+        description: >-
+          Known limitations of the dataset.
+        range: DatasetLimitation
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:known_limitations
+        broad_mappings:
+          - rai:dataLimitations
+
+      confidential_elements:
+        description: >-
+          Confidential or restricted information within the dataset.
+        range: Confidentiality
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:confidentialElements
+        broad_mappings:
+          - rai:personalSensitiveInformation
+
+      content_warnings:
+        description: >-
+          Content warnings for potentially harmful or disturbing material.
+        range: ContentWarning
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:contentWarnings
+
+      subpopulations:
+        description: >-
+          Subpopulations represented within the dataset.
+        range: Subpopulation
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:subpopulations
+        broad_mappings:
+          - schema:variableMeasured
+
+      sensitive_elements:
+        description: >-
+          Sensitive data elements requiring special handling.
+        range: SensitiveElement
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:sensitiveElements
+        broad_mappings:
+          - rai:personalSensitiveInformation
+
+      # Collection module
+      acquisition_methods:
+        description: >-
+          Methods used to acquire or obtain dataset instances.
+        range: InstanceAcquisition
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:acquisitionMethods
+        broad_mappings:
+          - rai:dataCollection
+
+      collection_mechanisms:
+        description: >-
+          Mechanisms, instruments, or tools used for data collection.
+        range: CollectionMechanism
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:collectionMechanisms
+        broad_mappings:
+          - rai:dataCollection
+
+      collection_timeframes:
+        description: >-
+          Time periods during which data was collected.
+        range: CollectionTimeframe
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:collectionTimeframes
+        broad_mappings:
+          - rai:dataCollectionTimeframe
+
+      data_collectors:
+        description: >-
+          Individuals or organizations responsible for collecting the data.
+        range: DataCollector
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:dataCollectors
+        broad_mappings:
+          - schema:contributor
+
+      missing_data_documentation:
+        description: >-
+          Documentation of missing data patterns and handling strategies.
+        range: MissingDataDocumentation
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:missingDataDocumentation
+        broad_mappings:
+          - rai:dataCollectionMissingData
+
+      raw_data_sources:
+        description: >-
+          Raw data sources before preprocessing.
+        range: RawDataSource
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:rawDataSources
+        broad_mappings:
+          - rai:dataCollectionRawData
+
+      sampling_strategies:
+        description: >-
+          Strategies used to select data instances from a larger population.
+        range: SamplingStrategy
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:samplingStrategies
+        broad_mappings:
+          - evi:samplingPlan
+
+      # Preprocessing module
+      raw_sources:
+        description: >-
+          Raw, unprocessed source data before any preprocessing was applied.
+        range: RawData
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:rawSources
+        broad_mappings:
+          - rai:dataCollectionRawData
+
+      preprocessing_strategies:
+        description: >-
+          Preprocessing steps applied to the raw data.
+        range: PreprocessingStrategy
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:preprocessingStrategies
+        broad_mappings:
+          - rai:dataPreprocessingProtocol
+
+      cleaning_strategies:
+        description: >-
+          Data cleaning and quality control procedures.
+        range: CleaningStrategy
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:cleaningStrategies
+        broad_mappings:
+          - rai:dataManipulationProtocol
+
+      labeling_strategies:
+        description: >-
+          Labeling or annotation methodologies applied to the data.
+        range: LabelingStrategy
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:labelingStrategies
+        broad_mappings:
+          - rai:dataAnnotationProtocol
+
+      imputation_protocols:
+        description: >-
+          Data imputation protocols applied to handle missing values.
+        range: ImputationProtocol
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:imputation_protocols
+        broad_mappings:
+          - rai:imputationProtocol
+
+      annotation_analyses:
+        description: >-
+          Analysis of annotation quality and inter-annotator agreement.
+        range: AnnotationAnalysis
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:annotation_analyses
+        broad_mappings:
+          - rai:dataAnnotationAnalysis
+
+      machine_annotation_tools:
+        description: >-
+          Automated annotation tools used in dataset creation.
+        range: MachineAnnotationTools
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:machineAnnotationTools
+        broad_mappings:
+          - rai:machineAnnotationTools
+
+      # Uses module
+      existing_uses:
+        description: >-
+          Known existing uses of the dataset at the time of publication.
+        range: ExistingUse
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:existingUses
+        broad_mappings:
+          - rai:dataUseCases
+
+      use_repository:
+        description: >-
+          Repositories or registries tracking how the dataset has been used.
+        range: UseRepository
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:useRepository
+        broad_mappings:
+          - schema:relatedLink
+
+      other_tasks:
+        description: >-
+          Additional tasks the dataset may support beyond its original intent.
+        range: OtherTask
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:otherTasks
+        broad_mappings:
+          - rai:dataUseCases
+
+      future_use_impacts:
+        description: >-
+          Anticipated impacts of future uses, including risks and benefits.
+        range: FutureUseImpact
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:futureUseImpacts
+
+      discouraged_uses:
+        description: >-
+          Uses that are not recommended for this dataset.
+        range: DiscouragedUse
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:discouragedUses
+        broad_mappings:
+          - rai:prohibitedUses
+
+      intended_uses:
+        description: >-
+          Explicit intended and recommended uses for this dataset.
+        range: IntendedUse
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:intendedUses
+        broad_mappings:
+          - rai:dataUseCases
+
+      prohibited_uses:
+        description: >-
+          Explicitly prohibited or forbidden uses for this dataset.
+        range: ProhibitedUse
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:prohibitedUses
+        broad_mappings:
+          - rai:prohibitedUses
+
+      # Distribution module
+      distribution_formats:
+        description: >-
+          Formats in which the dataset is distributed or made available.
+        range: DistributionFormat
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:distributionFormats
+        broad_mappings:
+          - evi:formats
+
+      distribution_dates:
+        description: >-
+          Dates when the dataset was or will be distributed or released.
+        range: DistributionDate
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:distributionDates
+        broad_mappings:
+          - schema:dateCreated
+
+      # Maintenance module
+      maintainers:
+        description: >-
+          Individuals or organizations responsible for maintaining the dataset.
+        range: Maintainer
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:maintainers
+        broad_mappings:
+          - schema:maintainer
+
+      errata:
+        description: >-
+          Known errors or corrections to the dataset since publication.
+        range: Erratum
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:errata
+
+      updates:
+        description: >-
+          Plans for future updates or versioning of the dataset.
+        range: UpdatePlan
+        inlined: true
+        slot_uri: d4d:updates
+        broad_mappings:
+          - rai:dataReleaseMaintenancePlan
+
+      retention_limit:
+        description: >-
+          Data retention policies and limits for the dataset.
+        range: RetentionLimits
+        inlined: true
+        slot_uri: d4d:retentionLimit
+        broad_mappings:
+          - schema:conditionsOfAccess
+
+      version_access:
+        description: >-
+          Information about access to different versions of the dataset.
+        range: VersionAccess
+        inlined: true
+        slot_uri: d4d:versionAccess
+        broad_mappings:
+          - schema:version
+
+      extension_mechanism:
+        description: >-
+          Mechanisms for extending or contributing to the dataset.
+        range: ExtensionMechanism
+        inlined: true
+        slot_uri: d4d:extensionMechanism
+        broad_mappings:
+          - schema:license
+
+      # Ethics module
+      ethical_reviews:
+        description: >-
+          Ethical reviews and institutional oversight for the dataset.
+        range: EthicalReview
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:ethicalReviews
+        broad_mappings:
+          - rai:ethicalReview
+
+      data_protection_impacts:
+        description: >-
+          Data protection impact assessments (DPIAs) conducted for the dataset.
+        range: DataProtectionImpact
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:dataProtectionImpacts
+        broad_mappings:
+          - rai:dataSocialImpact
+
+      # Human subjects module
+      human_subject_research:
+        description: >-
+          Information about whether dataset involves human subjects research.
+        range: HumanSubjectResearch
+        inlined: true
+        slot_uri: d4d:humanSubjectResearch
+        broad_mappings:
+          - d4d:humanSubject
+
+      informed_consent:
+        description: >-
+          Details about informed consent procedures.
+        range: InformedConsent
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:informedConsent
+        broad_mappings:
+          - d4d:informedConsent
+
+      at_risk_populations:
+        description: >-
+          Information about protections for at-risk populations.
+        range: AtRiskPopulations
+        inlined: true
+        slot_uri: d4d:atRiskPopulations
+        broad_mappings:
+          - d4d:atRiskPopulations
+
+      participant_privacy:
+        description: >-
+          Information about privacy protections for human research participants.
+        range: ParticipantPrivacy
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:participantPrivacy
+        broad_mappings:
+          - rai:personalSensitiveInformation
+
+      participant_compensation:
+        description: >-
+          Information about compensation provided to human research participants.
+        range: HumanSubjectCompensation
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:participantCompensation
+        broad_mappings:
+          - d4d:participantCompensation
+
+      # Data Governance module
+      license_and_use_terms:
+        description: >-
+          License and usage terms governing dataset access and use.
+        range: LicenseAndUseTerms
+        inlined: true
+        slot_uri: schema:license
+
+      ip_restrictions:
+        description: >-
+          Intellectual property restrictions on dataset use or redistribution.
+        range: IPRestrictions
+        inlined: true
+        slot_uri: d4d:ipRestrictions
+        broad_mappings:
+          - schema:conditionsOfAccess
+
+      regulatory_restrictions:
+        description: >-
+          Regulatory and export control restrictions applicable to the dataset.
+        range: ExportControlRegulatoryRestrictions
+        inlined: true
+        slot_uri: d4d:regulatoryRestrictions
+        broad_mappings:
+          - schema:conditionsOfAccess
+
+      # Variables module
+      variables:
+        description: >-
+          Metadata describing individual variables, fields, or columns.
+        range: VariableMetadata
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: schema:variableMeasured
+        exact_mappings:
+          - schema:variableMeasured
+
+      # -----------------------------------------------------------------------
+      # Group 3 — simple flags and scalar fields on Dataset
+      # -----------------------------------------------------------------------
+
+      is_deidentified:
+        description: >-
+          De-identification status and procedures applied to the dataset.
+        range: Deidentification
+        inlined: true
+        slot_uri: d4d:isDeidentified
+        broad_mappings:
+          - rai:confidentialityLevel
+
+      is_tabular:
+        description: >-
+          Whether the dataset is in tabular format (rows and columns).
+        range: boolean
+        slot_uri: d4d:isTabular
+        broad_mappings:
+          - schema:encodingFormat
+
+      citation:
+        description: >-
+          Recommended citation for this dataset in DataCite or BibTeX format.
+        range: string
+        slot_uri: schema:citation
+        exact_mappings:
+          - schema:citation
+
+      # -----------------------------------------------------------------------
+      # Dataset relationships (also in SKOS mapping)
+      # -----------------------------------------------------------------------
+
+      parent_datasets:
+        description: >-
+          Parent datasets that this dataset is part of or derived from.
+        range: CoreDataset
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: schema:isPartOf
+        exact_mappings:
+          - schema:isPartOf
+
+      related_datasets:
+        description: >-
+          Related datasets with typed relationships.
+        range: DatasetRelationship
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: schema:isRelatedTo
+
+      external_resources:
+        description: >-
+          External resources referenced at the dataset level.
+        range: ExternalResource
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: schema:relatedLink
+        broad_mappings:
+          - schema:relatedLink
+
+      resources:
+        description: >-
+          Sub-resources or component datasets that are part of this dataset.
+        range: CoreDataset
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: schema:hasPart
+        broad_mappings:
+          - schema:hasPart
