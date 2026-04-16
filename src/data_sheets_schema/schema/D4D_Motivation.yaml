@@ -123,7 +123,9 @@ classes:
       grantor:
         description: "Name/identifier of the organization providing monetary or resource support."
         range: Grantor
-        slot_uri: schema:funder
+        slot_uri: d4d:grantor
+        broad_mappings:
+          - schema:funder
       grants:
         description: "Grant mechanisms supporting dataset creation. Multiple grants may fund a single dataset."
         range: Grant

@@ -125,7 +125,9 @@ classes:
       total_bytes:
         description: "Total size of all files in this collection, in bytes (integer). Maps to dcat:byteSize."
         range: integer
-        slot_uri: dcat:byteSize
+        slot_uri: d4d:total_bytes
+        exact_mappings:
+          - dcat:byteSize
         annotations:
           "d4d:docExample": "1073741824 (1 GiB = 1024³ bytes)"
 

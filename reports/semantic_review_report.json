@@ -1,6 +1,6 @@
 {
-  "generated": "2026-04-08T18:00:46.777670",
-  "total_issues": 136,
+  "generated": "2026-04-15T23:21:11.072946",
+  "total_issues": 139,
   "reports_analyzed": [
     "slot_uri_conflicts",
     "range_mismatches",

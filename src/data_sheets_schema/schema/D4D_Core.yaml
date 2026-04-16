@@ -621,7 +621,9 @@ classes:
           License and usage terms governing dataset access and use.
         range: LicenseAndUseTerms
         inlined: true
-        slot_uri: schema:license
+        slot_uri: d4d:license_and_use_terms
+        broad_mappings:
+          - schema:license
 
       ip_restrictions:
         description: >-

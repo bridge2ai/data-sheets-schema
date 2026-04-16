@@ -4,8 +4,8 @@
     "total_issues": 76
   },
   "summary": {
-    "HIGH": 51,
-    "MEDIUM": 24,
+    "HIGH": 54,
+    "MEDIUM": 21,
     "LOW": 1
   },
   "issues": [
@@ -37,7 +37,7 @@
       "class": "Software",
       "attribute": "url",
       "description": "URL where the software can be found (e.g., homepage, repository, or documentation).",
-      "range": "string",
+      "range": "uri",
       "multivalued": false,
       "issue": "Description implies list but multivalued=false",
       "severity": "HIGH"
@@ -80,7 +80,7 @@
       "file": "D4D_Base_import.yaml",
       "class": "FormatDialect",
       "attribute": "double_quote",
-      "description": "String indicator of whether quotes within quoted fields are escaped by doubling them.",
+      "description": "Whether quotes within quoted fields are escaped by doubling them. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification). Follows the W3C CSV-on-the-Web dialect specification.",
       "range": "string",
       "multivalued": false,
       "issue": "String used but description implies enum (limited choices)",
@@ -91,7 +91,7 @@
       "file": "D4D_Base_import.yaml",
       "class": "FormatDialect",
       "attribute": "header",
-      "description": "String indicator of whether the first row contains column headers.",
+      "description": "Whether the first row of the file contains column headers. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification). Follows the W3C CSV-on-the-Web dialect specification.",
       "range": "string",
       "multivalued": false,
       "issue": "String used but description implies enum (limited choices)",
@@ -157,11 +157,11 @@
       "file": "D4D_Base_import.yaml",
       "class": null,
       "attribute": "hash",
-      "description": "Cryptographic hash value of the data for integrity verification.",
+      "description": "Cryptographic hash value of the data for integrity verification (e.g., SHA-256: 'e3b0c44298fc1c149afb...', MD5: 'd41d8cd98f00b204e9800998ecf8427e').",
       "range": "string",
       "multivalued": false,
-      "issue": "String used but description implies enum (limited choices)",
-      "severity": "MEDIUM"
+      "issue": "Description implies list but multivalued=false",
+      "severity": "HIGH"
     },
     {
       "module": "D4D_Base_import",
@@ -256,21 +256,21 @@
       "file": "D4D_Base_import.yaml",
       "class": null,
       "attribute": "doi",
-      "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
+      "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
       "range": "string",
       "multivalued": false,
-      "issue": "String used but description implies enum (limited choices)",
-      "severity": "MEDIUM"
+      "issue": "Description implies list but multivalued=false",
+      "severity": "HIGH"
     },
     {
       "module": "D4D_Collection",
       "file": "D4D_Collection.yaml",
       "class": "InstanceAcquisition",
       "attribute": "was_directly_observed",
-      "description": "Whether the data was directly observed.",
+      "description": "True if the data was directly observed by a researcher or instrument; false if it was obtained through other means (e.g., reported, inferred).",
       "range": "boolean",
       "multivalued": false,
-      "issue": "Boolean oversimplifies - description implies enum",
+      "issue": "Boolean oversimplifies - description implies string",
       "severity": "HIGH"
     },
     {
@@ -278,10 +278,10 @@
       "file": "D4D_Collection.yaml",
       "class": "InstanceAcquisition",
       "attribute": "was_reported_by_subjects",
-      "description": "Whether the data was reported directly by the subjects themselves.",
+      "description": "True if the data was self-reported directly by the subjects themselves (e.g., survey responses, questionnaires); false otherwise.",
       "range": "boolean",
       "multivalued": false,
-      "issue": "Boolean oversimplifies - description implies enum",
+      "issue": "Boolean oversimplifies - description implies string",
       "severity": "HIGH"
     },
     {
@@ -289,10 +289,10 @@
       "file": "D4D_Collection.yaml",
       "class": "InstanceAcquisition",
       "attribute": "was_inferred_derived",
-      "description": "Whether the data was inferred or derived from other data.",
+      "description": "True if the data was computationally inferred or derived from other data (e.g., model outputs, imputed values); false otherwise.",
       "range": "boolean",
       "multivalued": false,
-      "issue": "Boolean oversimplifies - description implies enum",
+      "issue": "Boolean oversimplifies - description implies string",
       "severity": "HIGH"
     },
     {
@@ -300,10 +300,10 @@
       "file": "D4D_Collection.yaml",
       "class": "InstanceAcquisition",
       "attribute": "was_validated_verified",
-      "description": "Whether the data was validated or verified in any way.",
+      "description": "True if the data underwent a validation or verification process (e.g., expert review, cross-checking with ground truth); false otherwise.",
       "range": "boolean",
       "multivalued": false,
-      "issue": "Boolean oversimplifies - description implies date",
+      "issue": "Boolean oversimplifies - description implies string",
       "severity": "HIGH"
     },
     {
@@ -333,7 +333,7 @@
       "file": "D4D_Collection.yaml",
       "class": "MissingDataDocumentation",
       "attribute": "handling_strategy",
-      "description": "Strategy used to handle missing data (e.g., deletion, imputation, flagging, multiple imputation).\n",
+      "description": "The primary strategy used to handle missing data (e.g., listwise deletion, mean imputation, multiple imputation, flagging with sentinel values).\n",
       "range": "string",
       "multivalued": false,
       "issue": "Description implies list but multivalued=false",
@@ -366,7 +366,7 @@
       "file": "D4D_Composition.yaml",
       "class": "Instance",
       "attribute": "instance_type",
-      "description": "Multiple types of instances? (e.g., movies, users, and ratings).\n",
+      "description": "The type or types of instances in the dataset (e.g., \"movie\", \"user\", \"rating\", \"clinical record\"). Use when the dataset contains multiple instance types with different structures.\n",
       "range": "string",
       "multivalued": false,
       "issue": "Description implies list but multivalued=false",
@@ -401,7 +401,7 @@
       "attribute": "is_sample",
       "description": "Indicates whether it is a sample of a larger set.",
       "range": "boolean",
-      "multivalued": true,
+      "multivalued": false,
       "issue": "Boolean oversimplifies - description implies enum",
       "severity": "HIGH"
     },
@@ -412,7 +412,7 @@
       "attribute": "is_random",
       "description": "Indicates whether the sample is random.",
       "range": "boolean",
-      "multivalued": true,
+      "multivalued": false,
       "issue": "Boolean oversimplifies - description implies enum",
       "severity": "HIGH"
     },
@@ -423,9 +423,20 @@
       "attribute": "is_representative",
       "description": "Indicates whether the sample is representative of the larger set.\n",
       "range": "boolean",
-      "multivalued": true,
+      "multivalued": false,
       "issue": "Boolean oversimplifies - description implies enum",
       "severity": "HIGH"
+    },
+    {
+      "module": "D4D_Composition",
+      "file": "D4D_Composition.yaml",
+      "class": "Relationships",
+      "attribute": "relationship_details",
+      "description": "Free-text description of how relationships between instances are represented (e.g., graph edges, ratings matrices, foreign keys), including relationship types and any associated metadata.\n",
+      "range": "string",
+      "multivalued": true,
+      "issue": "Primitive type 'string' used but description implies structured class",
+      "severity": "MEDIUM"
     },
     {
       "module": "D4D_Composition",
@@ -454,9 +465,9 @@
       "file": "D4D_Composition.yaml",
       "class": "ExternalResource",
       "attribute": "archival",
-      "description": "Indication whether official archival versions of external resources are included.\n",
+      "description": "Indicates whether official archival versions of external resources are included in the dataset.\n",
       "range": "boolean",
-      "multivalued": true,
+      "multivalued": false,
       "issue": "Boolean oversimplifies - description implies enum",
       "severity": "HIGH"
     },
@@ -549,6 +560,17 @@
       "severity": "HIGH"
     },
     {
+      "module": "D4D_Core",
+      "file": "D4D_Core.yaml",
+      "class": "CoreDataset",
+      "attribute": "is_tabular",
+      "description": "Whether the dataset is in tabular format (rows and columns).",
+      "range": "boolean",
+      "multivalued": false,
+      "issue": "Boolean oversimplifies - description implies enum",
+      "severity": "HIGH"
+    },
+    {
       "module": "D4D_Data_Governance",
       "file": "D4D_Data_Governance.yaml",
       "class": "LicenseAndUseTerms",
@@ -569,17 +591,6 @@
       "multivalued": false,
       "issue": "Boolean oversimplifies - description implies enum",
       "severity": "HIGH"
-    },
-    {
-      "module": "D4D_Distribution",
-      "file": "D4D_Distribution.yaml",
-      "class": "DistributionFormat",
-      "attribute": "access_urls",
-      "description": "Details of the distribution channel(s) or format(s).",
-      "range": "string",
-      "multivalued": true,
-      "issue": "Primitive type 'string' used but description implies structured class",
-      "severity": "MEDIUM"
     },
     {
       "module": "D4D_Ethics",
@@ -684,6 +695,17 @@
       "module": "D4D_Maintenance",
       "file": "D4D_Maintenance.yaml",
       "class": "VersionAccess",
+      "attribute": "latest_version_doi",
+      "description": "DOI or URL identifying the latest version of this dataset (e.g., '10.5281/zenodo.1234567' for a DOI or 'https://doi.org/10.5281/zenodo.1234567' for a full URL). Use CURIE format for DOIs (e.g., 'doi:10.5281/zenodo.1234567').",
+      "range": "uriorcurie",
+      "multivalued": false,
+      "issue": "Description implies list but multivalued=false",
+      "severity": "HIGH"
+    },
+    {
+      "module": "D4D_Maintenance",
+      "file": "D4D_Maintenance.yaml",
+      "class": "VersionAccess",
       "attribute": "versions_available",
       "description": "List of available versions with metadata.",
       "range": "string",
@@ -717,17 +739,6 @@
       "module": "D4D_Preprocessing",
       "file": "D4D_Preprocessing.yaml",
       "class": "LabelingStrategy",
-      "attribute": "data_annotation_platform",
-      "description": "Platform or tool used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
-      "range": "string",
-      "multivalued": false,
-      "issue": "Description implies list but multivalued=false",
-      "severity": "HIGH"
-    },
-    {
-      "module": "D4D_Preprocessing",
-      "file": "D4D_Preprocessing.yaml",
-      "class": "LabelingStrategy",
       "attribute": "annotations_per_item",
       "description": "Number of annotations collected per data item. Multiple annotations per item enable calculation of inter-annotator agreement.",
       "range": "integer",
@@ -745,17 +756,6 @@
       "multivalued": false,
       "issue": "Description implies list but multivalued=false",
       "severity": "HIGH"
-    },
-    {
-      "module": "D4D_Preprocessing",
-      "file": "D4D_Preprocessing.yaml",
-      "class": "LabelingStrategy",
-      "attribute": "annotator_demographics",
-      "description": "Demographic information about annotators, if available and relevant (e.g., geographic location, language background, expertise level).",
-      "range": "string",
-      "multivalued": true,
-      "issue": "Primitive type 'string' used but description implies structured class",
-      "severity": "MEDIUM"
     },
     {
       "module": "D4D_Preprocessing",
