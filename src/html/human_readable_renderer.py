@@ -577,17 +577,14 @@ class HumanReadableRenderer:
         if value is None:
             return ""
         elif isinstance(value, dict):
-            # For nested dicts, show key-value pairs compactly
-            items = [f"{k}: {v}" for k, v in value.items()]
-            return "<br>".join(items[:3])  # Limit to 3 items for readability
+            items = [f"<strong>{self._humanize_key(k)}:</strong> {v}" for k, v in value.items()]
+            return "<br>".join(items)
         elif isinstance(value, list):
-            if len(value) <= 3:
-                return ", ".join(str(v) for v in value)
-            else:
-                return f"{', '.join(str(v) for v in value[:2])}, ... (+{len(value)-2} more)"
+            return ", ".join(str(v) for v in value)
         elif isinstance(value, str):
-            if len(value) > 100:
-                return f"{value[:100]}..."
+            # Wrap long descriptions in a div so they flow naturally; never truncate
+            if len(value) > 200:
+                return f'<div class="long-description">{value}</div>'
             return value or ""
         else:
             return str(value)
@@ -627,15 +624,85 @@ class HumanReadableRenderer:
             return f"{n:,}"
         return str(n)
     
+    # Curated human-readable labels for D4D field names
+    FIELD_LABEL_MAP = {
+        'is_deidentified': 'Deidentification',
+        'ip_restrictions': 'Intellectual Property Restrictions',
+        'is_tabular': 'Tabular Data',
+        'is_sample': 'Sample',
+        'is_random': 'Random Sampling',
+        'is_representative': 'Representative Sample',
+        'addressing_gaps': 'Research Gaps Addressed',
+        'known_biases': 'Known Biases',
+        'known_limitations': 'Known Limitations',
+        'confidential_elements': 'Confidential Elements',
+        'content_warnings': 'Content Warnings',
+        'sensitive_elements': 'Sensitive Elements',
+        'subpopulations': 'Subpopulations',
+        'acquisition_methods': 'Acquisition Methods',
+        'collection_mechanisms': 'Collection Mechanisms',
+        'collection_timeframes': 'Collection Timeframes',
+        'data_collectors': 'Data Collectors',
+        'missing_data_documentation': 'Missing Data Documentation',
+        'raw_data_sources': 'Raw Data Sources',
+        'raw_sources': 'Raw Sources',
+        'labeling_strategies': 'Labeling Strategies',
+        'annotation_analyses': 'Annotation Analyses',
+        'machine_annotation_tools': 'Machine Annotation Tools',
+        'cleaning_strategies': 'Cleaning Strategies',
+        'preprocessing_strategies': 'Preprocessing Strategies',
+        'imputation_protocols': 'Imputation Protocols',
+        'existing_uses': 'Existing Uses',
+        'use_repository': 'Use Repository',
+        'other_tasks': 'Other Tasks',
+        'discouraged_uses': 'Discouraged Uses',
+        'prohibited_uses': 'Prohibited Uses',
+        'intended_uses': 'Intended Uses',
+        'future_use_impacts': 'Future Use Impacts',
+        'distribution_formats': 'Distribution Formats',
+        'distribution_dates': 'Distribution Dates',
+        'license_and_use_terms': 'License and Use Terms',
+        'regulatory_restrictions': 'Regulatory Restrictions',
+        'version_access': 'Version Access',
+        'extension_mechanism': 'Extension Mechanism',
+        'ethical_reviews': 'Ethical Reviews',
+        'data_protection_impacts': 'Data Protection Impact Assessments',
+        'human_subject_research': 'Human Subject Research',
+        'informed_consent': 'Informed Consent',
+        'at_risk_populations': 'At-Risk Populations',
+        'participant_privacy': 'Participant Privacy',
+        'participant_compensation': 'Participant Compensation',
+        'sampling_strategies': 'Sampling Strategies',
+        'related_datasets': 'Related Datasets',
+        'parent_datasets': 'Parent Datasets',
+        'external_resources': 'External Resources',
+        'retention_limit': 'Retention Limit',
+        'conforms_to': 'Conforms To',
+        'conforms_to_schema': 'Schema Conformance',
+        'conforms_to_class': 'Class Conformance',
+        'was_derived_from': 'Derived From',
+        'same_as': 'Same As',
+        'last_updated_on': 'Last Updated',
+        'created_on': 'Date Created',
+        'download_url': 'Download URL',
+        'file_collections': 'File Collections',
+        'distributions': 'Distributions',
+        'source_description': 'Source Description',
+    }
+
     def _humanize_key(self, key):
         """Convert key names to human-readable labels"""
+        # Check curated label map first (exact match on original key)
+        if key in self.FIELD_LABEL_MAP:
+            return self.FIELD_LABEL_MAP[key]
+
         # Convert snake_case and camelCase to Title Case
         key = key.replace('_', ' ').replace('-', ' ')
-        
+
         # Handle common abbreviations and terms
         replacements = {
             'id': 'ID',
-            'url': 'URL', 
+            'url': 'URL',
             'uri': 'URI',
             'doi': 'DOI',
             'api': 'API',
@@ -644,16 +711,16 @@ class HumanReadableRenderer:
             'nih': 'NIH',
             'irb': 'IRB',
             'phi': 'PHI',
-            'pii': 'PII'
+            'pii': 'PII',
         }
-        
+
         words = key.split()
         for i, word in enumerate(words):
             if word.lower() in replacements:
                 words[i] = replacements[word.lower()]
             else:
                 words[i] = word.capitalize()
-        
+
         return ' '.join(words)
     
     def _extract_title_from_data(self, data, fallback_title):
@@ -716,9 +783,8 @@ class HumanReadableRenderer:
                         {% if item.context %}
                         <div class="item-context">{{ item.context }}</div>
                         {% endif %}
-                        <label class="item-label {{ 'required-field' if item.required else 'optional-field' }}">
+                        <label class="item-label optional-field">
                             {{ humanize_key(item.key) }}
-                            {% if item.required %}<span class="required-indicator" title="Required field">*</span>{% endif %}
                         </label>
                         <div class="item-value">{{ format_value(item.value)|safe }}</div>
                     </div>
