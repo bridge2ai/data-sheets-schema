@@ -117,7 +117,7 @@ classes:
       # FileCollection module
       file_collections:
         description: >-
-          Collections of files within this dataset. Each collection represents
+          Collection of file groups within this dataset. Each entry represents
           a logical grouping of files with shared characteristics (e.g., all
           training data, all image files, all raw data files). Maps to nested
           RO-Crate Dataset entities via schema:hasPart in RO-Crate converters.
@@ -219,7 +219,7 @@ classes:
         inlined_as_list: true
       known_biases:
         description: >-
-          Known biases present in the dataset that may affect fairness,
+          List of known biases present in the dataset that may affect fairness,
           representativeness, or model performance. Uses BiasTypeEnum for
           standardized bias categorization mapped to the AI Ontology (AIO).
         slot_uri: d4d:known_biases
@@ -228,7 +228,7 @@ classes:
         inlined_as_list: true
       known_limitations:
         description: >-
-          Known limitations of the dataset that may affect its use or interpretation.
+          List of known limitations of the dataset that may affect its use or interpretation.
           Distinct from biases (systematic errors) and anomalies (data quality issues).
         slot_uri: d4d:known_limitations
         range: DatasetLimitation
@@ -373,7 +373,7 @@ classes:
         inlined_as_list: true
       missing_data_documentation:
         description: >-
-          Documentation of missing data patterns and handling strategies.
+          One or more records documenting missing data patterns and handling strategies.
         slot_uri: d4d:missingDataDocumentation
         range: MissingDataDocumentation
         multivalued: true
@@ -419,7 +419,7 @@ classes:
         multivalued: true
         inlined_as_list: true
         description: >-
-          Details about informed consent procedures, including consent type,
+          One or more records detailing informed consent procedures, including consent type,
           documentation, and withdrawal mechanisms.
       at_risk_populations:
         slot_uri: d4d:atRiskPopulations
@@ -434,7 +434,7 @@ classes:
         multivalued: true
         inlined_as_list: true
         description: >-
-          Information about privacy protections and anonymization procedures
+          One or more records describing privacy protections and anonymization procedures
           for human research participants.
       participant_compensation:
         slot_uri: d4d:participantCompensation
@@ -442,7 +442,7 @@ classes:
         multivalued: true
         inlined_as_list: true
         description: >-
-          Information about compensation or incentives provided to human research participants.
+          One or more records describing compensation or incentives provided to human research participants.
       # Preprocessing module classes
       preprocessing_strategies:
         description: >-
@@ -491,14 +491,14 @@ classes:
         inlined_as_list: true
       annotation_analyses:
         description: >-
-          Analysis of annotation quality and inter-annotator agreement.
+          One or more analyses of annotation quality and inter-annotator agreement.
         slot_uri: d4d:annotation_analyses
         range: AnnotationAnalysis
         multivalued: true
         inlined_as_list: true
       machine_annotation_tools:
         description: >-
-          Automated annotation tools used in dataset creation.
+          List of automated annotation tools used in dataset creation.
         range: MachineAnnotationTools
         multivalued: true
         inlined_as_list: true
@@ -554,7 +554,7 @@ classes:
         multivalued: true
         inlined_as_list: true
         description: >-
-          Explicit intended and recommended uses for this dataset.
+          List of explicit intended and recommended uses for this dataset.
           Complements future_use_impacts by focusing on positive applications.
       prohibited_uses:
         slot_uri: d4d:prohibitedUses
@@ -562,7 +562,7 @@ classes:
         multivalued: true
         inlined_as_list: true
         description: >-
-          Explicitly prohibited or forbidden uses for this dataset.
+          List of explicitly prohibited or forbidden uses for this dataset.
           Stronger than discouraged_uses - these are not permitted.
       # Distribution module classes
       distribution_formats:
@@ -673,7 +673,7 @@ classes:
       # Variable/field metadata
       variables:
         description: >-
-          Metadata describing individual variables, fields, or columns in the dataset.
+          List of metadata records describing individual variables, fields, or columns in the dataset.
         range: VariableMetadata
         multivalued: true
         inlined_as_list: true
@@ -708,7 +708,7 @@ classes:
           - schema:citation
       parent_datasets:
         description: >-
-          Parent datasets that this dataset is part of or derived from.
+          One or more parent datasets that this dataset is part of or derived from.
           Enables hierarchical dataset composition (hasPart/isPartOf relationships).
         range: Dataset
         multivalued: true
@@ -718,7 +718,7 @@ classes:
           - schema:isPartOf
       related_datasets:
         description: >-
-          Related datasets with typed relationships (e.g., supplements, derives from,
+          List of related datasets with typed relationships (e.g., supplements, derives from,
           is version of). Use DatasetRelationship class to specify relationship types.
         slot_uri: schema:isRelatedTo
         range: DatasetRelationship
@@ -776,7 +776,7 @@ slots:
 
   themes:
     description: >-
-      Themes associated with the data. These may be provided by
+      One or more themes associated with the data. These may be provided by
       the data creator or assigned later in a manual or automated
       manner.
     singular_name: theme
