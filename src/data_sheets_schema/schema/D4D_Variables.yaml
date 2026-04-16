@@ -48,6 +48,8 @@ classes:
         broad_mappings:
           - schema:name
           - schema:identifier
+        annotations:
+          "d4d:docExample": "hba1c_percent"
 
       data_type:
         description: >-
@@ -57,6 +59,8 @@ classes:
         slot_uri: schema:DataType
         exact_mappings:
           - schema:DataType
+        annotations:
+          "d4d:docExample": "float"
 
       unit:
         description: >-
@@ -68,6 +72,8 @@ classes:
         exact_mappings:
           - qudt:hasUnit
           - schema:unitCode
+        annotations:
+          "d4d:docExample": "%"
 
       missing_value_code:
         description: >-
@@ -76,6 +82,8 @@ classes:
         slot_uri: d4d:missingValueCode
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "NA"
 
       minimum_value:
         description: >-
@@ -100,6 +108,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: schema:valueReference
+        annotations:
+          "d4d:docExample": "4.0–14.0"
 
       examples:
         description: >-
@@ -136,6 +146,8 @@ classes:
           Examples: "mass spectrometry", "self-report survey", "GPS coordinates".
         range: string
         slot_uri: schema:measurementTechnique
+        annotations:
+          "d4d:docExample": "Glycated hemoglobin percentage measured at baseline visit"
 
       derivation:
         description: >-

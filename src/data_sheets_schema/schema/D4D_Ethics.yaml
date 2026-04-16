@@ -69,6 +69,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "IRB approval: UAB IRB-300010084, UCSD IRB-811480, UW IRB-STUDY00017428"
 
 
   DataProtectionImpact:
@@ -85,6 +87,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "DPIA conducted; minimal residual re-identification risk after de-identification"
 
 
   # CollectionNotification, CollectionConsent, and ConsentRevocation cover general data
@@ -105,6 +109,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Participants notified in-person at clinic visit; written information sheet provided in English and Spanish"
 
 
   CollectionConsent:
@@ -121,6 +127,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Written informed consent obtained before any study procedures; available in English and Spanish"
 
 
   ConsentRevocation:
@@ -137,3 +145,5 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Participants may withdraw via written request; data retained but excluded from future analyses"

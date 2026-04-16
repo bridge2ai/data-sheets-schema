@@ -54,6 +54,8 @@ classes:
         slot_uri: d4d:irbApproval
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCT05395169"
       ethics_review_board:
         description: >
           What ethics review board(s) reviewed this research?
@@ -75,6 +77,8 @@ classes:
         slot_uri: d4d:regulatoryCompliance
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "45 CFR Part 46, HIPAA Privacy Rule (45 CFR Parts 160 and 164)"
 
 
   InformedConsent:
@@ -93,6 +97,8 @@ classes:
         slot_uri: d4d:consentType
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "Written informed consent with optional consent for future use of biospecimens"
       consent_documentation:
         description: >
           How is consent documented? Include references to consent forms
@@ -100,6 +106,8 @@ classes:
         slot_uri: d4d:consentDocumentation
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "Separate consent forms for main study, biorepository, and genetic analysis"
       withdrawal_mechanism:
         description: >
           How can participants withdraw their consent? What procedures
@@ -129,6 +137,8 @@ classes:
         slot_uri: d4d:anonymizationMethod
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "De-identified per HIPAA Safe Harbor; 5-digit ZIP replaced with region codes"
       reidentification_risk:
         description: >
           What is the assessed risk of re-identification? What measures
@@ -136,6 +146,8 @@ classes:
         slot_uri: d4d:reidentificationRisk
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "Low risk; expert determination per 45 CFR 164.514(b)(1)"
       privacy_techniques:
         description: >
           What privacy-preserving techniques were applied (e.g., differential
@@ -168,6 +180,8 @@ classes:
         slot_uri: d4d:compensationType
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "Monetary payment via gift card"
       compensation_amount:
         description: >
           What was the amount or value of compensation provided?
@@ -175,6 +189,8 @@ classes:
         slot_uri: d4d:compensationAmount
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "$75 for initial visit; $25 for annual follow-up"
       compensation_rationale:
         description: >
           What was the rationale for the compensation structure?
@@ -202,6 +218,8 @@ classes:
         slot_uri: d4d:specialProtections
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "No participants under 18; pregnant women excluded from CGM protocol"
       assent_procedures:
         description: >
           For research involving minors, what assent procedures were used?

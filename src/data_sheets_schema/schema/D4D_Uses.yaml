@@ -48,6 +48,8 @@ classes:
         slot_uri: schema:example
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.1056/NEJMoa2404007)"
 
 
   UseRepository:
@@ -59,7 +61,7 @@ classes:
         description: "URL to a repository of known dataset uses."
         range: uri
         annotations:
-          "d4d:docExample": "https://example.org/dataset/known-uses"
+          "d4d:docExample": "https://paperswithcode.com/dataset/ai-readi"
       repository_details:
         description: >
           Free-text description of the repository of known dataset uses, including
@@ -81,6 +83,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Longitudinal disease trajectory modeling"
 
 
   FutureUseImpact:
@@ -101,6 +105,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Models trained on this data may reinforce existing health disparities if deployed without fairness audits"
 
 
   DiscouragedUse:
@@ -116,6 +122,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Not recommended for clinical diagnosis without additional validation"
 
 
   IntendedUse:
@@ -132,10 +140,14 @@ classes:
           List of example intended uses for this dataset.
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "Training fairness-aware ML models for T2DM prediction"
       usage_notes:
         description: >-
           A note or caveat about using the dataset for its intended purposes.
         range: string
+        annotations:
+          "d4d:docExample": "Models should be evaluated for fairness across racial/ethnic subgroups before clinical deployment"
       use_category:
         description: >-
           One or more categories of intended use (e.g., research, clinical, educational,
@@ -143,6 +155,8 @@ classes:
         slot_uri: d4d:useCategory
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "academic research"
 
 
   ProhibitedUse:
@@ -160,3 +174,5 @@ classes:
         slot_uri: d4d:prohibitionReason
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "Re-identification of participants is strictly prohibited"

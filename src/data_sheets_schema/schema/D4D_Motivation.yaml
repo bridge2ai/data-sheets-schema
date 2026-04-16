@@ -49,6 +49,8 @@ classes:
         slot_uri: d4d:questionResponse
         broad_mappings:
           - dcterms:description
+        annotations:
+          "d4d:docExample": "Primary purpose is to support hypothesis-agnostic AI/ML analyses of T2DM salutogenesis."
 
 
   Task:
@@ -61,6 +63,8 @@ classes:
         slot_uri: d4d:questionResponse
         broad_mappings:
           - dcterms:description
+        annotations:
+          "d4d:docExample": "Multi-domain biomarker discovery for Type 2 Diabetes mellitus."
 
 
   AddressingGap:
@@ -73,6 +77,8 @@ classes:
         slot_uri: d4d:questionResponse
         broad_mappings:
           - dcterms:description
+        annotations:
+          "d4d:docExample": "Lack of racially diverse T2DM datasets with linked multi-modal clinical data."
 
 
   Creator:
@@ -147,3 +153,5 @@ classes:
         slot_uri: d4d:grantIdentifier
         broad_mappings:
           - schema:identifier
+        annotations:
+          "d4d:docExample": "OT2OD032644"

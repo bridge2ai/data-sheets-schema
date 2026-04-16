@@ -57,6 +57,8 @@ classes:
         broad_mappings:
           - dcterms:license
           - dcterms:rights
+        annotations:
+          "d4d:docExample": "CC BY-NC 4.0 - Attribution-NonCommercial required"
       data_use_permission:
         description: >-
           Structured data use permissions using the Data Use Ontology (DUO).
@@ -68,6 +70,8 @@ classes:
         slot_uri: DUO:0000001
         exact_mappings:
           - DUO:0000001
+        annotations:
+          "d4d:docExample": "health_medical_biomedical_research"
       contact_person:
         description: >-
           Contact person for licensing questions. Provides structured contact
@@ -96,6 +100,8 @@ classes:
         broad_mappings:
           - DUO:0000046  # NCU - no commercial use
           - DUO:0000045  # NPU - non-profit use only
+        annotations:
+          "d4d:docExample": "Retinal imaging algorithms are subject to pending patent"
 
 
   ExportControlRegulatoryRestrictions:
@@ -116,12 +122,16 @@ classes:
           - DUO:0000021  # IRB - ethics approval required
           - DUO:0000022  # GS - geographic restriction
           - DUO:0000028  # IS - institution specific
+        annotations:
+          "d4d:docExample": "HIPAA compliant; subject to 45 CFR Part 46"
       hipaa_compliant:
         description: >-
           Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA).
           HIPAA applies to protected health information in the United States.
         slot_uri: d4d:hipaaCompliant
         range: ComplianceStatusEnum
+        annotations:
+          "d4d:docExample": "compliant"
       other_compliance:
         description: >-
           Other regulatory compliance frameworks applicable to this dataset

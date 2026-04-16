@@ -68,6 +68,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Retinal images captured with Heidelberg Spectralis OCT"
 
 
   CollectionMechanism:
@@ -86,6 +88,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "In-person clinical visit with standardized MOP"
 
 
   DataCollector:
@@ -98,6 +102,8 @@ classes:
         description: Role of the data collector (e.g., researcher, crowdworker).
         slot_uri: schema:roleName
         range: string
+        annotations:
+          "d4d:docExample": "Clinical Research Coordinator"
       collector_details:
         description: >
           Free-text description of who was involved in data collection (e.g., students,
@@ -106,6 +112,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Certified study coordinators at 3 collection sites"
 
 
   CollectionTimeframe:
@@ -120,10 +128,14 @@ classes:
         description: Start date of data collection.
         slot_uri: schema:startDate
         range: date
+        annotations:
+          "d4d:docExample": "2023-07-18"
       end_date:
         description: End date of data collection.
         slot_uri: schema:endDate
         range: date
+        annotations:
+          "d4d:docExample": "2026-11-30"
       timeframe_details:
         description: >
           Free-text description of the data collection period and whether this timeframe
@@ -132,6 +144,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Enrollment ongoing; data released annually"
 
 
   DirectCollection:
@@ -151,6 +165,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Collected directly from consented participants at clinical sites"
 
 
   MissingDataDocumentation:
@@ -168,6 +184,8 @@ classes:
         slot_uri: d4d:missingDataPatterns
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "CGM data missing for 15% of participants (device errors)"
       missing_data_causes:
         description: >
           Known or suspected causes of missing data (e.g., sensor failures,
@@ -175,12 +193,16 @@ classes:
         slot_uri: d4d:missingDataCauses
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "Device malfunction, participant non-compliance, technical failures"
       handling_strategy:
         description: >
           The primary strategy used to handle missing data (e.g., listwise deletion,
           mean imputation, multiple imputation, flagging with sentinel values).
         slot_uri: d4d:handlingStrategy
         range: string
+        annotations:
+          "d4d:docExample": "Multiple imputation using chained equations (MICE)"
 
 
   RawDataSource:
@@ -198,6 +220,8 @@ classes:
         slot_uri: dcterms:description
         range: string
         required: true
+        annotations:
+          "d4d:docExample": "Electronic health records from UCSF Epic system"
       source_type:
         description: >
           One or more types of raw source (e.g., sensor, database, user input, web scraping).
@@ -206,17 +230,23 @@ classes:
         multivalued: true
         broad_mappings:
           - dcterms:type
+        annotations:
+          "d4d:docExample": "Electronic Health Records"
       access_details:
         description: >
           Information on how to access or retrieve the raw source data.
         slot_uri: d4d:accessDetails
         range: string
+        annotations:
+          "d4d:docExample": "Requires institutional DUA and IRB approval"
       raw_data_format:
         description: >
           One or more formats of the raw data before any preprocessing (e.g., CSV, DICOM, JSON).
         slot_uri: d4d:rawDataFormat
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "HL7 FHIR R4"
 
 
 
