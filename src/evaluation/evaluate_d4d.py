@@ -18,6 +18,7 @@ Date: 2025-11-17
 import argparse
 import json
 import csv
+import subprocess
 import yaml
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
@@ -25,6 +26,58 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from data_sheets_schema.constants import PROJECTS, METHODS, RUBRIC10_PATH, RUBRIC20_PATH
+
+# Schema used for validation, keyed by method name
+_METHOD_SCHEMA = {
+    "claudecode_agent_core": (
+        "src/data_sheets_schema/schema/data_sheets_schema_core.yaml",
+        "CoreDataset",
+    ),
+}
+_DEFAULT_SCHEMA = (
+    "src/data_sheets_schema/schema/data_sheets_schema.yaml",
+    "Dataset",
+)
+
+
+def validate_d4d_yaml(file_path: Path, method: str = "") -> bool:
+    """
+    Run linkml-validate on a D4D YAML file.
+
+    Selects the correct schema based on method name (or file path convention
+    when method is not supplied).  Prints a clear warning on failure but does
+    NOT raise an exception — callers decide whether to abort.
+
+    Returns True if validation passed, False otherwise.
+    """
+    schema_file, class_name = _METHOD_SCHEMA.get(method, _DEFAULT_SCHEMA)
+
+    # Path-based fallback when called without a method (e.g. from the render CLI)
+    if method == "" and ("_core" in str(file_path) or "claudecode_agent_core" in str(file_path)):
+        schema_file, class_name = _METHOD_SCHEMA["claudecode_agent_core"]
+
+    result = subprocess.run(
+        ["poetry", "run", "linkml-validate",
+         "-s", schema_file, "-C", class_name, str(file_path)],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        print(
+            f"\n{'='*60}\n"
+            f"⚠️  VALIDATION FAILED: {file_path}\n"
+            f"    Schema : {schema_file}  (class: {class_name})\n"
+            f"{result.stdout.strip()}\n"
+            f"{result.stderr.strip()}\n"
+            f"{'='*60}\n"
+            "    Proceeding anyway — fix the YAML before publishing.\n"
+            f"{'='*60}\n"
+        )
+        return False
+
+    print(f"✓ Validation passed [{class_name}]: {file_path.name}")
+    return True
 
 
 @dataclass
@@ -338,6 +391,9 @@ class D4DEvaluator:
                     print(
                         f"Skipping {project}/{method}: file not found at {file_path}")
                     continue
+
+                # Validate before evaluating
+                validate_d4d_yaml(file_path, method)
 
                 print(f"Evaluating {project}/{method}...")
                 evaluation = self.evaluate_d4d_file(file_path, project, method)

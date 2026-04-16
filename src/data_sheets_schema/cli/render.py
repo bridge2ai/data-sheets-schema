@@ -92,12 +92,20 @@ def render():
 @click.option('--template', type=click.Choice(['human-readable', 'evaluation', 'linkml']),
               default='human-readable',
               help='HTML template style')
-def html(input_file, output, template):
+@click.option('--skip-validation', is_flag=True, default=False,
+              help='Skip linkml-validate check before rendering')
+def html(input_file, output, template, skip_validation):
     """Render a structured file to HTML."""
     require_repo_context("d4d render html")
 
     if not output and template != 'evaluation':
         output = Path(input_file).with_suffix('.html')
+
+    # Validate D4D YAML before rendering (skipped for evaluation JSONs and linkml templates)
+    if template == 'human-readable' and not skip_validation:
+        setup_repo_imports()
+        from src.evaluation.evaluate_d4d import validate_d4d_yaml
+        validate_d4d_yaml(Path(input_file))
 
     click.echo(f"🎨 Rendering {input_file} to HTML ({template} style)...")
 
