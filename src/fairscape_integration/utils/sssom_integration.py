@@ -67,7 +67,15 @@ class SSSOMIntegration:
             # Parse SSSOM file
             self.msdf = parse_sssom_table(str(self.sssom_path))
 
-            if self.verbose:
+            # sssom-py may silently drop rows with non-standard values
+            # (e.g. unknown EntityTypeEnum codes), returning an empty DataFrame
+            # instead of raising an exception. Fall back to custom reader.
+            if len(self.msdf.df) == 0:
+                if self.verbose:
+                    print("sssom-py returned 0 mappings, falling back to custom reader")
+                self.use_standard = False
+                self._load_with_custom_reader()
+            elif self.verbose:
                 print(f"Loaded {len(self.msdf.df)} mappings")
                 print(f"Mapping set ID: {self.msdf.mapping_set_id}")
         except Exception as e:
