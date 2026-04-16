@@ -165,7 +165,7 @@ classes:
   MissingInfo:
     description: >
       Is any information missing from individual instances? (e.g.,
-      unavailable data)
+      unavailable data).
     is_a: DatasetProperty
     attributes:
       missing:

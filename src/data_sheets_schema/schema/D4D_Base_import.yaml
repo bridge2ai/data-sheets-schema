@@ -211,7 +211,7 @@ classes:
           - schema:identifier
 
   Information:
-    description: "Grouping for datasets and data files"
+    description: "Grouping for datasets and data files."
     close_mappings:
       - schema:CreativeWork
     is_a: NamedThing
