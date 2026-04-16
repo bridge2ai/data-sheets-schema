@@ -308,12 +308,9 @@ sampling_strategies:
       Alzheimer's, Parkinson's, stroke, ALS; (3) Mood and Psychiatric Disorders - depression,
       schizophrenia, bipolar disorders; (4) Respiratory disorders - pneumonia, COPD, heart
       failure, obstructive sleep apnea; (5) Pediatric diseases - autism, speech delay.
-    is_sample:
-      - true
-    is_random:
-      - false
-    is_representative:
-      - false
+    is_sample: true
+    is_random: false
+    is_representative: false
     strategies:
       - Targeted recruitment from specialty clinics representing five disease cohort categories
       - Screening based on known conditions manifesting within voice waveform

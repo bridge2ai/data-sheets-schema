@@ -19,6 +19,7 @@ import argparse
 import json
 import csv
 import subprocess
+import tempfile
 import yaml
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
@@ -44,9 +45,13 @@ def validate_d4d_yaml(file_path: Path, method: str = "") -> bool:
     """
     Run linkml-validate on a D4D YAML file.
 
-    Selects the correct schema based on method name (or file path convention
-    when method is not supplied).  Prints a clear warning on failure but does
-    NOT raise an exception — callers decide whether to abort.
+    Selects the correct schema and target class automatically:
+    - ``DatasetCollection`` wrapper format (curated files)  → -C DatasetCollection
+    - ``claudecode_agent_core`` method or ``_core`` in path → -C CoreDataset
+    - Everything else                                       → -C Dataset
+
+    Prints a clear warning on failure but does NOT raise an exception —
+    callers decide whether to abort.
 
     Returns True if validation passed, False otherwise.
     """
@@ -56,12 +61,45 @@ def validate_d4d_yaml(file_path: Path, method: str = "") -> bool:
     if method == "" and ("_core" in str(file_path) or "claudecode_agent_core" in str(file_path)):
         schema_file, class_name = _METHOD_SCHEMA["claudecode_agent_core"]
 
+    # Peek at the YAML to detect DatasetCollection key-wrapped format used by
+    # curated files.  In that format the file contains:
+    #   DatasetCollection:
+    #     resources:
+    #       - {id: ..., ...}
+    # linkml-validate cannot unwrap this automatically, so we extract the first
+    # resource and validate it as a Dataset instead.
+    validate_path = file_path
+    tmp_file = None
+    try:
+        with open(file_path, "r", encoding="utf-8-sig") as fh:
+            top = yaml.safe_load(fh)
+        if isinstance(top, dict) and "DatasetCollection" in top:
+            collection = top["DatasetCollection"]
+            resources = collection.get("resources", []) if isinstance(collection, dict) else []
+            if resources:
+                tmp_file = tempfile.NamedTemporaryFile(
+                    mode="w", suffix=".yaml", delete=False, encoding="utf-8"
+                )
+                yaml.dump(resources[0], tmp_file)
+                tmp_file.close()
+                validate_path = Path(tmp_file.name)
+                # class_name stays Dataset (already set above)
+    except Exception:
+        pass  # fall through and let linkml-validate report the real problem
+
     result = subprocess.run(
         ["poetry", "run", "linkml-validate",
-         "-s", schema_file, "-C", class_name, str(file_path)],
+         "-s", schema_file, "-C", class_name, str(validate_path)],
         capture_output=True,
         text=True,
     )
+
+    # Clean up temp file if we created one
+    if tmp_file is not None:
+        try:
+            Path(tmp_file.name).unlink()
+        except Exception:
+            pass
 
     if result.returncode != 0:
         print(
