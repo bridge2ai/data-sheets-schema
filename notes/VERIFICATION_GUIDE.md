@@ -12,7 +12,7 @@ Use this guide to verify the GitHub D4D Assistant determinism implementation.
 
 ```bash
 # Check all new files exist
-ls -lh .github/workflows/d4d_assistant_deterministic_config.yaml
+ls -lh .github/workflows/d4d_assistant_deterministic.config
 ls -lh src/github/generate_d4d_metadata.py
 ls -lh src/github/validate_d4d_completeness.py
 ls -lh src/github/validate_prerequisites.sh
@@ -227,12 +227,12 @@ grep -A5 "input_documents:" data/sheets_d4dassistant/test_d4d_metadata.yaml
 
 ```bash
 # Check config file structure
-cat .github/workflows/d4d_assistant_deterministic_config.yaml
+cat .github/workflows/d4d_assistant_deterministic.config
 
 # Verify key settings
-grep -A3 "^model:" .github/workflows/d4d_assistant_deterministic_config.yaml
-grep "temperature:" .github/workflows/d4d_assistant_deterministic_config.yaml
-grep "block_threshold:" .github/workflows/d4d_assistant_deterministic_config.yaml
+grep -A3 "^model:" .github/workflows/d4d_assistant_deterministic.config
+grep "temperature:" .github/workflows/d4d_assistant_deterministic.config
+grep "block_threshold:" .github/workflows/d4d_assistant_deterministic.config
 ```
 
 **Expected**:

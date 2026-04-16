@@ -389,7 +389,7 @@ def load_config() -> Dict:
     Returns:
         Configuration dictionary
     """
-    config_path = Path(__file__).parent.parent.parent / ".github" / "workflows" / "d4d_assistant_deterministic_config.yaml"
+    config_path = Path(__file__).parent.parent.parent / ".github" / "workflows" / "d4d_assistant_deterministic.config"
 
     if not config_path.exists():
         return {}
