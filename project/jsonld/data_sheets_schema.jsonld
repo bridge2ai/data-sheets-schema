@@ -1653,7 +1653,7 @@
     {
       "name": "themes",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/themes",
-      "description": "Themes associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
+      "description": "One or more themes associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://www.w3.org/ns/dcat#theme"
@@ -1667,6 +1667,13 @@
     {
       "name": "title",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/title",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "AI-READI: Salutogenesis Study of Type 2 Diabetes",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The official title of the element.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1683,6 +1690,13 @@
     {
       "name": "language",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/language",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "en",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Language in which the information is expressed.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1725,6 +1739,13 @@
     {
       "name": "issued",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/issued",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "2024-11-15T00:00:00",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Date of formal issuance or publication of the resource.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1741,6 +1762,13 @@
     {
       "name": "page",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/page",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://fairhub.io/datasets/2",
+          "@type": "Annotation"
+        }
+      ],
       "description": "A landing page or web page providing access to or information about the resource.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1757,6 +1785,13 @@
     {
       "name": "dialect",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/dialect",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "RFC4180",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Specific format dialect or variation (e.g., CSV dialect, JSON-LD profile).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1773,6 +1808,13 @@
     {
       "name": "bytes",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/bytes",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "10485760",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Size of the data in bytes.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1789,6 +1831,13 @@
     {
       "name": "path",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/path",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "data/ai_readi/participants.csv",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The file path or URL where the content is located.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1806,6 +1855,13 @@
     {
       "name": "download_url",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/download_url",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://fairhub.io/datasets/2/download",
+          "@type": "Annotation"
+        }
+      ],
       "description": "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1825,6 +1881,13 @@
     {
       "name": "format",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/format",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "CSV",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1841,6 +1904,13 @@
     {
       "name": "encoding",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/encoding",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "UTF-8",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The character encoding of the data.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1857,6 +1927,13 @@
     {
       "name": "compression",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/compression",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "zip",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Compression format used, if any (e.g., gzip, bzip2, zip).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1875,6 +1952,13 @@
     {
       "name": "media_type",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/media_type",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "text/csv",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The media type of the data. This should be a MIME type.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1894,6 +1978,13 @@
     {
       "name": "hash",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/hash",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Cryptographic hash value of the data for integrity verification (e.g., SHA-256: 'e3b0c44298fc1c149afb...', MD5: 'd41d8cd98f00b204e9800998ecf8427e').",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1913,6 +2004,13 @@
     {
       "name": "md5",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/md5",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "d41d8cd98f00b204e9800998ecf8427e",
+          "@type": "Annotation"
+        }
+      ],
       "description": "MD5 hash value of the data (128-bit cryptographic hash).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1932,6 +2030,13 @@
     {
       "name": "sha256",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/sha256",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "@type": "Annotation"
+        }
+      ],
       "description": "SHA-256 hash value of the data (256-bit cryptographic hash, recommended).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1948,6 +2053,13 @@
     {
       "name": "conforms_to",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://www.w3.org/TR/vocab-dcat-3/",
+          "@type": "Annotation"
+        }
+      ],
       "description": "An established standard, specification, or schema to which the resource conforms.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1964,6 +2076,13 @@
     {
       "name": "conforms_to_schema",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to_schema",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://w3id.org/bridge2ai/data-sheets-schema",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The schema or data model to which the resource conforms.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -1983,6 +2102,13 @@
     {
       "name": "conforms_to_class",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to_class",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Dataset",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The specific class or type within a schema to which the resource conforms.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -2002,6 +2128,13 @@
     {
       "name": "license",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/license",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "CC-BY-NC-4.0",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The legal license under which the resource is made available (e.g., \"MIT\", \"CC-BY-4.0\").",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -2018,6 +2151,13 @@
     {
       "name": "keywords",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/keywords",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "diabetes, retinal imaging, multimodal, clinical data",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Keywords or tags describing the resource for discovery and classification.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -2035,6 +2175,13 @@
     {
       "name": "version",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/version",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "2.0.0",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The version identifier of the resource (e.g., \"1.0\", \"2.3.1\").",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -2051,6 +2198,13 @@
     {
       "name": "created_by",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/created_by",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "orcid:0000-0002-1234-5678",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The person or organization primarily responsible for creating the resource.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -2067,6 +2221,13 @@
     {
       "name": "created_on",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/created_on",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "2023-07-18T00:00:00",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The date and time when the resource was created.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -2083,6 +2244,13 @@
     {
       "name": "last_updated_on",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/last_updated_on",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "2024-11-15T00:00:00",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The date and time when the resource was most recently modified or updated.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -2099,6 +2267,13 @@
     {
       "name": "modified_by",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/modified_by",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "orcid:0000-0002-9876-5432",
+          "@type": "Annotation"
+        }
+      ],
       "description": "A person or organization that contributed to modifying or updating the resource.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -2115,6 +2290,13 @@
     {
       "name": "status",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/status",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "published",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The status of the resource (e.g., draft, published, deprecated).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -2131,6 +2313,13 @@
     {
       "name": "was_derived_from",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/was_derived_from",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://fairhub.io/datasets/2/versions/1",
+          "@type": "Annotation"
+        }
+      ],
       "description": "A resource from which this resource was derived, in whole or in part.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -2150,6 +2339,13 @@
     {
       "name": "doi",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/doi",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "10.5281/zenodo.10642459",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -2210,7 +2406,7 @@
     },
     {
       "name": "dataset__file_collections",
-      "description": "Collections of files within this dataset. Each collection represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart in RO-Crate converters.",
+      "description": "Collection of file groups within this dataset. Each entry represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart in RO-Crate converters.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/fileCollections"
@@ -2430,7 +2626,7 @@
     },
     {
       "name": "dataset__known_biases",
-      "description": "Known biases present in the dataset that may affect fairness, representativeness, or model performance. Uses BiasTypeEnum for standardized bias categorization mapped to the AI Ontology (AIO).",
+      "description": "List of known biases present in the dataset that may affect fairness, representativeness, or model performance. Uses BiasTypeEnum for standardized bias categorization mapped to the AI Ontology (AIO).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/known_biases"
@@ -2449,7 +2645,7 @@
     },
     {
       "name": "dataset__known_limitations",
-      "description": "Known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
+      "description": "List of known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/known_limitations"
@@ -2753,7 +2949,7 @@
     },
     {
       "name": "dataset__missing_data_documentation",
-      "description": "Documentation of missing data patterns and handling strategies.",
+      "description": "One or more records documenting missing data patterns and handling strategies.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/missingDataDocumentation"
@@ -2846,7 +3042,7 @@
     },
     {
       "name": "dataset__informed_consent",
-      "description": "Details about informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
+      "description": "One or more records detailing informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/informedConsent"
@@ -2882,7 +3078,7 @@
     },
     {
       "name": "dataset__participant_privacy",
-      "description": "Information about privacy protections and anonymization procedures for human research participants.",
+      "description": "One or more records describing privacy protections and anonymization procedures for human research participants.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/participantPrivacy"
@@ -2901,7 +3097,7 @@
     },
     {
       "name": "dataset__participant_compensation",
-      "description": "Information about compensation or incentives provided to human research participants.",
+      "description": "One or more records describing compensation or incentives provided to human research participants.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/participantCompensation"
@@ -3015,7 +3211,7 @@
     },
     {
       "name": "dataset__annotation_analyses",
-      "description": "Analysis of annotation quality and inter-annotator agreement.",
+      "description": "One or more analyses of annotation quality and inter-annotator agreement.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/annotation_analyses"
@@ -3034,7 +3230,7 @@
     },
     {
       "name": "dataset__machine_annotation_tools",
-      "description": "Automated annotation tools used in dataset creation.",
+      "description": "List of automated annotation tools used in dataset creation.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/machine_annotation_tools",
       "alias": "machine_annotation_tools",
@@ -3145,7 +3341,7 @@
     },
     {
       "name": "dataset__intended_uses",
-      "description": "Explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.",
+      "description": "List of explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/intendedUses"
@@ -3164,7 +3360,7 @@
     },
     {
       "name": "dataset__prohibited_uses",
-      "description": "Explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.",
+      "description": "List of explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/prohibitedUses"
@@ -3397,7 +3593,7 @@
     },
     {
       "name": "dataset__variables",
-      "description": "Metadata describing individual variables, fields, or columns in the dataset.",
+      "description": "List of metadata records describing individual variables, fields, or columns in the dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://schema.org/variableMeasured"
@@ -3471,7 +3667,7 @@
     },
     {
       "name": "dataset__parent_datasets",
-      "description": "Parent datasets that this dataset is part of or derived from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).",
+      "description": "One or more parent datasets that this dataset is part of or derived from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://schema.org/isPartOf"
@@ -3493,7 +3689,7 @@
     },
     {
       "name": "dataset__related_datasets",
-      "description": "Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
+      "description": "List of related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://schema.org/isRelatedTo"
@@ -3563,6 +3759,13 @@
     },
     {
       "name": "namedThing__name",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "AI-READI Dataset",
+          "@type": "Annotation"
+        }
+      ],
       "description": "A human-readable name for a thing.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -3579,6 +3782,13 @@
     },
     {
       "name": "namedThing__description",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "A multimodal dataset of 4,000 participants with Type 2 Diabetes.",
+          "@type": "Annotation"
+        }
+      ],
       "description": "A human-readable description for a thing.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -3669,6 +3879,13 @@
     },
     {
       "name": "software__version",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "3.8.1",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The version identifier of the software (e.g., \"1.0.0\", \"2.3.1-beta\").",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -3685,6 +3902,13 @@
     },
     {
       "name": "software__license",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "MIT",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The license under which the software is distributed (e.g., \"MIT\", \"Apache-2.0\", \"GPL-3.0\").",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -3701,6 +3925,13 @@
     },
     {
       "name": "software__url",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://github.com/example/tool",
+          "@type": "Annotation"
+        }
+      ],
       "description": "URL where the software can be found (e.g., homepage, repository, or documentation).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -3734,6 +3965,13 @@
     },
     {
       "name": "person__email",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "researcher@university.edu",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The email address of the person. Represents current/preferred contact information in the context of this dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -3842,6 +4080,13 @@
     },
     {
       "name": "purpose__response",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Primary purpose is to support hypothesis-agnostic AI/ML analyses of T2DM salutogenesis.",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Short explanation describing the primary purpose of creating the dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
@@ -3861,6 +4106,13 @@
     },
     {
       "name": "task__response",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Multi-domain biomarker discovery for Type 2 Diabetes mellitus.",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Short explanation describing the specific task or tasks for which this dataset was created.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
@@ -3880,6 +4132,13 @@
     },
     {
       "name": "addressingGap__response",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Lack of racially diverse T2DM datasets with linked multi-modal clinical data.",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Short explanation of the knowledge or resource gap that this dataset was intended to address.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
@@ -3961,9 +4220,12 @@
       "description": "Name/identifier of the organization providing monetary or resource support.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/grantor"
+      ],
+      "broad_mappings": [
         "http://schema.org/funder"
       ],
-      "slot_uri": "http://schema.org/funder",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/grantor",
       "alias": "grantor",
       "owner": "FundingMechanism",
       "domain_of": [
@@ -3993,6 +4255,13 @@
     },
     {
       "name": "grant__grant_number",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "OT2OD032644",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The alphanumeric identifier for the grant.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
@@ -4031,6 +4300,13 @@
     },
     {
       "name": "instance__instance_type",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "medical imaging studies",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The type or types of instances in the dataset (e.g., \"movie\", \"user\", \"rating\", \"clinical record\"). Use when the dataset contains multiple instance types with different structures.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4163,6 +4439,13 @@
     },
     {
       "name": "samplingStrategy__is_sample",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "true",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Indicates whether it is a sample of a larger set.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4179,6 +4462,13 @@
     },
     {
       "name": "samplingStrategy__is_random",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "false",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Indicates whether the sample is random.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4212,6 +4502,13 @@
     },
     {
       "name": "samplingStrategy__is_representative",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "true",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Indicates whether the sample is representative of the larger set.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4265,6 +4562,13 @@
     },
     {
       "name": "samplingStrategy__strategies",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Triple-balanced by race/ethnicity, sex, and T2DM severity",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more sampling strategies used (e.g., deterministic, simple random, stratified, cluster, systematic).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4282,6 +4586,13 @@
     },
     {
       "name": "missingInfo__missing",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "CGM readings absent for 15% of participants",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Description of the missing data fields or elements.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4302,6 +4613,13 @@
     },
     {
       "name": "missingInfo__why_missing",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Device malfunction or non-compliance during 14-day wear period",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Explanation of why each piece of data is missing.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4322,6 +4640,13 @@
     },
     {
       "name": "relationships__relationship_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Participants linked to multiple visits via participant_id foreign key",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of how relationships between instances are represented (e.g., graph edges, ratings matrices, foreign keys), including relationship types and any associated metadata.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4339,6 +4664,13 @@
     },
     {
       "name": "splits__split_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "70/15/15 train/validation/test split stratified by site and T2DM severity",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of the recommended data splits (e.g., 80/10/10 train/ validation/test), how they are defined, and the rationale for the split strategy.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4356,6 +4688,13 @@
     },
     {
       "name": "dataAnomaly__anomaly_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "15% of CGM readings missing due to device malfunction",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of errors, noise sources, or redundancies in the dataset, including their known causes and estimated prevalence.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4392,6 +4731,13 @@
     },
     {
       "name": "datasetBias__bias_description",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Sampling favored urban academic medical centers",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Detailed description of how this bias manifests in the dataset, including affected populations, features, or outcomes.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4408,6 +4754,13 @@
     },
     {
       "name": "datasetBias__mitigation_strategy",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Oversampling of underrepresented groups during model training",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Steps taken or recommended to mitigate this bias.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4424,6 +4777,13 @@
     },
     {
       "name": "datasetBias__affected_subsets",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Training split underrepresents Asian participants",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more specific subsets or features of the dataset affected by this bias (e.g., \"female participants\", \"non-English text\", \"images taken at night\").\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4457,6 +4817,13 @@
     },
     {
       "name": "datasetLimitation__limitation_description",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Cross-sectional design limits causal inference",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Detailed description of the limitation and its implications.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4473,6 +4840,13 @@
     },
     {
       "name": "datasetLimitation__scope_impact",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Findings may not generalize to non-diabetic populations",
+          "@type": "Annotation"
+        }
+      ],
       "description": "How this limitation affects the scope or applicability of the dataset.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4489,6 +4863,13 @@
     },
     {
       "name": "datasetLimitation__recommended_mitigation",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Use longitudinal follow-up cohorts for causal inference studies",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Recommended approaches for users to address this limitation.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4577,6 +4958,13 @@
     },
     {
       "name": "confidentiality__confidentiality_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "ZIP codes suppressed; race/ethnicity available only in aggregate",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of which data elements are confidential, the basis for confidentiality (e.g., legal privilege, patient data), and how they are handled or restricted.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4610,6 +4998,13 @@
     },
     {
       "name": "contentWarning__warnings",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Contains clinical images of diabetic retinopathy",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more specific content warnings describing potentially offensive, insulting, threatening, or anxiety-provoking content present in the dataset (e.g., violence, profanity, explicit imagery, hate speech).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4663,6 +5058,13 @@
     },
     {
       "name": "subpopulation__distribution",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Hispanic participants: 1,023 (25.6% of total)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The distribution of instances across identified subpopulations, including counts, percentages, or proportions for each subgroup.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4729,6 +5131,13 @@
     },
     {
       "name": "deidentification__deidentification_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "HIPAA Safe Harbor method applied; expert re-identification risk assessment confirms low risk",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Details on de-identification procedures and residual risks.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4762,6 +5171,13 @@
     },
     {
       "name": "sensitiveElement__sensitivity_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Genetic sequencing data requires additional DUA",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Details on sensitive data elements present and handling procedures.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4890,6 +5306,13 @@
     },
     {
       "name": "instanceAcquisition__acquisition_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Retinal images captured with Heidelberg Spectralis OCT",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of how data was acquired for each instance, including instruments, protocols, and any manual steps involved.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -4907,6 +5330,13 @@
     },
     {
       "name": "collectionMechanism__mechanism_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "In-person clinical visit with standardized MOP",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of the specific mechanisms or procedures used to collect the data (e.g., hardware model, software API, manual curation process), including how those mechanisms were validated.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -4924,6 +5354,13 @@
     },
     {
       "name": "dataCollector__role",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Clinical Research Coordinator",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Role of the data collector (e.g., researcher, crowdworker).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -4940,6 +5377,13 @@
     },
     {
       "name": "dataCollector__collector_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Certified study coordinators at 3 collection sites",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of who was involved in data collection (e.g., students, crowdworkers, contractors), their training or qualifications, and how they were compensated.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -4957,6 +5401,13 @@
     },
     {
       "name": "collectionTimeframe__start_date",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "2023-07-18",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Start date of data collection.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -4973,6 +5424,13 @@
     },
     {
       "name": "collectionTimeframe__end_date",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "2026-11-30",
+          "@type": "Annotation"
+        }
+      ],
       "description": "End date of data collection.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -4989,6 +5447,13 @@
     },
     {
       "name": "collectionTimeframe__timeframe_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Enrollment ongoing; data released annually",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of the data collection period and whether this timeframe matches the creation timeframe of the underlying data (e.g., historical records, prospective collection).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -5022,6 +5487,13 @@
     },
     {
       "name": "directCollection__collection_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Collected directly from consented participants at clinical sites",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of whether data was collected directly from individuals or obtained via third parties or other indirect sources, and what those sources are.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -5039,6 +5511,13 @@
     },
     {
       "name": "missingDataDocumentation__missing_data_patterns",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "CGM data missing for 15% of participants (device errors)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Description of patterns in missing data (e.g., missing completely at random, missing at random, missing not at random).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -5056,6 +5535,13 @@
     },
     {
       "name": "missingDataDocumentation__missing_data_causes",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Device malfunction, participant non-compliance, technical failures",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Known or suspected causes of missing data (e.g., sensor failures, participant dropout, privacy constraints).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -5073,6 +5559,13 @@
     },
     {
       "name": "missingDataDocumentation__handling_strategy",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Multiple imputation using chained equations (MICE)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The primary strategy used to handle missing data (e.g., listwise deletion, mean imputation, multiple imputation, flagging with sentinel values).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -5089,6 +5582,13 @@
     },
     {
       "name": "rawDataSource__source_description",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Electronic health records from UCSF Epic system",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Detailed description of where raw data comes from (e.g., sensors, databases, web APIs, manual collection).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -5106,6 +5606,13 @@
     },
     {
       "name": "rawDataSource__source_type",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Electronic Health Records",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more types of raw source (e.g., sensor, database, user input, web scraping).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -5126,6 +5633,13 @@
     },
     {
       "name": "rawDataSource__access_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Requires institutional DUA and IRB approval",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Information on how to access or retrieve the raw source data.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -5142,6 +5656,13 @@
     },
     {
       "name": "rawDataSource__raw_data_format",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "HL7 FHIR R4",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more formats of the raw data before any preprocessing (e.g., CSV, DICOM, JSON).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
@@ -5159,6 +5680,13 @@
     },
     {
       "name": "preprocessingStrategy__preprocessing_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "DICOM to NIfTI conversion using dcm2niix v1.0.20211006",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of preprocessing steps applied to the data, including tools used, parameters, order of operations, and rationale for each step.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5176,6 +5704,13 @@
     },
     {
       "name": "cleaningStrategy__cleaning_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Outlier removal using 3-sigma rule; manual review of flagged records",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of data cleaning procedures applied, including criteria for removing or correcting instances, tools used, and how removed instances are accounted for.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5193,6 +5728,13 @@
     },
     {
       "name": "labelingStrategy__data_annotation_platform",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Label Studio 1.7.3",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more platforms or tools used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5256,6 +5798,13 @@
     },
     {
       "name": "labelingStrategy__inter_annotator_agreement",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Cohen's \u03ba = 0.82 (substantial agreement)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Measure of agreement between annotators (e.g., Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percent agreement). Include both the metric name and value.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5292,6 +5841,13 @@
     },
     {
       "name": "labelingStrategy__labeling_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Board-certified ophthalmologists graded retinal images using ETDRS scale",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of the labeling or annotation procedures, including annotation guidelines, task definitions, and quality control metrics.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5349,6 +5905,13 @@
     },
     {
       "name": "imputationProtocol__imputation_method",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Multiple Imputation by Chained Equations (MICE)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Specific imputation technique used (mean, median, mode, forward fill, backward fill, interpolation, model-based imputation, etc.).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5366,6 +5929,13 @@
     },
     {
       "name": "imputationProtocol__imputed_fields",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "cgm_mean_glucose, hba1c_percent, bmi",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Fields or columns where imputation was applied.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5383,6 +5953,13 @@
     },
     {
       "name": "imputationProtocol__imputation_rationale",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "MICE with 20 imputations; predictors: age, sex, HbA1c",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Justification for the imputation approach chosen, including assumptions made about missing data mechanisms.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5481,6 +6058,13 @@
     },
     {
       "name": "annotationAnalysis__annotation_quality_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Inter-rater reliability: Cohen's \u03ba = 0.82",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Additional details on annotation quality assessment and findings.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5518,6 +6102,13 @@
     },
     {
       "name": "machineAnnotationTools__tool_descriptions",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "DeepDR automated grading system (AUC = 0.94)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Descriptions of what each tool does in the annotation process and what types of annotations it produces. Should correspond to the tools list.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5535,6 +6126,13 @@
     },
     {
       "name": "machineAnnotationTools__tool_accuracy",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "DeepDR AUC: 0.94 on EYEPACS validation set",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more known accuracy or performance metrics for the automated tools (if available). Include metric name and value (e.g., \"spaCy F1: 0.95\", \"GPT-4 Accuracy: 92%\").\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5552,6 +6150,13 @@
     },
     {
       "name": "existingUse__examples",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.1056/NEJMoa2404007)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "List of examples of known/previous uses of the dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
       "mappings": [
@@ -5572,7 +6177,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "https://example.org/dataset/known-uses",
+          "value": "https://paperswithcode.com/dataset/ai-readi",
           "@type": "Annotation"
         }
       ],
@@ -5606,6 +6211,13 @@
     },
     {
       "name": "otherTask__task_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Longitudinal disease trajectory modeling",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of other potential tasks the dataset could support, including any prerequisites or limitations for those uses.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
       "mappings": [
@@ -5623,6 +6235,13 @@
     },
     {
       "name": "futureUseImpact__impact_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Models trained on this data may reinforce existing health disparities if deployed without fairness audits",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of potential future impacts or risks arising from the dataset's composition or collection (e.g., unfair treatment, privacy violations, legal or financial risks), and any recommended mitigation strategies.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
       "mappings": [
@@ -5640,6 +6259,13 @@
     },
     {
       "name": "discouragedUse__discouragement_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Not recommended for clinical diagnosis without additional validation",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of tasks or applications for which the dataset is not recommended, with explanation of why (e.g., out-of-scope, risk of harm, poor coverage).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
       "mappings": [
@@ -5657,6 +6283,13 @@
     },
     {
       "name": "intendedUse__examples",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Training fairness-aware ML models for T2DM prediction",
+          "@type": "Annotation"
+        }
+      ],
       "description": "List of example intended uses for this dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#examples",
@@ -5671,6 +6304,13 @@
     },
     {
       "name": "intendedUse__usage_notes",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Models should be evaluated for fairness across racial/ethnic subgroups before clinical deployment",
+          "@type": "Annotation"
+        }
+      ],
       "description": "A note or caveat about using the dataset for its intended purposes.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#usage_notes",
@@ -5684,6 +6324,13 @@
     },
     {
       "name": "intendedUse__use_category",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "academic research",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more categories of intended use (e.g., research, clinical, educational, commercial, policy).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
       "mappings": [
@@ -5701,6 +6348,13 @@
     },
     {
       "name": "prohibitedUse__prohibition_reason",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Re-identification of participants is strictly prohibited",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more reasons why this use is prohibited (e.g., license restriction, ethical concern, privacy risk, legal constraint).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
       "mappings": [
@@ -5737,7 +6391,7 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "https://example.org/dataset/download",
+          "value": "https://fairhub.io/datasets/2",
           "@type": "Annotation"
         }
       ],
@@ -5758,6 +6412,13 @@
     },
     {
       "name": "distributionDate__release_dates",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "2024-11-15",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more dates or timeframes for dataset release, in ISO 8601 format (e.g., \"2024-03-15\") or as a descriptive string (e.g., \"Q2 2024\"). Use multiple values for staged or scheduled releases.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/distribution",
       "mappings": [
@@ -5791,6 +6452,13 @@
     },
     {
       "name": "maintainer__maintainer_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "AI-READI Data Coordinating Center, University of Washington",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of the organization, team, or individual responsible for maintaining the dataset, including contact information and hosting arrangements.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
@@ -5831,6 +6499,13 @@
     },
     {
       "name": "erratum__erratum_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "v1.0.1: Corrected mislabeled CGM device serial numbers for 12 participants",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of the error, its scope, the affected data or records, and the correction applied.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
@@ -5848,6 +6523,13 @@
     },
     {
       "name": "updatePlan__frequency",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Quarterly",
+          "@type": "Annotation"
+        }
+      ],
       "description": "How often updates are planned (e.g., quarterly, annually).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
@@ -5864,6 +6546,13 @@
     },
     {
       "name": "updatePlan__update_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Quarterly releases with approximately 500 new participants per release",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of planned update types (e.g., corrections, additions, deletions), responsible parties, and how updates will be communicated to users.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
@@ -5881,6 +6570,13 @@
     },
     {
       "name": "retentionLimits__retention_period",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "10 years minimum",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Time period for data retention.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
@@ -5897,6 +6593,13 @@
     },
     {
       "name": "retentionLimits__retention_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Data retained for minimum 10 years per NIH data sharing policy",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of applicable retention limits, legal or ethical basis for those limits, and how they will be enforced (e.g., automated deletion, anonymization after the retention period).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
@@ -5930,6 +6633,13 @@
     },
     {
       "name": "versionAccess__versions_available",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "v1.0 (2023-11), v1.1 (2024-02), v2.0 (2024-11)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "List of available versions with metadata.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
@@ -5947,6 +6657,13 @@
     },
     {
       "name": "versionAccess__version_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "All versions available at fairhub.io; older versions archived on Zenodo",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of version support policies, how long older versions will be hosted, and how dataset consumers will be notified when versions become obsolete.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
@@ -5987,6 +6704,13 @@
     },
     {
       "name": "extensionMechanism__extension_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "New modalities added via versioned data releases; schema extensions via GitHub PRs",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of how third parties can contribute to the dataset, how contributions are validated (e.g., peer review, automated tests), and how accepted contributions will be communicated to the community.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
@@ -6042,6 +6766,13 @@
     },
     {
       "name": "ethicalReview__review_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "IRB approval: UAB IRB-300010084, UCSD IRB-811480, UW IRB-STUDY00017428",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of the ethical review process, board decisions, outcomes, and any supporting documentation (e.g., IRB approval number, ethics committee name).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
       "mappings": [
@@ -6059,6 +6790,13 @@
     },
     {
       "name": "dataProtectionImpact__impact_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "DPIA conducted; minimal residual re-identification risk after de-identification",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of the data protection impact analysis, including methodology, privacy risks identified, mitigation measures taken, and any regulatory findings.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
       "mappings": [
@@ -6076,6 +6814,13 @@
     },
     {
       "name": "collectionNotification__notification_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Participants notified in-person at clinic visit; written information sheet provided in English and Spanish",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of how individuals were notified about data collection, including the notification method (e.g., email, poster, in-person), timing, and the language or text of the notification itself if available.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
       "mappings": [
@@ -6093,6 +6838,13 @@
     },
     {
       "name": "collectionConsent__consent_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Written informed consent obtained before any study procedures; available in English and Spanish",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of how consent was requested (e.g., opt-in form, verbal agreement), provided, and documented, including the language individuals consented to.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
       "mappings": [
@@ -6110,6 +6862,13 @@
     },
     {
       "name": "consentRevocation__revocation_details",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Participants may withdraw via written request; data retained but excluded from future analyses",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Free-text description of the mechanism provided for individuals to revoke consent (e.g., opt-out portal, written request), the scope of revocation (full withdrawal or specific uses), and what happens to their data after revocation.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
       "mappings": [
@@ -6143,6 +6902,13 @@
     },
     {
       "name": "humanSubjectResearch__irb_approval",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCT05395169",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Was Institutional Review Board (IRB) approval obtained? Include approval number and institution if applicable.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "mappings": [
@@ -6194,6 +6960,13 @@
     },
     {
       "name": "humanSubjectResearch__regulatory_compliance",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "45 CFR Part 46, HIPAA Privacy Rule (45 CFR Parts 160 and 164)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, HIPAA)?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "mappings": [
@@ -6227,6 +7000,13 @@
     },
     {
       "name": "informedConsent__consent_type",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Written informed consent with optional consent for future use of biospecimens",
+          "@type": "Annotation"
+        }
+      ],
       "description": "What type of consent was obtained (e.g., written, verbal, electronic, implied through participation)?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "mappings": [
@@ -6244,6 +7024,13 @@
     },
     {
       "name": "informedConsent__consent_documentation",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Separate consent forms for main study, biorepository, and genetic analysis",
+          "@type": "Annotation"
+        }
+      ],
       "description": "How is consent documented? Include references to consent forms or procedures used.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "mappings": [
@@ -6295,6 +7082,13 @@
     },
     {
       "name": "participantPrivacy__anonymization_method",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "De-identified per HIPAA Safe Harbor; 5-digit ZIP replaced with region codes",
+          "@type": "Annotation"
+        }
+      ],
       "description": "What methods were used to anonymize or de-identify participant data? Include technical details of privacy-preserving techniques.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "mappings": [
@@ -6312,6 +7106,13 @@
     },
     {
       "name": "participantPrivacy__reidentification_risk",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Low risk; expert determination per 45 CFR 164.514(b)(1)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "What is the assessed risk of re-identification? What measures were taken to minimize this risk?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "mappings": [
@@ -6379,6 +7180,13 @@
     },
     {
       "name": "humanSubjectCompensation__compensation_type",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Monetary payment via gift card",
+          "@type": "Annotation"
+        }
+      ],
       "description": "What type of compensation was provided (e.g., monetary payment, gift cards, course credit, other incentives)?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "mappings": [
@@ -6396,6 +7204,13 @@
     },
     {
       "name": "humanSubjectCompensation__compensation_amount",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "$75 for initial visit; $25 for annual follow-up",
+          "@type": "Annotation"
+        }
+      ],
       "description": "What was the amount or value of compensation provided? Include currency or equivalent value.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "mappings": [
@@ -6446,6 +7261,13 @@
     },
     {
       "name": "atRiskPopulations__special_protections",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "No participants under 18; pregnant women excluded from CGM protocol",
+          "@type": "Annotation"
+        }
+      ],
       "description": "What additional protections were implemented for at-risk populations? Include safeguards, modified procedures, or additional oversight.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "mappings": [
@@ -6497,6 +7319,13 @@
     },
     {
       "name": "licenseAndUseTerms__license_terms",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "CC BY-NC 4.0 - Attribution-NonCommercial required",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Description of the dataset's license and terms of use, including links, costs, or usage constraints (e.g., 'CC BY 4.0', 'Apache 2.0', 'MIT', 'CC BY-NC-SA 4.0', 'proprietary - contact data@example.org for access').",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
@@ -6518,6 +7347,13 @@
     },
     {
       "name": "licenseAndUseTerms__data_use_permission",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "health_medical_biomedical_research",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
@@ -6557,6 +7393,13 @@
     },
     {
       "name": "iPRestrictions__restrictions",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Retinal imaging algorithms are subject to pending patent",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more explanations of third-party IP restrictions or associated fees.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
@@ -6578,6 +7421,13 @@
     },
     {
       "name": "exportControlRegulatoryRestrictions__regulatory_restrictions",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "HIPAA compliant; subject to 45 CFR Part 46",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more export controls or regulatory restrictions applicable to the dataset (e.g., HIPAA, ITAR, GDPR).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
@@ -6600,6 +7450,13 @@
     },
     {
       "name": "exportControlRegulatoryRestrictions__hipaa_compliant",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "compliant",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA). HIPAA applies to protected health information in the United States.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
@@ -6668,6 +7525,13 @@
     },
     {
       "name": "variableMetadata__variable_name",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "hba1c_percent",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The name or identifier of the variable as it appears in the data files.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
@@ -6689,6 +7553,13 @@
     },
     {
       "name": "variableMetadata__data_type",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "float",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The data type of the variable (e.g., integer, float, string, boolean, date, categorical). Use standard type names when possible.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
@@ -6708,6 +7579,13 @@
     },
     {
       "name": "variableMetadata__unit",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "%",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The unit of measurement for the variable, preferably using QUDT units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
@@ -6728,6 +7606,13 @@
     },
     {
       "name": "variableMetadata__missing_value_code",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "NA",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Code(s) used to represent missing values for this variable. Examples: \"NA\", \"-999\", \"null\", \"\". Multiple codes may be specified.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
@@ -6791,6 +7676,13 @@
     },
     {
       "name": "variableMetadata__categories",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "4.0\u201314.0",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more permitted categories or values for a categorical variable. Each entry should describe a possible value and its meaning.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
@@ -6880,6 +7772,13 @@
     },
     {
       "name": "variableMetadata__measurement_technique",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Glycated hemoglobin percentage measured at baseline visit",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The technique or method used to measure this variable. Examples: \"mass spectrometry\", \"self-report survey\", \"GPS coordinates\".",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
@@ -6998,9 +7897,12 @@
       "description": "Total size of all files in this collection, in bytes (integer). Maps to dcat:byteSize.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/total_bytes"
+      ],
+      "exact_mappings": [
         "http://www.w3.org/ns/dcat#byteSize"
       ],
-      "slot_uri": "http://www.w3.org/ns/dcat#byteSize",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/total_bytes",
       "alias": "total_bytes",
       "owner": "FileCollection",
       "domain_of": [
@@ -7106,6 +8008,14 @@
     {
       "name": "FileCollection_path",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/path",
+      "annotations": {
+        "d4d:docExample": {
+          "tag": "d4d:docExample",
+          "value": "data/ai_readi/participants.csv",
+          "extensions": {},
+          "annotations": {}
+        }
+      },
       "description": "Path or URL to the FileCollection. May be a directory path, archive file path, or download URL depending on how the collection is distributed.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -7127,6 +8037,14 @@
     {
       "name": "FileCollection_compression",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/compression",
+      "annotations": {
+        "d4d:docExample": {
+          "tag": "d4d:docExample",
+          "value": "zip",
+          "extensions": {},
+          "annotations": {}
+        }
+      },
       "description": "Compression format if the collection is packaged as a compressed archive (e.g., gzip, zip, bzip2). Omit this field for uncompressed collections or purely logical groupings.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -7370,7 +8288,7 @@
       "attributes": [
         {
           "name": "file_collections",
-          "description": "Collections of files within this dataset. Each collection represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart in RO-Crate converters.",
+          "description": "Collection of file groups within this dataset. Each entry represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart in RO-Crate converters.",
           "exact_mappings": [
             "dcat:distribution"
           ],
@@ -7482,7 +8400,7 @@
         },
         {
           "name": "known_biases",
-          "description": "Known biases present in the dataset that may affect fairness, representativeness, or model performance. Uses BiasTypeEnum for standardized bias categorization mapped to the AI Ontology (AIO).",
+          "description": "List of known biases present in the dataset that may affect fairness, representativeness, or model performance. Uses BiasTypeEnum for standardized bias categorization mapped to the AI Ontology (AIO).",
           "slot_uri": "d4d:known_biases",
           "range": "DatasetBias",
           "multivalued": true,
@@ -7491,7 +8409,7 @@
         },
         {
           "name": "known_limitations",
-          "description": "Known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
+          "description": "List of known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
           "slot_uri": "d4d:known_limitations",
           "range": "DatasetLimitation",
           "multivalued": true,
@@ -7635,7 +8553,7 @@
         },
         {
           "name": "missing_data_documentation",
-          "description": "Documentation of missing data patterns and handling strategies.",
+          "description": "One or more records documenting missing data patterns and handling strategies.",
           "slot_uri": "d4d:missingDataDocumentation",
           "range": "MissingDataDocumentation",
           "multivalued": true,
@@ -7679,7 +8597,7 @@
         },
         {
           "name": "informed_consent",
-          "description": "Details about informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
+          "description": "One or more records detailing informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
           "slot_uri": "d4d:informedConsent",
           "range": "InformedConsent",
           "multivalued": true,
@@ -7696,7 +8614,7 @@
         },
         {
           "name": "participant_privacy",
-          "description": "Information about privacy protections and anonymization procedures for human research participants.",
+          "description": "One or more records describing privacy protections and anonymization procedures for human research participants.",
           "slot_uri": "d4d:participantPrivacy",
           "range": "ParticipantPrivacy",
           "multivalued": true,
@@ -7705,7 +8623,7 @@
         },
         {
           "name": "participant_compensation",
-          "description": "Information about compensation or incentives provided to human research participants.",
+          "description": "One or more records describing compensation or incentives provided to human research participants.",
           "slot_uri": "d4d:participantCompensation",
           "range": "HumanSubjectCompensation",
           "multivalued": true,
@@ -7759,7 +8677,7 @@
         },
         {
           "name": "annotation_analyses",
-          "description": "Analysis of annotation quality and inter-annotator agreement.",
+          "description": "One or more analyses of annotation quality and inter-annotator agreement.",
           "slot_uri": "d4d:annotation_analyses",
           "range": "AnnotationAnalysis",
           "multivalued": true,
@@ -7768,7 +8686,7 @@
         },
         {
           "name": "machine_annotation_tools",
-          "description": "Automated annotation tools used in dataset creation.",
+          "description": "List of automated annotation tools used in dataset creation.",
           "range": "MachineAnnotationTools",
           "multivalued": true,
           "inlined_as_list": true,
@@ -7821,7 +8739,7 @@
         },
         {
           "name": "intended_uses",
-          "description": "Explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.",
+          "description": "List of explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.",
           "slot_uri": "d4d:intendedUses",
           "range": "IntendedUse",
           "multivalued": true,
@@ -7830,7 +8748,7 @@
         },
         {
           "name": "prohibited_uses",
-          "description": "Explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.",
+          "description": "List of explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.",
           "slot_uri": "d4d:prohibitedUses",
           "range": "ProhibitedUse",
           "multivalued": true,
@@ -7940,7 +8858,7 @@
         },
         {
           "name": "variables",
-          "description": "Metadata describing individual variables, fields, or columns in the dataset.",
+          "description": "List of metadata records describing individual variables, fields, or columns in the dataset.",
           "exact_mappings": [
             "schema:variableMeasured"
           ],
@@ -7977,7 +8895,7 @@
         },
         {
           "name": "parent_datasets",
-          "description": "Parent datasets that this dataset is part of or derived from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).",
+          "description": "One or more parent datasets that this dataset is part of or derived from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).",
           "exact_mappings": [
             "schema:isPartOf"
           ],
@@ -7989,7 +8907,7 @@
         },
         {
           "name": "related_datasets",
-          "description": "Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
+          "description": "List of related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
           "slot_uri": "schema:isRelatedTo",
           "range": "DatasetRelationship",
           "multivalued": true,
@@ -8154,6 +9072,13 @@
         },
         {
           "name": "name",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "AI-READI Dataset",
+              "@type": "Annotation"
+            }
+          ],
           "description": "A human-readable name for a thing.",
           "slot_uri": "schema:name",
           "range": "string",
@@ -8161,6 +9086,13 @@
         },
         {
           "name": "description",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "A multimodal dataset of 4,000 participants with Type 2 Diabetes.",
+              "@type": "Annotation"
+            }
+          ],
           "description": "A human-readable description for a thing.",
           "slot_uri": "schema:description",
           "range": "string",
@@ -8266,6 +9198,13 @@
       "attributes": [
         {
           "name": "version",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "3.8.1",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The version identifier of the software (e.g., \"1.0.0\", \"2.3.1-beta\").",
           "slot_uri": "schema:softwareVersion",
           "range": "string",
@@ -8273,6 +9212,13 @@
         },
         {
           "name": "license",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "MIT",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The license under which the software is distributed (e.g., \"MIT\", \"Apache-2.0\", \"GPL-3.0\").",
           "slot_uri": "schema:license",
           "range": "string",
@@ -8280,6 +9226,13 @@
         },
         {
           "name": "url",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "https://github.com/example/tool",
+              "@type": "Annotation"
+            }
+          ],
           "description": "URL where the software can be found (e.g., homepage, repository, or documentation).",
           "slot_uri": "schema:url",
           "range": "uri",
@@ -8318,6 +9271,13 @@
         },
         {
           "name": "email",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "researcher@university.edu",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The email address of the person. Represents current/preferred contact information in the context of this dataset.",
           "slot_uri": "schema:email",
           "range": "string",
@@ -8348,7 +9308,7 @@
     {
       "name": "Information",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Information",
-      "description": "Grouping for datasets and data files",
+      "description": "Grouping for datasets and data files.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "close_mappings": [
         "schema:CreativeWork"
@@ -8443,6 +9403,13 @@
       "attributes": [
         {
           "name": "response",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Primary purpose is to support hypothesis-agnostic AI/ML analyses of T2DM salutogenesis.",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Short explanation describing the primary purpose of creating the dataset.",
           "broad_mappings": [
             "dcterms:description"
@@ -8472,6 +9439,13 @@
       "attributes": [
         {
           "name": "response",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Multi-domain biomarker discovery for Type 2 Diabetes mellitus.",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Short explanation describing the specific task or tasks for which this dataset was created.",
           "broad_mappings": [
             "dcterms:description"
@@ -8501,6 +9475,13 @@
       "attributes": [
         {
           "name": "response",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Lack of racially diverse T2DM datasets with linked multi-modal clinical data.",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Short explanation of the knowledge or resource gap that this dataset was intended to address.",
           "broad_mappings": [
             "dcterms:description"
@@ -8584,7 +9565,10 @@
         {
           "name": "grantor",
           "description": "Name/identifier of the organization providing monetary or resource support.",
-          "slot_uri": "schema:funder",
+          "broad_mappings": [
+            "schema:funder"
+          ],
+          "slot_uri": "d4d:grantor",
           "range": "Grantor",
           "@type": "SlotDefinition"
         },
@@ -8632,6 +9616,13 @@
       "attributes": [
         {
           "name": "grant_number",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "OT2OD032644",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The alphanumeric identifier for the grant.",
           "broad_mappings": [
             "schema:identifier"
@@ -8678,6 +9669,13 @@
         },
         {
           "name": "instance_type",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "medical imaging studies",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The type or types of instances in the dataset (e.g., \"movie\", \"user\", \"rating\", \"clinical record\"). Use when the dataset contains multiple instance types with different structures.\n",
           "broad_mappings": [
             "dcterms:type"
@@ -8770,6 +9768,13 @@
       "attributes": [
         {
           "name": "is_sample",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "true",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Indicates whether it is a sample of a larger set.",
           "slot_uri": "d4d:isSample",
           "range": "boolean",
@@ -8777,6 +9782,13 @@
         },
         {
           "name": "is_random",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "false",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Indicates whether the sample is random.",
           "slot_uri": "d4d:isRandom",
           "range": "boolean",
@@ -8792,6 +9804,13 @@
         },
         {
           "name": "is_representative",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "true",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Indicates whether the sample is representative of the larger set.\n",
           "slot_uri": "d4d:isRepresentative",
           "range": "boolean",
@@ -8818,6 +9837,13 @@
         },
         {
           "name": "strategies",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Triple-balanced by race/ethnicity, sex, and T2DM severity",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more sampling strategies used (e.g., deterministic, simple random, stratified, cluster, systematic).\n",
           "slot_uri": "d4d:strategies",
           "range": "string",
@@ -8831,7 +9857,7 @@
     {
       "name": "MissingInfo",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#MissingInfo",
-      "description": "Is any information missing from individual instances? (e.g., unavailable data)\n",
+      "description": "Is any information missing from individual instances? (e.g., unavailable data).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "is_a": "DatasetProperty",
       "slots": [
@@ -8846,6 +9872,13 @@
       "attributes": [
         {
           "name": "missing",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "CGM readings absent for 15% of participants",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Description of the missing data fields or elements.\n",
           "broad_mappings": [
             "dcterms:description"
@@ -8857,6 +9890,13 @@
         },
         {
           "name": "why_missing",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Device malfunction or non-compliance during 14-day wear period",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Explanation of why each piece of data is missing.\n",
           "broad_mappings": [
             "dcterms:description"
@@ -8887,6 +9927,13 @@
       "attributes": [
         {
           "name": "relationship_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Participants linked to multiple visits via participant_id foreign key",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of how relationships between instances are represented (e.g., graph edges, ratings matrices, foreign keys), including relationship types and any associated metadata.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -8914,6 +9961,13 @@
       "attributes": [
         {
           "name": "split_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "70/15/15 train/validation/test split stratified by site and T2DM severity",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of the recommended data splits (e.g., 80/10/10 train/ validation/test), how they are defined, and the rationale for the split strategy.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -8941,6 +9995,13 @@
       "attributes": [
         {
           "name": "anomaly_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "15% of CGM readings missing due to device malfunction",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of errors, noise sources, or redundancies in the dataset, including their known causes and estimated prevalence.\n",
           "broad_mappings": [
             "dcterms:description"
@@ -8984,6 +10045,13 @@
         },
         {
           "name": "bias_description",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Sampling favored urban academic medical centers",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Detailed description of how this bias manifests in the dataset, including affected populations, features, or outcomes.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -8991,6 +10059,13 @@
         },
         {
           "name": "mitigation_strategy",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Oversampling of underrepresented groups during model training",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Steps taken or recommended to mitigate this bias.\n",
           "slot_uri": "d4d:mitigation_strategy",
           "range": "string",
@@ -8998,6 +10073,13 @@
         },
         {
           "name": "affected_subsets",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Training split underrepresents Asian participants",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more specific subsets or features of the dataset affected by this bias (e.g., \"female participants\", \"non-English text\", \"images taken at night\").\n",
           "slot_uri": "d4d:affectedSubsets",
           "range": "string",
@@ -9038,6 +10120,13 @@
         },
         {
           "name": "limitation_description",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Cross-sectional design limits causal inference",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Detailed description of the limitation and its implications.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9045,6 +10134,13 @@
         },
         {
           "name": "scope_impact",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Findings may not generalize to non-diabetic populations",
+              "@type": "Annotation"
+            }
+          ],
           "description": "How this limitation affects the scope or applicability of the dataset.\n",
           "slot_uri": "d4d:scopeImpact",
           "range": "string",
@@ -9052,6 +10148,13 @@
         },
         {
           "name": "recommended_mitigation",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Use longitudinal follow-up cohorts for causal inference studies",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Recommended approaches for users to address this limitation.\n",
           "slot_uri": "d4d:recommendedMitigation",
           "range": "string",
@@ -9137,6 +10240,13 @@
         },
         {
           "name": "confidentiality_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "ZIP codes suppressed; race/ethnicity available only in aggregate",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of which data elements are confidential, the basis for confidentiality (e.g., legal privilege, patient data), and how they are handled or restricted.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9172,6 +10282,13 @@
         },
         {
           "name": "warnings",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Contains clinical images of diabetic retinopathy",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more specific content warnings describing potentially offensive, insulting, threatening, or anxiety-provoking content present in the dataset (e.g., violence, profanity, explicit imagery, hate speech).",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9219,6 +10336,13 @@
         },
         {
           "name": "distribution",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Hispanic participants: 1,023 (25.6% of total)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The distribution of instances across identified subpopulations, including counts, percentages, or proportions for each subgroup.",
           "broad_mappings": [
             "dcterms:description"
@@ -9273,6 +10397,13 @@
         },
         {
           "name": "deidentification_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "HIPAA Safe Harbor method applied; expert re-identification risk assessment confirms low risk",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Details on de-identification procedures and residual risks.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9311,6 +10442,13 @@
         },
         {
           "name": "sensitivity_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Genetic sequencing data requires additional DUA",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Details on sensitive data elements present and handling procedures.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9412,6 +10550,13 @@
         },
         {
           "name": "acquisition_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Retinal images captured with Heidelberg Spectralis OCT",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of how data was acquired for each instance, including instruments, protocols, and any manual steps involved.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9442,6 +10587,13 @@
       "attributes": [
         {
           "name": "mechanism_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "In-person clinical visit with standardized MOP",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of the specific mechanisms or procedures used to collect the data (e.g., hardware model, software API, manual curation process), including how those mechanisms were validated.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9470,6 +10622,13 @@
       "attributes": [
         {
           "name": "role",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Clinical Research Coordinator",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Role of the data collector (e.g., researcher, crowdworker).",
           "slot_uri": "schema:roleName",
           "range": "string",
@@ -9477,6 +10636,13 @@
         },
         {
           "name": "collector_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Certified study coordinators at 3 collection sites",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of who was involved in data collection (e.g., students, crowdworkers, contractors), their training or qualifications, and how they were compensated.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9509,6 +10675,13 @@
       "attributes": [
         {
           "name": "start_date",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "2023-07-18",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Start date of data collection.",
           "slot_uri": "schema:startDate",
           "range": "date",
@@ -9516,6 +10689,13 @@
         },
         {
           "name": "end_date",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "2026-11-30",
+              "@type": "Annotation"
+            }
+          ],
           "description": "End date of data collection.",
           "slot_uri": "schema:endDate",
           "range": "date",
@@ -9523,6 +10703,13 @@
         },
         {
           "name": "timeframe_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Enrollment ongoing; data released annually",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of the data collection period and whether this timeframe matches the creation timeframe of the underlying data (e.g., historical records, prospective collection).\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9558,6 +10745,13 @@
         },
         {
           "name": "collection_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Collected directly from consented participants at clinical sites",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of whether data was collected directly from individuals or obtained via third parties or other indirect sources, and what those sources are.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9590,6 +10784,13 @@
       "attributes": [
         {
           "name": "missing_data_patterns",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "CGM data missing for 15% of participants (device errors)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Description of patterns in missing data (e.g., missing completely at random, missing at random, missing not at random).\n",
           "slot_uri": "d4d:missingDataPatterns",
           "range": "string",
@@ -9598,6 +10799,13 @@
         },
         {
           "name": "missing_data_causes",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Device malfunction, participant non-compliance, technical failures",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Known or suspected causes of missing data (e.g., sensor failures, participant dropout, privacy constraints).\n",
           "slot_uri": "d4d:missingDataCauses",
           "range": "string",
@@ -9606,6 +10814,13 @@
         },
         {
           "name": "handling_strategy",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Multiple imputation using chained equations (MICE)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The primary strategy used to handle missing data (e.g., listwise deletion, mean imputation, multiple imputation, flagging with sentinel values).\n",
           "slot_uri": "d4d:handlingStrategy",
           "range": "string",
@@ -9638,6 +10853,13 @@
       "attributes": [
         {
           "name": "source_description",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Electronic health records from UCSF Epic system",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Detailed description of where raw data comes from (e.g., sensors, databases, web APIs, manual collection).\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9646,6 +10868,13 @@
         },
         {
           "name": "source_type",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Electronic Health Records",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more types of raw source (e.g., sensor, database, user input, web scraping).\n",
           "broad_mappings": [
             "dcterms:type"
@@ -9657,6 +10886,13 @@
         },
         {
           "name": "access_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Requires institutional DUA and IRB approval",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Information on how to access or retrieve the raw source data.\n",
           "slot_uri": "d4d:accessDetails",
           "range": "string",
@@ -9664,6 +10900,13 @@
         },
         {
           "name": "raw_data_format",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "HL7 FHIR R4",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more formats of the raw data before any preprocessing (e.g., CSV, DICOM, JSON).\n",
           "slot_uri": "d4d:rawDataFormat",
           "range": "string",
@@ -9694,6 +10937,13 @@
       "attributes": [
         {
           "name": "preprocessing_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "DICOM to NIfTI conversion using dcm2niix v1.0.20211006",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of preprocessing steps applied to the data, including tools used, parameters, order of operations, and rationale for each step.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9724,6 +10974,13 @@
       "attributes": [
         {
           "name": "cleaning_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Outlier removal using 3-sigma rule; manual review of flagged records",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of data cleaning procedures applied, including criteria for removing or correcting instances, tools used, and how removed instances are accounted for.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9756,6 +11013,13 @@
       "attributes": [
         {
           "name": "data_annotation_platform",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Label Studio 1.7.3",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more platforms or tools used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
           "slot_uri": "rai:dataAnnotationPlatform",
           "range": "string",
@@ -9792,6 +11056,13 @@
         },
         {
           "name": "inter_annotator_agreement",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Cohen's \u03ba = 0.82 (substantial agreement)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Measure of agreement between annotators (e.g., Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percent agreement). Include both the metric name and value.",
           "slot_uri": "schema:measurementMethod",
           "range": "string",
@@ -9810,6 +11081,13 @@
         },
         {
           "name": "labeling_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Board-certified ophthalmologists graded retinal images using ETDRS scale",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of the labeling or annotation procedures, including annotation guidelines, task definitions, and quality control metrics.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -9885,6 +11163,13 @@
       "attributes": [
         {
           "name": "imputation_method",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Multiple Imputation by Chained Equations (MICE)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Specific imputation technique used (mean, median, mode, forward fill, backward fill, interpolation, model-based imputation, etc.).\n",
           "slot_uri": "d4d:imputation_method",
           "range": "string",
@@ -9893,6 +11178,13 @@
         },
         {
           "name": "imputed_fields",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "cgm_mean_glucose, hba1c_percent, bmi",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Fields or columns where imputation was applied.\n",
           "slot_uri": "d4d:imputed_fields",
           "range": "string",
@@ -9901,6 +11193,13 @@
         },
         {
           "name": "imputation_rationale",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "MICE with 20 imputations; predictors: age, sex, HbA1c",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Justification for the imputation approach chosen, including assumptions made about missing data mechanisms.\n",
           "slot_uri": "d4d:imputation_rationale",
           "range": "string",
@@ -9971,6 +11270,13 @@
         },
         {
           "name": "annotation_quality_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Inter-rater reliability: Cohen's \u03ba = 0.82",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Additional details on annotation quality assessment and findings.\n",
           "slot_uri": "d4d:annotationQualityDetails",
           "range": "string",
@@ -10014,6 +11320,13 @@
         },
         {
           "name": "tool_descriptions",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "DeepDR automated grading system (AUC = 0.94)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Descriptions of what each tool does in the annotation process and what types of annotations it produces. Should correspond to the tools list.\n",
           "slot_uri": "d4d:toolDescriptions",
           "range": "string",
@@ -10022,6 +11335,13 @@
         },
         {
           "name": "tool_accuracy",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "DeepDR AUC: 0.94 on EYEPACS validation set",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more known accuracy or performance metrics for the automated tools (if available). Include metric name and value (e.g., \"spaCy F1: 0.95\", \"GPT-4 Accuracy: 92%\").\n",
           "slot_uri": "d4d:toolAccuracy",
           "range": "string",
@@ -10049,6 +11369,13 @@
       "attributes": [
         {
           "name": "examples",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.1056/NEJMoa2404007)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "List of examples of known/previous uses of the dataset.",
           "slot_uri": "schema:example",
           "range": "string",
@@ -10080,7 +11407,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "https://example.org/dataset/known-uses",
+              "value": "https://paperswithcode.com/dataset/ai-readi",
               "@type": "Annotation"
             }
           ],
@@ -10117,6 +11444,13 @@
       "attributes": [
         {
           "name": "task_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Longitudinal disease trajectory modeling",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of other potential tasks the dataset could support, including any prerequisites or limitations for those uses.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10147,6 +11481,13 @@
       "attributes": [
         {
           "name": "impact_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Models trained on this data may reinforce existing health disparities if deployed without fairness audits",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of potential future impacts or risks arising from the dataset's composition or collection (e.g., unfair treatment, privacy violations, legal or financial risks), and any recommended mitigation strategies.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10174,6 +11515,13 @@
       "attributes": [
         {
           "name": "discouragement_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Not recommended for clinical diagnosis without additional validation",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of tasks or applications for which the dataset is not recommended, with explanation of why (e.g., out-of-scope, risk of harm, poor coverage).\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10206,6 +11554,13 @@
       "attributes": [
         {
           "name": "examples",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Training fairness-aware ML models for T2DM prediction",
+              "@type": "Annotation"
+            }
+          ],
           "description": "List of example intended uses for this dataset.",
           "range": "string",
           "multivalued": true,
@@ -10213,12 +11568,26 @@
         },
         {
           "name": "usage_notes",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Models should be evaluated for fairness across racial/ethnic subgroups before clinical deployment",
+              "@type": "Annotation"
+            }
+          ],
           "description": "A note or caveat about using the dataset for its intended purposes.",
           "range": "string",
           "@type": "SlotDefinition"
         },
         {
           "name": "use_category",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "academic research",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more categories of intended use (e.g., research, clinical, educational, commercial, policy).",
           "slot_uri": "d4d:useCategory",
           "range": "string",
@@ -10246,6 +11615,13 @@
       "attributes": [
         {
           "name": "prohibition_reason",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Re-identification of participants is strictly prohibited",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more reasons why this use is prohibited (e.g., license restriction, ethical concern, privacy risk, legal constraint).",
           "slot_uri": "d4d:prohibitionReason",
           "range": "string",
@@ -10302,7 +11678,7 @@
           "annotations": [
             {
               "tag": "d4d:docExample",
-              "value": "https://example.org/dataset/download",
+              "value": "https://fairhub.io/datasets/2",
               "@type": "Annotation"
             }
           ],
@@ -10333,6 +11709,13 @@
       "attributes": [
         {
           "name": "release_dates",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "2024-11-15",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more dates or timeframes for dataset release, in ISO 8601 format (e.g., \"2024-03-15\") or as a descriptive string (e.g., \"Q2 2024\"). Use multiple values for staged or scheduled releases.\n",
           "slot_uri": "dcterms:available",
           "range": "string",
@@ -10368,6 +11751,13 @@
         },
         {
           "name": "maintainer_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "AI-READI Data Coordinating Center, University of Washington",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of the organization, team, or individual responsible for maintaining the dataset, including contact information and hosting arrangements.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10410,6 +11800,13 @@
         },
         {
           "name": "erratum_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "v1.0.1: Corrected mislabeled CGM device serial numbers for 12 participants",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of the error, its scope, the affected data or records, and the correction applied.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10441,6 +11838,13 @@
       "attributes": [
         {
           "name": "frequency",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Quarterly",
+              "@type": "Annotation"
+            }
+          ],
           "description": "How often updates are planned (e.g., quarterly, annually).",
           "slot_uri": "d4d:frequency",
           "range": "string",
@@ -10448,6 +11852,13 @@
         },
         {
           "name": "update_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Quarterly releases with approximately 500 new participants per release",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of planned update types (e.g., corrections, additions, deletions), responsible parties, and how updates will be communicated to users.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10476,6 +11887,13 @@
       "attributes": [
         {
           "name": "retention_period",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "10 years minimum",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Time period for data retention.",
           "slot_uri": "d4d:retentionPeriod",
           "range": "string",
@@ -10483,6 +11901,13 @@
         },
         {
           "name": "retention_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Data retained for minimum 10 years per NIH data sharing policy",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of applicable retention limits, legal or ethical basis for those limits, and how they will be enforced (e.g., automated deletion, anonymization after the retention period).\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10519,6 +11944,13 @@
         },
         {
           "name": "versions_available",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "v1.0 (2023-11), v1.1 (2024-02), v2.0 (2024-11)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "List of available versions with metadata.",
           "slot_uri": "d4d:versionsAvailable",
           "range": "string",
@@ -10527,6 +11959,13 @@
         },
         {
           "name": "version_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "All versions available at fairhub.io; older versions archived on Zenodo",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of version support policies, how long older versions will be hosted, and how dataset consumers will be notified when versions become obsolete.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10569,6 +12008,13 @@
         },
         {
           "name": "extension_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "New modalities added via versioned data releases; schema extensions via GitHub PRs",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of how third parties can contribute to the dataset, how contributions are validated (e.g., peer review, automated tests), and how accepted contributions will be communicated to the community.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10618,6 +12064,13 @@
         },
         {
           "name": "review_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "IRB approval: UAB IRB-300010084, UCSD IRB-811480, UW IRB-STUDY00017428",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of the ethical review process, board decisions, outcomes, and any supporting documentation (e.g., IRB approval number, ethics committee name).\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10645,6 +12098,13 @@
       "attributes": [
         {
           "name": "impact_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "DPIA conducted; minimal residual re-identification risk after de-identification",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of the data protection impact analysis, including methodology, privacy risks identified, mitigation measures taken, and any regulatory findings.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10672,6 +12132,13 @@
       "attributes": [
         {
           "name": "notification_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Participants notified in-person at clinic visit; written information sheet provided in English and Spanish",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of how individuals were notified about data collection, including the notification method (e.g., email, poster, in-person), timing, and the language or text of the notification itself if available.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10699,6 +12166,13 @@
       "attributes": [
         {
           "name": "consent_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Written informed consent obtained before any study procedures; available in English and Spanish",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of how consent was requested (e.g., opt-in form, verbal agreement), provided, and documented, including the language individuals consented to.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10726,6 +12200,13 @@
       "attributes": [
         {
           "name": "revocation_details",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Participants may withdraw via written request; data retained but excluded from future analyses",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Free-text description of the mechanism provided for individuals to revoke consent (e.g., opt-out portal, written request), the scope of revocation (full withdrawal or specific uses), and what happens to their data after revocation.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
@@ -10764,6 +12245,13 @@
         },
         {
           "name": "irb_approval",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "All participants provided written informed consent; study registered at ClinicalTrials.gov NCT05395169",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Was Institutional Review Board (IRB) approval obtained? Include approval number and institution if applicable.\n",
           "slot_uri": "d4d:irbApproval",
           "range": "string",
@@ -10788,6 +12276,13 @@
         },
         {
           "name": "regulatory_compliance",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "45 CFR Part 46, HIPAA Privacy Rule (45 CFR Parts 160 and 164)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, HIPAA)?\n",
           "slot_uri": "d4d:regulatoryCompliance",
           "range": "string",
@@ -10826,6 +12321,13 @@
         },
         {
           "name": "consent_type",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Written informed consent with optional consent for future use of biospecimens",
+              "@type": "Annotation"
+            }
+          ],
           "description": "What type of consent was obtained (e.g., written, verbal, electronic, implied through participation)?\n",
           "slot_uri": "d4d:consentType",
           "range": "string",
@@ -10834,6 +12336,13 @@
         },
         {
           "name": "consent_documentation",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Separate consent forms for main study, biorepository, and genetic analysis",
+              "@type": "Annotation"
+            }
+          ],
           "description": "How is consent documented? Include references to consent forms or procedures used.\n",
           "slot_uri": "d4d:consentDocumentation",
           "range": "string",
@@ -10880,6 +12389,13 @@
       "attributes": [
         {
           "name": "anonymization_method",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "De-identified per HIPAA Safe Harbor; 5-digit ZIP replaced with region codes",
+              "@type": "Annotation"
+            }
+          ],
           "description": "What methods were used to anonymize or de-identify participant data? Include technical details of privacy-preserving techniques.\n",
           "slot_uri": "d4d:anonymizationMethod",
           "range": "string",
@@ -10888,6 +12404,13 @@
         },
         {
           "name": "reidentification_risk",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Low risk; expert determination per 45 CFR 164.514(b)(1)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "What is the assessed risk of re-identification? What measures were taken to minimize this risk?\n",
           "slot_uri": "d4d:reidentificationRisk",
           "range": "string",
@@ -10941,6 +12464,13 @@
         },
         {
           "name": "compensation_type",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Monetary payment via gift card",
+              "@type": "Annotation"
+            }
+          ],
           "description": "What type of compensation was provided (e.g., monetary payment, gift cards, course credit, other incentives)?\n",
           "slot_uri": "d4d:compensationType",
           "range": "string",
@@ -10949,6 +12479,13 @@
         },
         {
           "name": "compensation_amount",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "$75 for initial visit; $25 for annual follow-up",
+              "@type": "Annotation"
+            }
+          ],
           "description": "What was the amount or value of compensation provided? Include currency or equivalent value.\n",
           "slot_uri": "d4d:compensationAmount",
           "range": "string",
@@ -10994,6 +12531,13 @@
         },
         {
           "name": "special_protections",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "No participants under 18; pregnant women excluded from CGM protocol",
+              "@type": "Annotation"
+            }
+          ],
           "description": "What additional protections were implemented for at-risk populations? Include safeguards, modified procedures, or additional oversight.\n",
           "slot_uri": "d4d:specialProtections",
           "range": "string",
@@ -11039,6 +12583,13 @@
       "attributes": [
         {
           "name": "license_terms",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "CC BY-NC 4.0 - Attribution-NonCommercial required",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Description of the dataset's license and terms of use, including links, costs, or usage constraints (e.g., 'CC BY 4.0', 'Apache 2.0', 'MIT', 'CC BY-NC-SA 4.0', 'proprietary - contact data@example.org for access').",
           "broad_mappings": [
             "dcterms:license",
@@ -11051,6 +12602,13 @@
         },
         {
           "name": "data_use_permission",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "health_medical_biomedical_research",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO.",
           "exact_mappings": [
             "DUO:0000001"
@@ -11091,6 +12649,13 @@
       "attributes": [
         {
           "name": "restrictions",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Retinal imaging algorithms are subject to pending patent",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more explanations of third-party IP restrictions or associated fees.",
           "broad_mappings": [
             "DUO:0000046",
@@ -11126,6 +12691,13 @@
       "attributes": [
         {
           "name": "regulatory_restrictions",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "HIPAA compliant; subject to 45 CFR Part 46",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more export controls or regulatory restrictions applicable to the dataset (e.g., HIPAA, ITAR, GDPR).",
           "broad_mappings": [
             "DUO:0000021",
@@ -11139,6 +12711,13 @@
         },
         {
           "name": "hipaa_compliant",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "compliant",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA). HIPAA applies to protected health information in the United States.",
           "slot_uri": "d4d:hipaaCompliant",
           "range": "ComplianceStatusEnum",
@@ -11209,6 +12788,13 @@
       "attributes": [
         {
           "name": "variable_name",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "hba1c_percent",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The name or identifier of the variable as it appears in the data files.",
           "broad_mappings": [
             "schema:name",
@@ -11221,6 +12807,13 @@
         },
         {
           "name": "data_type",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "float",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The data type of the variable (e.g., integer, float, string, boolean, date, categorical). Use standard type names when possible.",
           "exact_mappings": [
             "schema:DataType"
@@ -11231,6 +12824,13 @@
         },
         {
           "name": "unit",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "%",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The unit of measurement for the variable, preferably using QUDT units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.",
           "exact_mappings": [
             "qudt:hasUnit",
@@ -11242,6 +12842,13 @@
         },
         {
           "name": "missing_value_code",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "NA",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Code(s) used to represent missing values for this variable. Examples: \"NA\", \"-999\", \"null\", \"\". Multiple codes may be specified.",
           "slot_uri": "d4d:missingValueCode",
           "range": "string",
@@ -11278,6 +12885,13 @@
         },
         {
           "name": "categories",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "4.0\u201314.0",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more permitted categories or values for a categorical variable. Each entry should describe a possible value and its meaning.",
           "slot_uri": "schema:valueReference",
           "range": "string",
@@ -11322,6 +12936,13 @@
         },
         {
           "name": "measurement_technique",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Glycated hemoglobin percentage measured at baseline visit",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The technique or method used to measure this variable. Examples: \"mass spectrometry\", \"self-report survey\", \"GPS coordinates\".",
           "slot_uri": "schema:measurementTechnique",
           "range": "string",
@@ -11499,7 +13120,10 @@
             }
           ],
           "description": "Total size of all files in this collection, in bytes (integer). Maps to dcat:byteSize.",
-          "slot_uri": "dcat:byteSize",
+          "exact_mappings": [
+            "dcat:byteSize"
+          ],
+          "slot_uri": "d4d:total_bytes",
           "range": "integer",
           "@type": "SlotDefinition"
         }
@@ -11510,9 +13134,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-04-09T00:48:57",
-  "source_file_size": 31873,
-  "generation_date": "2026-04-09T10:17:07",
+  "source_file_date": "2026-04-15T21:22:11",
+  "source_file_size": 32030,
+  "generation_date": "2026-04-15T23:59:22",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

@@ -90,6 +90,24 @@
 </td><td>aireadi:format:4</td><td>XML for ECG data</td></tr></tbody></table></div>
                     </div>
                     
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Distribution Dates
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Pilot data released May 2024 as an early access release.</td><td>aireadi:distdate:1</td><td>Pilot data release</td></tr><tr><td>Version 1.0.0 data (through July 31, 2024) released November 2024.</td><td>aireadi:distdate:2</td><td>v1.0.0 release</td></tr><tr><td>Versions 2.0.0 and 3.0.0 released with additional participants following v1.0.0.</td><td>aireadi:distdate:3</td><td>v2.0.0 and v3.0.0 releases</td></tr><tr><td>Final dataset expected after completion of 4,000 participant enrollment by November 2026.</td><td>aireadi:distdate:4</td><td>Final dataset release</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Distributions
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>Format</th><th>ID</th><th>Media Type</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Public access subset of the AI-READI dataset available at https://fairhub.io/datasets/2 upon agreement with the CC BY-NC 4.0 license. Contains non-sensitive data including survey data, blood and urine lab results, fitness activity levels, clinical measurements, retinal images, ECG, blood glucose levels, and environmental variables. Distributed as a ZIP archive containing DICOM, CSV, mHealth, and XML files.
+</div></td><td>ZIP</td><td>aireadi:dist:1</td><td>application/zip</td><td>Public access dataset (ZIP archive)</td></tr><tr><td><div class="long-description">Controlled access subset requiring a data use agreement. Contains sensitive data including 5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications, and traffic and accident reports. Distributed as a ZIP archive containing DICOM, CSV, mHealth, and XML files.
+</div></td><td>ZIP</td><td>aireadi:dist:2</td><td>application/zip</td><td>Controlled access dataset (ZIP archive)</td></tr></tbody></table></div>
+                    </div>
+                    
                 </div>
             </div>
             
@@ -165,6 +183,14 @@
                     <div class="data-item">
                         
                         <label class="item-label optional-field">
+                            Tabular Data
+                        </label>
+                        <div class="item-value">False</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
                             Research Gaps Addressed
                         </label>
                         <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Provide a large-scale, harmonized, multi-site, multi-domain dataset enabling AI/ML analyses not feasible with existing sources (e.g., claims or EHR alone). With 4,000 participants and over 10 variable domains, this is the largest publicly accessible dataset of its kind for T2DM research.
@@ -184,22 +210,21 @@
                     <div class="data-item">
                         
                         <label class="item-label optional-field">
-                            Subsets
+                            Sensitive Elements
                         </label>
-                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Includes data not considered sensitive personal health information, available to the public for download upon agreement with a license. Contains survey data, blood and urine lab results, fitness activity levels, clinical measurements (e.g., monofilament and cognitive function testing), retinal images, ECG, blood glucose levels, and environmental variables such as home air quality. Available at https://fairhub.io/datasets/2.
-</div></td><td>aireadi:subset:1</td><td>Public Access Dataset</td></tr><tr><td><div class="long-description">Includes sensitive data accessible by entering into a data use agreement. Contains 5-digit zip code, sex, race, ethnicity, genetic sequencing data (from buffy coats), past health records, medications, and traffic and accident reports. Access requirements are being developed by the Data Access Committee.
-</div></td><td>aireadi:subset:2</td><td>Controlled Access Dataset</td></tr><tr><td><div class="long-description">Biobanked samples stored at UAB Center for Clinical and Translational Science (CCTS), including plasma, serum, buffy coats, peripheral blood mononuclear cells (PBMCs), PAXgene RNA, and urine. Available to researchers for future ancillary studies according to procedures and policies in development. Finite number of samples available.
-</div></td><td>aireadi:subset:3</td><td>Biorepository</td></tr></tbody></table></div>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Genomic DNA extracted from buffy coats, blood derivatives, and urine samples stored with potential for future genetic analyses. Available in controlled access dataset only. Includes genetic sequencing data from buffy coats, PBMCs, and PAXgene RNA.
+</div></td><td>aireadi:sensitive:1</td><td>Genetic and biospecimen data</td></tr><tr><td>5-digit zip code, detailed race, ethnicity, and sex information available in controlled access dataset only. Public dataset contains de-identified data.
+</td><td>aireadi:sensitive:2</td><td>Geographic and demographic identifiers</td></tr><tr><td>Past health records, medications with RxNorm codes, traffic and accident reports available in controlled access dataset only.
+</td><td>aireadi:sensitive:3</td><td>Medical history and records</td></tr></tbody></table></div>
                     </div>
                     
                     <div class="data-item">
                         
                         <label class="item-label optional-field">
-                            Sampling Strategies
+                            Confidential Elements
                         </label>
-                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>aireadi:sampling:1</dd><dt>Name</dt><dd>Triple-balanced recruitment</dd><dt>Description</dt><dd><div class="long-description">Recruitment sampling procedures aimed at achieving approximately equal distribution of participants across three dimensions: (1) race/ethnicity (Asian, Black, Hispanic, White), (2) T2DM severity (no diabetes, pre-diabetes/lifestyle-controlled, medication-controlled, insulin-controlled), and (3) biological sex (male, female). This balanced design is critical for developing unbiased machine learning models.
-</div></dd><dt>Sample</dt><dd>True</dd><dt>Random Sampling</dt><dd>False</dd><dt>Representative Sample</dt><dd>False</dd><dt>Why Not Representative</dt><dd><ul class='formatted-list'><li><div class="long-description">The triple-balanced design intentionally over-samples racial/ethnic minority groups and specific diabetes severity groups relative to their population prevalence, to enable unbiased AI/ML model development. Participants are volunteers, introducing volunteer selection bias that may limit generalizability to non-volunteer populations.
-</div></li></ul></dd><dt>Strategies</dt><dd><ul class='formatted-list'><li>Targeted recruitment to balance demographics across race/ethnicity, sex, and diabetes severity</li><li>Wave-based recruitment with monitoring and adjustment through under- and oversampling</li><li>Recruitment from electronic health records screening using ICD-10 codes (E11.X for T2DM, R73.09 for pre-diabetes)</li><li>Personalized invitation letters and emails with REDCap recruitment interface</li></ul></dd></dl></li></ol></div>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>aireadi:confidential:1</dd><dt>Name</dt><dd>Controlled access dataset</dd><dt>Description</dt><dd><div class="long-description">A controlled access subset requires a separate data use agreement and includes 5-digit zip code, sex, race, ethnicity, genetic sequencing data (from buffy coats), past health records, medications, and traffic and accident reports. Access requirements are managed by the Data Access Committee.
+</div></dd></dl></li></ul></div>
                     </div>
                     
                     <div class="data-item">
@@ -238,14 +263,42 @@
                     <div class="data-item">
                         
                         <label class="item-label optional-field">
+                            Collection Timeframes
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>aireadi:timeframe:1</dd><dt>Name</dt><dd>Study enrollment period</dd><dt>Description</dt><dd><div class="long-description">Enrollment began July 18, 2023 (pilot phase) and continues until November 30, 2026. Each participant completes a single study encounter. Data released periodically: pilot data released May 2024; v1.0.0 data through July 31, 2024 released November 2024; subsequent versions (v2.0.0, v3.0.0) released with additional participants. Final dataset expected after completion of 4,000 participant enrollment by November 2026.
+</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Data Collectors
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>aireadi:datacollector:1</dd><dt>Name</dt><dd>AI-READI Study Coordinators</dd><dt>Description</dt><dd><div class="long-description">Trained and certified study coordinators at three data collection sites (University of Alabama at Birmingham, University of California San Diego, University of Washington). Coordinators follow a standardized Manual of Procedures (MOP) and complete a certification process before enrolling participants. Practice subjects required before beginning participant enrollment.
+</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sampling Strategies
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>aireadi:sampling:1</dd><dt>Name</dt><dd>Triple-balanced recruitment</dd><dt>Description</dt><dd><div class="long-description">Recruitment sampling procedures aimed at achieving approximately equal distribution of participants across three dimensions: (1) race/ethnicity (Asian, Black, Hispanic, White), (2) T2DM severity (no diabetes, pre-diabetes/lifestyle-controlled, medication-controlled, insulin-controlled), and (3) biological sex (male, female). This balanced design is critical for developing unbiased machine learning models.
+</div></dd><dt>Sample</dt><dd>True</dd><dt>Random Sampling</dt><dd>False</dd><dt>Representative Sample</dt><dd>False</dd><dt>Why Not Representative</dt><dd><ul class='formatted-list'><li><div class="long-description">The triple-balanced design intentionally over-samples racial/ethnic minority groups and specific diabetes severity groups relative to their population prevalence, to enable unbiased AI/ML model development. Participants are volunteers, introducing volunteer selection bias that may limit generalizability to non-volunteer populations.
+</div></li></ul></dd><dt>Strategies</dt><dd><ul class='formatted-list'><li>Targeted recruitment to balance demographics across race/ethnicity, sex, and diabetes severity</li><li>Wave-based recruitment with monitoring and adjustment through under- and oversampling</li><li>Recruitment from electronic health records screening using ICD-10 codes (E11.X for T2DM, R73.09 for pre-diabetes)</li><li>Personalized invitation letters and emails with REDCap recruitment interface</li></ul></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
                             Preprocessing Strategies
                         </label>
-                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th><th>Preprocessing Details</th></tr></thead><tbody><tr><td><div class="long-description">Data harmonized across three collection sites (Birmingham, San Diego, Seattle) using standardized operating procedures, common protocols, and centralized data management through REDCap. Ensures consistency and comparability across sites.
-</div></td><td>aireadi:preproc:1</td><td>Data standardization and harmonization</td><td>Standardized operating procedures across all three sites, Common protocols and equipment across sites, Centralized data management through REDCap, Standardized training of study coordinators with certification process, Manual of Procedures (MOP) for reference</td></tr><tr><td>Retinal imaging data converted from proprietary formats (.fda, .sdt) to DICOM standard for the dataset. Wearable device data converted from .FIT format to mHealth standard.
-</td><td>aireadi:preproc:2</td><td>Image format conversion</td><td>Proprietary retinal imaging formats (.fda, .sdt) converted to DICOM, Wearable device data (.FIT) converted to mHealth standard, ECG data exported in .xml format, MoCA data exported in .csv format</td></tr><tr><td><div class="long-description">Standardized local processing for plasma, serum, and buffy coats using consistent protocols. Centralized processing of CPT tubes for PBMC isolation at UAB CCTS. Batch shipping of biospecimens for central clinical lab analyses.
-</div></td><td>aireadi:preproc:3</td><td>Biospecimen processing</td><td>Standardized local processing for plasma, serum, buffy coats, Centralized PBMC processing at UAB CCTS, Batch shipping for central lab analyses at UW NORC, Genomic DNA extractions from stored buffy coats performed at UAB CCTS</td></tr><tr><td><div class="long-description">Multiple quality control measures including standardized training of study coordinators, equipment calibration, duplicate measurements, and data validation checks in REDCap system. Data managers at each site oversee quality control before uploading to FAIRhub.
-</div></td><td>aireadi:preproc:4</td><td>Quality control and validation</td><td>Standardized training of study coordinators with certification, Equipment calibration protocols, Duplicate measurements for quality assurance (e.g., blood pressure measured twice), Data validation checks in REDCap, Practice subjects required before enrolling participants</td></tr><tr><td><div class="long-description">All data mapped to applicable data standard formats such as Observational Medical Outcomes Partnership Common Data Model for clinical data and DICOM format for retinal imaging. Data stored and shared as AI-ready enabling immediate AI/ML research without reformatting.
-</div></td><td>aireadi:preproc:5</td><td>Data mapping to standards</td><td>OMOP Common Data Model for clinical data, DICOM for retinal imaging, mHealth standard for wearable device data, RxNorm codes for medications, ICD-10 codes for diabetes classification</td></tr></tbody></table></div>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Data harmonized across three collection sites (Birmingham, San Diego, Seattle) using standardized operating procedures, common protocols, and centralized data management through REDCap. Ensures consistency and comparability across sites.
+</div></td><td>aireadi:preproc:1</td><td>Data standardization and harmonization</td></tr><tr><td>Retinal imaging data converted from proprietary formats (.fda, .sdt) to DICOM standard for the dataset. Wearable device data converted from .FIT format to mHealth standard.
+</td><td>aireadi:preproc:2</td><td>Image format conversion</td></tr><tr><td><div class="long-description">Standardized local processing for plasma, serum, and buffy coats using consistent protocols. Centralized processing of CPT tubes for PBMC isolation at UAB CCTS. Batch shipping of biospecimens for central clinical lab analyses.
+</div></td><td>aireadi:preproc:3</td><td>Biospecimen processing</td></tr><tr><td><div class="long-description">Multiple quality control measures including standardized training of study coordinators, equipment calibration, duplicate measurements, and data validation checks in REDCap system. Data managers at each site oversee quality control before uploading to FAIRhub.
+</div></td><td>aireadi:preproc:4</td><td>Quality control and validation</td></tr><tr><td><div class="long-description">All data mapped to applicable data standard formats such as Observational Medical Outcomes Partnership Common Data Model for clinical data and DICOM format for retinal imaging. Data stored and shared as AI-ready enabling immediate AI/ML research without reformatting.
+</div></td><td>aireadi:preproc:5</td><td>Data mapping to standards</td></tr></tbody></table></div>
                     </div>
                     
                     <div class="data-item">
@@ -253,8 +306,8 @@
                         <label class="item-label optional-field">
                             Cleaning Strategies
                         </label>
-                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>aireadi:cleaning:1</dd><dt>Name</dt><dd>Multi-site harmonization</dd><dt>Description</dt><dd><div class="long-description">Standardized protocols and procedures across all three data collection sites ensure data consistency and quality. Common equipment, training, and REDCap data management system used to maintain FAIR principles compliance.
-</div></dd><dt>Cleaning Details</dt><dd><ul class='formatted-list'><li>Cross-site harmonization procedures</li><li>Standardized equipment and training</li><li>REDCap data management for quality</li><li>FAIR principles implementation</li><li>Pilot enrollment period (July 18 - November 30, 2023) to ensure coordinator familiarity</li></ul></dd></dl></li></ol></div>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>aireadi:cleaning:1</dd><dt>Name</dt><dd>Multi-site harmonization</dd><dt>Description</dt><dd><div class="long-description">Standardized protocols and procedures across all three data collection sites ensure data consistency and quality. Common equipment, training, and REDCap data management system used to maintain FAIR principles compliance.
+</div></dd></dl></li></ul></div>
                     </div>
                     
                     <div class="data-item">
@@ -278,6 +331,15 @@
                     <div class="data-item">
                         
                         <label class="item-label optional-field">
+                            Extension Mechanism
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>aireadi:extension:1</dd><dt>Name</dt><dd>Ancillary study process</dd><dt>Description</dt><dd><div class="long-description">Researchers may apply to access biospecimens for future ancillary studies according to procedures and policies being developed by the AI-READI Consortium. Requests are reviewed and prioritized by designated committees.
+</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
                             Ethical Reviews
                         </label>
                         <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>aireadi:ethics:1</dd><dt>Name</dt><dd>University of Washington IRB Approval</dd><dt>Description</dt><dd><div class="long-description">Study approved by Institutional Review Board (IRB) of University of Washington (approval number STUDY00016228), with reliance agreements from IRBs of University of Alabama at Birmingham and University of California, San Diego. Written informed consent provided by all participants.
@@ -287,12 +349,37 @@
                     <div class="data-item">
                         
                         <label class="item-label optional-field">
-                            Sensitive Elements
+                            At-Risk Populations
                         </label>
-                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Genomic DNA extracted from buffy coats, blood derivatives, and urine samples stored with potential for future genetic analyses. Available in controlled access dataset only. Includes genetic sequencing data from buffy coats, PBMCs, and PAXgene RNA.
-</div></td><td>aireadi:sensitive:1</td><td>Genetic and biospecimen data</td></tr><tr><td>5-digit zip code, detailed race, ethnicity, and sex information available in controlled access dataset only. Public dataset contains de-identified data.
-</td><td>aireadi:sensitive:2</td><td>Geographic and demographic identifiers</td></tr><tr><td>Past health records, medications with RxNorm codes, traffic and accident reports available in controlled access dataset only.
-</td><td>aireadi:sensitive:3</td><td>Medical history and records</td></tr></tbody></table></div>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>aireadi:atrisk:1</dd><dt>Name</dt><dd>At-risk population protections</dd><dt>Description</dt><dd><div class="long-description">The dataset focuses on individuals with and without Type 2 Diabetes Mellitus (T2DM), with intentional inclusion of historically underrepresented racial and ethnic minority groups. The study design incorporates bioethics guidance from co-investigators specializing in bioethics and community engagement. A Community Advisory Board of 11 persons with diversity in race and ethnicity provides oversight. Exclusion criteria include pregnancy (protecting pregnant individuals from research burden). De-identification procedures protect participant privacy. Controlled access requirements protect sensitive data for populations at higher re-identification risk.
+</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Deidentification
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>aireadi:deidentified:1</dd><dt>Name</dt><dd>De-identification status</dd><dt>Description</dt><dd><div class="long-description">The public access dataset is de-identified, with sensitive personal health information (5-digit zip code, detailed race/ethnicity, genetic data, past health records) moved to the controlled access dataset. The AI-READI Data License Agreement prohibits re-identification attempts. De-identification procedures follow applicable regulations and guidelines.
+</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Intellectual Property Restrictions
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>aireadi:ip:1</dd><dt>Name</dt><dd>Non-commercial use restriction</dd><dt>Description</dt><dd><div class="long-description">The CC BY-NC 4.0 license restricts use to non-commercial purposes. Controlled access data requires a separate data use agreement with the University of Washington. No third-party IP restrictions beyond the licensing terms have been identified.
+</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Regulatory Restrictions
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>aireadi:regulatory:1</dd><dt>Name</dt><dd>HIPAA and NIH data sharing compliance</dd><dt>Description</dt><dd><div class="long-description">Dataset collection and sharing complies with HIPAA regulations and NIH data sharing policies (NIH grant OT2OD032644). IRB oversight ensures compliance with human subjects research regulations (45 CFR 46). Controlled access requirements protect sensitive health information. No export control restrictions identified.
+</div></dd></dl></div>
                     </div>
                     
                     <div class="data-item">
@@ -300,7 +387,7 @@
                         <label class="item-label optional-field">
                             External Resources
                         </label>
-                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>External Resources</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Official project website with overview and resources</td><td>https://aireadi.org/</td><td>aireadi:resource:1</td><td>AI-READI Project Website</td></tr><tr><td>Comprehensive dataset documentation with version-specific guides</td><td>https://docs.aireadi.org/</td><td>aireadi:resource:2</td><td>AI-READI Dataset Documentation</td></tr><tr><td>Dataset repository and download portal for AI-READI data</td><td>https://fairhub.io/datasets/2</td><td>aireadi:resource:3</td><td>FAIRhub Dataset Landing Page</td></tr><tr><td>Parent NIH Common Fund program supporting AI-ready biomedical datasets</td><td>https://bridge2ai.org/</td><td>aireadi:resource:4</td><td>Bridge2AI Program</td></tr><tr><td>Federal grant information and project details for grant 1OT2OD032644-01</td><td>https://reporter.nih.gov/project-details/10471118</td><td>aireadi:resource:5</td><td>NIH RePORTER Project Details</td></tr><tr><td>Policies and procedures for data access and sharing</td><td>https://aireadi.org/goals/data-sharing</td><td>aireadi:resource:6</td><td>Data Sharing Information</td></tr><tr><td>Additional dataset documentation and resources</td><td>https://doi.org/10.5281/zenodo.10642459</td><td>aireadi:resource:7</td><td>Zenodo Archive</td></tr><tr><td>BMJ Open publication describing study design and protocol (Owsley et al. 2025)</td><td>https://doi.org/10.1136/bmjopen-2024-097449</td><td>aireadi:resource:8</td><td>Protocol Publication (BMJ Open)</td></tr><tr><td>Overview of AI-READI approach and significance published in Nature Metabolism</td><td>https://doi.org/10.1038/s42255-024-01165-x</td><td>aireadi:resource:9</td><td>Nature Metabolism Commentary</td></tr></tbody></table></div>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Official project website with overview and resources at https://aireadi.org/</td><td>aireadi:resource:1</td><td>AI-READI Project Website</td></tr><tr><td>Comprehensive dataset documentation with version-specific guides at https://docs.aireadi.org/</td><td>aireadi:resource:2</td><td>AI-READI Dataset Documentation</td></tr><tr><td>Dataset repository and download portal for AI-READI data at https://fairhub.io/datasets/2</td><td>aireadi:resource:3</td><td>FAIRhub Dataset Landing Page</td></tr><tr><td>Parent NIH Common Fund program supporting AI-ready biomedical datasets at https://bridge2ai.org/</td><td>aireadi:resource:4</td><td>Bridge2AI Program</td></tr><tr><td>Federal grant information and project details for grant 1OT2OD032644-01 at https://reporter.nih.gov/project-details/10471118</td><td>aireadi:resource:5</td><td>NIH RePORTER Project Details</td></tr><tr><td>Policies and procedures for data access and sharing at https://aireadi.org/goals/data-sharing</td><td>aireadi:resource:6</td><td>Data Sharing Information</td></tr><tr><td>Additional dataset documentation and resources at https://doi.org/10.5281/zenodo.10642459</td><td>aireadi:resource:7</td><td>Zenodo Archive</td></tr><tr><td>BMJ Open publication describing study design and protocol (Owsley et al. 2025) at https://doi.org/10.1136/bmjopen-2024-097449</td><td>aireadi:resource:8</td><td>Protocol Publication (BMJ Open)</td></tr><tr><td>Overview of AI-READI approach and significance published in Nature Metabolism at https://doi.org/10.1038/s42255-024-01165-x</td><td>aireadi:resource:9</td><td>Nature Metabolism Commentary</td></tr></tbody></table></div>
                     </div>
                     
                 </div>
@@ -356,6 +443,17 @@
                     <div class="data-item">
                         
                         <label class="item-label optional-field">
+                            Prohibited Uses
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">The AI-READI Data License Agreement explicitly prohibits using the data to make clinical treatment decisions for individual patients. The dataset is intended for research purposes only and has not been validated for direct clinical use.
+</div></td><td>aireadi:prohibited:1</td><td>Clinical treatment decisions</td></tr><tr><td>Attempting to re-identify individual data subjects or groups from the de-identified public dataset is explicitly prohibited by the data use agreement and violates ethical principles.
+</td><td>aireadi:prohibited:2</td><td>Re-identification of participants</td></tr><tr><td>Sharing data with parties who have not entered into the applicable license agreement (CC BY-NC 4.0 for public data; separate data use agreement for controlled access data) is prohibited.
+</td><td>aireadi:prohibited:3</td><td>Sharing with non-licensed parties</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
                             License and Use Terms
                         </label>
                         <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>aireadi:license:1</dd><dt>Name</dt><dd>Creative Commons Attribution Non-Commercial and AI-READI Data License</dd><dt>Description</dt><dd><div class="long-description">Public access data distributed under Creative Commons Attribution Non-Commercial (CC BY-NC 4.0) license. Permits others to distribute, remix, adapt, build upon this work non-commercially, and license their derivative works on different terms, provided the original work is properly cited, appropriate credit is given, any changes made indicated, and the use is non-commercial. Controlled access data requires a separate data use agreement with the University of Washington as Licensor. The AI-READI Data License Agreement prohibits clinical treatment decisions based on the data, re-identification attempts, and sharing data with non-licensed parties. See http://creativecommons.org/licenses/by-nc/4.0/ for full CC BY-NC 4.0 license terms and https://docs.aireadi.org/ for the AI-READI specific license terms.
@@ -393,6 +491,15 @@
                         <div class="item-value">10.57895/fairhub.2</div>
                     </div>
                     
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Version Access
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>aireadi:versionaccess:1</dd><dt>Name</dt><dd>Version-specific documentation</dd><dt>Description</dt><dd><div class="long-description">All prior versions of the dataset are maintained with version-specific documentation at https://docs.aireadi.org/. Each version includes a changelog and data dictionary. Dataset versioning uses semantic versioning (e.g., v1.0.0, v2.0.0, v3.0.0).
+</div></dd></dl></div>
+                    </div>
+                    
                 </div>
             </div>
             
@@ -414,7 +521,7 @@
                             Updates
                         </label>
                         <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>aireadi:updates:1</dd><dt>Name</dt><dd>Periodic data releases</dd><dt>Description</dt><dd><div class="long-description">Dataset updated periodically as enrollment progresses toward target of 4,000 participants by November 2026. Version-specific documentation maintained for each release. Pilot data released May 2024. Data through July 31, 2024 released November 2024 as v1.0.0. Subsequent versions v2.0.0 and v3.0.0 released with additional participants. Final dataset expected after completion of enrollment by November 2026.
-</div></dd><dt>Frequency</dt><dd>Periodic releases with ongoing enrollment; final release planned for late 2026</dd><dt>Update Details</dt><dd><ul class='formatted-list'><li>Periodic data releases as enrollment continues toward 4,000 participant target</li><li>Pilot data released May 2024</li><li>v1.0.0 data through July 31, 2024 released November 2024</li><li>v2.0.0 and v3.0.0 released with additional participants</li><li>Final dataset expected after completion of 4,000 participant enrollment by November 2026</li><li>Dataset versioning implemented with version-specific documentation at https://docs.aireadi.org/</li></ul></dd></dl></div>
+</div></dd></dl></div>
                     </div>
                     
                 </div>
@@ -441,6 +548,15 @@
 </div></dd><dt>Involves Human Subjects</dt><dd>True</dd></dl></div>
                     </div>
                     
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Informed Consent
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>aireadi:consent:1</dd><dt>Name</dt><dd>Written informed consent</dd><dt>Description</dt><dd><div class="long-description">Written informed consent provided by all participants prior to study enrollment. Consent process conducted in English. Participants must be able to speak, read, and understand English. The consent process was developed with bioethics guidance and reviewed by the Community Advisory Board. Participants may withdraw at any time.
+</div></dd></dl></li></ul></div>
+                    </div>
+                    
                 </div>
             </div>
             
@@ -448,7 +564,7 @@
     
     
     <div class="timestamp">
-        Generated on 2026-04-15 23:59:21 using Bridge2AI Data Sheets Schema
+        Generated on 2026-04-16 00:00:59 using Bridge2AI Data Sheets Schema
     </div>
 </body>
 </html>

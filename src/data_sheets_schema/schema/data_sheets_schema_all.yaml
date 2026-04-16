@@ -1,3 +1,4 @@
+---
 name: data-sheets-schema
 description: A LinkML schema for Datasheets for Datasets.
 title: data-sheets-schema
@@ -566,7 +567,7 @@ enums:
         description: Simplified Chinese character encoding standard.
       HZ-GB-2312:
         text: HZ-GB-2312
-        description: 7-bit encoding for Simplified Chinese (GB2312)
+        description: 7-bit encoding for Simplified Chinese (GB2312).
       ISO-2022-CN-EXT:
         text: ISO-2022-CN-EXT
         description: Extended ISO-2022 encoding for Chinese (includes both Simplified
@@ -1319,6 +1320,10 @@ enums:
 slots:
   same_as:
     name: same_as
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: doi:10.XXXXX/example-dataset
     description: One or more URLs or URIs identifying equivalent or related representations
       of this dataset. Used to link to canonical or alternative representations of
       the same dataset on different platforms (e.g., DOI resolver, institutional repository,
@@ -1332,8 +1337,8 @@ slots:
     multivalued: true
   themes:
     name: themes
-    description: Themes associated with the data. These may be provided by the data
-      creator or assigned later in a manual or automated manner.
+    description: One or more themes associated with the data. These may be provided
+      by the data creator or assigned later in a manual or automated manner.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     singular_name: theme
     slot_uri: dcat:theme
@@ -1341,6 +1346,10 @@ slots:
     multivalued: true
   title:
     name: title
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
     description: The official title of the element.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:title
@@ -1352,6 +1361,10 @@ slots:
     - File
   language:
     name: language
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: en
     description: Language in which the information is expressed.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
@@ -1365,6 +1378,10 @@ slots:
     - File
   publisher:
     name: publisher
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 'ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name'
     description: The organization or entity responsible for making the resource available.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:publisher
@@ -1377,6 +1394,10 @@ slots:
     range: uriorcurie
   issued:
     name: issued
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2024-11-15T00:00:00'
     description: Date of formal issuance or publication of the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:issued
@@ -1389,6 +1410,10 @@ slots:
     range: datetime
   page:
     name: page
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://fairhub.io/datasets/2
     description: A landing page or web page providing access to or information about
       the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1401,6 +1426,10 @@ slots:
     - File
   dialect:
     name: dialect
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: RFC4180
     description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
       profile).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1409,6 +1438,10 @@ slots:
     - File
   bytes:
     name: bytes
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '10485760'
     description: Size of the data in bytes.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcat:byteSize
@@ -1417,6 +1450,10 @@ slots:
     range: integer
   path:
     name: path
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: data/ai_readi/participants.csv
     description: The file path or URL where the content is located.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: schema:contentUrl
@@ -1425,6 +1462,10 @@ slots:
     - FileCollection
   download_url:
     name: download_url
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://fairhub.io/datasets/2/download
     description: URL from which the data can be downloaded. This is not the same as
       the landing page, which is a page that describes the dataset. Rather, this URL
       points directly to the data itself.
@@ -1441,6 +1482,10 @@ slots:
     range: uri
   format:
     name: format
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: CSV
     description: The file format, physical medium, or dimensions of a resource. This
       should be a file extension or MIME type.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1450,6 +1495,10 @@ slots:
     range: FormatEnum
   encoding:
     name: encoding
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: UTF-8
     description: The character encoding of the data.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: d4d:characterEncoding
@@ -1458,6 +1507,10 @@ slots:
     range: EncodingEnum
   compression:
     name: compression
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: zip
     description: Compression format used, if any (e.g., gzip, bzip2, zip).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcat:compressFormat
@@ -1471,6 +1524,10 @@ slots:
     range: CompressionEnum
   media_type:
     name: media_type
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: text/csv
     description: The media type of the data. This should be a MIME type.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
@@ -1481,6 +1538,10 @@ slots:
     range: MediaTypeEnum
   hash:
     name: hash
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     description: 'Cryptographic hash value of the data for integrity verification
       (e.g., SHA-256: ''e3b0c44298fc1c149afb...'', MD5: ''d41d8cd98f00b204e9800998ecf8427e'').'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1491,6 +1552,10 @@ slots:
     - File
   md5:
     name: md5
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: d41d8cd98f00b204e9800998ecf8427e
     description: MD5 hash value of the data (128-bit cryptographic hash).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     broad_mappings:
@@ -1500,6 +1565,10 @@ slots:
     - File
   sha256:
     name: sha256
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     description: SHA-256 hash value of the data (256-bit cryptographic hash, recommended).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: schema:sha256
@@ -1507,6 +1576,10 @@ slots:
     - File
   conforms_to:
     name: conforms_to
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://www.w3.org/TR/vocab-dcat-3/
     description: An established standard, specification, or schema to which the resource
       conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1519,6 +1592,10 @@ slots:
     - File
   conforms_to_schema:
     name: conforms_to_schema
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://w3id.org/bridge2ai/data-sheets-schema
     description: The schema or data model to which the resource conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     broad_mappings:
@@ -1532,6 +1609,10 @@ slots:
     - File
   conforms_to_class:
     name: conforms_to_class
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Dataset
     description: The specific class or type within a schema to which the resource
       conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1546,6 +1627,10 @@ slots:
     - File
   license:
     name: license
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: CC-BY-NC-4.0
     description: The legal license under which the resource is made available (e.g.,
       "MIT", "CC-BY-4.0").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1559,6 +1644,10 @@ slots:
     - File
   keywords:
     name: keywords
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: diabetes, retinal imaging, multimodal, clinical data
     description: Keywords or tags describing the resource for discovery and classification.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcat:keyword
@@ -1571,6 +1660,10 @@ slots:
     multivalued: true
   version:
     name: version
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 2.0.0
     description: The version identifier of the resource (e.g., "1.0", "2.3.1").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: schema:version
@@ -1583,6 +1676,10 @@ slots:
     - File
   created_by:
     name: created_by
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: orcid:0000-0002-1234-5678
     description: The person or organization primarily responsible for creating the
       resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1595,6 +1692,10 @@ slots:
     - File
   created_on:
     name: created_on
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2023-07-18T00:00:00'
     description: The date and time when the resource was created.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:created
@@ -1607,6 +1708,10 @@ slots:
     range: datetime
   last_updated_on:
     name: last_updated_on
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2024-11-15T00:00:00'
     description: The date and time when the resource was most recently modified or
       updated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1620,6 +1725,10 @@ slots:
     range: datetime
   modified_by:
     name: modified_by
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: orcid:0000-0002-9876-5432
     description: A person or organization that contributed to modifying or updating
       the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1632,6 +1741,10 @@ slots:
     - File
   status:
     name: status
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: published
     description: The status of the resource (e.g., draft, published, deprecated).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: d4d:publicationStatus
@@ -1643,6 +1756,10 @@ slots:
     - File
   was_derived_from:
     name: was_derived_from
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://fairhub.io/datasets/2/versions/1
     description: A resource from which this resource was derived, in whole or in part.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
@@ -1656,6 +1773,10 @@ slots:
     - File
   doi:
     name: doi
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 10.5281/zenodo.10642459
     description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
       persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1741,6 +1862,10 @@ classes:
         inlined_as_list: true
       compression:
         name: compression
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: zip
         description: Compression format used, if any (e.g., gzip, bzip2, zip).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:compressFormat
@@ -1756,6 +1881,10 @@ classes:
         range: CompressionEnum
       conforms_to:
         name: conforms_to
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://www.w3.org/TR/vocab-dcat-3/
         description: An established standard, specification, or schema to which the
           resource conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1771,6 +1900,10 @@ classes:
         range: string
       conforms_to_class:
         name: conforms_to_class
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Dataset
         description: The specific class or type within a schema to which the resource
           conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1788,6 +1921,10 @@ classes:
         range: string
       conforms_to_schema:
         name: conforms_to_schema
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://w3id.org/bridge2ai/data-sheets-schema
         description: The schema or data model to which the resource conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         broad_mappings:
@@ -1804,6 +1941,10 @@ classes:
         range: string
       created_by:
         name: created_by
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: orcid:0000-0002-1234-5678
         description: The person or organization primarily responsible for creating
           the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1819,6 +1960,10 @@ classes:
         range: string
       created_on:
         name: created_on
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2023-07-18T00:00:00'
         description: The date and time when the resource was created.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:created
@@ -1833,6 +1978,10 @@ classes:
         range: datetime
       doi:
         name: doi
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 10.5281/zenodo.10642459
         description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
           persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1853,6 +2002,10 @@ classes:
         pattern: 10\.\d{4,}\/.+
       download_url:
         name: download_url
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2/download
         description: URL from which the data can be downloaded. This is not the same
           as the landing page, which is a page that describes the dataset. Rather,
           this URL points directly to the data itself.
@@ -1871,6 +2024,10 @@ classes:
         range: uri
       issued:
         name: issued
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15T00:00:00'
         description: Date of formal issuance or publication of the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:issued
@@ -1885,6 +2042,10 @@ classes:
         range: datetime
       keywords:
         name: keywords
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: diabetes, retinal imaging, multimodal, clinical data
         description: Keywords or tags describing the resource for discovery and classification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:keyword
@@ -1900,6 +2061,10 @@ classes:
         multivalued: true
       language:
         name: language
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: en
         description: Language in which the information is expressed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
@@ -1916,6 +2081,10 @@ classes:
         range: string
       last_updated_on:
         name: last_updated_on
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15T00:00:00'
         description: The date and time when the resource was most recently modified
           or updated.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1931,6 +2100,10 @@ classes:
         range: datetime
       license:
         name: license
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: CC-BY-NC-4.0
         description: The legal license under which the resource is made available
           (e.g., "MIT", "CC-BY-4.0").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1947,6 +2120,10 @@ classes:
         range: string
       modified_by:
         name: modified_by
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: orcid:0000-0002-9876-5432
         description: A person or organization that contributed to modifying or updating
           the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1962,6 +2139,10 @@ classes:
         range: string
       page:
         name: page
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2
         description: A landing page or web page providing access to or information
           about the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1977,6 +2158,10 @@ classes:
         range: string
       publisher:
         name: publisher
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name'
         description: The organization or entity responsible for making the resource
           available.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1992,6 +2177,10 @@ classes:
         range: uriorcurie
       status:
         name: status
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: published
         description: The status of the resource (e.g., draft, published, deprecated).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:publicationStatus
@@ -2006,6 +2195,10 @@ classes:
         range: string
       title:
         name: title
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
         description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:title
@@ -2020,6 +2213,10 @@ classes:
         range: string
       version:
         name: version
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 2.0.0
         description: The version identifier of the resource (e.g., "1.0", "2.3.1").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:version
@@ -2035,6 +2232,10 @@ classes:
         range: string
       was_derived_from:
         name: was_derived_from
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2/versions/1
         description: A resource from which this resource was derived, in whole or
           in part.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2052,9 +2253,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/my-dataset-001
         description: A unique identifier for a thing.
-        examples:
-        - value: https://example.org/dataset/my-dataset-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         identifier: true
@@ -2140,6 +2343,10 @@ classes:
         range: uriorcurie
       name:
         name: name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -2225,6 +2432,10 @@ classes:
         range: string
       description:
         name: description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -2343,7 +2554,7 @@ classes:
     attributes:
       file_collections:
         name: file_collections
-        description: Collections of files within this dataset. Each collection represents
+        description: Collection of file groups within this dataset. Each entry represents
           a logical grouping of files with shared characteristics (e.g., all training
           data, all image files, all raw data files). Maps to nested RO-Crate Dataset
           entities via schema:hasPart in RO-Crate converters.
@@ -2361,10 +2572,12 @@ classes:
         inlined_as_list: true
       total_file_count:
         name: total_file_count
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '156'
         description: Total number of files across all file collections in this dataset.
           Can be aggregated from file_collections[].file_count.
-        examples:
-        - value: '156'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:totalFileCount
         alias: total_file_count
@@ -2374,11 +2587,12 @@ classes:
         range: integer
       total_size_bytes:
         name: total_size_bytes
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 10737418240 (10 GiB = 10 × 1024³ bytes)
         description: Total size of all files in bytes across all file collections.
           Can be aggregated from file_collections[].total_bytes.
-        examples:
-        - value: '10737418240'
-          description: 10 GiB (10 × 1024³ bytes)
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:byteSize
         alias: total_size_bytes
@@ -2508,7 +2722,7 @@ classes:
         inlined_as_list: true
       known_biases:
         name: known_biases
-        description: Known biases present in the dataset that may affect fairness,
+        description: List of known biases present in the dataset that may affect fairness,
           representativeness, or model performance. Uses BiasTypeEnum for standardized
           bias categorization mapped to the AI Ontology (AIO).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2523,8 +2737,9 @@ classes:
         inlined_as_list: true
       known_limitations:
         name: known_limitations
-        description: Known limitations of the dataset that may affect its use or interpretation.
-          Distinct from biases (systematic errors) and anomalies (data quality issues).
+        description: List of known limitations of the dataset that may affect its
+          use or interpretation. Distinct from biases (systematic errors) and anomalies
+          (data quality issues).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:known_limitations
         alias: known_limitations
@@ -2764,7 +2979,8 @@ classes:
         inlined_as_list: true
       missing_data_documentation:
         name: missing_data_documentation
-        description: Documentation of missing data patterns and handling strategies.
+        description: One or more records documenting missing data patterns and handling
+          strategies.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:missingDataDocumentation
         alias: missing_data_documentation
@@ -2833,8 +3049,8 @@ classes:
         inlined: true
       informed_consent:
         name: informed_consent
-        description: Details about informed consent procedures, including consent
-          type, documentation, and withdrawal mechanisms.
+        description: One or more records detailing informed consent procedures, including
+          consent type, documentation, and withdrawal mechanisms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:informedConsent
         alias: informed_consent
@@ -2860,8 +3076,8 @@ classes:
         inlined: true
       participant_privacy:
         name: participant_privacy
-        description: Information about privacy protections and anonymization procedures
-          for human research participants.
+        description: One or more records describing privacy protections and anonymization
+          procedures for human research participants.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:participantPrivacy
         alias: participant_privacy
@@ -2874,8 +3090,8 @@ classes:
         inlined_as_list: true
       participant_compensation:
         name: participant_compensation
-        description: Information about compensation or incentives provided to human
-          research participants.
+        description: One or more records describing compensation or incentives provided
+          to human research participants.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:participantCompensation
         alias: participant_compensation
@@ -2963,7 +3179,8 @@ classes:
         inlined_as_list: true
       annotation_analyses:
         name: annotation_analyses
-        description: Analysis of annotation quality and inter-annotator agreement.
+        description: One or more analyses of annotation quality and inter-annotator
+          agreement.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:annotation_analyses
         alias: annotation_analyses
@@ -2976,7 +3193,7 @@ classes:
         inlined_as_list: true
       machine_annotation_tools:
         name: machine_annotation_tools
-        description: Automated annotation tools used in dataset creation.
+        description: List of automated annotation tools used in dataset creation.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         alias: machine_annotation_tools
         owner: Dataset
@@ -3063,8 +3280,8 @@ classes:
         inlined_as_list: true
       intended_uses:
         name: intended_uses
-        description: Explicit intended and recommended uses for this dataset. Complements
-          future_use_impacts by focusing on positive applications.
+        description: List of explicit intended and recommended uses for this dataset.
+          Complements future_use_impacts by focusing on positive applications.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:intendedUses
         alias: intended_uses
@@ -3077,8 +3294,8 @@ classes:
         inlined_as_list: true
       prohibited_uses:
         name: prohibited_uses
-        description: Explicitly prohibited or forbidden uses for this dataset. Stronger
-          than discouraged_uses - these are not permitted.
+        description: List of explicitly prohibited or forbidden uses for this dataset.
+          Stronger than discouraged_uses - these are not permitted.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:prohibitedUses
         alias: prohibited_uses
@@ -3258,8 +3475,8 @@ classes:
         inlined: true
       variables:
         name: variables
-        description: Metadata describing individual variables, fields, or columns
-          in the dataset.
+        description: List of metadata records describing individual variables, fields,
+          or columns in the dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
         - schema:variableMeasured
@@ -3313,8 +3530,8 @@ classes:
         range: string
       parent_datasets:
         name: parent_datasets
-        description: Parent datasets that this dataset is part of or derived from.
-          Enables hierarchical dataset composition (hasPart/isPartOf relationships).
+        description: One or more parent datasets that this dataset is part of or derived
+          from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
         - schema:isPartOf
@@ -3329,7 +3546,7 @@ classes:
         inlined_as_list: true
       related_datasets:
         name: related_datasets
-        description: Related datasets with typed relationships (e.g., supplements,
+        description: List of related datasets with typed relationships (e.g., supplements,
           derives from, is version of). Use DatasetRelationship class to specify relationship
           types.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3379,6 +3596,10 @@ classes:
         inlined_as_list: true
       compression:
         name: compression
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: zip
         description: Compression format used, if any (e.g., gzip, bzip2, zip).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:compressFormat
@@ -3394,6 +3615,10 @@ classes:
         range: CompressionEnum
       conforms_to:
         name: conforms_to
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://www.w3.org/TR/vocab-dcat-3/
         description: An established standard, specification, or schema to which the
           resource conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3409,6 +3634,10 @@ classes:
         range: string
       conforms_to_class:
         name: conforms_to_class
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Dataset
         description: The specific class or type within a schema to which the resource
           conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3426,6 +3655,10 @@ classes:
         range: string
       conforms_to_schema:
         name: conforms_to_schema
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://w3id.org/bridge2ai/data-sheets-schema
         description: The schema or data model to which the resource conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         broad_mappings:
@@ -3442,6 +3675,10 @@ classes:
         range: string
       created_by:
         name: created_by
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: orcid:0000-0002-1234-5678
         description: The person or organization primarily responsible for creating
           the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3457,6 +3694,10 @@ classes:
         range: string
       created_on:
         name: created_on
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2023-07-18T00:00:00'
         description: The date and time when the resource was created.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:created
@@ -3471,6 +3712,10 @@ classes:
         range: datetime
       doi:
         name: doi
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 10.5281/zenodo.10642459
         description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
           persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3491,6 +3736,10 @@ classes:
         pattern: 10\.\d{4,}\/.+
       download_url:
         name: download_url
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2/download
         description: URL from which the data can be downloaded. This is not the same
           as the landing page, which is a page that describes the dataset. Rather,
           this URL points directly to the data itself.
@@ -3509,6 +3758,10 @@ classes:
         range: uri
       issued:
         name: issued
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15T00:00:00'
         description: Date of formal issuance or publication of the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:issued
@@ -3523,6 +3776,10 @@ classes:
         range: datetime
       keywords:
         name: keywords
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: diabetes, retinal imaging, multimodal, clinical data
         description: Keywords or tags describing the resource for discovery and classification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:keyword
@@ -3538,6 +3795,10 @@ classes:
         multivalued: true
       language:
         name: language
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: en
         description: Language in which the information is expressed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
@@ -3554,6 +3815,10 @@ classes:
         range: string
       last_updated_on:
         name: last_updated_on
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15T00:00:00'
         description: The date and time when the resource was most recently modified
           or updated.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3569,6 +3834,10 @@ classes:
         range: datetime
       license:
         name: license
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: CC-BY-NC-4.0
         description: The legal license under which the resource is made available
           (e.g., "MIT", "CC-BY-4.0").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3585,6 +3854,10 @@ classes:
         range: string
       modified_by:
         name: modified_by
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: orcid:0000-0002-9876-5432
         description: A person or organization that contributed to modifying or updating
           the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3600,6 +3873,10 @@ classes:
         range: string
       page:
         name: page
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2
         description: A landing page or web page providing access to or information
           about the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3615,6 +3892,10 @@ classes:
         range: string
       publisher:
         name: publisher
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name'
         description: The organization or entity responsible for making the resource
           available.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3630,6 +3911,10 @@ classes:
         range: uriorcurie
       status:
         name: status
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: published
         description: The status of the resource (e.g., draft, published, deprecated).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:publicationStatus
@@ -3644,6 +3929,10 @@ classes:
         range: string
       title:
         name: title
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
         description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:title
@@ -3658,6 +3947,10 @@ classes:
         range: string
       version:
         name: version
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 2.0.0
         description: The version identifier of the resource (e.g., "1.0", "2.3.1").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:version
@@ -3673,6 +3966,10 @@ classes:
         range: string
       was_derived_from:
         name: was_derived_from
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2/versions/1
         description: A resource from which this resource was derived, in whole or
           in part.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3690,9 +3987,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/my-dataset-001
         description: A unique identifier for a thing.
-        examples:
-        - value: https://example.org/dataset/my-dataset-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         identifier: true
@@ -3779,6 +4078,10 @@ classes:
         required: true
       name:
         name: name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -3864,6 +4167,10 @@ classes:
         range: string
       description:
         name: description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -4010,7 +4317,7 @@ classes:
         inlined_as_list: true
       file_collections:
         name: file_collections
-        description: Collections of files within this dataset. Each collection represents
+        description: Collection of file groups within this dataset. Each entry represents
           a logical grouping of files with shared characteristics (e.g., all training
           data, all image files, all raw data files). Maps to nested RO-Crate Dataset
           entities via schema:hasPart in RO-Crate converters.
@@ -4027,10 +4334,12 @@ classes:
         inlined_as_list: true
       total_file_count:
         name: total_file_count
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '156'
         description: Total number of files across all file collections in this dataset.
           Can be aggregated from file_collections[].file_count.
-        examples:
-        - value: '156'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:totalFileCount
         alias: total_file_count
@@ -4040,11 +4349,12 @@ classes:
         range: integer
       total_size_bytes:
         name: total_size_bytes
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 10737418240 (10 GiB = 10 × 1024³ bytes)
         description: Total size of all files in bytes across all file collections.
           Can be aggregated from file_collections[].total_bytes.
-        examples:
-        - value: '10737418240'
-          description: 10 GiB (10 × 1024³ bytes)
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:byteSize
         alias: total_size_bytes
@@ -4166,7 +4476,7 @@ classes:
         inlined_as_list: true
       known_biases:
         name: known_biases
-        description: Known biases present in the dataset that may affect fairness,
+        description: List of known biases present in the dataset that may affect fairness,
           representativeness, or model performance. Uses BiasTypeEnum for standardized
           bias categorization mapped to the AI Ontology (AIO).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -4180,8 +4490,9 @@ classes:
         inlined_as_list: true
       known_limitations:
         name: known_limitations
-        description: Known limitations of the dataset that may affect its use or interpretation.
-          Distinct from biases (systematic errors) and anomalies (data quality issues).
+        description: List of known limitations of the dataset that may affect its
+          use or interpretation. Distinct from biases (systematic errors) and anomalies
+          (data quality issues).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:known_limitations
         alias: known_limitations
@@ -4405,7 +4716,8 @@ classes:
         inlined_as_list: true
       missing_data_documentation:
         name: missing_data_documentation
-        description: Documentation of missing data patterns and handling strategies.
+        description: One or more records documenting missing data patterns and handling
+          strategies.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:missingDataDocumentation
         alias: missing_data_documentation
@@ -4470,8 +4782,8 @@ classes:
         inlined: true
       informed_consent:
         name: informed_consent
-        description: Details about informed consent procedures, including consent
-          type, documentation, and withdrawal mechanisms.
+        description: One or more records detailing informed consent procedures, including
+          consent type, documentation, and withdrawal mechanisms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:informedConsent
         alias: informed_consent
@@ -4496,8 +4808,8 @@ classes:
         inlined: true
       participant_privacy:
         name: participant_privacy
-        description: Information about privacy protections and anonymization procedures
-          for human research participants.
+        description: One or more records describing privacy protections and anonymization
+          procedures for human research participants.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:participantPrivacy
         alias: participant_privacy
@@ -4509,8 +4821,8 @@ classes:
         inlined_as_list: true
       participant_compensation:
         name: participant_compensation
-        description: Information about compensation or incentives provided to human
-          research participants.
+        description: One or more records describing compensation or incentives provided
+          to human research participants.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:participantCompensation
         alias: participant_compensation
@@ -4592,7 +4904,8 @@ classes:
         inlined_as_list: true
       annotation_analyses:
         name: annotation_analyses
-        description: Analysis of annotation quality and inter-annotator agreement.
+        description: One or more analyses of annotation quality and inter-annotator
+          agreement.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:annotation_analyses
         alias: annotation_analyses
@@ -4604,7 +4917,7 @@ classes:
         inlined_as_list: true
       machine_annotation_tools:
         name: machine_annotation_tools
-        description: Automated annotation tools used in dataset creation.
+        description: List of automated annotation tools used in dataset creation.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         alias: machine_annotation_tools
         owner: DataSubset
@@ -4685,8 +4998,8 @@ classes:
         inlined_as_list: true
       intended_uses:
         name: intended_uses
-        description: Explicit intended and recommended uses for this dataset. Complements
-          future_use_impacts by focusing on positive applications.
+        description: List of explicit intended and recommended uses for this dataset.
+          Complements future_use_impacts by focusing on positive applications.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:intendedUses
         alias: intended_uses
@@ -4698,8 +5011,8 @@ classes:
         inlined_as_list: true
       prohibited_uses:
         name: prohibited_uses
-        description: Explicitly prohibited or forbidden uses for this dataset. Stronger
-          than discouraged_uses - these are not permitted.
+        description: List of explicitly prohibited or forbidden uses for this dataset.
+          Stronger than discouraged_uses - these are not permitted.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:prohibitedUses
         alias: prohibited_uses
@@ -4873,8 +5186,8 @@ classes:
         inlined: true
       variables:
         name: variables
-        description: Metadata describing individual variables, fields, or columns
-          in the dataset.
+        description: List of metadata records describing individual variables, fields,
+          or columns in the dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
         - schema:variableMeasured
@@ -4927,8 +5240,8 @@ classes:
         range: string
       parent_datasets:
         name: parent_datasets
-        description: Parent datasets that this dataset is part of or derived from.
-          Enables hierarchical dataset composition (hasPart/isPartOf relationships).
+        description: One or more parent datasets that this dataset is part of or derived
+          from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
         - schema:isPartOf
@@ -4942,7 +5255,7 @@ classes:
         inlined_as_list: true
       related_datasets:
         name: related_datasets
-        description: Related datasets with typed relationships (e.g., supplements,
+        description: List of related datasets with typed relationships (e.g., supplements,
           derives from, is version of). Use DatasetRelationship class to specify relationship
           types.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -4956,6 +5269,10 @@ classes:
         inlined_as_list: true
       compression:
         name: compression
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: zip
         description: Compression format used, if any (e.g., gzip, bzip2, zip).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:compressFormat
@@ -4971,6 +5288,10 @@ classes:
         range: CompressionEnum
       conforms_to:
         name: conforms_to
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://www.w3.org/TR/vocab-dcat-3/
         description: An established standard, specification, or schema to which the
           resource conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -4986,6 +5307,10 @@ classes:
         range: string
       conforms_to_class:
         name: conforms_to_class
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Dataset
         description: The specific class or type within a schema to which the resource
           conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -5003,6 +5328,10 @@ classes:
         range: string
       conforms_to_schema:
         name: conforms_to_schema
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://w3id.org/bridge2ai/data-sheets-schema
         description: The schema or data model to which the resource conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         broad_mappings:
@@ -5019,6 +5348,10 @@ classes:
         range: string
       created_by:
         name: created_by
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: orcid:0000-0002-1234-5678
         description: The person or organization primarily responsible for creating
           the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -5034,6 +5367,10 @@ classes:
         range: string
       created_on:
         name: created_on
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2023-07-18T00:00:00'
         description: The date and time when the resource was created.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:created
@@ -5048,6 +5385,10 @@ classes:
         range: datetime
       doi:
         name: doi
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 10.5281/zenodo.10642459
         description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
           persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -5068,6 +5409,10 @@ classes:
         pattern: 10\.\d{4,}\/.+
       download_url:
         name: download_url
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2/download
         description: URL from which the data can be downloaded. This is not the same
           as the landing page, which is a page that describes the dataset. Rather,
           this URL points directly to the data itself.
@@ -5086,6 +5431,10 @@ classes:
         range: uri
       issued:
         name: issued
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15T00:00:00'
         description: Date of formal issuance or publication of the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:issued
@@ -5100,6 +5449,10 @@ classes:
         range: datetime
       keywords:
         name: keywords
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: diabetes, retinal imaging, multimodal, clinical data
         description: Keywords or tags describing the resource for discovery and classification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:keyword
@@ -5115,6 +5468,10 @@ classes:
         multivalued: true
       language:
         name: language
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: en
         description: Language in which the information is expressed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
@@ -5131,6 +5488,10 @@ classes:
         range: string
       last_updated_on:
         name: last_updated_on
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15T00:00:00'
         description: The date and time when the resource was most recently modified
           or updated.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -5146,6 +5507,10 @@ classes:
         range: datetime
       license:
         name: license
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: CC-BY-NC-4.0
         description: The legal license under which the resource is made available
           (e.g., "MIT", "CC-BY-4.0").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -5162,6 +5527,10 @@ classes:
         range: string
       modified_by:
         name: modified_by
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: orcid:0000-0002-9876-5432
         description: A person or organization that contributed to modifying or updating
           the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -5177,6 +5546,10 @@ classes:
         range: string
       page:
         name: page
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2
         description: A landing page or web page providing access to or information
           about the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -5192,6 +5565,10 @@ classes:
         range: string
       publisher:
         name: publisher
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name'
         description: The organization or entity responsible for making the resource
           available.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -5207,6 +5584,10 @@ classes:
         range: uriorcurie
       status:
         name: status
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: published
         description: The status of the resource (e.g., draft, published, deprecated).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:publicationStatus
@@ -5221,6 +5602,10 @@ classes:
         range: string
       title:
         name: title
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
         description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:title
@@ -5235,6 +5620,10 @@ classes:
         range: string
       version:
         name: version
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 2.0.0
         description: The version identifier of the resource (e.g., "1.0", "2.3.1").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:version
@@ -5250,6 +5639,10 @@ classes:
         range: string
       was_derived_from:
         name: was_derived_from
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2/versions/1
         description: A resource from which this resource was derived, in whole or
           in part.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -5267,9 +5660,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/my-dataset-001
         description: A unique identifier for a thing.
-        examples:
-        - value: https://example.org/dataset/my-dataset-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         identifier: true
@@ -5356,6 +5751,10 @@ classes:
         required: true
       name:
         name: name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -5441,6 +5840,10 @@ classes:
         range: string
       description:
         name: description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -5531,9 +5934,11 @@ classes:
     attributes:
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/my-dataset-001
         description: A unique identifier for a thing.
-        examples:
-        - value: https://example.org/dataset/my-dataset-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         identifier: true
@@ -5620,6 +6025,10 @@ classes:
         required: true
       name:
         name: name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -5705,6 +6114,10 @@ classes:
         range: string
       description:
         name: description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -5797,9 +6210,11 @@ classes:
     attributes:
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/my-dataset-001
         description: A unique identifier for a thing.
-        examples:
-        - value: https://example.org/dataset/my-dataset-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         identifier: true
@@ -5886,6 +6301,10 @@ classes:
         required: true
       name:
         name: name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -5971,6 +6390,10 @@ classes:
         range: string
       description:
         name: description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -6062,9 +6485,11 @@ classes:
     attributes:
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -6397,6 +6822,10 @@ classes:
     attributes:
       version:
         name: version
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 3.8.1
         description: The version identifier of the software (e.g., "1.0.0", "2.3.1-beta").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:softwareVersion
@@ -6411,6 +6840,10 @@ classes:
         range: string
       license:
         name: license
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: MIT
         description: The license under which the software is distributed (e.g., "MIT",
           "Apache-2.0", "GPL-3.0").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -6426,6 +6859,10 @@ classes:
         range: string
       url:
         name: url
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://github.com/example/tool
         description: URL where the software can be found (e.g., homepage, repository,
           or documentation).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -6437,9 +6874,11 @@ classes:
         range: uri
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/my-dataset-001
         description: A unique identifier for a thing.
-        examples:
-        - value: https://example.org/dataset/my-dataset-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         identifier: true
@@ -6526,6 +6965,10 @@ classes:
         required: true
       name:
         name: name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -6611,6 +7054,10 @@ classes:
         range: string
       description:
         name: description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -6721,6 +7168,10 @@ classes:
         multivalued: true
       email:
         name: email
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: researcher@university.edu
         description: The email address of the person. Represents current/preferred
           contact information in the context of this dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -6732,6 +7183,10 @@ classes:
         range: string
       orcid:
         name: orcid
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 0000-0001-2345-6789
         description: 'ORCID (Open Researcher and Contributor ID) - a persistent digital
           identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups
           of 4). Use this for stable cross-dataset identification.'
@@ -6747,9 +7202,11 @@ classes:
         pattern: ^\d{4}-\d{4}-\d{4}-\d{3}[0-9X]$
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/my-dataset-001
         description: A unique identifier for a thing.
-        examples:
-        - value: https://example.org/dataset/my-dataset-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         identifier: true
@@ -6836,6 +7293,10 @@ classes:
         required: true
       name:
         name: name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -6921,6 +7382,10 @@ classes:
         range: string
       description:
         name: description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -7007,7 +7472,7 @@ classes:
     class_uri: schema:Person
   Information:
     name: Information
-    description: Grouping for datasets and data files
+    description: Grouping for datasets and data files.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     close_mappings:
     - schema:CreativeWork
@@ -7036,6 +7501,10 @@ classes:
     attributes:
       compression:
         name: compression
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: zip
         description: Compression format used, if any (e.g., gzip, bzip2, zip).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:compressFormat
@@ -7051,6 +7520,10 @@ classes:
         range: CompressionEnum
       conforms_to:
         name: conforms_to
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://www.w3.org/TR/vocab-dcat-3/
         description: An established standard, specification, or schema to which the
           resource conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -7066,6 +7539,10 @@ classes:
         range: string
       conforms_to_class:
         name: conforms_to_class
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Dataset
         description: The specific class or type within a schema to which the resource
           conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -7083,6 +7560,10 @@ classes:
         range: string
       conforms_to_schema:
         name: conforms_to_schema
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://w3id.org/bridge2ai/data-sheets-schema
         description: The schema or data model to which the resource conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         broad_mappings:
@@ -7099,6 +7580,10 @@ classes:
         range: string
       created_by:
         name: created_by
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: orcid:0000-0002-1234-5678
         description: The person or organization primarily responsible for creating
           the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -7114,6 +7599,10 @@ classes:
         range: string
       created_on:
         name: created_on
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2023-07-18T00:00:00'
         description: The date and time when the resource was created.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:created
@@ -7128,6 +7617,10 @@ classes:
         range: datetime
       doi:
         name: doi
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 10.5281/zenodo.10642459
         description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
           persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -7148,6 +7641,10 @@ classes:
         pattern: 10\.\d{4,}\/.+
       download_url:
         name: download_url
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2/download
         description: URL from which the data can be downloaded. This is not the same
           as the landing page, which is a page that describes the dataset. Rather,
           this URL points directly to the data itself.
@@ -7166,6 +7663,10 @@ classes:
         range: uri
       issued:
         name: issued
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15T00:00:00'
         description: Date of formal issuance or publication of the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:issued
@@ -7180,6 +7681,10 @@ classes:
         range: datetime
       keywords:
         name: keywords
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: diabetes, retinal imaging, multimodal, clinical data
         description: Keywords or tags describing the resource for discovery and classification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:keyword
@@ -7195,6 +7700,10 @@ classes:
         multivalued: true
       language:
         name: language
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: en
         description: Language in which the information is expressed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
@@ -7211,6 +7720,10 @@ classes:
         range: string
       last_updated_on:
         name: last_updated_on
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15T00:00:00'
         description: The date and time when the resource was most recently modified
           or updated.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -7226,6 +7739,10 @@ classes:
         range: datetime
       license:
         name: license
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: CC-BY-NC-4.0
         description: The legal license under which the resource is made available
           (e.g., "MIT", "CC-BY-4.0").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -7242,6 +7759,10 @@ classes:
         range: string
       modified_by:
         name: modified_by
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: orcid:0000-0002-9876-5432
         description: A person or organization that contributed to modifying or updating
           the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -7257,6 +7778,10 @@ classes:
         range: string
       page:
         name: page
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2
         description: A landing page or web page providing access to or information
           about the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -7272,6 +7797,10 @@ classes:
         range: string
       publisher:
         name: publisher
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name'
         description: The organization or entity responsible for making the resource
           available.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -7287,6 +7816,10 @@ classes:
         range: uriorcurie
       status:
         name: status
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: published
         description: The status of the resource (e.g., draft, published, deprecated).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:publicationStatus
@@ -7301,6 +7834,10 @@ classes:
         range: string
       title:
         name: title
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
         description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:title
@@ -7315,6 +7852,10 @@ classes:
         range: string
       version:
         name: version
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 2.0.0
         description: The version identifier of the resource (e.g., "1.0", "2.3.1").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:version
@@ -7330,6 +7871,10 @@ classes:
         range: string
       was_derived_from:
         name: was_derived_from
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2/versions/1
         description: A resource from which this resource was derived, in whole or
           in part.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -7347,9 +7892,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/my-dataset-001
         description: A unique identifier for a thing.
-        examples:
-        - value: https://example.org/dataset/my-dataset-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         identifier: true
@@ -7436,6 +7983,10 @@ classes:
         required: true
       name:
         name: name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -7521,6 +8072,10 @@ classes:
         range: string
       description:
         name: description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -7667,6 +8222,11 @@ classes:
     attributes:
       response:
         name: response
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Primary purpose is to support hypothesis-agnostic AI/ML analyses
+              of T2DM salutogenesis.
         description: Short explanation describing the primary purpose of creating
           the dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
@@ -7682,9 +8242,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -8014,6 +8576,10 @@ classes:
     attributes:
       response:
         name: response
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Multi-domain biomarker discovery for Type 2 Diabetes mellitus.
         description: Short explanation describing the specific task or tasks for which
           this dataset was created.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
@@ -8029,9 +8595,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -8363,6 +8931,11 @@ classes:
     attributes:
       response:
         name: response
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Lack of racially diverse T2DM datasets with linked multi-modal
+              clinical data.
         description: Short explanation of the knowledge or resource gap that this
           dataset was intended to address.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
@@ -8378,9 +8951,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -8756,9 +9331,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -9095,7 +9672,9 @@ classes:
         description: Name/identifier of the organization providing monetary or resource
           support.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
-        slot_uri: schema:funder
+        broad_mappings:
+        - schema:funder
+        slot_uri: d4d:grantor
         alias: grantor
         owner: FundingMechanism
         domain_of:
@@ -9116,9 +9695,11 @@ classes:
         inlined_as_list: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -9452,9 +10033,11 @@ classes:
     attributes:
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/my-dataset-001
         description: A unique identifier for a thing.
-        examples:
-        - value: https://example.org/dataset/my-dataset-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         identifier: true
@@ -9541,6 +10124,10 @@ classes:
         required: true
       name:
         name: name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -9626,6 +10213,10 @@ classes:
         range: string
       description:
         name: description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -9720,6 +10311,10 @@ classes:
     attributes:
       grant_number:
         name: grant_number
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: OT2OD032644
         description: The alphanumeric identifier for the grant.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
         broad_mappings:
@@ -9732,9 +10327,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/my-dataset-001
         description: A unique identifier for a thing.
-        examples:
-        - value: https://example.org/dataset/my-dataset-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         identifier: true
@@ -9821,6 +10418,10 @@ classes:
         required: true
       name:
         name: name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -9906,6 +10507,10 @@ classes:
         range: string
       description:
         name: description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -10014,6 +10619,10 @@ classes:
         range: uriorcurie
       instance_type:
         name: instance_type
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: medical imaging studies
         description: 'The type or types of instances in the dataset (e.g., "movie",
           "user", "rating", "clinical record"). Use when the dataset contains multiple
           instance types with different structures.
@@ -10044,12 +10653,13 @@ classes:
         range: uriorcurie
       counts:
         name: counts
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 42000 (42,000 patient records)
         description: 'How many instances are there in total (of each type, if appropriate)?
 
           '
-        examples:
-        - value: '42000'
-          description: 42,000 patient records
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
         slot_uri: schema:numberOfItems
         alias: counts
@@ -10114,9 +10724,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -10451,6 +11063,10 @@ classes:
     attributes:
       is_sample:
         name: is_sample
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'true'
         description: Indicates whether it is a sample of a larger set.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
         slot_uri: d4d:isSample
@@ -10461,6 +11077,10 @@ classes:
         range: boolean
       is_random:
         name: is_random
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'false'
         description: Indicates whether the sample is random.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
         slot_uri: d4d:isRandom
@@ -10485,6 +11105,10 @@ classes:
         multivalued: true
       is_representative:
         name: is_representative
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'true'
         description: 'Indicates whether the sample is representative of the larger
           set.
 
@@ -10528,6 +11152,10 @@ classes:
         multivalued: true
       strategies:
         name: strategies
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Triple-balanced by race/ethnicity, sex, and T2DM severity
         description: 'One or more sampling strategies used (e.g., deterministic, simple
           random, stratified, cluster, systematic).
 
@@ -10542,9 +11170,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -10870,7 +11500,7 @@ classes:
   MissingInfo:
     name: MissingInfo
     description: 'Is any information missing from individual instances? (e.g., unavailable
-      data)
+      data).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -10878,6 +11508,10 @@ classes:
     attributes:
       missing:
         name: missing
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: CGM readings absent for 15% of participants
         description: 'Description of the missing data fields or elements.
 
           '
@@ -10893,6 +11527,10 @@ classes:
         multivalued: true
       why_missing:
         name: why_missing
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Device malfunction or non-compliance during 14-day wear period
         description: 'Explanation of why each piece of data is missing.
 
           '
@@ -10908,9 +11546,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -11244,6 +11884,11 @@ classes:
     attributes:
       relationship_details:
         name: relationship_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Participants linked to multiple visits via participant_id foreign
+              key
         description: 'Free-text description of how relationships between instances
           are represented (e.g., graph edges, ratings matrices, foreign keys), including
           relationship types and any associated metadata.
@@ -11259,9 +11904,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -11595,6 +12242,11 @@ classes:
     attributes:
       split_details:
         name: split_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 70/15/15 train/validation/test split stratified by site and T2DM
+              severity
         description: 'Free-text description of the recommended data splits (e.g.,
           80/10/10 train/ validation/test), how they are defined, and the rationale
           for the split strategy.
@@ -11610,9 +12262,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -11945,6 +12599,10 @@ classes:
     attributes:
       anomaly_details:
         name: anomaly_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 15% of CGM readings missing due to device malfunction
         description: 'Free-text description of errors, noise sources, or redundancies
           in the dataset, including their known causes and estimated prevalence.
 
@@ -11961,9 +12619,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -12313,6 +12973,10 @@ classes:
         range: BiasTypeEnum
       bias_description:
         name: bias_description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Sampling favored urban academic medical centers
         description: 'Detailed description of how this bias manifests in the dataset,
           including affected populations, features, or outcomes.
 
@@ -12326,6 +12990,10 @@ classes:
         range: string
       mitigation_strategy:
         name: mitigation_strategy
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Oversampling of underrepresented groups during model training
         description: 'Steps taken or recommended to mitigate this bias.
 
           '
@@ -12338,6 +13006,10 @@ classes:
         range: string
       affected_subsets:
         name: affected_subsets
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Training split underrepresents Asian participants
         description: 'One or more specific subsets or features of the dataset affected
           by this bias (e.g., "female participants", "non-English text", "images taken
           at night").
@@ -12353,9 +13025,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -12704,6 +13378,10 @@ classes:
         range: LimitationTypeEnum
       limitation_description:
         name: limitation_description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Cross-sectional design limits causal inference
         description: 'Detailed description of the limitation and its implications.
 
           '
@@ -12716,6 +13394,10 @@ classes:
         range: string
       scope_impact:
         name: scope_impact
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Findings may not generalize to non-diabetic populations
         description: 'How this limitation affects the scope or applicability of the
           dataset.
 
@@ -12729,6 +13411,10 @@ classes:
         range: string
       recommended_mitigation:
         name: recommended_mitigation
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Use longitudinal follow-up cohorts for causal inference studies
         description: 'Recommended approaches for users to address this limitation.
 
           '
@@ -12741,9 +13427,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -13106,8 +13794,6 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-        broad_mappings:
-        - schema:archivedAt
         slot_uri: d4d:hasArchivalVersion
         alias: archival
         owner: ExternalResource
@@ -13148,9 +13834,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -13494,6 +14182,10 @@ classes:
         range: boolean
       confidentiality_details:
         name: confidentiality_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: ZIP codes suppressed; race/ethnicity available only in aggregate
         description: 'Free-text description of which data elements are confidential,
           the basis for confidentiality (e.g., legal privilege, patient data), and
           how they are handled or restricted.
@@ -13509,9 +14201,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -13855,6 +14549,10 @@ classes:
         range: boolean
       warnings:
         name: warnings
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Contains clinical images of diabetic retinopathy
         description: One or more specific content warnings describing potentially
           offensive, insulting, threatening, or anxiety-provoking content present
           in the dataset (e.g., violence, profanity, explicit imagery, hate speech).
@@ -13868,9 +14566,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -14229,6 +14929,10 @@ classes:
         multivalued: true
       distribution:
         name: distribution
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'Hispanic participants: 1,023 (25.6% of total)'
         description: The distribution of instances across identified subpopulations,
           including counts, percentages, or proportions for each subgroup.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -14243,9 +14947,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -14610,6 +15316,11 @@ classes:
         multivalued: true
       deidentification_details:
         name: deidentification_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: HIPAA Safe Harbor method applied; expert re-identification risk
+              assessment confirms low risk
         description: 'Details on de-identification procedures and residual risks.
 
           '
@@ -14623,9 +15334,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -14971,6 +15684,10 @@ classes:
         range: boolean
       sensitivity_details:
         name: sensitivity_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Genetic sequencing data requires additional DUA
         description: 'Details on sensitive data elements present and handling procedures.
 
           '
@@ -14984,9 +15701,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -15385,9 +16104,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -15682,6 +16403,10 @@ classes:
         range: boolean
       acquisition_details:
         name: acquisition_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Retinal images captured with Heidelberg Spectralis OCT
         description: 'Free-text description of how data was acquired for each instance,
           including instruments, protocols, and any manual steps involved.
 
@@ -15696,9 +16421,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -16035,6 +16762,10 @@ classes:
     attributes:
       mechanism_details:
         name: mechanism_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: In-person clinical visit with standardized MOP
         description: 'Free-text description of the specific mechanisms or procedures
           used to collect the data (e.g., hardware model, software API, manual curation
           process), including how those mechanisms were validated.
@@ -16050,9 +16781,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -16386,6 +17119,10 @@ classes:
     attributes:
       role:
         name: role
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Clinical Research Coordinator
         description: Role of the data collector (e.g., researcher, crowdworker).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
         slot_uri: schema:roleName
@@ -16397,6 +17134,10 @@ classes:
         range: string
       collector_details:
         name: collector_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Certified study coordinators at 3 collection sites
         description: 'Free-text description of who was involved in data collection
           (e.g., students, crowdworkers, contractors), their training or qualifications,
           and how they were compensated.
@@ -16412,9 +17153,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -16750,6 +17493,10 @@ classes:
     attributes:
       start_date:
         name: start_date
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2023-07-18'
         description: Start date of data collection.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
         slot_uri: schema:startDate
@@ -16760,6 +17507,10 @@ classes:
         range: date
       end_date:
         name: end_date
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2026-11-30'
         description: End date of data collection.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
         slot_uri: schema:endDate
@@ -16770,6 +17521,10 @@ classes:
         range: date
       timeframe_details:
         name: timeframe_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Enrollment ongoing; data released annually
         description: 'Free-text description of the data collection period and whether
           this timeframe matches the creation timeframe of the underlying data (e.g.,
           historical records, prospective collection).
@@ -16785,9 +17540,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -17131,6 +17888,10 @@ classes:
         range: boolean
       collection_details:
         name: collection_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Collected directly from consented participants at clinical sites
         description: 'Free-text description of whether data was collected directly
           from individuals or obtained via third parties or other indirect sources,
           and what those sources are.
@@ -17146,9 +17907,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -17484,6 +18247,10 @@ classes:
     attributes:
       missing_data_patterns:
         name: missing_data_patterns
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: CGM data missing for 15% of participants (device errors)
         description: 'Description of patterns in missing data (e.g., missing completely
           at random, missing at random, missing not at random).
 
@@ -17498,6 +18265,10 @@ classes:
         multivalued: true
       missing_data_causes:
         name: missing_data_causes
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Device malfunction, participant non-compliance, technical failures
         description: 'Known or suspected causes of missing data (e.g., sensor failures,
           participant dropout, privacy constraints).
 
@@ -17512,6 +18283,10 @@ classes:
         multivalued: true
       handling_strategy:
         name: handling_strategy
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Multiple imputation using chained equations (MICE)
         description: 'The primary strategy used to handle missing data (e.g., listwise
           deletion, mean imputation, multiple imputation, flagging with sentinel values).
 
@@ -17525,9 +18300,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -17864,6 +18641,10 @@ classes:
     attributes:
       source_description:
         name: source_description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Electronic health records from UCSF Epic system
         description: 'Detailed description of where raw data comes from (e.g., sensors,
           databases, web APIs, manual collection).
 
@@ -17878,6 +18659,10 @@ classes:
         required: true
       source_type:
         name: source_type
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Electronic Health Records
         description: 'One or more types of raw source (e.g., sensor, database, user
           input, web scraping).
 
@@ -17894,6 +18679,10 @@ classes:
         multivalued: true
       access_details:
         name: access_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Requires institutional DUA and IRB approval
         description: 'Information on how to access or retrieve the raw source data.
 
           '
@@ -17906,6 +18695,10 @@ classes:
         range: string
       raw_data_format:
         name: raw_data_format
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: HL7 FHIR R4
         description: 'One or more formats of the raw data before any preprocessing
           (e.g., CSV, DICOM, JSON).
 
@@ -17920,9 +18713,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -18258,6 +19053,10 @@ classes:
     attributes:
       preprocessing_details:
         name: preprocessing_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: DICOM to NIfTI conversion using dcm2niix v1.0.20211006
         description: 'Free-text description of preprocessing steps applied to the
           data, including tools used, parameters, order of operations, and rationale
           for each step.
@@ -18273,9 +19072,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -18611,6 +19412,10 @@ classes:
     attributes:
       cleaning_details:
         name: cleaning_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Outlier removal using 3-sigma rule; manual review of flagged records
         description: 'Free-text description of data cleaning procedures applied, including
           criteria for removing or correcting instances, tools used, and how removed
           instances are accounted for.
@@ -18626,9 +19431,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -18962,6 +19769,10 @@ classes:
     attributes:
       data_annotation_platform:
         name: data_annotation_platform
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Label Studio 1.7.3
         description: One or more platforms or tools used for annotation (e.g., Label
           Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
@@ -18989,11 +19800,12 @@ classes:
         multivalued: true
       annotations_per_item:
         name: annotations_per_item
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 3 (three independent annotators per item)
         description: Number of annotations collected per data item. Multiple annotations
           per item enable calculation of inter-annotator agreement.
-        examples:
-        - value: '3'
-          description: Three independent annotators per item
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
         exact_mappings:
         - rai:annotationsPerItem
@@ -19005,6 +19817,10 @@ classes:
         range: integer
       inter_annotator_agreement:
         name: inter_annotator_agreement
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Cohen's κ = 0.82 (substantial agreement)
         description: Measure of agreement between annotators (e.g., Cohen's kappa,
           Fleiss' kappa, Krippendorff's alpha, percent agreement). Include both the
           metric name and value.
@@ -19032,6 +19848,11 @@ classes:
         multivalued: true
       labeling_details:
         name: labeling_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Board-certified ophthalmologists graded retinal images using ETDRS
+              scale
         description: 'Free-text description of the labeling or annotation procedures,
           including annotation guidelines, task definitions, and quality control metrics.
 
@@ -19046,9 +19867,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -19382,9 +20205,11 @@ classes:
     attributes:
       access_url:
         name: access_url
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/raw/raw-data.zip
         description: URL or access point for the raw data.
-        examples:
-        - value: https://example.org/dataset/raw/raw-data.zip
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
         slot_uri: d4d:rawDataAccessURL
         alias: access_url
@@ -19408,9 +20233,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -19746,6 +20573,10 @@ classes:
     attributes:
       imputation_method:
         name: imputation_method
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Multiple Imputation by Chained Equations (MICE)
         description: 'Specific imputation technique used (mean, median, mode, forward
           fill, backward fill, interpolation, model-based imputation, etc.).
 
@@ -19760,6 +20591,10 @@ classes:
         multivalued: true
       imputed_fields:
         name: imputed_fields
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: cgm_mean_glucose, hba1c_percent, bmi
         description: 'Fields or columns where imputation was applied.
 
           '
@@ -19773,6 +20608,10 @@ classes:
         multivalued: true
       imputation_rationale:
         name: imputation_rationale
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'MICE with 20 imputations; predictors: age, sex, HbA1c'
         description: 'Justification for the imputation approach chosen, including
           assumptions made about missing data mechanisms.
 
@@ -19799,9 +20638,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -20189,6 +21030,10 @@ classes:
         multivalued: true
       annotation_quality_details:
         name: annotation_quality_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'Inter-rater reliability: Cohen''s κ = 0.82'
         description: 'Additional details on annotation quality assessment and findings.
 
           '
@@ -20202,9 +21047,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -20559,6 +21406,10 @@ classes:
         multivalued: true
       tool_descriptions:
         name: tool_descriptions
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: DeepDR automated grading system (AUC = 0.94)
         description: 'Descriptions of what each tool does in the annotation process
           and what types of annotations it produces. Should correspond to the tools
           list.
@@ -20574,6 +21425,10 @@ classes:
         multivalued: true
       tool_accuracy:
         name: tool_accuracy
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'DeepDR AUC: 0.94 on EYEPACS validation set'
         description: 'One or more known accuracy or performance metrics for the automated
           tools (if available). Include metric name and value (e.g., "spaCy F1: 0.95",
           "GPT-4 Accuracy: 92%").
@@ -20589,9 +21444,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -20924,6 +21781,10 @@ classes:
     attributes:
       examples:
         name: examples
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.1056/NEJMoa2404007)'
         description: List of examples of known/previous uses of the dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
         slot_uri: schema:example
@@ -20937,9 +21798,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -21272,9 +22135,11 @@ classes:
     attributes:
       repository_url:
         name: repository_url
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://paperswithcode.com/dataset/ai-readi
         description: URL to a repository of known dataset uses.
-        examples:
-        - value: https://example.org/dataset/known-uses
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
         alias: repository_url
         owner: UseRepository
@@ -21297,9 +22162,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -21632,6 +22499,10 @@ classes:
     attributes:
       task_details:
         name: task_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Longitudinal disease trajectory modeling
         description: 'Free-text description of other potential tasks the dataset could
           support, including any prerequisites or limitations for those uses.
 
@@ -21646,9 +22517,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -21986,6 +22859,11 @@ classes:
     attributes:
       impact_details:
         name: impact_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Models trained on this data may reinforce existing health disparities
+              if deployed without fairness audits
         description: 'Free-text description of potential future impacts or risks arising
           from the dataset''s composition or collection (e.g., unfair treatment, privacy
           violations, legal or financial risks), and any recommended mitigation strategies.
@@ -22002,9 +22880,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -22337,6 +23217,10 @@ classes:
     attributes:
       discouragement_details:
         name: discouragement_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Not recommended for clinical diagnosis without additional validation
         description: 'Free-text description of tasks or applications for which the
           dataset is not recommended, with explanation of why (e.g., out-of-scope,
           risk of harm, poor coverage).
@@ -22352,9 +23236,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -22691,6 +23577,10 @@ classes:
     attributes:
       examples:
         name: examples
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Training fairness-aware ML models for T2DM prediction
         description: List of example intended uses for this dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
         alias: examples
@@ -22703,6 +23593,11 @@ classes:
         multivalued: true
       usage_notes:
         name: usage_notes
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Models should be evaluated for fairness across racial/ethnic subgroups
+              before clinical deployment
         description: A note or caveat about using the dataset for its intended purposes.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
         alias: usage_notes
@@ -22712,6 +23607,10 @@ classes:
         range: string
       use_category:
         name: use_category
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: academic research
         description: One or more categories of intended use (e.g., research, clinical,
           educational, commercial, policy).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
@@ -22724,9 +23623,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -23061,6 +23962,10 @@ classes:
     attributes:
       prohibition_reason:
         name: prohibition_reason
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Re-identification of participants is strictly prohibited
         description: One or more reasons why this use is prohibited (e.g., license
           restriction, ethical concern, privacy risk, legal constraint).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
@@ -23073,9 +23978,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -23423,9 +24330,11 @@ classes:
         range: boolean
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -23759,11 +24668,12 @@ classes:
     attributes:
       access_urls:
         name: access_urls
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2
         description: One or more URLs providing access to the distribution channel(s)
           or format(s).
-        examples:
-        - value: https://example.org/dataset/download
-        - value: https://example.org/api/v1/dataset
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
         slot_uri: dcat:accessURL
         alias: access_urls
@@ -23774,9 +24684,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -24109,6 +25021,10 @@ classes:
     attributes:
       release_dates:
         name: release_dates
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15'
         description: 'One or more dates or timeframes for dataset release, in ISO
           8601 format (e.g., "2024-03-15") or as a descriptive string (e.g., "Q2 2024").
           Use multiple values for staged or scheduled releases.
@@ -24124,9 +25040,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -24472,6 +25390,10 @@ classes:
         range: CreatorOrMaintainerEnum
       maintainer_details:
         name: maintainer_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Data Coordinating Center, University of Washington
         description: 'Free-text description of the organization, team, or individual
           responsible for maintaining the dataset, including contact information and
           hosting arrangements.
@@ -24487,9 +25409,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -24823,9 +25747,11 @@ classes:
     attributes:
       erratum_url:
         name: erratum_url
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/errata/2024-01-15
         description: URL or access point for the erratum.
-        examples:
-        - value: https://example.org/dataset/errata/2024-01-15
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
         slot_uri: d4d:erratumURL
         alias: erratum_url
@@ -24835,6 +25761,11 @@ classes:
         range: uri
       erratum_details:
         name: erratum_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'v1.0.1: Corrected mislabeled CGM device serial numbers for 12
+              participants'
         description: 'Free-text description of the error, its scope, the affected
           data or records, and the correction applied.
 
@@ -24849,9 +25780,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -25188,6 +26121,10 @@ classes:
     attributes:
       frequency:
         name: frequency
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Quarterly
         description: How often updates are planned (e.g., quarterly, annually).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
         slot_uri: d4d:frequency
@@ -25198,6 +26135,11 @@ classes:
         range: string
       update_details:
         name: update_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Quarterly releases with approximately 500 new participants per
+              release
         description: 'Free-text description of planned update types (e.g., corrections,
           additions, deletions), responsible parties, and how updates will be communicated
           to users.
@@ -25213,9 +26155,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -25551,6 +26495,10 @@ classes:
     attributes:
       retention_period:
         name: retention_period
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 10 years minimum
         description: Time period for data retention.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
         slot_uri: d4d:retentionPeriod
@@ -25561,6 +26509,10 @@ classes:
         range: string
       retention_details:
         name: retention_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Data retained for minimum 10 years per NIH data sharing policy
         description: 'Free-text description of applicable retention limits, legal
           or ethical basis for those limits, and how they will be enforced (e.g.,
           automated deletion, anonymization after the retention period).
@@ -25576,9 +26528,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -25924,6 +26878,10 @@ classes:
         range: uriorcurie
       versions_available:
         name: versions_available
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: v1.0 (2023-11), v1.1 (2024-02), v2.0 (2024-11)
         description: List of available versions with metadata.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
         slot_uri: d4d:versionsAvailable
@@ -25935,6 +26893,11 @@ classes:
         multivalued: true
       version_details:
         name: version_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: All versions available at fairhub.io; older versions archived on
+              Zenodo
         description: 'Free-text description of version support policies, how long
           older versions will be hosted, and how dataset consumers will be notified
           when versions become obsolete.
@@ -25950,9 +26913,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -26287,9 +27252,11 @@ classes:
     attributes:
       contribution_url:
         name: contribution_url
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/contributing
         description: URL for contribution guidelines or process.
-        examples:
-        - value: https://example.org/dataset/contributing
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
         slot_uri: d4d:contributionURL
         alias: contribution_url
@@ -26299,6 +27266,11 @@ classes:
         range: uri
       extension_details:
         name: extension_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: New modalities added via versioned data releases; schema extensions
+              via GitHub PRs
         description: 'Free-text description of how third parties can contribute to
           the dataset, how contributions are validated (e.g., peer review, automated
           tests), and how accepted contributions will be communicated to the community.
@@ -26314,9 +27286,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -26680,6 +27654,10 @@ classes:
         range: Organization
       review_details:
         name: review_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'IRB approval: UAB IRB-300010084, UCSD IRB-811480, UW IRB-STUDY00017428'
         description: 'Free-text description of the ethical review process, board decisions,
           outcomes, and any supporting documentation (e.g., IRB approval number, ethics
           committee name).
@@ -26695,9 +27673,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -27033,6 +28013,10 @@ classes:
     attributes:
       impact_details:
         name: impact_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: DPIA conducted; minimal residual re-identification risk after de-identification
         description: 'Free-text description of the data protection impact analysis,
           including methodology, privacy risks identified, mitigation measures taken,
           and any regulatory findings.
@@ -27049,9 +28033,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -27386,6 +28372,11 @@ classes:
     attributes:
       notification_details:
         name: notification_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Participants notified in-person at clinic visit; written information
+              sheet provided in English and Spanish
         description: 'Free-text description of how individuals were notified about
           data collection, including the notification method (e.g., email, poster,
           in-person), timing, and the language or text of the notification itself
@@ -27402,9 +28393,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -27739,6 +28732,11 @@ classes:
     attributes:
       consent_details:
         name: consent_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Written informed consent obtained before any study procedures;
+              available in English and Spanish
         description: 'Free-text description of how consent was requested (e.g., opt-in
           form, verbal agreement), provided, and documented, including the language
           individuals consented to.
@@ -27754,9 +28752,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -28091,6 +29091,11 @@ classes:
     attributes:
       revocation_details:
         name: revocation_details
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Participants may withdraw via written request; data retained but
+              excluded from future analyses
         description: 'Free-text description of the mechanism provided for individuals
           to revoke consent (e.g., opt-out portal, written request), the scope of
           revocation (full withdrawal or specific uses), and what happens to their
@@ -28107,9 +29112,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -28453,6 +29460,11 @@ classes:
         range: boolean
       irb_approval:
         name: irb_approval
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: All participants provided written informed consent; study registered
+              at ClinicalTrials.gov NCT05395169
         description: 'Was Institutional Review Board (IRB) approval obtained? Include
           approval number and institution if applicable.
 
@@ -28495,6 +29507,10 @@ classes:
         multivalued: true
       regulatory_compliance:
         name: regulatory_compliance
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 45 CFR Part 46, HIPAA Privacy Rule (45 CFR Parts 160 and 164)
         description: 'What regulatory frameworks govern this human subjects research
           (e.g., 45 CFR 46, HIPAA)?
 
@@ -28509,9 +29525,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -28855,6 +29873,11 @@ classes:
         range: boolean
       consent_type:
         name: consent_type
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Written informed consent with optional consent for future use of
+              biospecimens
         description: 'What type of consent was obtained (e.g., written, verbal, electronic,
           implied through participation)?
 
@@ -28869,6 +29892,11 @@ classes:
         multivalued: true
       consent_documentation:
         name: consent_documentation
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Separate consent forms for main study, biorepository, and genetic
+              analysis
         description: 'How is consent documented? Include references to consent forms
           or procedures used.
 
@@ -28911,9 +29939,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -29247,6 +30277,11 @@ classes:
     attributes:
       anonymization_method:
         name: anonymization_method
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: De-identified per HIPAA Safe Harbor; 5-digit ZIP replaced with
+              region codes
         description: 'What methods were used to anonymize or de-identify participant
           data? Include technical details of privacy-preserving techniques.
 
@@ -29261,6 +30296,10 @@ classes:
         multivalued: true
       reidentification_risk:
         name: reidentification_risk
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Low risk; expert determination per 45 CFR 164.514(b)(1)
         description: 'What is the assessed risk of re-identification? What measures
           were taken to minimize this risk?
 
@@ -29303,9 +30342,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -29649,6 +30690,10 @@ classes:
         range: boolean
       compensation_type:
         name: compensation_type
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Monetary payment via gift card
         description: 'What type of compensation was provided (e.g., monetary payment,
           gift cards, course credit, other incentives)?
 
@@ -29663,6 +30708,10 @@ classes:
         multivalued: true
       compensation_amount:
         name: compensation_amount
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: $75 for initial visit; $25 for annual follow-up
         description: 'What was the amount or value of compensation provided? Include
           currency or equivalent value.
 
@@ -29691,9 +30740,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -30040,6 +31091,10 @@ classes:
         range: boolean
       special_protections:
         name: special_protections
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: No participants under 18; pregnant women excluded from CGM protocol
         description: 'What additional protections were implemented for at-risk populations?
           Include safeguards, modified procedures, or additional oversight.
 
@@ -30082,9 +31137,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -30419,6 +31476,10 @@ classes:
     attributes:
       license_terms:
         name: license_terms
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: CC BY-NC 4.0 - Attribution-NonCommercial required
         description: Description of the dataset's license and terms of use, including
           links, costs, or usage constraints (e.g., 'CC BY 4.0', 'Apache 2.0', 'MIT',
           'CC BY-NC-SA 4.0', 'proprietary - contact data@example.org for access').
@@ -30435,6 +31496,10 @@ classes:
         multivalued: true
       data_use_permission:
         name: data_use_permission
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: health_medical_biomedical_research
         description: Structured data use permissions using the Data Use Ontology (DUO).
           Specifies permitted uses (e.g., general research, health/medical research,
           disease-specific research) and restrictions (e.g., non-commercial use, ethics
@@ -30467,9 +31532,11 @@ classes:
         range: Person
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -30805,6 +31872,10 @@ classes:
     attributes:
       restrictions:
         name: restrictions
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Retinal imaging algorithms are subject to pending patent
         description: One or more explanations of third-party IP restrictions or associated
           fees.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
@@ -30821,9 +31892,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -31160,6 +32233,10 @@ classes:
     attributes:
       regulatory_restrictions:
         name: regulatory_restrictions
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: HIPAA compliant; subject to 45 CFR Part 46
         description: One or more export controls or regulatory restrictions applicable
           to the dataset (e.g., HIPAA, ITAR, GDPR).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
@@ -31178,6 +32255,10 @@ classes:
         multivalued: true
       hipaa_compliant:
         name: hipaa_compliant
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: compliant
         description: Indicates compliance with the Health Insurance Portability and
           Accountability Act (HIPAA). HIPAA applies to protected health information
           in the United States.
@@ -31227,9 +32308,11 @@ classes:
         range: Person
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -31564,6 +32647,10 @@ classes:
     attributes:
       variable_name:
         name: variable_name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: hba1c_percent
         description: The name or identifier of the variable as it appears in the data
           files.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -31579,6 +32666,10 @@ classes:
         required: true
       data_type:
         name: data_type
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: float
         description: The data type of the variable (e.g., integer, float, string,
           boolean, date, categorical). Use standard type names when possible.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -31592,6 +32683,10 @@ classes:
         range: VariableTypeEnum
       unit:
         name: unit
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '%'
         description: 'The unit of measurement for the variable, preferably using QUDT
           units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter,
           qudt:DegreeCelsius.'
@@ -31607,6 +32702,10 @@ classes:
         range: uriorcurie
       missing_value_code:
         name: missing_value_code
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: NA
         description: 'Code(s) used to represent missing values for this variable.
           Examples: "NA", "-999", "null", "". Multiple codes may be specified.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -31619,10 +32718,12 @@ classes:
         multivalued: true
       minimum_value:
         name: minimum_value
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '0.0'
         description: The minimum value that the variable can take. Applicable to numeric
           variables.
-        examples:
-        - value: '0.0'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
         slot_uri: schema:minValue
         alias: minimum_value
@@ -31632,10 +32733,12 @@ classes:
         range: float
       maximum_value:
         name: maximum_value
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '100.0'
         description: The maximum value that the variable can take. Applicable to numeric
           variables.
-        examples:
-        - value: '100.0'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
         slot_uri: schema:maxValue
         alias: maximum_value
@@ -31645,6 +32748,10 @@ classes:
         range: float
       categories:
         name: categories
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 4.0–14.0
         description: One or more permitted categories or values for a categorical
           variable. Each entry should describe a possible value and its meaning.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -31692,10 +32799,11 @@ classes:
         range: boolean
       precision:
         name: precision
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 2 (two decimal places, e.g., 3.14)
         description: The precision or number of decimal places for numeric variables.
-        examples:
-        - value: '2'
-          description: Two decimal places, e.g., 3.14
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
         slot_uri: schema:valuePrecision
         alias: precision
@@ -31705,6 +32813,10 @@ classes:
         range: integer
       measurement_technique:
         name: measurement_technique
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Glycated hemoglobin percentage measured at baseline visit
         description: 'The technique or method used to measure this variable. Examples:
           "mass spectrometry", "self-report survey", "GPS coordinates".'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -31741,9 +32853,11 @@ classes:
         multivalued: true
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/property-001
         description: An optional identifier for this property.
-        examples:
-        - value: https://example.org/dataset/property-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
@@ -32105,6 +33219,10 @@ classes:
         range: FileTypeEnum
       bytes:
         name: bytes
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '10485760'
         description: Size of the data in bytes.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:byteSize
@@ -32115,6 +33233,10 @@ classes:
         range: integer
       path:
         name: path
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: data/ai_readi/participants.csv
         description: The file path or URL where the content is located.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:contentUrl
@@ -32126,6 +33248,10 @@ classes:
         range: string
       format:
         name: format
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: CSV
         description: The file format, physical medium, or dimensions of a resource.
           This should be a file extension or MIME type.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32137,6 +33263,10 @@ classes:
         range: FormatEnum
       encoding:
         name: encoding
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: UTF-8
         description: The character encoding of the data.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:characterEncoding
@@ -32147,6 +33277,10 @@ classes:
         range: EncodingEnum
       compression:
         name: compression
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: zip
         description: Compression format used, if any (e.g., gzip, bzip2, zip).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:compressFormat
@@ -32162,6 +33296,10 @@ classes:
         range: CompressionEnum
       media_type:
         name: media_type
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: text/csv
         description: The media type of the data. This should be a MIME type.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
@@ -32174,6 +33312,10 @@ classes:
         range: MediaTypeEnum
       hash:
         name: hash
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
         description: 'Cryptographic hash value of the data for integrity verification
           (e.g., SHA-256: ''e3b0c44298fc1c149afb...'', MD5: ''d41d8cd98f00b204e9800998ecf8427e'').'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32187,6 +33329,10 @@ classes:
         range: string
       md5:
         name: md5
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: d41d8cd98f00b204e9800998ecf8427e
         description: MD5 hash value of the data (128-bit cryptographic hash).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         broad_mappings:
@@ -32199,6 +33345,10 @@ classes:
         range: string
       sha256:
         name: sha256
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
         description: SHA-256 hash value of the data (256-bit cryptographic hash, recommended).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:sha256
@@ -32209,6 +33359,10 @@ classes:
         range: string
       dialect:
         name: dialect
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: RFC4180
         description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
           profile).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32220,6 +33374,10 @@ classes:
         range: string
       conforms_to:
         name: conforms_to
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://www.w3.org/TR/vocab-dcat-3/
         description: An established standard, specification, or schema to which the
           resource conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32235,6 +33393,10 @@ classes:
         range: string
       conforms_to_class:
         name: conforms_to_class
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Dataset
         description: The specific class or type within a schema to which the resource
           conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32252,6 +33414,10 @@ classes:
         range: string
       conforms_to_schema:
         name: conforms_to_schema
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://w3id.org/bridge2ai/data-sheets-schema
         description: The schema or data model to which the resource conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         broad_mappings:
@@ -32268,6 +33434,10 @@ classes:
         range: string
       created_by:
         name: created_by
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: orcid:0000-0002-1234-5678
         description: The person or organization primarily responsible for creating
           the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32283,6 +33453,10 @@ classes:
         range: string
       created_on:
         name: created_on
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2023-07-18T00:00:00'
         description: The date and time when the resource was created.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:created
@@ -32297,6 +33471,10 @@ classes:
         range: datetime
       doi:
         name: doi
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 10.5281/zenodo.10642459
         description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
           persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32317,6 +33495,10 @@ classes:
         pattern: 10\.\d{4,}\/.+
       download_url:
         name: download_url
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2/download
         description: URL from which the data can be downloaded. This is not the same
           as the landing page, which is a page that describes the dataset. Rather,
           this URL points directly to the data itself.
@@ -32335,6 +33517,10 @@ classes:
         range: uri
       issued:
         name: issued
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15T00:00:00'
         description: Date of formal issuance or publication of the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:issued
@@ -32349,6 +33535,10 @@ classes:
         range: datetime
       keywords:
         name: keywords
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: diabetes, retinal imaging, multimodal, clinical data
         description: Keywords or tags describing the resource for discovery and classification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:keyword
@@ -32364,6 +33554,10 @@ classes:
         multivalued: true
       language:
         name: language
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: en
         description: Language in which the information is expressed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
@@ -32380,6 +33574,10 @@ classes:
         range: string
       last_updated_on:
         name: last_updated_on
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15T00:00:00'
         description: The date and time when the resource was most recently modified
           or updated.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32395,6 +33593,10 @@ classes:
         range: datetime
       license:
         name: license
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: CC-BY-NC-4.0
         description: The legal license under which the resource is made available
           (e.g., "MIT", "CC-BY-4.0").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32411,6 +33613,10 @@ classes:
         range: string
       modified_by:
         name: modified_by
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: orcid:0000-0002-9876-5432
         description: A person or organization that contributed to modifying or updating
           the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32426,6 +33632,10 @@ classes:
         range: string
       page:
         name: page
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2
         description: A landing page or web page providing access to or information
           about the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32441,6 +33651,10 @@ classes:
         range: string
       publisher:
         name: publisher
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name'
         description: The organization or entity responsible for making the resource
           available.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32456,6 +33670,10 @@ classes:
         range: uriorcurie
       status:
         name: status
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: published
         description: The status of the resource (e.g., draft, published, deprecated).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:publicationStatus
@@ -32470,6 +33688,10 @@ classes:
         range: string
       title:
         name: title
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
         description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:title
@@ -32484,6 +33706,10 @@ classes:
         range: string
       version:
         name: version
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 2.0.0
         description: The version identifier of the resource (e.g., "1.0", "2.3.1").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:version
@@ -32499,6 +33725,10 @@ classes:
         range: string
       was_derived_from:
         name: was_derived_from
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2/versions/1
         description: A resource from which this resource was derived, in whole or
           in part.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32516,9 +33746,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/my-dataset-001
         description: A unique identifier for a thing.
-        examples:
-        - value: https://example.org/dataset/my-dataset-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         identifier: true
@@ -32605,6 +33837,10 @@ classes:
         required: true
       name:
         name: name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -32690,6 +33926,10 @@ classes:
         range: string
       description:
         name: description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
@@ -32837,9 +34077,11 @@ classes:
         multivalued: true
       file_count:
         name: file_count
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '47'
         description: Number of files in this collection.
-        examples:
-        - value: '47'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
         slot_uri: d4d:fileCount
         alias: file_count
@@ -32849,13 +34091,16 @@ classes:
         range: integer
       total_bytes:
         name: total_bytes
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 1073741824 (1 GiB = 1024³ bytes)
         description: Total size of all files in this collection, in bytes (integer).
           Maps to dcat:byteSize.
-        examples:
-        - value: '1073741824'
-          description: 1 GiB (1024³ bytes)
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
-        slot_uri: dcat:byteSize
+        exact_mappings:
+        - dcat:byteSize
+        slot_uri: d4d:total_bytes
         alias: total_bytes
         owner: FileCollection
         domain_of:
@@ -32863,6 +34108,10 @@ classes:
         range: integer
       path:
         name: path
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: data/ai_readi/participants.csv
         description: Path or URL to the FileCollection. May be a directory path, archive
           file path, or download URL depending on how the collection is distributed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32875,6 +34124,10 @@ classes:
         range: string
       compression:
         name: compression
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: zip
         description: Compression format if the collection is packaged as a compressed
           archive (e.g., gzip, zip, bzip2). Omit this field for uncompressed collections
           or purely logical groupings.
@@ -32927,6 +34180,10 @@ classes:
         - range: FileCollection
       conforms_to:
         name: conforms_to
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://www.w3.org/TR/vocab-dcat-3/
         description: An established standard, specification, or schema to which the
           resource conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32942,6 +34199,10 @@ classes:
         range: string
       conforms_to_class:
         name: conforms_to_class
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Dataset
         description: The specific class or type within a schema to which the resource
           conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32959,6 +34220,10 @@ classes:
         range: string
       conforms_to_schema:
         name: conforms_to_schema
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://w3id.org/bridge2ai/data-sheets-schema
         description: The schema or data model to which the resource conforms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         broad_mappings:
@@ -32975,6 +34240,10 @@ classes:
         range: string
       created_by:
         name: created_by
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: orcid:0000-0002-1234-5678
         description: The person or organization primarily responsible for creating
           the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -32990,6 +34259,10 @@ classes:
         range: string
       created_on:
         name: created_on
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2023-07-18T00:00:00'
         description: The date and time when the resource was created.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:created
@@ -33004,6 +34277,10 @@ classes:
         range: datetime
       doi:
         name: doi
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 10.5281/zenodo.10642459
         description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
           persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -33024,6 +34301,10 @@ classes:
         pattern: 10\.\d{4,}\/.+
       download_url:
         name: download_url
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2/download
         description: URL from which the data can be downloaded. This is not the same
           as the landing page, which is a page that describes the dataset. Rather,
           this URL points directly to the data itself.
@@ -33042,6 +34323,10 @@ classes:
         range: uri
       issued:
         name: issued
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15T00:00:00'
         description: Date of formal issuance or publication of the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:issued
@@ -33056,6 +34341,10 @@ classes:
         range: datetime
       keywords:
         name: keywords
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: diabetes, retinal imaging, multimodal, clinical data
         description: Keywords or tags describing the resource for discovery and classification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:keyword
@@ -33071,6 +34360,10 @@ classes:
         multivalued: true
       language:
         name: language
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: en
         description: Language in which the information is expressed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
@@ -33087,6 +34380,10 @@ classes:
         range: string
       last_updated_on:
         name: last_updated_on
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: '2024-11-15T00:00:00'
         description: The date and time when the resource was most recently modified
           or updated.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -33102,6 +34399,10 @@ classes:
         range: datetime
       license:
         name: license
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: CC-BY-NC-4.0
         description: The legal license under which the resource is made available
           (e.g., "MIT", "CC-BY-4.0").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -33118,6 +34419,10 @@ classes:
         range: string
       modified_by:
         name: modified_by
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: orcid:0000-0002-9876-5432
         description: A person or organization that contributed to modifying or updating
           the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -33133,6 +34438,10 @@ classes:
         range: string
       page:
         name: page
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2
         description: A landing page or web page providing access to or information
           about the resource.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -33148,6 +34457,10 @@ classes:
         range: string
       publisher:
         name: publisher
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name'
         description: The organization or entity responsible for making the resource
           available.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -33163,6 +34476,10 @@ classes:
         range: uriorcurie
       status:
         name: status
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: published
         description: The status of the resource (e.g., draft, published, deprecated).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: d4d:publicationStatus
@@ -33177,6 +34494,10 @@ classes:
         range: string
       title:
         name: title
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
         description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:title
@@ -33191,6 +34512,10 @@ classes:
         range: string
       version:
         name: version
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: 2.0.0
         description: The version identifier of the resource (e.g., "1.0", "2.3.1").
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:version
@@ -33206,6 +34531,10 @@ classes:
         range: string
       was_derived_from:
         name: was_derived_from
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://fairhub.io/datasets/2/versions/1
         description: A resource from which this resource was derived, in whole or
           in part.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -33223,9 +34552,11 @@ classes:
         range: string
       id:
         name: id
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: https://example.org/dataset/my-dataset-001
         description: A unique identifier for a thing.
-        examples:
-        - value: https://example.org/dataset/my-dataset-001
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         identifier: true
@@ -33312,6 +34643,10 @@ classes:
         required: true
       name:
         name: name
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: AI-READI Dataset
         description: A human-readable name for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
@@ -33397,6 +34732,10 @@ classes:
         range: string
       description:
         name: description
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
         description: A human-readable description for a thing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
