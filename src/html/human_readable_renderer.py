@@ -176,7 +176,7 @@ class HumanReadableRenderer:
         # Remove empty sections
         return {k: v for k, v in sections.items() if v}
     
-    def format_value(self, value, context=""):
+    def format_value(self, value, context="", key=""):
         """Format a value for human-readable display"""
         # Convert None to empty string for HTML display
         if value is None:
@@ -186,7 +186,7 @@ class HumanReadableRenderer:
         elif isinstance(value, list):
             return self._format_list(value)
         elif isinstance(value, str):
-            return self._format_string(value)
+            return self._format_string(value, key=key)
         elif isinstance(value, (int, float)):
             return self._format_number(value)
         elif isinstance(value, bool):
@@ -202,7 +202,7 @@ class HumanReadableRenderer:
         items = []
         for key, value in d.items():
             formatted_key = self._humanize_key(key)
-            formatted_value = self.format_value(value)
+            formatted_value = self.format_value(value, key=key)
             items.append(f"<dt>{formatted_key}</dt><dd>{formatted_value}</dd>")
 
         return f"<dl class='nested-dict'>{''.join(items)}</dl>"
@@ -564,14 +564,18 @@ class HumanReadableRenderer:
             table_html += '<tr>'
             for key in keys:
                 value = item.get(key, '')
-                formatted_value = self._format_table_cell(value)
+                formatted_value = self._format_table_cell(value, key=key)
                 table_html += f'<td>{formatted_value}</td>'
             table_html += '</tr>'
         
         table_html += '</tbody></table>'
         return table_html
     
-    def _format_table_cell(self, value):
+    # Fields that should always render with the blue-bar description style
+    _DESCRIPTION_FIELDS = {'description', 'response', 'details', 'summary',
+                           'abstract', 'rationale', 'justification'}
+
+    def _format_table_cell(self, value, key=None):
         """Format a single table cell value"""
         # Convert None to empty string for HTML table cells
         if value is None:
@@ -582,7 +586,9 @@ class HumanReadableRenderer:
         elif isinstance(value, list):
             return ", ".join(str(v) for v in value)
         elif isinstance(value, str):
-            # Wrap all non-trivial descriptions with consistent styling
+            # Always wrap description-type fields with blue-bar styling
+            if key and key.lower() in self._DESCRIPTION_FIELDS:
+                return f'<div class="long-description">{value}</div>' if value else ""
             if len(value) > 80:
                 return f'<div class="long-description">{value}</div>'
             return value or ""
@@ -597,7 +603,7 @@ class HumanReadableRenderer:
             items.append(f"<li>{formatted_item}</li>")
         return f"<ul class='formatted-list'>{''.join(items)}</ul>"
     
-    def _format_string(self, s):
+    def _format_string(self, s, key=""):
         """Format string with proper emphasis and links"""
         # Return empty string for None or empty string (no "Not specified" message)
         if not s or s is None:
@@ -611,7 +617,11 @@ class HumanReadableRenderer:
             else:
                 return f'<a href="{s}" target="_blank">{s}</a>'
 
-        # Handle descriptions — consistent blue-bar styling
+        # Always wrap description-type fields with blue-bar styling
+        if key and key.lower() in self._DESCRIPTION_FIELDS:
+            return f'<div class="long-description">{s}</div>'
+
+        # Wrap other long strings
         if len(s) > 80:
             return f'<div class="long-description">{s}</div>'
 
