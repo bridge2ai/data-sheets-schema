@@ -68,8 +68,8 @@
                             Instances
                         </label>
                         <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>instance-001</dd><dt>Name</dt><dd>Critically ill patients</dd><dt>Description</dt><dd><div class="long-description">Individual critically ill patients requiring acute or critical care admitted to intensive care units or similar hospital settings across 14 data acquisition centers. As of November 2024, dataset covers 14 different hospitals with 23,400 unique admissions. Target enrollment exceeds 100,000 critically ill patients. Retrospective data collection from patients with acute or critical illness.
-</div></dd><dt>Instance Type</dt><dd>Human subjects - critically ill patients admitted to participating hospitals between data collection timeframe (specific dates vary by site, ongoing collection through November 2026).
-</dd></dl></li></ol></div>
+</div></dd><dt>Instance Type</dt><dd><div class="long-description">Human subjects - critically ill patients admitted to participating hospitals between data collection timeframe (specific dates vary by site, ongoing collection through November 2026).
+</div></dd></dl></li></ol></div>
                     </div>
                     
                     <div class="data-item">
@@ -77,9 +77,9 @@
                         <label class="item-label optional-field">
                             Subpopulations
                         </label>
-                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Patients distributed across 14 different hospitals within the CHoRUS network, ensuring geographic and institutional diversity in critical care settings.
-</td><td>subpop-001</td><td>Critically ill patients by hospital</td></tr><tr><td>Subset of patients with complete data across multiple modalities: structured EHR, waveform telemetry, imaging, clinical notes, and EEG (availability varies).
-</td><td>subpop-002</td><td>Patients with complete multi-modal data</td></tr></tbody></table></div>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Patients distributed across 14 different hospitals within the CHoRUS network, ensuring geographic and institutional diversity in critical care settings.
+</div></td><td>subpop-001</td><td>Critically ill patients by hospital</td></tr><tr><td><div class="long-description">Subset of patients with complete data across multiple modalities: structured EHR, waveform telemetry, imaging, clinical notes, and EEG (availability varies).
+</div></td><td>subpop-002</td><td>Patients with complete multi-modal data</td></tr></tbody></table></div>
                     </div>
                     
                     <div class="data-item">
@@ -87,12 +87,12 @@
                         <label class="item-label optional-field">
                             Distribution Formats
                         </label>
-                        <div class="item-value"><table class="data-table"><thead><tr><th>Access Urls</th><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>https://chorus4ai.org/</td><td>Structured electronic health record data distributed in OMOP Common Data Model format. Enables use of OHDSI tool stack for analysis. Available in secure enclave with controlled access.
-</td><td>format-001</td><td>OMOP Common Data Model</td></tr><tr><td>https://chorus4ai.org/</td><td>Waveform telemetry data distributed in WFDB (WaveForm DataBase) format following extended PhysioNet schema. Available in secure enclave with controlled access.
-</td><td>format-002</td><td>WFDB waveform format</td></tr><tr><td>https://chorus4ai.org/</td><td>Medical imaging data distributed in DICOM format with comprehensive metadata. De-identification in process, planned for controlled access in secure enclave.
-</td><td>format-003</td><td>DICOM imaging format</td></tr><tr><td>https://chorus4ai.org/</td><td>Clinical notes distributed as OHNLP-tokenized text following open source schema. Stored locally at sites except tokens, planned for controlled access.
-</td><td>format-004</td><td>OHNLP tokenized text</td></tr><tr><td>https://chorus4ai.org/</td><td>EEG waveform data distributed in EDF+ (European Data Format) and Persyst formats following open source schemas. Extraction in process, planned for controlled access.
-</td><td>format-005</td><td>EDF+ and Persyst EEG formats</td></tr></tbody></table></div>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Access Urls</th><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>https://chorus4ai.org/</td><td><div class="long-description">Structured electronic health record data distributed in OMOP Common Data Model format. Enables use of OHDSI tool stack for analysis. Available in secure enclave with controlled access.
+</div></td><td>format-001</td><td>OMOP Common Data Model</td></tr><tr><td>https://chorus4ai.org/</td><td><div class="long-description">Waveform telemetry data distributed in WFDB (WaveForm DataBase) format following extended PhysioNet schema. Available in secure enclave with controlled access.
+</div></td><td>format-002</td><td>WFDB waveform format</td></tr><tr><td>https://chorus4ai.org/</td><td><div class="long-description">Medical imaging data distributed in DICOM format with comprehensive metadata. De-identification in process, planned for controlled access in secure enclave.
+</div></td><td>format-003</td><td>DICOM imaging format</td></tr><tr><td>https://chorus4ai.org/</td><td><div class="long-description">Clinical notes distributed as OHNLP-tokenized text following open source schema. Stored locally at sites except tokens, planned for controlled access.
+</div></td><td>format-004</td><td>OHNLP tokenized text</td></tr><tr><td>https://chorus4ai.org/</td><td><div class="long-description">EEG waveform data distributed in EDF+ (European Data Format) and Persyst formats following open source schemas. Extraction in process, planned for controlled access.
+</div></td><td>format-005</td><td>EDF+ and Persyst EEG formats</td></tr></tbody></table></div>
                     </div>
                     
                 </div>
@@ -131,7 +131,7 @@
                         <label class="item-label optional-field">
                             Title
                         </label>
-                        <div class="item-value">Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI</div>
+                        <div class="item-value"><div class="long-description">Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI</div></div>
                     </div>
                     
                     <div class="data-item">
@@ -194,10 +194,10 @@
                         </label>
                         <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Primary dataset with controlled access requiring data use agreement and licensing. Includes OMOP-standardized structured EHR data, waveform telemetry, and associated metadata. As of November 2024, OMOP and telemetry data available in secure enclave. Registration required with institution email, and all participants must sign licensing agreement.
 </div></td><td>subset-001</td><td>Controlled Access Dataset</td></tr><tr><td><div class="long-description">Clinical notes extracted and tokenized using OHNLP (Open Health Natural Language Processing) toolkit. Stored locally at contributing sites (except tokens) with planned controlled access. Uses OHNLP open source schema for standardization.
-</div></td><td>subset-002</td><td>Clinical Notes (Tokenized)</td></tr><tr><td>Imaging data from PACS (Picture Archiving and Communication System) in DICOM format. De-identification in process as of November 2024, planned for controlled access. DICOM schema metadata available.
-</td><td>subset-003</td><td>Medical Imaging</td></tr><tr><td><div class="long-description">Electroencephalography (EEG) waveform data from hospital databases. Stored in EDF+ (European Data Format) and Persyst formats. Extraction in process as of November 2024, planned for controlled access. Open source EDF+ and Persyst schema available.
-</div></td><td>subset-004</td><td>EEG Waveforms</td></tr><tr><td>Subsets of the dataset currently being used for training activities and publications as the dataset undergoes expansion and quality assurance processes.
-</td><td>subset-005</td><td>Training and Publication Datasets</td></tr></tbody></table></div>
+</div></td><td>subset-002</td><td>Clinical Notes (Tokenized)</td></tr><tr><td><div class="long-description">Imaging data from PACS (Picture Archiving and Communication System) in DICOM format. De-identification in process as of November 2024, planned for controlled access. DICOM schema metadata available.
+</div></td><td>subset-003</td><td>Medical Imaging</td></tr><tr><td><div class="long-description">Electroencephalography (EEG) waveform data from hospital databases. Stored in EDF+ (European Data Format) and Persyst formats. Extraction in process as of November 2024, planned for controlled access. Open source EDF+ and Persyst schema available.
+</div></td><td>subset-004</td><td>EEG Waveforms</td></tr><tr><td><div class="long-description">Subsets of the dataset currently being used for training activities and publications as the dataset undergoes expansion and quality assurance processes.
+</div></td><td>subset-005</td><td>Training and Publication Datasets</td></tr></tbody></table></div>
                     </div>
                     
                     <div class="data-item">
@@ -206,7 +206,7 @@
                             Sampling Strategies
                         </label>
                         <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>sampling-001</dd><dt>Name</dt><dd>Multi-center federated sampling</dd><dt>Description</dt><dd><div class="long-description">Federated access enables sampling methods to ensure a balanced and diverse cohort across 20 academic centers (14 data acquisition centers). Legal framework established for collecting data at scale with sampling to ensure comprehensive sets of patient conditions and clinical treatment strategies.
-</div></dd><dt>Sample</dt><dd>True</dd><dt>Random Sampling</dt><dd>False</dd><dt>Representative Sample</dt><dd>True</dd><dt>Strategies</dt><dd><ul class='formatted-list'><li>Federated multi-center data collection across 14 hospitals</li><li>Sampling for balanced and diverse patient populations</li><li>Inclusion of contextual factors (geographic distance to hospital, Social Determinants of Health)</li><li>Community-facing ethics focus groups to determine appropriate data for public sharing</li><li>Legal framework for data collection at scale</li></ul></dd></dl></li></ol></div>
+</div></dd><dt>Sample</dt><dd>True</dd><dt>Random Sampling</dt><dd>False</dd><dt>Representative Sample</dt><dd>True</dd><dt>Strategies</dt><dd><ul class='formatted-list'><li>Federated multi-center data collection across 14 hospitals</li><li>Sampling for balanced and diverse patient populations</li><li><div class="long-description">Inclusion of contextual factors (geographic distance to hospital, Social Determinants of Health)</div></li><li><div class="long-description">Community-facing ethics focus groups to determine appropriate data for public sharing</div></li><li>Legal framework for data collection at scale</li></ul></dd></dl></li></ol></div>
                     </div>
                     
                     <div class="data-item">
@@ -215,10 +215,10 @@
                             Collection Mechanisms
                         </label>
                         <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Retrospective data collection from electronic health record systems at 14 data acquisition centers. Data extracted includes demographics, medication administration (dosing time-stamped upon each infusion change or dose administration), procedures, nursing flowsheets (high-frequency documentation), diagnoses, and clinical notes.
-</div></td><td>collection-001</td><td>Retrospective EHR extraction</td></tr><tr><td>Continuous waveform telemetry data captured from bedside monitors through gateway/middleware systems. Stored in WFDB (WaveForm DataBase) format following PhysioNet schema (extended).
-</td><td>collection-002</td><td>Waveform telemetry capture</td></tr><tr><td>Medical imaging data acquired from hospital PACS (Picture Archiving and Communication System) and stored in DICOM format with comprehensive metadata following DICOM schema.
-</td><td>collection-003</td><td>Medical imaging acquisition</td></tr><tr><td>Electroencephalography recordings extracted from hospital EEG databases in EDF+ and Persyst formats with metadata following open source schemas.
-</td><td>collection-004</td><td>EEG recording extraction</td></tr><tr><td><div class="long-description">Multi-center network capabilities to acquire, standardize, tokenize, store, visualize, and label data. All structured clinical data transformed to OMOP Common Data Model. Clinical notes tokenized using OHNLP toolkit. Imaging converted to DICOM. Waveforms standardized to WFDB format.
+</div></td><td>collection-001</td><td>Retrospective EHR extraction</td></tr><tr><td><div class="long-description">Continuous waveform telemetry data captured from bedside monitors through gateway/middleware systems. Stored in WFDB (WaveForm DataBase) format following PhysioNet schema (extended).
+</div></td><td>collection-002</td><td>Waveform telemetry capture</td></tr><tr><td><div class="long-description">Medical imaging data acquired from hospital PACS (Picture Archiving and Communication System) and stored in DICOM format with comprehensive metadata following DICOM schema.
+</div></td><td>collection-003</td><td>Medical imaging acquisition</td></tr><tr><td><div class="long-description">Electroencephalography recordings extracted from hospital EEG databases in EDF+ and Persyst formats with metadata following open source schemas.
+</div></td><td>collection-004</td><td>EEG recording extraction</td></tr><tr><td><div class="long-description">Multi-center network capabilities to acquire, standardize, tokenize, store, visualize, and label data. All structured clinical data transformed to OMOP Common Data Model. Clinical notes tokenized using OHNLP toolkit. Imaging converted to DICOM. Waveforms standardized to WFDB format.
 </div></td><td>collection-005</td><td>Standardized data transformation</td></tr></tbody></table></div>
                     </div>
                     
@@ -228,14 +228,14 @@
                             Acquisition Methods
                         </label>
                         <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Demographics, medication administration, procedures, nursing flowsheets, and diagnoses acquired from electronic health records and standardized to OMOP Common Data Model. Controlled access with published OMOP schema metadata.
-</div></td><td>acquisition-001</td><td>Structured EHR data (OMOP)</td></tr><tr><td>Dosing information time-stamped upon each infusion change or dose administration. Stored in OMOP format with controlled access and OMOP schema metadata.
-</td><td>acquisition-002</td><td>Medication administration records</td></tr><tr><td>Procedures and diagnoses documented by healthcare providers. Stored in OMOP format with controlled access and OMOP schema metadata.
-</td><td>acquisition-003</td><td>Provider documentation</td></tr><tr><td>Nursing documentation captured at high frequency intervals. Stored in OMOP format with controlled access and OMOP schema with extensions for high-frequency data.
-</td><td>acquisition-004</td><td>High-frequency nursing flowsheets</td></tr><tr><td>Clinical notes extracted and tokenized using OHNLP (Open Health Natural Language Processing) toolkit. Stored locally except tokens. Controlled access planned with OHNLP open source schema metadata.
-</td><td>acquisition-005</td><td>Clinical notes (tokenized)</td></tr><tr><td>Imaging data from PACS systems in DICOM format. De-identification in process. Planned controlled access with published DICOM schema metadata.
-</td><td>acquisition-006</td><td>Medical imaging (DICOM)</td></tr><tr><td>Bedside monitor waveform data acquired through gateway/middleware systems. Stored in WFDB format with controlled access and published PhysioNet schema (extended) metadata.
-</td><td>acquisition-007</td><td>Waveform telemetry (WFDB)</td></tr><tr><td>EEG recordings from hospital databases in EDF+ and Persyst formats. Extraction in process. Planned controlled access with open source EDF+ and Persyst schema metadata.
-</td><td>acquisition-008</td><td>EEG waveforms</td></tr></tbody></table></div>
+</div></td><td>acquisition-001</td><td>Structured EHR data (OMOP)</td></tr><tr><td><div class="long-description">Dosing information time-stamped upon each infusion change or dose administration. Stored in OMOP format with controlled access and OMOP schema metadata.
+</div></td><td>acquisition-002</td><td>Medication administration records</td></tr><tr><td><div class="long-description">Procedures and diagnoses documented by healthcare providers. Stored in OMOP format with controlled access and OMOP schema metadata.
+</div></td><td>acquisition-003</td><td>Provider documentation</td></tr><tr><td><div class="long-description">Nursing documentation captured at high frequency intervals. Stored in OMOP format with controlled access and OMOP schema with extensions for high-frequency data.
+</div></td><td>acquisition-004</td><td>High-frequency nursing flowsheets</td></tr><tr><td><div class="long-description">Clinical notes extracted and tokenized using OHNLP (Open Health Natural Language Processing) toolkit. Stored locally except tokens. Controlled access planned with OHNLP open source schema metadata.
+</div></td><td>acquisition-005</td><td>Clinical notes (tokenized)</td></tr><tr><td><div class="long-description">Imaging data from PACS systems in DICOM format. De-identification in process. Planned controlled access with published DICOM schema metadata.
+</div></td><td>acquisition-006</td><td>Medical imaging (DICOM)</td></tr><tr><td><div class="long-description">Bedside monitor waveform data acquired through gateway/middleware systems. Stored in WFDB format with controlled access and published PhysioNet schema (extended) metadata.
+</div></td><td>acquisition-007</td><td>Waveform telemetry (WFDB)</td></tr><tr><td><div class="long-description">EEG recordings from hospital databases in EDF+ and Persyst formats. Extraction in process. Planned controlled access with open source EDF+ and Persyst schema metadata.
+</div></td><td>acquisition-008</td><td>EEG waveforms</td></tr></tbody></table></div>
                     </div>
                     
                     <div class="data-item">
@@ -245,10 +245,10 @@
                         </label>
                         <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th><th>Preprocessing Details</th></tr></thead><tbody><tr><td><div class="long-description">All structured electronic health record data standardized to the OMOP (Observational Medical Outcomes Partnership) Common Data Model. Ensures interoperability and enables use of OHDSI (Observational Health Data Sciences and Informatics) tool stack for analysis.
 </div></td><td>preproc-001</td><td>OMOP Common Data Model transformation</td><td>Transformation of source EHR data to OMOP CDM, Standardization of terminology and codes, Mapping to OMOP vocabulary standards, Quality assurance of transformed data, Integration with OHDSI tools for analysis</td></tr><tr><td><div class="long-description">Clinical notes processed using OHNLP (Open Health Natural Language Processing) toolkit for extraction and tokenization. Protects patient privacy while enabling natural language processing and analysis.
-</div></td><td>preproc-002</td><td>Clinical note tokenization</td><td>Text extraction from clinical notes, OHNLP tokenization pipeline, De-identification of sensitive information, Standardization to OHNLP schema, Local storage (except tokens)</td></tr><tr><td>Waveform telemetry data from diverse bedside monitoring systems standardized to WFDB (WaveForm DataBase) format following extended PhysioNet schema.
-</td><td>preproc-003</td><td>Waveform standardization</td><td>Conversion from proprietary monitor formats, Standardization to WFDB format, Metadata extraction and schema compliance, Quality checks for waveform integrity, Synchronization with clinical events</td></tr><tr><td>DICOM imaging data undergoing de-identification process to remove patient identifiable information while preserving clinical utility and metadata.
-</td><td>preproc-004</td><td>Medical imaging de-identification</td><td>DICOM header de-identification, Removal of embedded patient information, Preservation of clinically relevant metadata, DICOM schema compliance verification, Quality assurance of de-identified images</td></tr><tr><td>Data transformed using approaches that limit re-identification while maintaining analytical utility. Multiple preprocessing strategies employed to protect patient privacy across all data modalities.
-</td><td>preproc-005</td><td>Data re-identification limitation</td><td>Application of de-identification algorithms, Privacy-preserving transformations, Risk assessment for re-identification, Compliance with ethical and legal requirements, Community ethics focus group input</td></tr></tbody></table></div>
+</div></td><td>preproc-002</td><td>Clinical note tokenization</td><td>Text extraction from clinical notes, OHNLP tokenization pipeline, De-identification of sensitive information, Standardization to OHNLP schema, Local storage (except tokens)</td></tr><tr><td><div class="long-description">Waveform telemetry data from diverse bedside monitoring systems standardized to WFDB (WaveForm DataBase) format following extended PhysioNet schema.
+</div></td><td>preproc-003</td><td>Waveform standardization</td><td>Conversion from proprietary monitor formats, Standardization to WFDB format, Metadata extraction and schema compliance, Quality checks for waveform integrity, Synchronization with clinical events</td></tr><tr><td><div class="long-description">DICOM imaging data undergoing de-identification process to remove patient identifiable information while preserving clinical utility and metadata.
+</div></td><td>preproc-004</td><td>Medical imaging de-identification</td><td>DICOM header de-identification, Removal of embedded patient information, Preservation of clinically relevant metadata, DICOM schema compliance verification, Quality assurance of de-identified images</td></tr><tr><td><div class="long-description">Data transformed using approaches that limit re-identification while maintaining analytical utility. Multiple preprocessing strategies employed to protect patient privacy across all data modalities.
+</div></td><td>preproc-005</td><td>Data re-identification limitation</td><td>Application of de-identification algorithms, Privacy-preserving transformations, Risk assessment for re-identification, Compliance with ethical and legal requirements, Community ethics focus group input</td></tr></tbody></table></div>
                     </div>
                     
                     <div class="data-item">
@@ -257,8 +257,8 @@
                             Cleaning Strategies
                         </label>
                         <div class="item-value"><table class="data-table"><thead><tr><th>Cleaning Details</th><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Semantic mapping validation by clinical experts, Standard operating protocol implementation, Cross-site data quality checks, Resolution of institutional variations, Clinical validation SOP for mappings</td><td><div class="long-description">Data from 14 acquisition centers harmonized through validated semantic mappings and standard operating protocols (SOPs). Ensures consistency and interoperability across diverse institutional EHR systems and clinical practices.
-</div></td><td>cleaning-001</td><td>Multi-center data harmonization</td></tr><tr><td>Schema compliance verification, Metadata completeness checks, Validation against published standards, Error detection and correction, Documentation of schema extensions</td><td>All data modalities validated against published metadata schemas (OMOP, DICOM, WFDB, OHNLP, EDF+, Persyst) to ensure compliance and data quality.
-</td><td>cleaning-002</td><td>Metadata schema validation</td></tr></tbody></table></div>
+</div></td><td>cleaning-001</td><td>Multi-center data harmonization</td></tr><tr><td>Schema compliance verification, Metadata completeness checks, Validation against published standards, Error detection and correction, Documentation of schema extensions</td><td><div class="long-description">All data modalities validated against published metadata schemas (OMOP, DICOM, WFDB, OHNLP, EDF+, Persyst) to ensure compliance and data quality.
+</div></td><td>cleaning-002</td><td>Metadata schema validation</td></tr></tbody></table></div>
                     </div>
                     
                     <div class="data-item">
@@ -266,8 +266,8 @@
                         <label class="item-label optional-field">
                             Labeling Strategies
                         </label>
-                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>labeling-001</dd><dt>Name</dt><dd>Visualization and annotation environment</dd><dt>Description</dt><dd>Custom visualization and annotation environment developed to label data with targets important for prediction tasks in critical care AI applications.
-</dd><dt>Labeling Details</dt><dd><ul class='formatted-list'><li>Interactive visualization tools</li><li>Annotation interface for clinical experts</li><li>Labeling of prediction targets</li><li>Quality control of annotations</li><li>Documentation of labeling protocols</li></ul></dd></dl></li></ol></div>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>labeling-001</dd><dt>Name</dt><dd>Visualization and annotation environment</dd><dt>Description</dt><dd><div class="long-description">Custom visualization and annotation environment developed to label data with targets important for prediction tasks in critical care AI applications.
+</div></dd><dt>Labeling Details</dt><dd><ul class='formatted-list'><li>Interactive visualization tools</li><li>Annotation interface for clinical experts</li><li>Labeling of prediction targets</li><li>Quality control of annotations</li><li>Documentation of labeling protocols</li></ul></dd></dl></li></ol></div>
                     </div>
                     
                     <div class="data-item">
@@ -275,8 +275,8 @@
                         <label class="item-label optional-field">
                             Maintainers
                         </label>
-                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Maintainer Details</th><th>Name</th></tr></thead><tbody><tr><td>Multi-institutional consortium managing dataset maintenance including data acquisition centers, coordinating teams, and infrastructure development.
-</td><td>maintainer-001</td><td>Massachusetts General Hospital (lead institution), University of Florida (data acquisition and coordination), UT Health Science Center (data acquisition and coordination), Tufts Medicine (data acquisition and coordination), 14 data acquisition centers across United States, Standards team (semantic mappings and validation), Data Acquisition team (extraction and contribution), Tooling team (software development), Project management via GitHub organization (chorus-ai)</td><td>CHoRUS Consortium</td></tr><tr><td><div class="long-description">Active GitHub organization (chorus-ai) housing repositories for software, semantic mappings, standard operating protocols, and project management. 28 repositories with comprehensive documentation and community support.
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Maintainer Details</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Multi-institutional consortium managing dataset maintenance including data acquisition centers, coordinating teams, and infrastructure development.
+</div></td><td>maintainer-001</td><td>Massachusetts General Hospital (lead institution), University of Florida (data acquisition and coordination), UT Health Science Center (data acquisition and coordination), Tufts Medicine (data acquisition and coordination), 14 data acquisition centers across United States, Standards team (semantic mappings and validation), Data Acquisition team (extraction and contribution), Tooling team (software development), Project management via GitHub organization (chorus-ai)</td><td>CHoRUS Consortium</td></tr><tr><td><div class="long-description">Active GitHub organization (chorus-ai) housing repositories for software, semantic mappings, standard operating protocols, and project management. 28 repositories with comprehensive documentation and community support.
 </div></td><td>maintainer-002</td><td>GitHub organization: https://github.com/chorus-ai, Chorus_SOP repository (centralized documentation), chorus-container-apps (Azure deployment), chorus-mapping (semantic mappings), chorus_waveform (waveform tools), privacy_scan_tool (privacy protection), Community discussions and issue tracking</td><td>CHoRUS GitHub Organization</td></tr></tbody></table></div>
                     </div>
                     
@@ -285,8 +285,8 @@
                         <label class="item-label optional-field">
                             Retention Limit
                         </label>
-                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>retention-001</dd><dt>Name</dt><dd>Long-term dataset retention</dd><dt>Description</dt><dd>Digital data maintained according to NIH data sharing policies and institutional requirements. Controlled access model ensures long-term availability for research while protecting patient privacy.
-</dd><dt>Retention Details</dt><dd><ul class='formatted-list'><li>NIH data sharing policies govern retention</li><li>Institutional requirements at participating centers</li><li>Controlled access model for privacy protection</li><li>Secure enclave infrastructure for data storage</li><li>Long-term maintenance through CHoRUS Consortium</li></ul></dd></dl></div>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>retention-001</dd><dt>Name</dt><dd>Long-term dataset retention</dd><dt>Description</dt><dd><div class="long-description">Digital data maintained according to NIH data sharing policies and institutional requirements. Controlled access model ensures long-term availability for research while protecting patient privacy.
+</div></dd><dt>Retention Details</dt><dd><ul class='formatted-list'><li>NIH data sharing policies govern retention</li><li>Institutional requirements at participating centers</li><li>Controlled access model for privacy protection</li><li>Secure enclave infrastructure for data storage</li><li>Long-term maintenance through CHoRUS Consortium</li></ul></dd></dl></div>
                     </div>
                     
                     <div class="data-item">
@@ -295,10 +295,10 @@
                             Sensitive Elements
                         </label>
                         <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th><th>Sensitive Elements Present</th><th>Sensitivity Details</th></tr></thead><tbody><tr><td><div class="long-description">Complete electronic health records including demographics, diagnoses, procedures, medications, nursing documentation, and clinical notes for critically ill patients. Contains protected health information subject to HIPAA and institutional privacy requirements.
-</div></td><td>sensitive-001</td><td>Clinical and medical data</td><td>True</td><td>Demographics and patient identifiers (de-identified), Diagnoses and medical conditions, Medication administration records, Procedures and interventions, Clinical notes (tokenized for privacy), Nursing flowsheet documentation</td></tr><tr><td>Continuous waveform telemetry and EEG recordings capturing detailed physiological states of critically ill patients. May reveal sensitive health conditions and treatment responses.
-</td><td>sensitive-002</td><td>Physiological monitoring data</td><td>True</td><td>Continuous cardiac waveforms, Respiratory monitoring data, Hemodynamic measurements, Electroencephalography recordings, High-frequency physiological parameters</td></tr><tr><td>Diagnostic imaging studies in DICOM format. Undergoing de-identification to remove embedded patient information while preserving clinical utility.
-</td><td>sensitive-003</td><td>Medical imaging</td><td>True</td><td>CT scans and X-rays, MRI and other imaging modalities, DICOM metadata (de-identified), Embedded patient information (removed)</td></tr><tr><td>Contextual factors including geographic information (distance to hospital) and social determinants of health data. Collected to support health equity research while maintaining patient privacy.
-</td><td>sensitive-004</td><td>Social Determinants of Health</td><td>True</td><td>Geographic location information, Social determinants of health variables, Contextual factors for equity research, Privacy-preserving transformations applied</td></tr></tbody></table></div>
+</div></td><td>sensitive-001</td><td>Clinical and medical data</td><td>True</td><td>Demographics and patient identifiers (de-identified), Diagnoses and medical conditions, Medication administration records, Procedures and interventions, Clinical notes (tokenized for privacy), Nursing flowsheet documentation</td></tr><tr><td><div class="long-description">Continuous waveform telemetry and EEG recordings capturing detailed physiological states of critically ill patients. May reveal sensitive health conditions and treatment responses.
+</div></td><td>sensitive-002</td><td>Physiological monitoring data</td><td>True</td><td>Continuous cardiac waveforms, Respiratory monitoring data, Hemodynamic measurements, Electroencephalography recordings, High-frequency physiological parameters</td></tr><tr><td><div class="long-description">Diagnostic imaging studies in DICOM format. Undergoing de-identification to remove embedded patient information while preserving clinical utility.
+</div></td><td>sensitive-003</td><td>Medical imaging</td><td>True</td><td>CT scans and X-rays, MRI and other imaging modalities, DICOM metadata (de-identified), Embedded patient information (removed)</td></tr><tr><td><div class="long-description">Contextual factors including geographic information (distance to hospital) and social determinants of health data. Collected to support health equity research while maintaining patient privacy.
+</div></td><td>sensitive-004</td><td>Social Determinants of Health</td><td>True</td><td>Geographic location information, Social determinants of health variables, Contextual factors for equity research, Privacy-preserving transformations applied</td></tr></tbody></table></div>
                     </div>
                     
                     <div class="data-item">
@@ -329,12 +329,12 @@
                         <label class="item-label optional-field">
                             Tasks
                         </label>
-                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Generate data for ML/AI applications aimed at characterizing acute and critical care illness patterns, progression, and outcomes across diverse patient populations and hospital settings.
-</td><td>task-001</td><td>Characterize acute and critical care illness</td></tr><tr><td>Enable prediction of complications among patients with acute or critical illness using multi-modal data including structured EHR, waveforms, imaging, and clinical notes.
-</td><td>task-002</td><td>Predict complications in critically ill patients</td></tr><tr><td>Support measurement and analysis of treatment response among critically ill patients through high-frequency documentation, medication administration records, and clinical outcomes data.
-</td><td>task-003</td><td>Measure treatment response</td></tr><tr><td>Provision a holdout test set accessible for model external validation to aid marketplace adoption of AI-developed models for implementation in acute and critical care settings.
-</td><td>task-004</td><td>External validation for marketplace adoption</td></tr><tr><td>Utilize visualization and annotation environment to label data with targets important for prediction tasks in critical care AI applications.
-</td><td>task-005</td><td>Label data for prediction targets</td></tr></tbody></table></div>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Generate data for ML/AI applications aimed at characterizing acute and critical care illness patterns, progression, and outcomes across diverse patient populations and hospital settings.
+</div></td><td>task-001</td><td>Characterize acute and critical care illness</td></tr><tr><td><div class="long-description">Enable prediction of complications among patients with acute or critical illness using multi-modal data including structured EHR, waveforms, imaging, and clinical notes.
+</div></td><td>task-002</td><td>Predict complications in critically ill patients</td></tr><tr><td><div class="long-description">Support measurement and analysis of treatment response among critically ill patients through high-frequency documentation, medication administration records, and clinical outcomes data.
+</div></td><td>task-003</td><td>Measure treatment response</td></tr><tr><td><div class="long-description">Provision a holdout test set accessible for model external validation to aid marketplace adoption of AI-developed models for implementation in acute and critical care settings.
+</div></td><td>task-004</td><td>External validation for marketplace adoption</td></tr><tr><td><div class="long-description">Utilize visualization and annotation environment to label data with targets important for prediction tasks in critical care AI applications.
+</div></td><td>task-005</td><td>Label data for prediction targets</td></tr></tbody></table></div>
                     </div>
                     
                     <div class="data-item">
@@ -343,10 +343,10 @@
                             Intended Uses
                         </label>
                         <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Primary intended use is development and training of artificial intelligence and machine learning models to characterize acute and critical care illness, predict complications, and measure treatment response in critically ill patients.
-</div></td><td>use-001</td><td>AI/ML model development for critical care</td></tr><tr><td>Provision of holdout test set accessible for model external validation to aid marketplace adoption of AI-developed models for implementation in acute and critical care settings.
-</td><td>use-002</td><td>External validation of AI models</td></tr><tr><td>Studies examining health equity, social determinants of health, and disparities in critical care outcomes across diverse patient populations and hospital settings.
-</td><td>use-003</td><td>Research on health equity and disparities</td></tr><tr><td>Research aimed at improving clinical care delivery, treatment protocols, and patient outcomes in acute and critical care settings through data-driven insights.
-</td><td>use-004</td><td>Clinical care improvement research</td></tr><tr><td><div class="long-description">Training and education of next generation of diverse academic and community AI scientists through hands-on experience with real-world critical care datasets. Integration with AIM-AHEAD training programs.
+</div></td><td>use-001</td><td>AI/ML model development for critical care</td></tr><tr><td><div class="long-description">Provision of holdout test set accessible for model external validation to aid marketplace adoption of AI-developed models for implementation in acute and critical care settings.
+</div></td><td>use-002</td><td>External validation of AI models</td></tr><tr><td><div class="long-description">Studies examining health equity, social determinants of health, and disparities in critical care outcomes across diverse patient populations and hospital settings.
+</div></td><td>use-003</td><td>Research on health equity and disparities</td></tr><tr><td><div class="long-description">Research aimed at improving clinical care delivery, treatment protocols, and patient outcomes in acute and critical care settings through data-driven insights.
+</div></td><td>use-004</td><td>Clinical care improvement research</td></tr><tr><td><div class="long-description">Training and education of next generation of diverse academic and community AI scientists through hands-on experience with real-world critical care datasets. Integration with AIM-AHEAD training programs.
 </div></td><td>use-005</td><td>Educational and training purposes</td></tr></tbody></table></div>
                     </div>
                     
@@ -355,10 +355,10 @@
                         <label class="item-label optional-field">
                             Discouraged Uses
                         </label>
-                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>As data collection continues through November 2026 and quality assurance processes are ongoing, early dataset versions should be used with awareness of completeness limitations and ongoing expansion.
-</td><td>discouraged-001</td><td>Uses during ongoing data collection</td></tr><tr><td><div class="long-description">Dataset is for research purposes. Any AI/ML models developed should undergo appropriate clinical validation, regulatory approval, and institutional review before use in patient care or clinical decision-making.
-</div></td><td>discouraged-002</td><td>Clinical decision-making without validation</td></tr><tr><td>Attempts to re-identify patients from de-identified data violate ethical principles, data use agreements, and legal frameworks established for privacy protection.
-</td><td>discouraged-003</td><td>Re-identification attempts</td></tr></tbody></table></div>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">As data collection continues through November 2026 and quality assurance processes are ongoing, early dataset versions should be used with awareness of completeness limitations and ongoing expansion.
+</div></td><td>discouraged-001</td><td>Uses during ongoing data collection</td></tr><tr><td><div class="long-description">Dataset is for research purposes. Any AI/ML models developed should undergo appropriate clinical validation, regulatory approval, and institutional review before use in patient care or clinical decision-making.
+</div></td><td>discouraged-002</td><td>Clinical decision-making without validation</td></tr><tr><td><div class="long-description">Attempts to re-identify patients from de-identified data violate ethical principles, data use agreements, and legal frameworks established for privacy protection.
+</div></td><td>discouraged-003</td><td>Re-identification attempts</td></tr></tbody></table></div>
                     </div>
                     
                     <div class="data-item">
@@ -448,7 +448,7 @@
     
     
     <div class="timestamp">
-        Generated on 2026-04-15 23:59:23 using Bridge2AI Data Sheets Schema
+        Generated on 2026-04-21 12:47:26 using Bridge2AI Data Sheets Schema
     </div>
 </body>
 </html>

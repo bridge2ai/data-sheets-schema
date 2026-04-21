@@ -582,8 +582,8 @@ class HumanReadableRenderer:
         elif isinstance(value, list):
             return ", ".join(str(v) for v in value)
         elif isinstance(value, str):
-            # Wrap long descriptions in a div so they flow naturally; never truncate
-            if len(value) > 200:
+            # Wrap all non-trivial descriptions with consistent styling
+            if len(value) > 80:
                 return f'<div class="long-description">{value}</div>'
             return value or ""
         else:
@@ -611,8 +611,8 @@ class HumanReadableRenderer:
             else:
                 return f'<a href="{s}" target="_blank">{s}</a>'
 
-        # Handle long descriptions
-        if len(s) > 200:
+        # Handle descriptions — consistent blue-bar styling
+        if len(s) > 80:
             return f'<div class="long-description">{s}</div>'
 
         return s
