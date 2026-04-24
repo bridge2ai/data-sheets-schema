@@ -12,7 +12,7 @@ Successfully aligned the GitHub D4D Assistant with the Claude Code deterministic
 
 ### Phase 1: Deterministic Configuration ✅
 
-**Created**: `.github/workflows/d4d_assistant_deterministic_config.yaml`
+**Created**: `.github/workflows/d4d_assistant_deterministic.config`
 - Central configuration file for all deterministic settings
 - Model: `claude-sonnet-4-5-20250929` (date-pinned)
 - Temperature: `0.0` (maximum determinism)
@@ -258,7 +258,7 @@ provenance:
 
 ## Files Created
 
-1. `.github/workflows/d4d_assistant_deterministic_config.yaml` - Central configuration
+1. `.github/workflows/d4d_assistant_deterministic.config` - Central configuration
 2. `src/github/generate_d4d_metadata.py` - Metadata generator
 3. `src/github/validate_d4d_completeness.py` - Quality gate validator
 4. `src/github/validate_prerequisites.sh` - Prerequisites checker
@@ -403,7 +403,7 @@ diff data/d4d_concatenated/claudecode/TEST_d4d_metadata.yaml \
 
 ## Configuration Reference
 
-**All settings in**: `.github/workflows/d4d_assistant_deterministic_config.yaml`
+**All settings in**: `.github/workflows/d4d_assistant_deterministic.config`
 
 **Key parameters**:
 ```yaml
