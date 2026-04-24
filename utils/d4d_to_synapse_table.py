@@ -24,11 +24,11 @@ def add_css(css_name: str, source_folder: str, d4d_dict: dict[str, list[str]]) -
 	return d4d_dict
 
 
-def add_html(file_org_map: dict[str, str], source_folder: str, html_name_parts: str, d4d_dict: dict[str, list[str]]) -> dict[str, list[str]]:
+def add_html(file_org_map: dict[str, str], source_folder: str, html_name: str, d4d_dict: dict[str, list[str]]) -> dict[str, list[str]]:
 	"""Add HTML content to the D4D dictionary."""
 
 	for org, id in file_org_map.items():
-		html_path = os.path.join(source_folder, "".join([html_name_parts[0], org, html_name_parts[1]]))
+		html_path = os.path.join(source_folder, "".join([org, html_name]))
 		if os.path.exists(html_path):
 			with open(html_path, 'r') as html_file:
 				d4d_text = html_file.read()
@@ -76,8 +76,8 @@ def main():
 	project_id = "syn63096806"  # standards-data Synapse project ID
 	table_id = "syn68885644"  # if provided, the table associated with this ID will be cleared before being updated with new entries
 	table_name = "D4D_content"  # if table_id was provided, table_name should match the name of the table associated with table_id
-	source_folder = "src/html/output"  # folder containing HTML and CSS files
-	html_name_parts = ["D4D_-_", "_v4_human_readable.html"]  # joined with org name in in org_id_map to create HTML paths
+	source_folder = "data/d4d_html/concatenated/claudecode_agent_core"  # folder containing HTML and CSS files
+	html_name = "_d4d_core_human_readable.html"  # joined with org name in in org_id_map to create HTML paths
 	css_name = "datasheet-common.css"  # since a single CSS is in use, no need to select multiple or build distinct paths
 
 	d4d_dict = {  # initialize dict to store D4D info
@@ -87,14 +87,14 @@ def main():
 		}
     
 	org_id_map = {  # define relationships between GC labels and ORG_IDs
-		"AI-READI": "B2AI_ORG:114",
+		"AI_READI": "B2AI_ORG:114",
 		"CM4AI": "B2AI_ORG:116",
 		"VOICE": "B2AI_ORG:117",
 		"CHORUS": "B2AI_ORG:115"
 	}
 
 	updated_d4d_dict = add_css(css_name, source_folder, d4d_dict)
-	final_d4d_dict = add_html(org_id_map, source_folder, html_name_parts, updated_d4d_dict)
+	final_d4d_dict = add_html(org_id_map, source_folder, html_name, updated_d4d_dict)
 	d4d_df = create_d4d_df(final_d4d_dict)
 	generate_table(syn, table_name, table_id, project_id, d4d_df)
 	
