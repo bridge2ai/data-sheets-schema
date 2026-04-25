@@ -8,6 +8,7 @@ import os
 import shutil
 import yaml
 import json
+import html
 from datetime import datetime
 from jinja2 import Template, Environment
 from pathlib import Path
@@ -576,24 +577,35 @@ class HumanReadableRenderer:
                            'abstract', 'rationale', 'justification'}
 
     def _format_table_cell(self, value, key=None):
-        """Format a single table cell value"""
+        """Format a single table cell value.
+
+        All user-derived text (keys and values from the input YAML) is escaped
+        with ``html.escape`` before being interpolated, since the rendered
+        output is later passed through Jinja's ``|safe`` filter. Only the
+        wrapper markup (``<strong>``, ``<br>``, ``<div class="...">``) is
+        treated as trusted.
+        """
         # Convert None to empty string for HTML table cells
         if value is None:
             return ""
         elif isinstance(value, dict):
-            items = [f"<strong>{self._humanize_key(k)}:</strong> {v}" for k, v in value.items()]
+            items = [
+                f"<strong>{html.escape(self._humanize_key(k))}:</strong> {html.escape(str(v))}"
+                for k, v in value.items()
+            ]
             return "<br>".join(items)
         elif isinstance(value, list):
-            return ", ".join(str(v) for v in value)
+            return ", ".join(html.escape(str(v)) for v in value)
         elif isinstance(value, str):
+            escaped = html.escape(value)
             # Always wrap description-type fields with blue-bar styling
             if key and key.lower() in self._DESCRIPTION_FIELDS:
-                return f'<div class="long-description">{value}</div>' if value else ""
+                return f'<div class="long-description">{escaped}</div>' if value else ""
             if len(value) > 80:
-                return f'<div class="long-description">{value}</div>'
-            return value or ""
+                return f'<div class="long-description">{escaped}</div>'
+            return escaped
         else:
-            return str(value)
+            return html.escape(str(value))
     
     def _format_list_fallback(self, lst):
         """Fallback formatting for non-tabular lists"""

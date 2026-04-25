@@ -41,19 +41,26 @@ _DEFAULT_SCHEMA = (
 )
 
 
+_VALIDATE_TIMEOUT_SECONDS = 60
+
+
 def validate_d4d_yaml(file_path: Path, method: str = "") -> bool:
     """
     Run linkml-validate on a D4D YAML file.
 
     Selects the correct schema and target class automatically:
-    - ``DatasetCollection`` wrapper format (curated files)  → -C DatasetCollection
+    - ``DatasetCollection`` wrapper format (curated files)  → extract first
+      resource and validate as ``Dataset``
     - ``claudecode_agent_core`` method or ``_core`` in path → -C CoreDataset
     - Everything else                                       → -C Dataset
 
-    Prints a clear warning on failure but does NOT raise an exception —
+    Tries `linkml-validate` directly first, falls back to `poetry run
+    linkml-validate` if the binary is not on PATH. Each invocation has a
+    60-second timeout. Prints a clear warning on failure but does NOT raise —
     callers decide whether to abort.
 
-    Returns True if validation passed, False otherwise.
+    Returns True if validation passed, False otherwise (including when
+    validation could not run because the tool is unavailable or timed out).
     """
     schema_file, class_name = _METHOD_SCHEMA.get(method, _DEFAULT_SCHEMA)
 
@@ -87,19 +94,47 @@ def validate_d4d_yaml(file_path: Path, method: str = "") -> bool:
     except Exception:
         pass  # fall through and let linkml-validate report the real problem
 
-    result = subprocess.run(
-        ["poetry", "run", "linkml-validate",
-         "-s", schema_file, "-C", class_name, str(validate_path)],
-        capture_output=True,
-        text=True,
-    )
+    base_args = ["-s", schema_file, "-C", class_name, str(validate_path)]
+    commands = [
+        ["linkml-validate", *base_args],
+        ["poetry", "run", "linkml-validate", *base_args],
+    ]
 
-    # Clean up temp file if we created one
-    if tmp_file is not None:
-        try:
-            Path(tmp_file.name).unlink()
-        except Exception:
-            pass
+    result = None
+    last_error = ""
+    try:
+        for cmd in commands:
+            try:
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=_VALIDATE_TIMEOUT_SECONDS,
+                )
+                break  # got a result (success or validation failure)
+            except FileNotFoundError:
+                last_error = f"command not found: {cmd[0]}"
+                continue
+            except subprocess.TimeoutExpired:
+                last_error = f"timeout after {_VALIDATE_TIMEOUT_SECONDS}s"
+                break
+    finally:
+        # Clean up temp file if we created one
+        if tmp_file is not None:
+            try:
+                Path(tmp_file.name).unlink()
+            except Exception:
+                pass
+
+    if result is None:
+        print(
+            f"\n{'='*60}\n"
+            f"⚠️  VALIDATION SKIPPED: {file_path}\n"
+            f"    {last_error or 'linkml-validate not available'}\n"
+            "    Install linkml or run inside the poetry environment to enable validation.\n"
+            f"{'='*60}\n"
+        )
+        return False
 
     if result.returncode != 0:
         print(
@@ -430,8 +465,13 @@ class D4DEvaluator:
                         f"Skipping {project}/{method}: file not found at {file_path}")
                     continue
 
-                # Validate before evaluating
-                validate_d4d_yaml(file_path, method)
+                # Validate before evaluating; skip on failure so the batch
+                # report only contains evaluations of valid YAML.
+                if not validate_d4d_yaml(file_path, method):
+                    print(
+                        f"Skipping evaluation for {project}/{method}: validation failed."
+                    )
+                    continue
 
                 print(f"Evaluating {project}/{method}...")
                 evaluation = self.evaluate_d4d_file(file_path, project, method)
