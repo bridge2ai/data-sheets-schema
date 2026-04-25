@@ -7,12 +7,11 @@ classDiagram
 
   class CoreDatasetCollection {
     +CoreDataset[] resources
-    +CompressionEnum compression
+    +Compr.Enum compression
     +string conforms_to
     +string conforms_to_class
     +string conforms_to_schema
-    +string created_by
-    +... (18 more slots)
+    +... (19 more)
   }
   class CoreDataset {
     +CoreDistribution[] distributions
@@ -20,8 +19,7 @@ classDiagram
     +Task[] tasks
     +AddressingGap[] addressing_gaps
     +Creator[] creators
-    +FundingMechanism[] funders
-    +... (73 more slots)
+    +... (74 more)
   }
   class CoreDistribution {
     +integer bytes
@@ -29,75 +27,35 @@ classDiagram
     +string md5
     +string sha256
     +string path
-    +FormatEnum format
-    +... (7 more slots)
+    +... (8 more)
   }
   class Purpose {
     +string response
-    +uri id
-    +string name
-    +string description
     +Software[] used_software
-  }
-  class Task {
-    +string response
-    +uri id
-    +string name
-    +string description
-    +Software[] used_software
+    +... (2 more)
   }
   class Creator {
     +Person principal_investigator
     +Organization[] affiliations
     +CRediTRoleEnum[] credit_roles
-    +uri id
-    +string name
-    +string description
-    +... (1 more slots)
-  }
-  class FundingMechanism {
-    +Grantor grantor
-    +Grant[] grants
-    +uri id
-    +string name
-    +string description
-    +Software[] used_software
+    +... (4 more)
   }
   class Instance {
     +uri data_topic
     +string instance_type
     +uri data_substrate
-    +integer counts
-    +boolean label
-    +string label_description
-    +... (6 more slots)
-  }
-  class EthicalReview {
-    +Person contact_person
-    +Organization reviewing_organization
-    +string[] review_details
-    +uri id
-    +string name
-    +string description
-    +... (1 more slots)
+    +... (9 more)
   }
 
   CoreDatasetCollection "*" --> CoreDataset : resources
   CoreDataset "*" --> CoreDistribution : distributions
   CoreDataset "*" --> Purpose : purposes
-  CoreDataset "*" --> Task : tasks
   CoreDataset "*" --> Creator : creators
-  CoreDataset "*" --> FundingMechanism : funders
   CoreDataset "*" --> Instance : instances
-  CoreDataset "*" --> EthicalReview : ethical_reviews
-
 
   style CoreDatasetCollection fill:#D8EAF7,stroke:#1976D2,stroke-width:3px
   style CoreDataset fill:#D8EAF7,stroke:#1976D2,stroke-width:3px
   style CoreDistribution fill:#D8EAF7,stroke:#1976D2,stroke-width:3px
-  style Purpose fill:#F5F5F5,stroke:#787878,stroke-width:1.5px
-  style Task fill:#F5F5F5,stroke:#787878,stroke-width:1.5px
-  style Creator fill:#F5F5F5,stroke:#787878,stroke-width:1.5px
-  style FundingMechanism fill:#F5F5F5,stroke:#787878,stroke-width:1.5px
-  style Instance fill:#F5F5F5,stroke:#787878,stroke-width:1.5px
-  style EthicalReview fill:#F5F5F5,stroke:#787878,stroke-width:1.5px
+  style Purpose fill:#F5F5F5,stroke:#787878,stroke-width:2px
+  style Creator fill:#F5F5F5,stroke:#787878,stroke-width:2px
+  style Instance fill:#F5F5F5,stroke:#787878,stroke-width:2px
