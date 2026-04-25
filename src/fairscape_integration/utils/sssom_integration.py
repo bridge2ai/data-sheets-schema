@@ -71,6 +71,13 @@ class SSSOMIntegration:
             # (e.g. unknown EntityTypeEnum codes), returning an empty DataFrame
             # instead of raising an exception. Fall back to custom reader.
             if len(self.msdf.df) == 0:
+                warnings.warn(
+                    f"sssom-py returned 0 mappings for {self.sssom_path}; "
+                    "this typically indicates rows were silently dropped due to "
+                    "non-standard column values. Falling back to custom reader.",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
                 if self.verbose:
                     print("sssom-py returned 0 mappings, falling back to custom reader")
                 self.use_standard = False
@@ -317,9 +324,28 @@ class SSSOMIntegration:
     @staticmethod
     def get_implementation() -> str:
         """
-        Get the implementation being used.
+        Get the implementation that would be selected by default.
+
+        Reflects whether the standard sssom-py package is importable. This is a
+        process-wide check and does not account for per-instance fallbacks (e.g.
+        when sssom-py returns 0 rows and an instance switches to the custom
+        reader). Use :meth:`get_active_implementation` for per-instance state.
 
         Returns:
             'sssom-py' if standard package is available, 'custom' otherwise
         """
         return 'sssom-py' if SSSOM_AVAILABLE else 'custom'
+
+    def get_active_implementation(self) -> str:
+        """
+        Get the implementation actively in use by this instance.
+
+        Unlike :meth:`get_implementation`, this reflects any runtime fallback
+        that occurred for this specific instance (e.g. sssom-py was available
+        but returned 0 rows, causing this instance to fall back to the custom
+        reader).
+
+        Returns:
+            'sssom-py' if this instance is using sssom-py, 'custom' otherwise
+        """
+        return 'sssom-py' if self.use_standard else 'custom'
