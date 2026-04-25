@@ -203,7 +203,7 @@ The GitHub Assistant uses these scripts in sequence:
 
 ## Configuration
 
-Central configuration: `.github/workflows/d4d_assistant_deterministic_config.yaml`
+Central configuration: `.github/workflows/d4d_assistant_deterministic.config`
 
 **Key settings**:
 ```yaml
@@ -318,6 +318,6 @@ The assistant can modify existing PRs to apply corrections and improvements.
 - **Instruction files**:
   - `.github/workflows/d4d_assistant_create.md` - Creating datasheets
   - `.github/workflows/d4d_assistant_edit.md` - Editing datasheets
-- **Configuration**: `.github/workflows/d4d_assistant_deterministic_config.yaml`
+- **Configuration**: `.github/workflows/d4d_assistant_deterministic.config`
 - **Batch extraction**: `src/download/process_concatenated_d4d_claude.py`
 - **D4D schema**: `src/data_sheets_schema/schema/data_sheets_schema_all.yaml`

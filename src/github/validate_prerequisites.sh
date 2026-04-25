@@ -92,7 +92,7 @@ fi
 
 # Check config file exists
 echo -n "⚙️  Checking config file... "
-CONFIG_FILE=".github/workflows/d4d_assistant_deterministic_config.yaml"
+CONFIG_FILE=".github/workflows/d4d_assistant_deterministic.config"
 if [ -f "$CONFIG_FILE" ]; then
     echo -e "${GREEN}✓ Found${NC}"
 else
