@@ -63,6 +63,8 @@ classes:
         slot_uri: d4d:instanceType
         broad_mappings:
           - dcterms:type
+        annotations:
+          "d4d:docExample": "medical imaging studies"
       data_substrate:
         description: >
           Type of data (e.g., raw text, images) from Bridge2AI standards.
@@ -114,10 +116,14 @@ classes:
         description: "Indicates whether it is a sample of a larger set."
         slot_uri: d4d:isSample
         range: boolean
+        annotations:
+          "d4d:docExample": "true"
       is_random:
         description: "Indicates whether the sample is random."
         slot_uri: d4d:isRandom
         range: boolean
+        annotations:
+          "d4d:docExample": "false"
       source_data:
         description: >
           One or more descriptions of the larger sets from which the sample was drawn, if applicable.
@@ -129,6 +135,8 @@ classes:
           Indicates whether the sample is representative of the larger set.
         slot_uri: d4d:isRepresentative
         range: boolean
+        annotations:
+          "d4d:docExample": "true"
       representative_verification:
         description: >
           One or more explanations of how representativeness was validated or verified (e.g., statistical tests, domain expert review).
@@ -150,12 +158,14 @@ classes:
         slot_uri: d4d:strategies
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "Triple-balanced by race/ethnicity, sex, and T2DM severity"
 
 
   MissingInfo:
     description: >
       Is any information missing from individual instances? (e.g.,
-      unavailable data)
+      unavailable data).
     is_a: DatasetProperty
     attributes:
       missing:
@@ -166,6 +176,8 @@ classes:
         slot_uri: d4d:missingDataDescription
         broad_mappings:
           - dcterms:description
+        annotations:
+          "d4d:docExample": "CGM readings absent for 15% of participants"
       why_missing:
         description: >
           Explanation of why each piece of data is missing.
@@ -174,6 +186,8 @@ classes:
         slot_uri: d4d:missingDataCause
         broad_mappings:
           - dcterms:description
+        annotations:
+          "d4d:docExample": "Device malfunction or non-compliance during 14-day wear period"
 
 
   Relationships:
@@ -190,6 +204,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Participants linked to multiple visits via participant_id foreign key"
 
 
   Splits:
@@ -205,6 +221,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "70/15/15 train/validation/test split stratified by site and T2DM severity"
 
 
   DataAnomaly:
@@ -221,6 +239,8 @@ classes:
         slot_uri: d4d:anomalyDetails
         broad_mappings:
           - dcterms:description
+        annotations:
+          "d4d:docExample": "15% of CGM readings missing due to device malfunction"
 
 
   DatasetBias:
@@ -244,11 +264,15 @@ classes:
           including affected populations, features, or outcomes.
         range: string
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Sampling favored urban academic medical centers"
       mitigation_strategy:
         description: >
           Steps taken or recommended to mitigate this bias.
         slot_uri: d4d:mitigation_strategy
         range: string
+        annotations:
+          "d4d:docExample": "Oversampling of underrepresented groups during model training"
       affected_subsets:
         description: >
           One or more specific subsets or features of the dataset affected by this bias
@@ -256,6 +280,8 @@ classes:
         slot_uri: d4d:affectedSubsets
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "Training split underrepresents Asian participants"
 
 
   DatasetLimitation:
@@ -277,16 +303,22 @@ classes:
           Detailed description of the limitation and its implications.
         range: string
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Cross-sectional design limits causal inference"
       scope_impact:
         description: >
           How this limitation affects the scope or applicability of the dataset.
         slot_uri: d4d:scopeImpact
         range: string
+        annotations:
+          "d4d:docExample": "Findings may not generalize to non-diabetic populations"
       recommended_mitigation:
         description: >
           Recommended approaches for users to address this limitation.
         slot_uri: d4d:recommendedMitigation
         range: string
+        annotations:
+          "d4d:docExample": "Use longitudinal follow-up cohorts for causal inference studies"
 
 
   ExternalResource:
@@ -346,6 +378,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "ZIP codes suppressed; race/ethnicity available only in aggregate"
 
 
   ContentWarning:
@@ -366,6 +400,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Contains clinical images of diabetic retinopathy"
 
 
   Subpopulation:
@@ -396,6 +432,8 @@ classes:
         slot_uri: d4d:subpopulationDistribution
         broad_mappings:
           - dcterms:description
+        annotations:
+          "d4d:docExample": "Hispanic participants: 1,023 (25.6% of total)"
 
 
   Deidentification:
@@ -424,6 +462,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "HIPAA Safe Harbor method applied; expert re-identification risk assessment confirms low risk"
 
 
   SensitiveElement:
@@ -444,6 +484,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Genetic sequencing data requires additional DUA"
 
 
   DatasetRelationship:

@@ -346,6 +346,8 @@ SKOS_ALIGNMENT = src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl
 ROCRATE_JSON = data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json
 INTERFACE_MAPPING = data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
 D4D_SCHEMA_ALL = src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+D4D_CORE_SCHEMA = src/data_sheets_schema/schema/data_sheets_schema_core.yaml
+D4D_CORE_SCHEMA_ALL = src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
 URI_RECOMMENDATIONS = notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv
 SSSOM_FULL = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv
 SSSOM_SUBSET = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping_subset.tsv
@@ -354,7 +356,21 @@ SSSOM_URI_COMPREHENSIVE = src/data_sheets_schema/alignment/d4d_rocrate_sssom_uri
 SSSOM_COMPREHENSIVE = src/data_sheets_schema/alignment/d4d_rocrate_sssom_comprehensive.tsv
 SSSOM_STRUCTURAL = data/mappings/d4d_rocrate_structural_mapping.sssom.tsv
 
-.PHONY: gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural gen-sssom-all clean-sssom
+.PHONY: gen-core-schema validate-core lint-core gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural gen-sssom-all clean-sssom
+
+gen-core-schema: $(D4D_CORE_SCHEMA_ALL) ## Generate merged core exchange schema (data_sheets_schema_core_all.yaml)
+
+$(D4D_CORE_SCHEMA_ALL): $(D4D_CORE_SCHEMA) src/data_sheets_schema/schema/D4D_Core.yaml
+	@echo "Generating merged core exchange schema..."
+	$(RUN) gen-linkml -o $(D4D_CORE_SCHEMA_ALL) -f yaml $(D4D_CORE_SCHEMA)
+	@echo "✓ Core schema: $(D4D_CORE_SCHEMA_ALL)"
+
+validate-core: ## Validate the core exchange schema with linkml-validate
+	$(RUN) linkml-validate -s $(D4D_CORE_SCHEMA) --validate-schema
+
+lint-core: ## Lint the core exchange schema files
+	$(RUN) linkml-lint src/data_sheets_schema/schema/D4D_Core.yaml
+	$(RUN) linkml-lint $(D4D_CORE_SCHEMA)
 
 gen-sssom: gen-sssom-full gen-sssom-subset ## Generate SSSOM property-level mappings (full and subset)
 

@@ -2,7 +2,7 @@
 CONCATENATED DOCUMENT
 ================================================================================
 Input Directory: data/preprocessed/individual/CHORUS
-Total Files: 7
+Total Files: 10
 Extensions: All
 Recursive: False
 ================================================================================
@@ -15,7 +15,10 @@ TABLE OF CONTENTS
   4. aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.txt
   5. aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.txt
   6. aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9.txt
-  7. github_chorus_ai_row9.txt
+  7. bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt
+  8. chorus4ai_org_row11.txt
+  9. github_chorus_ai_row9.txt
+ 10. reporter_nih_gov_project-details-10472824_row7.txt
 ================================================================================
 
 FILE: CHoRUS for Equitable AI - github.txt
@@ -4296,6 +4299,1001 @@ Care CFA.
 
 ================================================================================
 
+FILE: bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt
+PATH: data/preprocessed/individual/CHORUS/bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt
+SIZE: 16080 bytes
+--------------------------------------------------------------------------------
+
+AIM-AHEAD Bridge2AI for Clinical Care
+Training Program
+
+Cohort 2
+
+Informational Webinar
+
+September 09, 2025, 2:00pm Central
+
+JK
+
+AIM-AHEAD Consortium
+
+AIM-AHEAD  is  a  nationwide  network  of  institutions  and  organizations 
+designed  to  build  AI  talent  among  researchers  and  clinicians,  support 
+multidisciplinary  research  projects  that  harness  AI/ML  to  improve  the 
+health of Americans, and enhance the AI capabilities and infrastructure 
+of  communities  or  hospitals  that  otherwise  would  not  have  had  the 
+resources or the capacity to beneﬁt from the advancement of AI/ML.
+
+JK
+
+The AIM-AHEAD Coordinating Center
+
+The A-CC consists of four cores, focused on various initiatives to achieve 
+AIM-AHEAD’s mission. 
+
+Leadership Core
+
+Data Science Training Core
+
+Lead, recruit, and coordinate 
+the AIM-AHEAD Consortium
+
+Assess, develop, and 
+implement data science 
+training curriculum
+
+Data and Research Core
+
+Infrastructure Core
+
+Address research priorities and 
+needs to form a comprehensive 
+basis for AI/ML
+
+Assess data, computing, and 
+software infrastructure to facilitate 
+AI/ML and health research
+
+JK
+
+NIH Leadership Team
+
+Samson Gebreab, Ph.D. MSc. 
+Program Lead, AIM-AHEAD
+Oﬃce of Data Science Strategy,
+NIH
+
+Shurjo K. Sen, Ph.D.
+Program Director, Bridge2AI
+Oﬃce of Genomic Data Science,
+NIH
+
+Haluk Resat Ph.D.
+Program Lead, Bridge2AI
+Oﬃce of Strategic Coordination
+NIH
+
+Dr. Emir Khatipov
+Program Director, AIM-AHEAD
+Oﬃce of Data Science Strategy,
+NIH
+
+Eva Lancaster, Ph.D.  
+Program Director, AIM-AHEAD
+Oﬃce of Data Science Strategy,
+NIH
+
+JK
+
+AIM-AHEAD  Leadership Team
+
+Jamboor Vishwanatha, PhD
+UNT Health Science Center
+AIM-AHEAD PI
+
+Toufeeq A. Syed, PhD
+University of Texas Health 
+Science Center, 
+Houston, TX
+AIM-AHEAD MPI
+
+Nawar Shara, PhD
+MedStar Health Research Institute
+AIM-AHEAD DSTC MPI
+
+JK
+
+Bridge2AI CHoRUS Leadership Team
+
+Eric Rosenthal
+Massachusetts General 
+Hospital
+
+Azra Bihorac
+University of Florida
+
+Xiaoqian Jiang
+UTHealth Houston
+
+Yulia Strekalova
+University of Florida
+
+Parisa Rashidi
+University of Florida
+
+Manlik Kwong
+Tufts University
+
+TS
+
+Program Partnership
+
+Strategic Collaboration: AIM-AHEAD and Bridge2AI collaborate to deliver specialized 
+AI/ML training for clinical care, leveraging shared resources and expertise.
+
+Combined Expertise: AIM-AHEAD’s strength in trainee engagement and Bridge2AI’s AI data 
+and curriculum deliver a comprehensive training experience.
+
+Partnership
+
+Focus on Training: The partnership equips trainees with practical skills to apply AI/ML 
+methods to clinical care challenges using real-world data.
+
+Goal: Build a skilled workforce prepared to advance AI/ML applications in health research.
+
+TS
+
+Program Purpose 
+
+The  AIM-AHEAD  Bridge2AI  for  Clinical  Care  Training  Program 
+expands access to Bridge2AI CHoRUS data through engagement, AI 
+training, and mentorship. It equips trainees to apply AI/ML methods 
+innovative  research  at  the 
+to  big  data  analysis  and  conduct 
+intersection  of  healthcare  challenges  and  AI/ML  using  multi-modal 
+datasets from a broad range of cohort participants.
+
+TS
+
+Bridge2AI for Clinical Care Dataset
+
+Multicenter
+
+Multimodal &
+High-Resolution
+
+ER
+
+CHoRUS Dataset
+
+• Retrospective data collection
+
+• Controlled access 
+
+• As of August 2025, covers 14 different 
+
+hospitals with over 45K unique admissions
+• OMOP and telemetry in enclave except:
+
+• Clinical notes – stored locally except tokens
+
+•
+
+Imaging – currently 1000 images available 
+with de-id in process for larger cohort
+
+• EEG – extraction in process at this point
+
+• Datasets are being used for training 
+
+activities and publications
+
+Data type
+
+Data 
+standard
+
+Demographics OMOP
+
+OMOP
+
+Controlled
+
+Controlled
+
+Access control
+
+Metadata
+
+Yes
+
+Yes
+
+Yes
+
+Yes
+
+OMOP
+
+Controlled
+
+OMOP
+
+Controlled
+
+Medication administration 
+(dosing time-stamped upon 
+each infusion change or 
+dose administration)
+
+Procedures (documentation 
+by providers)
+
+Nursing flowsheets 
+(high-frequency 
+documentation)
+
+Diagnoses (documentation 
+by providers)
+
+Clinical notes (extracted 
+and tokenized using OHNLP 
+toolkit)
+
+OMOP
+
+Controlled
+
+Yes
+
+Yes (OMOP schema)
+
+OHNLP
+
+Controlled
+
+Planned
+
+Published metadata 
+schema
+
+Yes (OMOP schema)
+
+Yes (OMOP schema)
+
+Yes (OMOP schema)
+
+Yes (OMOP schema with 
+extensions)
+
+Yes (OHNLP open source 
+schema)
+
+Yes (DICOM schema)
+
+Yes (PhysioNet schema 
+extended)
+
+Imaging (from PACS)
+
+DICOM
+
+Waveform telemetry 
+(bedside monitors, 
+gateway/middleware)
+
+WFDB
+
+Controlled
+
+Controlled
+
+Planned
+
+Yes
+
+Waveform EEG (hospital 
+database)
+
+EDF+ and 
+Persyst
+
+Controlled
+
+Planned
+
+Yes (open source EDF+ and 
+Persyst schema)
+
+ER
+
+Bridge2AI for Clinical Care Dataset
+
+ER
+
+CHoRUS Dataset
+
+ER
+
+CHoRUS Dataset
+
+ER
+
+CHoRUS Dataset
+
+ER
+
+Foundational Hands-On Training
+
+Gain experience with AI/ML in the Bridge2AI CHoRUS ecosystem
+Learn fundamental skills, tools, and design patterns for applying AI to clinical problems.
+
+Asynchronous
+Jupyter Notebooks
+
+Synchronous
+Office Hours
+
+Hybrid Workshop:
+AI in Clinical Care
+
+Python and Version Control
+
+Structured EHR Datasets
+
+ML for Clinical Applications
+
+Clinical Deep Learning
+
+Ethics of Clinical AI
+
+Virtual meetings
+with AI experts
+
+Guided coding exercises
+
+Notebook review
+
+Hands-on brainstorming
+
+Open Q&A
+
+Community team building
+
+ER
+
+Accessing the Data
+
+Registration Process
+
+Participants will ﬁll out a registration form with name, email, and institution
+
+Once access is granted and compute is provisioned, an email will be sent
+
+1
+
+2
+
+Licensing Agreement
+
+All participants must sign a licensing agreement included in the registration form before gaining 
+access to the dataset
+
+*This requirement is not a barrier to acceptance into the program. Program administrators will assist with this access if 
+needed.
+
+ER
+
+Training Overview
+
+Trainees will receive hands-on training on the Bridge2AI AI/ML for Clinical Care Network 
+and leverage the data and tools to create practical use cases, putting their new skills 
+to work in real-life situations and innovative data-driven research. Training will include:
+
+Workshops on using Jupyter 
+Notebooks
+
+Didactics on generative AI 
+and speciﬁc use cases
+
+Ongoing mentorship and support 
+using Collaborative Cloud 
+platforms
+
+Workshops on using the OHDSI 
+tool stack
+
+Instruction on creating 
+practical use cases
+
+Workshops on the OHDSI/OMOP 
+common data model
+
+Virtual live courses and 
+learning sessions
+
+Hands-on training on the 
+Bridge2AI AI/ML for Clinical 
+Care Collaborative Cloud
+
+ER
+
+Curriculum Overview
+
+Examples of Learning Sessions Provided:
+
+Host
+
+Lecturer(s)
+
+Delivery
+
+Approach
+
+Topic and Description
+
+MGH
+
+Morteza 
+Zabihi
+
+Live Online
+
+Didactic
+
+Machine Learning Basics - Intro to ML 
+methods for AI
+
+Hosts: MGB, UF, UTH, Tufts
+
+Delivery: Live Online, 
+Recorded, Asynchronous
+
+Format: Didactic, Workshop, 
+Office Hours, Self-Directed
+
+UF
+
+Zhenhong Hu
+
+Self-Directed
+
+Python 
+Notebook
+
+Intro to Python & Version Control
+
+UTH
+
+Debora 
+Simmons
+
+Recorded
+
+Lecture
+
+Ethics of AI in Clinical Practice - Safety, risk, 
+and legal considerations
+
+Tufts
+
+Jared 
+Houghtaling
+
+Live Online
+
+Didactic
+
+Working with EHR Data for Research
+
+MGH
+
+Siril Singa
+
+Workshop
+
+Collaborative
+
+Data Schemas in Clinical Cloud
+
+ER
+
+Curriculum Overview
+
+AI-LEARN Curriculum for Bridge2AI Broad Learning Communities
+
+Courses to leverage & sync DSTC_MHRI Workshops
+
+Curriculum 
+Offering
+
+Target Audience / 
+Purpose
+
+Key Topics
+
+Format: Online, self-paced 
+with video lectures, case 
+studies, and exercises. 
+
+Certiﬁcation: Available upon 
+completion. 
+
+AI/ML Essentials for 
+Healthcare
+
+No coding; 
+healthcare workers
+
+Intro to AI/ML, ethics, patient engagement
+
+Advanced 
+Decision-Making 
+Models
+
+Focus on model 
+selection for 
+healthcare
+
+Statistical modeling, decision trees, healthcare 
+use cases
+
+Cutting Edge AI 
+Training Modules
+
+Keeping up with AI 
+advancements
+
+Integration with DSTC_MHRI workshops, latest 
+AI/ML trends
+
+MS
+
+Curriculum Overview
+
+AI-LEARN Curriculum for Bridge2AI Broad Learning Communities 
+
+Courses to leverage & sync DSTC_MHRI Workshops
+
+Titles
+
+Key Topics
+
+Format
+
+Format: Sync workshops and 
+panel discussions hosted by 
+MHRI team
+
+Navigating IRB, Data Compliance, 
+and Quality Assurance in AI/ML 
+Healthcare Research
+
+- IRB protocol drafting
+- HIPAA/GDPR compliance for OMOP/FHIR data
+- QA audit frameworks
+
+Hyperparameter Tuning, Model 
+Selection, and Deployment for 
+Healthcare AI
+
+- Compare optimization techniques (e.g., 
+Bayesian)
+- Model interpretability vs. performance
+- Docker deployment demo
+
+Hands-on IRB drafting, 
+MedStar Program managers/ 
+IRB Chair Q&A, Compliance 
+checklist toolkit
+
+Live session with real-world 
+use cases 
+
+Bridging the Gap: Clinicians 
+and Data Scientists on 
+Methodological Challenges
+
+- Align AI projects with clinical priorities
+- Address EHR data limitations
+
+Panel (MedStar clinicians, data 
+scientists), breakout consultations, 
+live Q&A
+
+MS
+
+Program Trainee Objectives
+
+Objective 1
+
+Exhibit advanced expertise in AI/ML principles as they are applied to clinical care.
+
+Objective 2
+
+Develop and present use cases suitable to apply in Bridge2AI Data Topics.
+
+Objective 3
+
+Participate  in  collaborative  research  on  the  Bridge2AI  Clinical  Care  Cloud  platform,  applying 
+program insights and engaging with BRIDGE Center expertise for responsible AI/ML.
+
+Objective 4
+
+Prepare a compelling poster presentation for the AIM-AHEAD and Bridge2AI Annual Meetings, 
+submit  an  abstract  for  a  health  informatics  conference,  and/or  develop  a  manuscript  for  a 
+peer-reviewed journal.
+
+After completing the program, trainees will understand how to develop real-world use cases and how to address 
+concerns such as privacy in the responsible application of AI/ML. They will be equipped to engage in collaborative 
+research on the Bridge2AI platform and will connect with a community of professionals dedicated to advancing the 
+use of AI/ML in biomedical research.
+
+Outcome
+
+MS
+
+Trainee Expectations
+
+In order to successfully complete the program, selected trainees must:
+
+Time Commitment: Be able to commit to 8 hours per week (on average) of coursework and synchronous 
+class sessions 
+
+Attendance: Attend one virtual, synchronous class session per week (day of the week and time TBD)
+
+Assignments: Complete all assigned milestones and goals
+
+Presentation of Work: Attend both the AIM-AHEAD Annual Meeting* (July 2026) and the 
+Bridge2AI Annual Meeting* (May 2026) and present a works-in-progress poster. 
+
+*These are both in-person events and a travel allowance will be given to each trainee for travel expenses.
+
+TS
+
+Program Benefits
+
+Stipend
+
+An $8,000 stipend upon successful 
+completion of trainee milestones
+
+Travel allowances to attend both the 
+AIM-AHEAD Annual Meeting and the 
+Bridge2AI Conference in 2026  
+
+Support
+
+Support and guidance 
+from an experienced 
+AIM-AHEAD mentor
+
+Support from the 
+AIM-AHEAD Data 
+Science Training Core
+
+Direct 1:1 guidance, virtual oﬃce 
+hours, helpdesk support, and 
+concierge services supporting R/ 
+Python coding and the OHDSI tool 
+stack
+
+Training
+
+Training on:
+
+● Introductory machine learning and feature engineering.
+● The Bridge2AI AI/ML for Clinical Care Collaborative Cloud.
+● Ethics and Policy issues in AI/ML.
+● AI/ML for Clinical Care canonical Jupyter Notebooks.
+● The OHDSI/OMOP common data model.
+● Generative AI and speciﬁc use cases.
+● Creating practical use cases during Bridge2AI topics.
+
+TS
+
+AIM-AHEAD Mentorship Process
+
+Each  trainee  will  be  matched  with  a  mentor  who  will  provide  mentoring 
+and  support  throughout  the  training  program.  Mentors  are  matched  with 
+mentees using the Connect Platform.  Mentorship matches are made using: 
+
+AI Algorithm
+
+Administrative 
+Matching
+
+Mentor Pool 
+Search 
+
+TS
+
+Applicant Eligibility
+
+Citizenship 
+and Tax 
+Requirements 
+
+✓ Must be a U.S. Citizen, Permanent Resident, or Non-Citizen U.S. National
+✓ Permanent Residency must be established by Sept. 26, 2025
+✓ Temporary visa holders (F1, J1, H1, etc.) are not eligible
+✓ Accepted candidates must be able to submit a W-9 form
+
+✓ Current/former AIM-AHEAD program participants (awardees, fellows, trainees, 
+
+Participation 
+Restrictions
+
+mentors, advisors, coaches) are ineligible
+
+✓ Applicants may apply to more than one AIM-AHEAD training program but can only be 
+
+selected for one
+
+Special Cases
+
+✓ AIM-AHEAD Coordinating Center personnel and Federal employees may participate, 
+
+but will not receive stipend or travel allowance
+
+Note: Please refer to the full CFA on AIM-AHEAD.net for all eligibility requirements.
+
+TS
+
+Education & Experience 
+
+Education 
+Requirements
+
+✓ Minimum: Bachelor’s degree in physical sciences, life sciences, math, statistics, data 
+
+science, engineering, health sciences, or public health
+
+✓ Eligible applicants include: post-baccalaureate and graduate students, postdocs, medical 
+students/residents, allied health trainees, early-career investigators, and early-career 
+professionals in non-academic institutions
+
+Required Skills
+
+✓ Prior programming experience
+✓ Basic understanding of statistics
+✓ Working command of English
+
+Recommended 
+Skills
+
+✓ Coursework in probability and statistics or higher-level math
+✓ Coding experience in R or Python
+✓ Experience with data manipulation and management through coursework or research
+
+Note: Please refer to the full CFA on AIM-AHEAD.net for all eligibility requirements.
+
+TS
+
+Eligibility Requirements
+
+Eligible Organizations
+
+Higher education institutions
+
+Local, state, and tribal 
+governments
+
+Nonprofits 
+(with or without 501(c)(3) status)
+
+For-profit businesses and 
+organizations
+
+Other U.S.-based organizations
+
+(e.g., school districts, housing 
+authorities, faith-based, 
+community-based, and regional 
+organizations)
+
+Email Requirement
+
+In order to gain access to 
+the dataset, you will need 
+to have a “.edu” email 
+address.*
+
+*This requirement is not a barrier 
+to acceptance into the program. 
+
+Program administrators will 
+assist with this access if needed.
+
+Note: Please refer to the full CFA on AIM-AHEAD.net for all eligibility requirements.
+
+TS
+
+ 
+Application Requirements
+
+Submission Deadline: September 26, 2025 by 11:59 PM EST
+
+Required Application Elements
+
+●
+●
+
+●
+●
+●
+
+Proﬁle Information (basic applicant details in InfoReady portal)
+Letters of Support & Recommendation (two letters)
+
+○
+○
+
+Supervisor letter conﬁrming protected time
+At least one faculty recommendation (additional letters optional)
+
+Academic Transcript (undergraduate and, if applicable, graduate)
+Biographical Sketch (NIH biosketch or CV, max 5 pages)
+Statement of Rationale (≤2 pages) describing goals, need for training, relevant experience, and long-term plans
+
+Important Note
+
+●
+●
+
+Applicants may apply to more than one program but can only be selected for one
+Applicants will rank program preferences in the application
+
+*This is just an overview. Please see the CFA for the full list of application requirements
+
+TS
+
+Application Process
+
+Applications must be submitted between September 02, 2025 and September 26, 2025 at 11:59 PM EST 
+
+Note: Please use Chrome, Firefox, or Edge browsers. 
+
+1
+
+2
+
+3
+
+4
+
+Familiarize 
+yourself with the 
+program 
+requirements 
+outlined in the call 
+for applications 
+
+Gather all of the 
+required 
+application 
+materials 
+
+Create an 
+account on 
+AIM-AHEAD 
+Connect  and 
+register as a 
+“mentee/learner”
+
+Submit 
+application for 
+review using the 
+InfoReady 
+platform
+
+Up to 30 trainees will be selected 
+
+TS
+
+Key Program Dates
+
+CFA Release Date 
+
+September 02, 2025
+
+Application Deadline 
+
+September 26, 2025 by 11:59 PM EST
+
+Notice of Award
+
+November 10, 2025
+
+Program Start Date
+
+November 17, 2025
+
+Bridge2AI Conference 2026
+
+May 2026
+
+AIM-AHEAD Annual Meeting 2026
+
+July 2026
+
+Program End Date
+
+July 31,  2026
+
+TS
+
+Questions?
+
+Please see the FAQ 
+document  linked 
+above and in the chat 
+
+Scan the QR code above 
+to access the 
+AIM-AHEAD Bridge2AI 
+for Clinical Care CFA.
+
+TS
+
+
+
+================================================================================
+
+FILE: chorus4ai_org_row11.txt
+PATH: data/preprocessed/individual/CHORUS/chorus4ai_org_row11.txt
+SIZE: 2582 bytes
+--------------------------------------------------------------------------------
+
+CHoRUS – This repoitory is under review for potential modification in compliance with Administration directives.
+CHoRUS
+HomepageTeamProject OverviewToolsData AcquisitionStandardsCommunity EngagementEthicsDatasetLearning Resources & Opportunities
+This repoitory is under review for potential modification in compliance with Administration directives.
+AI for Clinical Care
+Creating a patient-focused collaborative hospital repository uniting standards for clinical care AI
+DataSet
+Expanding Artificial Intelligence and Machine Learning to Improve Recovery from Acute Illness
+The CHoRUS project is one data generation project of four in the National Institute of Health (NIH) funded Bridge2AI consortium. The goal is to work with projects to create ethically sourced datasets and tools around Artificial Intelligence and to create best practices for AI in health.
+Learn more about Bridge2AI Consortium
+Snapshot of the dataset
+Anticipated Final Dataset
+100,000
+Patient admissions
+9
+Different data modalities
+14
+Data contributing hospitals
+60+
+CHoRUS consortium members across 20 different institutions
+Current Released Dataset
+50,000
+Patient admissions from ICU, PICU, and NICU
+1.6 Billion
+Rows of EHR OMOP data
+7,642
+Admissions with Radiology Data
+23 Tb
+Waveform data
+CHoRUS Project Components
+Data
+The CHoRUS project is the collection of multi-modal data across 14 different hospitals. The data utilizes ongoing and new standardization practices. The team creates tools to support the cloud enclave.
+Ethics
+The CHoRUS consortium evaluates community perspectives on clinical care AI to find ways to increase trustworthiness of provenance and privacy in AI. New approaches are being created as existing legal and regulatory landscape is analyzed.
+People
+Dedicated to engaging the community in CHoRUS and Bridge2AI work products, CHoRUS project is dedicated to training engineers, data scientists, and clinicians to solidify AI in Clinical Care Data Engineering Infrastructure.
+Learning Opportunities
+Learn of different opportunities to gain hands-on training using the CHoRUS dataset to support the development of transnational AI in clinical care.
+Learn More
+CHoRUS Consortium
+This project is funded by the NIH under award number OT2OD032701. The content on this website is solely the responsibility of the authors and does not necessarily represent the official views of the NIH.
+Pages
+HomepageTeamProject OverviewToolsData AcquisitionStandardsCommunity EngagementEthicsDatasetLearning Resources & Opportunities
+Contact Us
+Ciera McCrary, MGH, Program Manager
+cmccrary@mgh.havard.edu
+
+================================================================================
+
 FILE: github_chorus_ai_row9.txt
 PATH: data/preprocessed/individual/CHORUS/github_chorus_ai_row9.txt
 SIZE: 8813 bytes
@@ -4866,3 +5864,12 @@ https://github.com/chorus-ai#table-of-contents
 7/7
 
 
+
+================================================================================
+
+FILE: reporter_nih_gov_project-details-10472824_row7.txt
+PATH: data/preprocessed/individual/CHORUS/reporter_nih_gov_project-details-10472824_row7.txt
+SIZE: 123 bytes
+--------------------------------------------------------------------------------
+
+RePORT ⟩ RePORTERWe're sorry but RePORTER doesn't work properly without JavaScript enabled. Please enable it to continue.

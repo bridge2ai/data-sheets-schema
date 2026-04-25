@@ -57,6 +57,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "DICOM to NIfTI conversion using dcm2niix v1.0.20211006"
 
 
   CleaningStrategy:
@@ -75,6 +77,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Outlier removal using 3-sigma rule; manual review of flagged records"
 
 
   LabelingStrategy:
@@ -90,6 +94,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: rai:dataAnnotationPlatform
+        annotations:
+          "d4d:docExample": "Label Studio 1.7.3"
       data_annotation_protocol:
         description: >-
           Annotation methodology, tasks, and protocols followed during labeling.
@@ -115,6 +121,8 @@ classes:
           Krippendorff's alpha, percent agreement). Include both the metric name and value.
         range: string
         slot_uri: schema:measurementMethod
+        annotations:
+          "d4d:docExample": "Cohen's κ = 0.82 (substantial agreement)"
       annotator_demographics:
         description: >-
           One or more demographic characteristics of the annotators, if available and relevant
@@ -131,6 +139,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Board-certified ophthalmologists graded retinal images using ETDRS scale"
 
 
   RawData:
@@ -169,18 +179,24 @@ classes:
         slot_uri: d4d:imputation_method
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "Multiple Imputation by Chained Equations (MICE)"
       imputed_fields:
         description: >
           Fields or columns where imputation was applied.
         slot_uri: d4d:imputed_fields
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "cgm_mean_glucose, hba1c_percent, bmi"
       imputation_rationale:
         description: >
           Justification for the imputation approach chosen, including
           assumptions made about missing data mechanisms.
         slot_uri: d4d:imputation_rationale
         range: string
+        annotations:
+          "d4d:docExample": "MICE with 20 imputations; predictors: age, sex, HbA1c"
       imputation_validation:
         description: >
           Methods used to validate imputation quality (if any).
@@ -227,6 +243,8 @@ classes:
         slot_uri: d4d:annotationQualityDetails
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "Inter-rater reliability: Cohen's κ = 0.82"
 
 
   MachineAnnotationTools:
@@ -254,6 +272,8 @@ classes:
         slot_uri: d4d:toolDescriptions
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "DeepDR automated grading system (AUC = 0.94)"
       tool_accuracy:
         description: >
           One or more known accuracy or performance metrics for the automated tools (if available).
@@ -261,3 +281,5 @@ classes:
         slot_uri: d4d:toolAccuracy
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "DeepDR AUC: 0.94 on EYEPACS validation set"

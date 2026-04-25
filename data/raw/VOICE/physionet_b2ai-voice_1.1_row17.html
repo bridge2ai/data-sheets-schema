@@ -32,6 +32,7 @@
     
   <script src="/static/mathjax/MathJax.js?config=MML_HTMLorMML"></script>
   <script src="/static/highlight/js/highlight.min.js"></script>
+  <script src="/static/custom/js/copy-to-clipboard.js"></script>
 
     <link rel="shortcut icon" type="image/png" href="/static/favicon.ico"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -78,6 +79,8 @@
         
           
         
+          
+            <a href="/about/faqs/" class="nav-link">FAQs</a>
           
         
 
@@ -188,6 +191,8 @@
       
         
       
+        
+          <a href="/about/faqs/" class="nav-link">FAQs</a>
         
       
       <hr>
@@ -318,6 +323,18 @@
         
         
           <p>
+            <strong>Raw Audio Data Access for Bridge2AI Voice Adult Cohort is via Synapse</strong>
+            <em>(March 9, 2026, 10:11 a.m.)</em>
+            <p>The published Bridge2AI-Voice Adult Dataset contains derived features from the audio waveforms. This PhysioNet project does not contain raw audios.</p>
+<p><span>Accessing raw audio is a more involved process and requires institutional sign off. Please reach out to the access committee if you are interested in access: DACO@b2ai-voice.org</span></p>
+<p><span>Data will be made available via Synapse: <a href="https://www.synapse.org/Synapse:syn72370534/">https://www.synapse.org/Synapse:syn72370534/</a></span></p>
+<p><span>For questions regarding the dataset itself, please contact the corresponding author, listed on the sidebar.</span></p>
+<p><span>Note that the Bridge2AI-Voice&nbsp;Pediatric Dataset is also available on PhysioNet:&nbsp;<a href="../../../../content/b2ai-voice-pediatric/">https://physionet.org/content/b2ai-voice-pediatric/</a></span></p>
+            
+          </p>
+          
+        
+          <p>
             <strong>Bridge2AI Raw Audio Data Access</strong>
             <em>(Sept. 11, 2025, 3:47 p.m.)</em>
             <p>The published Bridge2AI-Voice dataset contains derived features from the audio waveforms. Interested users can request access to the original raw audio data by contacting: DACO@b2ai-voice.org</p>
@@ -339,9 +356,20 @@
     
       <p>
         <strong>When using this resource, please cite: </strong>
-        <a href="#citationModal" data-toggle="modal">(show more options)</a>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="modal" data-target="#citationModal" title="View citation formats"><i class="bi bi-quote"></i> Cite</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary ml-1" title="Copy BibTeX" onclick="copyToClipboard(document.getElementById('bibtex-data-2').value); this.innerHTML='<i class=\'bi bi-check\'></i> Copied'; var btn=this; setTimeout(function(){ btn.innerHTML='<i class=\'bi bi-clipboard\'></i> Copy BibTeX'; }, 2000);"><i class="bi bi-clipboard"></i> Copy BibTeX</button>
         <br><span>Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., &amp; Bensoussan, Y. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). <i>PhysioNet</i>. RRID:SCR_007345. <a href="https://doi.org/10.13026/249v-w155">https://doi.org/10.13026/249v-w155</a></span>
       </p>
+      <textarea id="bibtex-data-2" style="display:none;">@article{PhysioNet-b2ai-voice-1.1,
+  author = {Johnson, Alistair and Bélisle-Pipon, Jean-Christophe and Dorr, David and Ghosh, Satrajit and Payne, Philip and Powell, Maria and Rameau, Anais and Ravitsky, Vardit and Sigaras, Alexandros and Elemento, Olivier and Bensoussan, Yael},
+  title = {{Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information}},
+  journal = {{PhysioNet}},
+  year = {2025},
+  month = jan,
+  note = {Version 1.1},
+  doi = {10.13026/249v-w155},
+  url = {https://doi.org/10.13026/249v-w155}
+}</textarea>
 
       <div class="modal fade" id="citationModal">
   <div class="modal-dialog citation" role="document">
@@ -356,32 +384,60 @@
 
       <table><tbody>
         
+          
           <tr>
             <th>MLA</th>
             <td>Johnson, Alistair, et al. "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information" (version 1.1). <i>PhysioNet</i> (2025). RRID:SCR_007345. <a href="https://doi.org/10.13026/249v-w155">https://doi.org/10.13026/249v-w155</a></td>
           </tr>
+          
         
+          
           <tr>
             <th>APA</th>
             <td>Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., &amp; Bensoussan, Y. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). <i>PhysioNet</i>. RRID:SCR_007345. <a href="https://doi.org/10.13026/249v-w155">https://doi.org/10.13026/249v-w155</a></td>
           </tr>
+          
         
+          
           <tr>
             <th>Chicago</th>
             <td>Johnson, Alistair, Bélisle-Pipon, Jean-Christophe, Dorr, David, Ghosh, Satrajit, Payne, Philip, Powell, Maria, Rameau, Anais, Ravitsky, Vardit, Sigaras, Alexandros, Elemento, Olivier, and Yael Bensoussan. "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information" (version 1.1). <i>PhysioNet</i> (2025). RRID:SCR_007345. <a href="https://doi.org/10.13026/249v-w155">https://doi.org/10.13026/249v-w155</a></td>
           </tr>
+          
         
+          
           <tr>
             <th>Harvard</th>
             <td>Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., and Bensoussan, Y. (2025) 'Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information' (version 1.1), <i>PhysioNet</i>. RRID:SCR_007345. Available at: <a href='https://doi.org/10.13026/249v-w155'>https://doi.org/10.13026/249v-w155</a></td>
           </tr>
+          
         
+          
           <tr>
             <th>Vancouver</th>
             <td>Johnson A, Bélisle-Pipon J, Dorr D, Ghosh S, Payne P, Powell M, Rameau A, Ravitsky V, Sigaras A, Elemento O, Bensoussan Y. Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). PhysioNet. 2025. RRID:SCR_007345. Available from: <a href="https://doi.org/10.13026/249v-w155">https://doi.org/10.13026/249v-w155</a></td>
           </tr>
+          
+        
+          
         
       </tbody></table>
+      
+      <div class="mt-3">
+        <strong>BibTeX</strong>
+        <button class="btn btn-sm btn-outline-secondary ml-2" onclick="copyToClipboard(document.getElementById('bibtex-data-2').value); var btn=this; btn.textContent='Copied!'; setTimeout(function(){ btn.textContent='Copy'; }, 2000)">Copy</button>
+        <pre id="bibtex-citation-2" class="mt-2 p-2 border rounded" style="white-space: pre-wrap; background-color: #f8f9fa;">@article{PhysioNet-b2ai-voice-1.1,
+  author = {Johnson, Alistair and Bélisle-Pipon, Jean-Christophe and Dorr, David and Ghosh, Satrajit and Payne, Philip and Powell, Maria and Rameau, Anais and Ravitsky, Vardit and Sigaras, Alexandros and Elemento, Olivier and Bensoussan, Yael},
+  title = {{Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information}},
+  journal = {{PhysioNet}},
+  year = {2025},
+  month = jan,
+  note = {Version 1.1},
+  doi = {10.13026/249v-w155},
+  url = {https://doi.org/10.13026/249v-w155}
+}</pre>
+      </div>
+      
             </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -788,6 +844,26 @@ df = pd.read_csv(&quot;phenotype.tsv&quot;, sep=&quot;\t&quot;, header=0)
         </div>
 
         <div class="card my-4">
+          <h5 class="card-header">Project Views</h5>
+          <div class="card-body text-center">
+            <div class="d-flex justify-content-around mb-2">
+              <div>
+                <h3 class="mb-0">208</h3>
+                <small class="text-muted">Current Version</small>
+              </div>
+              <div>
+                <h3 class="mb-0">683</h3>
+                <small class="text-muted">All Versions</small>
+              </div>
+            </div>
+            <small class="text-muted mb-0"><em>Project Views by Unique Registered Users</em></small>
+            <div class="mt-2">
+              <a href="/content/b2ai-voice/metrics/1.1/" class="btn btn-sm btn-outline-secondary">View Details</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card my-4">
           <h5 class="card-header">Corresponding Author</h5>
           <div class="card-body">
             
@@ -795,29 +871,49 @@ df = pd.read_csv(&quot;phenotype.tsv&quot;, sep=&quot;\t&quot;, header=0)
             
           </div>
         </div>
-        
-          <div class="card my-4">
-            <h5 class="card-header">Versions</h5>
-            <ul class="list-group">
-              
-                <li class="list-group-item"><a
-                  href="/content/b2ai-voice/1.1/">1.1</a>
-                  - Jan. 17, 2025
-                </li>
-              
-                <li class="list-group-item"><a
-                  href="/content/b2ai-voice/2.0.0/">2.0.0</a>
-                  - April 16, 2025
-                </li>
-              
-                <li class="list-group-item"><a
-                  href="/content/b2ai-voice/2.0.1/">2.0.1</a>
-                  - Aug. 18, 2025
-                </li>
-              
-            </ul>
-          </div>
-        
+
+        <div class="card my-4">
+  <h5 class="card-header">Versions</h5>
+  <ul class="list-group list-group-flush project-version-list">
+    
+      <li class="list-group-item">
+        <a href="/content/b2ai-voice/1.1/">
+          <span class="project-version">1.1</span>
+          <time datetime="2025-01-17">
+            Jan. 17, 2025
+          </time>
+        </a>
+      </li>
+    
+      <li class="list-group-item">
+        <a href="/content/b2ai-voice/2.0.0/">
+          <span class="project-version">2.0.0</span>
+          <time datetime="2025-04-16">
+            April 16, 2025
+          </time>
+        </a>
+      </li>
+    
+      <li class="list-group-item">
+        <a href="/content/b2ai-voice/2.0.1/">
+          <span class="project-version">2.0.1</span>
+          <time datetime="2025-08-18">
+            Aug. 18, 2025
+          </time>
+        </a>
+      </li>
+    
+      <li class="list-group-item">
+        <a href="/content/b2ai-voice/3.0.0/">
+          <span class="project-version">3.0.0</span>
+          <time datetime="2025-12-16">
+            Dec. 16, 2025
+          </time>
+        </a>
+      </li>
+    
+  </ul>
+</div>
 
       </div>
       <!-- /.sidebar -->
@@ -828,8 +924,8 @@ df = pd.read_csv(&quot;phenotype.tsv&quot;, sep=&quot;\t&quot;, header=0)
         
           The files for this version of the project (1.1) are no longer available. The
           latest version of this project is
-          <a href="/content/b2ai-voice/2.0.1/"
-            target="_blank">2.0.1</a>
+          <a href="/content/b2ai-voice/3.0.0/"
+            target="_blank">3.0.0</a>
         
       </div>
     

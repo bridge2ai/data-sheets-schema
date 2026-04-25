@@ -1,27 +1,27 @@
 # Detailed Evaluation: AI_READI - GPT5
 
-Evaluated: 2025-11-21T11:37:05.482953
+Evaluated: 2026-04-10T14:06:47.012777
 File: `data/d4d_concatenated/gpt5/AI_READI_d4d.yaml`
 
 ## Overall Scores
 
-- **Rubric10**: 9.0/50 (18.0%)
-- **Rubric20**: 36.0/84 (42.9%)
+- **Rubric10**: 3.0/50 (6.0%)
+- **Rubric20**: 10.0/88 (11.4%)
 
 ## Rubric10 Element Scores
 
 | ID | Element | Score | Details |
 |----|---------|-------|---------|
-| 1 | Dataset Discovery and Identification | 4/5 | 4/5 sub-elements present |
-| 2 | Dataset Access and Retrieval | 1/5 | 1/5 sub-elements present |
-| 3 | Data Reuse and Interoperability | 1/5 | 1/5 sub-elements present |
+| 1 | Dataset Discovery and Identification | 3/5 | 3/5 sub-elements present |
+| 2 | Dataset Access and Retrieval | 0/5 | 0/5 sub-elements present |
+| 3 | Data Reuse and Interoperability | 0/5 | 0/5 sub-elements present |
 | 4 | Ethical Use and Privacy Safeguards | 0/5 | 0/5 sub-elements present |
 | 5 | Data Composition and Structure | 0/5 | 0/5 sub-elements present |
-| 6 | Data Provenance and Version Tracking | 2/5 | 2/5 sub-elements present |
+| 6 | Data Provenance and Version Tracking | 0/5 | 0/5 sub-elements present |
 | 7 | Scientific Motivation and Funding Transparency | 0/5 | 0/5 sub-elements present |
 | 8 | Technical Transparency (Data Collection and Processing) | 0/5 | 0/5 sub-elements present |
 | 9 | Dataset Evaluation and Limitations Disclosure | 0/5 | 0/5 sub-elements present |
-| 10 | Cross-Platform and Community Integration | 1/5 | 1/5 sub-elements present |
+| 10 | Cross-Platform and Community Integration | 0/5 | 0/5 sub-elements present |
 
 ### Rubric10 Sub-Element Details
 
@@ -30,151 +30,157 @@ File: `data/d4d_concatenated/gpt5/AI_READI_d4d.yaml`
 
 Can a user or system discover and uniquely identify this dataset?
 
-- ✅ **Persistent Identifier (DOI, RRID, etc.)**
-  - Found: id: https://fairhub.io/datasets/2
+- ✅ **Persistent Identifier (DOI, RRID, or URI)**
+  - Found: id: ai-readi-dataset-collection
 - ✅ **Dataset Title and Description Completeness**
-  - Found: title: AI-READI Flagship Dataset of Type 2 Diabetes
-- ✅ **Keywords or Tags for Searchability**
-  - Found: keywords: list (non-empty)
-- ❌ **Dataset Landing Page or Platform URL**
-  - Fields checked: page, external_resources
-- ✅ **Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)**
-  - Found: keywords: list (non-empty)
+  - Found: title: AI-READI Dataset Collection
+- ❌ **Keywords or Tags for Searchability**
+  - Fields checked: keywords
+- ✅ **Landing Page and Resources (page, hierarchical resources)**
+  - Found: resources: list (non-empty)
+- ❌ **Hierarchical Structure (parent datasets, relationships)**
+  - Fields checked: parent_datasets, related_datasets
 
 #### 2. Dataset Access and Retrieval
 
 Can the dataset and its associated resources be located, accessed, and downloaded?
 
-- ❌ **Access Mechanism Defined (e.g., open, restricted, registered)**
-  - Fields checked: access_and_licensing.access_policy
-- ❌ **Data Use Agreement Required?**
-  - Fields checked: access_and_licensing.data_use_agreement
-- ✅ **Download URL or Platform Link Available**
-  - Found: distribution_formats: list (non-empty)
-- ❌ **File Formats Specified**
-  - Fields checked: data_characteristics.data_formats, files.listing.type
-- ❌ **External Links to Similar or Related Datasets**
-  - Fields checked: external_resources, project_website
+- ❌ **Access Policy and IP Restrictions Defined**
+  - Fields checked: license_and_use_terms, ip_restrictions
+- ❌ **Regulatory Compliance and Confidentiality Classification**
+  - Fields checked: regulatory_restrictions, confidentiality_level, hipaa_compliant, other_compliance, governance_committee_contact
+- ❌ **Download URL or Platform Link Available**
+  - Fields checked: download_url
+- ❌ **Distribution Formats and File Types Specified**
+  - Fields checked: distribution_formats, format, media_type
+- ❌ **Related Datasets and External Resources Linked**
+  - Fields checked: related_datasets, external_resources
 
 #### 3. Data Reuse and Interoperability
 
 Is sufficient information provided to reuse and integrate the dataset with others?
+Note: Evaluate whether the dataset is designed for integration with similar datasets, including: common identifiers for cross-dataset linking, standardized formats for data harmonization, and documented integration procedures.
 
-- ✅ **License Terms Allow Reuse**
-  - Found: license_and_use_terms.description: Public data are available for download upon agreement with a license defining permitted uses. Full d
-- ❌ **Data Formats Are Standardized (e.g., JSON, TSV, Parquet)**
-  - Fields checked: data_characteristics.data_formats
+
+- ❌ **License Terms Allow Reuse**
+  - Fields checked: license_and_use_terms
+- ❌ **Data Formats Are Standardized (encoding, format)**
+  - Fields checked: format, encoding
 - ❌ **Schema or Ontology Conformance Stated**
-  - Fields checked: conforms_to
-- ❌ **Identifiers Defined for Linking (e.g., participant_id)**
-  - Fields checked: data_characteristics.identifiers_in_files
-- ❌ **Documentation of Processing Tools for Reproducibility**
-  - Fields checked: software_and_tools, open_source_code
+  - Fields checked: conforms_to, conforms_to_schema
+- ❌ **Variable Metadata with Identifiers Defined**
+  - Fields checked: variables
+- ❌ **Use Guidance Provided (intended, prohibited uses)**
+  - Fields checked: intended_uses, prohibited_uses, discouraged_uses
 
 #### 4. Ethical Use and Privacy Safeguards
 
 Does the dataset provide clear information about consent, privacy, and ethical oversight?
 
-- ❌ **IRB or Ethics Review Documented**
-  - Fields checked: ethics.irb_approval
-- ❌ **Deidentification Method Described (e.g., HIPAA Safe Harbor)**
-  - Fields checked: deidentification_and_privacy.approach
-- ❌ **Identifiers Removed or Masked**
-  - Fields checked: deidentification_and_privacy.examples_of_identifiers_removed
+- ❌ **IRB or Ethics Review and Data Protection Impact**
+  - Fields checked: ethical_reviews, human_subject_research, data_protection_impacts
+- ❌ **Deidentification Method Described**
+  - Fields checked: is_deidentified
+- ❌ **Privacy Protections and Re-identification Risk Assessment**
+  - Fields checked: participant_privacy, reidentification_risk
 - ❌ **Informed Consent Obtained from Participants**
-  - Fields checked: collection_process.consent
-- ❌ **Ethical Sourcing Statement Included**
-  - Fields checked: ethics.ethical_position
+  - Fields checked: informed_consent
+- ❌ **Vulnerable Populations and Compensation Documented**
+  - Fields checked: vulnerable_populations, participant_compensation
 
 #### 5. Data Composition and Structure
 
-Can the dataset’s structure, modality, and population be understood from metadata?
+Can the dataset's structure, modality, and population be understood from metadata?
 
-- ❌ **Cohort or Population Characteristics Described**
-  - Fields checked: composition.population
-- ❌ **Number of Participants or Samples Reported**
-  - Fields checked: composition.population.participants
-- ❌ **Modalities or Data Types Listed**
-  - Fields checked: data_characteristics.modalities
-- ❌ **Conditions or Phenotypes Represented**
-  - Fields checked: composition.condition_groups
-- ❌ **File Dimensions or Sampling Rates Provided**
-  - Fields checked: data_characteristics.sampling_and_dimensions
+- ❌ **Cohort or Subpopulations Characteristics Described**
+  - Fields checked: subpopulations
+- ❌ **Number of Instances or Samples Reported**
+  - Fields checked: instances
+- ❌ **Variable-Level Metadata, Tabular Flag, and Data Splits**
+  - Fields checked: variables, is_tabular, is_data_split, is_subpopulation
+- ❌ **Data Topics or Conditions Represented**
+  - Fields checked: instances
+- ❌ **Data Quality, Anomalies, and Missing Data Documented**
+  - Fields checked: anomalies, sampling_strategies, missing_data_documentation
 
 #### 6. Data Provenance and Version Tracking
 
 Can a user determine dataset versions, update history, and provenance?
 
 - ❌ **Dataset Version Number Provided**
-  - Fields checked: dataset_version, version
-- ❌ **Version History Documented (release_notes)**
-  - Fields checked: release_notes
-- ❌ **Change Descriptions for Each Version**
-  - Fields checked: release_notes.notes
-- ✅ **Update Schedule or Frequency Indicated**
-  - Found: updates: dict (non-empty)
-- ✅ **Versioned Documentation or External References**
-  - Found: version_access: dict (non-empty)
+  - Fields checked: version
+- ❌ **Version Access Methods Documented**
+  - Fields checked: version_access
+- ❌ **Change Descriptions and Errata Provided**
+  - Fields checked: errata, updates
+- ❌ **Update Schedule or Frequency Indicated**
+  - Fields checked: updates
+- ❌ **Provenance, Source Derivation, and Raw Data Sources**
+  - Fields checked: was_derived_from, release_notes, raw_data_sources
 
 #### 7. Scientific Motivation and Funding Transparency
 
 Does the metadata clearly state why the dataset exists and who funded it?
 
-- ❌ **Motivation or Rationale for Dataset Creation**
-  - Fields checked: motivation
-- ❌ **Primary Research Objective or Task**
-  - Fields checked: intended_uses.primary
-- ❌ **Funding Source or Grant Agency Listed**
-  - Fields checked: funding_and_acknowledgements.funding.agency
-- ❌ **Award Number or Grant ID Present**
-  - Fields checked: funding_and_acknowledgements.funding.award_number
-- ❌ **Acknowledgement of Platform or Participant Support**
-  - Fields checked: funding_and_acknowledgements.acknowledgements
+- ❌ **Motivation or Purpose for Dataset Creation**
+  - Fields checked: purposes
+- ❌ **Primary Research Objectives or Tasks**
+  - Fields checked: tasks
+- ❌ **Funding Sources and Mechanisms Listed**
+  - Fields checked: funders
+- ❌ **Grant IDs or Award Numbers Present**
+  - Fields checked: funders
+- ❌ **Creators and Acknowledgements Documented**
+  - Fields checked: creators, funders
 
 #### 8. Technical Transparency (Data Collection and Processing)
 
 Can data collection and processing steps be replicated or understood?
+Note: Preprocessing and collection metadata may be represented as structured text descriptions OR as machine-readable provenance graphs (e.g., W3C PROV-O, workflow graphs). Evaluation should check for: (1) structured text descriptions OR (2) graph representations with entity-activity-agent relationships. Both formats are acceptable.
 
-- ❌ **Collection Setting or Sites Described**
-  - Fields checked: collection_process.setting
-- ❌ **Data Capture Method or Device Listed**
-  - Fields checked: collection_process.data_capture
-- ❌ **Preprocessing or Cleaning Steps Documented**
-  - Fields checked: preprocessing_and_derived_data.raw_audio_processing
-- ❌ **Open-Source Processing Code Provided**
-  - Fields checked: software_and_tools.preprocessing_code
-- ❌ **External Standards or References Cited**
-  - Fields checked: references
+
+- ❌ **Collection Mechanisms and Settings Described**
+  - Fields checked: collection_mechanisms
+- ❌ **Data Acquisition Methods Listed**
+  - Fields checked: acquisition_methods
+- ❌ **Preprocessing, Cleaning, Labeling, and Annotation Quality**
+  - Fields checked: preprocessing_strategies, cleaning_strategies, labeling_strategies, annotation_analyses, machine_annotation_tools
+- ❌ **Software and Tools Documented**
+  - Fields checked: software_and_tools
+- ❌ **External Standards, Resources, and Imputation Protocols**
+  - Fields checked: external_resources, conforms_to, imputation_protocols
 
 #### 9. Dataset Evaluation and Limitations Disclosure
 
 Does the metadata communicate known risks, biases, or dataset limitations?
 
-- ❌ **Limitations Section Present**
-  - Fields checked: limitations
-- ❌ **Sampling Bias or Representativeness Noted**
-  - Fields checked: composition.population, sampling_and_dimensions
-- ❌ **Quality Control or Validation Steps Mentioned**
-  - Fields checked: preprocessing_and_derived_data, data_quality
-- ❌ **Known Risks or Use Constraints Listed**
-  - Fields checked: intended_uses.usage_notes
-- ❌ **Conflicts of Interest Declared**
-  - Fields checked: ethics.conflicts_of_interest
+- ❌ **Known Limitations Documented**
+  - Fields checked: known_limitations
+- ❌ **Biases Categorized Using Standard Taxonomy (RAI-aligned)**
+  - Fields checked: known_biases
+- ❌ **Data Anomalies and Quality Issues Noted**
+  - Fields checked: anomalies
+- ❌ **Sensitive Content and Warnings Provided**
+  - Fields checked: sensitive_elements, content_warnings
+- ❌ **Ethical Review and Social Impact Analysis**
+  - Fields checked: ethical_reviews, future_use_impacts
 
 #### 10. Cross-Platform and Community Integration
 
 Does the dataset connect to wider data ecosystems, repositories, or standards?
+Note: For Bridge2AI datasets, citation metadata is mandatory and should include: (1) formatted citation string, (2) DOI, and (3) citation instructions. Hosting platform identification should specify the publisher or repository (e.g., PhysioNet, Dataverse, institutional repositories).
 
-- ❌ **Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)**
-  - Fields checked: publisher, access_and_licensing.platform
-- ❌ **Cross-referenced DOIs or Related Dataset Links**
-  - Fields checked: external_resources, references
-- ❌ **Community Standards or Schema Reference**
+
+- ❌ **Dataset Published on a Recognized Platform**
+  - Fields checked: publisher
+- ❌ **Citation and DOI for Cross-referencing**
+  - Fields checked: citation, doi
+- ❌ **Community Standards or Schema Conformance**
   - Fields checked: conforms_to
-- ✅ **Associated Outreach Materials (e.g., webinar, documentation)**
-  - Found: distribution_formats: list (non-empty)
-- ❌ **Similar Dataset Links or Thematic Grouping**
-  - Fields checked: project, related_datasets
+- ❌ **Outreach Materials and Documentation Links**
+  - Fields checked: external_resources, page
+- ❌ **Related Datasets with Typed Relationships**
+  - Fields checked: related_datasets
 
 ## Rubric20 Question Scores
 
@@ -185,19 +191,19 @@ Does the dataset connect to wider data ecosystems, repositories, or standards?
 |----|----------|-------|--------|
 | 1 | Field Completeness | 4.0/5 | ✅ |
 | 2 | Entry Length Adequacy | 4.0/5 | ✅ |
-| 3 | Keyword Diversity | 4.0/5 | ✅ |
-| 4 | File Enumeration and Type Variety | 4.0/5 | ✅ |
+| 3 | Keyword Diversity | 0.0/5 | ❌ |
+| 4 | File Enumeration and Type Variety | 0.0/5 | ❌ |
 | 5 | Data File Size Availability | Fail | ❌ |
 
 ### Metadata Quality & Content
 
 | ID | Question | Score | Status |
 |----|----------|-------|--------|
-| 6 | Dataset Identification Metadata | Fail | ❌ |
+| 6 | Dataset Identification Metadata | Pass | ✅ |
 | 7 | Funding and Acknowledgements Completeness | 0.0/5 | ❌ |
 | 8 | Ethical and Privacy Declarations | 0.0/5 | ❌ |
-| 9 | Access Requirements Documentation | 4.0/5 | ✅ |
-| 10 | Interoperability and Standardization | 0.0/5 | ❌ |
+| 9 | Access Requirements and Governance Documentation | 0.0/5 | ❌ |
+| 10 | Interoperability, Standardization, and Cross-Platform Integration | 0.0/5 | ❌ |
 
 ### Technical Documentation
 
@@ -205,16 +211,16 @@ Does the dataset connect to wider data ecosystems, repositories, or standards?
 |----|----------|-------|--------|
 | 11 | Tool and Software Transparency | 0.0/5 | ❌ |
 | 12 | Collection Protocol Clarity | 0.0/5 | ❌ |
-| 13 | Version History Documentation | 0.0/5 | ❌ |
+| 13 | Version History, Maintenance, and Sustainability | 0.0/5 | ❌ |
 | 14 | Associated Publications | 0.0/5 | ❌ |
-| 15 | Human Subject Representation | 4.0/5 | ✅ |
+| 15 | Human Subject Representation | 0.0/5 | ❌ |
 
 ### FAIRness & Accessibility
 
 | ID | Question | Score | Status |
 |----|----------|-------|--------|
-| 16 | Findability (Persistent Links) | Fail | ❌ |
-| 17 | Accessibility (Access Mechanism) | 4.0/5 | ✅ |
-| 18 | Reusability (License Clarity) | 4.0/5 | ✅ |
-| 19 | Data Integrity and Provenance | 4.0/5 | ✅ |
-| 20 | Interlinking Across Platforms | Fail | ❌ |
+| 16 | Findability (Persistent Links) | Pass | ✅ |
+| 17 | Accessibility (Access Mechanism) | 0.0/5 | ❌ |
+| 18 | Reusability, Use Guidance, and Social Impact | 0.0/5 | ❌ |
+| 19 | Data Integrity, Provenance Graph, and Quality | 0.0/5 | ❌ |
+| 20 | Bias Documentation and Responsible AI Alignment | 0.0/5 | ❌ |

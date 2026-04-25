@@ -2204,6 +2204,27 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "jinjanator"
+version = "25.2.0"
+description = "Command-line interface to Jinja2 for templating in shell scripts."
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+markers = "python_version == \"3.9\""
+files = [
+    {file = "jinjanator-25.2.0-py3-none-any.whl", hash = "sha256:b74f86b6daa447c2154b63386c7fcfcd4eb012b24d7c018b2e1c4ec7b8351930"},
+    {file = "jinjanator-25.2.0.tar.gz", hash = "sha256:d3df38c267f9274ad5460a4f29b88b460de40a9155dfc9b28633c38ac42df766"},
+]
+
+[package.dependencies]
+attrs = "*"
+jinja2 = ">=2.7.2"
+jinjanator-plugins = "==24.2.*"
+python-dotenv = ">=1"
+pyyaml = "*"
+typing-extensions = "*"
+
+[[package]]
+name = "jinjanator"
 version = "25.3.1"
 description = "Command-line interface to Jinja2 for templating in shell scripts."
 optional = false
@@ -2221,6 +2242,24 @@ jinja2 = ">=2.7.2"
 jinjanator-plugins = "==25.1.*"
 python-dotenv = ">=1"
 pyyaml = "*"
+typing-extensions = "*"
+
+[[package]]
+name = "jinjanator-plugins"
+version = "24.2.0"
+description = "Package which provides the plugin API for the jinjanator tool"
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+markers = "python_version == \"3.9\""
+files = [
+    {file = "jinjanator_plugins-24.2.0-py3-none-any.whl", hash = "sha256:a0adfe5df0e8bd1a025602bc1867505b243eac5783464f8ce2b8600ac41e73ba"},
+    {file = "jinjanator_plugins-24.2.0.tar.gz", hash = "sha256:5fa8eecb6d9fbef5e7947b3820da4bd7b2ef3f102721e42382de5e71e52b409a"},
+]
+
+[package.dependencies]
+attrs = "*"
+pluggy = "*"
 typing-extensions = "*"
 
 [[package]]
@@ -2722,7 +2761,7 @@ version = "6.0.0"
 description = "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API."
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "lxml-6.0.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:35bc626eec405f745199200ccb5c6b36f202675d204aa29bb52e27ba2b71dea8"},
     {file = "lxml-6.0.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:246b40f8a4aec341cbbf52617cad8ab7c888d944bfe12a6abd2b1f6cfb6f6082"},
@@ -4734,17 +4773,33 @@ files = [
 six = ">=1.5"
 
 [[package]]
+name = "python-docx"
+version = "1.2.0"
+description = "Create, read, and update Microsoft Word .docx files."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "python_docx-1.2.0-py3-none-any.whl", hash = "sha256:3fd478f3250fbbbfd3b94fe1e985955737c145627498896a8a6bf81f4baf66c7"},
+    {file = "python_docx-1.2.0.tar.gz", hash = "sha256:7bc9d7b7d8a69c9c02ca09216118c86552704edc23bac179283f2e38f86220ce"},
+]
+
+[package.dependencies]
+lxml = ">=3.1.0"
+typing_extensions = ">=4.9.0"
+
+[[package]]
 name = "python-dotenv"
 version = "1.2.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev"]
-markers = "python_version >= \"3.10\""
 files = [
     {file = "python_dotenv-1.2.1-py3-none-any.whl", hash = "sha256:b81ee9561e9ca4004139c6cbba3a238c32b03e4894671e181b671e8cb8425d61"},
     {file = "python_dotenv-1.2.1.tar.gz", hash = "sha256:42667e897e16ab0d66954af0e60a9caa94f0fd4ecf3aaf6d2d260eec1aa36ad6"},
 ]
+markers = {main = "python_version >= \"3.10\""}
 
 [package.extras]
 cli = ["click (>=5.0)"]
@@ -6152,28 +6207,11 @@ scipy = ["scipy"]
 
 [[package]]
 name = "sssom-schema"
-version = "1.0.0"
-description = "SSSOM is a Simple Standard for Sharing Ontology Mappings."
-optional = false
-python-versions = "<4.0.0,>=3.8.1"
-groups = ["dev"]
-markers = "python_version == \"3.9\""
-files = [
-    {file = "sssom_schema-1.0.0-py3-none-any.whl", hash = "sha256:e41031637094eddce7e71d6642e1f7b3f972aae08c0039c1dd27fe5208835d15"},
-    {file = "sssom_schema-1.0.0.tar.gz", hash = "sha256:62ae18f0f1a7fd10a1d0bfdf1167a8b5761b3f5473bc1e5243005e163aceaec9"},
-]
-
-[package.dependencies]
-linkml-runtime = "*"
-
-[[package]]
-name = "sssom-schema"
 version = "1.1.0a3"
 description = "SSSOM is a Simple Standard for Sharing Ontology Mappings."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["dev"]
-markers = "python_version >= \"3.10\""
 files = [
     {file = "sssom_schema-1.1.0a3-py3-none-any.whl", hash = "sha256:ca737e771919e947eb85240f56f5c7fd78980992f92cdb130195cd42aca5215b"},
     {file = "sssom_schema-1.1.0a3.tar.gz", hash = "sha256:b68a4a14a3712c01b8637147b9f7e5153806acdba966cde86961030df2533b1c"},
@@ -6908,4 +6946,4 @@ docs = []
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "81247ade81957972a533dc06b56bb4c310be2bd2a8f9c5a1b053c8dcf06374e6"
+content-hash = "6bebe6de8c52d5d4ca2bd214e8b241a66eab6c34a2c915567483a78297ef337b"

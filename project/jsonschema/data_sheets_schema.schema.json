@@ -970,7 +970,7 @@
                     ]
                 },
                 "annotation_analyses": {
-                    "description": "Analysis of annotation quality and inter-annotator agreement.",
+                    "description": "One or more analyses of annotation quality and inter-annotator agreement.",
                     "items": {
                         "$ref": "#/$defs/AnnotationAnalysis"
                     },
@@ -1271,7 +1271,7 @@
                     ]
                 },
                 "file_collections": {
-                    "description": "Collections of files within this dataset. Each collection represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart in RO-Crate converters.",
+                    "description": "Collection of file groups within this dataset. Each entry represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart in RO-Crate converters.",
                     "items": {
                         "$ref": "#/$defs/FileCollection"
                     },
@@ -1326,7 +1326,7 @@
                     ]
                 },
                 "informed_consent": {
-                    "description": "Details about informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
+                    "description": "One or more records detailing informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
                     "items": {
                         "$ref": "#/$defs/InformedConsent"
                     },
@@ -1346,7 +1346,7 @@
                     ]
                 },
                 "intended_uses": {
-                    "description": "Explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.",
+                    "description": "List of explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.",
                     "items": {
                         "$ref": "#/$defs/IntendedUse"
                     },
@@ -1417,7 +1417,7 @@
                     ]
                 },
                 "known_biases": {
-                    "description": "Known biases present in the dataset that may affect fairness, representativeness, or model performance. Uses BiasTypeEnum for standardized bias categorization mapped to the AI Ontology (AIO).",
+                    "description": "List of known biases present in the dataset that may affect fairness, representativeness, or model performance. Uses BiasTypeEnum for standardized bias categorization mapped to the AI Ontology (AIO).",
                     "items": {
                         "$ref": "#/$defs/DatasetBias"
                     },
@@ -1427,7 +1427,7 @@
                     ]
                 },
                 "known_limitations": {
-                    "description": "Known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
+                    "description": "List of known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
                     "items": {
                         "$ref": "#/$defs/DatasetLimitation"
                     },
@@ -1480,7 +1480,7 @@
                     "description": "License and usage terms governing dataset access and use. LicenseAndUseTerms object from the Data Governance module describing the applicable license, permitted uses, and any restrictions."
                 },
                 "machine_annotation_tools": {
-                    "description": "Automated annotation tools used in dataset creation.",
+                    "description": "List of automated annotation tools used in dataset creation.",
                     "items": {
                         "$ref": "#/$defs/MachineAnnotationTools"
                     },
@@ -1500,7 +1500,7 @@
                     ]
                 },
                 "missing_data_documentation": {
-                    "description": "Documentation of missing data patterns and handling strategies.",
+                    "description": "One or more records documenting missing data patterns and handling strategies.",
                     "items": {
                         "$ref": "#/$defs/MissingDataDocumentation"
                     },
@@ -1541,7 +1541,7 @@
                     ]
                 },
                 "parent_datasets": {
-                    "description": "Parent datasets that this dataset is part of or derived from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).",
+                    "description": "One or more parent datasets that this dataset is part of or derived from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).",
                     "items": {
                         "$ref": "#/$defs/Dataset"
                     },
@@ -1551,7 +1551,7 @@
                     ]
                 },
                 "participant_compensation": {
-                    "description": "Information about compensation or incentives provided to human research participants.",
+                    "description": "One or more records describing compensation or incentives provided to human research participants.",
                     "items": {
                         "$ref": "#/$defs/HumanSubjectCompensation"
                     },
@@ -1561,7 +1561,7 @@
                     ]
                 },
                 "participant_privacy": {
-                    "description": "Information about privacy protections and anonymization procedures for human research participants.",
+                    "description": "One or more records describing privacy protections and anonymization procedures for human research participants.",
                     "items": {
                         "$ref": "#/$defs/ParticipantPrivacy"
                     },
@@ -1581,7 +1581,7 @@
                     ]
                 },
                 "prohibited_uses": {
-                    "description": "Explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.",
+                    "description": "List of explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.",
                     "items": {
                         "$ref": "#/$defs/ProhibitedUse"
                     },
@@ -1639,7 +1639,7 @@
                     "description": "Regulatory and export control restrictions applicable to the dataset. ExportControlRegulatoryRestrictions object from the Data Governance module describing compliance requirements such as ITAR, EAR, or GDPR."
                 },
                 "related_datasets": {
-                    "description": "Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
+                    "description": "List of related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
                     "items": {
                         "$ref": "#/$defs/DatasetRelationship"
                     },
@@ -1799,7 +1799,7 @@
                     ]
                 },
                 "variables": {
-                    "description": "Metadata describing individual variables, fields, or columns in the dataset.",
+                    "description": "List of metadata records describing individual variables, fields, or columns in the dataset.",
                     "items": {
                         "$ref": "#/$defs/VariableMetadata"
                     },
@@ -1894,7 +1894,7 @@
                     ]
                 },
                 "annotation_analyses": {
-                    "description": "Analysis of annotation quality and inter-annotator agreement.",
+                    "description": "One or more analyses of annotation quality and inter-annotator agreement.",
                     "items": {
                         "$ref": "#/$defs/AnnotationAnalysis"
                     },
@@ -2195,7 +2195,7 @@
                     ]
                 },
                 "file_collections": {
-                    "description": "Collections of files within this dataset. Each collection represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart in RO-Crate converters.",
+                    "description": "Collection of file groups within this dataset. Each entry represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart in RO-Crate converters.",
                     "items": {
                         "$ref": "#/$defs/FileCollection"
                     },
@@ -2250,7 +2250,7 @@
                     ]
                 },
                 "informed_consent": {
-                    "description": "Details about informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
+                    "description": "One or more records detailing informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
                     "items": {
                         "$ref": "#/$defs/InformedConsent"
                     },
@@ -2270,7 +2270,7 @@
                     ]
                 },
                 "intended_uses": {
-                    "description": "Explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.",
+                    "description": "List of explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.",
                     "items": {
                         "$ref": "#/$defs/IntendedUse"
                     },
@@ -2327,7 +2327,7 @@
                     ]
                 },
                 "known_biases": {
-                    "description": "Known biases present in the dataset that may affect fairness, representativeness, or model performance. Uses BiasTypeEnum for standardized bias categorization mapped to the AI Ontology (AIO).",
+                    "description": "List of known biases present in the dataset that may affect fairness, representativeness, or model performance. Uses BiasTypeEnum for standardized bias categorization mapped to the AI Ontology (AIO).",
                     "items": {
                         "$ref": "#/$defs/DatasetBias"
                     },
@@ -2337,7 +2337,7 @@
                     ]
                 },
                 "known_limitations": {
-                    "description": "Known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
+                    "description": "List of known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
                     "items": {
                         "$ref": "#/$defs/DatasetLimitation"
                     },
@@ -2390,7 +2390,7 @@
                     "description": "License and usage terms governing dataset access and use. LicenseAndUseTerms object from the Data Governance module describing the applicable license, permitted uses, and any restrictions."
                 },
                 "machine_annotation_tools": {
-                    "description": "Automated annotation tools used in dataset creation.",
+                    "description": "List of automated annotation tools used in dataset creation.",
                     "items": {
                         "$ref": "#/$defs/MachineAnnotationTools"
                     },
@@ -2410,7 +2410,7 @@
                     ]
                 },
                 "missing_data_documentation": {
-                    "description": "Documentation of missing data patterns and handling strategies.",
+                    "description": "One or more records documenting missing data patterns and handling strategies.",
                     "items": {
                         "$ref": "#/$defs/MissingDataDocumentation"
                     },
@@ -2451,7 +2451,7 @@
                     ]
                 },
                 "parent_datasets": {
-                    "description": "Parent datasets that this dataset is part of or derived from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).",
+                    "description": "One or more parent datasets that this dataset is part of or derived from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).",
                     "items": {
                         "$ref": "#/$defs/Dataset"
                     },
@@ -2461,7 +2461,7 @@
                     ]
                 },
                 "participant_compensation": {
-                    "description": "Information about compensation or incentives provided to human research participants.",
+                    "description": "One or more records describing compensation or incentives provided to human research participants.",
                     "items": {
                         "$ref": "#/$defs/HumanSubjectCompensation"
                     },
@@ -2471,7 +2471,7 @@
                     ]
                 },
                 "participant_privacy": {
-                    "description": "Information about privacy protections and anonymization procedures for human research participants.",
+                    "description": "One or more records describing privacy protections and anonymization procedures for human research participants.",
                     "items": {
                         "$ref": "#/$defs/ParticipantPrivacy"
                     },
@@ -2491,7 +2491,7 @@
                     ]
                 },
                 "prohibited_uses": {
-                    "description": "Explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.",
+                    "description": "List of explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.",
                     "items": {
                         "$ref": "#/$defs/ProhibitedUse"
                     },
@@ -2549,7 +2549,7 @@
                     "description": "Regulatory and export control restrictions applicable to the dataset. ExportControlRegulatoryRestrictions object from the Data Governance module describing compliance requirements such as ITAR, EAR, or GDPR."
                 },
                 "related_datasets": {
-                    "description": "Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
+                    "description": "List of related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
                     "items": {
                         "$ref": "#/$defs/DatasetRelationship"
                     },
@@ -2709,7 +2709,7 @@
                     ]
                 },
                 "variables": {
-                    "description": "Metadata describing individual variables, fields, or columns in the dataset.",
+                    "description": "List of metadata records describing individual variables, fields, or columns in the dataset.",
                     "items": {
                         "$ref": "#/$defs/VariableMetadata"
                     },
@@ -4898,7 +4898,7 @@
         },
         "Information": {
             "additionalProperties": false,
-            "description": "Grouping for datasets and data files",
+            "description": "Grouping for datasets and data files.",
             "properties": {
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
@@ -5788,7 +5788,7 @@
         },
         "MissingInfo": {
             "additionalProperties": false,
-            "description": "Is any information missing from individual instances? (e.g., unavailable data)",
+            "description": "Is any information missing from individual instances? (e.g., unavailable data).",
             "properties": {
                 "description": {
                     "description": "A human-readable description for this property.",

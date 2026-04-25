@@ -1,0 +1,38 @@
+---
+id: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
+name: data-sheets-schema-core
+title: D4D Core Schema (Semantic Exchange Layer)
+description: |-
+  The primary D4D schema for cross-system interoperability.
+  Restricted to the 95 fields from the curated SKOS semantic exchange layer
+  alignment with schema.org, RAI, EVI, and DCAT.
+  The full schema (data_sheets_schema.yaml) is the extended reservoir with
+  284 attributes; this core schema is the recommended entry point for
+  new datasheets and interoperability use cases.
+license: MIT
+see_also:
+  - https://bridge2ai.github.io/data-sheets-schema
+  - src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl
+
+prefixes:
+  AIO: https://w3id.org/aio/
+  d4d: https://w3id.org/bridge2ai/data-sheets-schema/
+  d4dcore: https://w3id.org/bridge2ai/data-sheets-schema/core#
+  data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
+  dcat: http://www.w3.org/ns/dcat#
+  dcterms: http://purl.org/dc/terms/
+  evi: https://w3id.org/EVI#
+  linkml: https://w3id.org/linkml/
+  prov: http://www.w3.org/ns/prov#
+  qudt: http://qudt.org/schema/qudt/
+  rai: http://mlcommons.org/croissant/RAI/
+  schema: http://schema.org/
+  skos: http://www.w3.org/2004/02/skos/core#
+
+default_prefix: d4dcore
+default_range: string
+
+imports:
+  - linkml:types
+  # D4D Core module (imports D4D_Base_import and all needed D4D modules)
+  - D4D_Core

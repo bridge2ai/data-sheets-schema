@@ -102,10 +102,14 @@ classes:
         slot_uri: schema:name
         description: A human-readable name for a thing.
         range: string
+        annotations:
+          "d4d:docExample": "AI-READI Dataset"
       description:
         slot_uri: schema:description
         description: A human-readable description for a thing.
         range: string
+        annotations:
+          "d4d:docExample": "A multimodal dataset of 4,000 participants with Type 2 Diabetes."
     class_uri: schema:Thing
 
   Organization:
@@ -151,15 +155,21 @@ classes:
         description: The version identifier of the software (e.g., "1.0.0", "2.3.1-beta").
         range: string
         slot_uri: schema:softwareVersion
+        annotations:
+          "d4d:docExample": "3.8.1"
       license:
         description: >-
           The license under which the software is distributed (e.g., "MIT", "Apache-2.0", "GPL-3.0").
         range: string
         slot_uri: schema:license
+        annotations:
+          "d4d:docExample": "MIT"
       url:
         description: URL where the software can be found (e.g., homepage, repository, or documentation).
         range: uri
         slot_uri: schema:url
+        annotations:
+          "d4d:docExample": "https://github.com/example/tool"
 
   Person:
     description: >-
@@ -185,6 +195,8 @@ classes:
           information in the context of this dataset.
         range: string
         slot_uri: schema:email
+        annotations:
+          "d4d:docExample": "researcher@university.edu"
       orcid:
         description: >-
           ORCID (Open Researcher and Contributor ID) - a persistent digital identifier
@@ -199,7 +211,7 @@ classes:
           - schema:identifier
 
   Information:
-    description: "Grouping for datasets and data files"
+    description: "Grouping for datasets and data files."
     close_mappings:
       - schema:CreativeWork
     is_a: NamedThing
@@ -256,12 +268,16 @@ slots:
   title:
     description: The official title of the element.
     slot_uri: dcterms:title
+    annotations:
+      "d4d:docExample": "AI-READI: Salutogenesis Study of Type 2 Diabetes"
 
   language:
     description: Language in which the information is expressed.
     slot_uri: dcterms:language
     exact_mappings:
       - schema:inLanguage
+    annotations:
+      "d4d:docExample": "en"
 
   publisher:
     description: The organization or entity responsible for making the resource available.
@@ -274,23 +290,33 @@ slots:
     description: Date of formal issuance or publication of the resource.
     slot_uri: dcterms:issued
     range: datetime
+    annotations:
+      "d4d:docExample": "2024-11-15T00:00:00"
 
   page:
     description: A landing page or web page providing access to or information about the resource.
     slot_uri: dcat:landingPage
+    annotations:
+      "d4d:docExample": "https://fairhub.io/datasets/2"
 
   dialect:
     description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD profile).
     slot_uri: schema:encodingFormat
+    annotations:
+      "d4d:docExample": "RFC4180"
 
   bytes:
     description: Size of the data in bytes.
     range: integer
     slot_uri: dcat:byteSize
+    annotations:
+      "d4d:docExample": "10485760"
 
   path:
     description: The file path or URL where the content is located.
     slot_uri: schema:contentUrl
+    annotations:
+      "d4d:docExample": "data/ai_readi/participants.csv"
 
   download_url:
     description: >-
@@ -301,6 +327,8 @@ slots:
     slot_uri: dcat:downloadURL
     exact_mappings:
       - schema:url
+    annotations:
+      "d4d:docExample": "https://fairhub.io/datasets/2/download"
 
   format:
     description: >-
@@ -308,16 +336,22 @@ slots:
       be a file extension or MIME type.
     range: FormatEnum
     slot_uri: dcterms:format
+    annotations:
+      "d4d:docExample": "CSV"
 
   encoding:
     description: The character encoding of the data.
     range: EncodingEnum
     slot_uri: d4d:characterEncoding
+    annotations:
+      "d4d:docExample": "UTF-8"
 
   compression:
     description: Compression format used, if any (e.g., gzip, bzip2, zip).
     range: CompressionEnum
     slot_uri: dcat:compressFormat
+    annotations:
+      "d4d:docExample": "zip"
 
   media_type:
     description: >-
@@ -326,6 +360,8 @@ slots:
     slot_uri: dcat:mediaType
     exact_mappings:
       - schema:encodingFormat
+    annotations:
+      "d4d:docExample": "text/csv"
 
   hash:
     description: >-
@@ -334,73 +370,103 @@ slots:
     slot_uri: d4d:hashValue
     broad_mappings:
       - dcterms:identifier
+    annotations:
+      "d4d:docExample": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
   md5:
     description: MD5 hash value of the data (128-bit cryptographic hash).
     slot_uri: d4d:md5Checksum
     broad_mappings:
       - dcterms:identifier
+    annotations:
+      "d4d:docExample": "d41d8cd98f00b204e9800998ecf8427e"
 
   sha256:
     description: SHA-256 hash value of the data (256-bit cryptographic hash, recommended).
     slot_uri: schema:sha256
+    annotations:
+      "d4d:docExample": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
   conforms_to:
     description: An established standard, specification, or schema to which the resource conforms.
     slot_uri: dcterms:conformsTo
+    annotations:
+      "d4d:docExample": "https://www.w3.org/TR/vocab-dcat-3/"
 
   conforms_to_schema:
     description: The schema or data model to which the resource conforms.
     slot_uri: d4d:conformsToSchema
     broad_mappings:
       - dcterms:conformsTo
+    annotations:
+      "d4d:docExample": "https://w3id.org/bridge2ai/data-sheets-schema"
 
   conforms_to_class:
     description: The specific class or type within a schema to which the resource conforms.
     slot_uri: d4d:conformsToClass
     broad_mappings:
       - dcterms:conformsTo
+    annotations:
+      "d4d:docExample": "Dataset"
 
   license:
     description: The legal license under which the resource is made available (e.g., "MIT", "CC-BY-4.0").
     slot_uri: dcterms:license
+    annotations:
+      "d4d:docExample": "CC-BY-NC-4.0"
 
   keywords:
     description: Keywords or tags describing the resource for discovery and classification.
     multivalued: true
     slot_uri: dcat:keyword
+    annotations:
+      "d4d:docExample": "diabetes, retinal imaging, multimodal, clinical data"
 
   version:
     description: The version identifier of the resource (e.g., "1.0", "2.3.1").
     slot_uri: schema:version
+    annotations:
+      "d4d:docExample": "2.0.0"
 
   created_by:
     description: The person or organization primarily responsible for creating the resource.
     slot_uri: dcterms:creator
+    annotations:
+      "d4d:docExample": "orcid:0000-0002-1234-5678"
 
   created_on:
     description: The date and time when the resource was created.
     slot_uri: dcterms:created
     range: datetime
+    annotations:
+      "d4d:docExample": "2023-07-18T00:00:00"
 
   last_updated_on:
     description: The date and time when the resource was most recently modified or updated.
     slot_uri: dcterms:modified
     range: datetime
+    annotations:
+      "d4d:docExample": "2024-11-15T00:00:00"
 
   modified_by:
     description: A person or organization that contributed to modifying or updating the resource.
     slot_uri: dcterms:contributor
+    annotations:
+      "d4d:docExample": "orcid:0000-0002-9876-5432"
 
   status:
     description: The status of the resource (e.g., draft, published, deprecated).
     slot_uri: d4d:publicationStatus
+    annotations:
+      "d4d:docExample": "published"
 
   was_derived_from:
     description: A resource from which this resource was derived, in whole or in part.
     slot_uri: prov:wasDerivedFrom
     exact_mappings:
       - dcterms:source
+    annotations:
+      "d4d:docExample": "https://fairhub.io/datasets/2/versions/1"
 
   doi:
     description: >-
@@ -412,6 +478,8 @@ slots:
       - dcterms:identifier
     exact_mappings:
       - schema:identifier
+    annotations:
+      "d4d:docExample": "10.5281/zenodo.10642459"
 
   external_resources:
     description: >-

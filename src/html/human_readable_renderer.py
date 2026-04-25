@@ -8,6 +8,7 @@ import os
 import shutil
 import yaml
 import json
+import html
 from datetime import datetime
 from jinja2 import Template, Environment
 from pathlib import Path
@@ -176,7 +177,7 @@ class HumanReadableRenderer:
         # Remove empty sections
         return {k: v for k, v in sections.items() if v}
     
-    def format_value(self, value, context=""):
+    def format_value(self, value, context="", key=""):
         """Format a value for human-readable display"""
         # Convert None to empty string for HTML display
         if value is None:
@@ -186,7 +187,7 @@ class HumanReadableRenderer:
         elif isinstance(value, list):
             return self._format_list(value)
         elif isinstance(value, str):
-            return self._format_string(value)
+            return self._format_string(value, key=key)
         elif isinstance(value, (int, float)):
             return self._format_number(value)
         elif isinstance(value, bool):
@@ -202,7 +203,7 @@ class HumanReadableRenderer:
         items = []
         for key, value in d.items():
             formatted_key = self._humanize_key(key)
-            formatted_value = self.format_value(value)
+            formatted_value = self.format_value(value, key=key)
             items.append(f"<dt>{formatted_key}</dt><dd>{formatted_value}</dd>")
 
         return f"<dl class='nested-dict'>{''.join(items)}</dl>"
@@ -564,33 +565,47 @@ class HumanReadableRenderer:
             table_html += '<tr>'
             for key in keys:
                 value = item.get(key, '')
-                formatted_value = self._format_table_cell(value)
+                formatted_value = self._format_table_cell(value, key=key)
                 table_html += f'<td>{formatted_value}</td>'
             table_html += '</tr>'
         
         table_html += '</tbody></table>'
         return table_html
     
-    def _format_table_cell(self, value):
-        """Format a single table cell value"""
+    # Fields that should always render with the blue-bar description style
+    _DESCRIPTION_FIELDS = {'description', 'response', 'details', 'summary',
+                           'abstract', 'rationale', 'justification'}
+
+    def _format_table_cell(self, value, key=None):
+        """Format a single table cell value.
+
+        All user-derived text (keys and values from the input YAML) is escaped
+        with ``html.escape`` before being interpolated, since the rendered
+        output is later passed through Jinja's ``|safe`` filter. Only the
+        wrapper markup (``<strong>``, ``<br>``, ``<div class="...">``) is
+        treated as trusted.
+        """
         # Convert None to empty string for HTML table cells
         if value is None:
             return ""
         elif isinstance(value, dict):
-            # For nested dicts, show key-value pairs compactly
-            items = [f"{k}: {v}" for k, v in value.items()]
-            return "<br>".join(items[:3])  # Limit to 3 items for readability
+            items = [
+                f"<strong>{html.escape(self._humanize_key(k))}:</strong> {html.escape(str(v))}"
+                for k, v in value.items()
+            ]
+            return "<br>".join(items)
         elif isinstance(value, list):
-            if len(value) <= 3:
-                return ", ".join(str(v) for v in value)
-            else:
-                return f"{', '.join(str(v) for v in value[:2])}, ... (+{len(value)-2} more)"
+            return ", ".join(html.escape(str(v)) for v in value)
         elif isinstance(value, str):
-            if len(value) > 100:
-                return f"{value[:100]}..."
-            return value or ""
+            escaped = html.escape(value)
+            # Always wrap description-type fields with blue-bar styling
+            if key and key.lower() in self._DESCRIPTION_FIELDS:
+                return f'<div class="long-description">{escaped}</div>' if value else ""
+            if len(value) > 80:
+                return f'<div class="long-description">{escaped}</div>'
+            return escaped
         else:
-            return str(value)
+            return html.escape(str(value))
     
     def _format_list_fallback(self, lst):
         """Fallback formatting for non-tabular lists"""
@@ -600,7 +615,7 @@ class HumanReadableRenderer:
             items.append(f"<li>{formatted_item}</li>")
         return f"<ul class='formatted-list'>{''.join(items)}</ul>"
     
-    def _format_string(self, s):
+    def _format_string(self, s, key=""):
         """Format string with proper emphasis and links"""
         # Return empty string for None or empty string (no "Not specified" message)
         if not s or s is None:
@@ -614,8 +629,12 @@ class HumanReadableRenderer:
             else:
                 return f'<a href="{s}" target="_blank">{s}</a>'
 
-        # Handle long descriptions
-        if len(s) > 200:
+        # Always wrap description-type fields with blue-bar styling
+        if key and key.lower() in self._DESCRIPTION_FIELDS:
+            return f'<div class="long-description">{s}</div>'
+
+        # Wrap other long strings
+        if len(s) > 80:
             return f'<div class="long-description">{s}</div>'
 
         return s
@@ -627,15 +646,85 @@ class HumanReadableRenderer:
             return f"{n:,}"
         return str(n)
     
+    # Curated human-readable labels for D4D field names
+    FIELD_LABEL_MAP = {
+        'is_deidentified': 'Deidentification',
+        'ip_restrictions': 'Intellectual Property Restrictions',
+        'is_tabular': 'Tabular Data',
+        'is_sample': 'Sample',
+        'is_random': 'Random Sampling',
+        'is_representative': 'Representative Sample',
+        'addressing_gaps': 'Research Gaps Addressed',
+        'known_biases': 'Known Biases',
+        'known_limitations': 'Known Limitations',
+        'confidential_elements': 'Confidential Elements',
+        'content_warnings': 'Content Warnings',
+        'sensitive_elements': 'Sensitive Elements',
+        'subpopulations': 'Subpopulations',
+        'acquisition_methods': 'Acquisition Methods',
+        'collection_mechanisms': 'Collection Mechanisms',
+        'collection_timeframes': 'Collection Timeframes',
+        'data_collectors': 'Data Collectors',
+        'missing_data_documentation': 'Missing Data Documentation',
+        'raw_data_sources': 'Raw Data Sources',
+        'raw_sources': 'Raw Sources',
+        'labeling_strategies': 'Labeling Strategies',
+        'annotation_analyses': 'Annotation Analyses',
+        'machine_annotation_tools': 'Machine Annotation Tools',
+        'cleaning_strategies': 'Cleaning Strategies',
+        'preprocessing_strategies': 'Preprocessing Strategies',
+        'imputation_protocols': 'Imputation Protocols',
+        'existing_uses': 'Existing Uses',
+        'use_repository': 'Use Repository',
+        'other_tasks': 'Other Tasks',
+        'discouraged_uses': 'Discouraged Uses',
+        'prohibited_uses': 'Prohibited Uses',
+        'intended_uses': 'Intended Uses',
+        'future_use_impacts': 'Future Use Impacts',
+        'distribution_formats': 'Distribution Formats',
+        'distribution_dates': 'Distribution Dates',
+        'license_and_use_terms': 'License and Use Terms',
+        'regulatory_restrictions': 'Regulatory Restrictions',
+        'version_access': 'Version Access',
+        'extension_mechanism': 'Extension Mechanism',
+        'ethical_reviews': 'Ethical Reviews',
+        'data_protection_impacts': 'Data Protection Impact Assessments',
+        'human_subject_research': 'Human Subject Research',
+        'informed_consent': 'Informed Consent',
+        'at_risk_populations': 'At-Risk Populations',
+        'participant_privacy': 'Participant Privacy',
+        'participant_compensation': 'Participant Compensation',
+        'sampling_strategies': 'Sampling Strategies',
+        'related_datasets': 'Related Datasets',
+        'parent_datasets': 'Parent Datasets',
+        'external_resources': 'External Resources',
+        'retention_limit': 'Retention Limit',
+        'conforms_to': 'Conforms To',
+        'conforms_to_schema': 'Schema Conformance',
+        'conforms_to_class': 'Class Conformance',
+        'was_derived_from': 'Derived From',
+        'same_as': 'Same As',
+        'last_updated_on': 'Last Updated',
+        'created_on': 'Date Created',
+        'download_url': 'Download URL',
+        'file_collections': 'File Collections',
+        'distributions': 'Distributions',
+        'source_description': 'Source Description',
+    }
+
     def _humanize_key(self, key):
         """Convert key names to human-readable labels"""
+        # Check curated label map first (exact match on original key)
+        if key in self.FIELD_LABEL_MAP:
+            return self.FIELD_LABEL_MAP[key]
+
         # Convert snake_case and camelCase to Title Case
         key = key.replace('_', ' ').replace('-', ' ')
-        
+
         # Handle common abbreviations and terms
         replacements = {
             'id': 'ID',
-            'url': 'URL', 
+            'url': 'URL',
             'uri': 'URI',
             'doi': 'DOI',
             'api': 'API',
@@ -644,16 +733,16 @@ class HumanReadableRenderer:
             'nih': 'NIH',
             'irb': 'IRB',
             'phi': 'PHI',
-            'pii': 'PII'
+            'pii': 'PII',
         }
-        
+
         words = key.split()
         for i, word in enumerate(words):
             if word.lower() in replacements:
                 words[i] = replacements[word.lower()]
             else:
                 words[i] = word.capitalize()
-        
+
         return ' '.join(words)
     
     def _extract_title_from_data(self, data, fallback_title):
@@ -716,9 +805,8 @@ class HumanReadableRenderer:
                         {% if item.context %}
                         <div class="item-context">{{ item.context }}</div>
                         {% endif %}
-                        <label class="item-label {{ 'required-field' if item.required else 'optional-field' }}">
+                        <label class="item-label optional-field">
                             {{ humanize_key(item.key) }}
-                            {% if item.required %}<span class="required-indicator" title="Required field">*</span>{% endif %}
                         </label>
                         <div class="item-value">{{ format_value(item.value)|safe }}</div>
                     </div>

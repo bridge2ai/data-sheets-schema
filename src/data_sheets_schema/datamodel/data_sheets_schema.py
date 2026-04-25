@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-04-09T10:17:09
+# Generation date: 2026-04-15T23:59:24
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -309,7 +309,7 @@ class Person(NamedThing):
 @dataclass(repr=False)
 class Information(NamedThing):
     """
-    Grouping for datasets and data files
+    Grouping for datasets and data files.
     """
     _inherited_slots: ClassVar[list[str]] = []
 
@@ -1135,7 +1135,7 @@ class SamplingStrategy(DatasetProperty):
 @dataclass(repr=False)
 class MissingInfo(DatasetProperty):
     """
-    Is any information missing from individual instances? (e.g., unavailable data)
+    Is any information missing from individual instances? (e.g., unavailable data).
     """
     _inherited_slots: ClassVar[list[str]] = []
 
@@ -4295,7 +4295,7 @@ slots.creator__affiliations = Slot(uri=D4D.teamAffiliation, name="creator__affil
 slots.creator__credit_roles = Slot(uri=D4D.creditRoles, name="creator__credit_roles", curie=D4D.curie('creditRoles'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__credit_roles, domain=None, range=Optional[Union[Union[str, "CRediTRoleEnum"], list[Union[str, "CRediTRoleEnum"]]]])
 
-slots.fundingMechanism__grantor = Slot(uri=SCHEMA.funder, name="fundingMechanism__grantor", curie=SCHEMA.curie('funder'),
+slots.fundingMechanism__grantor = Slot(uri=D4D.grantor, name="fundingMechanism__grantor", curie=D4D.curie('grantor'),
                    model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grantor, domain=None, range=Optional[Union[str, GrantorId]])
 
 slots.fundingMechanism__grants = Slot(uri=SCHEMA.funding, name="fundingMechanism__grants", curie=SCHEMA.curie('funding'),
@@ -4814,7 +4814,7 @@ slots.fileCollection__collection_type = Slot(uri=D4D.collectionType, name="fileC
 slots.fileCollection__file_count = Slot(uri=D4D.fileCount, name="fileCollection__file_count", curie=D4D.curie('fileCount'),
                    model_uri=DATA_SHEETS_SCHEMA.fileCollection__file_count, domain=None, range=Optional[int])
 
-slots.fileCollection__total_bytes = Slot(uri=DCAT.byteSize, name="fileCollection__total_bytes", curie=DCAT.curie('byteSize'),
+slots.fileCollection__total_bytes = Slot(uri=D4D.total_bytes, name="fileCollection__total_bytes", curie=D4D.curie('total_bytes'),
                    model_uri=DATA_SHEETS_SCHEMA.fileCollection__total_bytes, domain=None, range=Optional[int])
 
 slots.DatasetCollection_resources = Slot(uri=SCHEMA.hasPart, name="DatasetCollection_resources", curie=SCHEMA.curie('hasPart'),

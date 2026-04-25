@@ -55,6 +55,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "AI-READI Data Coordinating Center, University of Washington"
 
 
   Erratum:
@@ -75,6 +77,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "v1.0.1: Corrected mislabeled CGM device serial numbers for 12 participants"
 
 
   UpdatePlan:
@@ -90,6 +94,8 @@ classes:
         description: "How often updates are planned (e.g., quarterly, annually)."
         slot_uri: d4d:frequency
         range: string
+        annotations:
+          "d4d:docExample": "Quarterly"
       update_details:
         description: >
           Free-text description of planned update types (e.g., corrections, additions,
@@ -97,6 +103,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Quarterly releases with approximately 500 new participants per release"
 
 
   RetentionLimits:
@@ -111,6 +119,8 @@ classes:
         description: "Time period for data retention."
         slot_uri: d4d:retentionPeriod
         range: string
+        annotations:
+          "d4d:docExample": "10 years minimum"
       retention_details:
         description: >
           Free-text description of applicable retention limits, legal or ethical basis
@@ -119,6 +129,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "Data retained for minimum 10 years per NIH data sharing policy"
 
 
   VersionAccess:
@@ -136,6 +148,8 @@ classes:
         slot_uri: d4d:versionsAvailable
         range: string
         multivalued: true
+        annotations:
+          "d4d:docExample": "v1.0 (2023-11), v1.1 (2024-02), v2.0 (2024-11)"
       version_details:
         description: >
           Free-text description of version support policies, how long older versions will
@@ -143,6 +157,8 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "All versions available at fairhub.io; older versions archived on Zenodo"
 
 
   ExtensionMechanism:
@@ -166,3 +182,5 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+        annotations:
+          "d4d:docExample": "New modalities added via versioned data releases; schema extensions via GitHub PRs"

@@ -264,12 +264,9 @@ sampling_strategies:
       across 20 academic centers (14 data acquisition centers). Legal framework established
       for collecting data at scale with sampling to ensure comprehensive sets of patient
       conditions and clinical treatment strategies.
-    is_sample:
-      - true
-    is_random:
-      - false
-    is_representative:
-      - true
+    is_sample: true
+    is_random: false
+    is_representative: true
     strategies:
       - Federated multi-center data collection across 14 hospitals
       - Sampling for balanced and diverse patient populations

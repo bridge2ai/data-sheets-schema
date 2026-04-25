@@ -1,14 +1,14 @@
 # D4D Evaluation Summary Report
 
-Generated: 2025-11-21T11:37:05.670003
+Generated: 2026-04-10T14:06:47.365634
 
 ## Overview
 
-Total evaluations: 11
+Total evaluations: 19
 
 Projects evaluated: AI_READI, CHORUS, CM4AI, VOICE
 
-Methods evaluated: claudecode, curated, gpt5
+Methods evaluated: claudecode, claudecode_agent, claudecode_agent_core, curated, gpt5
 
 
 ## Overall Scores
@@ -17,34 +17,44 @@ Methods evaluated: claudecode, curated, gpt5
 
 | Project | Curated | GPT-5 | Claude Code |
 |---------|---------|-------|-------------|
-| AI_READI | 11.0 (22.0%) | 9.0 (18.0%) | 9.0 (18.0%) |
-| CHORUS | N/A | 2.0 (4.0%) | 9.0 (18.0%) |
-| CM4AI | 8.0 (16.0%) | 12.0 (24.0%) | 9.0 (18.0%) |
-| VOICE | 13.0 (26.0%) | 2.0 (4.0%) | 9.0 (18.0%) |
+| AI_READI | 26.0 (52.0%) | 3.0 (6.0%) | 26.0 (52.0%) |
+| CHORUS | N/A | 4.0 (8.0%) | 11.0 (22.0%) |
+| CM4AI | 18.0 (36.0%) | 20.0 (40.0%) | 23.0 (46.0%) |
+| VOICE | 30.0 (60.0%) | 1.0 (2.0%) | 25.0 (50.0%) |
 
 ### Rubric20 Scores (varies by max)
 
 | Project | Curated | GPT-5 | Claude Code |
 |---------|---------|-------|-------------|
-| AI_READI | 41.0/84 (48.8%) | 36.0/84 (42.9%) | 36.0/84 (42.9%) |
-| CHORUS | N/A | 8.0/84 (9.5%) | 36.0/84 (42.9%) |
-| CM4AI | 25.0/84 (29.8%) | 37.0/84 (44.0%) | 36.0/84 (42.9%) |
-| VOICE | 39.0/84 (46.4%) | 8.0/84 (9.5%) | 36.0/84 (42.9%) |
+| AI_READI | 67.0/88 (76.1%) | 10.0/88 (11.4%) | 63.0/88 (71.6%) |
+| CHORUS | N/A | 14.0/88 (15.9%) | 35.0/88 (39.8%) |
+| CM4AI | 51.0/88 (58.0%) | 54.0/88 (61.4%) | 63.0/88 (71.6%) |
+| VOICE | 67.0/88 (76.1%) | 4.0/88 (4.5%) | 59.0/88 (67.0%) |
 
 ## Method Comparison
 
 
 ### CLAUDECODE
-- Average Rubric10: 18.0%
-- Average Rubric20: 42.9%
+- Average Rubric10: 42.5%
+- Average Rubric20: 62.5%
+- Evaluations: 4
+
+### CLAUDECODE_AGENT
+- Average Rubric10: 59.0%
+- Average Rubric20: 76.1%
+- Evaluations: 4
+
+### CLAUDECODE_AGENT_CORE
+- Average Rubric10: 73.5%
+- Average Rubric20: 78.4%
 - Evaluations: 4
 
 ### CURATED
-- Average Rubric10: 21.3%
-- Average Rubric20: 41.7%
+- Average Rubric10: 49.3%
+- Average Rubric20: 70.1%
 - Evaluations: 3
 
 ### GPT5
-- Average Rubric10: 12.5%
-- Average Rubric20: 26.5%
+- Average Rubric10: 14.0%
+- Average Rubric20: 23.3%
 - Evaluations: 4
