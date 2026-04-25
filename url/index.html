@@ -308,6 +308,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -381,6 +388,21 @@ Alias: url</p>
 <li>Range: <a href="../Uri/">Uri</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>https://github.com/example/tool</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -408,6 +430,10 @@ Alias: url</p>
 <details>
 
 <pre><code class="language-yaml">name: url
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: https://github.com/example/tool
 description: URL where the software can be found (e.g., homepage, repository, or documentation).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000

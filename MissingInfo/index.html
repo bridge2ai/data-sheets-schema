@@ -215,7 +215,7 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-missinginfo">Class: MissingInfo</h1>
-<p><em>Is any information missing from individual instances? (e.g., unavailable data)</em></p>
+<p><em>Is any information missing from individual instances? (e.g., unavailable data).</em></p>
 <p>__</p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/MissingInfo">data_sheets_schema:MissingInfo</a></p>
 <div class="mermaid"> classDiagram
@@ -352,7 +352,7 @@
 <details>
 <pre><code class="language-yaml">name: MissingInfo
 description: 'Is any information missing from individual instances? (e.g., unavailable
-  data)
+  data).
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -360,6 +360,10 @@ is_a: DatasetProperty
 attributes:
   missing:
     name: missing
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: CGM readings absent for 15% of participants
     description: 'Description of the missing data fields or elements.
 
       '
@@ -374,6 +378,10 @@ attributes:
     multivalued: true
   why_missing:
     name: why_missing
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Device malfunction or non-compliance during 14-day wear period
     description: 'Explanation of why each piece of data is missing.
 
       '
@@ -393,7 +401,7 @@ attributes:
 <details>
 <pre><code class="language-yaml">name: MissingInfo
 description: 'Is any information missing from individual instances? (e.g., unavailable
-  data)
+  data).
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -401,6 +409,10 @@ is_a: DatasetProperty
 attributes:
   missing:
     name: missing
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: CGM readings absent for 15% of participants
     description: 'Description of the missing data fields or elements.
 
       '
@@ -417,6 +429,10 @@ attributes:
     multivalued: true
   why_missing:
     name: why_missing
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Device malfunction or non-compliance during 14-day wear period
     description: 'Explanation of why each piece of data is missing.
 
       '

@@ -308,6 +308,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -370,18 +377,8 @@ Alias: license</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td><a href="../Software/">Software</a></td>
+<td>A software program or library</td>
 <td>no</td>
 </tr>
 <tr>
@@ -390,8 +387,18 @@ Alias: license</p>
 <td>no</td>
 </tr>
 <tr>
+<td><a href="../FileCollection/">FileCollection</a></td>
+<td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td>no</td>
+</tr>
+<tr>
 <td><a href="../DatasetCollection/">DatasetCollection</a></td>
 <td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../File/">File</a></td>
+<td>A single file within a dataset or file collection</td>
 <td>no</td>
 </tr>
 <tr>
@@ -400,8 +407,8 @@ Alias: license</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../Software/">Software</a></td>
-<td>A software program or library</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -411,6 +418,21 @@ Alias: license</p>
 <li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>CC-BY-NC-4.0</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -438,6 +460,10 @@ Alias: license</p>
 <details>
 
 <pre><code class="language-yaml">name: license
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: CC-BY-NC-4.0
 description: The legal license under which the resource is made available (e.g., &quot;MIT&quot;,
   &quot;CC-BY-4.0&quot;).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema

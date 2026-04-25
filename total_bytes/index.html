@@ -362,7 +362,7 @@
 
 <h1 id="slot-total_bytes">Slot: total_bytes</h1>
 <p><em>Total size of all files in this collection, in bytes (integer). Maps to dcat:byteSize.</em></p>
-<p>URI: <a href="http://www.w3.org/ns/dcat#byteSize">dcat:byteSize</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/total_bytes">d4d:total_bytes</a>
 Alias: total_bytes</p>
 <!-- no inheritance hierarchy -->
 
@@ -418,11 +418,15 @@ Alias: total_bytes</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcat:byteSize</td>
+<td>d4d:total_bytes</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:total_bytes</td>
+</tr>
+<tr>
+<td>exact</td>
+<td>dcat:byteSize</td>
 </tr>
 </tbody>
 </table>
@@ -437,8 +441,10 @@ annotations:
 description: Total size of all files in this collection, in bytes (integer). Maps
   to dcat:byteSize.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- dcat:byteSize
 rank: 1000
-slot_uri: dcat:byteSize
+slot_uri: d4d:total_bytes
 alias: total_bytes
 owner: FileCollection
 domain_of:

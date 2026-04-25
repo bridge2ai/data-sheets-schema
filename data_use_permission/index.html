@@ -308,6 +308,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -386,6 +393,21 @@ Alias: data_use_permission</p>
 </li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>health_medical_biomedical_research</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -417,6 +439,10 @@ Alias: data_use_permission</p>
 <details>
 
 <pre><code class="language-yaml">name: data_use_permission
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: health_medical_biomedical_research
 description: Structured data use permissions using the Data Use Ontology (DUO). Specifies
   permitted uses (e.g., general research, health/medical research, disease-specific
   research) and restrictions (e.g., non-commercial use, ethics approval required,

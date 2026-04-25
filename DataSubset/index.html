@@ -1080,7 +1080,7 @@
 <tr>
 <td><a href="../file_collections/">file_collections</a></td>
 <td>* <br/> <a href="../FileCollection/">FileCollection</a></td>
-<td>Collections of files within this dataset</td>
+<td>Collection of file groups within this dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1146,13 +1146,13 @@
 <tr>
 <td><a href="../known_biases/">known_biases</a></td>
 <td>* <br/> <a href="../DatasetBias/">DatasetBias</a></td>
-<td>Known biases present in the dataset that may affect fairness, representativen...</td>
+<td>List of known biases present in the dataset that may affect fairness, represe...</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../known_limitations/">known_limitations</a></td>
 <td>* <br/> <a href="../DatasetLimitation/">DatasetLimitation</a></td>
-<td>Known limitations of the dataset that may affect its use or interpretation</td>
+<td>List of known limitations of the dataset that may affect its use or interpret...</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1248,7 +1248,7 @@
 <tr>
 <td><a href="../missing_data_documentation/">missing_data_documentation</a></td>
 <td>* <br/> <a href="../MissingDataDocumentation/">MissingDataDocumentation</a></td>
-<td>Documentation of missing data patterns and handling strategies</td>
+<td>One or more records documenting missing data patterns and handling strategies</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1278,7 +1278,7 @@
 <tr>
 <td><a href="../informed_consent/">informed_consent</a></td>
 <td>* <br/> <a href="../InformedConsent/">InformedConsent</a></td>
-<td>Details about informed consent procedures, including consent type, documentat...</td>
+<td>One or more records detailing informed consent procedures, including consent ...</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1290,13 +1290,13 @@
 <tr>
 <td><a href="../participant_privacy/">participant_privacy</a></td>
 <td>* <br/> <a href="../ParticipantPrivacy/">ParticipantPrivacy</a></td>
-<td>Information about privacy protections and anonymization procedures for human ...</td>
+<td>One or more records describing privacy protections and anonymization procedur...</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../participant_compensation/">participant_compensation</a></td>
 <td>* <br/> <a href="../HumanSubjectCompensation/">HumanSubjectCompensation</a></td>
-<td>Information about compensation or incentives provided to human research parti...</td>
+<td>One or more records describing compensation or incentives provided to human r...</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1332,13 +1332,13 @@
 <tr>
 <td><a href="../annotation_analyses/">annotation_analyses</a></td>
 <td>* <br/> <a href="../AnnotationAnalysis/">AnnotationAnalysis</a></td>
-<td>Analysis of annotation quality and inter-annotator agreement</td>
+<td>One or more analyses of annotation quality and inter-annotator agreement</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../machine_annotation_tools/">machine_annotation_tools</a></td>
 <td>* <br/> <a href="../MachineAnnotationTools/">MachineAnnotationTools</a></td>
-<td>Automated annotation tools used in dataset creation</td>
+<td>List of automated annotation tools used in dataset creation</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1374,13 +1374,13 @@
 <tr>
 <td><a href="../intended_uses/">intended_uses</a></td>
 <td>* <br/> <a href="../IntendedUse/">IntendedUse</a></td>
-<td>Explicit intended and recommended uses for this dataset</td>
+<td>List of explicit intended and recommended uses for this dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../prohibited_uses/">prohibited_uses</a></td>
 <td>* <br/> <a href="../ProhibitedUse/">ProhibitedUse</a></td>
-<td>Explicitly prohibited or forbidden uses for this dataset</td>
+<td>List of explicitly prohibited or forbidden uses for this dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1458,7 +1458,7 @@
 <tr>
 <td><a href="../variables/">variables</a></td>
 <td>* <br/> <a href="../VariableMetadata/">VariableMetadata</a></td>
-<td>Metadata describing individual variables, fields, or columns in the dataset</td>
+<td>List of metadata records describing individual variables, fields, or columns ...</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1482,13 +1482,13 @@
 <tr>
 <td><a href="../parent_datasets/">parent_datasets</a></td>
 <td>* <br/> <a href="../Dataset/">Dataset</a></td>
-<td>Parent datasets that this dataset is part of or derived from</td>
+<td>One or more parent datasets that this dataset is part of or derived from</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../related_datasets/">related_datasets</a></td>
 <td>* <br/> <a href="../DatasetRelationship/">DatasetRelationship</a></td>
-<td>Related datasets with typed relationships (e</td>
+<td>List of related datasets with typed relationships (e</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1776,7 +1776,7 @@ attributes:
     inlined_as_list: true
   file_collections:
     name: file_collections
-    description: Collections of files within this dataset. Each collection represents
+    description: Collection of file groups within this dataset. Each entry represents
       a logical grouping of files with shared characteristics (e.g., all training
       data, all image files, all raw data files). Maps to nested RO-Crate Dataset
       entities via schema:hasPart in RO-Crate converters.
@@ -1954,9 +1954,9 @@ attributes:
     inlined_as_list: true
   known_biases:
     name: known_biases
-    description: Known biases present in the dataset that may affect fairness, representativeness,
-      or model performance. Uses BiasTypeEnum for standardized bias categorization
-      mapped to the AI Ontology (AIO).
+    description: List of known biases present in the dataset that may affect fairness,
+      representativeness, or model performance. Uses BiasTypeEnum for standardized
+      bias categorization mapped to the AI Ontology (AIO).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:known_biases
@@ -1970,8 +1970,9 @@ attributes:
     inlined_as_list: true
   known_limitations:
     name: known_limitations
-    description: Known limitations of the dataset that may affect its use or interpretation.
-      Distinct from biases (systematic errors) and anomalies (data quality issues).
+    description: List of known limitations of the dataset that may affect its use
+      or interpretation. Distinct from biases (systematic errors) and anomalies (data
+      quality issues).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:known_limitations
@@ -2226,7 +2227,8 @@ attributes:
     inlined_as_list: true
   missing_data_documentation:
     name: missing_data_documentation
-    description: Documentation of missing data patterns and handling strategies.
+    description: One or more records documenting missing data patterns and handling
+      strategies.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:missingDataDocumentation
@@ -2300,8 +2302,8 @@ attributes:
     inlined: true
   informed_consent:
     name: informed_consent
-    description: Details about informed consent procedures, including consent type,
-      documentation, and withdrawal mechanisms.
+    description: One or more records detailing informed consent procedures, including
+      consent type, documentation, and withdrawal mechanisms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:informedConsent
@@ -2328,8 +2330,8 @@ attributes:
     inlined: true
   participant_privacy:
     name: participant_privacy
-    description: Information about privacy protections and anonymization procedures
-      for human research participants.
+    description: One or more records describing privacy protections and anonymization
+      procedures for human research participants.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:participantPrivacy
@@ -2343,8 +2345,8 @@ attributes:
     inlined_as_list: true
   participant_compensation:
     name: participant_compensation
-    description: Information about compensation or incentives provided to human research
-      participants.
+    description: One or more records describing compensation or incentives provided
+      to human research participants.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:participantCompensation
@@ -2438,7 +2440,7 @@ attributes:
     inlined_as_list: true
   annotation_analyses:
     name: annotation_analyses
-    description: Analysis of annotation quality and inter-annotator agreement.
+    description: One or more analyses of annotation quality and inter-annotator agreement.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:annotation_analyses
@@ -2452,7 +2454,7 @@ attributes:
     inlined_as_list: true
   machine_annotation_tools:
     name: machine_annotation_tools
-    description: Automated annotation tools used in dataset creation.
+    description: List of automated annotation tools used in dataset creation.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     alias: machine_annotation_tools
@@ -2545,8 +2547,8 @@ attributes:
     inlined_as_list: true
   intended_uses:
     name: intended_uses
-    description: Explicit intended and recommended uses for this dataset. Complements
-      future_use_impacts by focusing on positive applications.
+    description: List of explicit intended and recommended uses for this dataset.
+      Complements future_use_impacts by focusing on positive applications.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:intendedUses
@@ -2560,8 +2562,8 @@ attributes:
     inlined_as_list: true
   prohibited_uses:
     name: prohibited_uses
-    description: Explicitly prohibited or forbidden uses for this dataset. Stronger
-      than discouraged_uses - these are not permitted.
+    description: List of explicitly prohibited or forbidden uses for this dataset.
+      Stronger than discouraged_uses - these are not permitted.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:prohibitedUses
@@ -2754,8 +2756,8 @@ attributes:
     inlined: true
   variables:
     name: variables
-    description: Metadata describing individual variables, fields, or columns in the
-      dataset.
+    description: List of metadata records describing individual variables, fields,
+      or columns in the dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - schema:variableMeasured
@@ -2812,8 +2814,8 @@ attributes:
     range: string
   parent_datasets:
     name: parent_datasets
-    description: Parent datasets that this dataset is part of or derived from. Enables
-      hierarchical dataset composition (hasPart/isPartOf relationships).
+    description: One or more parent datasets that this dataset is part of or derived
+      from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - schema:isPartOf
@@ -2829,8 +2831,8 @@ attributes:
     inlined_as_list: true
   related_datasets:
     name: related_datasets
-    description: Related datasets with typed relationships (e.g., supplements, derives
-      from, is version of). Use DatasetRelationship class to specify relationship
+    description: List of related datasets with typed relationships (e.g., supplements,
+      derives from, is version of). Use DatasetRelationship class to specify relationship
       types.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -2845,6 +2847,10 @@ attributes:
     inlined_as_list: true
   compression:
     name: compression
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: zip
     description: Compression format used, if any (e.g., gzip, bzip2, zip).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -2858,6 +2864,10 @@ attributes:
     range: CompressionEnum
   conforms_to:
     name: conforms_to
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://www.w3.org/TR/vocab-dcat-3/
     description: An established standard, specification, or schema to which the resource
       conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2870,6 +2880,10 @@ attributes:
     range: string
   conforms_to_class:
     name: conforms_to_class
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Dataset
     description: The specific class or type within a schema to which the resource
       conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2884,6 +2898,10 @@ attributes:
     range: string
   conforms_to_schema:
     name: conforms_to_schema
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://w3id.org/bridge2ai/data-sheets-schema
     description: The schema or data model to which the resource conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     broad_mappings:
@@ -2897,6 +2915,10 @@ attributes:
     range: string
   created_by:
     name: created_by
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: orcid:0000-0002-1234-5678
     description: The person or organization primarily responsible for creating the
       resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2909,6 +2931,10 @@ attributes:
     range: string
   created_on:
     name: created_on
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2023-07-18T00:00:00'
     description: The date and time when the resource was created.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -2920,6 +2946,10 @@ attributes:
     range: datetime
   doi:
     name: doi
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 10.5281/zenodo.10642459
     description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
       persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2937,6 +2967,10 @@ attributes:
     pattern: 10\.\d{4,}\/.+
   download_url:
     name: download_url
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://fairhub.io/datasets/2/download
     description: URL from which the data can be downloaded. This is not the same as
       the landing page, which is a page that describes the dataset. Rather, this URL
       points directly to the data itself.
@@ -2952,6 +2986,10 @@ attributes:
     range: uri
   issued:
     name: issued
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2024-11-15T00:00:00'
     description: Date of formal issuance or publication of the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -2963,6 +3001,10 @@ attributes:
     range: datetime
   keywords:
     name: keywords
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: diabetes, retinal imaging, multimodal, clinical data
     description: Keywords or tags describing the resource for discovery and classification.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -2975,6 +3017,10 @@ attributes:
     multivalued: true
   language:
     name: language
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: en
     description: Language in which the information is expressed.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
@@ -2988,6 +3034,10 @@ attributes:
     range: string
   last_updated_on:
     name: last_updated_on
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2024-11-15T00:00:00'
     description: The date and time when the resource was most recently modified or
       updated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3000,6 +3050,10 @@ attributes:
     range: datetime
   license:
     name: license
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: CC-BY-NC-4.0
     description: The legal license under which the resource is made available (e.g.,
       "MIT", "CC-BY-4.0").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3013,6 +3067,10 @@ attributes:
     range: string
   modified_by:
     name: modified_by
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: orcid:0000-0002-9876-5432
     description: A person or organization that contributed to modifying or updating
       the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3025,6 +3083,10 @@ attributes:
     range: string
   page:
     name: page
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://fairhub.io/datasets/2
     description: A landing page or web page providing access to or information about
       the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3052,6 +3114,10 @@ attributes:
     range: uriorcurie
   status:
     name: status
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: published
     description: The status of the resource (e.g., draft, published, deprecated).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -3063,6 +3129,10 @@ attributes:
     range: string
   title:
     name: title
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
     description: The official title of the element.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -3074,6 +3144,10 @@ attributes:
     range: string
   version:
     name: version
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 2.0.0
     description: The version identifier of the resource (e.g., "1.0", "2.3.1").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -3086,6 +3160,10 @@ attributes:
     range: string
   was_derived_from:
     name: was_derived_from
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://fairhub.io/datasets/2/versions/1
     description: A resource from which this resource was derived, in whole or in part.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
@@ -3117,6 +3195,10 @@ attributes:
     required: true
   name:
     name: name
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: AI-READI Dataset
     description: A human-readable name for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
@@ -3129,6 +3211,10 @@ attributes:
     range: string
   description:
     name: description
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
     description: A human-readable description for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000

@@ -684,6 +684,10 @@ attributes:
     range: FileTypeEnum
   bytes:
     name: bytes
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '10485760'
     description: Size of the data in bytes.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -695,6 +699,10 @@ attributes:
     range: integer
   path:
     name: path
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: data/ai_readi/participants.csv
     description: The file path or URL where the content is located.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -707,6 +715,10 @@ attributes:
     range: string
   format:
     name: format
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: CSV
     description: The file format, physical medium, or dimensions of a resource. This
       should be a file extension or MIME type.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -719,6 +731,10 @@ attributes:
     range: FormatEnum
   encoding:
     name: encoding
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: UTF-8
     description: The character encoding of the data.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -730,6 +746,10 @@ attributes:
     range: EncodingEnum
   compression:
     name: compression
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: zip
     description: Compression format used, if any (e.g., gzip, bzip2, zip).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -743,6 +763,10 @@ attributes:
     range: CompressionEnum
   media_type:
     name: media_type
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: text/csv
     description: The media type of the data. This should be a MIME type.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
@@ -756,6 +780,10 @@ attributes:
     range: MediaTypeEnum
   hash:
     name: hash
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     description: 'Cryptographic hash value of the data for integrity verification
       (e.g., SHA-256: ''e3b0c44298fc1c149afb...'', MD5: ''d41d8cd98f00b204e9800998ecf8427e'').'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -770,6 +798,10 @@ attributes:
     range: string
   md5:
     name: md5
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: d41d8cd98f00b204e9800998ecf8427e
     description: MD5 hash value of the data (128-bit cryptographic hash).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     broad_mappings:
@@ -783,6 +815,10 @@ attributes:
     range: string
   sha256:
     name: sha256
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     description: SHA-256 hash value of the data (256-bit cryptographic hash, recommended).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -794,6 +830,10 @@ attributes:
     range: string
   dialect:
     name: dialect
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: RFC4180
     description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
       profile).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -806,6 +846,10 @@ attributes:
     range: string
   conforms_to:
     name: conforms_to
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://www.w3.org/TR/vocab-dcat-3/
     description: An established standard, specification, or schema to which the resource
       conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -818,6 +862,10 @@ attributes:
     range: string
   conforms_to_class:
     name: conforms_to_class
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Dataset
     description: The specific class or type within a schema to which the resource
       conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -832,6 +880,10 @@ attributes:
     range: string
   conforms_to_schema:
     name: conforms_to_schema
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://w3id.org/bridge2ai/data-sheets-schema
     description: The schema or data model to which the resource conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     broad_mappings:
@@ -845,6 +897,10 @@ attributes:
     range: string
   created_by:
     name: created_by
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: orcid:0000-0002-1234-5678
     description: The person or organization primarily responsible for creating the
       resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -857,6 +913,10 @@ attributes:
     range: string
   created_on:
     name: created_on
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2023-07-18T00:00:00'
     description: The date and time when the resource was created.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -868,6 +928,10 @@ attributes:
     range: datetime
   doi:
     name: doi
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 10.5281/zenodo.10642459
     description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
       persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -885,6 +949,10 @@ attributes:
     pattern: 10\.\d{4,}\/.+
   download_url:
     name: download_url
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://fairhub.io/datasets/2/download
     description: URL from which the data can be downloaded. This is not the same as
       the landing page, which is a page that describes the dataset. Rather, this URL
       points directly to the data itself.
@@ -900,6 +968,10 @@ attributes:
     range: uri
   issued:
     name: issued
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2024-11-15T00:00:00'
     description: Date of formal issuance or publication of the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -911,6 +983,10 @@ attributes:
     range: datetime
   keywords:
     name: keywords
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: diabetes, retinal imaging, multimodal, clinical data
     description: Keywords or tags describing the resource for discovery and classification.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -923,6 +999,10 @@ attributes:
     multivalued: true
   language:
     name: language
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: en
     description: Language in which the information is expressed.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
@@ -936,6 +1016,10 @@ attributes:
     range: string
   last_updated_on:
     name: last_updated_on
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2024-11-15T00:00:00'
     description: The date and time when the resource was most recently modified or
       updated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -948,6 +1032,10 @@ attributes:
     range: datetime
   license:
     name: license
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: CC-BY-NC-4.0
     description: The legal license under which the resource is made available (e.g.,
       "MIT", "CC-BY-4.0").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -961,6 +1049,10 @@ attributes:
     range: string
   modified_by:
     name: modified_by
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: orcid:0000-0002-9876-5432
     description: A person or organization that contributed to modifying or updating
       the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -973,6 +1065,10 @@ attributes:
     range: string
   page:
     name: page
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://fairhub.io/datasets/2
     description: A landing page or web page providing access to or information about
       the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1000,6 +1096,10 @@ attributes:
     range: uriorcurie
   status:
     name: status
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: published
     description: The status of the resource (e.g., draft, published, deprecated).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -1011,6 +1111,10 @@ attributes:
     range: string
   title:
     name: title
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
     description: The official title of the element.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -1022,6 +1126,10 @@ attributes:
     range: string
   version:
     name: version
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 2.0.0
     description: The version identifier of the resource (e.g., "1.0", "2.3.1").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -1034,6 +1142,10 @@ attributes:
     range: string
   was_derived_from:
     name: was_derived_from
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://fairhub.io/datasets/2/versions/1
     description: A resource from which this resource was derived, in whole or in part.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
@@ -1065,6 +1177,10 @@ attributes:
     required: true
   name:
     name: name
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: AI-READI Dataset
     description: A human-readable name for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
@@ -1077,6 +1193,10 @@ attributes:
     range: string
   description:
     name: description
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
     description: A human-readable description for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000

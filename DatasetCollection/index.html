@@ -563,6 +563,10 @@ attributes:
     inlined_as_list: true
   compression:
     name: compression
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: zip
     description: Compression format used, if any (e.g., gzip, bzip2, zip).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -576,6 +580,10 @@ attributes:
     range: CompressionEnum
   conforms_to:
     name: conforms_to
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://www.w3.org/TR/vocab-dcat-3/
     description: An established standard, specification, or schema to which the resource
       conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -588,6 +596,10 @@ attributes:
     range: string
   conforms_to_class:
     name: conforms_to_class
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Dataset
     description: The specific class or type within a schema to which the resource
       conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -602,6 +614,10 @@ attributes:
     range: string
   conforms_to_schema:
     name: conforms_to_schema
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://w3id.org/bridge2ai/data-sheets-schema
     description: The schema or data model to which the resource conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     broad_mappings:
@@ -615,6 +631,10 @@ attributes:
     range: string
   created_by:
     name: created_by
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: orcid:0000-0002-1234-5678
     description: The person or organization primarily responsible for creating the
       resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -627,6 +647,10 @@ attributes:
     range: string
   created_on:
     name: created_on
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2023-07-18T00:00:00'
     description: The date and time when the resource was created.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -638,6 +662,10 @@ attributes:
     range: datetime
   doi:
     name: doi
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 10.5281/zenodo.10642459
     description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
       persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -655,6 +683,10 @@ attributes:
     pattern: 10\.\d{4,}\/.+
   download_url:
     name: download_url
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://fairhub.io/datasets/2/download
     description: URL from which the data can be downloaded. This is not the same as
       the landing page, which is a page that describes the dataset. Rather, this URL
       points directly to the data itself.
@@ -670,6 +702,10 @@ attributes:
     range: uri
   issued:
     name: issued
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2024-11-15T00:00:00'
     description: Date of formal issuance or publication of the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -681,6 +717,10 @@ attributes:
     range: datetime
   keywords:
     name: keywords
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: diabetes, retinal imaging, multimodal, clinical data
     description: Keywords or tags describing the resource for discovery and classification.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -693,6 +733,10 @@ attributes:
     multivalued: true
   language:
     name: language
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: en
     description: Language in which the information is expressed.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
@@ -706,6 +750,10 @@ attributes:
     range: string
   last_updated_on:
     name: last_updated_on
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2024-11-15T00:00:00'
     description: The date and time when the resource was most recently modified or
       updated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -718,6 +766,10 @@ attributes:
     range: datetime
   license:
     name: license
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: CC-BY-NC-4.0
     description: The legal license under which the resource is made available (e.g.,
       "MIT", "CC-BY-4.0").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -731,6 +783,10 @@ attributes:
     range: string
   modified_by:
     name: modified_by
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: orcid:0000-0002-9876-5432
     description: A person or organization that contributed to modifying or updating
       the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -743,6 +799,10 @@ attributes:
     range: string
   page:
     name: page
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://fairhub.io/datasets/2
     description: A landing page or web page providing access to or information about
       the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -770,6 +830,10 @@ attributes:
     range: uriorcurie
   status:
     name: status
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: published
     description: The status of the resource (e.g., draft, published, deprecated).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -781,6 +845,10 @@ attributes:
     range: string
   title:
     name: title
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 'AI-READI: Salutogenesis Study of Type 2 Diabetes'
     description: The official title of the element.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -792,6 +860,10 @@ attributes:
     range: string
   version:
     name: version
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 2.0.0
     description: The version identifier of the resource (e.g., "1.0", "2.3.1").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -804,6 +876,10 @@ attributes:
     range: string
   was_derived_from:
     name: was_derived_from
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://fairhub.io/datasets/2/versions/1
     description: A resource from which this resource was derived, in whole or in part.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
@@ -834,6 +910,10 @@ attributes:
     range: uriorcurie
   name:
     name: name
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: AI-READI Dataset
     description: A human-readable name for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
@@ -846,6 +926,10 @@ attributes:
     range: string
   description:
     name: description
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
     description: A human-readable description for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000

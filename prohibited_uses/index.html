@@ -354,7 +354,7 @@
 
 
 <h1 id="slot-prohibited_uses">Slot: prohibited_uses</h1>
-<p><em>Explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.</em></p>
+<p><em>List of explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/prohibitedUses">d4d:prohibitedUses</a>
 Alias: prohibited_uses</p>
 <!-- no inheritance hierarchy -->
@@ -370,13 +370,13 @@ Alias: prohibited_uses</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -418,8 +418,8 @@ Alias: prohibited_uses</p>
 <details>
 
 <pre><code class="language-yaml">name: prohibited_uses
-description: Explicitly prohibited or forbidden uses for this dataset. Stronger than
-  discouraged_uses - these are not permitted.
+description: List of explicitly prohibited or forbidden uses for this dataset. Stronger
+  than discouraged_uses - these are not permitted.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:prohibitedUses

@@ -388,6 +388,10 @@ is_a: DatasetProperty
 attributes:
   imputation_method:
     name: imputation_method
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Multiple Imputation by Chained Equations (MICE)
     description: 'Specific imputation technique used (mean, median, mode, forward
       fill, backward fill, interpolation, model-based imputation, etc.).
 
@@ -401,6 +405,10 @@ attributes:
     multivalued: true
   imputed_fields:
     name: imputed_fields
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: cgm_mean_glucose, hba1c_percent, bmi
     description: 'Fields or columns where imputation was applied.
 
       '
@@ -413,6 +421,10 @@ attributes:
     multivalued: true
   imputation_rationale:
     name: imputation_rationale
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 'MICE with 20 imputations; predictors: age, sex, HbA1c'
     description: 'Justification for the imputation approach chosen, including assumptions
       made about missing data mechanisms.
 
@@ -452,6 +464,10 @@ is_a: DatasetProperty
 attributes:
   imputation_method:
     name: imputation_method
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Multiple Imputation by Chained Equations (MICE)
     description: 'Specific imputation technique used (mean, median, mode, forward
       fill, backward fill, interpolation, model-based imputation, etc.).
 
@@ -467,6 +483,10 @@ attributes:
     multivalued: true
   imputed_fields:
     name: imputed_fields
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: cgm_mean_glucose, hba1c_percent, bmi
     description: 'Fields or columns where imputation was applied.
 
       '
@@ -481,6 +501,10 @@ attributes:
     multivalued: true
   imputation_rationale:
     name: imputation_rationale
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 'MICE with 20 imputations; predictors: age, sex, HbA1c'
     description: 'Justification for the imputation approach chosen, including assumptions
       made about missing data mechanisms.
 

@@ -355,7 +355,7 @@
 
 <h1 id="slot-grantor">Slot: grantor</h1>
 <p><em>Name/identifier of the organization providing monetary or resource support.</em></p>
-<p>URI: <a href="http://schema.org/funder">schema:funder</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/grantor">d4d:grantor</a>
 Alias: grantor</p>
 <!-- no inheritance hierarchy -->
 
@@ -396,11 +396,15 @@ Alias: grantor</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>schema:funder</td>
+<td>d4d:grantor</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:grantor</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>schema:funder</td>
 </tr>
 </tbody>
 </table>
@@ -410,8 +414,10 @@ Alias: grantor</p>
 <pre><code class="language-yaml">name: grantor
 description: Name/identifier of the organization providing monetary or resource support.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- schema:funder
 rank: 1000
-slot_uri: schema:funder
+slot_uri: d4d:grantor
 alias: grantor
 owner: FundingMechanism
 domain_of:
