@@ -2,6 +2,7 @@
 @prefix schema: <https://schema.org/> .
 @prefix rai: <http://mlcommons.org/croissant/RAI/> .
 @prefix evi: <https://w3id.org/EVI#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -26,6 +27,26 @@
 # Class-level alignments
 # ==============================================================================
 d4d:Dataset skos:exactMatch schema:Dataset .
+
+# Added 2026-04-25 — RO-Crate root + supporting classes
+# DatasetCollection: tree_root in d4d schema → projects to RO-Crate root
+# (@type=["Dataset", "https://w3id.org/EVI#ROCrate"], @id="./")
+d4d:DatasetCollection skos:exactMatch schema:Dataset .
+d4d:DatasetCollection skos:closeMatch dcat:Catalog .
+# File: matches schema:MediaObject in D4D_FileCollection.yaml class_uri
+d4d:File skos:exactMatch schema:MediaObject .
+d4d:File skos:closeMatch schema:DigitalDocument .
+# FileCollection: nested Dataset in RO-Crate hasPart
+d4d:FileCollection skos:exactMatch schema:Dataset .
+d4d:FileCollection skos:closeMatch dcat:Distribution .
+
+# Class-level slot mappings (added 2026-04-25)
+d4d:DatasetCollection_resources skos:exactMatch schema:hasPart .
+d4d:File_file_type skos:exactMatch d4d:fileType .
+d4d:FileCollection_resources skos:exactMatch schema:hasPart .
+d4d:FileCollection_collection_type skos:exactMatch d4d:collectionType .
+d4d:FileCollection_file_count skos:exactMatch d4d:fileCount .
+d4d:FileCollection_total_bytes skos:exactMatch dcat:byteSize .
 
 # Direct/Exact Mappings (52 properties)
 # ==============================================================================
