@@ -11,8 +11,8 @@
 # ==============================================================================
 # D4D to RO-Crate SKOS Semantic Alignment
 # ==============================================================================
-# Version: 1.0
-# Date: 2026-03-12
+# Version: 1.1
+# Date: 2026-04-26
 # Description: Formal semantic mappings between D4D LinkML schema and RO-Crate
 #              properties using SKOS mapping predicates.
 #
@@ -214,18 +214,20 @@ d4d:conforms_to_schema skos:narrowMatch schema:conformsTo .
 # ==============================================================================
 # Alignment Statistics
 # ==============================================================================
-# Total mappings: 100 D4D properties (+ 1 class-level alignment)
-# - Exact matches: 60 (60.0%)
-# - Close matches: 24 (24.0%)
-# - Related matches: 10 (10.0%)
-# - Narrow/Broad matches: 6 (6.0%)
+# Total mappings: 112 SKOS triples (class-level + slot-level)
+# - Exact matches: 69 (61.6%)
+# - Close matches: 25 (22.3%)
+# - Related matches: 10 (8.9%)
+# - Narrow matches:  7 (6.3%)
+# - Broad matches:   1 (0.9%)
 #
-# Coverage by namespace (approximate):
-# - schema.org: ~32 properties
-# - rai: (Responsible AI): ~36 properties
-# - evi: (FAIRSCAPE Evidence): ~5 properties
-# - d4d: (D4D-specific): ~25 properties
-# - rdf: ~1 property
+# Coverage by target namespace:
+# - schema.org: 57 mappings
+# - rai (Responsible AI): 29 mappings
+# - d4d (D4D-internal): 10 mappings
+# - evi (FAIRSCAPE Evidence): 7 mappings
+# - dcat (Data Catalog Vocabulary): 3 mappings
+# - rdf: 1 mapping
 #
 # Note: Some D4D properties map to the same RO-Crate property when they represent
 #       synonyms or alternative expressions of the same concept.
