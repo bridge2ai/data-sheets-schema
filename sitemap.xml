@@ -1031,6 +1031,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/d4d_core/</loc>
+         <lastmod>2026-04-26</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/d4d_examples/</loc>
          <lastmod>2026-04-26</lastmod>
          <changefreq>daily</changefreq>
@@ -1942,6 +1947,11 @@
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/scope_impact/</loc>
+         <lastmod>2026-04-26</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/semantic_exchange/</loc>
          <lastmod>2026-04-26</lastmod>
          <changefreq>daily</changefreq>
     </url>
