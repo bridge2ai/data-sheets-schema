@@ -355,15 +355,15 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description='Generate SSSOM mapping from D4D SKOS alignment')
-    parser.add_argument('--skos', default='src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl',
+    parser.add_argument('--skos', default='src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl',
                         help='SKOS alignment TTL file')
     parser.add_argument('--rocrate', default='data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json',
                         help='RO-Crate JSON reference')
     parser.add_argument('--mapping', default='data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv',
                         help='Interface mapping TSV file')
-    parser.add_argument('--output', default='src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv',
+    parser.add_argument('--output', default='src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv',
                         help='Output SSSOM file (full)')
-    parser.add_argument('--output-subset', default='src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping_subset.tsv',
+    parser.add_argument('--output-subset', default='src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping_subset.tsv',
                         help='Output SSSOM file (subset)')
 
     args = parser.parse_args()

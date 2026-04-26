@@ -235,7 +235,7 @@ def main():
     )
     parser.add_argument(
         '--skos',
-        default='src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl',
+        default='src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl',
         help='SKOS alignment file'
     )
     parser.add_argument(
@@ -245,7 +245,7 @@ def main():
     )
     parser.add_argument(
         '--output',
-        default='src/data_sheets_schema/alignment/d4d_rocrate_sssom_uri_mapping.tsv',
+        default='src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_mapping.tsv',
         help='Output SSSOM URI mapping file'
     )
 

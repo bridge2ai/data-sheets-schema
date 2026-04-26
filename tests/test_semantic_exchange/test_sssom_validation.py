@@ -22,7 +22,7 @@ class TestSSSOMValidation(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.repo_root = Path(__file__).parent.parent.parent
-        self.mappings_dir = self.repo_root / "data" / "mappings"
+        self.mappings_dir = self.repo_root / "data" / "semantic_exchange"
 
         # Expected SSSOM files
         self.sssom_files = {
@@ -249,7 +249,7 @@ class TestSSSOMValidation(unittest.TestCase):
 
     def test_sssom_generation_succeeds(self):
         """Test that SSSOM generation command succeeds."""
-        self.skipTest("SSSOM files are manually curated in data/mappings/")
+        self.skipTest("SSSOM files are manually curated in data/semantic_exchange/")
 
 
 class TestSSSOMIntegration(unittest.TestCase):
@@ -258,7 +258,7 @@ class TestSSSOMIntegration(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.repo_root = Path(__file__).parent.parent.parent
-        self.mappings_dir = self.repo_root / "data" / "mappings"
+        self.mappings_dir = self.repo_root / "data" / "semantic_exchange"
 
     def test_sssom_references_valid_d4d_slots(self):
         """Test that SSSOM subject_ids reference actual D4D schema slots."""

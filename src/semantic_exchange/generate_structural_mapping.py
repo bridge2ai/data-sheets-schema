@@ -627,7 +627,7 @@ def main():
     base_dir = Path(__file__).parent.parent.parent
     d4d_schema = base_dir / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
     rocrate_example = base_dir / "data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json"
-    output_dir = base_dir / "data/mappings"
+    output_dir = base_dir / "data/semantic_exchange"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Parse schemas

@@ -3,10 +3,10 @@
 Phase 2: Implementation Script for URI Mappings
 
 This script adds slot_uri definitions to D4D schema files based on the
-validated mapping recommendations in data/mappings/uri_mapping_recommendations.md
+validated mapping recommendations in data/semantic_exchange/uri_mapping_recommendations.md
 
 Usage:
-    python src/alignment/implement_uri_mappings.py [--dry-run] [--priority {high,duo,d4d,rocrate,all}]
+    python src/semantic_exchange/implement_uri_mappings.py [--dry-run] [--priority {high,duo,d4d,rocrate,all}]
 """
 
 import argparse

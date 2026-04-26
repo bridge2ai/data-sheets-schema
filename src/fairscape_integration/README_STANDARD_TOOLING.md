@@ -41,7 +41,7 @@ print(f"LinkML-Map available: {LinkMLMapIntegration.is_available()}")
 from src.fairscape_integration.utils import SSSOMIntegration
 
 # Load SSSOM file (uses sssom-py if available, falls back to custom reader)
-integration = SSSOMIntegration('data/mappings/d4d_rocrate_structural_mapping.sssom.tsv')
+integration = SSSOMIntegration('data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv')
 
 # Query mappings
 exact_matches = integration.get_exact_matches()
@@ -85,7 +85,7 @@ from src.fairscape_integration.utils import LinkMLMapIntegration
 transformer = LinkMLMapIntegration(
     source_schema='path/to/rocrate_schema.yaml',
     target_schema='src/data_sheets_schema/schema/data_sheets_schema_all.yaml',
-    sssom_mappings='data/mappings/d4d_rocrate_structural_mapping.sssom.tsv',
+    sssom_mappings='data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv',
     verbose=True
 )
 
@@ -156,7 +156,7 @@ Both integration modules automatically detect if standard packages are available
 ### Example 1: Find All Exact Matches for D4D Field
 
 ```python
-integration = SSSOMIntegration('data/mappings/d4d_rocrate_structural_mapping.sssom.tsv')
+integration = SSSOMIntegration('data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv')
 
 # Get RO-Crate property for D4D field
 mappings = integration.get_mappings_by_subject('d4d:Metadata/title')
@@ -169,7 +169,7 @@ for mapping in mappings:
 ### Example 2: Generate Mapping Coverage Report
 
 ```python
-integration = SSSOMIntegration('data/mappings/d4d_rocrate_comprehensive.sssom.tsv')
+integration = SSSOMIntegration('data/semantic_exchange/d4d_rocrate_comprehensive.sssom.tsv')
 
 stats = integration.get_statistics()
 
@@ -214,13 +214,13 @@ The standard tools are integrated into the `fairscape-cli`:
 ```bash
 # Use SSSOM mappings with transformation
 fairscape-cli transform input.json -o output.yaml \
-    -m data/mappings/d4d_rocrate_structural_mapping.sssom.tsv \
+    -m data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv \
     --validate
 
 # Merge multiple RO-Crates using SSSOM-guided field resolution
 fairscape-cli merge file1.json file2.json \
     -o merged.yaml \
-    -m data/mappings/d4d_rocrate_structural_mapping.sssom.tsv \
+    -m data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv \
     --report
 ```
 
