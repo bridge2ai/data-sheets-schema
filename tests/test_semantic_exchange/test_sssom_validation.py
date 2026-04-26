@@ -22,14 +22,15 @@ class TestSSSOMValidation(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.repo_root = Path(__file__).parent.parent.parent
+        # Structural SSSOM lives under data/; the rest are canonical under src/.
         self.mappings_dir = self.repo_root / "data" / "semantic_exchange"
+        self.src_dir = self.repo_root / "src" / "data_sheets_schema" / "semantic_exchange"
 
-        # Expected SSSOM files
         self.sssom_files = {
             'structural': self.mappings_dir / "d4d_rocrate_structural_mapping.sssom.tsv",
-            'comprehensive': self.mappings_dir / "d4d_rocrate_sssom_comprehensive.tsv",
-            'uri': self.mappings_dir / "d4d_rocrate_sssom_uri_mapping.tsv",
-            'uri_comprehensive': self.mappings_dir / "d4d_rocrate_sssom_uri_comprehensive_v1.tsv",
+            'comprehensive': self.src_dir / "d4d_rocrate_sssom_comprehensive.tsv",
+            'uri': self.src_dir / "d4d_rocrate_sssom_uri_mapping.tsv",
+            'uri_comprehensive': self.src_dir / "d4d_rocrate_sssom_uri_comprehensive.tsv",
         }
 
     def test_sssom_files_exist(self):
@@ -259,6 +260,7 @@ class TestSSSOMIntegration(unittest.TestCase):
         """Set up test fixtures."""
         self.repo_root = Path(__file__).parent.parent.parent
         self.mappings_dir = self.repo_root / "data" / "semantic_exchange"
+        self.src_dir = self.repo_root / "src" / "data_sheets_schema" / "semantic_exchange"
 
     def test_sssom_references_valid_d4d_slots(self):
         """Test that SSSOM subject_ids reference actual D4D schema slots."""
@@ -287,7 +289,8 @@ class TestSSSOMIntegration(unittest.TestCase):
 
     def test_sssom_mapping_files_readable(self):
         """Test that all SSSOM files can be read without errors."""
-        sssom_files = list(self.mappings_dir.glob("*.tsv"))
+        sssom_files = (list(self.mappings_dir.glob("*.tsv"))
+                       + list(self.src_dir.glob("*.tsv")))
 
         self.assertGreater(len(sssom_files), 0,
                           "Should have at least one SSSOM .tsv file")
