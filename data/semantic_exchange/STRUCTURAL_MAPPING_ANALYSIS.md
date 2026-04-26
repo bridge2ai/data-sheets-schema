@@ -6,7 +6,7 @@ This document describes the schema-structure-aware mapping between D4D (Datashee
 
 **Generation Date**: 2026-03-20  
 **Method**: Automated structural analysis  
-**Script**: `src/alignment/generate_structural_mapping.py`  
+**Script**: `src/semantic_exchange/generate_structural_mapping.py`  
 **Total Mappings**: 142
 
 ## Mapping Quality Metrics
@@ -158,19 +158,19 @@ The structural mapper prevented the following types of errors that occurred in P
 ### Generate Mappings
 
 ```bash
-poetry run python src/alignment/generate_structural_mapping.py
+poetry run python src/semantic_exchange/generate_structural_mapping.py
 ```
 
 **Outputs**:
-- `data/mappings/d4d_rocrate_structural_mapping.sssom.tsv` - SSSOM format
-- `data/mappings/d4d_rocrate_structural_mapping_summary.md` - Human-readable summary
+- `data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv` - SSSOM format
+- `data/semantic_exchange/d4d_rocrate_structural_mapping_summary.md` - Human-readable summary
 
 ### Read Mappings
 
 ```python
 import pandas as pd
 
-df = pd.read_csv("data/mappings/d4d_rocrate_structural_mapping.sssom.tsv", sep="\t")
+df = pd.read_csv("data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv", sep="\t")
 
 # Filter exact matches
 exact = df[df["predicate_id"] == "skos:exactMatch"]

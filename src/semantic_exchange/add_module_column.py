@@ -270,7 +270,7 @@ def main():
     # Paths
     repo_root = Path(__file__).parent.parent.parent
     schema_file = repo_root / 'src/data_sheets_schema/schema/data_sheets_schema.yaml'
-    mappings_dir = repo_root / 'data/mappings'
+    mappings_dir = repo_root / 'data/semantic_exchange'
 
     print("=" * 80)
     print("Adding d4d_module column to SSSOM files")

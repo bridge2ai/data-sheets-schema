@@ -15,6 +15,14 @@ Curated comprehensive datasheets for each Bridge2AI data generating project:
 
 [View all D4D examples →](d4d_examples.md)
 
+## D4D-Core Schema (Recommended Entry Point)
+
+A curated, interop-focused subset of D4D — the recommended starting point for new datasheets and for systems that exchange datasheets with RO-Crate / FAIRSCAPE / DCAT consumers. See **[D4D-Core →](d4d_core.md)** for the schema YAMLs, merged form, validation targets, and curated HTML examples. Each d4d-core slot is paired with a SKOS-aligned external term in the **[Semantic Exchange Layer →](semantic_exchange.md)**.
+
+## Semantic Exchange Layer (D4D ↔ RO-Crate / FAIRSCAPE)
+
+The canonical SKOS + SSSOM mapping that lets a D4D datasheet round-trip through RO-Crate, FAIRSCAPE EVI, schema.org, DCAT, and Croissant RAI. See **[Semantic Exchange →](semantic_exchange.md)** for the SKOS TTL, semantic + structural SSSOM, generator scripts, and the `/d4d-add-mapping` workflow for new mappings.
+
 ## Repository Structure
 
 Browse the source code repository on GitHub:
@@ -22,13 +30,18 @@ Browse the source code repository on GitHub:
 * **[src/data/examples/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples)** - Example data files
 * **[project/](https://github.com/bridge2ai/data-sheets-schema/tree/main/project)** - Generated project files (JSON Schema, OWL, SHACL, etc.)
 * **[src/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src)** - Source files
-  * **[src/data_sheets_schema/schema/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/schema)** - LinkML schema source (edit here)
+  * **[src/data_sheets_schema/schema/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/schema)** - LinkML schema source (edit here); `data_sheets_schema_core.yaml` is the d4d-core entry point
+  * **[src/data_sheets_schema/semantic_exchange/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/semantic_exchange)** - canonical SKOS + SSSOM exchange-layer artifacts
   * **[src/data_sheets_schema/datamodel/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/datamodel)** - Generated Python datamodel
-* **[tests/](https://github.com/bridge2ai/data-sheets-schema/tree/main/tests)** - Python tests
+  * **[src/semantic_exchange/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/semantic_exchange)** - SSSOM/SKOS generator scripts
+* **[data/semantic_exchange/](https://github.com/bridge2ai/data-sheets-schema/tree/main/data/semantic_exchange)** - structural SSSOM + analysis docs
+* **[tests/](https://github.com/bridge2ai/data-sheets-schema/tree/main/tests)** - Python tests (`test_semantic_exchange/`, `test_fairscape_integration/`, …)
 * **[data/](https://github.com/bridge2ai/data-sheets-schema/tree/main/data)** - D4D metadata and evaluation data
 
 ## Quick Links
 
+- **[D4D-Core](d4d_core.md)** - Curated interop-focused schema subset (recommended entry point)
+- **[Semantic Exchange](semantic_exchange.md)** - SKOS + SSSOM mapping to RO-Crate / FAIRSCAPE
 - **[Schema Documentation](index.md)** - Complete schema reference (classes, slots, enumerations)
 - **[CLI Reference](cli.md)** - Command groups, flags, and workflow examples for `d4d`
 - **[D4D Examples](d4d_examples.md)** - View rendered datasheets for Bridge2AI projects

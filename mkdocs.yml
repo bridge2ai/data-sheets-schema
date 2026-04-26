@@ -13,6 +13,8 @@ plugins:
       version: 10.6.1
 nav:
   - Home: home.md
+  - D4D-Core: d4d_core.md
+  - Semantic Exchange: semantic_exchange.md
   - Schema Documentation: index.md
   - CLI Reference: cli.md
   - About: about.md

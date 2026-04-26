@@ -24,6 +24,41 @@ Curated comprehensive datasheets for each Bridge2AI data generating project:
 
 [View all D4D examples →](https://bridge2ai.github.io/data-sheets-schema/d4d_examples.html)
 
+## D4D-Core Schema (Recommended Entry Point)
+
+The **D4D-Core schema** is the curated, interop-focused subset of D4D — the recommended starting point for new datasheets and for systems that exchange datasheets with RO-Crate / FAIRSCAPE / DCAT consumers. Every slot in d4d-core is paired with a SKOS-aligned external term in the [Semantic Exchange Layer](#semantic-exchange-layer-d4d--ro-crate--fairscape).
+
+| Artifact | Path | Description |
+|---|---|---|
+| Source schema | [`src/data_sheets_schema/schema/data_sheets_schema_core.yaml`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/schema/data_sheets_schema_core.yaml) | Core schema entry point (imports `D4D_Core.yaml`) |
+| Module | [`src/data_sheets_schema/schema/D4D_Core.yaml`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/schema/D4D_Core.yaml) | `CoreDataset`, `CoreDatasetCollection`, `CoreDistribution` definitions |
+| Merged form | [`src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml) | Single-file merged schema (auto-generated) |
+| HTML examples | [Bridge2AI generating-center datasheets](#bridge2ai-generating-center-datasheets) (above) | Curated d4d-core renderings |
+| Validate / build | `make validate-core`, `make gen-core-schema`, `make lint-core` | Core-schema-only Make targets |
+
+**Scope:** ~95 fields across `CoreDataset`, `CoreDatasetCollection`, `CoreDistribution` and supporting classes (`Person`, `Organization`, `Creator`, `Grant`, `FundingMechanism`). The full schema (`data_sheets_schema.yaml`, ~284 attributes) remains the extended reservoir.
+
+## Semantic Exchange Layer (D4D ↔ RO-Crate / FAIRSCAPE)
+
+The **Semantic Exchange Layer** is the canonical SKOS + SSSOM mapping that lets a D4D datasheet round-trip through RO-Crate, FAIRSCAPE EVI, schema.org, DCAT, and Croissant RAI. All artifacts live in two directories:
+
+| Artifact | Path | Description |
+|---|---|---|
+| SKOS alignment (authoritative) | [`src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl) | 100+ `skos:exactMatch` / `closeMatch` / `relatedMatch` triples |
+| Semantic SSSOM | [`src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv) | 19-column SSSOM with json_path / pydantic / interface columns |
+| URI SSSOM | [`d4d_rocrate_sssom_uri_mapping.tsv`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_mapping.tsv) + `_comprehensive.tsv` | Auto-regenerated URI variants |
+| Structural SSSOM | [`data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv`](https://github.com/bridge2ai/data-sheets-schema/blob/main/data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv) | sssom-py-compatible 17-column structural mapping |
+| Generators | [`src/semantic_exchange/`](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/semantic_exchange) | Scripts that derive the URI/comprehensive/structural variants |
+| Tests | [`tests/test_semantic_exchange/`](https://github.com/bridge2ai/data-sheets-schema/tree/main/tests/test_semantic_exchange) + `tests/test_fairscape_integration/` | SSSOM column/structure validation |
+| Add a new mapping | `/d4d-add-mapping` Claude Code skill ([command](.claude/commands/d4d-add-mapping.md)) | Schema-driven workflow for new SSSOM rows |
+
+**Build / validate:**
+
+```bash
+make gen-sssom-all       # regenerate URI + comprehensive + structural variants
+poetry run pytest tests/test_semantic_exchange tests/test_fairscape_integration -v
+```
+
 ## Repository Structure
 
 Browse the source code repository:
@@ -31,9 +66,12 @@ Browse the source code repository:
 * **[src/data/examples/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples)** - example YAML data
 * **[project/](https://github.com/bridge2ai/data-sheets-schema/tree/main/project)** - project files (do not edit these)
 * **[src/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src)** - source files (edit these)
-  * **[src/data_sheets_schema/schema/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/schema)** - LinkML schema (edit this)
+  * **[src/data_sheets_schema/schema/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/schema)** - LinkML schema (edit this); `data_sheets_schema_core.yaml` is the d4d-core entry point
+  * **[src/data_sheets_schema/semantic_exchange/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/semantic_exchange)** - canonical SKOS + SSSOM exchange-layer artifacts
   * **[src/data_sheets_schema/datamodel/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/datamodel)** - generated Python datamodel
-* **[tests/](https://github.com/bridge2ai/data-sheets-schema/tree/main/tests)** - Python tests
+  * **[src/semantic_exchange/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/semantic_exchange)** - SSSOM/SKOS generator scripts
+* **[data/semantic_exchange/](https://github.com/bridge2ai/data-sheets-schema/tree/main/data/semantic_exchange)** - structural SSSOM + analysis docs
+* **[tests/](https://github.com/bridge2ai/data-sheets-schema/tree/main/tests)** - Python tests (`test_semantic_exchange/`, `test_fairscape_integration/`, …)
 
 ## D4D CLI
 

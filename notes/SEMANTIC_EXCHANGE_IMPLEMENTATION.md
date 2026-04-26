@@ -36,7 +36,7 @@ See `data/ro-crate/profiles/D4D/README.md` for detailed comparison and usage gui
 ### Phase 1: Core Infrastructure (COMPLETE ✅)
 
 #### 1. SKOS Semantic Alignment
-- **File**: `src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl`
+- **File**: `src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl`
 - **Format**: RDF/Turtle with SKOS mapping predicates
 - **Content**: 89 SKOS triples mapping D4D properties to RO-Crate
 - **Mapping Types**:
@@ -274,7 +274,7 @@ All scripts recovered from git commit 4bb4785:
 ## File Inventory
 
 ### Phase 1 Files (5 files)
-1. `src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl` (10 KB)
+1. `src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl` (10 KB)
 2. `data/ro-crate_mapping/d4d_rocrate_mapping_v1.tsv` (14 KB)
 3. `data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv` (20 KB)
 4. `data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv` (25 KB)
@@ -306,7 +306,7 @@ wc -l data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv  # 84 rows
 wc -l data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv  # 134 rows
 
 # Verify SKOS alignment
-grep -c "skos:" src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl  # 89 triples
+grep -c "skos:" src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl  # 89 triples
 
 # Test generators
 python3 .claude/agents/scripts/generate_enhanced_tsv.py  # ✓ Success
