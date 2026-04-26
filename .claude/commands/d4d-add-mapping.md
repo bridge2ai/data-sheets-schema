@@ -8,9 +8,9 @@ Invoke this skill when:
 - The user asks to "add SSSOM mappings", "update the exchange layer", or names specific classes to map.
 
 The skill produces:
-- New rows in the **semantic SSSOM** (`src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv`)
-- New rows in the **structural SSSOM** (`data/mappings/d4d_rocrate_structural_mapping.sssom.tsv`)
-- Matching SKOS triples in `src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl`
+- New rows in the **semantic SSSOM** (`src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv`)
+- New rows in the **structural SSSOM** (`data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv`)
+- Matching SKOS triples in `src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl`
 - A new branch + commit + optional PR
 
 ## Inputs
@@ -21,15 +21,15 @@ The user names one or more **D4D class names** (e.g. `Dataset`, `DatasetCollecti
 
 Always read these BEFORE editing anything:
 
-1. `src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv` — first 10 lines (header + samples) to confirm the **19-column tab-separated** layout. Columns:
+1. `src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv` — first 10 lines (header + samples) to confirm the **19-column tab-separated** layout. Columns:
    ```
    d4d_schema_path  subject_id  subject_label  predicate_id  rocrate_json_path  object_id  object_label  mapping_justification  confidence  comment  author_id  mapping_date  subject_source  object_source  mapping_set_id  mapping_set_version  in_rocrate_json  in_pydantic_model  in_interface_mapping
    ```
-2. `data/mappings/d4d_rocrate_structural_mapping.sssom.tsv` — first 5 lines for the **17-column** structural layout. Columns:
+2. `data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv` — first 5 lines for the **17-column** structural layout. Columns:
    ```
    subject_id  subject_label  subject_category  predicate_id  object_id  object_label  mapping_justification  confidence  subject_source  object_source  d4d_subject_range  subject_multivalued  rocrate_value_type  type_compatible  composition_path  structural_notes  warnings
    ```
-3. `src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl` — to see the prefix declarations and existing class/slot triples.
+3. `src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl` — to see the prefix declarations and existing class/slot triples.
 4. The schema YAML(s) defining each target class — typically:
    - `src/data_sheets_schema/schema/D4D_Base_import.yaml` (NamedThing, Information, common)
    - `src/data_sheets_schema/schema/D4D_FileCollection.yaml` (File, FileCollection)
@@ -41,9 +41,9 @@ For each class, capture the existing `class_uri`, `exact_mappings`, `close_mappi
 ## Pre-edit grep (avoid duplicates)
 
 ```bash
-grep -n "d4d:CLASSNAME" src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv \
-                       src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl
-grep -n "d4d:CLASSNAME/" data/mappings/d4d_rocrate_structural_mapping.sssom.tsv
+grep -n "d4d:CLASSNAME" src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv \
+                       src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl
+grep -n "d4d:CLASSNAME/" data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv
 ```
 
 If a class-level row already exists with the right mapping, leave it intact and only add what's missing.
@@ -94,7 +94,7 @@ Structural file is **slot-level only** — do not add class-level rows there.
 
 ## SKOS TTL template
 
-In `src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl`, append under `# Class-level alignments`:
+In `src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl`, append under `# Class-level alignments`:
 
 ```turtle
 d4d:{ClassName} skos:exactMatch {TARGET_ID} .
@@ -144,9 +144,9 @@ After appending rows, run:
 poetry run python -c "
 import sys; sys.path.insert(0,'src')
 from fairscape_integration.utils.sssom_integration import SSSOMIntegration
-sem = SSSOMIntegration('src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv', verbose=False)
+sem = SSSOMIntegration('src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv', verbose=False)
 print('Semantic:', sem.get_active_implementation(), sem.get_mappings_count())
-struct = SSSOMIntegration('data/mappings/d4d_rocrate_structural_mapping.sssom.tsv', verbose=False)
+struct = SSSOMIntegration('data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv', verbose=False)
 print('Structural:', struct.get_active_implementation(), struct.get_mappings_count())
 # Spot-check the new class subjects
 for c in ['CLASS1', 'CLASS2']:
@@ -154,7 +154,7 @@ for c in ['CLASS1', 'CLASS2']:
     assert matches, f'd4d:{c} missing from semantic SSSOM'
     print(f'  d4d:{c} →', [m['object_id'] for m in matches])
 "
-poetry run python -m pytest tests/test_alignment tests/test_fairscape_integration -v
+poetry run python -m pytest tests/test_semantic_exchange tests/test_fairscape_integration -v
 ```
 
 The semantic file uses non-SSSOM-standard columns and falls back to the custom reader (`impl=custom`); the structural file should pass `sssom-py` (`impl=sssom-py`). All existing alignment + fairscape tests must continue to pass.
@@ -167,10 +167,10 @@ Conventional workflow:
 git checkout main && git pull origin main
 git checkout -b update_exchange   # or another descriptive name supplied by the user
 # ... edits ...
-poetry run python -m pytest tests/test_alignment tests/test_fairscape_integration
-git add src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv \
-        data/mappings/d4d_rocrate_structural_mapping.sssom.tsv \
-        src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl
+poetry run python -m pytest tests/test_semantic_exchange tests/test_fairscape_integration
+git add src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv \
+        data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv \
+        src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl
 git commit -m "Add SSSOM mappings for {CLASSES} in the exchange layer
 
 Brief explanation of new rows and the reasoning behind primary/secondary targets.
@@ -186,16 +186,16 @@ gh pr create --base main --title "Add SSSOM mappings for {CLASSES}" --body "..."
 When opening the PR, **explicitly call out** these as separate follow-ups (do NOT bundle them):
 
 1. **Converter code** in `src/fairscape_integration/d4d_to_fairscape.py:292-295` and `fairscape_to_d4d.py:289-292` — `TODO`s about traversing `FileCollection.resources` to emit RO-Crate `File` entities. The mapping layer alone is not enough; converter code needs separate updates.
-2. **Generated comprehensive variants** — `*_comprehensive*.tsv` and `*_uri*.tsv` are produced by scripts in `src/alignment/` (`generate_sssom_mapping.py`, `generate_structural_mapping.py`, etc.). Those scripts may not auto-discover newly added classes; running `make gen-sssom-all` may overwrite hand-curated rows. Skip regen unless the generators have been updated to handle the new classes.
+2. **Generated comprehensive variants** — `*_comprehensive*.tsv` and `*_uri*.tsv` are produced by scripts in `src/semantic_exchange/` (`generate_sssom_mapping.py`, `generate_structural_mapping.py`, etc.). Those scripts may not auto-discover newly added classes; running `make gen-sssom-all` may overwrite hand-curated rows. Skip regen unless the generators have been updated to handle the new classes.
 3. **Schema YAML touch-ups** — verify each newly mapped class has matching `class_uri` and/or `exact_mappings` annotations in the YAML so the schema is self-consistent with the SSSOM. Add them in a small follow-up if needed.
 
 ## Reference: a complete walkthrough
 
 A worked example (PR #147) added six class-level + six slot-level rows for `Dataset`, `DatasetCollection`, `File`, `FileCollection`. The diff is the canonical template:
 
-- `git show 9efcac84 -- src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv`
-- `git show 9efcac84 -- data/mappings/d4d_rocrate_structural_mapping.sssom.tsv`
-- `git show 9efcac84 -- src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl`
+- `git show 9efcac84 -- src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv`
+- `git show 9efcac84 -- data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv`
+- `git show 9efcac84 -- src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl`
 
 ## Style and quality bar
 
@@ -203,4 +203,4 @@ A worked example (PR #147) added six class-level + six slot-level rows for `Data
 - Use `confidence: 1.0` only for true `skos:exactMatch` with a documented schema-level mapping; use `0.7–0.9` for `skos:closeMatch` with semantic similarity.
 - Keep `mapping_date` current (today, ISO 8601).
 - Do not modify pre-existing rows unless explicitly asked — additive edits only.
-- After commit, regenerate any docs that quote the row counts (e.g. `data/mappings/STRUCTURAL_MAPPING_ANALYSIS.md`, `notes/*`).
+- After commit, regenerate any docs that quote the row counts (e.g. `data/semantic_exchange/STRUCTURAL_MAPPING_ANALYSIS.md`, `notes/*`).
