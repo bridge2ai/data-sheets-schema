@@ -67,25 +67,25 @@
       <line x1="165" y1="125" x2="165" y2="139" stroke="#1565C0" stroke-width="1.5"/>
       <!-- body -->
       <rect x="40" y="170" width="200" height="140" rx="14" fill="#BBDEFB" stroke="#1565C0" stroke-width="4"/>
-      <!-- chest panel -->
-      <rect x="100" y="200" width="80" height="80" rx="8" fill="white" stroke="#1565C0" stroke-width="3"/>
-      <text x="140" y="232" text-anchor="middle" font-size="22" font-weight="bold" fill="#1565C0">D4D</text>
-      <text x="140" y="262" text-anchor="middle" font-size="20" fill="#1565C0">agent</text>
-      <!-- LEFT arms (3) -->
-      <g transform="rotate(-40 40 185)">
-        <rect x="-30" y="173" width="70" height="24" rx="8" fill="#90CAF9" stroke="#1565C0" stroke-width="3"/>
+      <!-- chest panel — red background, white "D4D agent" text (matches headband) -->
+      <rect x="100" y="200" width="80" height="80" rx="8" fill="#D32F2F" stroke="#1565C0" stroke-width="3"/>
+      <text x="140" y="232" text-anchor="middle" font-size="22" font-weight="bold" fill="white">D4D</text>
+      <text x="140" y="262" text-anchor="middle" font-size="20" fill="white">agent</text>
+      <!-- LEFT arms (3 thin, pointing outward) -->
+      <g transform="rotate(-45 40 200)">
+        <rect x="-50" y="194" width="90" height="12" rx="6" fill="#90CAF9" stroke="#1565C0" stroke-width="3"/>
       </g>
-      <rect x="10" y="220" width="30" height="60" rx="8" fill="#90CAF9" stroke="#1565C0" stroke-width="3"/>
-      <g transform="rotate(40 40 295)">
-        <rect x="-30" y="283" width="70" height="24" rx="8" fill="#90CAF9" stroke="#1565C0" stroke-width="3"/>
+      <rect x="-50" y="234" width="90" height="12" rx="6" fill="#90CAF9" stroke="#1565C0" stroke-width="3"/>
+      <g transform="rotate(45 40 280)">
+        <rect x="-50" y="274" width="90" height="12" rx="6" fill="#90CAF9" stroke="#1565C0" stroke-width="3"/>
       </g>
-      <!-- RIGHT arms (3) mirrored -->
-      <g transform="rotate(40 240 185)">
-        <rect x="240" y="173" width="70" height="24" rx="8" fill="#90CAF9" stroke="#1565C0" stroke-width="3"/>
+      <!-- RIGHT arms (3 thin, pointing outward) -->
+      <g transform="rotate(45 240 200)">
+        <rect x="240" y="194" width="90" height="12" rx="6" fill="#90CAF9" stroke="#1565C0" stroke-width="3"/>
       </g>
-      <rect x="240" y="220" width="30" height="60" rx="8" fill="#90CAF9" stroke="#1565C0" stroke-width="3"/>
-      <g transform="rotate(-40 240 295)">
-        <rect x="240" y="283" width="70" height="24" rx="8" fill="#90CAF9" stroke="#1565C0" stroke-width="3"/>
+      <rect x="240" y="234" width="90" height="12" rx="6" fill="#90CAF9" stroke="#1565C0" stroke-width="3"/>
+      <g transform="rotate(-45 240 280)">
+        <rect x="240" y="274" width="90" height="12" rx="6" fill="#90CAF9" stroke="#1565C0" stroke-width="3"/>
       </g>
       <!-- gear icons (working indicator) — black -->
       <circle cx="60" cy="335" r="14" fill="#222222" stroke="#000000" stroke-width="3"/>
