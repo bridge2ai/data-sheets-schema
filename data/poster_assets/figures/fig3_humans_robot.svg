@@ -43,10 +43,15 @@
     <!-- Reusable robot (extended viewBox to fit angled multi-arms) -->
     <symbol id="robot" viewBox="-50 0 380 360">
       <!-- antenna -->
-      <line x1="140" y1="10" x2="140" y2="40" stroke="#1565C0" stroke-width="4"/>
+      <line x1="140" y1="10" x2="140" y2="25" stroke="#1565C0" stroke-width="4"/>
       <circle cx="140" cy="10" r="8" fill="#F57C00"/>
-      <!-- head -->
-      <rect x="60" y="40" width="160" height="120" rx="14" fill="#90CAF9" stroke="#1565C0" stroke-width="4"/>
+      <!-- head (taller, to fit the D4D headband at top) -->
+      <rect x="60" y="25" width="160" height="140" rx="14" fill="#90CAF9" stroke="#1565C0" stroke-width="4"/>
+      <!-- red headband with white "D4D" letters -->
+      <path d="M 60,39 Q 60,25 74,25 L 206,25 Q 220,25 220,39 L 220,60 L 60,60 Z"
+            fill="#D32F2F" stroke="#1565C0" stroke-width="4"/>
+      <text x="140" y="52" text-anchor="middle" font-size="24" font-weight="bold"
+            fill="white" letter-spacing="3">D4D</text>
       <!-- eyes -->
       <circle cx="105" cy="95" r="14" fill="white" stroke="#1565C0" stroke-width="3"/>
       <circle cx="175" cy="95" r="14" fill="white" stroke="#1565C0" stroke-width="3"/>
