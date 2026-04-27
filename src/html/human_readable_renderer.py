@@ -19,48 +19,53 @@ class HumanReadableRenderer:
     def __init__(self):
         # Load schema information for required field indicators
         self.schema_info = self._load_schema_info()
+        # Section titles + icons stay here as presentation choices; the
+        # subtitle question is pulled from each module YAML's
+        # annotations.d4d:section_question (canonical D4D paper wording).
         self.d4d_sections = {
-            "Motivation": {
-                "title": "Motivation",
-                "description": "Why was the dataset created?",
-                "icon": "🎯"
-            },
-            "Composition": {
-                "title": "Composition", 
-                "description": "What do the instances represent?",
-                "icon": "📊"
-            },
-            "Collection": {
-                "title": "Collection Process",
-                "description": "How was the data acquired?", 
-                "icon": "🔍"
-            },
-            "Preprocessing": {
-                "title": "Preprocessing/Cleaning/Labeling",
-                "description": "Was any preprocessing/cleaning/labeling done?",
-                "icon": "🔧"
-            },
-            "Uses": {
-                "title": "Uses",
-                "description": "What (other) tasks could the dataset be used for?",
-                "icon": "🚀"
-            },
-            "Distribution": {
-                "title": "Distribution",
-                "description": "How will the dataset be distributed?",
-                "icon": "📤"
-            },
-            "Maintenance": {
-                "title": "Maintenance", 
-                "description": "How will the dataset be maintained?",
-                "icon": "🔄"
-            },
-            "Human": {
-                "title": "Human Subjects",
-                "description": "Does the dataset relate to people?",
-                "icon": "👥"
-            }
+            "Motivation":    {"title": "Motivation",                       "module": "D4D_Motivation",   "icon": "🎯"},
+            "Composition":   {"title": "Composition",                      "module": "D4D_Composition",  "icon": "📊"},
+            "Collection":    {"title": "Collection Process",               "module": "D4D_Collection",   "icon": "🔍"},
+            "Preprocessing": {"title": "Preprocessing/Cleaning/Labeling",  "module": "D4D_Preprocessing","icon": "🔧"},
+            "Uses":          {"title": "Uses",                             "module": "D4D_Uses",         "icon": "🚀"},
+            "Distribution":  {"title": "Distribution",                     "module": "D4D_Distribution", "icon": "📤"},
+            "Maintenance":   {"title": "Maintenance",                      "module": "D4D_Maintenance",  "icon": "🔄"},
+            "Human":         {"title": "Human Subjects",                   "module": "D4D_Human",        "icon": "👥"},
         }
+        self._populate_section_descriptions()
+
+    def _populate_section_descriptions(self):
+        """Fill self.d4d_sections[section]['description'] from each module
+        YAML's `annotations.d4d:section_question`. Keeps a hardcoded
+        fallback only if the schema is unreachable."""
+        FALLBACKS = {
+            "Motivation":    "Why was the dataset created?",
+            "Composition":   "What do the instances represent?",
+            "Collection":    "How was the data acquired?",
+            "Preprocessing": "Was any preprocessing/cleaning/labeling done?",
+            "Uses":          "What (other) tasks could the dataset be used for?",
+            "Distribution":  "How will the dataset be distributed?",
+            "Maintenance":   "How will the dataset be maintained?",
+            "Human":         "Does the dataset relate to people?",
+        }
+        schema_dir = os.path.join(os.path.dirname(__file__),
+                                  '..', 'data_sheets_schema', 'schema')
+        for section, meta in self.d4d_sections.items():
+            module_yaml = os.path.join(schema_dir, f"{meta['module']}.yaml")
+            description = FALLBACKS[section]
+            try:
+                with open(module_yaml, 'r') as f:
+                    mod = yaml.safe_load(f)
+                ann = (mod or {}).get('annotations') or {}
+                # Annotation may parse as plain string or as {tag:..., value:...}
+                raw = ann.get('d4d:section_question')
+                if isinstance(raw, dict):
+                    raw = raw.get('value')
+                if isinstance(raw, str) and raw.strip():
+                    description = raw.strip()
+            except Exception as e:
+                print(f"Warning: could not load {module_yaml}: {e}")
+            meta['description'] = description
     
     def _load_schema_info(self):
         """Load JSON Schema to get required field information"""

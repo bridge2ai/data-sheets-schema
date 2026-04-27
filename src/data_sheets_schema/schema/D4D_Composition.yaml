@@ -6,8 +6,8 @@ description: >
   The questions in this section are intended to provide dataset consumers
   with the information they need to make informed decisions about using the
   dataset for their chosen tasks.
-
-
+annotations:
+  "d4d:section_question": "What do the instances that comprise the dataset represent?"
 license: MIT
 see_also:
   - "https://bridge2ai.github.io/data-sheets-schema"

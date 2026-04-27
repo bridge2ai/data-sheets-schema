@@ -6,6 +6,8 @@ description: >
   The questions in this section are primarily intended to encourage dataset 
   creators to articulate their reasons for creating the dataset and to 
   promote transparency about funding interests.
+annotations:
+  "d4d:section_question": "For what purpose was the dataset created?"
 license: MIT
 see_also:
   - "https://bridge2ai.github.io/data-sheets-schema"
