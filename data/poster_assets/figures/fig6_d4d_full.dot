@@ -13,7 +13,6 @@ digraph D4DFull {
   "Software" [fillcolor="#FFEAD4", color="#F57C00", penwidth=1.5];
   "Person" [fillcolor="#FFEAD4", color="#F57C00", penwidth=1.5];
   "Information" [fillcolor="#FFEAD4", color="#F57C00", penwidth=1.5];
-  "FormatDialect" [fillcolor="#FFEAD4", color="#F57C00", penwidth=1.5];
   "Purpose" [fillcolor="#FFEAD4", color="#F57C00", penwidth=1.5];
   "Task" [fillcolor="#FFEAD4", color="#F57C00", penwidth=1.5];
   "AddressingGap" [fillcolor="#FFEAD4", color="#F57C00", penwidth=1.5];
