@@ -5,6 +5,9 @@
     <marker id="arr" markerWidth="14" markerHeight="14" refX="11" refY="6" orient="auto">
       <path d="M0,0 L12,6 L0,12 z" fill="#555"/>
     </marker>
+    <marker id="arr-red" markerWidth="14" markerHeight="14" refX="11" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#D32F2F"/>
+    </marker>
     <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
       <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
       <feOffset dx="3" dy="4" result="off"/>
@@ -146,10 +149,10 @@
     <text x="210" y="785" text-anchor="middle" font-size="22" font-weight="bold" fill="#5D4037">dataset descriptions</text>
   </g>
 
-  <!-- ─────────── ARROWS from each human to robot ─────────── -->
-  <path d="M 400,180  C 600,250 700,300 870,420" stroke="#777" stroke-width="5" fill="none" marker-end="url(#arr)" stroke-linecap="round"/>
-  <path d="M 400,450  L 870,450" stroke="#777" stroke-width="5" fill="none" marker-end="url(#arr)" stroke-linecap="round"/>
-  <path d="M 400,720  C 600,650 700,580 870,480" stroke="#777" stroke-width="5" fill="none" marker-end="url(#arr)" stroke-linecap="round"/>
+  <!-- ─────────── ARROWS from each human to robot (shortened) ─────────── -->
+  <path d="M 400,180  C 540,250 640,300 800,420" stroke="#777" stroke-width="5" fill="none" marker-end="url(#arr)" stroke-linecap="round"/>
+  <path d="M 400,450  L 800,450" stroke="#777" stroke-width="5" fill="none" marker-end="url(#arr)" stroke-linecap="round"/>
+  <path d="M 400,720  C 540,650 640,580 800,480" stroke="#777" stroke-width="5" fill="none" marker-end="url(#arr)" stroke-linecap="round"/>
 
   <!-- ─────────── CENTER: robot (enlarged + multi-arm) ─────────── -->
   <g transform="translate(840, 180)">
@@ -158,9 +161,29 @@
     <text x="220" y="560" text-anchor="middle" font-size="22" fill="#444">parse · synthesize · validate · align · render</text>
   </g>
 
-  <!-- ─────────── ARROW to outputs ─────────── -->
-  <path d="M 1300,440 L 1620,440" stroke="#777" stroke-width="6" fill="none" marker-end="url(#arr)" stroke-linecap="round"/>
-  <text x="1460" y="425" text-anchor="middle" font-size="22" font-style="italic" fill="#666">structured · validated · shareable</text>
+  <!-- ─────────── AGENT → VALIDATOR → OUTPUTS, with feedback loop ─────────── -->
+  <!-- agent → validator (short forward arrow) -->
+  <path d="M 1300,440 L 1340,440" stroke="#777" stroke-width="6" fill="none" marker-end="url(#arr)" stroke-linecap="round"/>
+
+  <!-- LinkML schema validator block (right of robot) -->
+  <g transform="translate(1340, 380)">
+    <rect x="0" y="0" width="190" height="120" rx="12" fill="#FFF3E0" stroke="#F57C00" stroke-width="4"/>
+    <text x="95" y="36" text-anchor="middle" font-size="22" font-weight="bold" fill="#5D4037">LinkML</text>
+    <text x="95" y="64" text-anchor="middle" font-size="22" font-weight="bold" fill="#5D4037">schema</text>
+    <text x="95" y="92" text-anchor="middle" font-size="20" fill="#5D4037">validation</text>
+  </g>
+
+  <!-- validator → outputs (short forward arrow, validated) -->
+  <path d="M 1530,440 L 1610,440" stroke="#777" stroke-width="6" fill="none" marker-end="url(#arr)" stroke-linecap="round"/>
+  <text x="1570" y="425" text-anchor="middle" font-size="20" font-style="italic" fill="#388E3C">validated</text>
+
+  <!-- feedback loop: validator → back to agent (errors → corrections) -->
+  <path d="M 1340,500 Q 1340,650 1180,650 Q 1060,650 1060,610"
+        stroke="#D32F2F" stroke-width="5" fill="none"
+        stroke-dasharray="10,6"
+        marker-end="url(#arr-red)" stroke-linecap="round"/>
+  <text x="1280" y="700" text-anchor="middle" font-size="22" font-style="italic"
+        font-weight="bold" fill="#D32F2F">errors → corrections</text>
 
   <!-- ─────────── RIGHT: output records ─────────── -->
   <g transform="translate(1640, 60)">
