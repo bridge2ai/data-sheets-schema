@@ -11,7 +11,7 @@
 # ==============================================================================
 # D4D to RO-Crate SKOS Semantic Alignment
 # ==============================================================================
-# Version: 1.1
+# Version: 1.2
 # Date: 2026-04-26
 # Description: Formal semantic mappings between D4D LinkML schema and RO-Crate
 #              properties using SKOS mapping predicates.
@@ -47,6 +47,95 @@ d4d:FileCollection_resources skos:exactMatch schema:hasPart .
 d4d:FileCollection_collection_type skos:exactMatch d4d:collectionType .
 d4d:FileCollection_file_count skos:exactMatch d4d:fileCount .
 d4d:FileCollection_total_bytes skos:exactMatch dcat:byteSize .
+
+# Added 2026-04-26 — DataSubset (full schema) + d4d-core Core* classes
+# DataSubset: is_a Dataset; sub-Dataset under hasPart
+d4d:DataSubset skos:exactMatch schema:Dataset .
+# CoreDataset (d4d-core, primary exchange-layer record)
+d4d:CoreDataset skos:exactMatch schema:Dataset .
+d4d:CoreDataset skos:closeMatch dcat:Dataset .
+# CoreDatasetCollection (d4d-core, RO-Crate root)
+d4d:CoreDatasetCollection skos:exactMatch schema:Dataset .
+d4d:CoreDatasetCollection skos:closeMatch dcat:Catalog .
+# CoreDistribution (d4d-core, file/distribution surface)
+d4d:CoreDistribution skos:exactMatch schema:DataDownload .
+d4d:CoreDistribution skos:closeMatch dcat:Distribution .
+
+# Added 2026-04-26 — sub-entity classes referenced via RO-Crate properties
+d4d:Person skos:exactMatch schema:Person .
+d4d:Creator skos:exactMatch schema:Person .
+d4d:Organization skos:exactMatch schema:Organization .
+d4d:Grantor skos:exactMatch schema:Organization .
+d4d:Grant skos:exactMatch schema:Grant .
+d4d:FundingMechanism skos:exactMatch schema:Grant .
+d4d:VariableMetadata skos:exactMatch schema:PropertyValue .
+d4d:Software skos:exactMatch schema:SoftwareApplication .
+d4d:Maintainer skos:exactMatch schema:Person .
+d4d:DataCollector skos:exactMatch schema:Person .
+
+# Added 2026-04-26 — DatasetProperty subclasses with natural RO-Crate / RAI analogues
+d4d:Instance skos:closeMatch schema:variableMeasured .
+d4d:SamplingStrategy skos:exactMatch evi:samplingPlan .
+d4d:LabelingStrategy skos:exactMatch rai:dataAnnotationProtocol .
+d4d:InstanceAcquisition skos:closeMatch rai:dataCollection .
+d4d:HumanSubjectResearch skos:exactMatch d4d:humanSubject .
+d4d:InformedConsent skos:exactMatch d4d:informedConsent .
+d4d:Deidentification skos:closeMatch rai:confidentialityLevel .
+d4d:RawDataSource skos:exactMatch rai:dataCollectionRawData .
+d4d:RawData skos:exactMatch rai:dataCollectionRawData .
+d4d:ImputationProtocol skos:exactMatch rai:dataImputationProtocol .
+d4d:AtRiskPopulations skos:exactMatch d4d:atRiskPopulations .
+d4d:Subpopulation skos:closeMatch schema:variableMeasured .
+d4d:CollectionTimeframe skos:exactMatch rai:dataCollectionTimeframe .
+d4d:MissingDataDocumentation skos:exactMatch rai:dataCollectionMissingData .
+d4d:MachineAnnotationTools skos:exactMatch rai:machineAnnotationTools .
+d4d:IntendedUse skos:exactMatch rai:dataUseCases .
+d4d:Purpose skos:closeMatch rai:dataUseCases .
+d4d:Task skos:closeMatch rai:dataUseCases .
+d4d:OtherTask skos:closeMatch rai:dataUseCases .
+d4d:ExistingUse skos:exactMatch rai:dataUseCases .
+d4d:DiscouragedUse skos:exactMatch rai:prohibitedUses .
+d4d:ProhibitedUse skos:exactMatch rai:prohibitedUses .
+d4d:DatasetBias skos:exactMatch rai:dataBiases .
+d4d:DatasetLimitation skos:exactMatch rai:dataLimitations .
+d4d:VersionAccess skos:closeMatch schema:version .
+d4d:EthicalReview skos:exactMatch rai:ethicalReview .
+d4d:LicenseAndUseTerms skos:closeMatch schema:license .
+d4d:Confidentiality skos:closeMatch rai:personalSensitiveInformation .
+d4d:ContentWarning skos:exactMatch d4d:contentWarning .
+d4d:SensitiveElement skos:closeMatch rai:personalSensitiveInformation .
+d4d:Erratum skos:closeMatch schema:correction .
+d4d:UpdatePlan skos:exactMatch rai:dataReleaseMaintenancePlan .
+d4d:RetentionLimits skos:closeMatch schema:conditionsOfAccess .
+d4d:ExtensionMechanism skos:closeMatch schema:license .
+d4d:AddressingGap skos:exactMatch d4d:addressingGaps .
+d4d:DataAnomaly skos:exactMatch d4d:dataAnomalies .
+d4d:CollectionMechanism skos:exactMatch rai:dataCollection .
+d4d:PreprocessingStrategy skos:exactMatch rai:dataPreprocessingProtocol .
+d4d:CleaningStrategy skos:exactMatch rai:dataManipulationProtocol .
+d4d:FutureUseImpact skos:exactMatch rai:dataSocialImpact .
+d4d:DataProtectionImpact skos:exactMatch rai:dataSocialImpact .
+d4d:IPRestrictions skos:closeMatch schema:conditionsOfAccess .
+d4d:DistributionFormat skos:closeMatch evi:formats .
+d4d:DistributionDate skos:closeMatch schema:dateCreated .
+d4d:HumanSubjectCompensation skos:exactMatch d4d:participantCompensation .
+d4d:UseRepository skos:closeMatch schema:relatedLink .
+d4d:ExternalResource skos:closeMatch schema:relatedLink .
+d4d:DatasetRelationship skos:closeMatch schema:isRelatedTo .
+d4d:AnnotationAnalysis skos:exactMatch rai:dataAnnotationAnalysis .
+d4d:ParticipantPrivacy skos:closeMatch rai:personalSensitiveInformation .
+d4d:Splits skos:closeMatch schema:hasPart .
+d4d:Relationships skos:closeMatch schema:isRelatedTo .
+
+# Added 2026-04-26 — final gap-fill (consent workflow + access control)
+d4d:CollectionConsent skos:closeMatch rai:personalSensitiveInformation .
+d4d:CollectionNotification skos:closeMatch rai:personalSensitiveInformation .
+d4d:ConsentRevocation skos:closeMatch rai:personalSensitiveInformation .
+d4d:DirectCollection skos:closeMatch rai:dataCollection .
+d4d:ExportControlRegulatoryRestrictions skos:closeMatch schema:conditionsOfAccess .
+d4d:MissingInfo skos:closeMatch rai:dataCollectionMissingData .
+d4d:ThirdPartySharing skos:closeMatch schema:conditionsOfAccess .
+d4d:FormatDialect skos:closeMatch schema:encodingFormat .
 
 # Direct/Exact Mappings (52 properties)
 # ==============================================================================
@@ -214,12 +303,12 @@ d4d:conforms_to_schema skos:narrowMatch schema:conformsTo .
 # ==============================================================================
 # Alignment Statistics
 # ==============================================================================
-# Total mappings: 112 SKOS triples (class-level + slot-level)
-# - Exact matches: 69 (61.6%)
-# - Close matches: 25 (22.3%)
-# - Related matches: 10 (8.9%)
-# - Narrow matches:  7 (6.3%)
-# - Broad matches:   1 (0.9%)
+# Total mappings: 189 SKOS triples (class-level + slot-level)
+# - Exact matches: 112 (59.3%)
+# - Close matches: 59 (31.2%)
+# - Related matches: 10 (5.3%)
+# - Narrow matches:  7 (3.7%)
+# - Broad matches:   1 (0.5%)
 #
 # Coverage by target namespace:
 # - schema.org: 57 mappings
