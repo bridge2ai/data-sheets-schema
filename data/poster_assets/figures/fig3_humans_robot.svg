@@ -5,8 +5,9 @@
     <marker id="arr" markerWidth="14" markerHeight="14" refX="11" refY="6" orient="auto">
       <path d="M0,0 L12,6 L0,12 z" fill="#555"/>
     </marker>
-    <marker id="arr-red" markerWidth="14" markerHeight="14" refX="11" refY="6" orient="auto">
-      <path d="M0,0 L12,6 L0,12 z" fill="#D32F2F"/>
+    <marker id="arr-red" markerWidth="18" markerHeight="18" refX="14" refY="9"
+            orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L16,9 L0,18 z" fill="#D32F2F"/>
     </marker>
     <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
       <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
@@ -47,7 +48,7 @@
     <symbol id="robot" viewBox="-50 0 380 360">
       <!-- antenna -->
       <line x1="140" y1="10" x2="140" y2="25" stroke="#1565C0" stroke-width="4"/>
-      <circle cx="140" cy="10" r="8" fill="#F57C00"/>
+      <circle cx="140" cy="10" r="9" fill="#D32F2F" stroke="#7A1313" stroke-width="1.5"/>
       <!-- head (taller, to fit the D4D headband at top) -->
       <rect x="60" y="25" width="160" height="140" rx="14" fill="#90CAF9" stroke="#1565C0" stroke-width="4"/>
       <!-- red headband with white "D4D" letters -->
@@ -177,12 +178,12 @@
   <path d="M 1530,440 L 1610,440" stroke="#777" stroke-width="6" fill="none" marker-end="url(#arr)" stroke-linecap="round"/>
   <text x="1570" y="425" text-anchor="middle" font-size="20" font-style="italic" fill="#388E3C">validated</text>
 
-  <!-- feedback loop: validator → back to agent (errors → corrections) -->
-  <path d="M 1340,500 Q 1340,650 1180,650 Q 1060,650 1060,610"
+  <!-- feedback loop: validator → robot's red headlight (top of antenna) -->
+  <path d="M 1340,380 Q 1180,80 1060,200"
         stroke="#D32F2F" stroke-width="5" fill="none"
         stroke-dasharray="10,6"
         marker-end="url(#arr-red)" stroke-linecap="round"/>
-  <text x="1280" y="700" text-anchor="middle" font-size="22" font-style="italic"
+  <text x="1230" y="55" text-anchor="middle" font-size="22" font-style="italic"
         font-weight="bold" fill="#D32F2F">errors → corrections</text>
 
   <!-- ─────────── RIGHT: output records ─────────── -->
