@@ -158,7 +158,7 @@ class TestSSSOMIntegrationWithRealFile(unittest.TestCase):
 
     def test_load_structural_mapping(self):
         """Test loading real structural mapping file."""
-        sssom_file = repo_root / "data/mappings/d4d_rocrate_structural_mapping.sssom.tsv"
+        sssom_file = repo_root / "data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv"
 
         if not sssom_file.exists():
             self.skipTest("Structural SSSOM file not found")

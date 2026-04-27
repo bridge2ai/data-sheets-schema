@@ -9,9 +9,10 @@ Custom slash commands and conversational agents for D4D datasheet generation and
 Type the command name in Claude Code to expand the instructions:
 
 ```
-/d4d-agent       # Agent approach with Task tool parallelization
-/d4d-assistant   # Assistant approach following workflow methodology
-/d4d-webfetch    # Live URL fetching with WebFetch + ARTL
+/d4d-agent        # Agent approach with Task tool parallelization
+/d4d-assistant    # Assistant approach following workflow methodology
+/d4d-webfetch     # Live URL fetching with WebFetch + ARTL
+/d4d-add-mapping  # Add D4D ↔ RO-Crate SSSOM mappings for new classes
 ```
 
 ### Conversational Agents
@@ -36,6 +37,7 @@ Invoke agents by mentioning their purpose in conversation or using the Skill too
 | `/d4d-agent` | Task tool agents | Preprocessed files | `claudecode/` |
 | `/d4d-assistant` | In-session synthesis | Preprocessed files | `claudecode_assistant/` |
 | `/d4d-webfetch` | WebFetch + ARTL | Live URLs | `sheets_d4dassistant/` |
+| `/d4d-add-mapping` | Schema-driven SSSOM editing | D4D class names | New rows in canonical SSSOM + SKOS files; PR-ready branch |
 
 ## Available Agents
 
@@ -59,6 +61,7 @@ Invoke agents by mentioning their purpose in conversation or using the Skill too
 - **`/d4d-agent`**: Best for parallel processing of multiple projects
 - **`/d4d-assistant`**: Best for step-by-step control and debugging
 - **`/d4d-webfetch`**: Best when you need fresh content from URLs
+- **`/d4d-add-mapping`**: Best when adding a newly-introduced D4D class to the RO-Crate / FAIRSCAPE exchange layer (semantic + structural SSSOM rows + SKOS triples in one workflow)
 
 ## Choosing an Agent
 

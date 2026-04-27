@@ -1,0 +1,42 @@
+---
+config:
+  theme: default
+  flowchart:
+    htmlLabels: true
+---
+flowchart LR
+  subgraph LEFT["<b>D4D record</b>"]
+    direction TB
+    CD["<b>CoreDataset</b>"]
+    FCB["<b>FileCollection</b>"]
+  end
+  subgraph MID["<b>D4D ↔ RO-Crate Bridge</b>"]
+    direction TB
+    PROF["<b>D4D RO-Crate profile</b><br/>ro-crate-metadata.json"]
+    SEM["<b>Semantic SSSOM</b><br/>133 bidirectional mappings<br/>89 SKOS triples<br/>Schema.org · DCAT · RAI · EVI"]
+    STR["<b>Structural SSSOM</b><br/>class · property<br/>cardinality · type"]
+    BADGE{{"✓ validated by sssom-py"}}
+    PROF --- SEM
+    PROF --- STR
+    SEM -.-> BADGE
+    STR -.-> BADGE
+  end
+  subgraph RIGHT["<b>RO-Crate / FAIRSCAPE</b>"]
+    direction TB
+    RD["Dataset · Distribution"]
+    RC["Catalog"]
+  end
+  CD --> SEM
+  FCB --> STR
+  SEM --> RD
+  STR --> RD
+  CD --> RC
+
+  classDef d4d fill:#D8EAF7,stroke:#1976D2,stroke-width:2px;
+  classDef bridge fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px;
+  classDef roc fill:#E2F2E3,stroke:#388E3C,stroke-width:2px;
+  classDef badge fill:#FFEAD4,stroke:#F57C00,stroke-width:2px;
+  class LEFT,CD,FCB d4d;
+  class MID,PROF,SEM,STR bridge;
+  class BADGE badge;
+  class RIGHT,RD,RC roc;

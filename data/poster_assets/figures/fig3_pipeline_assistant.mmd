@@ -1,0 +1,36 @@
+---
+config:
+  theme: default
+  flowchart:
+    htmlLabels: true
+---
+flowchart LR
+  GCS[("<b>GC source bundles</b><br/>papers · docs · URLs<br/>AI-READI · CHORUS · CM4AI · VOICE")]
+  subgraph BATCH["<b>D4D agentic pipeline</b> · d4d-agent"]
+    direction TB
+    PARSE["parse + concatenate"]
+    SYN["parallel multi-document synthesis"]
+    ALIGN["SSSOM alignment"]
+    VAL["linkml-validate + render"]
+    PARSE --> SYN --> ALIGN --> VAL
+  end
+  CORE[("<b>D4D-Core records</b><br/>4 sanctioned datasheets<br/>YAML + HTML")]
+  GCS --> BATCH --> CORE
+
+  USER["👤 <b>individual researcher</b><br/>paper · URL · dataset"]
+  subgraph INTER["<b>D4D Assistant</b> · d4d-assistant + d4d-webfetch"]
+    direction TB
+    GUIDE["guided extraction"]
+    REF["interactive refinement"]
+    OUT["validate + render"]
+    GUIDE --> REF --> OUT
+  end
+  PERS[("<b>Personal D4D record</b><br/>YAML + HTML")]
+  USER --> INTER --> PERS
+
+  classDef src fill:#F5F5F5,stroke:#787878,stroke-width:2px;
+  classDef agent fill:#FFEAD4,stroke:#F57C00,stroke-width:2px;
+  classDef out fill:#D8EAF7,stroke:#1976D2,stroke-width:2px;
+  class GCS,USER src;
+  class BATCH,INTER,PARSE,SYN,ALIGN,VAL,GUIDE,REF,OUT agent;
+  class CORE,PERS out;

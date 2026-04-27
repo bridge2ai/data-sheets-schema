@@ -604,7 +604,7 @@ def main():
     )
     parser.add_argument(
         '--sssom',
-        default='src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv',
+        default='src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv',
         help='SSSOM mapping file for semantic guidance'
     )
     parser.add_argument(

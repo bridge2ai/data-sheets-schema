@@ -1,0 +1,39 @@
+---
+config:
+  theme: default
+  flowchart:
+    htmlLabels: true
+---
+flowchart LR
+  subgraph RICH["<b>Rich D4D schema</b><br/>LinkML-validated"]
+    direction TB
+    M["10 modules · 76 classes<br/>272 slots · 15 enums"]
+    A["161 slot_uri (41.5% URI coverage)<br/>+ 97 additional mappings identified"]
+    V(("linkml-validate"))
+    M --- A --- V
+  end
+  subgraph EXCH["<b>Semantic exchange layer</b>"]
+    direction TB
+    CORE["<b>CoreDataset</b><br/>compact projection<br/>DCAT · schema.org · RAI · EVI · DUO"]
+    DIST["<b>CoreDistribution</b><br/>bytes · hash · format<br/>encoding · media_type"]
+    FC["<b>FileCollection</b><br/>file_type · collection_type"]
+    CORE --> DIST
+    CORE --> FC
+  end
+  subgraph DATA["<b>Files on disk</b>"]
+    direction TB
+    D1[/"data files"/]
+    D2[/"code"/]
+    D3[/"docs"/]
+  end
+  RICH ==projection==> CORE
+  DIST --> D1
+  DIST --> D2
+  FC --> D3
+
+  classDef d4d fill:#D8EAF7,stroke:#1976D2,stroke-width:2px;
+  classDef exch fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px;
+  classDef data fill:#F5F5F5,stroke:#787878,stroke-width:2px;
+  class RICH,M,A,V d4d;
+  class EXCH,CORE,DIST,FC exch;
+  class DATA,D1,D2,D3 data;

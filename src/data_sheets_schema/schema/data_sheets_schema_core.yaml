@@ -12,7 +12,7 @@ description: |-
 license: MIT
 see_also:
   - https://bridge2ai.github.io/data-sheets-schema
-  - src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl
+  - src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl
 
 prefixes:
   AIO: https://w3id.org/aio/

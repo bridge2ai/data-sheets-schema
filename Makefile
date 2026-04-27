@@ -337,24 +337,24 @@ git-status:
 ## SSSOM Alignment Generation
 ## ------------------------------------------------------------------
 
-SSSOM_SCRIPT = src/alignment/generate_sssom_mapping.py
-SSSOM_URI_SCRIPT = src/alignment/generate_sssom_uri_mapping.py
-SSSOM_URI_COMPREHENSIVE_SCRIPT = src/alignment/generate_comprehensive_sssom_uri.py
-SSSOM_COMPREHENSIVE_SCRIPT = src/alignment/generate_comprehensive_sssom.py
-SSSOM_STRUCTURAL_SCRIPT = src/alignment/generate_structural_mapping.py
-SKOS_ALIGNMENT = src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl
+SSSOM_SCRIPT = src/semantic_exchange/generate_sssom_mapping.py
+SSSOM_URI_SCRIPT = src/semantic_exchange/generate_sssom_uri_mapping.py
+SSSOM_URI_COMPREHENSIVE_SCRIPT = src/semantic_exchange/generate_comprehensive_sssom_uri.py
+SSSOM_COMPREHENSIVE_SCRIPT = src/semantic_exchange/generate_comprehensive_sssom.py
+SSSOM_STRUCTURAL_SCRIPT = src/semantic_exchange/generate_structural_mapping.py
+SKOS_ALIGNMENT = src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl
 ROCRATE_JSON = data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json
 INTERFACE_MAPPING = data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
 D4D_SCHEMA_ALL = src/data_sheets_schema/schema/data_sheets_schema_all.yaml
 D4D_CORE_SCHEMA = src/data_sheets_schema/schema/data_sheets_schema_core.yaml
 D4D_CORE_SCHEMA_ALL = src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
 URI_RECOMMENDATIONS = notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv
-SSSOM_FULL = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv
-SSSOM_SUBSET = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping_subset.tsv
-SSSOM_URI = src/data_sheets_schema/alignment/d4d_rocrate_sssom_uri_mapping.tsv
-SSSOM_URI_COMPREHENSIVE = src/data_sheets_schema/alignment/d4d_rocrate_sssom_uri_comprehensive.tsv
-SSSOM_COMPREHENSIVE = src/data_sheets_schema/alignment/d4d_rocrate_sssom_comprehensive.tsv
-SSSOM_STRUCTURAL = data/mappings/d4d_rocrate_structural_mapping.sssom.tsv
+SSSOM_FULL = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv
+SSSOM_SUBSET = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping_subset.tsv
+SSSOM_URI = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_mapping.tsv
+SSSOM_URI_COMPREHENSIVE = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_comprehensive.tsv
+SSSOM_COMPREHENSIVE = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_comprehensive.tsv
+SSSOM_STRUCTURAL = data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv
 
 .PHONY: gen-core-schema validate-core lint-core gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural gen-sssom-all clean-sssom
 

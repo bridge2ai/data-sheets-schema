@@ -11,7 +11,7 @@ Features:
 - Git commit tracking for provenance
 - Comprehensive extraction metadata
 - Compatible with batch extraction metadata structure
-- Configuration-driven from d4d_assistant_deterministic_config.yaml
+- Configuration-driven from d4d_assistant_deterministic.config
 
 Usage:
     # Generate metadata for a D4D YAML file
@@ -173,7 +173,7 @@ class D4DMetadataGenerator:
         self.project_root = project_root or Path(__file__).parent.parent.parent
         self.prompts_dir = self.project_root / "src" / "download" / "prompts"
         self.schema_path = self.project_root / "src" / "data_sheets_schema" / "schema" / "data_sheets_schema_all.yaml"
-        self.config_path = self.project_root / ".github" / "workflows" / "d4d_assistant_deterministic_config.yaml"
+        self.config_path = self.project_root / ".github" / "workflows" / "d4d_assistant_deterministic.config"
 
         # Load configuration
         self.config = config or load_config(self.config_path)
