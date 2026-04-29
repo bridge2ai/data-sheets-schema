@@ -276,7 +276,7 @@
 <tr>
 <td><a href="../preprocessing_details/">preprocessing_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Free-text description of preprocessing steps applied to the data, including t...</td>
+<td>Details on preprocessing steps applied to the data</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -374,13 +374,7 @@ is_a: DatasetProperty
 attributes:
   preprocessing_details:
     name: preprocessing_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: DICOM to NIfTI conversion using dcm2niix v1.0.20211006
-    description: 'Free-text description of preprocessing steps applied to the data,
-      including tools used, parameters, order of operations, and rationale for each
-      step.
+    description: 'Details on preprocessing steps applied to the data.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
@@ -407,13 +401,7 @@ is_a: DatasetProperty
 attributes:
   preprocessing_details:
     name: preprocessing_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: DICOM to NIfTI conversion using dcm2niix v1.0.20211006
-    description: 'Free-text description of preprocessing steps applied to the data,
-      including tools used, parameters, order of operations, and rationale for each
-      step.
+    description: 'Details on preprocessing steps applied to the data.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
@@ -427,10 +415,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -468,7 +452,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: PreprocessingStrategy
     domain_of:

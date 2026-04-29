@@ -293,14 +293,14 @@
 </tr>
 <tr>
 <td><a href="../archival/">archival</a></td>
-<td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
-<td>Indicates whether official archival versions of external resources are includ...</td>
+<td>* <br/> <a href="../Boolean/">Boolean</a></td>
+<td>Indication whether official archival versions of external resources are inclu...</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../restrictions/">restrictions</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>One or more descriptions of restrictions or fees associated with accessing th...</td>
+<td>Description of any restrictions or fees associated with external resources</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -348,12 +348,6 @@
 </tr>
 <tr>
 <td><a href="../DataSubset/">DataSubset</a></td>
-<td><a href="../external_resources/">external_resources</a></td>
-<td>range</td>
-<td><a href="./">ExternalResource</a></td>
-</tr>
-<tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
 <td><a href="../external_resources/">external_resources</a></td>
 <td>range</td>
 <td><a href="./">ExternalResource</a></td>
@@ -411,38 +405,33 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - dcterms:description
     rank: 1000
-    slot_uri: d4d:availabilityGuarantee
+    slot_uri: dcterms:description
     domain_of:
     - ExternalResource
     range: string
     multivalued: true
   archival:
     name: archival
-    description: 'Indicates whether official archival versions of external resources
-      are included in the dataset.
+    description: 'Indication whether official archival versions of external resources
+      are included.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:hasArchivalVersion
     domain_of:
     - ExternalResource
     range: boolean
+    multivalued: true
   restrictions:
     name: restrictions
-    description: 'One or more descriptions of restrictions or fees associated with
-      accessing these external resources (e.g., paywalls, registration requirements,
-      API limits).
+    description: 'Description of any restrictions or fees associated with external
+      resources.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - dcterms:accessRights
     rank: 1000
-    slot_uri: d4d:externalResourceRestrictions
+    slot_uri: dcterms:accessRights
     domain_of:
     - ExternalResource
     - IPRestrictions
@@ -474,10 +463,8 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - dcterms:description
     rank: 1000
-    slot_uri: d4d:availabilityGuarantee
+    slot_uri: dcterms:description
     alias: future_guarantees
     owner: ExternalResource
     domain_of:
@@ -486,30 +473,27 @@ attributes:
     multivalued: true
   archival:
     name: archival
-    description: 'Indicates whether official archival versions of external resources
-      are included in the dataset.
+    description: 'Indication whether official archival versions of external resources
+      are included.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:hasArchivalVersion
     alias: archival
     owner: ExternalResource
     domain_of:
     - ExternalResource
     range: boolean
+    multivalued: true
   restrictions:
     name: restrictions
-    description: 'One or more descriptions of restrictions or fees associated with
-      accessing these external resources (e.g., paywalls, registration requirements,
-      API limits).
+    description: 'Description of any restrictions or fees associated with external
+      resources.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - dcterms:accessRights
     rank: 1000
-    slot_uri: d4d:externalResourceRestrictions
+    slot_uri: dcterms:accessRights
     alias: restrictions
     owner: ExternalResource
     domain_of:
@@ -528,15 +512,10 @@ attributes:
     domain_of:
     - Dataset
     - ExternalResource
-    - FileCollection
     range: string
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -574,7 +553,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: ExternalResource
     domain_of:

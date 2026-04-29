@@ -385,16 +385,11 @@ attributes:
     description: Indicates whether sensitive data elements are present.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:sensitive_elements_present
     domain_of:
     - SensitiveElement
     range: boolean
   sensitivity_details:
     name: sensitivity_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Genetic sequencing data requires additional DUA
     description: 'Details on sensitive data elements present and handling procedures.
 
       '
@@ -425,7 +420,6 @@ attributes:
     description: Indicates whether sensitive data elements are present.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:sensitive_elements_present
     alias: sensitive_elements_present
     owner: SensitiveElement
     domain_of:
@@ -433,10 +427,6 @@ attributes:
     range: boolean
   sensitivity_details:
     name: sensitivity_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Genetic sequencing data requires additional DUA
     description: 'Details on sensitive data elements present and handling procedures.
 
       '
@@ -451,10 +441,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -492,7 +478,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: SensitiveElement
     domain_of:

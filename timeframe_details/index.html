@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -391,7 +384,7 @@
 
 
 <h1 id="slot-timeframe_details">Slot: timeframe_details</h1>
-<p><em>Free-text description of the data collection period and whether this timeframe matches the creation timeframe of the underlying data (e.g., historical records, prospective collection).</em></p>
+<p><em>Details on the collection timeframe and relationship to data creation dates.</em></p>
 <p>__</p>
 <p>URI: <a href="http://purl.org/dc/terms/description">dcterms:description</a>
 Alias: timeframe_details</p>
@@ -424,21 +417,6 @@ Alias: timeframe_details</p>
 </li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>Enrollment ongoing; data released annually</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -466,13 +444,8 @@ Alias: timeframe_details</p>
 <details>
 
 <pre><code class="language-yaml">name: timeframe_details
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: Enrollment ongoing; data released annually
-description: 'Free-text description of the data collection period and whether this
-  timeframe matches the creation timeframe of the underlying data (e.g., historical
-  records, prospective collection).
+description: 'Details on the collection timeframe and relationship to data creation
+  dates.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema

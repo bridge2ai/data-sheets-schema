@@ -384,8 +384,7 @@
 
 
 <h1 id="slot-subsets">Slot: subsets</h1>
-<p><em>Subsets or splits of this dataset. List of DataSubset objects from the Composition module, each representing a logical partition such as training, validation, or test splits, or demographic subgroups.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/dataSubset">d4d:dataSubset</a>
+<p>URI: <a href="http://www.w3.org/ns/dcat#distribution">dcat:distribution</a>
 Alias: subsets</p>
 <!-- no inheritance hierarchy -->
 
@@ -436,11 +435,15 @@ Alias: subsets</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>d4d:dataSubset</td>
+<td>dcat:distribution</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:subsets</td>
+</tr>
+<tr>
+<td>exact</td>
+<td>schema:distribution</td>
 </tr>
 </tbody>
 </table>
@@ -448,12 +451,11 @@ Alias: subsets</p>
 <details>
 
 <pre><code class="language-yaml">name: subsets
-description: Subsets or splits of this dataset. List of DataSubset objects from the
-  Composition module, each representing a logical partition such as training, validation,
-  or test splits, or demographic subgroups.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- schema:distribution
 rank: 1000
-slot_uri: d4d:dataSubset
+slot_uri: dcat:distribution
 alias: subsets
 owner: Dataset
 domain_of:

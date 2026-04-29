@@ -284,7 +284,7 @@
 <tr>
 <td><a href="../warnings/">warnings</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>One or more specific content warnings describing potentially offensive, insul...</td>
+<td></td>
 <td>direct</td>
 </tr>
 <tr>
@@ -379,19 +379,11 @@ attributes:
     description: Indicates whether any content warnings are needed.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:content_warnings_present
     domain_of:
     - ContentWarning
     range: boolean
   warnings:
     name: warnings
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Contains clinical images of diabetic retinopathy
-    description: One or more specific content warnings describing potentially offensive,
-      insulting, threatening, or anxiety-provoking content present in the dataset
-      (e.g., violence, profanity, explicit imagery, hate speech).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
     slot_uri: dcterms:description
@@ -417,7 +409,6 @@ attributes:
     description: Indicates whether any content warnings are needed.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:content_warnings_present
     alias: content_warnings_present
     owner: ContentWarning
     domain_of:
@@ -425,13 +416,6 @@ attributes:
     range: boolean
   warnings:
     name: warnings
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Contains clinical images of diabetic retinopathy
-    description: One or more specific content warnings describing potentially offensive,
-      insulting, threatening, or anxiety-provoking content present in the dataset
-      (e.g., violence, profanity, explicit imagery, hate speech).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
     slot_uri: dcterms:description
@@ -443,10 +427,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -484,7 +464,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: ContentWarning
     domain_of:

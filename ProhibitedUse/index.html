@@ -276,7 +276,7 @@
 <tr>
 <td><a href="../prohibition_reason/">prohibition_reason</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>One or more reasons why this use is prohibited (e</td>
+<td>Reason why this use is prohibited (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -369,15 +369,10 @@ is_a: DatasetProperty
 attributes:
   prohibition_reason:
     name: prohibition_reason
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Re-identification of participants is strictly prohibited
-    description: One or more reasons why this use is prohibited (e.g., license restriction,
-      ethical concern, privacy risk, legal constraint).
+    description: Reason why this use is prohibited (e.g., license restriction, ethical
+      concern, privacy risk, legal constraint).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     rank: 1000
-    slot_uri: d4d:prohibitionReason
     domain_of:
     - ProhibitedUse
     range: string
@@ -398,15 +393,10 @@ is_a: DatasetProperty
 attributes:
   prohibition_reason:
     name: prohibition_reason
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Re-identification of participants is strictly prohibited
-    description: One or more reasons why this use is prohibited (e.g., license restriction,
-      ethical concern, privacy risk, legal constraint).
+    description: Reason why this use is prohibited (e.g., license restriction, ethical
+      concern, privacy risk, legal constraint).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     rank: 1000
-    slot_uri: d4d:prohibitionReason
     alias: prohibition_reason
     owner: ProhibitedUse
     domain_of:
@@ -415,10 +405,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -456,7 +442,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: ProhibitedUse
     domain_of:

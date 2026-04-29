@@ -310,7 +310,7 @@
 <tr>
 <td><a href="../review_details/">review_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Free-text description of the ethical review process, board decisions, outcome...</td>
+<td>Details on ethical review processes, outcomes, and supporting documentation</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -407,10 +407,10 @@ attributes:
     description: Contact person for questions about ethical review. Provides structured
       contact information including name, email, affiliation, and optional ORCID.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
-    broad_mappings:
+    exact_mappings:
     - schema:contactPoint
     rank: 1000
-    slot_uri: d4d:ethicsContactPoint
+    slot_uri: schema:contactPoint
     domain_of:
     - EthicalReview
     - LicenseAndUseTerms
@@ -430,13 +430,7 @@ attributes:
     range: Organization
   review_details:
     name: review_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 'IRB approval: UAB IRB-300010084, UCSD IRB-811480, UW IRB-STUDY00017428'
-    description: 'Free-text description of the ethical review process, board decisions,
-      outcomes, and any supporting documentation (e.g., IRB approval number, ethics
-      committee name).
+    description: 'Details on ethical review processes, outcomes, and supporting documentation.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
@@ -466,10 +460,10 @@ attributes:
     description: Contact person for questions about ethical review. Provides structured
       contact information including name, email, affiliation, and optional ORCID.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
-    broad_mappings:
+    exact_mappings:
     - schema:contactPoint
     rank: 1000
-    slot_uri: d4d:ethicsContactPoint
+    slot_uri: schema:contactPoint
     alias: contact_person
     owner: EthicalReview
     domain_of:
@@ -493,13 +487,7 @@ attributes:
     range: Organization
   review_details:
     name: review_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 'IRB approval: UAB IRB-300010084, UCSD IRB-811480, UW IRB-STUDY00017428'
-    description: 'Free-text description of the ethical review process, board decisions,
-      outcomes, and any supporting documentation (e.g., IRB approval number, ethics
-      committee name).
+    description: 'Details on ethical review processes, outcomes, and supporting documentation.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
@@ -513,10 +501,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -554,7 +538,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: EthicalReview
     domain_of:

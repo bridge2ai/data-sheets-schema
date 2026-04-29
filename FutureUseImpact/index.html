@@ -276,7 +276,7 @@
 <tr>
 <td><a href="../impact_details/">impact_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Free-text description of potential future impacts or risks arising from the d...</td>
+<td>Details on potential impacts, risks, and mitigation strategies</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -375,14 +375,7 @@ is_a: DatasetProperty
 attributes:
   impact_details:
     name: impact_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Models trained on this data may reinforce existing health disparities
-          if deployed without fairness audits
-    description: 'Free-text description of potential future impacts or risks arising
-      from the dataset''s composition or collection (e.g., unfair treatment, privacy
-      violations, legal or financial risks), and any recommended mitigation strategies.
+    description: 'Details on potential impacts, risks, and mitigation strategies.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
@@ -411,14 +404,7 @@ is_a: DatasetProperty
 attributes:
   impact_details:
     name: impact_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Models trained on this data may reinforce existing health disparities
-          if deployed without fairness audits
-    description: 'Free-text description of potential future impacts or risks arising
-      from the dataset''s composition or collection (e.g., unfair treatment, privacy
-      violations, legal or financial risks), and any recommended mitigation strategies.
+    description: 'Details on potential impacts, risks, and mitigation strategies.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
@@ -433,10 +419,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -474,7 +456,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: FutureUseImpact
     domain_of:

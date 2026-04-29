@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -391,9 +384,9 @@
 
 
 <h1 id="slot-instance_type">Slot: instance_type</h1>
-<p><em>The type or types of instances in the dataset (e.g., "movie", "user", "rating", "clinical record"). Use when the dataset contains multiple instance types with different structures.</em></p>
+<p><em>Multiple types of instances? (e.g., movies, users, and ratings).</em></p>
 <p>__</p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/instanceType">d4d:instanceType</a>
+<p>URI: <a href="http://purl.org/dc/terms/type">dcterms:type</a>
 Alias: instance_type</p>
 <!-- no inheritance hierarchy -->
 
@@ -419,21 +412,6 @@ Alias: instance_type</p>
 <li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>medical imaging studies</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -449,15 +427,11 @@ Alias: instance_type</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>d4d:instanceType</td>
+<td>dcterms:type</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:instance_type</td>
-</tr>
-<tr>
-<td>broad</td>
-<td>dcterms:type</td>
 </tr>
 </tbody>
 </table>
@@ -465,20 +439,12 @@ Alias: instance_type</p>
 <details>
 
 <pre><code class="language-yaml">name: instance_type
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: medical imaging studies
-description: 'The type or types of instances in the dataset (e.g., &quot;movie&quot;, &quot;user&quot;,
-  &quot;rating&quot;, &quot;clinical record&quot;). Use when the dataset contains multiple instance types
-  with different structures.
+description: 'Multiple types of instances? (e.g., movies, users, and ratings).
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-broad_mappings:
-- dcterms:type
 rank: 1000
-slot_uri: d4d:instanceType
+slot_uri: dcterms:type
 alias: instance_type
 owner: Instance
 domain_of:

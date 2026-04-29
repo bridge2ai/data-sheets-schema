@@ -346,7 +346,7 @@
 <tr>
 <td><a href="../categories/">categories</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>One or more permitted categories or values for a categorical variable</td>
+<td>The permitted categories or values for a categorical variable</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -485,28 +485,19 @@ is_a: DatasetProperty
 attributes:
   variable_name:
     name: variable_name
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: hba1c_percent
     description: The name or identifier of the variable as it appears in the data
       files.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
-    broad_mappings:
+    exact_mappings:
     - schema:name
-    - schema:identifier
     rank: 1000
-    slot_uri: d4d:variableName
+    slot_uri: schema:name
     domain_of:
     - VariableMetadata
     range: string
     required: true
   data_type:
     name: data_type
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: float
     description: The data type of the variable (e.g., integer, float, string, boolean,
       date, categorical). Use standard type names when possible.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -519,10 +510,6 @@ attributes:
     range: VariableTypeEnum
   unit:
     name: unit
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: '%'
     description: 'The unit of measurement for the variable, preferably using QUDT
       units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -536,25 +523,16 @@ attributes:
     range: uriorcurie
   missing_value_code:
     name: missing_value_code
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: NA
     description: 'Code(s) used to represent missing values for this variable. Examples:
       "NA", "-999", "null", "". Multiple codes may be specified.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: d4d:missingValueCode
     domain_of:
     - VariableMetadata
     range: string
     multivalued: true
   minimum_value:
     name: minimum_value
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: '0.0'
     description: The minimum value that the variable can take. Applicable to numeric
       variables.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -565,10 +543,6 @@ attributes:
     range: float
   maximum_value:
     name: maximum_value
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: '100.0'
     description: The maximum value that the variable can take. Applicable to numeric
       variables.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -579,12 +553,8 @@ attributes:
     range: float
   categories:
     name: categories
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 4.0–14.0
-    description: One or more permitted categories or values for a categorical variable.
-      Each entry should describe a possible value and its meaning.
+    description: The permitted categories or values for a categorical variable. Each
+      entry should describe a possible value and its meaning.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
     slot_uri: schema:valueReference
@@ -609,7 +579,7 @@ attributes:
       key for records in the dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: d4d:isIdentifier
+    slot_uri: schema:identifier
     domain_of:
     - VariableMetadata
     range: boolean
@@ -619,29 +589,19 @@ attributes:
       personal data, protected health information).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: d4d:isSensitive
     domain_of:
     - VariableMetadata
     range: boolean
   precision:
     name: precision
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 2 (two decimal places, e.g., 3.14)
     description: The precision or number of decimal places for numeric variables.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: schema:valuePrecision
     domain_of:
     - VariableMetadata
     range: integer
   measurement_technique:
     name: measurement_technique
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Glycated hemoglobin percentage measured at baseline visit
     description: 'The technique or method used to measure this variable. Examples:
       "mass spectrometry", "self-report survey", "GPS coordinates".'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -656,7 +616,6 @@ attributes:
       variables, if applicable.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: dcterms:provenance
     domain_of:
     - VariableMetadata
     range: string
@@ -665,10 +624,7 @@ attributes:
     description: Notes about data quality, reliability, or known issues specific to
       this variable.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
-    broad_mappings:
-    - dcterms:description
     rank: 1000
-    slot_uri: d4d:qualityNotes
     domain_of:
     - VariableMetadata
     range: string
@@ -690,18 +646,13 @@ is_a: DatasetProperty
 attributes:
   variable_name:
     name: variable_name
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: hba1c_percent
     description: The name or identifier of the variable as it appears in the data
       files.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
-    broad_mappings:
+    exact_mappings:
     - schema:name
-    - schema:identifier
     rank: 1000
-    slot_uri: d4d:variableName
+    slot_uri: schema:name
     alias: variable_name
     owner: VariableMetadata
     domain_of:
@@ -710,10 +661,6 @@ attributes:
     required: true
   data_type:
     name: data_type
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: float
     description: The data type of the variable (e.g., integer, float, string, boolean,
       date, categorical). Use standard type names when possible.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -728,10 +675,6 @@ attributes:
     range: VariableTypeEnum
   unit:
     name: unit
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: '%'
     description: 'The unit of measurement for the variable, preferably using QUDT
       units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -747,15 +690,10 @@ attributes:
     range: uriorcurie
   missing_value_code:
     name: missing_value_code
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: NA
     description: 'Code(s) used to represent missing values for this variable. Examples:
       "NA", "-999", "null", "". Multiple codes may be specified.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: d4d:missingValueCode
     alias: missing_value_code
     owner: VariableMetadata
     domain_of:
@@ -764,10 +702,6 @@ attributes:
     multivalued: true
   minimum_value:
     name: minimum_value
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: '0.0'
     description: The minimum value that the variable can take. Applicable to numeric
       variables.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -780,10 +714,6 @@ attributes:
     range: float
   maximum_value:
     name: maximum_value
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: '100.0'
     description: The maximum value that the variable can take. Applicable to numeric
       variables.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -796,12 +726,8 @@ attributes:
     range: float
   categories:
     name: categories
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 4.0–14.0
-    description: One or more permitted categories or values for a categorical variable.
-      Each entry should describe a possible value and its meaning.
+    description: The permitted categories or values for a categorical variable. Each
+      entry should describe a possible value and its meaning.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
     slot_uri: schema:valueReference
@@ -830,7 +756,7 @@ attributes:
       key for records in the dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: d4d:isIdentifier
+    slot_uri: schema:identifier
     alias: is_identifier
     owner: VariableMetadata
     domain_of:
@@ -842,7 +768,6 @@ attributes:
       personal data, protected health information).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: d4d:isSensitive
     alias: is_sensitive
     owner: VariableMetadata
     domain_of:
@@ -850,14 +775,9 @@ attributes:
     range: boolean
   precision:
     name: precision
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 2 (two decimal places, e.g., 3.14)
     description: The precision or number of decimal places for numeric variables.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: schema:valuePrecision
     alias: precision
     owner: VariableMetadata
     domain_of:
@@ -865,10 +785,6 @@ attributes:
     range: integer
   measurement_technique:
     name: measurement_technique
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Glycated hemoglobin percentage measured at baseline visit
     description: 'The technique or method used to measure this variable. Examples:
       "mass spectrometry", "self-report survey", "GPS coordinates".'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -885,7 +801,6 @@ attributes:
       variables, if applicable.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: dcterms:provenance
     alias: derivation
     owner: VariableMetadata
     domain_of:
@@ -896,10 +811,7 @@ attributes:
     description: Notes about data quality, reliability, or known issues specific to
       this variable.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
-    broad_mappings:
-    - dcterms:description
     rank: 1000
-    slot_uri: d4d:qualityNotes
     alias: quality_notes
     owner: VariableMetadata
     domain_of:
@@ -908,10 +820,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -949,7 +857,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: VariableMetadata
     domain_of:

@@ -364,16 +364,10 @@ is_a: DatasetProperty
 attributes:
   response:
     name: response
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Multi-domain biomarker discovery for Type 2 Diabetes mellitus.
     description: Short explanation describing the specific task or tasks for which
       this dataset was created.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
-    broad_mappings:
-    - dcterms:description
-    slot_uri: d4d:questionResponse
+    slot_uri: dcterms:description
     domain_of:
     - Purpose
     - Task
@@ -391,16 +385,10 @@ is_a: DatasetProperty
 attributes:
   response:
     name: response
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Multi-domain biomarker discovery for Type 2 Diabetes mellitus.
     description: Short explanation describing the specific task or tasks for which
       this dataset was created.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
-    broad_mappings:
-    - dcterms:description
-    slot_uri: d4d:questionResponse
+    slot_uri: dcterms:description
     alias: response
     owner: Task
     domain_of:
@@ -410,10 +398,6 @@ attributes:
     range: string
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -451,7 +435,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: Task
     domain_of:

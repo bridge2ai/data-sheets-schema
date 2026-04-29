@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -407,8 +400,13 @@ Alias: bytes</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -418,21 +416,6 @@ Alias: bytes</p>
 <li>Range: <a href="../Integer/">Integer</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>10485760</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -460,17 +443,13 @@ Alias: bytes</p>
 <details>
 
 <pre><code class="language-yaml">name: bytes
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: '10485760'
 description: Size of the data in bytes.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: dcat:byteSize
 alias: bytes
 domain_of:
-- File
+- Dataset
 range: integer
 
 </code></pre>

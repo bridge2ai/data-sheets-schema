@@ -367,14 +367,9 @@ is_a: DatasetProperty
 attributes:
   examples:
     name: examples
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 'Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.1056/NEJMoa2404007)'
     description: List of examples of known/previous uses of the dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     rank: 1000
-    slot_uri: schema:example
     domain_of:
     - ExistingUse
     - IntendedUse
@@ -395,14 +390,9 @@ is_a: DatasetProperty
 attributes:
   examples:
     name: examples
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 'Used in NEJM 2024 paper on CGM patterns in T2DM (DOI: 10.1056/NEJMoa2404007)'
     description: List of examples of known/previous uses of the dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     rank: 1000
-    slot_uri: schema:example
     alias: examples
     owner: ExistingUse
     domain_of:
@@ -413,10 +403,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -454,7 +440,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: ExistingUse
     domain_of:

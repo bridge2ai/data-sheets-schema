@@ -292,7 +292,7 @@
 <tr>
 <td><a href="../handling_strategy/">handling_strategy</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The primary strategy used to handle missing data (e</td>
+<td>Strategy used to handle missing data (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -390,51 +390,36 @@ is_a: DatasetProperty
 attributes:
   missing_data_patterns:
     name: missing_data_patterns
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: CGM data missing for 15% of participants (device errors)
     description: 'Description of patterns in missing data (e.g., missing completely
       at random, missing at random, missing not at random).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: d4d:missingDataPatterns
     domain_of:
     - MissingDataDocumentation
     range: string
     multivalued: true
   missing_data_causes:
     name: missing_data_causes
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Device malfunction, participant non-compliance, technical failures
     description: 'Known or suspected causes of missing data (e.g., sensor failures,
       participant dropout, privacy constraints).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: d4d:missingDataCauses
     domain_of:
     - MissingDataDocumentation
     range: string
     multivalued: true
   handling_strategy:
     name: handling_strategy
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Multiple imputation using chained equations (MICE)
-    description: 'The primary strategy used to handle missing data (e.g., listwise
-      deletion, mean imputation, multiple imputation, flagging with sentinel values).
+    description: 'Strategy used to handle missing data (e.g., deletion, imputation,
+      flagging, multiple imputation).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: d4d:handlingStrategy
     domain_of:
     - MissingDataDocumentation
     range: string
@@ -455,17 +440,12 @@ is_a: DatasetProperty
 attributes:
   missing_data_patterns:
     name: missing_data_patterns
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: CGM data missing for 15% of participants (device errors)
     description: 'Description of patterns in missing data (e.g., missing completely
       at random, missing at random, missing not at random).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: d4d:missingDataPatterns
     alias: missing_data_patterns
     owner: MissingDataDocumentation
     domain_of:
@@ -474,17 +454,12 @@ attributes:
     multivalued: true
   missing_data_causes:
     name: missing_data_causes
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Device malfunction, participant non-compliance, technical failures
     description: 'Known or suspected causes of missing data (e.g., sensor failures,
       participant dropout, privacy constraints).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: d4d:missingDataCauses
     alias: missing_data_causes
     owner: MissingDataDocumentation
     domain_of:
@@ -493,17 +468,12 @@ attributes:
     multivalued: true
   handling_strategy:
     name: handling_strategy
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Multiple imputation using chained equations (MICE)
-    description: 'The primary strategy used to handle missing data (e.g., listwise
-      deletion, mean imputation, multiple imputation, flagging with sentinel values).
+    description: 'Strategy used to handle missing data (e.g., deletion, imputation,
+      flagging, multiple imputation).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: d4d:handlingStrategy
     alias: handling_strategy
     owner: MissingDataDocumentation
     domain_of:
@@ -511,10 +481,6 @@ attributes:
     range: string
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -552,7 +518,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: MissingDataDocumentation
     domain_of:

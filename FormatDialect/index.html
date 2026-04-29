@@ -215,7 +215,7 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-formatdialect">Class: FormatDialect</h1>
-<p><em>Additional format information for a file.</em></p>
+<p><em>Additional format information for a file</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/FormatDialect">data_sheets_schema:FormatDialect</a></p>
 <div class="mermaid"> classDiagram
     class FormatDialect
@@ -247,31 +247,31 @@
 <tr>
 <td><a href="../comment_prefix/">comment_prefix</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>Character(s) used to indicate comment lines (e</td>
+<td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../delimiter/">delimiter</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>Field delimiter character (e</td>
+<td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../double_quote/">double_quote</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>Whether quotes within quoted fields are escaped by doubling them</td>
+<td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../header/">header</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>Whether the first row of the file contains column headers</td>
+<td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../quote_char/">quote_char</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>Character used for quoting fields (e</td>
+<td></td>
 <td>direct</td>
 </tr>
 </tbody>
@@ -305,44 +305,35 @@
 <h3 id="direct">Direct</h3>
 <details>
 <pre><code class="language-yaml">name: FormatDialect
-description: Additional format information for a file.
+description: Additional format information for a file
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 attributes:
   comment_prefix:
     name: comment_prefix
-    description: Character(s) used to indicate comment lines (e.g., "#" for CSV comments).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     domain_of:
     - FormatDialect
   delimiter:
     name: delimiter
-    description: Field delimiter character (e.g., "," for CSV, "\t" for TSV).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     domain_of:
     - FormatDialect
   double_quote:
     name: double_quote
-    description: 'Whether quotes within quoted fields are escaped by doubling them.
-      Expected values: "true" or "false" (as strings per CSV dialect specification).
-      Follows the W3C CSV-on-the-Web dialect specification.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     domain_of:
     - FormatDialect
   header:
     name: header
-    description: 'Whether the first row of the file contains column headers. Expected
-      values: "true" or "false" (as strings per CSV dialect specification). Follows
-      the W3C CSV-on-the-Web dialect specification.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     domain_of:
     - FormatDialect
   quote_char:
     name: quote_char
-    description: Character used for quoting fields (e.g., '"' for CSV).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     domain_of:
@@ -353,12 +344,11 @@ attributes:
 <h3 id="induced">Induced</h3>
 <details>
 <pre><code class="language-yaml">name: FormatDialect
-description: Additional format information for a file.
+description: Additional format information for a file
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 attributes:
   comment_prefix:
     name: comment_prefix
-    description: Character(s) used to indicate comment lines (e.g., "#" for CSV comments).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     alias: comment_prefix
@@ -368,7 +358,6 @@ attributes:
     range: string
   delimiter:
     name: delimiter
-    description: Field delimiter character (e.g., "," for CSV, "\t" for TSV).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     alias: delimiter
@@ -378,9 +367,6 @@ attributes:
     range: string
   double_quote:
     name: double_quote
-    description: 'Whether quotes within quoted fields are escaped by doubling them.
-      Expected values: "true" or "false" (as strings per CSV dialect specification).
-      Follows the W3C CSV-on-the-Web dialect specification.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     alias: double_quote
@@ -390,9 +376,6 @@ attributes:
     range: string
   header:
     name: header
-    description: 'Whether the first row of the file contains column headers. Expected
-      values: "true" or "false" (as strings per CSV dialect specification). Follows
-      the W3C CSV-on-the-Web dialect specification.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     alias: header
@@ -402,7 +385,6 @@ attributes:
     range: string
   quote_char:
     name: quote_char
-    description: Character used for quoting fields (e.g., '"' for CSV).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     alias: quote_char

@@ -294,7 +294,7 @@
 </thead>
 <tbody>
 <tr>
-<td><a href="../grantor/">grantor</a></td>
+<td><a href="grantor.md">grantor</a></td>
 <td>0..1 <br/> <a href="../Grantor/">Grantor</a></td>
 <td>Name/identifier of the organization providing monetary or resource support</td>
 <td>direct</td>
@@ -397,10 +397,8 @@ attributes:
     description: Name/identifier of the organization providing monetary or resource
       support.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
-    broad_mappings:
-    - schema:funder
     rank: 1000
-    slot_uri: d4d:grantor
+    slot_uri: schema:funder
     domain_of:
     - FundingMechanism
     range: Grantor
@@ -435,10 +433,8 @@ attributes:
     description: Name/identifier of the organization providing monetary or resource
       support.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
-    broad_mappings:
-    - schema:funder
     rank: 1000
-    slot_uri: d4d:grantor
+    slot_uri: schema:funder
     alias: grantor
     owner: FundingMechanism
     domain_of:
@@ -461,10 +457,6 @@ attributes:
     inlined_as_list: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -502,7 +494,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: FundingMechanism
     domain_of:

@@ -284,7 +284,7 @@
 <tr>
 <td><a href="../collector_details/">collector_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Free-text description of who was involved in data collection (e</td>
+<td>Details on who collected the data and their compensation</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -376,27 +376,16 @@ is_a: DatasetProperty
 attributes:
   role:
     name: role
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Clinical Research Coordinator
-    description: Role of the data collector (e.g., researcher, crowdworker).
+    description: Role of the data collector (e.g., researcher, crowdworker)
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: schema:roleName
     domain_of:
     - DataCollector
     - Maintainer
     range: string
   collector_details:
     name: collector_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Certified study coordinators at 3 collection sites
-    description: 'Free-text description of who was involved in data collection (e.g.,
-      students, crowdworkers, contractors), their training or qualifications, and
-      how they were compensated.
+    description: 'Details on who collected the data and their compensation.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
@@ -421,14 +410,9 @@ is_a: DatasetProperty
 attributes:
   role:
     name: role
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Clinical Research Coordinator
-    description: Role of the data collector (e.g., researcher, crowdworker).
+    description: Role of the data collector (e.g., researcher, crowdworker)
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: schema:roleName
     alias: role
     owner: DataCollector
     domain_of:
@@ -437,13 +421,7 @@ attributes:
     range: string
   collector_details:
     name: collector_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Certified study coordinators at 3 collection sites
-    description: 'Free-text description of who was involved in data collection (e.g.,
-      students, crowdworkers, contractors), their training or qualifications, and
-      how they were compensated.
+    description: 'Details on who collected the data and their compensation.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
@@ -457,10 +435,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -498,7 +472,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: DataCollector
     domain_of:

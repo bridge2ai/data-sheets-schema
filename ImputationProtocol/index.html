@@ -398,50 +398,35 @@ is_a: DatasetProperty
 attributes:
   imputation_method:
     name: imputation_method
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Multiple Imputation by Chained Equations (MICE)
     description: 'Specific imputation technique used (mean, median, mode, forward
       fill, backward fill, interpolation, model-based imputation, etc.).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
-    slot_uri: d4d:imputation_method
     domain_of:
     - ImputationProtocol
     range: string
     multivalued: true
   imputed_fields:
     name: imputed_fields
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: cgm_mean_glucose, hba1c_percent, bmi
     description: 'Fields or columns where imputation was applied.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
-    slot_uri: d4d:imputed_fields
     domain_of:
     - ImputationProtocol
     range: string
     multivalued: true
   imputation_rationale:
     name: imputation_rationale
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 'MICE with 20 imputations; predictors: age, sex, HbA1c'
     description: 'Justification for the imputation approach chosen, including assumptions
       made about missing data mechanisms.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
-    slot_uri: d4d:imputation_rationale
     domain_of:
     - ImputationProtocol
     range: string
@@ -452,7 +437,6 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
-    slot_uri: d4d:imputation_validation
     domain_of:
     - ImputationProtocol
     range: string
@@ -474,17 +458,12 @@ is_a: DatasetProperty
 attributes:
   imputation_method:
     name: imputation_method
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Multiple Imputation by Chained Equations (MICE)
     description: 'Specific imputation technique used (mean, median, mode, forward
       fill, backward fill, interpolation, model-based imputation, etc.).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
-    slot_uri: d4d:imputation_method
     alias: imputation_method
     owner: ImputationProtocol
     domain_of:
@@ -493,16 +472,11 @@ attributes:
     multivalued: true
   imputed_fields:
     name: imputed_fields
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: cgm_mean_glucose, hba1c_percent, bmi
     description: 'Fields or columns where imputation was applied.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
-    slot_uri: d4d:imputed_fields
     alias: imputed_fields
     owner: ImputationProtocol
     domain_of:
@@ -511,17 +485,12 @@ attributes:
     multivalued: true
   imputation_rationale:
     name: imputation_rationale
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 'MICE with 20 imputations; predictors: age, sex, HbA1c'
     description: 'Justification for the imputation approach chosen, including assumptions
       made about missing data mechanisms.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
-    slot_uri: d4d:imputation_rationale
     alias: imputation_rationale
     owner: ImputationProtocol
     domain_of:
@@ -534,7 +503,6 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
-    slot_uri: d4d:imputation_validation
     alias: imputation_validation
     owner: ImputationProtocol
     domain_of:
@@ -543,10 +511,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -584,7 +548,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: ImputationProtocol
     domain_of:

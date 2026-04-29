@@ -384,8 +384,8 @@
 
 
 <h1 id="slot-annotator_demographics">Slot: annotator_demographics</h1>
-<p><em>One or more demographic characteristics of the annotators, if available and relevant (e.g., geographic location, language background, expertise level, native language).</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/annotatorDemographics">d4d:annotatorDemographics</a>
+<p><em>Demographic information about annotators, if available and relevant (e.g., geographic location, language background, expertise level).</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/annotator_demographics">data_sheets_schema:annotator_demographics</a>
 Alias: annotator_demographics</p>
 <!-- no inheritance hierarchy -->
 
@@ -431,7 +431,7 @@ Alias: annotator_demographics</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>d4d:annotatorDemographics</td>
+<td>data_sheets_schema:annotator_demographics</td>
 </tr>
 <tr>
 <td>native</td>
@@ -447,14 +447,12 @@ Alias: annotator_demographics</p>
 <details>
 
 <pre><code class="language-yaml">name: annotator_demographics
-description: One or more demographic characteristics of the annotators, if available
-  and relevant (e.g., geographic location, language background, expertise level, native
-  language).
+description: Demographic information about annotators, if available and relevant (e.g.,
+  geographic location, language background, expertise level).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 exact_mappings:
 - rai:annotatorDemographics
 rank: 1000
-slot_uri: d4d:annotatorDemographics
 alias: annotator_demographics
 owner: LabelingStrategy
 domain_of:

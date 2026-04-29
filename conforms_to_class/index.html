@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -391,8 +384,7 @@
 
 
 <h1 id="slot-conforms_to_class">Slot: conforms_to_class</h1>
-<p><em>The specific class or type within a schema to which the resource conforms.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/conformsToClass">d4d:conformsToClass</a>
+<p>URI: <a href="http://purl.org/dc/terms/conformsTo">dcterms:conformsTo</a>
 Alias: conforms_to_class</p>
 <!-- no inheritance hierarchy -->
 
@@ -407,8 +399,13 @@ Alias: conforms_to_class</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -421,21 +418,6 @@ Alias: conforms_to_class</p>
 <td>Grouping for datasets and data files</td>
 <td>no</td>
 </tr>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>no</td>
-</tr>
 </tbody>
 </table>
 <h2 id="properties">Properties</h2>
@@ -443,21 +425,6 @@ Alias: conforms_to_class</p>
 <li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>Dataset</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -473,15 +440,11 @@ Alias: conforms_to_class</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>d4d:conformsToClass</td>
+<td>dcterms:conformsTo</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:conforms_to_class</td>
-</tr>
-<tr>
-<td>broad</td>
-<td>dcterms:conformsTo</td>
 </tr>
 </tbody>
 </table>
@@ -489,16 +452,9 @@ Alias: conforms_to_class</p>
 <details>
 
 <pre><code class="language-yaml">name: conforms_to_class
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: Dataset
-description: The specific class or type within a schema to which the resource conforms.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-broad_mappings:
-- dcterms:conformsTo
 rank: 1000
-slot_uri: d4d:conformsToClass
+slot_uri: dcterms:conformsTo
 alias: conforms_to_class
 domain_of:
 - Information

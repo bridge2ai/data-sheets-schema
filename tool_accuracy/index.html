@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -391,9 +384,9 @@
 
 
 <h1 id="slot-tool_accuracy">Slot: tool_accuracy</h1>
-<p><em>One or more known accuracy or performance metrics for the automated tools (if available). Include metric name and value (e.g., "spaCy F1: 0.95", "GPT-4 Accuracy: 92%").</em></p>
+<p><em>Known accuracy or performance metrics for the automated tools (if available). Include metric name and value (e.g., "spaCy F1: 0.95", "GPT-4 Accuracy: 92%").</em></p>
 <p>__</p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/toolAccuracy">d4d:toolAccuracy</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/tool_accuracy">data_sheets_schema:tool_accuracy</a>
 Alias: tool_accuracy</p>
 <!-- no inheritance hierarchy -->
 
@@ -424,21 +417,6 @@ Alias: tool_accuracy</p>
 </li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>DeepDR AUC: 0.94 on EYEPACS validation set</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -454,7 +432,7 @@ Alias: tool_accuracy</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>d4d:toolAccuracy</td>
+<td>data_sheets_schema:tool_accuracy</td>
 </tr>
 <tr>
 <td>native</td>
@@ -466,18 +444,12 @@ Alias: tool_accuracy</p>
 <details>
 
 <pre><code class="language-yaml">name: tool_accuracy
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: 'DeepDR AUC: 0.94 on EYEPACS validation set'
-description: 'One or more known accuracy or performance metrics for the automated
-  tools (if available). Include metric name and value (e.g., &quot;spaCy F1: 0.95&quot;, &quot;GPT-4
-  Accuracy: 92%&quot;).
+description: 'Known accuracy or performance metrics for the automated tools (if available).
+  Include metric name and value (e.g., &quot;spaCy F1: 0.95&quot;, &quot;GPT-4 Accuracy: 92%&quot;).
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: d4d:toolAccuracy
 alias: tool_accuracy
 owner: MachineAnnotationTools
 domain_of:

@@ -276,7 +276,7 @@
 <tr>
 <td><a href="../impact_details/">impact_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Free-text description of the data protection impact analysis, including metho...</td>
+<td>Details on data protection impact analysis, outcomes, and documentation</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -370,13 +370,7 @@ is_a: DatasetProperty
 attributes:
   impact_details:
     name: impact_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: DPIA conducted; minimal residual re-identification risk after de-identification
-    description: 'Free-text description of the data protection impact analysis, including
-      methodology, privacy risks identified, mitigation measures taken, and any regulatory
-      findings.
+    description: 'Details on data protection impact analysis, outcomes, and documentation.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
@@ -403,13 +397,7 @@ is_a: DatasetProperty
 attributes:
   impact_details:
     name: impact_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: DPIA conducted; minimal residual re-identification risk after de-identification
-    description: 'Free-text description of the data protection impact analysis, including
-      methodology, privacy risks identified, mitigation measures taken, and any regulatory
-      findings.
+    description: 'Details on data protection impact analysis, outcomes, and documentation.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
@@ -423,10 +411,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -464,7 +448,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: DataProtectionImpact
     domain_of:

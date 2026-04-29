@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -393,7 +386,7 @@
 <h1 id="slot-why_missing">Slot: why_missing</h1>
 <p><em>Explanation of why each piece of data is missing.</em></p>
 <p>__</p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/missingDataCause">d4d:missingDataCause</a>
+<p>URI: <a href="http://purl.org/dc/terms/description">dcterms:description</a>
 Alias: why_missing</p>
 <!-- no inheritance hierarchy -->
 
@@ -424,21 +417,6 @@ Alias: why_missing</p>
 </li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>Device malfunction or non-compliance during 14-day wear period</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -454,15 +432,11 @@ Alias: why_missing</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>d4d:missingDataCause</td>
+<td>dcterms:description</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:why_missing</td>
-</tr>
-<tr>
-<td>broad</td>
-<td>dcterms:description</td>
 </tr>
 </tbody>
 </table>
@@ -470,18 +444,12 @@ Alias: why_missing</p>
 <details>
 
 <pre><code class="language-yaml">name: why_missing
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: Device malfunction or non-compliance during 14-day wear period
 description: 'Explanation of why each piece of data is missing.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-broad_mappings:
-- dcterms:description
 rank: 1000
-slot_uri: d4d:missingDataCause
+slot_uri: dcterms:description
 alias: why_missing
 owner: MissingInfo
 domain_of:

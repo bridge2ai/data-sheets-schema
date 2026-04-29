@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -393,7 +386,7 @@
 <h1 id="slot-imputation_rationale">Slot: imputation_rationale</h1>
 <p><em>Justification for the imputation approach chosen, including assumptions made about missing data mechanisms.</em></p>
 <p>__</p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/imputation_rationale">d4d:imputation_rationale</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/imputation_rationale">data_sheets_schema:imputation_rationale</a>
 Alias: imputation_rationale</p>
 <!-- no inheritance hierarchy -->
 
@@ -419,21 +412,6 @@ Alias: imputation_rationale</p>
 <li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>MICE with 20 imputations; predictors: age, sex, HbA1c</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -449,7 +427,7 @@ Alias: imputation_rationale</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>d4d:imputation_rationale</td>
+<td>data_sheets_schema:imputation_rationale</td>
 </tr>
 <tr>
 <td>native</td>
@@ -461,17 +439,12 @@ Alias: imputation_rationale</p>
 <details>
 
 <pre><code class="language-yaml">name: imputation_rationale
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: 'MICE with 20 imputations; predictors: age, sex, HbA1c'
 description: 'Justification for the imputation approach chosen, including assumptions
   made about missing data mechanisms.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: d4d:imputation_rationale
 alias: imputation_rationale
 owner: ImputationProtocol
 domain_of:

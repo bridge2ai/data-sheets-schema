@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -392,7 +385,7 @@
 
 <h1 id="slot-variable_name">Slot: variable_name</h1>
 <p><em>The name or identifier of the variable as it appears in the data files.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/variableName">d4d:variableName</a>
+<p>URI: <a href="http://schema.org/name">schema:name</a>
 Alias: variable_name</p>
 <!-- no inheritance hierarchy -->
 
@@ -423,21 +416,6 @@ Alias: variable_name</p>
 </li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>hba1c_percent</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -453,15 +431,15 @@ Alias: variable_name</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>d4d:variableName</td>
+<td>schema:name</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:variable_name</td>
 </tr>
 <tr>
-<td>broad</td>
-<td>schema:name, schema:identifier</td>
+<td>exact</td>
+<td>schema:name</td>
 </tr>
 </tbody>
 </table>
@@ -469,17 +447,12 @@ Alias: variable_name</p>
 <details>
 
 <pre><code class="language-yaml">name: variable_name
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: hba1c_percent
 description: The name or identifier of the variable as it appears in the data files.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-broad_mappings:
+exact_mappings:
 - schema:name
-- schema:identifier
 rank: 1000
-slot_uri: d4d:variableName
+slot_uri: schema:name
 alias: variable_name
 owner: VariableMetadata
 domain_of:

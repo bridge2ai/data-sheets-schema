@@ -284,7 +284,7 @@
 <tr>
 <td><a href="../extension_details/">extension_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Free-text description of how third parties can contribute to the dataset, how...</td>
+<td>Details on extension mechanisms, contribution validation, and communication</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -377,27 +377,15 @@ is_a: DatasetProperty
 attributes:
   contribution_url:
     name: contribution_url
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/contributing
     description: URL for contribution guidelines or process.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
-    slot_uri: d4d:contributionURL
     domain_of:
     - ExtensionMechanism
     range: uri
   extension_details:
     name: extension_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: New modalities added via versioned data releases; schema extensions
-          via GitHub PRs
-    description: 'Free-text description of how third parties can contribute to the
-      dataset, how contributions are validated (e.g., peer review, automated tests),
-      and how accepted contributions will be communicated to the community.
+    description: 'Details on extension mechanisms, contribution validation, and communication.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -423,14 +411,9 @@ is_a: DatasetProperty
 attributes:
   contribution_url:
     name: contribution_url
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/contributing
     description: URL for contribution guidelines or process.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
-    slot_uri: d4d:contributionURL
     alias: contribution_url
     owner: ExtensionMechanism
     domain_of:
@@ -438,14 +421,7 @@ attributes:
     range: uri
   extension_details:
     name: extension_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: New modalities added via versioned data releases; schema extensions
-          via GitHub PRs
-    description: 'Free-text description of how third parties can contribute to the
-      dataset, how contributions are validated (e.g., peer review, automated tests),
-      and how accepted contributions will be communicated to the community.
+    description: 'Details on extension mechanisms, contribution validation, and communication.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -459,10 +435,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -500,7 +472,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: ExtensionMechanism
     domain_of:

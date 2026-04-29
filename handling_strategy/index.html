@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -391,9 +384,9 @@
 
 
 <h1 id="slot-handling_strategy">Slot: handling_strategy</h1>
-<p><em>The primary strategy used to handle missing data (e.g., listwise deletion, mean imputation, multiple imputation, flagging with sentinel values).</em></p>
+<p><em>Strategy used to handle missing data (e.g., deletion, imputation, flagging, multiple imputation).</em></p>
 <p>__</p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/handlingStrategy">d4d:handlingStrategy</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/handling_strategy">data_sheets_schema:handling_strategy</a>
 Alias: handling_strategy</p>
 <!-- no inheritance hierarchy -->
 
@@ -419,21 +412,6 @@ Alias: handling_strategy</p>
 <li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>Multiple imputation using chained equations (MICE)</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -449,7 +427,7 @@ Alias: handling_strategy</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>d4d:handlingStrategy</td>
+<td>data_sheets_schema:handling_strategy</td>
 </tr>
 <tr>
 <td>native</td>
@@ -461,17 +439,12 @@ Alias: handling_strategy</p>
 <details>
 
 <pre><code class="language-yaml">name: handling_strategy
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: Multiple imputation using chained equations (MICE)
-description: 'The primary strategy used to handle missing data (e.g., listwise deletion,
-  mean imputation, multiple imputation, flagging with sentinel values).
+description: 'Strategy used to handle missing data (e.g., deletion, imputation, flagging,
+  multiple imputation).
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: d4d:handlingStrategy
 alias: handling_strategy
 owner: MissingDataDocumentation
 domain_of:

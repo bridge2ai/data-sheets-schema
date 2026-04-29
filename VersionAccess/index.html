@@ -279,8 +279,8 @@
 <tbody>
 <tr>
 <td><a href="../latest_version_doi/">latest_version_doi</a></td>
-<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>DOI or URL identifying the latest version of this dataset (e</td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>DOI or URL of the latest dataset version</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -292,7 +292,7 @@
 <tr>
 <td><a href="../version_details/">version_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Free-text description of version support policies, how long older versions wi...</td>
+<td>Details on version support policies and obsolescence communication</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -384,38 +384,24 @@ is_a: DatasetProperty
 attributes:
   latest_version_doi:
     name: latest_version_doi
-    description: DOI or URL identifying the latest version of this dataset (e.g.,
-      '10.5281/zenodo.1234567' for a DOI or 'https://doi.org/10.5281/zenodo.1234567'
-      for a full URL). Use CURIE format for DOIs (e.g., 'doi:10.5281/zenodo.1234567').
+    description: DOI or URL of the latest dataset version.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
-    slot_uri: dcterms:hasVersion
     domain_of:
     - VersionAccess
-    range: uriorcurie
+    range: string
   versions_available:
     name: versions_available
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: v1.0 (2023-11), v1.1 (2024-02), v2.0 (2024-11)
     description: List of available versions with metadata.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
-    slot_uri: d4d:versionsAvailable
     domain_of:
     - VersionAccess
     range: string
     multivalued: true
   version_details:
     name: version_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: All versions available at fairhub.io; older versions archived on Zenodo
-    description: 'Free-text description of version support policies, how long older
-      versions will be hosted, and how dataset consumers will be notified when versions
-      become obsolete.
+    description: 'Details on version support policies and obsolescence communication.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -440,27 +426,19 @@ is_a: DatasetProperty
 attributes:
   latest_version_doi:
     name: latest_version_doi
-    description: DOI or URL identifying the latest version of this dataset (e.g.,
-      '10.5281/zenodo.1234567' for a DOI or 'https://doi.org/10.5281/zenodo.1234567'
-      for a full URL). Use CURIE format for DOIs (e.g., 'doi:10.5281/zenodo.1234567').
+    description: DOI or URL of the latest dataset version.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
-    slot_uri: dcterms:hasVersion
     alias: latest_version_doi
     owner: VersionAccess
     domain_of:
     - VersionAccess
-    range: uriorcurie
+    range: string
   versions_available:
     name: versions_available
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: v1.0 (2023-11), v1.1 (2024-02), v2.0 (2024-11)
     description: List of available versions with metadata.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
-    slot_uri: d4d:versionsAvailable
     alias: versions_available
     owner: VersionAccess
     domain_of:
@@ -469,13 +447,7 @@ attributes:
     multivalued: true
   version_details:
     name: version_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: All versions available at fairhub.io; older versions archived on Zenodo
-    description: 'Free-text description of version support policies, how long older
-      versions will be hosted, and how dataset consumers will be notified when versions
-      become obsolete.
+    description: 'Details on version support policies and obsolescence communication.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -489,10 +461,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -530,7 +498,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: VersionAccess
     domain_of:

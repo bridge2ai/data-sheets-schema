@@ -385,7 +385,7 @@
 
 <h1 id="slot-governance_committee_contact">Slot: governance_committee_contact</h1>
 <p><em>Contact person for data governance committee. This person can answer questions about data governance policies, access procedures, and oversight mechanisms.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/governanceContactPoint">d4d:governanceContactPoint</a>
+<p>URI: <a href="http://schema.org/contactPoint">schema:contactPoint</a>
 Alias: governance_committee_contact</p>
 <!-- no inheritance hierarchy -->
 
@@ -426,14 +426,14 @@ Alias: governance_committee_contact</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>d4d:governanceContactPoint</td>
+<td>schema:contactPoint</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:governance_committee_contact</td>
 </tr>
 <tr>
-<td>broad</td>
+<td>exact</td>
 <td>schema:contactPoint</td>
 </tr>
 </tbody>
@@ -445,10 +445,10 @@ Alias: governance_committee_contact</p>
 description: Contact person for data governance committee. This person can answer
   questions about data governance policies, access procedures, and oversight mechanisms.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-broad_mappings:
+exact_mappings:
 - schema:contactPoint
 rank: 1000
-slot_uri: d4d:governanceContactPoint
+slot_uri: schema:contactPoint
 alias: governance_committee_contact
 owner: ExportControlRegulatoryRestrictions
 domain_of:

@@ -288,7 +288,7 @@
 <tr>
 <td><a href="../source_type/">source_type</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>One or more types of raw source (e</td>
+<td>Type of raw source (sensor, database, user input, web scraping, etc</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -300,7 +300,7 @@
 <tr>
 <td><a href="../raw_data_format/">raw_data_format</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>One or more formats of the raw data before any preprocessing (e</td>
+<td>Format of the raw data before any preprocessing</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -398,68 +398,45 @@ is_a: DatasetProperty
 attributes:
   source_description:
     name: source_description
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Electronic health records from UCSF Epic system
     description: 'Detailed description of where raw data comes from (e.g., sensors,
       databases, web APIs, manual collection).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: dcterms:description
     domain_of:
     - RawDataSource
     range: string
     required: true
   source_type:
     name: source_type
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Electronic Health Records
-    description: 'One or more types of raw source (e.g., sensor, database, user input,
-      web scraping).
+    description: 'Type of raw source (sensor, database, user input, web scraping,
+      etc.).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
-    broad_mappings:
-    - dcterms:type
     rank: 1000
-    slot_uri: d4d:sourceType
     domain_of:
     - RawDataSource
     range: string
     multivalued: true
   access_details:
     name: access_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Requires institutional DUA and IRB approval
     description: 'Information on how to access or retrieve the raw source data.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: d4d:accessDetails
     domain_of:
     - RawDataSource
     range: string
   raw_data_format:
     name: raw_data_format
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: HL7 FHIR R4
-    description: 'One or more formats of the raw data before any preprocessing (e.g.,
-      CSV, DICOM, JSON).
+    description: 'Format of the raw data before any preprocessing.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: d4d:rawDataFormat
     domain_of:
     - RawDataSource
     range: string
@@ -481,17 +458,12 @@ is_a: DatasetProperty
 attributes:
   source_description:
     name: source_description
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Electronic health records from UCSF Epic system
     description: 'Detailed description of where raw data comes from (e.g., sensors,
       databases, web APIs, manual collection).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: dcterms:description
     alias: source_description
     owner: RawDataSource
     domain_of:
@@ -500,19 +472,12 @@ attributes:
     required: true
   source_type:
     name: source_type
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Electronic Health Records
-    description: 'One or more types of raw source (e.g., sensor, database, user input,
-      web scraping).
+    description: 'Type of raw source (sensor, database, user input, web scraping,
+      etc.).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
-    broad_mappings:
-    - dcterms:type
     rank: 1000
-    slot_uri: d4d:sourceType
     alias: source_type
     owner: RawDataSource
     domain_of:
@@ -521,16 +486,11 @@ attributes:
     multivalued: true
   access_details:
     name: access_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Requires institutional DUA and IRB approval
     description: 'Information on how to access or retrieve the raw source data.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: d4d:accessDetails
     alias: access_details
     owner: RawDataSource
     domain_of:
@@ -538,17 +498,11 @@ attributes:
     range: string
   raw_data_format:
     name: raw_data_format
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: HL7 FHIR R4
-    description: 'One or more formats of the raw data before any preprocessing (e.g.,
-      CSV, DICOM, JSON).
+    description: 'Format of the raw data before any preprocessing.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
-    slot_uri: d4d:rawDataFormat
     alias: raw_data_format
     owner: RawDataSource
     domain_of:
@@ -557,10 +511,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -598,7 +548,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: RawDataSource
     domain_of:

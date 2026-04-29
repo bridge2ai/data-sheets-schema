@@ -400,10 +400,6 @@ attributes:
     multivalued: true
   email:
     name: email
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: researcher@university.edu
     description: The email address of the person. Represents current/preferred contact
       information in the context of this dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -414,18 +410,14 @@ attributes:
     range: string
   orcid:
     name: orcid
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 0000-0001-2345-6789
     description: 'ORCID (Open Researcher and Contributor ID) - a persistent digital
       identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups
       of 4). Use this for stable cross-dataset identification.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    broad_mappings:
+    exact_mappings:
     - schema:identifier
     rank: 1000
-    slot_uri: d4d:orcidIdentifier
+    slot_uri: schema:identifier
     domain_of:
     - Person
     range: string
@@ -461,10 +453,6 @@ attributes:
     multivalued: true
   email:
     name: email
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: researcher@university.edu
     description: The email address of the person. Represents current/preferred contact
       information in the context of this dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
@@ -477,18 +465,14 @@ attributes:
     range: string
   orcid:
     name: orcid
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 0000-0001-2345-6789
     description: 'ORCID (Open Researcher and Contributor ID) - a persistent digital
       identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups
       of 4). Use this for stable cross-dataset identification.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    broad_mappings:
+    exact_mappings:
     - schema:identifier
     rank: 1000
-    slot_uri: d4d:orcidIdentifier
+    slot_uri: schema:identifier
     alias: orcid
     owner: Person
     domain_of:
@@ -497,10 +481,6 @@ attributes:
     pattern: ^\d{4}-\d{4}-\d{4}-\d{3}[0-9X]$
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/my-dataset-001
     description: A unique identifier for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
@@ -515,10 +495,6 @@ attributes:
     required: true
   name:
     name: name
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: AI-READI Dataset
     description: A human-readable name for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
@@ -531,10 +507,6 @@ attributes:
     range: string
   description:
     name: description
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
     description: A human-readable description for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000

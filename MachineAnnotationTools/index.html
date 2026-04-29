@@ -292,7 +292,7 @@
 <tr>
 <td><a href="../tool_accuracy/">tool_accuracy</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>One or more known accuracy or performance metrics for the automated tools (if...</td>
+<td>Known accuracy or performance metrics for the automated tools (if available)</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -397,45 +397,32 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
-    broad_mappings:
-    - schema:name
     rank: 1000
-    slot_uri: d4d:toolNames
     domain_of:
     - MachineAnnotationTools
     range: string
     multivalued: true
   tool_descriptions:
     name: tool_descriptions
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: DeepDR automated grading system (AUC = 0.94)
     description: 'Descriptions of what each tool does in the annotation process and
       what types of annotations it produces. Should correspond to the tools list.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
-    slot_uri: d4d:toolDescriptions
     domain_of:
     - MachineAnnotationTools
     range: string
     multivalued: true
   tool_accuracy:
     name: tool_accuracy
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 'DeepDR AUC: 0.94 on EYEPACS validation set'
-    description: 'One or more known accuracy or performance metrics for the automated
-      tools (if available). Include metric name and value (e.g., "spaCy F1: 0.95",
-      "GPT-4 Accuracy: 92%").
+    description: 'Known accuracy or performance metrics for the automated tools (if
+      available). Include metric name and value (e.g., "spaCy F1: 0.95", "GPT-4 Accuracy:
+      92%").
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
-    slot_uri: d4d:toolAccuracy
     domain_of:
     - MachineAnnotationTools
     range: string
@@ -464,10 +451,7 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
-    broad_mappings:
-    - schema:name
     rank: 1000
-    slot_uri: d4d:toolNames
     alias: tools
     owner: MachineAnnotationTools
     domain_of:
@@ -476,17 +460,12 @@ attributes:
     multivalued: true
   tool_descriptions:
     name: tool_descriptions
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: DeepDR automated grading system (AUC = 0.94)
     description: 'Descriptions of what each tool does in the annotation process and
       what types of annotations it produces. Should correspond to the tools list.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
-    slot_uri: d4d:toolDescriptions
     alias: tool_descriptions
     owner: MachineAnnotationTools
     domain_of:
@@ -495,18 +474,13 @@ attributes:
     multivalued: true
   tool_accuracy:
     name: tool_accuracy
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 'DeepDR AUC: 0.94 on EYEPACS validation set'
-    description: 'One or more known accuracy or performance metrics for the automated
-      tools (if available). Include metric name and value (e.g., "spaCy F1: 0.95",
-      "GPT-4 Accuracy: 92%").
+    description: 'Known accuracy or performance metrics for the automated tools (if
+      available). Include metric name and value (e.g., "spaCy F1: 0.95", "GPT-4 Accuracy:
+      92%").
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
-    slot_uri: d4d:toolAccuracy
     alias: tool_accuracy
     owner: MachineAnnotationTools
     domain_of:
@@ -515,10 +489,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -556,7 +526,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: MachineAnnotationTools
     domain_of:

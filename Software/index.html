@@ -268,19 +268,19 @@
 <tr>
 <td><a href="../version/">version</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The version identifier of the software (e</td>
+<td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../license/">license</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The license under which the software is distributed (e</td>
+<td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../url/">url</a></td>
-<td>0..1 <br/> <a href="../Uri/">Uri</a></td>
-<td>URL where the software can be found (e</td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td></td>
 <td>direct</td>
 </tr>
 <tr>
@@ -675,7 +675,7 @@
 <td><a href="./">Software</a></td>
 </tr>
 <tr>
-<td><a href="../AtRiskPopulations/">AtRiskPopulations</a></td>
+<td><a href="../VulnerablePopulations/">VulnerablePopulations</a></td>
 <td><a href="../used_software/">used_software</a></td>
 <td>range</td>
 <td><a href="./">Software</a></td>
@@ -747,11 +747,6 @@ is_a: NamedThing
 attributes:
   version:
     name: version
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 3.8.1
-    description: The version identifier of the software (e.g., "1.0.0", "2.3.1-beta").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:softwareVersion
     domain_of:
@@ -760,12 +755,6 @@ attributes:
     range: string
   license:
     name: license
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: MIT
-    description: The license under which the software is distributed (e.g., "MIT",
-      "Apache-2.0", "GPL-3.0").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:license
     domain_of:
@@ -774,18 +763,12 @@ attributes:
     range: string
   url:
     name: url
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://github.com/example/tool
-    description: URL where the software can be found (e.g., homepage, repository,
-      or documentation).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:url
     domain_of:
     - Software
-    range: uri
+    range: string
 class_uri: schema:SoftwareApplication
 
 </code></pre>
@@ -801,11 +784,6 @@ is_a: NamedThing
 attributes:
   version:
     name: version
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 3.8.1
-    description: The version identifier of the software (e.g., "1.0.0", "2.3.1-beta").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:softwareVersion
     alias: version
@@ -816,12 +794,6 @@ attributes:
     range: string
   license:
     name: license
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: MIT
-    description: The license under which the software is distributed (e.g., "MIT",
-      "Apache-2.0", "GPL-3.0").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:license
     alias: license
@@ -832,12 +804,6 @@ attributes:
     range: string
   url:
     name: url
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://github.com/example/tool
-    description: URL where the software can be found (e.g., homepage, repository,
-      or documentation).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:url
@@ -845,13 +811,9 @@ attributes:
     owner: Software
     domain_of:
     - Software
-    range: uri
+    range: string
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/my-dataset-001
     description: A unique identifier for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
@@ -866,10 +828,6 @@ attributes:
     required: true
   name:
     name: name
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: AI-READI Dataset
     description: A human-readable name for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
@@ -882,10 +840,6 @@ attributes:
     range: string
   description:
     name: description
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
     description: A human-readable description for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000

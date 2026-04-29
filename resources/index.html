@@ -384,8 +384,8 @@
 
 
 <h1 id="slot-resources">Slot: resources</h1>
-<p><em>Sub-resources or component items. In DatasetCollection, contains Dataset objects. In Dataset, contains nested Dataset objects. In FileCollection, contains nested FileCollection objects. The specific range is defined via slot_usage in each class.</em></p>
-<p>URI: <a href="http://schema.org/hasPart">schema:hasPart</a>
+<p><em>Sub-resources or component datasets. Used in DatasetCollection to contain Dataset objects, and in Dataset to allow nested resource structures.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/resources">data_sheets_schema:resources</a>
 Alias: resources</p>
 <!-- no inheritance hierarchy -->
 
@@ -400,19 +400,14 @@ Alias: resources</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>yes</td>
 </tr>
 <tr>
 <td><a href="../DataSubset/">DataSubset</a></td>
 <td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
-</tr>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>yes</td>
 </tr>
 <tr>
 <td><a href="../Dataset/">Dataset</a></td>
@@ -446,7 +441,7 @@ Alias: resources</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>schema:hasPart</td>
+<td>data_sheets_schema:resources</td>
 </tr>
 <tr>
 <td>native</td>
@@ -458,18 +453,14 @@ Alias: resources</p>
 <details>
 
 <pre><code class="language-yaml">name: resources
-description: Sub-resources or component items. In DatasetCollection, contains Dataset
-  objects. In Dataset, contains nested Dataset objects. In FileCollection, contains
-  nested FileCollection objects. The specific range is defined via slot_usage in each
-  class.
+description: Sub-resources or component datasets. Used in DatasetCollection to contain
+  Dataset objects, and in Dataset to allow nested resource structures.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: schema:hasPart
 alias: resources
 domain_of:
 - DatasetCollection
 - Dataset
-- FileCollection
 range: Dataset
 multivalued: true
 

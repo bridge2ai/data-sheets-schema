@@ -314,7 +314,7 @@
 <tr>
 <td><a href="../instance_type/">instance_type</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The type or types of instances in the dataset (e</td>
+<td>Multiple types of instances? (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -455,20 +455,12 @@ attributes:
     range: uriorcurie
   instance_type:
     name: instance_type
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: medical imaging studies
-    description: 'The type or types of instances in the dataset (e.g., "movie", "user",
-      "rating", "clinical record"). Use when the dataset contains multiple instance
-      types with different structures.
+    description: 'Multiple types of instances? (e.g., movies, users, and ratings).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - dcterms:type
     rank: 1000
-    slot_uri: d4d:instanceType
+    slot_uri: dcterms:type
     domain_of:
     - Instance
     range: string
@@ -481,16 +473,12 @@ attributes:
     rank: 1000
     values_from:
     - B2AI_SUBSTRATE
-    slot_uri: dcterms:type
+    slot_uri: dcterms:format
     domain_of:
     - Instance
     range: uriorcurie
   counts:
     name: counts
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 42000 (42,000 patient records)
     description: 'How many instances are there in total (of each type, if appropriate)?
 
       '
@@ -507,7 +495,6 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:hasLabel
     domain_of:
     - Instance
     range: boolean
@@ -517,10 +504,8 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - schema:description
     rank: 1000
-    slot_uri: d4d:labelPattern
+    slot_uri: schema:description
     domain_of:
     - Instance
     range: string
@@ -530,7 +515,6 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    slot_uri: d4d:samplingStrategies
     domain_of:
     - Dataset
     - Instance
@@ -544,7 +528,6 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:missingInformation
     domain_of:
     - Instance
     range: MissingInfo
@@ -579,20 +562,12 @@ attributes:
     range: uriorcurie
   instance_type:
     name: instance_type
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: medical imaging studies
-    description: 'The type or types of instances in the dataset (e.g., "movie", "user",
-      "rating", "clinical record"). Use when the dataset contains multiple instance
-      types with different structures.
+    description: 'Multiple types of instances? (e.g., movies, users, and ratings).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - dcterms:type
     rank: 1000
-    slot_uri: d4d:instanceType
+    slot_uri: dcterms:type
     alias: instance_type
     owner: Instance
     domain_of:
@@ -607,7 +582,7 @@ attributes:
     rank: 1000
     values_from:
     - B2AI_SUBSTRATE
-    slot_uri: dcterms:type
+    slot_uri: dcterms:format
     alias: data_substrate
     owner: Instance
     domain_of:
@@ -615,10 +590,6 @@ attributes:
     range: uriorcurie
   counts:
     name: counts
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 42000 (42,000 patient records)
     description: 'How many instances are there in total (of each type, if appropriate)?
 
       '
@@ -637,7 +608,6 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:hasLabel
     alias: label
     owner: Instance
     domain_of:
@@ -649,10 +619,8 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - schema:description
     rank: 1000
-    slot_uri: d4d:labelPattern
+    slot_uri: schema:description
     alias: label_description
     owner: Instance
     domain_of:
@@ -664,7 +632,6 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    slot_uri: d4d:samplingStrategies
     alias: sampling_strategies
     owner: Instance
     domain_of:
@@ -680,7 +647,6 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:missingInformation
     alias: missing_information
     owner: Instance
     domain_of:
@@ -689,10 +655,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -730,7 +692,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: Instance
     domain_of:

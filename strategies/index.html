@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -391,9 +384,9 @@
 
 
 <h1 id="slot-strategies">Slot: strategies</h1>
-<p><em>One or more sampling strategies used (e.g., deterministic, simple random, stratified, cluster, systematic).</em></p>
+<p><em>Description of the sampling strategy (deterministic, probabilistic, etc.).</em></p>
 <p>__</p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/strategies">d4d:strategies</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/strategies">data_sheets_schema:strategies</a>
 Alias: strategies</p>
 <!-- no inheritance hierarchy -->
 
@@ -424,21 +417,6 @@ Alias: strategies</p>
 </li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>Triple-balanced by race/ethnicity, sex, and T2DM severity</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -454,7 +432,7 @@ Alias: strategies</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>d4d:strategies</td>
+<td>data_sheets_schema:strategies</td>
 </tr>
 <tr>
 <td>native</td>
@@ -466,17 +444,12 @@ Alias: strategies</p>
 <details>
 
 <pre><code class="language-yaml">name: strategies
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: Triple-balanced by race/ethnicity, sex, and T2DM severity
-description: 'One or more sampling strategies used (e.g., deterministic, simple random,
-  stratified, cluster, systematic).
+description: 'Description of the sampling strategy (deterministic, probabilistic,
+  etc.).
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: d4d:strategies
 alias: strategies
 owner: SamplingStrategy
 domain_of:

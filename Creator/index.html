@@ -319,7 +319,7 @@
 <tr>
 <td><a href="../credit_roles/">credit_roles</a></td>
 <td>* <br/> <a href="../CRediTRoleEnum/">CRediTRoleEnum</a></td>
-<td>One or more contributor roles using the CRediT (Contributor Roles Taxonomy) f...</td>
+<td>Contributor roles using the CRediT (Contributor Roles Taxonomy) for the princ...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -415,11 +415,10 @@ attributes:
     description: A key individual (Principal Investigator) responsible for or overseeing
       dataset creation.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
-    broad_mappings:
-    - dcterms:creator
+    exact_mappings:
     - schema:creator
     rank: 1000
-    slot_uri: d4d:principalInvestigator
+    slot_uri: dcterms:creator
     domain_of:
     - Creator
     range: Person
@@ -427,10 +426,8 @@ attributes:
     name: affiliations
     description: Organizations with which the creator or team is affiliated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
-    broad_mappings:
-    - schema:affiliation
     rank: 1000
-    slot_uri: d4d:teamAffiliation
+    slot_uri: schema:affiliation
     domain_of:
     - Creator
     range: Organization
@@ -439,12 +436,13 @@ attributes:
     inlined_as_list: true
   credit_roles:
     name: credit_roles
-    description: One or more contributor roles using the CRediT (Contributor Roles
-      Taxonomy) for the principal investigator or creator team (e.g., Conceptualization,
-      Data Curation, Methodology).
+    description: 'Contributor roles using the CRediT (Contributor Roles Taxonomy)
+      for the principal investigator or creator team. Specifies the specific contributions
+      made to this dataset (e.g., Conceptualization, Data Curation, Methodology).
+      Note: roles are specified here rather than on Person directly, since the same
+      person may have different roles across different datasets.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
     rank: 1000
-    slot_uri: d4d:creditRoles
     domain_of:
     - Creator
     range: CRediTRoleEnum
@@ -468,11 +466,10 @@ attributes:
     description: A key individual (Principal Investigator) responsible for or overseeing
       dataset creation.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
-    broad_mappings:
-    - dcterms:creator
+    exact_mappings:
     - schema:creator
     rank: 1000
-    slot_uri: d4d:principalInvestigator
+    slot_uri: dcterms:creator
     alias: principal_investigator
     owner: Creator
     domain_of:
@@ -482,10 +479,8 @@ attributes:
     name: affiliations
     description: Organizations with which the creator or team is affiliated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
-    broad_mappings:
-    - schema:affiliation
     rank: 1000
-    slot_uri: d4d:teamAffiliation
+    slot_uri: schema:affiliation
     alias: affiliations
     owner: Creator
     domain_of:
@@ -496,12 +491,13 @@ attributes:
     inlined_as_list: true
   credit_roles:
     name: credit_roles
-    description: One or more contributor roles using the CRediT (Contributor Roles
-      Taxonomy) for the principal investigator or creator team (e.g., Conceptualization,
-      Data Curation, Methodology).
+    description: 'Contributor roles using the CRediT (Contributor Roles Taxonomy)
+      for the principal investigator or creator team. Specifies the specific contributions
+      made to this dataset (e.g., Conceptualization, Data Curation, Methodology).
+      Note: roles are specified here rather than on Person directly, since the same
+      person may have different roles across different datasets.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
     rank: 1000
-    slot_uri: d4d:creditRoles
     alias: credit_roles
     owner: Creator
     domain_of:
@@ -510,10 +506,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -551,7 +543,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: Creator
     domain_of:

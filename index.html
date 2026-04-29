@@ -465,10 +465,6 @@
 <td>Analysis of annotation quality, inter-annotator agreement metrics, and system...</td>
 </tr>
 <tr>
-<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="AtRiskPopulations/">AtRiskPopulations</a></td>
-<td>Information about protections for at-risk populations in human subjects resea...</td>
-</tr>
-<tr>
 <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="CleaningStrategy/">CleaningStrategy</a></td>
 <td>Was any cleaning of the data done (e</td>
 </tr>
@@ -702,7 +698,7 @@
 </tr>
 <tr>
 <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="UseRepository/">UseRepository</a></td>
-<td>A repository or registry of known uses of this dataset by third parties</td>
+<td>Is there a repository that links to any or all papers or systems that use the...</td>
 </tr>
 <tr>
 <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="VariableMetadata/">VariableMetadata</a></td>
@@ -711,6 +707,10 @@
 <tr>
 <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="VersionAccess/">VersionAccess</a></td>
 <td>Will older versions of the dataset continue to be supported/hosted/maintained...</td>
+</tr>
+<tr>
+<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="VulnerablePopulations/">VulnerablePopulations</a></td>
+<td>Information about protections for vulnerable populations in human subjects re...</td>
 </tr>
 <tr>
 <td><a href="FormatDialect/">FormatDialect</a></td>
@@ -739,14 +739,6 @@
 <tr>
 <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="DatasetCollection/">DatasetCollection</a></td>
 <td>A collection of related datasets, likely containing multiple files of multipl...</td>
-</tr>
-<tr>
-<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-</tr>
-<tr>
-<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
 </tr>
 <tr>
 <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="Organization/">Organization</a></td>
@@ -785,23 +777,23 @@
 </tr>
 <tr>
 <td><a href="access_urls/">access_urls</a></td>
-<td>One or more URLs providing access to the distribution channel(s) or format(s)</td>
+<td>Details of the distribution channel(s) or format(s)</td>
 </tr>
 <tr>
 <td><a href="acquisition_details/">acquisition_details</a></td>
-<td>Free-text description of how data was acquired for each instance, including i...</td>
+<td>Details on how data was acquired for each instance</td>
 </tr>
 <tr>
 <td><a href="acquisition_methods/">acquisition_methods</a></td>
-<td>Methods used to acquire or obtain dataset instances</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="addressing_gaps/">addressing_gaps</a></td>
-<td>Research or practical gaps this dataset addresses</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="affected_subsets/">affected_subsets</a></td>
-<td>One or more specific subsets or features of the dataset affected by this bias...</td>
+<td>Specific subsets or features of the dataset affected by this bias</td>
 </tr>
 <tr>
 <td><a href="affiliation/">affiliation</a></td>
@@ -821,7 +813,7 @@
 </tr>
 <tr>
 <td><a href="annotation_analyses/">annotation_analyses</a></td>
-<td>One or more analyses of annotation quality and inter-annotator agreement</td>
+<td>Analysis of annotation quality and inter-annotator agreement</td>
 </tr>
 <tr>
 <td><a href="annotation_quality_details/">annotation_quality_details</a></td>
@@ -833,15 +825,15 @@
 </tr>
 <tr>
 <td><a href="annotator_demographics/">annotator_demographics</a></td>
-<td>One or more demographic characteristics of the annotators, if available and r...</td>
+<td>Demographic information about annotators, if available and relevant (e</td>
 </tr>
 <tr>
 <td><a href="anomalies/">anomalies</a></td>
-<td>Known data quality issues, errors, or irregularities in the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="anomaly_details/">anomaly_details</a></td>
-<td>Free-text description of errors, noise sources, or redundancies in the datase...</td>
+<td>Details on errors, noise sources, or redundancies in the dataset</td>
 </tr>
 <tr>
 <td><a href="anonymization_method/">anonymization_method</a></td>
@@ -849,19 +841,11 @@
 </tr>
 <tr>
 <td><a href="archival/">archival</a></td>
-<td>Indicates whether official archival versions of external resources are includ...</td>
+<td>Indication whether official archival versions of external resources are inclu...</td>
 </tr>
 <tr>
 <td><a href="assent_procedures/">assent_procedures</a></td>
 <td>For research involving minors, what assent procedures were used? How was deve...</td>
-</tr>
-<tr>
-<td><a href="at_risk_groups_included/">at_risk_groups_included</a></td>
-<td>Are any at-risk populations included (e</td>
-</tr>
-<tr>
-<td><a href="at_risk_populations/">at_risk_populations</a></td>
-<td>Information about protections for at-risk populations (e</td>
 </tr>
 <tr>
 <td><a href="bias_description/">bias_description</a></td>
@@ -877,7 +861,7 @@
 </tr>
 <tr>
 <td><a href="categories/">categories</a></td>
-<td>One or more permitted categories or values for a categorical variable</td>
+<td>The permitted categories or values for a categorical variable</td>
 </tr>
 <tr>
 <td><a href="citation/">citation</a></td>
@@ -885,43 +869,31 @@
 </tr>
 <tr>
 <td><a href="cleaning_details/">cleaning_details</a></td>
-<td>Free-text description of data cleaning procedures applied, including criteria...</td>
+<td>Details on data cleaning procedures applied</td>
 </tr>
 <tr>
 <td><a href="cleaning_strategies/">cleaning_strategies</a></td>
-<td>Data cleaning and quality control procedures applied to the dataset</td>
-</tr>
-<tr>
-<td><a href="collection_consents/">collection_consents</a></td>
-<td>Consent obtained from individuals for data collection and use</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="collection_details/">collection_details</a></td>
-<td>Free-text description of whether data was collected directly from individuals...</td>
+<td>Details on direct vs</td>
 </tr>
 <tr>
 <td><a href="collection_mechanisms/">collection_mechanisms</a></td>
-<td>Mechanisms, instruments, or tools used for data collection</td>
-</tr>
-<tr>
-<td><a href="collection_notifications/">collection_notifications</a></td>
-<td>Notifications provided to individuals about data collection</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="collection_timeframes/">collection_timeframes</a></td>
-<td>Time periods during which data was collected</td>
-</tr>
-<tr>
-<td><a href="collection_type/">collection_type</a></td>
-<td>Type(s) of content in this file collection</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="collector_details/">collector_details</a></td>
-<td>Free-text description of who was involved in data collection (e</td>
+<td>Details on who collected the data and their compensation</td>
 </tr>
 <tr>
 <td><a href="comment_prefix/">comment_prefix</a></td>
-<td>Character(s) used to indicate comment lines (e</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="compensation_amount/">compensation_amount</a></td>
@@ -941,11 +913,11 @@
 </tr>
 <tr>
 <td><a href="compression/">compression</a></td>
-<td>Compression format used, if any (e</td>
+<td>compression format used, if any</td>
 </tr>
 <tr>
 <td><a href="confidential_elements/">confidential_elements</a></td>
-<td>Confidential or restricted information within the dataset that requires acces...</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="confidential_elements_present/">confidential_elements_present</a></td>
@@ -953,7 +925,7 @@
 </tr>
 <tr>
 <td><a href="confidentiality_details/">confidentiality_details</a></td>
-<td>Free-text description of which data elements are confidential, the basis for ...</td>
+<td>Details on confidential data elements and handling procedures</td>
 </tr>
 <tr>
 <td><a href="confidentiality_level/">confidentiality_level</a></td>
@@ -961,19 +933,19 @@
 </tr>
 <tr>
 <td><a href="conforms_to/">conforms_to</a></td>
-<td>An established standard, specification, or schema to which the resource confo...</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="conforms_to_class/">conforms_to_class</a></td>
-<td>The specific class or type within a schema to which the resource conforms</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="conforms_to_schema/">conforms_to_schema</a></td>
-<td>The schema or data model to which the resource conforms</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="consent_details/">consent_details</a></td>
-<td>Free-text description of how consent was requested (e</td>
+<td>Details on how consent was requested, provided, and documented</td>
 </tr>
 <tr>
 <td><a href="consent_documentation/">consent_documentation</a></td>
@@ -982,10 +954,6 @@
 <tr>
 <td><a href="consent_obtained/">consent_obtained</a></td>
 <td>Was informed consent obtained from all participants?</td>
-</tr>
-<tr>
-<td><a href="consent_revocations/">consent_revocations</a></td>
-<td>Mechanisms for individuals to revoke previously given consent</td>
 </tr>
 <tr>
 <td><a href="consent_scope/">consent_scope</a></td>
@@ -1001,7 +969,7 @@
 </tr>
 <tr>
 <td><a href="content_warnings/">content_warnings</a></td>
-<td>Content warnings for potentially harmful, offensive, or disturbing material i...</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="content_warnings_present/">content_warnings_present</a></td>
@@ -1017,23 +985,23 @@
 </tr>
 <tr>
 <td><a href="created_by/">created_by</a></td>
-<td>The person or organization primarily responsible for creating the resource</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="created_on/">created_on</a></td>
-<td>The date and time when the resource was created</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="creators/">creators</a></td>
-<td>Individuals or organizations who created the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="credit_roles/">credit_roles</a></td>
-<td>One or more contributor roles using the CRediT (Contributor Roles Taxonomy) f...</td>
+<td>Contributor roles using the CRediT (Contributor Roles Taxonomy) for the princ...</td>
 </tr>
 <tr>
 <td><a href="data_annotation_platform/">data_annotation_platform</a></td>
-<td>One or more platforms or tools used for annotation (e</td>
+<td>Platform or tool used for annotation (e</td>
 </tr>
 <tr>
 <td><a href="data_annotation_protocol/">data_annotation_protocol</a></td>
@@ -1041,7 +1009,7 @@
 </tr>
 <tr>
 <td><a href="data_collectors/">data_collectors</a></td>
-<td>Individuals or organizations responsible for collecting the data</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="data_linkage/">data_linkage</a></td>
@@ -1049,7 +1017,7 @@
 </tr>
 <tr>
 <td><a href="data_protection_impacts/">data_protection_impacts</a></td>
-<td>Data protection impact assessments (DPIAs) conducted for the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="data_substrate/">data_substrate</a></td>
@@ -1073,7 +1041,7 @@
 </tr>
 <tr>
 <td><a href="delimiter/">delimiter</a></td>
-<td>Field delimiter character (e</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="derivation/">derivation</a></td>
@@ -1085,11 +1053,7 @@
 </tr>
 <tr>
 <td><a href="dialect/">dialect</a></td>
-<td>Specific format dialect or variation (e</td>
-</tr>
-<tr>
-<td><a href="direct_collection/">direct_collection</a></td>
-<td>Whether data was collected directly from individuals or via third parties</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="disagreement_patterns/">disagreement_patterns</a></td>
@@ -1097,31 +1061,31 @@
 </tr>
 <tr>
 <td><a href="discouraged_uses/">discouraged_uses</a></td>
-<td>Uses that are not recommended for this dataset due to limitations, risks, or ...</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="discouragement_details/">discouragement_details</a></td>
-<td>Free-text description of tasks or applications for which the dataset is not r...</td>
+<td>Details on tasks for which the dataset should not be used</td>
 </tr>
 <tr>
 <td><a href="distribution/">distribution</a></td>
-<td>The distribution of instances across identified subpopulations, including cou...</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="distribution_dates/">distribution_dates</a></td>
-<td>Dates when the dataset was or will be distributed or released</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="distribution_formats/">distribution_formats</a></td>
-<td>Formats in which the dataset is distributed or made available</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="doi/">doi</a></td>
-<td>Digital Object Identifier (DOI) in format 10</td>
+<td>digital object identifier</td>
 </tr>
 <tr>
 <td><a href="double_quote/">double_quote</a></td>
-<td>Whether quotes within quoted fields are escaped by doubling them</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="download_url/">download_url</a></td>
@@ -1133,7 +1097,7 @@
 </tr>
 <tr>
 <td><a href="encoding/">encoding</a></td>
-<td>The character encoding of the data</td>
+<td>the character encoding of the data</td>
 </tr>
 <tr>
 <td><a href="end_date/">end_date</a></td>
@@ -1141,11 +1105,11 @@
 </tr>
 <tr>
 <td><a href="errata/">errata</a></td>
-<td>Known errors or corrections to the dataset since publication</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="erratum_details/">erratum_details</a></td>
-<td>Free-text description of the error, its scope, the affected data or records, ...</td>
+<td>Details on any errata or corrections to the dataset</td>
 </tr>
 <tr>
 <td><a href="erratum_url/">erratum_url</a></td>
@@ -1153,7 +1117,7 @@
 </tr>
 <tr>
 <td><a href="ethical_reviews/">ethical_reviews</a></td>
-<td>Ethical reviews and institutional oversight for the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="ethics_review_board/">ethics_review_board</a></td>
@@ -1165,31 +1129,19 @@
 </tr>
 <tr>
 <td><a href="existing_uses/">existing_uses</a></td>
-<td>Known existing uses of the dataset at the time of publication</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="extension_details/">extension_details</a></td>
-<td>Free-text description of how third parties can contribute to the dataset, how...</td>
+<td>Details on extension mechanisms, contribution validation, and communication</td>
 </tr>
 <tr>
 <td><a href="extension_mechanism/">extension_mechanism</a></td>
-<td>Mechanisms for extending or contributing to the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="external_resources/">external_resources</a></td>
 <td>Links or identifiers for external resources</td>
-</tr>
-<tr>
-<td><a href="file_collections/">file_collections</a></td>
-<td>Collection of file groups within this dataset</td>
-</tr>
-<tr>
-<td><a href="file_count/">file_count</a></td>
-<td>Number of files in this collection</td>
-</tr>
-<tr>
-<td><a href="file_type/">file_type</a></td>
-<td>Semantic type or purpose of this file (e</td>
 </tr>
 <tr>
 <td><a href="format/">format</a></td>
@@ -1201,7 +1153,7 @@
 </tr>
 <tr>
 <td><a href="funders/">funders</a></td>
-<td>Funding mechanisms that supported dataset creation</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="future_guarantees/">future_guarantees</a></td>
@@ -1209,7 +1161,7 @@
 </tr>
 <tr>
 <td><a href="future_use_impacts/">future_use_impacts</a></td>
-<td>Anticipated impacts of future uses, including risks and benefits</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="governance_committee_contact/">governance_committee_contact</a></td>
@@ -1220,7 +1172,7 @@
 <td>The alphanumeric identifier for the grant</td>
 </tr>
 <tr>
-<td><a href="grantor/">grantor</a></td>
+<td><a href="grantor.md">grantor</a></td>
 <td>Name/identifier of the organization providing monetary or resource support</td>
 </tr>
 <tr>
@@ -1233,15 +1185,15 @@
 </tr>
 <tr>
 <td><a href="handling_strategy/">handling_strategy</a></td>
-<td>The primary strategy used to handle missing data (e</td>
+<td>Strategy used to handle missing data (e</td>
 </tr>
 <tr>
 <td><a href="hash/">hash</a></td>
-<td>Cryptographic hash value of the data for integrity verification (e</td>
+<td>hash of the data</td>
 </tr>
 <tr>
 <td><a href="header/">header</a></td>
-<td>Whether the first row of the file contains column headers</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="hipaa_compliant/">hipaa_compliant</a></td>
@@ -1261,15 +1213,15 @@
 </tr>
 <tr>
 <td><a href="identification/">identification</a></td>
-<td>How subpopulations are identified and defined (e</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="identifiers_removed/">identifiers_removed</a></td>
-<td>List of identifier types removed during de-identification (e</td>
+<td>List of identifier types removed during de-identification</td>
 </tr>
 <tr>
 <td><a href="impact_details/">impact_details</a></td>
-<td>Free-text description of potential future impacts or risks arising from the d...</td>
+<td>Details on potential impacts, risks, and mitigation strategies</td>
 </tr>
 <tr>
 <td><a href="imputation_method/">imputation_method</a></td>
@@ -1277,7 +1229,7 @@
 </tr>
 <tr>
 <td><a href="imputation_protocols/">imputation_protocols</a></td>
-<td>Data imputation protocols applied to handle missing values</td>
+<td>Data imputation methodology and techniques</td>
 </tr>
 <tr>
 <td><a href="imputation_rationale/">imputation_rationale</a></td>
@@ -1293,19 +1245,19 @@
 </tr>
 <tr>
 <td><a href="informed_consent/">informed_consent</a></td>
-<td>One or more records detailing informed consent procedures, including consent ...</td>
+<td>Details about informed consent procedures, including consent type, documentat...</td>
 </tr>
 <tr>
 <td><a href="instance_type/">instance_type</a></td>
-<td>The type or types of instances in the dataset (e</td>
+<td>Multiple types of instances? (e</td>
 </tr>
 <tr>
 <td><a href="instances/">instances</a></td>
-<td>Individual data instances or records in the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="intended_uses/">intended_uses</a></td>
-<td>List of explicit intended and recommended uses for this dataset</td>
+<td>Explicit intended and recommended uses for this dataset</td>
 </tr>
 <tr>
 <td><a href="inter_annotator_agreement/">inter_annotator_agreement</a></td>
@@ -1321,7 +1273,7 @@
 </tr>
 <tr>
 <td><a href="ip_restrictions/">ip_restrictions</a></td>
-<td>Intellectual property restrictions on dataset use or redistribution</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="irb_approval/">irb_approval</a></td>
@@ -1333,7 +1285,7 @@
 </tr>
 <tr>
 <td><a href="is_deidentified/">is_deidentified</a></td>
-<td>De-identification status and procedures applied to the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="is_direct/">is_direct</a></td>
@@ -1369,23 +1321,23 @@
 </tr>
 <tr>
 <td><a href="is_tabular/">is_tabular</a></td>
-<td>Whether the dataset is in tabular format (rows and columns)</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="issued/">issued</a></td>
-<td>Date of formal issuance or publication of the resource</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="keywords/">keywords</a></td>
-<td>Keywords or tags describing the resource for discovery and classification</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="known_biases/">known_biases</a></td>
-<td>List of known biases present in the dataset that may affect fairness, represe...</td>
+<td>Known biases present in the dataset that may affect fairness, representativen...</td>
 </tr>
 <tr>
 <td><a href="known_limitations/">known_limitations</a></td>
-<td>List of known limitations of the dataset that may affect its use or interpret...</td>
+<td>Known limitations of the dataset that may affect its use or interpretation</td>
 </tr>
 <tr>
 <td><a href="label/">label</a></td>
@@ -1397,35 +1349,35 @@
 </tr>
 <tr>
 <td><a href="labeling_details/">labeling_details</a></td>
-<td>Free-text description of the labeling or annotation procedures, including ann...</td>
+<td>Details on labeling/annotation procedures and quality metrics</td>
 </tr>
 <tr>
 <td><a href="labeling_strategies/">labeling_strategies</a></td>
-<td>Labeling or annotation methodologies applied to the data</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="language/">language</a></td>
-<td>Language in which the information is expressed</td>
+<td>language in which the information is expressed</td>
 </tr>
 <tr>
 <td><a href="last_updated_on/">last_updated_on</a></td>
-<td>The date and time when the resource was most recently modified or updated</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="latest_version_doi/">latest_version_doi</a></td>
-<td>DOI or URL identifying the latest version of this dataset (e</td>
+<td>DOI or URL of the latest dataset version</td>
 </tr>
 <tr>
 <td><a href="license/">license</a></td>
-<td>The legal license under which the resource is made available (e</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="license_and_use_terms/">license_and_use_terms</a></td>
-<td>License and usage terms governing dataset access and use</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="license_terms/">license_terms</a></td>
-<td>Description of the dataset's license and terms of use, including links, costs...</td>
+<td>Description of the dataset's license and terms of use (including links, costs...</td>
 </tr>
 <tr>
 <td><a href="limitation_description/">limitation_description</a></td>
@@ -1437,15 +1389,15 @@
 </tr>
 <tr>
 <td><a href="machine_annotation_tools/">machine_annotation_tools</a></td>
-<td>List of automated annotation tools used in dataset creation</td>
+<td>Automated annotation tools used in dataset creation</td>
 </tr>
 <tr>
 <td><a href="maintainer_details/">maintainer_details</a></td>
-<td>Free-text description of the organization, team, or individual responsible fo...</td>
+<td>Details on who will support, host, or maintain the dataset</td>
 </tr>
 <tr>
 <td><a href="maintainers/">maintainers</a></td>
-<td>Individuals or organizations responsible for maintaining the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="maximum_value/">maximum_value</a></td>
@@ -1453,7 +1405,7 @@
 </tr>
 <tr>
 <td><a href="md5/">md5</a></td>
-<td>MD5 hash value of the data (128-bit cryptographic hash)</td>
+<td>md5 hash of the data</td>
 </tr>
 <tr>
 <td><a href="measurement_technique/">measurement_technique</a></td>
@@ -1461,7 +1413,7 @@
 </tr>
 <tr>
 <td><a href="mechanism_details/">mechanism_details</a></td>
-<td>Free-text description of the specific mechanisms or procedures used to collec...</td>
+<td>Details on mechanisms or procedures used to collect the data</td>
 </tr>
 <tr>
 <td><a href="media_type/">media_type</a></td>
@@ -1485,7 +1437,7 @@
 </tr>
 <tr>
 <td><a href="missing_data_documentation/">missing_data_documentation</a></td>
-<td>One or more records documenting missing data patterns and handling strategies</td>
+<td>Documentation of missing data patterns and handling strategies</td>
 </tr>
 <tr>
 <td><a href="missing_data_patterns/">missing_data_patterns</a></td>
@@ -1505,7 +1457,7 @@
 </tr>
 <tr>
 <td><a href="modified_by/">modified_by</a></td>
-<td>A person or organization that contributed to modifying or updating the resour...</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="name/">name</a></td>
@@ -1513,7 +1465,7 @@
 </tr>
 <tr>
 <td><a href="notification_details/">notification_details</a></td>
-<td>Free-text description of how individuals were notified about data collection,...</td>
+<td>Details on how individuals were notified about data collection</td>
 </tr>
 <tr>
 <td><a href="orcid/">orcid</a></td>
@@ -1525,27 +1477,27 @@
 </tr>
 <tr>
 <td><a href="other_tasks/">other_tasks</a></td>
-<td>Additional tasks the dataset may support beyond its original intent</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="page/">page</a></td>
-<td>A landing page or web page providing access to or information about the resou...</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="parent_datasets/">parent_datasets</a></td>
-<td>One or more parent datasets that this dataset is part of or derived from</td>
+<td>Parent datasets that this dataset is part of or derived from</td>
 </tr>
 <tr>
 <td><a href="participant_compensation/">participant_compensation</a></td>
-<td>One or more records describing compensation or incentives provided to human r...</td>
+<td>Compensation or incentives provided to human research participants</td>
 </tr>
 <tr>
 <td><a href="participant_privacy/">participant_privacy</a></td>
-<td>One or more records describing privacy protections and anonymization procedur...</td>
+<td>Privacy protections and anonymization procedures for human research participa...</td>
 </tr>
 <tr>
 <td><a href="path/">path</a></td>
-<td>The file path or URL where the content is located</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="precision/">precision</a></td>
@@ -1553,11 +1505,11 @@
 </tr>
 <tr>
 <td><a href="preprocessing_details/">preprocessing_details</a></td>
-<td>Free-text description of preprocessing steps applied to the data, including t...</td>
+<td>Details on preprocessing steps applied to the data</td>
 </tr>
 <tr>
 <td><a href="preprocessing_strategies/">preprocessing_strategies</a></td>
-<td>Preprocessing steps applied to the raw data</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="principal_investigator/">principal_investigator</a></td>
@@ -1569,19 +1521,19 @@
 </tr>
 <tr>
 <td><a href="prohibited_uses/">prohibited_uses</a></td>
-<td>List of explicitly prohibited or forbidden uses for this dataset</td>
+<td>Explicitly prohibited or forbidden uses for this dataset</td>
 </tr>
 <tr>
 <td><a href="prohibition_reason/">prohibition_reason</a></td>
-<td>One or more reasons why this use is prohibited (e</td>
+<td>Reason why this use is prohibited (e</td>
 </tr>
 <tr>
 <td><a href="publisher/">publisher</a></td>
-<td>The organization or entity responsible for making the resource available</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="purposes/">purposes</a></td>
-<td>Purposes for which the dataset was created</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="quality_notes/">quality_notes</a></td>
@@ -1589,23 +1541,23 @@
 </tr>
 <tr>
 <td><a href="quote_char/">quote_char</a></td>
-<td>Character used for quoting fields (e</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="raw_data_details/">raw_data_details</a></td>
-<td>Free-text description of raw data availability, access procedures, and any co...</td>
+<td>Details on raw data availability and access procedures</td>
 </tr>
 <tr>
 <td><a href="raw_data_format/">raw_data_format</a></td>
-<td>One or more formats of the raw data before any preprocessing (e</td>
+<td>Format of the raw data before any preprocessing</td>
 </tr>
 <tr>
 <td><a href="raw_data_sources/">raw_data_sources</a></td>
-<td>List of raw data sources before preprocessing</td>
+<td>Description of raw data sources before preprocessing</td>
 </tr>
 <tr>
 <td><a href="raw_sources/">raw_sources</a></td>
-<td>Raw, unprocessed source data before any preprocessing was applied</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="recommended_mitigation/">recommended_mitigation</a></td>
@@ -1617,7 +1569,7 @@
 </tr>
 <tr>
 <td><a href="regulatory_restrictions/">regulatory_restrictions</a></td>
-<td>Regulatory and export control restrictions applicable to the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="reidentification_risk/">reidentification_risk</a></td>
@@ -1625,27 +1577,23 @@
 </tr>
 <tr>
 <td><a href="related_datasets/">related_datasets</a></td>
-<td>List of related datasets with typed relationships (e</td>
+<td>Related datasets with typed relationships (e</td>
 </tr>
 <tr>
 <td><a href="relationship_details/">relationship_details</a></td>
-<td>Free-text description of how relationships between instances are represented ...</td>
+<td>Details on relationships between instances (e</td>
 </tr>
 <tr>
 <td><a href="relationship_type/">relationship_type</a></td>
 <td>The type of relationship (e</td>
 </tr>
 <tr>
-<td><a href="relationships/">relationships</a></td>
-<td>Explicit relationships between individual instances in the dataset</td>
-</tr>
-<tr>
 <td><a href="release_dates/">release_dates</a></td>
-<td>One or more dates or timeframes for dataset release, in ISO 8601 format (e</td>
+<td>Dates or timeframe for dataset release</td>
 </tr>
 <tr>
 <td><a href="repository_details/">repository_details</a></td>
-<td>Free-text description of the repository of known dataset uses, including how ...</td>
+<td>Details on the repository of known dataset uses</td>
 </tr>
 <tr>
 <td><a href="repository_url/">repository_url</a></td>
@@ -1653,11 +1601,11 @@
 </tr>
 <tr>
 <td><a href="representative_verification/">representative_verification</a></td>
-<td>One or more explanations of how representativeness was validated or verified ...</td>
+<td>Explanation of how representativeness was validated or verified</td>
 </tr>
 <tr>
 <td><a href="resources/">resources</a></td>
-<td>Sub-resources or component items</td>
+<td>Sub-resources or component datasets</td>
 </tr>
 <tr>
 <td><a href="response/">response</a></td>
@@ -1665,15 +1613,15 @@
 </tr>
 <tr>
 <td><a href="restrictions/">restrictions</a></td>
-<td>One or more descriptions of restrictions or fees associated with accessing th...</td>
+<td>Description of any restrictions or fees associated with external resources</td>
 </tr>
 <tr>
 <td><a href="retention_details/">retention_details</a></td>
-<td>Free-text description of applicable retention limits, legal or ethical basis ...</td>
+<td>Details on data retention limits and enforcement procedures</td>
 </tr>
 <tr>
 <td><a href="retention_limit/">retention_limit</a></td>
-<td>Data retention policies and limits for the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="retention_period/">retention_period</a></td>
@@ -1681,7 +1629,7 @@
 </tr>
 <tr>
 <td><a href="review_details/">review_details</a></td>
-<td>Free-text description of the ethical review process, board decisions, outcome...</td>
+<td>Details on ethical review processes, outcomes, and supporting documentation</td>
 </tr>
 <tr>
 <td><a href="reviewing_organization/">reviewing_organization</a></td>
@@ -1689,7 +1637,7 @@
 </tr>
 <tr>
 <td><a href="revocation_details/">revocation_details</a></td>
-<td>Free-text description of the mechanism provided for individuals to revoke con...</td>
+<td>Details on consent revocation mechanisms and procedures</td>
 </tr>
 <tr>
 <td><a href="role/">role</a></td>
@@ -1697,11 +1645,11 @@
 </tr>
 <tr>
 <td><a href="same_as/">same_as</a></td>
-<td>One or more URLs or URIs identifying equivalent or related representations of...</td>
+<td>URL of a reference web resource that is the same as this dataset</td>
 </tr>
 <tr>
 <td><a href="sampling_strategies/">sampling_strategies</a></td>
-<td>Strategies used to select data instances from a larger population</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="scope_impact/">scope_impact</a></td>
@@ -1709,7 +1657,7 @@
 </tr>
 <tr>
 <td><a href="sensitive_elements/">sensitive_elements</a></td>
-<td>Sensitive data elements requiring special handling or access controls</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="sensitive_elements_present/">sensitive_elements_present</a></td>
@@ -1721,11 +1669,11 @@
 </tr>
 <tr>
 <td><a href="sha256/">sha256</a></td>
-<td>SHA-256 hash value of the data (256-bit cryptographic hash, recommended)</td>
+<td>sha256 hash of the data</td>
 </tr>
 <tr>
 <td><a href="source_data/">source_data</a></td>
-<td>One or more descriptions of the larger sets from which the sample was drawn, ...</td>
+<td>Description of the larger set from which the sample was drawn, if any</td>
 </tr>
 <tr>
 <td><a href="source_description/">source_description</a></td>
@@ -1733,7 +1681,7 @@
 </tr>
 <tr>
 <td><a href="source_type/">source_type</a></td>
-<td>One or more types of raw source (e</td>
+<td>Type of raw source (sensor, database, user input, web scraping, etc</td>
 </tr>
 <tr>
 <td><a href="special_populations/">special_populations</a></td>
@@ -1741,15 +1689,11 @@
 </tr>
 <tr>
 <td><a href="special_protections/">special_protections</a></td>
-<td>What additional protections were implemented for at-risk populations? Include...</td>
+<td>What additional protections were implemented for vulnerable populations? Incl...</td>
 </tr>
 <tr>
 <td><a href="split_details/">split_details</a></td>
-<td>Free-text description of the recommended data splits (e</td>
-</tr>
-<tr>
-<td><a href="splits/">splits</a></td>
-<td>Recommended data splits for this dataset</td>
+<td>Details on recommended data splits and their rationale</td>
 </tr>
 <tr>
 <td><a href="start_date/">start_date</a></td>
@@ -1757,11 +1701,11 @@
 </tr>
 <tr>
 <td><a href="status/">status</a></td>
-<td>The status of the resource (e</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="strategies/">strategies</a></td>
-<td>One or more sampling strategies used (e</td>
+<td>Description of the sampling strategy (deterministic, probabilistic, etc</td>
 </tr>
 <tr>
 <td><a href="subpopulation_elements_present/">subpopulation_elements_present</a></td>
@@ -1769,11 +1713,11 @@
 </tr>
 <tr>
 <td><a href="subpopulations/">subpopulations</a></td>
-<td>Subpopulations represented within the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="subsets/">subsets</a></td>
-<td>Subsets or splits of this dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="target_dataset/">target_dataset</a></td>
@@ -1781,31 +1725,27 @@
 </tr>
 <tr>
 <td><a href="task_details/">task_details</a></td>
-<td>Free-text description of other potential tasks the dataset could support, inc...</td>
+<td>Details on other potential tasks the dataset could be used for</td>
 </tr>
 <tr>
 <td><a href="tasks/">tasks</a></td>
-<td>Tasks the dataset is intended to support</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="themes/">themes</a></td>
-<td>One or more themes associated with the data</td>
-</tr>
-<tr>
-<td><a href="third_party_sharing/">third_party_sharing</a></td>
-<td>Third-party distribution policies for the dataset</td>
+<td>Themes associated with the data</td>
 </tr>
 <tr>
 <td><a href="timeframe_details/">timeframe_details</a></td>
-<td>Free-text description of the data collection period and whether this timefram...</td>
+<td>Details on the collection timeframe and relationship to data creation dates</td>
 </tr>
 <tr>
 <td><a href="title/">title</a></td>
-<td>The official title of the element</td>
+<td>the official title of the element</td>
 </tr>
 <tr>
 <td><a href="tool_accuracy/">tool_accuracy</a></td>
-<td>One or more known accuracy or performance metrics for the automated tools (if...</td>
+<td>Known accuracy or performance metrics for the automated tools (if available)</td>
 </tr>
 <tr>
 <td><a href="tool_descriptions/">tool_descriptions</a></td>
@@ -1816,44 +1756,32 @@
 <td>List of automated annotation tools with their versions</td>
 </tr>
 <tr>
-<td><a href="total_bytes/">total_bytes</a></td>
-<td>Total size of all files in this collection, in bytes (integer)</td>
-</tr>
-<tr>
-<td><a href="total_file_count/">total_file_count</a></td>
-<td>Total number of files across all file collections in this dataset</td>
-</tr>
-<tr>
-<td><a href="total_size_bytes/">total_size_bytes</a></td>
-<td>Total size of all files in bytes across all file collections</td>
-</tr>
-<tr>
 <td><a href="unit/">unit</a></td>
 <td>The unit of measurement for the variable, preferably using QUDT units (http:/...</td>
 </tr>
 <tr>
 <td><a href="update_details/">update_details</a></td>
-<td>Free-text description of planned update types (e</td>
+<td>Details on update plans, responsible parties, and communication methods</td>
 </tr>
 <tr>
 <td><a href="updates/">updates</a></td>
-<td>Plans for future updates or versioning of the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="url/">url</a></td>
-<td>URL where the software can be found (e</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="usage_notes/">usage_notes</a></td>
-<td>A note or caveat about using the dataset for its intended purposes</td>
+<td>Notes or caveats about using the dataset for intended purposes</td>
 </tr>
 <tr>
 <td><a href="use_category/">use_category</a></td>
-<td>One or more categories of intended use (e</td>
+<td>Category of intended use (e</td>
 </tr>
 <tr>
 <td><a href="use_repository/">use_repository</a></td>
-<td>Repositories or registries tracking how the dataset has been used</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="used_software/">used_software</a></td>
@@ -1865,47 +1793,55 @@
 </tr>
 <tr>
 <td><a href="variables/">variables</a></td>
-<td>List of metadata records describing individual variables, fields, or columns ...</td>
+<td>Metadata describing individual variables, fields, or columns in the dataset</td>
 </tr>
 <tr>
 <td><a href="version/">version</a></td>
-<td>The version identifier of the resource (e</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="version_access/">version_access</a></td>
-<td>Information about access to different versions of the dataset</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="version_details/">version_details</a></td>
-<td>Free-text description of version support policies, how long older versions wi...</td>
+<td>Details on version support policies and obsolescence communication</td>
 </tr>
 <tr>
 <td><a href="versions_available/">versions_available</a></td>
 <td>List of available versions with metadata</td>
 </tr>
 <tr>
+<td><a href="vulnerable_groups_included/">vulnerable_groups_included</a></td>
+<td>Are any vulnerable populations included (e</td>
+</tr>
+<tr>
+<td><a href="vulnerable_populations/">vulnerable_populations</a></td>
+<td>Information about protections for vulnerable populations (e</td>
+</tr>
+<tr>
 <td><a href="warnings/">warnings</a></td>
-<td>One or more specific content warnings describing potentially offensive, insul...</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="was_derived_from/">was_derived_from</a></td>
-<td>A resource from which this resource was derived, in whole or in part</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="was_directly_observed/">was_directly_observed</a></td>
-<td>True if the data was directly observed by a researcher or instrument; false i...</td>
+<td>Whether the data was directly observed</td>
 </tr>
 <tr>
 <td><a href="was_inferred_derived/">was_inferred_derived</a></td>
-<td>True if the data was computationally inferred or derived from other data (e</td>
+<td>Whether the data was inferred or derived from other data</td>
 </tr>
 <tr>
 <td><a href="was_reported_by_subjects/">was_reported_by_subjects</a></td>
-<td>True if the data was self-reported directly by the subjects themselves (e</td>
+<td>Whether the data was reported directly by the subjects themselves</td>
 </tr>
 <tr>
 <td><a href="was_validated_verified/">was_validated_verified</a></td>
-<td>True if the data underwent a validation or verification process (e</td>
+<td>Whether the data was validated or verified in any way</td>
 </tr>
 <tr>
 <td><a href="why_missing/">why_missing</a></td>
@@ -1913,7 +1849,7 @@
 </tr>
 <tr>
 <td><a href="why_not_representative/">why_not_representative</a></td>
-<td>One or more explanations of why the sample is not representative of the large...</td>
+<td>Explanation of why the sample is not representative, if applicable</td>
 </tr>
 <tr>
 <td><a href="withdrawal_mechanism/">withdrawal_mechanism</a></td>
@@ -1936,7 +1872,7 @@
 </tr>
 <tr>
 <td><a href="Boolean/">Boolean</a></td>
-<td>Three-valued boolean logic supporting true, false, and unknown states</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="ComplianceStatusEnum/">ComplianceStatusEnum</a></td>
@@ -1944,7 +1880,7 @@
 </tr>
 <tr>
 <td><a href="CompressionEnum/">CompressionEnum</a></td>
-<td>Compression algorithms and formats for file compression</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="ConfidentialityLevelEnum/">ConfidentialityLevelEnum</a></td>
@@ -1968,19 +1904,11 @@
 </tr>
 <tr>
 <td><a href="EncodingEnum/">EncodingEnum</a></td>
-<td>Character encoding schemes for text representation in different languages and...</td>
-</tr>
-<tr>
-<td><a href="FileCollectionTypeEnum/">FileCollectionTypeEnum</a></td>
-<td>Types of file collections within datasets</td>
-</tr>
-<tr>
-<td><a href="FileTypeEnum/">FileTypeEnum</a></td>
-<td>Types of individual files within datasets</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="FormatEnum/">FormatEnum</a></td>
-<td>Common file format extensions for data files and documents</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="LimitationTypeEnum/">LimitationTypeEnum</a></td>
@@ -1988,7 +1916,7 @@
 </tr>
 <tr>
 <td><a href="MediaTypeEnum/">MediaTypeEnum</a></td>
-<td>MIME media types (Internet Media Types) for file content identification</td>
+<td></td>
 </tr>
 <tr>
 <td><a href="VariableTypeEnum/">VariableTypeEnum</a></td>
@@ -2109,7 +2037,7 @@
 <td>The questions in this section relate to how the dataset is governed: how it i...</td>
 </tr>
 <tr>
-<td><a href="Distribution/">Distribution</a></td>
+<td><a href="Distribution.md">Distribution</a></td>
 <td>The questions in this section pertain to dataset distribution</td>
 </tr>
 <tr>

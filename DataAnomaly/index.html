@@ -276,7 +276,7 @@
 <tr>
 <td><a href="../anomaly_details/">anomaly_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Free-text description of errors, noise sources, or redundancies in the datase...</td>
+<td>Details on errors, noise sources, or redundancies in the dataset</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -367,19 +367,12 @@ is_a: DatasetProperty
 attributes:
   anomaly_details:
     name: anomaly_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 15% of CGM readings missing due to device malfunction
-    description: 'Free-text description of errors, noise sources, or redundancies
-      in the dataset, including their known causes and estimated prevalence.
+    description: 'Details on errors, noise sources, or redundancies in the dataset.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - dcterms:description
     rank: 1000
-    slot_uri: d4d:anomalyDetails
+    slot_uri: dcterms:description
     domain_of:
     - DataAnomaly
     range: string
@@ -398,19 +391,12 @@ is_a: DatasetProperty
 attributes:
   anomaly_details:
     name: anomaly_details
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 15% of CGM readings missing due to device malfunction
-    description: 'Free-text description of errors, noise sources, or redundancies
-      in the dataset, including their known causes and estimated prevalence.
+    description: 'Details on errors, noise sources, or redundancies in the dataset.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - dcterms:description
     rank: 1000
-    slot_uri: d4d:anomalyDetails
+    slot_uri: dcterms:description
     alias: anomaly_details
     owner: DataAnomaly
     domain_of:
@@ -419,10 +405,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -460,7 +442,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: DataAnomaly
     domain_of:

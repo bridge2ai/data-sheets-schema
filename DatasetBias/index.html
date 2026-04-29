@@ -309,7 +309,7 @@
 <tr>
 <td><a href="../affected_subsets/">affected_subsets</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>One or more specific subsets or features of the dataset affected by this bias...</td>
+<td>Specific subsets or features of the dataset affected by this bias</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -414,16 +414,11 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:biasType
     domain_of:
     - DatasetBias
     range: BiasTypeEnum
   bias_description:
     name: bias_description
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Sampling favored urban academic medical centers
     description: 'Detailed description of how this bias manifests in the dataset,
       including affected populations, features, or outcomes.
 
@@ -436,33 +431,21 @@ attributes:
     range: string
   mitigation_strategy:
     name: mitigation_strategy
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Oversampling of underrepresented groups during model training
     description: 'Steps taken or recommended to mitigate this bias.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:mitigation_strategy
     domain_of:
     - DatasetBias
     range: string
   affected_subsets:
     name: affected_subsets
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Training split underrepresents Asian participants
-    description: 'One or more specific subsets or features of the dataset affected
-      by this bias (e.g., "female participants", "non-English text", "images taken
-      at night").
+    description: 'Specific subsets or features of the dataset affected by this bias.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:affectedSubsets
     domain_of:
     - DatasetBias
     range: string
@@ -491,7 +474,6 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:biasType
     alias: bias_type
     owner: DatasetBias
     domain_of:
@@ -499,10 +481,6 @@ attributes:
     range: BiasTypeEnum
   bias_description:
     name: bias_description
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Sampling favored urban academic medical centers
     description: 'Detailed description of how this bias manifests in the dataset,
       including affected populations, features, or outcomes.
 
@@ -517,16 +495,11 @@ attributes:
     range: string
   mitigation_strategy:
     name: mitigation_strategy
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Oversampling of underrepresented groups during model training
     description: 'Steps taken or recommended to mitigate this bias.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:mitigation_strategy
     alias: mitigation_strategy
     owner: DatasetBias
     domain_of:
@@ -534,18 +507,11 @@ attributes:
     range: string
   affected_subsets:
     name: affected_subsets
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: Training split underrepresents Asian participants
-    description: 'One or more specific subsets or features of the dataset affected
-      by this bias (e.g., "female participants", "non-English text", "images taken
-      at night").
+    description: 'Specific subsets or features of the dataset affected by this bias.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:affectedSubsets
     alias: affected_subsets
     owner: DatasetBias
     domain_of:
@@ -554,10 +520,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -595,7 +557,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: DatasetBias
     domain_of:

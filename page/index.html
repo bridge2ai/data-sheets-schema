@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -391,7 +384,6 @@
 
 
 <h1 id="slot-page">Slot: page</h1>
-<p><em>A landing page or web page providing access to or information about the resource.</em></p>
 <p>URI: <a href="http://www.w3.org/ns/dcat#landingPage">dcat:landingPage</a>
 Alias: page</p>
 <!-- no inheritance hierarchy -->
@@ -407,8 +399,13 @@ Alias: page</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -421,21 +418,6 @@ Alias: page</p>
 <td>Grouping for datasets and data files</td>
 <td>no</td>
 </tr>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>no</td>
-</tr>
 </tbody>
 </table>
 <h2 id="properties">Properties</h2>
@@ -443,21 +425,6 @@ Alias: page</p>
 <li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>https://fairhub.io/datasets/2</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -485,12 +452,6 @@ Alias: page</p>
 <details>
 
 <pre><code class="language-yaml">name: page
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: https://fairhub.io/datasets/2
-description: A landing page or web page providing access to or information about the
-  resource.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: dcat:landingPage

@@ -286,13 +286,13 @@
 <tr>
 <td><a href="../identification/">identification</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>How subpopulations are identified and defined (e</td>
+<td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../distribution/">distribution</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>The distribution of instances across identified subpopulations, including cou...</td>
+<td></td>
 <td>direct</td>
 </tr>
 <tr>
@@ -387,36 +387,23 @@ attributes:
     description: Indicates whether any subpopulations are explicitly identified.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:subpopulationElementsPresent
     domain_of:
     - Subpopulation
     range: boolean
   identification:
     name: identification
-    description: How subpopulations are identified and defined (e.g., by age groups,
-      gender, geographic region, disease status, or other demographic/clinical characteristics).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - dcterms:description
     rank: 1000
-    slot_uri: d4d:subpopulationIdentification
+    slot_uri: dcterms:description
     domain_of:
     - Subpopulation
     range: string
     multivalued: true
   distribution:
     name: distribution
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 'Hispanic participants: 1,023 (25.6% of total)'
-    description: The distribution of instances across identified subpopulations, including
-      counts, percentages, or proportions for each subgroup.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - dcterms:description
     rank: 1000
-    slot_uri: d4d:subpopulationDistribution
+    slot_uri: dcterms:description
     domain_of:
     - Subpopulation
     range: string
@@ -439,7 +426,6 @@ attributes:
     description: Indicates whether any subpopulations are explicitly identified.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: d4d:subpopulationElementsPresent
     alias: subpopulation_elements_present
     owner: Subpopulation
     domain_of:
@@ -447,13 +433,9 @@ attributes:
     range: boolean
   identification:
     name: identification
-    description: How subpopulations are identified and defined (e.g., by age groups,
-      gender, geographic region, disease status, or other demographic/clinical characteristics).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - dcterms:description
     rank: 1000
-    slot_uri: d4d:subpopulationIdentification
+    slot_uri: dcterms:description
     alias: identification
     owner: Subpopulation
     domain_of:
@@ -462,17 +444,9 @@ attributes:
     multivalued: true
   distribution:
     name: distribution
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: 'Hispanic participants: 1,023 (25.6% of total)'
-    description: The distribution of instances across identified subpopulations, including
-      counts, percentages, or proportions for each subgroup.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    broad_mappings:
-    - dcterms:description
     rank: 1000
-    slot_uri: d4d:subpopulationDistribution
+    slot_uri: dcterms:description
     alias: distribution
     owner: Subpopulation
     domain_of:
@@ -481,10 +455,6 @@ attributes:
     multivalued: true
   id:
     name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -522,7 +492,6 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: Subpopulation
     domain_of:
