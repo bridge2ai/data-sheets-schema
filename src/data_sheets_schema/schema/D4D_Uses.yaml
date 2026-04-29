@@ -5,8 +5,8 @@ description: >
   Subschema for data uses–related information in Datasheets for Datasets.
   The questions in this section are intended to encourage dataset creators
   to reflect on the tasks for which the dataset should (and should not) be used.
-
-
+annotations:
+  "d4d:section_question": "Has the dataset been used for any tasks already?"
 license: MIT
 see_also:
   - "https://bridge2ai.github.io/data-sheets-schema"

@@ -6,8 +6,8 @@ description: >
   This module covers classes, attributes, and properties specific to datasets
   involving human participants, focusing on ethical considerations, consent,
   privacy protections, and regulatory compliance unique to human subjects research.
-
-
+annotations:
+  "d4d:section_question": "Does the dataset relate to people?"
 license: MIT
 see_also:
   - "https://bridge2ai.github.io/data-sheets-schema"

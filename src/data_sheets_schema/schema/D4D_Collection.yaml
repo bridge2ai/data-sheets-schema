@@ -6,6 +6,8 @@ description: >
   who collected it, over what timeframe, whether consent was gathered, 
   notifications were provided, etc. Based on the “Collection” subset 
   from the full Data Sheets for Datasets (D4D) schema.
+annotations:
+  "d4d:section_question": "How was the data associated with each instance acquired?"
 license: MIT
 
 

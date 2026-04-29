@@ -5,8 +5,8 @@ description: >
   Subschema for maintenance-related information in Datasheets for Datasets.
   The questions in this section are intended to encourage dataset creators to
   plan for dataset maintenance and communicate this plan to dataset consumers.
-
-
+annotations:
+  "d4d:section_question": "Who will be supporting, hosting, or maintaining the dataset?"
 license: MIT
 see_also:
   - "https://bridge2ai.github.io/data-sheets-schema"

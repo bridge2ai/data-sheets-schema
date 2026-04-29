@@ -6,8 +6,8 @@ description: >
   The questions in this section pertain to how the dataset is distributed,
   including whether it will be shared with third parties, under what license,
   and any regulatory restrictions.
-
-
+annotations:
+  "d4d:section_question": "Will the dataset be distributed to third parties outside of the entity on behalf of which it was created?"
 license: MIT
 see_also:
   - "https://bridge2ai.github.io/data-sheets-schema"
