@@ -54,7 +54,7 @@ class HumanReadableRenderer:
             module_yaml = os.path.join(schema_dir, f"{meta['module']}.yaml")
             description = FALLBACKS[section]
             try:
-                with open(module_yaml, 'r') as f:
+                with open(module_yaml, 'r', encoding='utf-8') as f:
                     mod = yaml.safe_load(f)
                 ann = (mod or {}).get('annotations') or {}
                 # Annotation may parse as plain string or as {tag:..., value:...}
