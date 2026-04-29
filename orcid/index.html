@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -385,7 +392,7 @@
 
 <h1 id="slot-orcid">Slot: orcid</h1>
 <p><em>ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4). Use this for stable cross-dataset identification.</em></p>
-<p>URI: <a href="http://schema.org/identifier">schema:identifier</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/orcidIdentifier">d4d:orcidIdentifier</a>
 Alias: orcid</p>
 <!-- no inheritance hierarchy -->
 
@@ -416,6 +423,21 @@ Alias: orcid</p>
 </li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>0000-0001-2345-6789</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -431,14 +453,14 @@ Alias: orcid</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>schema:identifier</td>
+<td>d4d:orcidIdentifier</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:orcid</td>
 </tr>
 <tr>
-<td>exact</td>
+<td>broad</td>
 <td>schema:identifier</td>
 </tr>
 </tbody>
@@ -447,14 +469,18 @@ Alias: orcid</p>
 <details>
 
 <pre><code class="language-yaml">name: orcid
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: 0000-0001-2345-6789
 description: 'ORCID (Open Researcher and Contributor ID) - a persistent digital identifier
   for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4). Use this
   for stable cross-dataset identification.'
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
+broad_mappings:
 - schema:identifier
 rank: 1000
-slot_uri: schema:identifier
+slot_uri: d4d:orcidIdentifier
 alias: orcid
 owner: Person
 domain_of:

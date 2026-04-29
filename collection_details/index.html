@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -384,7 +391,7 @@
 
 
 <h1 id="slot-collection_details">Slot: collection_details</h1>
-<p><em>Details on direct vs. indirect collection methods and sources.</em></p>
+<p><em>Free-text description of whether data was collected directly from individuals or obtained via third parties or other indirect sources, and what those sources are.</em></p>
 <p>__</p>
 <p>URI: <a href="http://purl.org/dc/terms/description">dcterms:description</a>
 Alias: collection_details</p>
@@ -417,6 +424,21 @@ Alias: collection_details</p>
 </li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>Collected directly from consented participants at clinical sites</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -444,7 +466,13 @@ Alias: collection_details</p>
 <details>
 
 <pre><code class="language-yaml">name: collection_details
-description: 'Details on direct vs. indirect collection methods and sources.
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: Collected directly from consented participants at clinical sites
+description: 'Free-text description of whether data was collected directly from individuals
+  or obtained via third parties or other indirect sources, and what those sources
+  are.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema

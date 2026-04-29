@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -384,7 +391,7 @@
 
 
 <h1 id="slot-release_dates">Slot: release_dates</h1>
-<p><em>Dates or timeframe for dataset release. Could be a one-time release date or multiple scheduled releases.</em></p>
+<p><em>One or more dates or timeframes for dataset release, in ISO 8601 format (e.g., "2024-03-15") or as a descriptive string (e.g., "Q2 2024"). Use multiple values for staged or scheduled releases.</em></p>
 <p>__</p>
 <p>URI: <a href="http://purl.org/dc/terms/available">dcterms:available</a>
 Alias: release_dates</p>
@@ -417,6 +424,21 @@ Alias: release_dates</p>
 </li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>2024-11-15</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -444,8 +466,13 @@ Alias: release_dates</p>
 <details>
 
 <pre><code class="language-yaml">name: release_dates
-description: 'Dates or timeframe for dataset release. Could be a one-time release
-  date or multiple scheduled releases.
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: '2024-11-15'
+description: 'One or more dates or timeframes for dataset release, in ISO 8601 format
+  (e.g., &quot;2024-03-15&quot;) or as a descriptive string (e.g., &quot;Q2 2024&quot;). Use multiple
+  values for staged or scheduled releases.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema

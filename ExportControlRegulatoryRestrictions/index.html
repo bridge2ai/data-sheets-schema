@@ -311,7 +311,7 @@
 <tr>
 <td><a href="../regulatory_restrictions/">regulatory_restrictions</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Export or regulatory restrictions on the dataset</td>
+<td>One or more export controls or regulatory restrictions applicable to the data...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -430,7 +430,12 @@ is_a: DatasetProperty
 attributes:
   regulatory_restrictions:
     name: regulatory_restrictions
-    description: Export or regulatory restrictions on the dataset.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: HIPAA compliant; subject to 45 CFR Part 46
+    description: One or more export controls or regulatory restrictions applicable
+      to the dataset (e.g., HIPAA, ITAR, GDPR).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     broad_mappings:
     - DUO:0000021
@@ -444,10 +449,15 @@ attributes:
     multivalued: true
   hipaa_compliant:
     name: hipaa_compliant
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: compliant
     description: Indicates compliance with the Health Insurance Portability and Accountability
       Act (HIPAA). HIPAA applies to protected health information in the United States.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     rank: 1000
+    slot_uri: d4d:hipaaCompliant
     domain_of:
     - ExportControlRegulatoryRestrictions
     range: ComplianceStatusEnum
@@ -457,6 +467,7 @@ attributes:
       (e.g., CCPA, PIPEDA, industry-specific regulations).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     rank: 1000
+    slot_uri: d4d:otherCompliance
     domain_of:
     - ExportControlRegulatoryRestrictions
     range: string
@@ -467,6 +478,7 @@ attributes:
       access restrictions and sensitivity.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     rank: 1000
+    slot_uri: d4d:confidentialityLevel
     domain_of:
     - ExportControlRegulatoryRestrictions
     range: ConfidentialityLevelEnum
@@ -475,10 +487,10 @@ attributes:
     description: Contact person for data governance committee. This person can answer
       questions about data governance policies, access procedures, and oversight mechanisms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
-    exact_mappings:
+    broad_mappings:
     - schema:contactPoint
     rank: 1000
-    slot_uri: schema:contactPoint
+    slot_uri: d4d:governanceContactPoint
     domain_of:
     - ExportControlRegulatoryRestrictions
     range: Person
@@ -500,7 +512,12 @@ is_a: DatasetProperty
 attributes:
   regulatory_restrictions:
     name: regulatory_restrictions
-    description: Export or regulatory restrictions on the dataset.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: HIPAA compliant; subject to 45 CFR Part 46
+    description: One or more export controls or regulatory restrictions applicable
+      to the dataset (e.g., HIPAA, ITAR, GDPR).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     broad_mappings:
     - DUO:0000021
@@ -516,10 +533,15 @@ attributes:
     multivalued: true
   hipaa_compliant:
     name: hipaa_compliant
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: compliant
     description: Indicates compliance with the Health Insurance Portability and Accountability
       Act (HIPAA). HIPAA applies to protected health information in the United States.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     rank: 1000
+    slot_uri: d4d:hipaaCompliant
     alias: hipaa_compliant
     owner: ExportControlRegulatoryRestrictions
     domain_of:
@@ -531,6 +553,7 @@ attributes:
       (e.g., CCPA, PIPEDA, industry-specific regulations).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     rank: 1000
+    slot_uri: d4d:otherCompliance
     alias: other_compliance
     owner: ExportControlRegulatoryRestrictions
     domain_of:
@@ -543,6 +566,7 @@ attributes:
       access restrictions and sensitivity.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     rank: 1000
+    slot_uri: d4d:confidentialityLevel
     alias: confidentiality_level
     owner: ExportControlRegulatoryRestrictions
     domain_of:
@@ -553,10 +577,10 @@ attributes:
     description: Contact person for data governance committee. This person can answer
       questions about data governance policies, access procedures, and oversight mechanisms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
-    exact_mappings:
+    broad_mappings:
     - schema:contactPoint
     rank: 1000
-    slot_uri: schema:contactPoint
+    slot_uri: d4d:governanceContactPoint
     alias: governance_committee_contact
     owner: ExportControlRegulatoryRestrictions
     domain_of:
@@ -564,6 +588,10 @@ attributes:
     range: Person
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -601,6 +629,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: ExportControlRegulatoryRestrictions
     domain_of:

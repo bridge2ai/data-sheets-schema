@@ -172,6 +172,11 @@
   </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="#usages">
+    Usages
+  </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#identifier-and-mapping-information">
     Identifier and Mapping Information
   </a>
@@ -279,7 +284,7 @@
 <tr>
 <td><a href="../collection_details/">collection_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on direct vs</td>
+<td>Free-text description of whether data was collected directly from individuals...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -305,6 +310,31 @@
 <td>* <br/> <a href="../Software/">Software</a></td>
 <td>What software was used as part of this dataset property?</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="usages">Usages</h2>
+<table>
+<thead>
+<tr>
+<th>used by</th>
+<th>used in</th>
+<th>type</th>
+<th>used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../Dataset/">Dataset</a></td>
+<td><a href="../direct_collection/">direct_collection</a></td>
+<td>range</td>
+<td><a href="./">DirectCollection</a></td>
+</tr>
+<tr>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td><a href="../direct_collection/">direct_collection</a></td>
+<td>range</td>
+<td><a href="./">DirectCollection</a></td>
 </tr>
 </tbody>
 </table>
@@ -346,15 +376,22 @@ is_a: DatasetProperty
 attributes:
   is_direct:
     name: is_direct
-    description: Whether collection was direct from individuals
+    description: Whether collection was direct from individuals.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
+    slot_uri: d4d:isDirect
     domain_of:
     - DirectCollection
     range: boolean
   collection_details:
     name: collection_details
-    description: 'Details on direct vs. indirect collection methods and sources.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Collected directly from consented participants at clinical sites
+    description: 'Free-text description of whether data was collected directly from
+      individuals or obtained via third parties or other indirect sources, and what
+      those sources are.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
@@ -379,9 +416,10 @@ is_a: DatasetProperty
 attributes:
   is_direct:
     name: is_direct
-    description: Whether collection was direct from individuals
+    description: Whether collection was direct from individuals.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
+    slot_uri: d4d:isDirect
     alias: is_direct
     owner: DirectCollection
     domain_of:
@@ -389,7 +427,13 @@ attributes:
     range: boolean
   collection_details:
     name: collection_details
-    description: 'Details on direct vs. indirect collection methods and sources.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Collected directly from consented participants at clinical sites
+    description: 'Free-text description of whether data was collected directly from
+      individuals or obtained via third parties or other indirect sources, and what
+      those sources are.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
@@ -403,6 +447,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -440,6 +488,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: DirectCollection
     domain_of:

@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -384,7 +391,7 @@
 
 
 <h1 id="slot-preprocessing_details">Slot: preprocessing_details</h1>
-<p><em>Details on preprocessing steps applied to the data.</em></p>
+<p><em>Free-text description of preprocessing steps applied to the data, including tools used, parameters, order of operations, and rationale for each step.</em></p>
 <p>__</p>
 <p>URI: <a href="http://purl.org/dc/terms/description">dcterms:description</a>
 Alias: preprocessing_details</p>
@@ -417,6 +424,21 @@ Alias: preprocessing_details</p>
 </li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>DICOM to NIfTI conversion using dcm2niix v1.0.20211006</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -444,7 +466,12 @@ Alias: preprocessing_details</p>
 <details>
 
 <pre><code class="language-yaml">name: preprocessing_details
-description: 'Details on preprocessing steps applied to the data.
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: DICOM to NIfTI conversion using dcm2niix v1.0.20211006
+description: 'Free-text description of preprocessing steps applied to the data, including
+  tools used, parameters, order of operations, and rationale for each step.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema

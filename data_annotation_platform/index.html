@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -384,8 +391,8 @@
 
 
 <h1 id="slot-data_annotation_platform">Slot: data_annotation_platform</h1>
-<p><em>Platform or tool used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).</em></p>
-<p>URI: <a href="http://schema.org/instrument">schema:instrument</a>
+<p><em>One or more platforms or tools used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).</em></p>
+<p>URI: <a href="http://mlcommons.org/croissant/RAI/dataAnnotationPlatform">rai:dataAnnotationPlatform</a>
 Alias: data_annotation_platform</p>
 <!-- no inheritance hierarchy -->
 
@@ -408,9 +415,29 @@ Alias: data_annotation_platform</p>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>Range: <a href="../String/">String</a></li>
+<li>
+<p>Range: <a href="../String/">String</a></p>
+</li>
+<li>
+<p>Multivalued: True</p>
+</li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>Label Studio 1.7.3</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -426,15 +453,11 @@ Alias: data_annotation_platform</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>schema:instrument</td>
+<td>rai:dataAnnotationPlatform</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:data_annotation_platform</td>
-</tr>
-<tr>
-<td>exact</td>
-<td>rai:dataAnnotationPlatform</td>
 </tr>
 </tbody>
 </table>
@@ -442,18 +465,21 @@ Alias: data_annotation_platform</p>
 <details>
 
 <pre><code class="language-yaml">name: data_annotation_platform
-description: Platform or tool used for annotation (e.g., Label Studio, Prodigy, Amazon
-  Mechanical Turk, custom annotation tool).
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: Label Studio 1.7.3
+description: One or more platforms or tools used for annotation (e.g., Label Studio,
+  Prodigy, Amazon Mechanical Turk, custom annotation tool).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
-- rai:dataAnnotationPlatform
 rank: 1000
-slot_uri: schema:instrument
+slot_uri: rai:dataAnnotationPlatform
 alias: data_annotation_platform
 owner: LabelingStrategy
 domain_of:
 - LabelingStrategy
 range: string
+multivalued: true
 
 </code></pre>
 

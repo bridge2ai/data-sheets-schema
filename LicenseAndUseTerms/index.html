@@ -298,7 +298,7 @@
 <tr>
 <td><a href="../license_terms/">license_terms</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Description of the dataset's license and terms of use (including links, costs...</td>
+<td>Description of the dataset's license and terms of use, including links, costs...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -403,23 +403,33 @@ is_a: DatasetProperty
 attributes:
   license_terms:
     name: license_terms
-    description: 'Description of the dataset''s license and terms of use (including
-      links, costs, or usage constraints).
-
-      '
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: CC BY-NC 4.0 - Attribution-NonCommercial required
+    description: Description of the dataset's license and terms of use, including
+      links, costs, or usage constraints (e.g., 'CC BY 4.0', 'Apache 2.0', 'MIT',
+      'CC BY-NC-SA 4.0', 'proprietary - contact data@example.org for access').
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    broad_mappings:
+    - dcterms:license
+    - dcterms:rights
     rank: 1000
-    slot_uri: dcterms:license
+    slot_uri: d4d:licenseDescription
     domain_of:
     - LicenseAndUseTerms
     range: string
     multivalued: true
   data_use_permission:
     name: data_use_permission
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: health_medical_biomedical_research
     description: Structured data use permissions using the Data Use Ontology (DUO).
       Specifies permitted uses (e.g., general research, health/medical research, disease-specific
       research) and restrictions (e.g., non-commercial use, ethics approval required,
-      collaboration required). See https://github.com/EBISPOT/DUO
+      collaboration required). See https://github.com/EBISPOT/DUO.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     exact_mappings:
     - DUO:0000001
@@ -435,9 +445,9 @@ attributes:
       information including name, email, affiliation, and optional ORCID. This person
       can answer questions about licensing terms, usage restrictions, fees, and permissions.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
-    exact_mappings:
+    broad_mappings:
     - schema:contactPoint
-    slot_uri: schema:contactPoint
+    slot_uri: d4d:licenseContactPoint
     domain_of:
     - EthicalReview
     - LicenseAndUseTerms
@@ -458,13 +468,19 @@ is_a: DatasetProperty
 attributes:
   license_terms:
     name: license_terms
-    description: 'Description of the dataset''s license and terms of use (including
-      links, costs, or usage constraints).
-
-      '
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: CC BY-NC 4.0 - Attribution-NonCommercial required
+    description: Description of the dataset's license and terms of use, including
+      links, costs, or usage constraints (e.g., 'CC BY 4.0', 'Apache 2.0', 'MIT',
+      'CC BY-NC-SA 4.0', 'proprietary - contact data@example.org for access').
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    broad_mappings:
+    - dcterms:license
+    - dcterms:rights
     rank: 1000
-    slot_uri: dcterms:license
+    slot_uri: d4d:licenseDescription
     alias: license_terms
     owner: LicenseAndUseTerms
     domain_of:
@@ -473,10 +489,14 @@ attributes:
     multivalued: true
   data_use_permission:
     name: data_use_permission
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: health_medical_biomedical_research
     description: Structured data use permissions using the Data Use Ontology (DUO).
       Specifies permitted uses (e.g., general research, health/medical research, disease-specific
       research) and restrictions (e.g., non-commercial use, ethics approval required,
-      collaboration required). See https://github.com/EBISPOT/DUO
+      collaboration required). See https://github.com/EBISPOT/DUO.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     exact_mappings:
     - DUO:0000001
@@ -494,9 +514,9 @@ attributes:
       information including name, email, affiliation, and optional ORCID. This person
       can answer questions about licensing terms, usage restrictions, fees, and permissions.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
-    exact_mappings:
+    broad_mappings:
     - schema:contactPoint
-    slot_uri: schema:contactPoint
+    slot_uri: d4d:licenseContactPoint
     alias: contact_person
     owner: LicenseAndUseTerms
     domain_of:
@@ -505,6 +525,10 @@ attributes:
     range: Person
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -542,6 +566,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: LicenseAndUseTerms
     domain_of:

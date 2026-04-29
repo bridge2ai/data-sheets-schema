@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -384,6 +391,7 @@
 
 
 <h1 id="slot-path">Slot: path</h1>
+<p><em>The file path or URL where the content is located.</em></p>
 <p>URI: <a href="http://schema.org/contentUrl">schema:contentUrl</a>
 Alias: path</p>
 <!-- no inheritance hierarchy -->
@@ -399,13 +407,13 @@ Alias: path</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
+<td><a href="../FileCollection/">FileCollection</a></td>
+<td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td>yes</td>
 </tr>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../File/">File</a></td>
+<td>A single file within a dataset or file collection</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -415,6 +423,21 @@ Alias: path</p>
 <li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>data/ai_readi/participants.csv</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -442,12 +465,18 @@ Alias: path</p>
 <details>
 
 <pre><code class="language-yaml">name: path
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: data/ai_readi/participants.csv
+description: The file path or URL where the content is located.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: schema:contentUrl
 alias: path
 domain_of:
-- Dataset
+- File
+- FileCollection
 range: string
 
 </code></pre>

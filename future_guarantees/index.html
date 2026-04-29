@@ -386,7 +386,7 @@
 <h1 id="slot-future_guarantees">Slot: future_guarantees</h1>
 <p><em>Explanation of any commitments that external resources will remain available and stable over time.</em></p>
 <p>__</p>
-<p>URI: <a href="http://purl.org/dc/terms/description">dcterms:description</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/availabilityGuarantee">d4d:availabilityGuarantee</a>
 Alias: future_guarantees</p>
 <!-- no inheritance hierarchy -->
 
@@ -432,11 +432,15 @@ Alias: future_guarantees</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:description</td>
+<td>d4d:availabilityGuarantee</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:future_guarantees</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>dcterms:description</td>
 </tr>
 </tbody>
 </table>
@@ -449,8 +453,10 @@ description: 'Explanation of any commitments that external resources will remain
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- dcterms:description
 rank: 1000
-slot_uri: dcterms:description
+slot_uri: d4d:availabilityGuarantee
 alias: future_guarantees
 owner: ExternalResource
 domain_of:

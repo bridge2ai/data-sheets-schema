@@ -284,7 +284,7 @@
 <tr>
 <td><a href="../raw_data_details/">raw_data_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on raw data availability and access procedures</td>
+<td>Free-text description of raw data availability, access procedures, and any co...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -376,15 +376,21 @@ is_a: DatasetProperty
 attributes:
   access_url:
     name: access_url
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/raw/raw-data.zip
     description: URL or access point for the raw data.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
+    slot_uri: d4d:rawDataAccessURL
     domain_of:
     - RawData
     range: uri
   raw_data_details:
     name: raw_data_details
-    description: 'Details on raw data availability and access procedures.
+    description: 'Free-text description of raw data availability, access procedures,
+      and any conditions or restrictions on accessing the raw data.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
@@ -409,9 +415,14 @@ is_a: DatasetProperty
 attributes:
   access_url:
     name: access_url
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/raw/raw-data.zip
     description: URL or access point for the raw data.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     rank: 1000
+    slot_uri: d4d:rawDataAccessURL
     alias: access_url
     owner: RawData
     domain_of:
@@ -419,7 +430,8 @@ attributes:
     range: uri
   raw_data_details:
     name: raw_data_details
-    description: 'Details on raw data availability and access procedures.
+    description: 'Free-text description of raw data availability, access procedures,
+      and any conditions or restrictions on accessing the raw data.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
@@ -433,6 +445,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -470,6 +486,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: RawData
     domain_of:

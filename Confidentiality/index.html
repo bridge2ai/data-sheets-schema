@@ -284,7 +284,7 @@
 <tr>
 <td><a href="../confidentiality_details/">confidentiality_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on confidential data elements and handling procedures</td>
+<td>Free-text description of which data elements are confidential, the basis for ...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -379,12 +379,19 @@ attributes:
     description: Indicates whether any confidential data elements are present.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: d4d:confidential_elements_present
     domain_of:
     - Confidentiality
     range: boolean
   confidentiality_details:
     name: confidentiality_details
-    description: 'Details on confidential data elements and handling procedures.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: ZIP codes suppressed; race/ethnicity available only in aggregate
+    description: 'Free-text description of which data elements are confidential, the
+      basis for confidentiality (e.g., legal privilege, patient data), and how they
+      are handled or restricted.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -412,6 +419,7 @@ attributes:
     description: Indicates whether any confidential data elements are present.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: d4d:confidential_elements_present
     alias: confidential_elements_present
     owner: Confidentiality
     domain_of:
@@ -419,7 +427,13 @@ attributes:
     range: boolean
   confidentiality_details:
     name: confidentiality_details
-    description: 'Details on confidential data elements and handling procedures.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: ZIP codes suppressed; race/ethnicity available only in aggregate
+    description: 'Free-text description of which data elements are confidential, the
+      basis for confidentiality (e.g., legal privilege, patient data), and how they
+      are handled or restricted.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -433,6 +447,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -470,6 +488,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: Confidentiality
     domain_of:

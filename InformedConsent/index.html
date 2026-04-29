@@ -402,29 +402,40 @@ attributes:
     description: Was informed consent obtained from all participants?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:consentObtained
     domain_of:
     - InformedConsent
     range: boolean
   consent_type:
     name: consent_type
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Written informed consent with optional consent for future use of biospecimens
     description: 'What type of consent was obtained (e.g., written, verbal, electronic,
       implied through participation)?
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:consentType
     domain_of:
     - InformedConsent
     range: string
     multivalued: true
   consent_documentation:
     name: consent_documentation
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Separate consent forms for main study, biorepository, and genetic analysis
     description: 'How is consent documented? Include references to consent forms or
       procedures used.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:consentDocumentation
     domain_of:
     - InformedConsent
     range: string
@@ -437,6 +448,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:withdrawalMechanism
     domain_of:
     - InformedConsent
     range: string
@@ -449,6 +461,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:consentScope
     domain_of:
     - InformedConsent
     range: string
@@ -470,6 +483,7 @@ attributes:
     description: Was informed consent obtained from all participants?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:consentObtained
     alias: consent_obtained
     owner: InformedConsent
     domain_of:
@@ -477,12 +491,17 @@ attributes:
     range: boolean
   consent_type:
     name: consent_type
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Written informed consent with optional consent for future use of biospecimens
     description: 'What type of consent was obtained (e.g., written, verbal, electronic,
       implied through participation)?
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:consentType
     alias: consent_type
     owner: InformedConsent
     domain_of:
@@ -491,12 +510,17 @@ attributes:
     multivalued: true
   consent_documentation:
     name: consent_documentation
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Separate consent forms for main study, biorepository, and genetic analysis
     description: 'How is consent documented? Include references to consent forms or
       procedures used.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:consentDocumentation
     alias: consent_documentation
     owner: InformedConsent
     domain_of:
@@ -511,6 +535,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:withdrawalMechanism
     alias: withdrawal_mechanism
     owner: InformedConsent
     domain_of:
@@ -525,6 +550,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:consentScope
     alias: consent_scope
     owner: InformedConsent
     domain_of:
@@ -533,6 +559,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -570,6 +600,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: InformedConsent
     domain_of:

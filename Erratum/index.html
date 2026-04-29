@@ -284,7 +284,7 @@
 <tr>
 <td><a href="../erratum_details/">erratum_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on any errata or corrections to the dataset</td>
+<td>Free-text description of the error, its scope, the affected data or records, ...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -375,15 +375,25 @@ is_a: DatasetProperty
 attributes:
   erratum_url:
     name: erratum_url
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/errata/2024-01-15
     description: URL or access point for the erratum.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
+    slot_uri: d4d:erratumURL
     domain_of:
     - Erratum
     range: uri
   erratum_details:
     name: erratum_details
-    description: 'Details on any errata or corrections to the dataset.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 'v1.0.1: Corrected mislabeled CGM device serial numbers for 12 participants'
+    description: 'Free-text description of the error, its scope, the affected data
+      or records, and the correction applied.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -407,9 +417,14 @@ is_a: DatasetProperty
 attributes:
   erratum_url:
     name: erratum_url
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/errata/2024-01-15
     description: URL or access point for the erratum.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
+    slot_uri: d4d:erratumURL
     alias: erratum_url
     owner: Erratum
     domain_of:
@@ -417,7 +432,12 @@ attributes:
     range: uri
   erratum_details:
     name: erratum_details
-    description: 'Details on any errata or corrections to the dataset.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 'v1.0.1: Corrected mislabeled CGM device serial numbers for 12 participants'
+    description: 'Free-text description of the error, its scope, the affected data
+      or records, and the correction applied.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -431,6 +451,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -468,6 +492,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: Erratum
     domain_of:

@@ -384,8 +384,8 @@
 
 
 <h1 id="slot-identifiers_removed">Slot: identifiers_removed</h1>
-<p><em>List of identifier types removed during de-identification.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/identifiers_removed">data_sheets_schema:identifiers_removed</a>
+<p><em>List of identifier types removed during de-identification (e.g., 'name', 'date of birth', 'SSN', 'email address', 'geographic subdivision').</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/removedIdentifierTypes">d4d:removedIdentifierTypes</a>
 Alias: identifiers_removed</p>
 <!-- no inheritance hierarchy -->
 
@@ -431,7 +431,7 @@ Alias: identifiers_removed</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:identifiers_removed</td>
+<td>d4d:removedIdentifierTypes</td>
 </tr>
 <tr>
 <td>native</td>
@@ -443,9 +443,11 @@ Alias: identifiers_removed</p>
 <details>
 
 <pre><code class="language-yaml">name: identifiers_removed
-description: List of identifier types removed during de-identification.
+description: List of identifier types removed during de-identification (e.g., 'name',
+  'date of birth', 'SSN', 'email address', 'geographic subdivision').
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:removedIdentifierTypes
 alias: identifiers_removed
 owner: Deidentification
 domain_of:

@@ -276,7 +276,7 @@
 <tr>
 <td><a href="../discouragement_details/">discouragement_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on tasks for which the dataset should not be used</td>
+<td>Free-text description of tasks or applications for which the dataset is not r...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -367,7 +367,13 @@ is_a: DatasetProperty
 attributes:
   discouragement_details:
     name: discouragement_details
-    description: 'Details on tasks for which the dataset should not be used.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Not recommended for clinical diagnosis without additional validation
+    description: 'Free-text description of tasks or applications for which the dataset
+      is not recommended, with explanation of why (e.g., out-of-scope, risk of harm,
+      poor coverage).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
@@ -391,7 +397,13 @@ is_a: DatasetProperty
 attributes:
   discouragement_details:
     name: discouragement_details
-    description: 'Details on tasks for which the dataset should not be used.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Not recommended for clinical diagnosis without additional validation
+    description: 'Free-text description of tasks or applications for which the dataset
+      is not recommended, with explanation of why (e.g., out-of-scope, risk of harm,
+      poor coverage).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
@@ -405,6 +417,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -442,6 +458,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: DiscouragedUse
     domain_of:

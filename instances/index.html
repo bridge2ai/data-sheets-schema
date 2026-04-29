@@ -384,7 +384,8 @@
 
 
 <h1 id="slot-instances">Slot: instances</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/instances">data_sheets_schema:instances</a>
+<p><em>Individual data instances or records in the dataset. List of Instance objects from the Composition module describing what each data point represents, its type, and associated label information.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/instances">d4d:instances</a>
 Alias: instances</p>
 <!-- no inheritance hierarchy -->
 
@@ -435,7 +436,7 @@ Alias: instances</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:instances</td>
+<td>d4d:instances</td>
 </tr>
 <tr>
 <td>native</td>
@@ -447,8 +448,12 @@ Alias: instances</p>
 <details>
 
 <pre><code class="language-yaml">name: instances
+description: Individual data instances or records in the dataset. List of Instance
+  objects from the Composition module describing what each data point represents,
+  its type, and associated label information.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:instances
 alias: instances
 owner: Dataset
 domain_of:

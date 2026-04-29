@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -386,7 +393,7 @@
 <h1 id="slot-recommended_mitigation">Slot: recommended_mitigation</h1>
 <p><em>Recommended approaches for users to address this limitation.</em></p>
 <p>__</p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/recommended_mitigation">data_sheets_schema:recommended_mitigation</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/recommendedMitigation">d4d:recommendedMitigation</a>
 Alias: recommended_mitigation</p>
 <!-- no inheritance hierarchy -->
 
@@ -412,6 +419,21 @@ Alias: recommended_mitigation</p>
 <li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>Use longitudinal follow-up cohorts for causal inference studies</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -427,7 +449,7 @@ Alias: recommended_mitigation</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:recommended_mitigation</td>
+<td>d4d:recommendedMitigation</td>
 </tr>
 <tr>
 <td>native</td>
@@ -439,11 +461,16 @@ Alias: recommended_mitigation</p>
 <details>
 
 <pre><code class="language-yaml">name: recommended_mitigation
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: Use longitudinal follow-up cohorts for causal inference studies
 description: 'Recommended approaches for users to address this limitation.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:recommendedMitigation
 alias: recommended_mitigation
 owner: DatasetLimitation
 domain_of:

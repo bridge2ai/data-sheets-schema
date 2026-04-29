@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -411,6 +418,21 @@ Alias: inter_annotator_agreement</p>
 <li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>Cohen's κ = 0.82 (substantial agreement)</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -438,6 +460,10 @@ Alias: inter_annotator_agreement</p>
 <details>
 
 <pre><code class="language-yaml">name: inter_annotator_agreement
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: Cohen's κ = 0.82 (substantial agreement)
 description: Measure of agreement between annotators (e.g., Cohen's kappa, Fleiss'
   kappa, Krippendorff's alpha, percent agreement). Include both the metric name and
   value.

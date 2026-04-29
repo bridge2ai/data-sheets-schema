@@ -384,7 +384,8 @@
 
 
 <h1 id="slot-sensitive_elements">Slot: sensitive_elements</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/sensitive_elements">data_sheets_schema:sensitive_elements</a>
+<p><em>Sensitive data elements requiring special handling or access controls. List of SensitiveElement objects identifying sensitive attributes such as personal identifiers, protected health information, or legally sensitive content.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/sensitiveElements">d4d:sensitiveElements</a>
 Alias: sensitive_elements</p>
 <!-- no inheritance hierarchy -->
 
@@ -435,7 +436,7 @@ Alias: sensitive_elements</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:sensitive_elements</td>
+<td>d4d:sensitiveElements</td>
 </tr>
 <tr>
 <td>native</td>
@@ -447,8 +448,12 @@ Alias: sensitive_elements</p>
 <details>
 
 <pre><code class="language-yaml">name: sensitive_elements
+description: Sensitive data elements requiring special handling or access controls.
+  List of SensitiveElement objects identifying sensitive attributes such as personal
+  identifiers, protected health information, or legally sensitive content.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:sensitiveElements
 alias: sensitive_elements
 owner: Dataset
 domain_of:

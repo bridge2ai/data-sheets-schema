@@ -88,12 +88,9 @@ sampling_strategies:
   - description: >
       Recruitment sampling procedures aimed at achieving approximately equal
       distribution of participants across diabetes severity.
-    is_sample:
-      - true
-    is_random:
-      - false
-    is_representative:
-      - false
+    is_sample: true
+    is_random: false
+    is_representative: false
     strategies:
       - Targeted recruitment to balance diabetes severity across participant groups
 

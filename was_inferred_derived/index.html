@@ -384,8 +384,8 @@
 
 
 <h1 id="slot-was_inferred_derived">Slot: was_inferred_derived</h1>
-<p><em>Whether the data was inferred or derived from other data</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/was_inferred_derived">data_sheets_schema:was_inferred_derived</a>
+<p><em>True if the data was computationally inferred or derived from other data (e.g., model outputs, imputed values); false otherwise.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/wasInferred">d4d:wasInferred</a>
 Alias: was_inferred_derived</p>
 <!-- no inheritance hierarchy -->
 
@@ -426,7 +426,7 @@ Alias: was_inferred_derived</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:was_inferred_derived</td>
+<td>d4d:wasInferred</td>
 </tr>
 <tr>
 <td>native</td>
@@ -438,9 +438,11 @@ Alias: was_inferred_derived</p>
 <details>
 
 <pre><code class="language-yaml">name: was_inferred_derived
-description: Whether the data was inferred or derived from other data
+description: True if the data was computationally inferred or derived from other data
+  (e.g., model outputs, imputed values); false otherwise.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:wasInferred
 alias: was_inferred_derived
 owner: InstanceAcquisition
 domain_of:

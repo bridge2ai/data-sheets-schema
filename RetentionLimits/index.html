@@ -284,7 +284,7 @@
 <tr>
 <td><a href="../retention_details/">retention_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on data retention limits and enforcement procedures</td>
+<td>Free-text description of applicable retention limits, legal or ethical basis ...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -378,15 +378,26 @@ is_a: DatasetProperty
 attributes:
   retention_period:
     name: retention_period
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 10 years minimum
     description: Time period for data retention.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
+    slot_uri: d4d:retentionPeriod
     domain_of:
     - RetentionLimits
     range: string
   retention_details:
     name: retention_details
-    description: 'Details on data retention limits and enforcement procedures.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Data retained for minimum 10 years per NIH data sharing policy
+    description: 'Free-text description of applicable retention limits, legal or ethical
+      basis for those limits, and how they will be enforced (e.g., automated deletion,
+      anonymization after the retention period).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -413,9 +424,14 @@ is_a: DatasetProperty
 attributes:
   retention_period:
     name: retention_period
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 10 years minimum
     description: Time period for data retention.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
+    slot_uri: d4d:retentionPeriod
     alias: retention_period
     owner: RetentionLimits
     domain_of:
@@ -423,7 +439,13 @@ attributes:
     range: string
   retention_details:
     name: retention_details
-    description: 'Details on data retention limits and enforcement procedures.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Data retained for minimum 10 years per NIH data sharing policy
+    description: 'Free-text description of applicable retention limits, legal or ethical
+      basis for those limits, and how they will be enforced (e.g., automated deletion,
+      anonymization after the retention period).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -437,6 +459,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -474,6 +500,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: RetentionLimits
     domain_of:

@@ -384,7 +384,8 @@
 
 
 <h1 id="slot-cleaning_strategies">Slot: cleaning_strategies</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/cleaning_strategies">data_sheets_schema:cleaning_strategies</a>
+<p><em>Data cleaning and quality control procedures applied to the dataset. List of CleaningStrategy objects from the Preprocessing module describing outlier removal, deduplication, and error correction steps.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/cleaningStrategies">d4d:cleaningStrategies</a>
 Alias: cleaning_strategies</p>
 <!-- no inheritance hierarchy -->
 
@@ -435,7 +436,7 @@ Alias: cleaning_strategies</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:cleaning_strategies</td>
+<td>d4d:cleaningStrategies</td>
 </tr>
 <tr>
 <td>native</td>
@@ -447,8 +448,12 @@ Alias: cleaning_strategies</p>
 <details>
 
 <pre><code class="language-yaml">name: cleaning_strategies
+description: Data cleaning and quality control procedures applied to the dataset.
+  List of CleaningStrategy objects from the Preprocessing module describing outlier
+  removal, deduplication, and error correction steps.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:cleaningStrategies
 alias: cleaning_strategies
 owner: Dataset
 domain_of:

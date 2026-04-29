@@ -284,7 +284,7 @@
 <tr>
 <td><a href="../update_details/">update_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on update plans, responsible parties, and communication methods</td>
+<td>Free-text description of planned update types (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -383,16 +383,26 @@ is_a: DatasetProperty
 attributes:
   frequency:
     name: frequency
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Quarterly
     description: How often updates are planned (e.g., quarterly, annually).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
+    slot_uri: d4d:frequency
     domain_of:
     - UpdatePlan
     range: string
   update_details:
     name: update_details
-    description: 'Details on update plans, responsible parties, and communication
-      methods.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Quarterly releases with approximately 500 new participants per release
+    description: 'Free-text description of planned update types (e.g., corrections,
+      additions, deletions), responsible parties, and how updates will be communicated
+      to users.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -420,9 +430,14 @@ is_a: DatasetProperty
 attributes:
   frequency:
     name: frequency
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Quarterly
     description: How often updates are planned (e.g., quarterly, annually).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
+    slot_uri: d4d:frequency
     alias: frequency
     owner: UpdatePlan
     domain_of:
@@ -430,8 +445,13 @@ attributes:
     range: string
   update_details:
     name: update_details
-    description: 'Details on update plans, responsible parties, and communication
-      methods.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Quarterly releases with approximately 500 new participants per release
+    description: 'Free-text description of planned update types (e.g., corrections,
+      additions, deletions), responsible parties, and how updates will be communicated
+      to users.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -445,6 +465,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -482,6 +506,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: UpdatePlan
     domain_of:

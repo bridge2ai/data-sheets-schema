@@ -392,24 +392,35 @@ is_a: DatasetProperty
 attributes:
   anonymization_method:
     name: anonymization_method
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: De-identified per HIPAA Safe Harbor; 5-digit ZIP replaced with region
+          codes
     description: 'What methods were used to anonymize or de-identify participant data?
       Include technical details of privacy-preserving techniques.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:anonymizationMethod
     domain_of:
     - ParticipantPrivacy
     range: string
     multivalued: true
   reidentification_risk:
     name: reidentification_risk
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Low risk; expert determination per 45 CFR 164.514(b)(1)
     description: 'What is the assessed risk of re-identification? What measures were
       taken to minimize this risk?
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:reidentificationRisk
     domain_of:
     - ParticipantPrivacy
     range: string
@@ -422,6 +433,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:privacyTechniques
     domain_of:
     - ParticipantPrivacy
     range: string
@@ -434,6 +446,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:dataLinkage
     domain_of:
     - ParticipantPrivacy
     range: string
@@ -453,12 +466,18 @@ is_a: DatasetProperty
 attributes:
   anonymization_method:
     name: anonymization_method
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: De-identified per HIPAA Safe Harbor; 5-digit ZIP replaced with region
+          codes
     description: 'What methods were used to anonymize or de-identify participant data?
       Include technical details of privacy-preserving techniques.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:anonymizationMethod
     alias: anonymization_method
     owner: ParticipantPrivacy
     domain_of:
@@ -467,12 +486,17 @@ attributes:
     multivalued: true
   reidentification_risk:
     name: reidentification_risk
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Low risk; expert determination per 45 CFR 164.514(b)(1)
     description: 'What is the assessed risk of re-identification? What measures were
       taken to minimize this risk?
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:reidentificationRisk
     alias: reidentification_risk
     owner: ParticipantPrivacy
     domain_of:
@@ -487,6 +511,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:privacyTechniques
     alias: privacy_techniques
     owner: ParticipantPrivacy
     domain_of:
@@ -501,6 +526,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:dataLinkage
     alias: data_linkage
     owner: ParticipantPrivacy
     domain_of:
@@ -509,6 +535,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -546,6 +576,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: ParticipantPrivacy
     domain_of:

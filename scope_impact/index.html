@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -386,7 +393,7 @@
 <h1 id="slot-scope_impact">Slot: scope_impact</h1>
 <p><em>How this limitation affects the scope or applicability of the dataset.</em></p>
 <p>__</p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/scope_impact">data_sheets_schema:scope_impact</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/scopeImpact">d4d:scopeImpact</a>
 Alias: scope_impact</p>
 <!-- no inheritance hierarchy -->
 
@@ -412,6 +419,21 @@ Alias: scope_impact</p>
 <li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>Findings may not generalize to non-diabetic populations</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -427,7 +449,7 @@ Alias: scope_impact</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:scope_impact</td>
+<td>d4d:scopeImpact</td>
 </tr>
 <tr>
 <td>native</td>
@@ -439,11 +461,16 @@ Alias: scope_impact</p>
 <details>
 
 <pre><code class="language-yaml">name: scope_impact
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: Findings may not generalize to non-diabetic populations
 description: 'How this limitation affects the scope or applicability of the dataset.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:scopeImpact
 alias: scope_impact
 owner: DatasetLimitation
 domain_of:

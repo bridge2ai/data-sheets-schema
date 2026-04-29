@@ -385,7 +385,7 @@
 
 <h1 id="slot-affiliations">Slot: affiliations</h1>
 <p><em>Organizations with which the creator or team is affiliated.</em></p>
-<p>URI: <a href="http://schema.org/affiliation">schema:affiliation</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/teamAffiliation">d4d:teamAffiliation</a>
 Alias: affiliations</p>
 <!-- no inheritance hierarchy -->
 
@@ -431,11 +431,15 @@ Alias: affiliations</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>schema:affiliation</td>
+<td>d4d:teamAffiliation</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:affiliations</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>schema:affiliation</td>
 </tr>
 </tbody>
 </table>
@@ -445,8 +449,10 @@ Alias: affiliations</p>
 <pre><code class="language-yaml">name: affiliations
 description: Organizations with which the creator or team is affiliated.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- schema:affiliation
 rank: 1000
-slot_uri: schema:affiliation
+slot_uri: d4d:teamAffiliation
 alias: affiliations
 owner: Creator
 domain_of:

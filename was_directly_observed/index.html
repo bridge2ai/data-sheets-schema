@@ -384,8 +384,8 @@
 
 
 <h1 id="slot-was_directly_observed">Slot: was_directly_observed</h1>
-<p><em>Whether the data was directly observed</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/was_directly_observed">data_sheets_schema:was_directly_observed</a>
+<p><em>True if the data was directly observed by a researcher or instrument; false if it was obtained through other means (e.g., reported, inferred).</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/wasDirectlyObserved">d4d:wasDirectlyObserved</a>
 Alias: was_directly_observed</p>
 <!-- no inheritance hierarchy -->
 
@@ -426,7 +426,7 @@ Alias: was_directly_observed</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:was_directly_observed</td>
+<td>d4d:wasDirectlyObserved</td>
 </tr>
 <tr>
 <td>native</td>
@@ -438,9 +438,11 @@ Alias: was_directly_observed</p>
 <details>
 
 <pre><code class="language-yaml">name: was_directly_observed
-description: Whether the data was directly observed
+description: True if the data was directly observed by a researcher or instrument;
+  false if it was obtained through other means (e.g., reported, inferred).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:wasDirectlyObserved
 alias: was_directly_observed
 owner: InstanceAcquisition
 domain_of:

@@ -384,9 +384,9 @@
 
 
 <h1 id="slot-representative_verification">Slot: representative_verification</h1>
-<p><em>Explanation of how representativeness was validated or verified.</em></p>
+<p><em>One or more explanations of how representativeness was validated or verified (e.g., statistical tests, domain expert review).</em></p>
 <p>__</p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/representative_verification">data_sheets_schema:representative_verification</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/verificationDescription">d4d:verificationDescription</a>
 Alias: representative_verification</p>
 <!-- no inheritance hierarchy -->
 
@@ -432,11 +432,15 @@ Alias: representative_verification</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:representative_verification</td>
+<td>d4d:verificationDescription</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:representative_verification</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>schema:description</td>
 </tr>
 </tbody>
 </table>
@@ -444,11 +448,15 @@ Alias: representative_verification</p>
 <details>
 
 <pre><code class="language-yaml">name: representative_verification
-description: 'Explanation of how representativeness was validated or verified.
+description: 'One or more explanations of how representativeness was validated or
+  verified (e.g., statistical tests, domain expert review).
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- schema:description
 rank: 1000
+slot_uri: d4d:verificationDescription
 alias: representative_verification
 owner: SamplingStrategy
 domain_of:

@@ -384,8 +384,8 @@
 
 
 <h1 id="slot-was_validated_verified">Slot: was_validated_verified</h1>
-<p><em>Whether the data was validated or verified in any way</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/was_validated_verified">data_sheets_schema:was_validated_verified</a>
+<p><em>True if the data underwent a validation or verification process (e.g., expert review, cross-checking with ground truth); false otherwise.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/wasValidated">d4d:wasValidated</a>
 Alias: was_validated_verified</p>
 <!-- no inheritance hierarchy -->
 
@@ -426,7 +426,7 @@ Alias: was_validated_verified</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:was_validated_verified</td>
+<td>d4d:wasValidated</td>
 </tr>
 <tr>
 <td>native</td>
@@ -438,9 +438,11 @@ Alias: was_validated_verified</p>
 <details>
 
 <pre><code class="language-yaml">name: was_validated_verified
-description: Whether the data was validated or verified in any way
+description: True if the data underwent a validation or verification process (e.g.,
+  expert review, cross-checking with ground truth); false otherwise.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:wasValidated
 alias: was_validated_verified
 owner: InstanceAcquisition
 domain_of:

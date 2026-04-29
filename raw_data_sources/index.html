@@ -384,8 +384,8 @@
 
 
 <h1 id="slot-raw_data_sources">Slot: raw_data_sources</h1>
-<p><em>Description of raw data sources before preprocessing.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/raw_data_sources">data_sheets_schema:raw_data_sources</a>
+<p><em>List of raw data sources before preprocessing. Each RawDataSource object describes where the original data came from and how it can be accessed.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/rawDataSources">d4d:rawDataSources</a>
 Alias: raw_data_sources</p>
 <!-- no inheritance hierarchy -->
 
@@ -436,7 +436,7 @@ Alias: raw_data_sources</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:raw_data_sources</td>
+<td>d4d:rawDataSources</td>
 </tr>
 <tr>
 <td>native</td>
@@ -448,9 +448,11 @@ Alias: raw_data_sources</p>
 <details>
 
 <pre><code class="language-yaml">name: raw_data_sources
-description: Description of raw data sources before preprocessing.
+description: List of raw data sources before preprocessing. Each RawDataSource object
+  describes where the original data came from and how it can be accessed.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:rawDataSources
 alias: raw_data_sources
 owner: Dataset
 domain_of:

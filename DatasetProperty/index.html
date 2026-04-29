@@ -343,8 +343,8 @@
         click ParticipantPrivacy href "../ParticipantPrivacy/"
       DatasetProperty &lt;|-- HumanSubjectCompensation
         click HumanSubjectCompensation href "../HumanSubjectCompensation/"
-      DatasetProperty &lt;|-- VulnerablePopulations
-        click VulnerablePopulations href "../VulnerablePopulations/"
+      DatasetProperty &lt;|-- AtRiskPopulations
+        click AtRiskPopulations href "../AtRiskPopulations/"
       DatasetProperty &lt;|-- LicenseAndUseTerms
         click LicenseAndUseTerms href "../LicenseAndUseTerms/"
       DatasetProperty &lt;|-- IPRestrictions
@@ -435,7 +435,7 @@
 <li><a href="../InformedConsent/">InformedConsent</a></li>
 <li><a href="../ParticipantPrivacy/">ParticipantPrivacy</a></li>
 <li><a href="../HumanSubjectCompensation/">HumanSubjectCompensation</a></li>
-<li><a href="../VulnerablePopulations/">VulnerablePopulations</a></li>
+<li><a href="../AtRiskPopulations/">AtRiskPopulations</a></li>
 <li><a href="../LicenseAndUseTerms/">LicenseAndUseTerms</a></li>
 <li><a href="../IPRestrictions/">IPRestrictions</a></li>
 <li><a href="../ExportControlRegulatoryRestrictions/">ExportControlRegulatoryRestrictions</a></li>
@@ -514,6 +514,10 @@ from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 attributes:
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -545,6 +549,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     domain_of:
     - DatasetProperty
     range: Software
@@ -562,6 +567,10 @@ from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 attributes:
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -599,6 +608,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: DatasetProperty
     domain_of:

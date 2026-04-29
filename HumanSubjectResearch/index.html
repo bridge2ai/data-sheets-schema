@@ -403,17 +403,24 @@ attributes:
     description: Does this dataset involve human subjects research?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:involvesHumanSubjects
     domain_of:
     - HumanSubjectResearch
     range: boolean
   irb_approval:
     name: irb_approval
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: All participants provided written informed consent; study registered
+          at ClinicalTrials.gov NCT05395169
     description: 'Was Institutional Review Board (IRB) approval obtained? Include
       approval number and institution if applicable.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:irbApproval
     domain_of:
     - HumanSubjectResearch
     range: string
@@ -426,6 +433,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:ethicsReviewBoard
     domain_of:
     - HumanSubjectResearch
     range: string
@@ -438,18 +446,24 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:specialPopulations
     domain_of:
     - HumanSubjectResearch
     range: string
     multivalued: true
   regulatory_compliance:
     name: regulatory_compliance
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 45 CFR Part 46, HIPAA Privacy Rule (45 CFR Parts 160 and 164)
     description: 'What regulatory frameworks govern this human subjects research (e.g.,
       45 CFR 46, HIPAA)?
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:regulatoryCompliance
     domain_of:
     - HumanSubjectResearch
     range: string
@@ -472,6 +486,7 @@ attributes:
     description: Does this dataset involve human subjects research?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:involvesHumanSubjects
     alias: involves_human_subjects
     owner: HumanSubjectResearch
     domain_of:
@@ -479,12 +494,18 @@ attributes:
     range: boolean
   irb_approval:
     name: irb_approval
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: All participants provided written informed consent; study registered
+          at ClinicalTrials.gov NCT05395169
     description: 'Was Institutional Review Board (IRB) approval obtained? Include
       approval number and institution if applicable.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:irbApproval
     alias: irb_approval
     owner: HumanSubjectResearch
     domain_of:
@@ -499,6 +520,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:ethicsReviewBoard
     alias: ethics_review_board
     owner: HumanSubjectResearch
     domain_of:
@@ -513,6 +535,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:specialPopulations
     alias: special_populations
     owner: HumanSubjectResearch
     domain_of:
@@ -521,12 +544,17 @@ attributes:
     multivalued: true
   regulatory_compliance:
     name: regulatory_compliance
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 45 CFR Part 46, HIPAA Privacy Rule (45 CFR Parts 160 and 164)
     description: 'What regulatory frameworks govern this human subjects research (e.g.,
       45 CFR 46, HIPAA)?
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:regulatoryCompliance
     alias: regulatory_compliance
     owner: HumanSubjectResearch
     domain_of:
@@ -535,6 +563,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -572,6 +604,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: HumanSubjectResearch
     domain_of:

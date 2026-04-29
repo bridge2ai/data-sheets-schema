@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -384,8 +391,8 @@
 
 
 <h1 id="slot-use_category">Slot: use_category</h1>
-<p><em>Category of intended use (e.g., research, clinical, educational, commercial, policy).</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/use_category">data_sheets_schema:use_category</a>
+<p><em>One or more categories of intended use (e.g., research, clinical, educational, commercial, policy).</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/useCategory">d4d:useCategory</a>
 Alias: use_category</p>
 <!-- no inheritance hierarchy -->
 
@@ -416,6 +423,21 @@ Alias: use_category</p>
 </li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>academic research</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -431,7 +453,7 @@ Alias: use_category</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:use_category</td>
+<td>d4d:useCategory</td>
 </tr>
 <tr>
 <td>native</td>
@@ -443,10 +465,15 @@ Alias: use_category</p>
 <details>
 
 <pre><code class="language-yaml">name: use_category
-description: Category of intended use (e.g., research, clinical, educational, commercial,
-  policy).
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: academic research
+description: One or more categories of intended use (e.g., research, clinical, educational,
+  commercial, policy).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:useCategory
 alias: use_category
 owner: IntendedUse
 domain_of:

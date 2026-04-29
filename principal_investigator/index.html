@@ -385,7 +385,7 @@
 
 <h1 id="slot-principal_investigator">Slot: principal_investigator</h1>
 <p><em>A key individual (Principal Investigator) responsible for or overseeing dataset creation.</em></p>
-<p>URI: <a href="http://purl.org/dc/terms/creator">dcterms:creator</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/principalInvestigator">d4d:principalInvestigator</a>
 Alias: principal_investigator</p>
 <!-- no inheritance hierarchy -->
 
@@ -426,15 +426,15 @@ Alias: principal_investigator</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:creator</td>
+<td>d4d:principalInvestigator</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:principal_investigator</td>
 </tr>
 <tr>
-<td>exact</td>
-<td>schema:creator</td>
+<td>broad</td>
+<td>dcterms:creator, schema:creator</td>
 </tr>
 </tbody>
 </table>
@@ -445,10 +445,11 @@ Alias: principal_investigator</p>
 description: A key individual (Principal Investigator) responsible for or overseeing
   dataset creation.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
+broad_mappings:
+- dcterms:creator
 - schema:creator
 rank: 1000
-slot_uri: dcterms:creator
+slot_uri: d4d:principalInvestigator
 alias: principal_investigator
 owner: Creator
 domain_of:

@@ -338,6 +338,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -385,7 +392,7 @@
 
 <h1 id="slot-contribution_url">Slot: contribution_url</h1>
 <p><em>URL for contribution guidelines or process.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/contribution_url">data_sheets_schema:contribution_url</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/contributionURL">d4d:contributionURL</a>
 Alias: contribution_url</p>
 <!-- no inheritance hierarchy -->
 
@@ -411,6 +418,21 @@ Alias: contribution_url</p>
 <li>Range: <a href="../Uri/">Uri</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>https://example.org/dataset/contributing</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -426,7 +448,7 @@ Alias: contribution_url</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:contribution_url</td>
+<td>d4d:contributionURL</td>
 </tr>
 <tr>
 <td>native</td>
@@ -438,9 +460,14 @@ Alias: contribution_url</p>
 <details>
 
 <pre><code class="language-yaml">name: contribution_url
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: https://example.org/dataset/contributing
 description: URL for contribution guidelines or process.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:contributionURL
 alias: contribution_url
 owner: ExtensionMechanism
 domain_of:

@@ -292,7 +292,7 @@
 <tr>
 <td><a href="../timeframe_details/">timeframe_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on the collection timeframe and relationship to data creation dates</td>
+<td>Free-text description of the data collection period and whether this timefram...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -390,24 +390,39 @@ is_a: DatasetProperty
 attributes:
   start_date:
     name: start_date
-    description: Start date of data collection
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2023-07-18'
+    description: Start date of data collection.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
+    slot_uri: schema:startDate
     domain_of:
     - CollectionTimeframe
     range: date
   end_date:
     name: end_date
-    description: End date of data collection
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2026-11-30'
+    description: End date of data collection.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
+    slot_uri: schema:endDate
     domain_of:
     - CollectionTimeframe
     range: date
   timeframe_details:
     name: timeframe_details
-    description: 'Details on the collection timeframe and relationship to data creation
-      dates.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Enrollment ongoing; data released annually
+    description: 'Free-text description of the data collection period and whether
+      this timeframe matches the creation timeframe of the underlying data (e.g.,
+      historical records, prospective collection).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
@@ -434,9 +449,14 @@ is_a: DatasetProperty
 attributes:
   start_date:
     name: start_date
-    description: Start date of data collection
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2023-07-18'
+    description: Start date of data collection.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
+    slot_uri: schema:startDate
     alias: start_date
     owner: CollectionTimeframe
     domain_of:
@@ -444,9 +464,14 @@ attributes:
     range: date
   end_date:
     name: end_date
-    description: End date of data collection
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '2026-11-30'
+    description: End date of data collection.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
+    slot_uri: schema:endDate
     alias: end_date
     owner: CollectionTimeframe
     domain_of:
@@ -454,8 +479,13 @@ attributes:
     range: date
   timeframe_details:
     name: timeframe_details
-    description: 'Details on the collection timeframe and relationship to data creation
-      dates.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Enrollment ongoing; data released annually
+    description: 'Free-text description of the data collection period and whether
+      this timeframe matches the creation timeframe of the underlying data (e.g.,
+      historical records, prospective collection).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
@@ -469,6 +499,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -506,6 +540,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: CollectionTimeframe
     domain_of:

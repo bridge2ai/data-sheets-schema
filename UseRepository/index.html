@@ -225,8 +225,7 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-userepository">Class: UseRepository</h1>
-<p><em>Is there a repository that links to any or all papers or systems that use the dataset? If so, provide a link or other access point.</em></p>
-<p>__</p>
+<p><em>A repository or registry of known uses of this dataset by third parties. Documents where the dataset has been applied, enabling discoverability of downstream use cases and impact tracking.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/UseRepository">data_sheets_schema:UseRepository</a></p>
 <div class="mermaid"> classDiagram
     class UseRepository
@@ -284,7 +283,7 @@
 <tr>
 <td><a href="../repository_details/">repository_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on the repository of known dataset uses</td>
+<td>Free-text description of the repository of known dataset uses, including how ...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -367,15 +366,18 @@
 <h3 id="direct">Direct</h3>
 <details>
 <pre><code class="language-yaml">name: UseRepository
-description: 'Is there a repository that links to any or all papers or systems that
-  use the dataset? If so, provide a link or other access point.
-
-  '
+description: A repository or registry of known uses of this dataset by third parties.
+  Documents where the dataset has been applied, enabling discoverability of downstream
+  use cases and impact tracking.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
   repository_url:
     name: repository_url
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://paperswithcode.com/dataset/ai-readi
     description: URL to a repository of known dataset uses.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     rank: 1000
@@ -384,7 +386,8 @@ attributes:
     range: uri
   repository_details:
     name: repository_details
-    description: 'Details on the repository of known dataset uses.
+    description: 'Free-text description of the repository of known dataset uses, including
+      how it is maintained and how to contribute new use cases.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
@@ -400,15 +403,18 @@ attributes:
 <h3 id="induced">Induced</h3>
 <details>
 <pre><code class="language-yaml">name: UseRepository
-description: 'Is there a repository that links to any or all papers or systems that
-  use the dataset? If so, provide a link or other access point.
-
-  '
+description: A repository or registry of known uses of this dataset by third parties.
+  Documents where the dataset has been applied, enabling discoverability of downstream
+  use cases and impact tracking.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
   repository_url:
     name: repository_url
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://paperswithcode.com/dataset/ai-readi
     description: URL to a repository of known dataset uses.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     rank: 1000
@@ -419,7 +425,8 @@ attributes:
     range: uri
   repository_details:
     name: repository_details
-    description: 'Details on the repository of known dataset uses.
+    description: 'Free-text description of the repository of known dataset uses, including
+      how it is maintained and how to contribute new use cases.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
@@ -433,6 +440,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -470,6 +481,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: UseRepository
     domain_of:

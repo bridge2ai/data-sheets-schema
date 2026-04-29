@@ -395,29 +395,40 @@ attributes:
     description: Were participants compensated for their participation?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:compensationProvided
     domain_of:
     - HumanSubjectCompensation
     range: boolean
   compensation_type:
     name: compensation_type
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Monetary payment via gift card
     description: 'What type of compensation was provided (e.g., monetary payment,
       gift cards, course credit, other incentives)?
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:compensationType
     domain_of:
     - HumanSubjectCompensation
     range: string
     multivalued: true
   compensation_amount:
     name: compensation_amount
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: $75 for initial visit; $25 for annual follow-up
     description: 'What was the amount or value of compensation provided? Include currency
       or equivalent value.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:compensationAmount
     domain_of:
     - HumanSubjectCompensation
     range: string
@@ -430,6 +441,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:compensationRationale
     domain_of:
     - HumanSubjectCompensation
     range: string
@@ -452,6 +464,7 @@ attributes:
     description: Were participants compensated for their participation?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:compensationProvided
     alias: compensation_provided
     owner: HumanSubjectCompensation
     domain_of:
@@ -459,12 +472,17 @@ attributes:
     range: boolean
   compensation_type:
     name: compensation_type
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: Monetary payment via gift card
     description: 'What type of compensation was provided (e.g., monetary payment,
       gift cards, course credit, other incentives)?
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:compensationType
     alias: compensation_type
     owner: HumanSubjectCompensation
     domain_of:
@@ -473,12 +491,17 @@ attributes:
     multivalued: true
   compensation_amount:
     name: compensation_amount
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: $75 for initial visit; $25 for annual follow-up
     description: 'What was the amount or value of compensation provided? Include currency
       or equivalent value.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:compensationAmount
     alias: compensation_amount
     owner: HumanSubjectCompensation
     domain_of:
@@ -493,6 +516,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
     rank: 1000
+    slot_uri: d4d:compensationRationale
     alias: compensation_rationale
     owner: HumanSubjectCompensation
     domain_of:
@@ -501,6 +525,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -538,6 +566,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: HumanSubjectCompensation
     domain_of:

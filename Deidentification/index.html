@@ -294,7 +294,7 @@
 <tr>
 <td><a href="../identifiers_removed/">identifiers_removed</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>List of identifier types removed during de-identification</td>
+<td>List of identifier types removed during de-identification (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -395,6 +395,7 @@ attributes:
     description: Indicates whether data subjects can be identified.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: d4d:identifiableElementsPresent
     domain_of:
     - Deidentification
     range: boolean
@@ -408,15 +409,22 @@ attributes:
     range: string
   identifiers_removed:
     name: identifiers_removed
-    description: List of identifier types removed during de-identification.
+    description: List of identifier types removed during de-identification (e.g.,
+      'name', 'date of birth', 'SSN', 'email address', 'geographic subdivision').
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: d4d:removedIdentifierTypes
     domain_of:
     - Deidentification
     range: string
     multivalued: true
   deidentification_details:
     name: deidentification_details
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: HIPAA Safe Harbor method applied; expert re-identification risk assessment
+          confirms low risk
     description: 'Details on de-identification procedures and residual risks.
 
       '
@@ -445,6 +453,7 @@ attributes:
     description: Indicates whether data subjects can be identified.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: d4d:identifiableElementsPresent
     alias: identifiable_elements_present
     owner: Deidentification
     domain_of:
@@ -462,9 +471,11 @@ attributes:
     range: string
   identifiers_removed:
     name: identifiers_removed
-    description: List of identifier types removed during de-identification.
+    description: List of identifier types removed during de-identification (e.g.,
+      'name', 'date of birth', 'SSN', 'email address', 'geographic subdivision').
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: d4d:removedIdentifierTypes
     alias: identifiers_removed
     owner: Deidentification
     domain_of:
@@ -473,6 +484,11 @@ attributes:
     multivalued: true
   deidentification_details:
     name: deidentification_details
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: HIPAA Safe Harbor method applied; expert re-identification risk assessment
+          confirms low risk
     description: 'Details on de-identification procedures and residual risks.
 
       '
@@ -487,6 +503,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -524,6 +544,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: Deidentification
     domain_of:

@@ -384,8 +384,8 @@
 
 
 <h1 id="slot-related_datasets">Slot: related_datasets</h1>
-<p><em>Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/related_datasets">data_sheets_schema:related_datasets</a>
+<p><em>List of related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.</em></p>
+<p>URI: <a href="http://schema.org/isRelatedTo">schema:isRelatedTo</a>
 Alias: related_datasets</p>
 <!-- no inheritance hierarchy -->
 
@@ -436,7 +436,7 @@ Alias: related_datasets</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:related_datasets</td>
+<td>schema:isRelatedTo</td>
 </tr>
 <tr>
 <td>native</td>
@@ -448,10 +448,12 @@ Alias: related_datasets</p>
 <details>
 
 <pre><code class="language-yaml">name: related_datasets
-description: Related datasets with typed relationships (e.g., supplements, derives
-  from, is version of). Use DatasetRelationship class to specify relationship types.
+description: List of related datasets with typed relationships (e.g., supplements,
+  derives from, is version of). Use DatasetRelationship class to specify relationship
+  types.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: schema:isRelatedTo
 alias: related_datasets
 owner: Dataset
 domain_of:

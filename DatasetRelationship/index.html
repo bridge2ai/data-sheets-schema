@@ -390,6 +390,7 @@ attributes:
       identifier, URL, or Dataset object.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: dcterms:relation
     domain_of:
     - DatasetRelationship
     range: string
@@ -400,6 +401,7 @@ attributes:
       Uses DatasetRelationshipTypeEnum for standardized relationship types.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: schema:additionalType
     domain_of:
     - DatasetRelationship
     range: DatasetRelationshipTypeEnum
@@ -433,6 +435,7 @@ attributes:
       identifier, URL, or Dataset object.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: dcterms:relation
     alias: target_dataset
     owner: DatasetRelationship
     domain_of:
@@ -445,6 +448,7 @@ attributes:
       Uses DatasetRelationshipTypeEnum for standardized relationship types.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: schema:additionalType
     alias: relationship_type
     owner: DatasetRelationship
     domain_of:
@@ -464,6 +468,10 @@ attributes:
     range: string
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier
@@ -489,6 +497,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: DatasetRelationship
     domain_of:
