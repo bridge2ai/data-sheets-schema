@@ -290,9 +290,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** One citation or external resource
 - **5:** Multiple references and dataset citation
 
-**Assessment:** Count publications, external resources, and check for formal dataset citation.
-
-**Applies to:** Bridge2AI-Voice, AI-READI
+**Assessment:** Count publications, external resources, and check for formal dataset citation. Always report results of this question, but only score if publication was identified elsewhere and datasets were shared and available for reuse.
 
 ---
 
