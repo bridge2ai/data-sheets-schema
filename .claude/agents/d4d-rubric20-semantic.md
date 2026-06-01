@@ -204,7 +204,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** Basic ethics (IRB + deidentification)
 - **5:** Comprehensive (all human subjects protections documented)
 
-**Assessment:** Evaluate comprehensiveness of ethical documentation across all protection areas. Only score this question if human subjects or governance restrictions are identified elsewhere.
+**Assessment:** Evaluate comprehensiveness of ethical documentation across all protection areas. Always report results of this question, but only score if human subjects or governance restrictions are identified elsewhere.
 
 ---
 
@@ -218,9 +218,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** License only
 - **5:** License + restrictions + confidentiality classification
 
-**Assessment:** Evaluate clarity and completeness of governance and access documentation.
-
-**Applies to:** Bridge2AI-Voice, Dataverse
+**Assessment:** Evaluate clarity and completeness of governance and terms of use documentation. Always report results of this question, but only score if human subjects or governance restrictions are identified elsewhere.
 
 ---
 
