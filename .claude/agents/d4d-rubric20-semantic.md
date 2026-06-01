@@ -232,9 +232,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** Standard format but no schema reference
 - **5:** Standard formats + schema/ontology compliance
 
-**Assessment:** Check for standard formats (Parquet, TSV, OMOP, FHIR, DICOM), encoding, and schema conformance references.
-
-**Applies to:** Bridge2AI-Voice, Health Nexus
+**Assessment:** Check for standard formats (Parquet, TSV, OMOP, FHIR, DICOM), encoding, and schema conformance references. Always report results of this question, but only score if datasets were identified elsewhere as shared and available for reuse.
 
 ---
 
