@@ -753,9 +753,9 @@ semantic_analysis_summary:
 **User:** "Run rubric20 assessment on CM4AI D4D files (curated, gpt5, claudecode)"
 
 **Agent:**
-1. Evaluates each file separately
-2. Generates detailed quality assessments
-3. Highlights differences in FAIR compliance and technical documentation
+1. Evaluates each file separately and generates detailed quality assessments, following the procedure in Example 1
+2. Compare and contrast content and scoring between files
+3. Report summary of comparison between files
 
 ## How This Agent Works
 
