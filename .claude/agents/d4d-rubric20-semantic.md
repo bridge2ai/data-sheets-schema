@@ -248,9 +248,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** At least one strategy or tool listed
 - **5:** Comprehensive strategies with software versions/URLs
 
-**Assessment:** Look for strategy documentation and software names, versions, and links.
-
-**Applies to:** Bridge2AI-Voice
+**Assessment:** Look for strategy documentation and software names, versions, and links. Always report results of this question, but only score if software tools were identified elsewhere as shared and available for reuse.
 
 ---
 
