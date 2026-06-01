@@ -304,9 +304,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** General human data without subgroup description
 - **5:** Detailed demographics and inclusion/exclusion criteria
 
-**Assessment:** Evaluate demographic detail and population characterization through instances and subpopulations.
-
-**Applies to:** Bridge2AI-Voice, AI-READI
+**Assessment:** Evaluate demographic detail and population characterization through instances and subpopulations. Always report results of this question, but only score if human subjects or governance restrictions are identified elsewhere.
 
 ---
 
