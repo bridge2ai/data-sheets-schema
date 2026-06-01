@@ -319,7 +319,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **Pass:** At least one working external URL present
 - **Fail:** No external links found
 
-**Assessment:** Verify presence of persistent URLs.
+**Assessment:** Verify presence of persistent URLs. 
 
 ---
 
@@ -333,9 +333,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** Partially described access mechanism
 - **5:** Fully defined access path (platform, login, policy)
 
-**Assessment:** Evaluate clarity of access instructions through distribution formats and licensing.
-
-**Applies to:** Dataverse, PhysioNet
+**Assessment:** Evaluate clarity of access instructions through distribution formats and licensing. Always report results of this question, but only score if datasets were identified elsewhere as shared and available for reuse.
 
 ---
 
