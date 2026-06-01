@@ -374,9 +374,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **Pass:** Cross-platform links verified
 - **Fail:** No external linkages found
 
-**Assessment:** Look for external resources linking to related platforms (FAIRhub, PhysioNet, GitHub, etc.).
-
-**Applies to:** Health Nexus, PhysioNet, FAIRhub
+**Assessment:** Look for external resources linking to related platforms (FAIRhub, PhysioNet, GitHub, etc.). Always report results of this question, but only score if datasets were identified elsewhere as shared and available for reuse.
 
 ---
 
