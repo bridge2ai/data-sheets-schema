@@ -276,9 +276,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** Version number + basic access info
 - **5:** Comprehensive versioning with errata, updates, and release notes
 
-**Assessment:** Evaluate completeness of version tracking infrastructure.
-
-**Applies to:** Bridge2AI-Voice, Dataverse
+**Assessment:** Evaluate completeness of version tracking infrastructure. Always report results of this question, but only score if data collection was identified elsewhere and datasets were shared and available for reuse.
 
 ---
 
