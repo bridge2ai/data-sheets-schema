@@ -204,7 +204,9 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** Basic ethics (IRB + deidentification)
 - **5:** Comprehensive (all human subjects protections documented)
 
-**Assessment:** Evaluate comprehensiveness of ethical documentation across all protection areas. Always report results of this question, but only score if human subjects or governance restrictions are identified elsewhere.
+**Assessment:** Evaluate comprehensiveness of ethical documentation across all protection areas
+
+**Applies to:** Always report results of this question, but only score if human subjects or governance restrictions are identified elsewhere.
 
 ---
 
@@ -218,7 +220,9 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** License only
 - **5:** License + restrictions + confidentiality classification
 
-**Assessment:** Evaluate clarity and completeness of governance and terms of use documentation. Always report results of this question, but only score if human subjects or governance restrictions are identified elsewhere.
+**Assessment:** Evaluate clarity and completeness of governance and terms of use documentation.
+
+**Applies to:** Always report results of this question, but only score if human subjects or governance restrictions are identified elsewhere.
 
 ---
 
@@ -232,7 +236,9 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** Standard format but no schema reference
 - **5:** Standard formats + schema/ontology compliance
 
-**Assessment:** Check for standard formats (Parquet, TSV, OMOP, FHIR, DICOM), encoding, and schema conformance references. Always report results of this question, but only score if datasets were identified elsewhere as shared and available for reuse.
+**Assessment:** Check for standard formats (Parquet, TSV, OMOP, FHIR, DICOM), encoding, and schema conformance references.
+
+**Applies to:** Always report results of this question, but only score if datasets were identified elsewhere as shared and available for reuse.
 
 ---
 
@@ -248,7 +254,9 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** At least one strategy or tool listed
 - **5:** Comprehensive strategies with software versions/URLs
 
-**Assessment:** Look for strategy documentation and software names, versions, and links. Always report results of this question, but only score if software tools were identified elsewhere as shared and available for reuse.
+**Assessment:** Look for strategy documentation and software names, versions, and links.
+
+**Applies to:** Always report results of this question, but only score if software tools were identified elsewhere as shared and available for reuse.
 
 ---
 
@@ -262,7 +270,9 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** Partial description (e.g., mechanism only)
 - **5:** Full collection protocol with methods, collectors, and timeframes
 
-**Assessment:** Evaluate detail level and completeness of collection protocol documentation. Always report results of this question, but only score if data collection was identified elsewhere and datasets were shared and available for reuse.
+**Assessment:** Evaluate detail level and completeness of collection protocol documentation.
+
+**Applies to:** Always report results of this question, but only score if data collection was identified elsewhere and datasets were shared and available for reuse.
 
 ---
 
@@ -276,7 +286,9 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** Version number + basic access info
 - **5:** Comprehensive versioning with errata, updates, and release notes
 
-**Assessment:** Evaluate completeness of version tracking infrastructure. Always report results of this question, but only score if data collection was identified elsewhere and datasets were shared and available for reuse.
+**Assessment:** Evaluate completeness of version tracking infrastructure.
+
+**Applies to:** Always report results of this question, but only score if data collection was identified elsewhere and datasets were shared and available for reuse.
 
 ---
 
@@ -290,7 +302,9 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** One citation or external resource
 - **5:** Multiple references and dataset citation
 
-**Assessment:** Count publications, external resources, and check for formal dataset citation. Always report results of this question, but only score if publication was identified elsewhere and datasets were shared and available for reuse.
+**Assessment:** Count publications, external resources, and check for formal dataset citation.
+
+**Applies to:** Always report results of this question, but only score if publication was identified elsewhere and datasets were shared and available for reuse.
 
 ---
 
@@ -304,7 +318,9 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** General human data without subgroup description
 - **5:** Detailed demographics and inclusion/exclusion criteria
 
-**Assessment:** Evaluate demographic detail and population characterization through instances and subpopulations. Always report results of this question, but only score if human subjects or governance restrictions are identified elsewhere.
+**Assessment:** Evaluate demographic detail and population characterization through instances and subpopulations.
+
+**Applies to:** Always report results of this question, but only score if human subjects or governance restrictions are identified elsewhere.
 
 ---
 
@@ -333,7 +349,9 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** Partially described access mechanism
 - **5:** Fully defined access path (platform, login, policy)
 
-**Assessment:** Evaluate clarity of access instructions through distribution formats and licensing. Always report results of this question, but only score if datasets were identified elsewhere as shared and available for reuse.
+**Assessment:** Evaluate clarity of access instructions through distribution formats and licensing.
+
+**Applies to:** Always report results of this question, but only score if datasets were identified elsewhere as shared and available for reuse.
 
 ---
 
@@ -374,7 +392,9 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **Pass:** Cross-platform links verified
 - **Fail:** No external linkages found
 
-**Assessment:** Look for external resources linking to related platforms (FAIRhub, PhysioNet, GitHub, etc.). Always report results of this question, but only score if datasets were identified elsewhere as shared and available for reuse.
+**Assessment:** Look for external resources linking to related platforms (FAIRhub, PhysioNet, GitHub, etc.).
+
+**Applies to:** Always report results of this question, but only score if datasets were identified elsewhere as shared and available for reuse.
 
 ---
 
@@ -709,7 +729,7 @@ semantic_analysis_summary:
 
 2. **Evidence-Based Scoring:** Include specific field values and quotes.
 
-3. **Context-Aware:** Some questions apply only to specific dataset types (see "applies_to" field).
+3. **Context-Aware:** Some questions apply only to specific dataset and program types (see "Applies to" field in questions).
 
 4. **Graduated Scoring:** Use the full 0-5 range for numeric questions based on quality levels.
 
