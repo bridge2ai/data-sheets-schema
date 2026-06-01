@@ -57,7 +57,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 
 1. **Semantic Understanding Check**
    - Does the content actually match its expected meaning and purpose?
-   - Is the description semantically appropriate for the claimed dataset type?
+   - Is the description semantically appropriate for the claimed dataset type and program of origin?
    - Are technical terms used correctly and consistently?
 
 2. **Correctness Validation**
@@ -85,12 +85,12 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 
 4. **Content Accuracy Assessment**
    - **Ethics Claims Plausibility:** Do Licensing & Governance and Data Protection & Compliance sections align with Human Subjects section and overall project scope?
-   - **Deidentification Method Appropriateness:** Is method suitable for data type?
+   - **Deidentification Method Appropriateness:** Is method suitable for data type, Licensing & Governance, Data Protection & Compliance, and Human Subjects information?
    - **Funding Pattern Matching:** Do grant numbers follow expected patterns?
    - **Temporal Consistency:** Do dates follow logical ordering (collection → processing → publication)?
-   - **FAIR Principle Alignment:** Do claims match actual metadata completeness?
+   - **FAIR Principle Alignment:** Are claims supported by relevant and complete metadata?
 
-**Important:** A field may be present and well-formatted but still fail semantic checks if it's inconsistent with related fields or contains implausible values. This affects scoring - reduce score if semantic issues detected.
+**Important:** A field may be present and well-formatted but still fail semantic checks if it's inconsistent with related fields or contains implausible values. This affects scoring - reduce score if semantic issues detected. Always note where semantic issues impacted scoring.
 
 ## Rubric20 Specification
 
@@ -148,7 +148,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** 2–3 file types
 - **5:** >3 file types
 
-**Assessment:** Count unique file formats and media types (TSV, Parquet, JSON, DICOM, etc.). Variety indicates multi-modal data.
+**Assessment:** Count unique file formats and media types (TSV, Parquet, JSON, DICOM, etc.). Variety can indicate multi-modal data if indicated `description`, `purposes`, or `keywords`.
 
 ---
 
@@ -161,7 +161,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **Pass:** Numeric file size or instance count found
 - **Fail:** No file size/instance metadata
 
-**Assessment:** Look for bytes field, instance counts, or sample size documentation.
+**Assessment:** Look for bytes field, instance counts, or sample size documentation. Note that sample size only enables and estimate of the file size.
 
 ---
 
