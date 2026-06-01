@@ -262,9 +262,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** Partial description (e.g., mechanism only)
 - **5:** Full collection protocol with methods, collectors, and timeframes
 
-**Assessment:** Evaluate detail level and completeness of collection protocol documentation.
-
-**Applies to:** Bridge2AI-Voice, AI-READI
+**Assessment:** Evaluate detail level and completeness of collection protocol documentation. Always report results of this question, but only score if data collection was identified elsewhere and datasets were shared and available for reuse.
 
 ---
 
