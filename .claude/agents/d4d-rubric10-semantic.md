@@ -29,24 +29,24 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 ### Scoring Standards
 
 A sub-element scores **1** (present/pass) ONLY if:
-- ✅ The field exists in the D4D file AND is non-empty
-- ✅ Contains **meaningful, non-trivial content** (not just boilerplate)
-- ✅ Provides **actionable information** to dataset users
-- ✅ Is **complete enough** to support the sub-element's stated purpose
+- The field exists in the D4D file AND is non-empty
+- Contains **meaningful, non-trivial content** (not just boilerplate)
+- Provides **actionable information** to dataset users
+- Is **complete enough** to support the sub-element's stated purpose
 
 Score **0** (absent/fail) if:
-- ❌ Field is missing, null, or empty
-- ❌ Content is generic, boilerplate, or placeholder text
-- ❌ Information is incomplete, vague, or too high-level
-- ❌ Does not meaningfully address the sub-element's intent
+- Field is missing, null, or empty
+- Content is generic, boilerplate, or placeholder text
+- Information is incomplete, vague, or does not address the purpose of the D4D, element, or sub-element
+- Does not meaningfully address the sub-element's intent
 
 ### Quality vs. Presence
 
 **This is NOT simple field-presence detection.** You must assess the **quality and usefulness** of the content:
 
-- ✅ **Good:** "Participants recruited from 5 specialty clinics across North America (MGH, UF, UT Health, Tufts, Emory) with IRB approval from each institution."
-- ⚠️ **Marginal:** "Data collected from multiple sites."
-- ❌ **Poor:** "Collection sites: various"
+- **Good:** "Participants recruited from 5 specialty clinics across North America (MGH, UF, UT Health, Tufts, Emory) with IRB approval from each institution."
+- **Marginal:** "Data collected from multiple sites."
+- **Poor:** "Collection sites: various"
 
 ### Semantic Analysis Requirements
 
@@ -54,7 +54,7 @@ Score **0** (absent/fail) if:
 
 1. **Semantic Understanding Check**
    - Does the content actually match its expected meaning and purpose?
-   - Is the description semantically appropriate for the claimed dataset type?
+   - Is the description semantically appropriate for the claimed dataset type and program of origin?
    - Are technical terms used correctly and consistently?
 
 2. **Correctness Validation**
@@ -78,7 +78,7 @@ Score **0** (absent/fail) if:
      - IF funding present → EXPECT `purposes` aligns with funding goals
 
 4. **Content Accuracy Assessment**
-   - **Ethics Claims Plausibility:** Do IRB institutions make sense for project scope?
+   - **Ethics Claims Plausibility:** Do Licensing & Governance and Data Protection & Compliance sections align with Human Subjects section and overall project scope?
    - **Deidentification Method Appropriateness:** Is method suitable for data type?
    - **Funding Pattern Matching:** Do grant numbers follow expected patterns?
    - **Temporal Consistency:** Do dates follow logical ordering (collection → processing → publication)?
