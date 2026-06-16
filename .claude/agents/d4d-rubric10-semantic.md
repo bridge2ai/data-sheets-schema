@@ -83,14 +83,16 @@ Score **0** (absent/fail) if:
 
        | Condition | Satisfied when… | Gates |
        |---|---|---|
-       | Human subjects / governance | `human_subject_research.involves_human_subjects=True` OR governance/regulatory restrictions mentioned anywhere in the datasheet | Element 4 (all 5 sub-elements) |
+       | Human subjects | `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment — never E4's own fields | Element 4 (all 5 sub-elements) |
+       | Governance restrictions | `regulatory_restrictions` or `confidentiality_level` (from E2) indicate governance constraints — E2 fields, not E4 fields, so non-circular | Element 4 (all 5 sub-elements) |
        | Datasets shared & available for reuse | `distribution_formats` populated OR `download_url`/`page` links to accessible data OR license explicitly permits reuse | Element 3 sub-elements 1–4, Element 6 (all), Element 8 (all), Element 10 (all) |
-       | Software tools shared & available for reuse | `software_and_tools` lists at least one tool AND an access path (URL, repo, or distribution) exists | Element 8 sub-elements 3–4 |
+       | Software tools produced as dataset output | `external_resources` (from E10) references a code repository, OR `description`/`purposes` (from E1/E7) explicitly identifies software production as a dataset output — never E8's own fields | Element 8 sub-elements 3–4 |
        | Data collection identified AND datasets shared | Collection fields populated (`acquisition_methods`, `collection_mechanisms`) AND the datasets shared condition above is met | Element 8 sub-elements 1–2 |
        | Publication identified AND datasets shared | `citation` or `external_resources` includes at least one publication reference AND the datasets shared condition above is met | Element 10 sub-element 2 |
 
      - **Step 2 — Apply the N/A encoding convention:** If a condition is not met, set `applicable: false` and `score: null` for every sub-element it gates. Do not emit `0`. Subtract 1 from the denominator per excluded sub-element per the N/A Sub-Element Convention above.
      - **Ambiguity rule:** When a condition is borderline (e.g., a dataset page exists but access requires approval), default to `applicable: true` and score based on what is documented. This prevents silent N/A inflation on datasets that are partially shared.
+     - **Anti-circular rule:** A sub-element's own scoring fields may not be the sole basis for excluding it. If the only reason to set `applicable: false` is the absence of the sub-element's own fields, treat it as `applicable: true` and score accordingly (receiving 0 if those fields are absent). Applicability must be evidenced by fields belonging to a *different* element. Emit `applicability_status` and `applicability_evidence` before scoring every conditional sub-element to make this determination explicit and auditable.
      - EXAMPLE (applicable + scored): `distribution_formats` lists Parquet and TSV with a PhysioNet download URL → datasets shared condition is met → Element 6, 8, and 10 sub-elements are applicable and scored.
      - EXAMPLE (applicable + scored low): `human_subject_research.involves_human_subjects=True` but no IRB fields populated → Element 4 sub-elements are applicable (condition met) and receive a score of 0, flagged as a consistency gap.
      - EXAMPLE (not applicable): No `distribution_formats`, no accessible URL, license is proprietary/internal-only → datasets shared condition is NOT met → Element 3 sub-elements 1–4, all of Element 6, all of Element 8, and all of Element 10 are set to `applicable: false`, `score: null`, and excluded from the denominator.
@@ -224,27 +226,27 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
    - Fields: `ethical_reviews`, `human_subject_research`, `data_protection_impacts`, `regulatory_restrictions.governance_committee_contact`
    - Look for: IRB approval details, institutional oversight, ethics review boards, data protection impact assessments (DPIAs), governance committee contacts
    - **Semantic Check:** If `human_subject_research.involves_human_subjects=True`, this MUST be populated
-   - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
+   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) indicate governance constraints. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 2. **Deidentification Method Described**
    - Fields: `is_deidentified`
    - Look for: Specific deidentification method (HIPAA Safe Harbor, Expert Determination, k-anonymity)
-   - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
+   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) indicate governance constraints. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 3. **Privacy Protections and Re-identification Risk Assessment**
    - Fields: `participant_privacy`, `participant_privacy.reidentification_risk`
    - Look for: Privacy protections, anonymization procedures, explicit re-identification risk assessment and mitigation measures
-   - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
+   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) indicate governance constraints. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 4. **Informed Consent Obtained from Participants**
    - Fields: `informed_consent`
    - Look for: Consent procedures, consent type (written, verbal), withdrawal mechanisms
-   - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
+   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) indicate governance constraints. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 5. **Vulnerable Populations and Compensation Documented**
    - Fields: `at_risk_populations`, `participant_compensation`
    - Look for: Protections for at-risk populations, compensation details
-   - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
+   - **Applies to:** Always report results of this sub-element, but only score if `description` or `keywords` (from E1) reference human participants, patients, or clinical research, OR `collection_mechanisms` (from E8) describes human participant recruitment, OR `regulatory_restrictions`/`confidentiality_level` (from E2) indicate governance constraints. Do not use E4's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 ---
 
@@ -352,12 +354,12 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
 3. **Preprocessing, Cleaning, Labeling, and Annotation Quality**
    - Fields: `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `annotation_analyses`, `machine_annotation_tools`, `imputation_protocols`
    - Look for: Preprocessing pipeline, cleaning steps, labeling methods, annotation quality analyses, machine annotation tools, imputation protocols for missing values
-   - **Applies to:** Always report results of this sub-element, but only score if software tools are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Always report results of this sub-element, but only score if `external_resources` (from E10) references a code repository, OR `description` or `purposes` (from E1/E7) explicitly identifies software production as a dataset output. Do not use E8's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 4. **Software and Tools Documented**
    - Fields: `software_and_tools`
    - Look for: Software names, versions, processing tools, GitHub repos
-   - **Applies to:** Always report results of this sub-element, but only score if software tools are identified elsewhere as shared and available for reuse.
+   - **Applies to:** Always report results of this sub-element, but only score if `external_resources` (from E10) references a code repository, OR `description` or `purposes` (from E1/E7) explicitly identifies software production as a dataset output. Do not use E8's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 5. **External Standards and Resources Referenced**
    - Fields: `external_resources`, `conforms_to`
@@ -530,6 +532,8 @@ Return your evaluation as a **JSON object** with this EXACT structure:
         {
           "name": "IRB or Ethics Review Documented",
           "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "description contains 'voice recordings from participants'; keywords include 'clinical trial'",
           "score": 1,
           "evidence": "ethical_reviews: IRB approval from 5 institutions documented",
           "quality_note": "Human subjects confirmed; IRB details present"
@@ -537,9 +541,11 @@ Return your evaluation as a **JSON object** with this EXACT structure:
         {
           "name": "Informed Consent Obtained from Participants",
           "applicable": false,
+          "applicability_status": "not_applicable",
+          "applicability_evidence": "description and keywords contain no clinical/patient/participant terms; collection_mechanisms absent; regulatory_restrictions and confidentiality_level (E2) not populated",
           "score": null,
-          "evidence": "human_subject_research.involves_human_subjects not present in this datasheet",
-          "quality_note": "Excluded from denominator: human subjects / governance condition not met"
+          "evidence": "No human subject evidence found in E1, E2, or E8 fields",
+          "quality_note": "Excluded from denominator: human subjects and governance conditions not met via external fields"
         }
       ],
       "element_score": 1,
@@ -828,4 +834,3 @@ See `notes/RUBRIC_AGENT_USAGE.md` for comprehensive usage examples.
 - **Complement, Not Replace:** This LLM-based evaluation complements the existing field-presence detection in `src/evaluation/evaluate_d4d.py`
 - **Cost:** ~$0.10-0.30 per file evaluation via Anthropic API
 - **Time:** ~30-60 seconds per file (slower than presence detection but provides deeper insights)
-
