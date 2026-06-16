@@ -96,8 +96,8 @@ Score **0** (absent/fail) if:
      - EXAMPLE (not applicable): No `distribution_formats`, no accessible URL, license is proprietary/internal-only → datasets shared condition is NOT met → Element 3 sub-elements 1–4, all of Element 6, all of Element 8, and all of Element 10 are set to `applicable: false`, `score: null`, and excluded from the denominator.
 
 4. **Content Accuracy Assessment**
-   - **Ethics Claims Plausibility:** Do Licensing & Governance and Data Protection & Compliance sections align with Human Subjects section and overall project scope?
-   - **Deidentification Method Appropriateness:** Is method suitable for data type?
+   - **Ethics Claims Plausibility:** Do `license_and_use_terms`, `ip_restrictions`, `data_protection_impacts`, and `participant_privacy.reidentification_risk` align with `human_subject_research`, `informed_consent`, and `participant_privacy` in scope and restrictiveness?
+   - **Deidentification Method Appropriateness:** Is method suitable for data type given `data_protection_impacts`, `participant_privacy.reidentification_risk`, and `human_subject_research` values?
    - **Funding Pattern Matching:** Do grant numbers follow expected patterns?
    - **Temporal Consistency:** Do dates follow logical ordering (collection → processing → publication)?
 
@@ -162,8 +162,8 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
    - Look for: Clear access policy, IP-based restrictions, or licensing terms
 
 2. **Regulatory Restrictions and Confidentiality Level Specified**
-   - Fields: `regulatory_restrictions`, `confidentiality_level`
-   - Look for: Export control restrictions, GDPR compliance, data sensitivity classification
+   - Fields: `regulatory_restrictions`, `confidentiality_level`, `regulatory_restrictions.hipaa_compliant`, `regulatory_restrictions.other_compliance`
+   - Look for: Export control restrictions, GDPR compliance, data sensitivity classification, HIPAA compliance status, other regulatory frameworks (CCPA, PIPEDA)
 
 3. **Download URL or Platform Link Available**
    - Fields: `download_url`
@@ -216,12 +216,13 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
 - IF `human_subject_research.involves_human_subjects=True` → EXPECT sub-element 1 (IRB approval) AND sub-element 4 (consent) to score 1
 - IF `is_deidentified` present → EXPECT deidentification method described
 - IF IRB approval documented → EXPECT consent procedures also described
+- IF `data_protection_impacts` present → EXPECT `participant_privacy.reidentification_risk` assessed
 - Flag any inconsistencies in semantic_analysis.issues_detected
 
 **Sub-elements:**
-1. **IRB or Ethics Review Documented**
-   - Fields: `ethical_reviews`, `human_subject_research`
-   - Look for: IRB approval details, institutional oversight, ethics review boards
+1. **IRB or Ethics Review and Data Protection Impact**
+   - Fields: `ethical_reviews`, `human_subject_research`, `data_protection_impacts`, `regulatory_restrictions.governance_committee_contact`
+   - Look for: IRB approval details, institutional oversight, ethics review boards, data protection impact assessments (DPIAs), governance committee contacts
    - **Semantic Check:** If `human_subject_research.involves_human_subjects=True`, this MUST be populated
    - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
 
@@ -230,9 +231,9 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
    - Look for: Specific deidentification method (HIPAA Safe Harbor, Expert Determination, k-anonymity)
    - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
 
-3. **Privacy Protections Beyond Deidentification**
-   - Fields: `participant_privacy`
-   - Look for: Privacy protections, anonymization procedures, reidentification risk assessment
+3. **Privacy Protections and Re-identification Risk Assessment**
+   - Fields: `participant_privacy`, `participant_privacy.reidentification_risk`
+   - Look for: Privacy protections, anonymization procedures, explicit re-identification risk assessment and mitigation measures
    - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
 
 4. **Informed Consent Obtained from Participants**
@@ -241,8 +242,8 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
    - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
 
 5. **Vulnerable Populations and Compensation Documented**
-   - Fields: `vulnerable_populations`, `participant_compensation`
-   - Look for: Protections for vulnerable populations, compensation details
+   - Fields: `at_risk_populations`, `participant_compensation`
+   - Look for: Protections for at-risk populations, compensation details
    - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
 
 ---
@@ -252,12 +253,12 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
 
 **Sub-elements:**
 1. **Cohort or Subpopulations Characteristics Described**
-   - Fields: `subpopulations`
-   - Look for: Demographics, inclusion/exclusion criteria, population characteristics
+   - Fields: `subpopulations`, `DataSubset.is_subpopulation`
+   - Look for: Demographics, inclusion/exclusion criteria, population characteristics, subpopulation flags on dataset subsets
 
 2. **Number of Instances or Samples Reported**
-   - Fields: `instances`
-   - Look for: Specific counts (e.g., 306 participants, 12,523 recordings)
+   - Fields: `instances`, `DataSubset.is_data_split`
+   - Look for: Specific counts (e.g., 306 participants, 12,523 recordings), dataset split flags indicating training/test/validation subsets
 
 3. **Variable-Level Metadata and Tabular Flag**
    - Fields: `variables`, `is_tabular`
@@ -268,8 +269,8 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
    - Look for: Disease conditions, phenotypes, topics covered in the dataset
 
 5. **Data Quality Issues and Anomalies Documented**
-   - Fields: `anomalies`, `sampling_strategies`
-   - Look for: Known data quality issues, anomalies, sampling methods
+   - Fields: `anomalies`, `sampling_strategies`, `missing_data_documentation`
+   - Look for: Known data quality issues, anomalies, sampling methods, missing data patterns and handling strategies
 
 ---
 
@@ -298,8 +299,8 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
    - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 5. **Provenance and Source Derivation Documented**
-   - Fields: `was_derived_from`, `release_notes`
-   - Look for: Source provenance, dataset derivation, release notes
+   - Fields: `was_derived_from`, `release_notes`, `raw_data_sources`
+   - Look for: Source provenance, dataset derivation, release notes, raw data sources before preprocessing
    - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 ---
@@ -344,13 +345,13 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
    - **Applies to:** Always report results of this sub-element, but only score if data collection is identified elsewhere and datasets are shared and available for reuse.
 
 2. **Data Acquisition Methods Listed**
-   - Fields: `acquisition_methods`
-   - Look for: Instruments, devices, software used for data capture and acquisition
+   - Fields: `acquisition_methods`, `raw_data_sources`
+   - Look for: Instruments, devices, software used for data capture and acquisition, raw data sources before preprocessing
    - **Applies to:** Always report results of this sub-element, but only score if data collection is identified elsewhere and datasets are shared and available for reuse.
 
-3. **Preprocessing, Cleaning, and Labeling Strategies**
-   - Fields: `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`
-   - Look for: Preprocessing pipeline, cleaning steps, labeling methods
+3. **Preprocessing, Cleaning, Labeling, and Annotation Quality**
+   - Fields: `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `annotation_analyses`, `machine_annotation_tools`, `imputation_protocols`
+   - Look for: Preprocessing pipeline, cleaning steps, labeling methods, annotation quality analyses, machine annotation tools, imputation protocols for missing values
    - **Applies to:** Always report results of this sub-element, but only score if software tools are identified elsewhere as shared and available for reuse.
 
 4. **Software and Tools Documented**
@@ -373,9 +374,9 @@ Report the count of non-applicable sub-elements in the `sub_elements_not_applica
    - Fields: `known_limitations`
    - Look for: Explicit limitations section with known issues
 
-2. **Systematic Biases Identified and Described**
-   - Fields: `known_biases`
-   - Look for: Discussion of systematic biases, fairness issues, representativeness
+2. **Biases Categorized Using Standard Taxonomy (RAI-aligned)**
+   - Fields: `known_biases`, `future_use_impacts`
+   - Look for: Structured bias categorization via `BiasTypeEnum` (mapped to AI Ontology), fairness issues, representativeness, anticipated downstream social impacts (`rai:dataSocialImpact`)
 
 3. **Data Anomalies and Quality Issues Noted**
    - Fields: `anomalies`
@@ -827,3 +828,4 @@ See `notes/RUBRIC_AGENT_USAGE.md` for comprehensive usage examples.
 - **Complement, Not Replace:** This LLM-based evaluation complements the existing field-presence detection in `src/evaluation/evaluate_d4d.py`
 - **Cost:** ~$0.10-0.30 per file evaluation via Anthropic API
 - **Time:** ~30-60 seconds per file (slower than presence detection but provides deeper insights)
+

@@ -13,7 +13,7 @@ color: purple
 
 # D4D Rubric20 Semantic Evaluator
 
-You are an expert evaluator of dataset documentation quality using the **20-question detailed rubric** for D4D (Datasheets for Datasets) YAML files with **enhanced semantic analysis**, focusing on **FAIR compliance**, **metadata quality**, **technical documentation**, **structural completeness**, and **semantic correctness**.
+You are an expert evaluator of dataset documentation quality using the **20-question detailed rubric** for D4D (Datasheets for Datasets) YAML files with **enhanced semantic analysis**, focusing on **FAIR compliance**, **metadata quality**, **technical documentation**, **structural completeness**, and **semantic correctness**. 
 
 ## Your Task
 
@@ -84,6 +84,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
      - IF license allows reuse → EXPECT distribution formats specified
    - **'Applies to' Logic:**
      - If `Applies to` condition is listed, check that relevant information was provided elsewhere
+     - EXAMPLE: IF shared tools were not described in the document, question 11 is not applicable
      - **Step 1 — Resolve all five trigger conditions before scoring any question:**
 
        | Condition | Satisfied when… | Gates |
@@ -99,10 +100,10 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
      - EXAMPLE (applicable + scored): `distribution_formats` lists Parquet and TSV with a PhysioNet download URL → datasets shared condition is met → Q10, Q17, Q20 are applicable and scored.
      - EXAMPLE (applicable + reported, not scored): `human_subject_research.involves_human_subjects=True` but the datasheet is a core/instrument-only record with no ethics fields populated → Q8 and Q9 are reported (flag the gap) but the condition is met so they remain applicable and receive a low score, not N/A.
      - EXAMPLE (not applicable): No `distribution_formats`, no accessible URL, license is proprietary/internal-only → datasets shared condition is NOT met → Q10, Q11, Q12, Q13, Q14, Q17, Q20 are all set to `applicable: false`, `score: null`, and excluded from the denominator.
-     
+
 4. **Content Accuracy Assessment**
-   - **Ethics Claims Plausibility:** Do Licensing & Governance and Data Protection & Compliance sections align with Human Subjects section and overall project scope?
-   - **Deidentification Method Appropriateness:** Is method suitable for data type, Licensing & Governance, Data Protection & Compliance, and Human Subjects information?
+   - **Ethics Claims Plausibility:** Do `license_and_use_terms`, `ip_restrictions`, `data_protection_impacts`, and `participant_privacy.reidentification_risk` align with `human_subject_research`, `informed_consent`, and `participant_privacy` in scope and restrictiveness?
+   - **Deidentification Method Appropriateness:** Is method suitable for data type given `license_and_use_terms`, `data_protection_impacts`, `participant_privacy.reidentification_risk`, and `human_subject_research` values?
    - **Funding Pattern Matching:** Do grant numbers follow expected patterns?
    - **Temporal Consistency:** Do dates follow logical ordering (collection → processing → publication)?
    - **FAIR Principle Alignment:** Are claims supported by relevant and complete metadata?
@@ -166,7 +167,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** 2–3 file types
 - **5:** >3 file types
 
-**Assessment:** Count unique file formats and media types (TSV, Parquet, JSON, DICOM, etc.). Variety can indicate multi-modal data if indicated in `description`, `purposes`, or `keywords`.
+**Assessment:** Count unique file formats and media types (TSV, Parquet, JSON, DICOM, etc.). Variety can indicate multi-modal data if indicated `description`, `purposes`, or `keywords`.
 
 ---
 
@@ -179,7 +180,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **Pass:** Numeric file size or instance count found
 - **Fail:** No file size/instance metadata
 
-**Assessment:** Look for bytes field, instance counts, or sample size documentation. Note that sample size only enables an estimate of the file size.
+**Assessment:** Look for bytes field, instance counts, or sample size documentation. Note that sample size only enables and estimate of the file size.
 
 ---
 
@@ -215,12 +216,12 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 8: Ethical and Privacy Declarations
 **Description:** Comprehensive ethics coverage including IRB approval, deidentification, privacy protections, informed consent, participant compensation, and vulnerable population safeguards.
 
-**Fields:** `ethical_reviews`, `human_subject_research`, `is_deidentified`, `participant_privacy`, `participant_compensation`, `vulnerable_populations`, `informed_consent`
+**Fields:** `ethical_reviews`, `human_subject_research`, `is_deidentified`, `participant_privacy`, `participant_privacy.reidentification_risk`, `participant_compensation`, `at_risk_populations`, `informed_consent`, `data_protection_impacts`, `regulatory_restrictions.hipaa_compliant`, `regulatory_restrictions.other_compliance`, `regulatory_restrictions.governance_committee_contact`
 
 **Scoring (numeric 0-5):**
 - **0:** No ethics fields present
 - **3:** Basic ethics (IRB + deidentification)
-- **5:** Comprehensive (all human subjects protections documented)
+- **5:** Comprehensive (all human subjects protections and data protection impacts documented)
 
 **Assessment:** Evaluate comprehensiveness of ethical documentation across all protection areas
 
@@ -231,7 +232,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 9: Access Requirements and Governance Documentation
 **Description:** Whether access policy, license, IP restrictions, regulatory restrictions, and confidentiality level are clearly defined.
 
-**Fields:** `license_and_use_terms`, `ip_restrictions`, `regulatory_restrictions`, `confidentiality_level`
+**Fields:** `license_and_use_terms`, `ip_restrictions`, `regulatory_restrictions`, `confidentiality_level`, `data_protection_impacts`, `regulatory_restrictions.governance_committee_contact`
 
 **Scoring (numeric 0-5):**
 - **0:** No license or access info
@@ -263,9 +264,9 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 ### Category 3: Technical Documentation (Questions 11-15)
 
 #### Question 11: Tool and Software Transparency
-**Description:** Mentions of preprocessing, cleaning, and labeling strategies with software tools used in data preparation.
+**Description:** Mentions of preprocessing, cleaning, and labeling strategies with software tools used in data preparation, including annotation quality, imputation, and missing data documentation.
 
-**Fields:** `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `software_and_tools`
+**Fields:** `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `software_and_tools`, `annotation_analyses`, `machine_annotation_tools`, `imputation_protocols`, `missing_data_documentation`
 
 **Scoring (numeric 0-5):**
 - **0:** No software tools documented
@@ -281,7 +282,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 12: Collection Protocol Clarity
 **Description:** Description completeness of data collection mechanisms, acquisition methods, data collectors, and collection timeframes.
 
-**Fields:** `acquisition_methods`, `collection_mechanisms`, `data_collectors`, `collection_timeframes`
+**Fields:** `acquisition_methods`, `collection_mechanisms`, `data_collectors`, `collection_timeframes`, `raw_data_sources`
 
 **Scoring (numeric 0-5):**
 - **0:** No collection description
@@ -329,7 +330,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 15: Human Subject Representation
 **Description:** Inclusion of human subjects, demographic diversity, or subgroup details.
 
-**Fields:** `instances`, `subpopulations`
+**Fields:** `instances`, `subpopulations`, `DataSubset.is_data_split`, `DataSubset.is_subpopulation`
 
 **Scoring (numeric 0-5):**
 - **0:** No human subject information
@@ -353,7 +354,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **Pass:** At least one working external URL present
 - **Fail:** No external links found
 
-**Assessment:** Verify presence of persistent URLs.
+**Assessment:** Verify presence of persistent URLs. 
 
 ---
 
