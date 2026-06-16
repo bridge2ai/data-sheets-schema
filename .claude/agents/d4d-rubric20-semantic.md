@@ -730,7 +730,7 @@ semantic_analysis_summary:
 - **Technical Documentation (5 questions):** 25 points max (5 numeric @5 each)
 - **FAIRness & Accessibility (5 questions):** 13 points max (3 numeric @5 each + 2 pass/fail)
 
-**NOTE:** if any question in the output includes "applicable": "false", decrease the Maximum Possible Score by the question `max_score` and use the adjusted Maximum Possible Score to calculate score percentage. Report the number of non-applicable questions in the "questions_not_applicable" field.
+**NOTE:** If any question in the output includes "applicable": "false", decrease the Maximum Possible Score by the question `max_score` and use the adjusted Maximum Possible Score to calculate score percentage. Report the number of non-applicable questions in the "questions_not_applicable" field.
 
 ## Key Principles
 
