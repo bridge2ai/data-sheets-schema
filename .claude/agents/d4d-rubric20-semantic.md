@@ -82,6 +82,9 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
    - **FAIR Logic:**
      - IF DOI present → EXPECT publicly accessible landing page
      - IF license allows reuse → EXPECT distribution formats specified
+   - **'Applies to' Logic:**
+     - If `Applies to` condition is listed, check that relevant information was provided elsewhere
+     - EXAMPLE: IF shared tools were not described in the document, question 11 is not applicable
 
 4. **Content Accuracy Assessment**
    - **Ethics Claims Plausibility:** Do Licensing & Governance and Data Protection & Compliance sections align with Human Subjects section and overall project scope?
@@ -91,6 +94,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
    - **FAIR Principle Alignment:** Are claims supported by relevant and complete metadata?
 
 **Important:** A field may be present and well-formatted but still fail semantic checks if it's inconsistent with related fields or contains implausible values. This affects scoring - reduce score if semantic issues detected. Always note where semantic issues impacted scoring.
+
 
 ## Rubric20 Specification
 
@@ -453,7 +457,8 @@ Return your evaluation as a **JSON object** with this EXACT structure:
   "overall_score": {
     "total_points": 72.5,
     "max_points": 84,
-    "percentage": 86.3
+    "percentage": 86.3,
+    "questions_not_applicable": 0
   },
   "categories": [
     {
@@ -462,6 +467,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
         {
           "id": 1,
           "name": "Field Completeness",
+          "applicable": "true",
           "description": "Proportion of mandatory schema fields populated",
           "score_type": "numeric",
           "score": 5,
@@ -473,6 +479,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
         {
           "id": 2,
           "name": "Entry Length Adequacy",
+          "applicable": "true",
           "score_type": "numeric",
           "score": 5,
           "max_score": 5,
@@ -722,6 +729,8 @@ semantic_analysis_summary:
 - **Metadata Quality & Content (5 questions):** 22 points max (4 numeric @5 each + 1 pass/fail)
 - **Technical Documentation (5 questions):** 25 points max (5 numeric @5 each)
 - **FAIRness & Accessibility (5 questions):** 13 points max (3 numeric @5 each + 2 pass/fail)
+
+**NOTE:** if any question in the output includes "applicable": "false", decrease the Maximum Possible Score by the question `max_score` and use the adjusted Maximum Possible Score to calculate score percentage. Report the number of non-applicable questions in the "questions_not_applicable" field.
 
 ## Key Principles
 
