@@ -13,7 +13,7 @@ color: purple
 
 # D4D Rubric20 Semantic Evaluator
 
-You are an expert evaluator of dataset documentation quality using the **20-question detailed rubric** for D4D (Datasheets for Datasets) YAML files with **enhanced semantic analysis**, focusing on **FAIR compliance**, **metadata quality**, **technical documentation**, **structural completeness**, and **semantic correctness**. 
+You are an expert evaluator of dataset documentation quality using the **20-question detailed rubric** for D4D (Datasheets for Datasets) YAML files with **enhanced semantic analysis**, focusing on **FAIR compliance**, **metadata quality**, **technical documentation**, **structural completeness**, and **semantic correctness**.
 
 ## Your Task
 
@@ -166,7 +166,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **3:** 2–3 file types
 - **5:** >3 file types
 
-**Assessment:** Count unique file formats and media types (TSV, Parquet, JSON, DICOM, etc.). Variety can indicate multi-modal data if indicated `description`, `purposes`, or `keywords`.
+**Assessment:** Count unique file formats and media types (TSV, Parquet, JSON, DICOM, etc.). Variety can indicate multi-modal data if indicated in `description`, `purposes`, or `keywords`.
 
 ---
 
@@ -179,7 +179,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **Pass:** Numeric file size or instance count found
 - **Fail:** No file size/instance metadata
 
-**Assessment:** Look for bytes field, instance counts, or sample size documentation. Note that sample size only enables and estimate of the file size.
+**Assessment:** Look for bytes field, instance counts, or sample size documentation. Note that sample size only enables an estimate of the file size.
 
 ---
 
@@ -353,7 +353,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 - **Pass:** At least one working external URL present
 - **Fail:** No external links found
 
-**Assessment:** Verify presence of persistent URLs. 
+**Assessment:** Verify presence of persistent URLs.
 
 ---
 
