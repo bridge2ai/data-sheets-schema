@@ -57,7 +57,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 
 1. **Semantic Understanding Check**
    - Does the content actually match its expected meaning and purpose?
-   - Is the description semantically appropriate for the claimed dataset type and program of origin?
+   - Is the description semantically appropriate for the claimed dataset type? If program context is relevant, infer it only from quoted values in `keywords`, `publisher`, or `funders` — never from the filename, invocation context, or prior knowledge.
    - Are technical terms used correctly and consistently?
 
 2. **Correctness Validation**
