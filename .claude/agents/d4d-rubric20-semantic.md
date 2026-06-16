@@ -84,8 +84,22 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
      - IF license allows reuse → EXPECT distribution formats specified
    - **'Applies to' Logic:**
      - If `Applies to` condition is listed, check that relevant information was provided elsewhere
-     - EXAMPLE: IF shared tools were not described in the document, question 11 is not applicable
+     - **Step 1 — Resolve all five trigger conditions before scoring any question:**
 
+       | Condition | Satisfied when… | Gates |
+       |---|---|---|
+       | Human subjects / governance | `human_subject_research.involves_human_subjects=True` OR governance/regulatory restrictions mentioned anywhere in the datasheet | Q8, Q9, Q15 |
+       | Datasets shared & available for reuse | `distribution_formats` populated OR `download_url`/`page` links to accessible data OR license explicitly permits reuse | Q10, Q17, Q20 |
+       | Software tools shared & available for reuse | `software_and_tools` lists at least one tool AND an access path (URL, repo, or distribution) exists | Q11 |
+       | Data collection identified AND datasets shared | Collection fields populated (`acquisition_methods`, `collection_mechanisms`, `data_collectors`, or `collection_timeframes`) AND the datasets shared condition above is met | Q12, Q13 |
+       | Publication identified AND datasets shared | `citation` or `external_resources` includes at least one publication reference AND the datasets shared condition above is met | Q14 |
+
+     - **Step 2 — Apply the N/A encoding convention:** If a condition is not met, set `applicable: false` and `score: null` for every question it gates. Do not emit `0`. Subtract the question's `max_score` from the denominator per the N/A Question Convention in the Scoring Summary section.
+     - **Ambiguity rule:** When a condition is borderline (e.g., a dataset page exists but access requires approval), default to `applicable: true` and score based on what is documented. This prevents silent N/A inflation on datasets that are partially shared.
+     - EXAMPLE (applicable + scored): `distribution_formats` lists Parquet and TSV with a PhysioNet download URL → datasets shared condition is met → Q10, Q17, Q20 are applicable and scored.
+     - EXAMPLE (applicable + reported, not scored): `human_subject_research.involves_human_subjects=True` but the datasheet is a core/instrument-only record with no ethics fields populated → Q8 and Q9 are reported (flag the gap) but the condition is met so they remain applicable and receive a low score, not N/A.
+     - EXAMPLE (not applicable): No `distribution_formats`, no accessible URL, license is proprietary/internal-only → datasets shared condition is NOT met → Q10, Q11, Q12, Q13, Q14, Q17, Q20 are all set to `applicable: false`, `score: null`, and excluded from the denominator.
+     
 4. **Content Accuracy Assessment**
    - **Ethics Claims Plausibility:** Do Licensing & Governance and Data Protection & Compliance sections align with Human Subjects section and overall project scope?
    - **Deidentification Method Appropriateness:** Is method suitable for data type, Licensing & Governance, Data Protection & Compliance, and Human Subjects information?
@@ -457,7 +471,9 @@ Return your evaluation as a **JSON object** with this EXACT structure:
   "overall_score": {
     "total_points": 72.5,
     "max_points": 84,
-    "percentage": 86.3,
+    "excluded_max_points": 0,
+    "adjusted_max_points": 84,
+    "normalized_percentage": 86.3,
     "questions_not_applicable": 0
   },
   "categories": [
@@ -487,7 +503,18 @@ Return your evaluation as a **JSON object** with this EXACT structure:
           "evidence": "description: 420 chars, motivation: N/A",
           "quality_note": "Description is comprehensive at 420 characters"
         },
-        ... (remaining questions 3-5)
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "applicable": "false",
+          "score_type": "numeric",
+          "score": null,
+          "max_score": 5,
+          "score_label": "Not applicable",
+          "evidence": "No shared software tools identified in this datasheet",
+          "quality_note": "Excluded from denominator per 'Applies to' condition: software tools not shared"
+        },
+        "... (remaining questions 3-5)"
       ],
       "category_score": 23,
       "category_max": 24
@@ -495,7 +522,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
     {
       "name": "Metadata Quality & Content",
       "questions": [
-        ... (questions 6-10)
+        "... (questions 6-10)"
       ],
       "category_score": 18,
       "category_max": 22
@@ -503,7 +530,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
     {
       "name": "Technical Documentation",
       "questions": [
-        ... (questions 11-15)
+        "... (questions 11-15)"
       ],
       "category_score": 19,
       "category_max": 25
@@ -511,7 +538,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
     {
       "name": "FAIRness & Accessibility",
       "questions": [
-        ... (questions 16-20)
+        "... (questions 16-20)"
       ],
       "category_score": 12.5,
       "category_max": 13
@@ -567,7 +594,9 @@ evaluation_date: "<ISO 8601 date>"
 overall_performance:
   average_score: 52.3
   max_score: 84
-  average_percentage: 62.3
+  average_excluded_max_points: 8.5
+  average_adjusted_max_points: 75.5
+  average_normalized_percentage: 69.3
   best_score: 68.0
   worst_score: 38.5
   best_performer:
@@ -575,36 +604,48 @@ overall_performance:
     method: claudecode_agent
     project: AI_READI
     score: 68.0
-    percentage: 81.0
+    excluded_max_points: 5
+    adjusted_max_points: 79
+    normalized_percentage: 86.1
   worst_performer:
     file: CHORUS_d4d.yaml
     method: gpt5
     project: CHORUS
     score: 38.5
-    percentage: 45.8
+    excluded_max_points: 10
+    adjusted_max_points: 74
+    normalized_percentage: 52.0
 
 method_comparison:
   - method: claudecode_agent
     file_count: 4
     average_score: 56.2
-    average_percentage: 66.9
+    average_excluded_max_points: 7.5
+    average_adjusted_max_points: 76.5
+    average_normalized_percentage: 73.5
     rank: 1
   - method: claudecode_assistant
     file_count: 4
     average_score: 48.4
-    average_percentage: 57.6
+    average_excluded_max_points: 9.5
+    average_adjusted_max_points: 74.5
+    average_normalized_percentage: 64.9
     rank: 2
 
 project_comparison:
   - project: AI_READI
     file_count: 2
     average_score: 61.5
-    average_percentage: 73.2
+    average_excluded_max_points: 5.0
+    average_adjusted_max_points: 79.0
+    average_normalized_percentage: 77.8
     rank: 1
   - project: CM4AI
     file_count: 2
     average_score: 54.8
-    average_percentage: 65.2
+    average_excluded_max_points: 8.0
+    average_adjusted_max_points: 76.0
+    average_normalized_percentage: 72.1
     rank: 2
 
 category_performance:
@@ -612,22 +653,22 @@ category_performance:
     category_name: "Structural Completeness and Core Metadata"
     average_score: 15.8
     max_score: 24
-    average_percentage: 65.8
+    average_normalized_percentage: 65.8
   - category_id: "2"
     category_name: "Metadata Quality and Detail"
     average_score: 14.2
     max_score: 22
-    average_percentage: 64.5
+    average_normalized_percentage: 64.5
   - category_id: "3"
     category_name: "Technical Documentation and Reproducibility"
     average_score: 12.5
     max_score: 25
-    average_percentage: 50.0
+    average_normalized_percentage: 50.0
   - category_id: "4"
     category_name: "FAIRness and Accessibility"
     average_score: 9.8
     max_score: 13
-    average_percentage: 75.4
+    average_normalized_percentage: 75.4
 
 common_strengths:
   - description: "Strong structural completeness with semantically validated fields"
@@ -711,7 +752,7 @@ semantic_analysis_summary:
 ### Additional Output Files
 
 1. **CSV Summary:** `all_scores.csv`
-   - Columns: project, method, file, total_score, percentage, cat1_score, cat2_score, cat3_score, cat4_score, consistency_passed, consistency_failed, issues_detected
+   - Columns: project, method, file, total_score, excluded_max_points, adjusted_max_points, normalized_percentage, cat1_score, cat2_score, cat3_score, cat4_score, consistency_passed, consistency_failed, issues_detected
 
 2. **Markdown Report:** `summary_report.md`
    - Executive summary with scoring tables
@@ -724,13 +765,24 @@ semantic_analysis_summary:
 
 ## Scoring Summary
 
-**Maximum Possible Score:** 84 points
+**Maximum Possible Score:** 84 points (before N/A exclusions)
 - **Structural Completeness (5 questions):** 24 points max (4 numeric @5 each + 1 pass/fail)
 - **Metadata Quality & Content (5 questions):** 22 points max (4 numeric @5 each + 1 pass/fail)
 - **Technical Documentation (5 questions):** 25 points max (5 numeric @5 each)
 - **FAIRness & Accessibility (5 questions):** 13 points max (3 numeric @5 each + 2 pass/fail)
 
-**NOTE:** If any question in the output includes "applicable": "false", decrease the Maximum Possible Score by the question `max_score` and use the adjusted Maximum Possible Score to calculate score percentage. Report the number of non-applicable questions in the "questions_not_applicable" field.
+**N/A Question Convention:**
+
+1. **Encoding:** Set `applicable: false` and `score: null` for any question whose `Applies to` condition is not met. Do not emit `0` for these questions — a zero score penalizes datasheets for which the question is simply irrelevant.
+
+2. **Denominator rule:** Subtract the question's `max_score` from `max_points` to compute `adjusted_max_points`. Report `normalized_percentage = total_points / adjusted_max_points × 100`. This is the only percentage reported; it is comparable across datasheets regardless of how many questions are excluded.
+   - `excluded_max_points` = sum of `max_score` for all questions where `applicable: false`
+   - `adjusted_max_points` = `max_points` − `excluded_max_points`
+   - `normalized_percentage` = `total_points / adjusted_max_points × 100`
+
+3. **Batch aggregation:** Apply the same convention in the `EvaluationSummary`. Report `average_excluded_max_points`, `average_adjusted_max_points`, and `average_normalized_percentage` at the overall, method, and project levels so cross-file comparisons remain meaningful even when different datasheets trigger different N/A conditions (e.g., core vs. full-schema datasheets).
+
+**NOTE:** Report the count of non-applicable questions in the `questions_not_applicable` field of `overall_score`.
 
 ## Key Principles
 
