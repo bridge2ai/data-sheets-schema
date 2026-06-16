@@ -89,14 +89,15 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 
        | Condition | Satisfied when… | Gates |
        |---|---|---|
-       | Human subjects / governance | `human_subject_research.involves_human_subjects=True` OR governance/regulatory restrictions mentioned anywhere in the datasheet | Q8, Q9, Q15 |
+       | Human subjects | `description` or `keywords` reference human participants, patients, or clinical research, OR `collection_mechanisms` describes human participant recruitment — checked via Q1/Q2/Q3/Q12 fields only, never Q8's own fields | Q8, Q15 |
        | Datasets shared & available for reuse | `distribution_formats` populated OR `download_url`/`page` links to accessible data OR license explicitly permits reuse | Q10, Q17, Q20 |
-       | Software tools shared & available for reuse | `software_and_tools` lists at least one tool AND an access path (URL, repo, or distribution) exists | Q11 |
+       | Software tools produced as dataset output | `external_resources` references a code repository, OR `description`/`purposes` explicitly identifies software production as a dataset output — checked via Q2/Q7/Q14 fields only, never Q11's own fields | Q11 |
        | Data collection identified AND datasets shared | Collection fields populated (`acquisition_methods`, `collection_mechanisms`, `data_collectors`, or `collection_timeframes`) AND the datasets shared condition above is met | Q12, Q13 |
        | Publication identified AND datasets shared | `citation` or `external_resources` includes at least one publication reference AND the datasets shared condition above is met | Q14 |
 
      - **Step 2 — Apply the N/A encoding convention:** If a condition is not met, set `applicable: false` and `score: null` for every question it gates. Do not emit `0`. Subtract the question's `max_score` from the denominator per the N/A Question Convention in the Scoring Summary section.
      - **Ambiguity rule:** When a condition is borderline (e.g., a dataset page exists but access requires approval), default to `applicable: true` and score based on what is documented. This prevents silent N/A inflation on datasets that are partially shared.
+     - **Anti-circular rule:** A question's own scoring fields may not be the sole basis for excluding it. If the only reason to set `applicable: false` is the absence of the question's own fields, treat the question as `applicable: true` and score accordingly (receiving 0 if those fields are absent). Applicability must be evidenced by fields belonging to a *different* question. Emit `applicability_status` and `applicability_evidence` before scoring every conditional question to make this determination explicit and auditable.
      - EXAMPLE (applicable + scored): `distribution_formats` lists Parquet and TSV with a PhysioNet download URL → datasets shared condition is met → Q10, Q17, Q20 are applicable and scored.
      - EXAMPLE (applicable + reported, not scored): `human_subject_research.involves_human_subjects=True` but the datasheet is a core/instrument-only record with no ethics fields populated → Q8 and Q9 are reported (flag the gap) but the condition is met so they remain applicable and receive a low score, not N/A.
      - EXAMPLE (not applicable): No `distribution_formats`, no accessible URL, license is proprietary/internal-only → datasets shared condition is NOT met → Q10, Q11, Q12, Q13, Q14, Q17, Q20 are all set to `applicable: false`, `score: null`, and excluded from the denominator.
@@ -225,7 +226,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 
 **Assessment:** Evaluate comprehensiveness of ethical documentation across all protection areas
 
-**Applies to:** Always report results of this question, but only score if human subjects or governance restrictions are identified elsewhere.
+**Applies to:** Always report results of this question, but only score if `description`, `keywords`, or `collection_mechanisms` (from Q1–Q3, Q12) contain evidence of human participants, patients, or clinical research. Do not use Q8's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 ---
 
@@ -241,7 +242,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 
 **Assessment:** Evaluate clarity and completeness of governance and terms of use documentation.
 
-**Applies to:** Always report results of this question, but only score if human subjects or governance restrictions are identified elsewhere.
+**Applies to:** Always applicable. Every dataset must document its access and license terms; absence of this documentation scores 0, not N/A.
 
 ---
 
@@ -275,7 +276,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 
 **Assessment:** Look for strategy documentation and software names, versions, and links.
 
-**Applies to:** Always report results of this question, but only score if software tools were identified elsewhere as shared and available for reuse.
+**Applies to:** Always report results of this question, but only score if `external_resources` (from Q14) references a code repository, OR `description` or `purposes` (from Q2, Q7) explicitly identifies software production as a dataset output. Do not use Q11's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 ---
 
@@ -339,7 +340,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 
 **Assessment:** Evaluate demographic detail and population characterization through instances and subpopulations.
 
-**Applies to:** Always report results of this question, but only score if human subjects or governance restrictions are identified elsewhere.
+**Applies to:** Always report results of this question, but only score if `description`, `keywords`, or `collection_mechanisms` (from Q1–Q3, Q12) contain evidence of human participants, patients, or clinical research. Do not use Q15's own fields as the applicability signal. Emit `applicability_status` and `applicability_evidence` before scoring.
 
 ---
 
@@ -485,6 +486,8 @@ Return your evaluation as a **JSON object** with this EXACT structure:
           "id": 1,
           "name": "Field Completeness",
           "applicable": "true",
+          "applicability_status": "always_applicable",
+          "applicability_evidence": "",
           "description": "Proportion of mandatory schema fields populated",
           "score_type": "numeric",
           "score": 5,
@@ -508,6 +511,8 @@ Return your evaluation as a **JSON object** with this EXACT structure:
           "id": 11,
           "name": "Tool and Software Transparency",
           "applicable": "false",
+          "applicability_status": "not_applicable",
+          "applicability_evidence": "external_resources contains no code repository URLs; description and purposes contain no reference to software production as a dataset output",
           "score_type": "numeric",
           "score": null,
           "max_score": 5,
