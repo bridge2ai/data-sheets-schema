@@ -76,12 +76,47 @@ Score **0** (absent/fail) if:
    - **Funding Logic:**
      - IF `funders` present → EXPECT `funding_and_acknowledgements.funding.agency` matches
      - IF funding present → EXPECT `purposes` aligns with funding goals
+   - **'Applies to' Logic:**
+     - If an element or sub-element is only meaningful under a specific condition, check that the condition is satisfied before scoring it
+     - EXAMPLE: IF no human subjects are identified in the datasheet, Element 4 sub-elements are not applicable
+     - **Step 1 — Resolve all five trigger conditions before scoring any element:**
+
+       | Condition | Satisfied when… | Gates |
+       |---|---|---|
+       | Human subjects / governance | `human_subject_research.involves_human_subjects=True` OR governance/regulatory restrictions mentioned anywhere in the datasheet | Element 4 (all 5 sub-elements) |
+       | Datasets shared & available for reuse | `distribution_formats` populated OR `download_url`/`page` links to accessible data OR license explicitly permits reuse | Element 3 sub-elements 1–4, Element 6 (all), Element 8 (all), Element 10 (all) |
+       | Software tools shared & available for reuse | `software_and_tools` lists at least one tool AND an access path (URL, repo, or distribution) exists | Element 8 sub-elements 3–4 |
+       | Data collection identified AND datasets shared | Collection fields populated (`acquisition_methods`, `collection_mechanisms`) AND the datasets shared condition above is met | Element 8 sub-elements 1–2 |
+       | Publication identified AND datasets shared | `citation` or `external_resources` includes at least one publication reference AND the datasets shared condition above is met | Element 10 sub-element 2 |
+
+     - **Step 2 — Apply the N/A encoding convention:** If a condition is not met, set `applicable: false` and `score: null` for every sub-element it gates. Do not emit `0`. Subtract 1 from the denominator per excluded sub-element per the N/A Sub-Element Convention above.
+     - **Ambiguity rule:** When a condition is borderline (e.g., a dataset page exists but access requires approval), default to `applicable: true` and score based on what is documented. This prevents silent N/A inflation on datasets that are partially shared.
+     - EXAMPLE (applicable + scored): `distribution_formats` lists Parquet and TSV with a PhysioNet download URL → datasets shared condition is met → Element 6, 8, and 10 sub-elements are applicable and scored.
+     - EXAMPLE (applicable + scored low): `human_subject_research.involves_human_subjects=True` but no IRB fields populated → Element 4 sub-elements are applicable (condition met) and receive a score of 0, flagged as a consistency gap.
+     - EXAMPLE (not applicable): No `distribution_formats`, no accessible URL, license is proprietary/internal-only → datasets shared condition is NOT met → Element 3 sub-elements 1–4, all of Element 6, all of Element 8, and all of Element 10 are set to `applicable: false`, `score: null`, and excluded from the denominator.
 
 4. **Content Accuracy Assessment**
    - **Ethics Claims Plausibility:** Do Licensing & Governance and Data Protection & Compliance sections align with Human Subjects section and overall project scope?
    - **Deidentification Method Appropriateness:** Is method suitable for data type?
    - **Funding Pattern Matching:** Do grant numbers follow expected patterns?
    - **Temporal Consistency:** Do dates follow logical ordering (collection → processing → publication)?
+
+### N/A Sub-Element Convention
+
+**Maximum Possible Score:** 50 points (before N/A exclusions; 10 elements × 5 sub-elements × 1 point each)
+
+Some sub-elements are only applicable under certain conditions (see 'Applies to' Logic in Cross-Field Consistency Checking). When a condition is not met:
+
+1. **Encoding:** Set `applicable: false` and `score: null` for the sub-element. Do not emit `0` — a zero score penalizes datasheets for which the sub-element is simply irrelevant.
+
+2. **Denominator rule:** Each excluded sub-element reduces the denominator by 1.
+   - `excluded_max_points` = count of sub-elements where `applicable: false`
+   - `adjusted_max_points` = `max_points` − `excluded_max_points`
+   - `normalized_percentage` = `total_points / adjusted_max_points × 100`
+
+3. **Batch aggregation:** Apply the same convention in the `EvaluationSummary`. Report `average_excluded_max_points`, `average_adjusted_max_points`, and `average_normalized_percentage` at the overall, method, and project levels so cross-file comparisons remain meaningful even when different datasheets trigger different N/A conditions.
+
+Report the count of non-applicable sub-elements in the `sub_elements_not_applicable` field of `overall_score`.
 
 **Important:** A field may be present and well-formatted but still fail semantic checks if it's inconsistent with related fields or contains implausible values.
 
@@ -151,18 +186,22 @@ Score **0** (absent/fail) if:
 1. **License Terms Allow Reuse**
    - Fields: `license_and_use_terms`
    - Look for: Clear license (CC BY, CC BY-NC-SA, etc.) with reuse permissions
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 2. **Data Formats Are Standardized (encoding, format)**
    - Fields: `format`, `encoding`
    - Look for: Use of standard formats (JSON, TSV, Parquet, DICOM, WFDB) and character encoding
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 3. **Schema or Ontology Conformance Stated**
    - Fields: `conforms_to`, `conforms_to_schema`
    - Look for: References to schemas (OMOP, FHIR, schema.org, etc.)
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 4. **Variable Metadata with Identifiers Defined**
    - Fields: `variables`
    - Look for: Variable-level metadata with identifiers and descriptions
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 5. **Use Guidance Provided (intended, prohibited uses)**
    - Fields: `intended_uses`, `prohibited_uses`, `discouraged_uses`
@@ -184,22 +223,27 @@ Score **0** (absent/fail) if:
    - Fields: `ethical_reviews`, `human_subject_research`
    - Look for: IRB approval details, institutional oversight, ethics review boards
    - **Semantic Check:** If `human_subject_research.involves_human_subjects=True`, this MUST be populated
+   - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
 
 2. **Deidentification Method Described**
    - Fields: `is_deidentified`
    - Look for: Specific deidentification method (HIPAA Safe Harbor, Expert Determination, k-anonymity)
+   - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
 
 3. **Privacy Protections Beyond Deidentification**
    - Fields: `participant_privacy`
    - Look for: Privacy protections, anonymization procedures, reidentification risk assessment
+   - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
 
 4. **Informed Consent Obtained from Participants**
    - Fields: `informed_consent`
    - Look for: Consent procedures, consent type (written, verbal), withdrawal mechanisms
+   - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
 
 5. **Vulnerable Populations and Compensation Documented**
    - Fields: `vulnerable_populations`, `participant_compensation`
    - Look for: Protections for vulnerable populations, compensation details
+   - **Applies to:** Always report results of this sub-element, but only score if human subjects or governance restrictions are identified elsewhere.
 
 ---
 
@@ -236,22 +280,27 @@ Score **0** (absent/fail) if:
 1. **Dataset Version Number Provided**
    - Fields: `version`
    - Look for: Version number (1.0, 1.1, 2.0.1)
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 2. **Version Access Methods Documented**
    - Fields: `version_access`
    - Look for: How to access different versions of the dataset
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 3. **Change Descriptions and Errata Provided**
    - Fields: `errata`, `updates`
    - Look for: Errata documentation, update descriptions, change logs
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 4. **Update Schedule or Frequency Indicated**
    - Fields: `updates`
    - Look for: Update schedule, maintenance plan, update frequency
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 5. **Provenance and Source Derivation Documented**
    - Fields: `was_derived_from`, `release_notes`
    - Look for: Source provenance, dataset derivation, release notes
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 ---
 
@@ -292,22 +341,27 @@ Score **0** (absent/fail) if:
 1. **Collection Mechanisms and Settings Described**
    - Fields: `collection_mechanisms`
    - Look for: Collection procedures, settings, timeframes
+   - **Applies to:** Always report results of this sub-element, but only score if data collection is identified elsewhere and datasets are shared and available for reuse.
 
 2. **Data Acquisition Methods Listed**
    - Fields: `acquisition_methods`
    - Look for: Instruments, devices, software used for data capture and acquisition
+   - **Applies to:** Always report results of this sub-element, but only score if data collection is identified elsewhere and datasets are shared and available for reuse.
 
 3. **Preprocessing, Cleaning, and Labeling Strategies**
    - Fields: `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`
    - Look for: Preprocessing pipeline, cleaning steps, labeling methods
+   - **Applies to:** Always report results of this sub-element, but only score if software tools are identified elsewhere as shared and available for reuse.
 
 4. **Software and Tools Documented**
    - Fields: `software_and_tools`
    - Look for: Software names, versions, processing tools, GitHub repos
+   - **Applies to:** Always report results of this sub-element, but only score if software tools are identified elsewhere as shared and available for reuse.
 
 5. **External Standards and Resources Referenced**
    - Fields: `external_resources`, `conforms_to`
    - Look for: Published papers, standards documents, external documentation
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 ---
 
@@ -344,22 +398,27 @@ Score **0** (absent/fail) if:
 1. **Dataset Published on a Recognized Platform**
    - Fields: `publisher`
    - Look for: PhysioNet, Dataverse, FAIRhub, Zenodo, institutional repository
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 2. **Citation and DOI for Cross-referencing**
    - Fields: `citation`, `doi`
    - Look for: Recommended citation format, DOI for cross-referencing
+   - **Applies to:** Always report results of this sub-element, but only score if a publication is identified elsewhere and datasets are shared and available for reuse.
 
 3. **Community Standards or Schema Conformance**
    - Fields: `conforms_to`
    - Look for: OMOP, FHIR, schema.org, Dublin Core, other community standards
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 4. **Outreach Materials and Documentation Links**
    - Fields: `external_resources`, `page`
    - Look for: Webinars, tutorials, documentation links, landing pages
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 5. **Related Datasets with Typed Relationships**
    - Fields: `related_datasets`
    - Look for: Related datasets with relationship types (supplements, derives from, is version of)
+   - **Applies to:** Always report results of this sub-element, but only score if datasets are identified elsewhere as shared and available for reuse.
 
 ---
 
@@ -417,7 +476,10 @@ Return your evaluation as a **JSON object** with this EXACT structure:
   "overall_score": {
     "total_points": 38.5,
     "max_points": 50,
-    "percentage": 77.0
+    "excluded_max_points": 0,
+    "adjusted_max_points": 50,
+    "normalized_percentage": 77.0,
+    "sub_elements_not_applicable": 0
   },
   "elements": [
     {
@@ -459,7 +521,30 @@ Return your evaluation as a **JSON object** with this EXACT structure:
       "element_score": 5,
       "element_max": 5
     },
-    ... (repeat for all 10 elements)
+    {
+      "id": 4,
+      "name": "Ethical Use and Privacy Safeguards",
+      "description": "Does the dataset provide clear information about consent, privacy, and ethical oversight?",
+      "sub_elements": [
+        {
+          "name": "IRB or Ethics Review Documented",
+          "applicable": true,
+          "score": 1,
+          "evidence": "ethical_reviews: IRB approval from 5 institutions documented",
+          "quality_note": "Human subjects confirmed; IRB details present"
+        },
+        {
+          "name": "Informed Consent Obtained from Participants",
+          "applicable": false,
+          "score": null,
+          "evidence": "human_subject_research.involves_human_subjects not present in this datasheet",
+          "quality_note": "Excluded from denominator: human subjects / governance condition not met"
+        }
+      ],
+      "element_score": 1,
+      "element_max": 1
+    },
+    "... (repeat for all 10 elements)"
   ],
   "assessment": {
     "strengths": [
@@ -511,7 +596,9 @@ evaluation_date: "<ISO 8601 date>"
 overall_performance:
   average_score: 35.2
   max_score: 50
-  average_percentage: 70.4
+  average_excluded_max_points: 4.2
+  average_adjusted_max_points: 45.8
+  average_normalized_percentage: 76.9
   best_score: 42.0
   worst_score: 28.0
   best_performer:
@@ -519,36 +606,48 @@ overall_performance:
     method: claudecode_agent
     project: AI_READI
     score: 42.0
-    percentage: 84.0
+    excluded_max_points: 0
+    adjusted_max_points: 50
+    normalized_percentage: 84.0
   worst_performer:
     file: CHORUS_d4d.yaml
     method: gpt5
     project: CHORUS
     score: 28.0
-    percentage: 56.0
+    excluded_max_points: 5
+    adjusted_max_points: 45
+    normalized_percentage: 62.2
 
 method_comparison:
   - method: claudecode_agent
     file_count: 4
     average_score: 37.5
-    average_percentage: 75.0
+    average_excluded_max_points: 3.0
+    average_adjusted_max_points: 47.0
+    average_normalized_percentage: 79.8
     rank: 1
   - method: claudecode_assistant
     file_count: 4
     average_score: 32.8
-    average_percentage: 65.6
+    average_excluded_max_points: 5.5
+    average_adjusted_max_points: 44.5
+    average_normalized_percentage: 73.7
     rank: 2
 
 project_comparison:
   - project: AI_READI
     file_count: 2
     average_score: 39.0
-    average_percentage: 78.0
+    average_excluded_max_points: 2.0
+    average_adjusted_max_points: 48.0
+    average_normalized_percentage: 81.3
     rank: 1
   - project: CM4AI
     file_count: 2
     average_score: 36.5
-    average_percentage: 73.0
+    average_excluded_max_points: 4.0
+    average_adjusted_max_points: 46.0
+    average_normalized_percentage: 79.3
     rank: 2
 
 element_performance:
@@ -556,12 +655,12 @@ element_performance:
     element_name: "Dataset Discovery and Identification"
     average_score: 4.2
     max_score: 5
-    average_percentage: 84.0
+    average_normalized_percentage: 84.0
   - element_id: "2"
     element_name: "Terms of Reuse"
     average_score: 4.5
     max_score: 5
-    average_percentage: 90.0
+    average_normalized_percentage: 90.0
   # ... (10 elements total)
 
 common_strengths:
@@ -636,7 +735,7 @@ semantic_analysis_summary:
 ### Additional Output Files
 
 1. **CSV Summary:** `all_scores.csv`
-   - Columns: project, method, file, total_score, percentage, consistency_passed, consistency_failed, issues_detected
+   - Columns: project, method, file, total_score, excluded_max_points, adjusted_max_points, normalized_percentage, consistency_passed, consistency_failed, issues_detected
 
 2. **Markdown Report:** `summary_report.md`
    - Executive summary with comparison tables
