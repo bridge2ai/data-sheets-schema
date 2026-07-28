@@ -1,0 +1,364 @@
+"""Track and compare parallel D4D generation runs.
+
+Naming convention
+-----------------
+``data/d4d_concatenated/{METHOD}/{DATE}_{MODEL}_r{N}/{PROJECT}_d4d[_core].yaml``
+
+- **METHOD** encodes the arm (``claudecode_agent`` = baseline,
+  ``claudecode_agent_crate`` = de novo, ``claudecode_agent_healthsheet`` =
+  healthsheet-only, plus their ``_core`` counterparts).
+- **{DATE}_{MODEL}** identifies the configuration.
+- **r{N}** is the replicate index.
+
+The label is therefore *identical across arms of the same round*: hold the label
+constant and vary METHOD to compare arms; hold METHOD constant and vary ``r{N}``
+to compare replicates.
+
+Why "replicate" and not "seed"
+------------------------------
+These runs expose no seed. Temperature 0.0 does not make an agentic run
+deterministic — tool-call ordering, retrieval order and context assembly all
+vary between runs. ``r{N}`` therefore labels an independent sample from an
+uncontrolled process. Calling it a seed would imply a reproducibility guarantee
+that does not exist here.
+
+Deterministic arms (``rocrate_mapped``, ``rocrate_static_map``) are excluded
+from the replicate convention on purpose: re-running them over unchanged inputs
+is idempotent, so a replicate index would imply sampling that does not happen.
+"""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from pathlib import Path
+
+import yaml
+
+CONCAT_DIR = Path("data/d4d_concatenated")
+# Replicate marker is `_rep{N}` — deliberately NOT `_r{N}`.
+#
+# Historical runs use `-r{N}` to mean a *revision* (a changed pipeline), e.g.
+# 2026-07-23_gpt-5.5-high-fast-r2 switched from Claude Code to Codex CLI. An
+# earlier version of this module used `_r{N}` for *replicate*, leaving the two
+# opposite meanings separated by a single character. `_rep{N}` cannot be
+# confused with `-r{N}` at a glance or under a typo.
+REPLICATE_RE = re.compile(r"^(?P<config>.+?)_rep(?P<replicate>\d+)$")
+LEGACY_REVISION_RE = re.compile(r"^(?P<config>.+?)-r(?P<revision>\d+)$")
+
+ARM_BY_METHOD = {
+    "claudecode_agent": "baseline",
+    "claudecode_agent_core": "baseline",
+    "claudecode_agent_crate": "de_novo",
+    "claudecode_agent_crate_core": "de_novo",
+    "claudecode_agent_healthsheet": "healthsheet_only",
+    "claudecode_agent_healthsheet_core": "healthsheet_only",
+    "claudecode_agent_crate_only": "crate_only",
+    "claudecode_agent_crate_only_core": "crate_only",
+    "rocrate_mapped": "deterministic_upstream",
+    "rocrate_static_map": "deterministic_ours",
+}
+DETERMINISTIC = {"rocrate_mapped", "rocrate_static_map"}
+
+
+@dataclass
+class Run:
+    method: str
+    label: str
+    arm: str
+    config: str | None
+    replicate: int | None
+    projects: list[str] = field(default_factory=list)
+    is_core: bool = False
+    deterministic: bool = False
+    legacy_revision: int | None = None
+
+    @property
+    def path(self) -> Path:
+        return CONCAT_DIR / self.method / self.label
+
+
+def discover(concat_dir: Path = CONCAT_DIR) -> list[Run]:
+    """Find every run directory on disk."""
+    runs: list[Run] = []
+    for method_dir in sorted(p for p in concat_dir.iterdir() if p.is_dir()):
+        method = method_dir.name
+        for label_dir in sorted(p for p in method_dir.iterdir() if p.is_dir()):
+            records = sorted(label_dir.glob("*_d4d*.yaml"))
+            if not records:
+                continue
+            m = REPLICATE_RE.match(label_dir.name)
+            legacy = LEGACY_REVISION_RE.match(label_dir.name)
+            implicit_first = (m is None and legacy is None
+                              and method not in DETERMINISTIC)
+            projects = []
+            for r in records:
+                name = r.stem
+                for suffix in ("_d4d_core", "_d4d"):
+                    if name.endswith(suffix):
+                        projects.append(name[: -len(suffix)])
+                        break
+            runs.append(Run(
+                method=method,
+                label=label_dir.name,
+                arm=ARM_BY_METHOD.get(method, "unknown"),
+                config=m.group("config") if m else (
+                    label_dir.name if implicit_first else None),
+                replicate=int(m.group("replicate")) if m else (
+                    1 if implicit_first else None),
+                legacy_revision=int(legacy.group("revision")) if legacy else None,
+                projects=sorted(set(projects)),
+                is_core=method.endswith("_core"),
+                deterministic=method in DETERMINISTIC,
+            ))
+    return runs
+
+
+# Header fields that define the *procedure*. Two runs are replicates only if
+# these agree; if they differ, the runs used different pipelines and their
+# difference measures the pipeline change, not sampling variance.
+PROCEDURE_FIELDS = ("Generation Method", "Agent runtime", "Provider", "Model",
+                    "Reasoning effort", "Mode")
+
+# Values that carry no procedural information. Agents invent wording for any
+# header field the prompt does not pin down — "Reasoning effort" came back as
+# "default" from one run and "not applicable" from another on an identical
+# configuration. Treating those as a procedure change is a false positive.
+# A field with a real value (e.g. "high") still discriminates.
+PLACEHOLDER_VALUES = {"", "-", "n/a", "na", "none", "null", "default",
+                      "not applicable", "unspecified", "not specified"}
+
+
+def procedure_fingerprint(path: Path) -> dict[str, str]:
+    """Extract the procedure-defining header fields from a generated record."""
+    out: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("#"):
+            break
+        body = line.lstrip("#").strip()
+        key, _, value = body.partition(":")
+        if key.strip() in PROCEDURE_FIELDS:
+            v = value.strip()
+            if v.lower() not in PLACEHOLDER_VALUES:
+                out[key.strip()] = v
+    return out
+
+
+def slots(path: Path) -> set[str]:
+    return set(yaml.safe_load(path.read_text(encoding="utf-8")) or {})
+
+
+def record_path(method: str, label: str, project: str,
+                concat_dir: Path = CONCAT_DIR) -> Path | None:
+    core = method.endswith("_core")
+    name = f"{project}_d4d_core.yaml" if core else f"{project}_d4d.yaml"
+    p = concat_dir / method / label / name
+    return p if p.exists() else None
+
+
+def is_complete(method: str, label: str, project: str,
+                concat_dir: Path = CONCAT_DIR) -> bool:
+    """A run is complete only when full, core and report all exist.
+
+    Phases 3-4 back-port corrections into the full record, so a full record
+    that exists is not necessarily a finished one. Comparing mid-flight output
+    silently measures an unfinished run.
+    """
+    base = method[:-5] if method.endswith("_core") else method
+    full = concat_dir / base / label / f"{project}_d4d.yaml"
+    core = concat_dir / f"{base}_core" / label / f"{project}_d4d_core.yaml"
+    report = concat_dir / f"{base}_core" / label / f"{project}_reconciliation.md"
+    return full.exists() and core.exists() and report.exists()
+
+
+def compare(method: str, project: str, labels: list[str],
+            concat_dir: Path = CONCAT_DIR) -> dict:
+    """Slot-level agreement across runs of one method for one project."""
+    present: dict[str, set[str]] = {}
+    incomplete: list[str] = []
+    for label in labels:
+        if not is_complete(method, label, project, concat_dir):
+            incomplete.append(label)
+            continue
+        p = record_path(method, label, project, concat_dir)
+        if p:
+            present[label] = slots(p)
+    if len(present) < 2:
+        return {"error": f"need >=2 COMPLETE runs with {project} under {method}; "
+                         f"found {len(present)}"
+                         + (f"; excluded as incomplete: {incomplete}" if incomplete else "")}
+    sets = list(present.values())
+    stable = set.intersection(*sets)
+    union = set.union(*sets)
+
+    # Replicate comparison is only meaningful across an identical procedure.
+    prints = {}
+    for label in present:
+        p = record_path(method, label, project, concat_dir)
+        if p:
+            prints[label] = procedure_fingerprint(p)
+    distinct = {tuple(sorted(fp.items())) for fp in prints.values()}
+    same_procedure = len(distinct) <= 1
+
+    return {
+        "project": project,
+        "method": method,
+        "labels": list(present),
+        "counts": {k: len(v) for k, v in present.items()},
+        "stable": sorted(stable),
+        "varying": sorted(union - stable),
+        "agreement": len(stable) / len(union) if union else 1.0,
+        "same_procedure": same_procedure,
+        "procedures": prints,
+        "excluded_incomplete": incomplete,
+    }
+
+
+class ReplicateMismatch(RuntimeError):
+    """A new replicate does not share the established procedure."""
+
+
+def input_fingerprint(method: str, label: str, project: str,
+                      concat_dir: Path = CONCAT_DIR) -> str | None:
+    """The md5 of the input bundle a run actually consumed.
+
+    Read from the run's provenance record, not the file header: the header
+    names a *path*, and the same path can hold different bytes on different
+    days. CM4AI_crate_only.txt changed size by 31% between two crate-only
+    conditions while keeping its name, so a path comparison would have called
+    those runs replicates of each other.
+
+    Returns None when the record is absent or its input hash was withheld as
+    unrecoverable — in which case identity cannot be established and the caller
+    must not assume a match.
+    """
+    from data_sheets_schema.provenance import record_path_for
+    rec = record_path_for(project, method, label, concat_dir)
+    if not rec.exists():
+        return None
+    try:
+        data = yaml.safe_load(rec.read_text(encoding="utf-8")) or {}
+    except Exception:
+        return None
+    return (data.get("inputs") or {}).get("bundle_md5")
+
+
+def check_replicate(method: str, config: str, new_label: str, project: str,
+                    concat_dir: Path = CONCAT_DIR) -> dict:
+    """Verify a new replicate matches the procedure AND input of the existing.
+
+    Call this when a replicate is *written*, not only when it is compared —
+    catching a change at creation is what stops a revision being mislabelled as
+    a replicate in the first place.
+
+    Two runs are replicates only if BOTH their procedure fingerprint and their
+    input bytes agree. Procedure alone is insufficient: an identical prompt over
+    a changed bundle is a different condition.
+    """
+    new = record_path(method, new_label, project, concat_dir)
+    if new is None:
+        raise FileNotFoundError(f"no {project} record under {method}/{new_label}")
+    new_fp = procedure_fingerprint(new)
+
+    siblings = [r for r in discover(concat_dir)
+                if r.method == method and r.config == config
+                and r.label != new_label and r.replicate is not None]
+    if not siblings:
+        return {"status": "first", "fingerprint": new_fp, "compared_to": []}
+
+    mismatches: list[dict] = []
+    variance: list[dict] = []
+    for s in siblings:
+        p = record_path(method, s.label, project, concat_dir)
+        if p is None:
+            continue
+        fp = procedure_fingerprint(p)
+        # Only fields present in BOTH headers can evidence a procedure change.
+        # A field emitted by one run and omitted by the other is header
+        # formatting variance — agents word optional lines differently — and
+        # must not be read as a changed pipeline.
+        shared = set(fp) & set(new_fp)
+        diff = {k: (fp[k], new_fp[k]) for k in shared if fp[k] != new_fp[k]}
+        only_one = sorted((set(fp) ^ set(new_fp)))
+        if diff:
+            mismatches.append({"label": s.label, "differs": diff})
+        elif only_one:
+            variance.append({"label": s.label, "fields": only_one})
+    if mismatches:
+        raise ReplicateMismatch(
+            f"{new_label} does not share the procedure of "
+            f"{[m['label'] for m in mismatches]}: {mismatches[0]['differs']}. "
+            "A changed pipeline is a revision, not a replicate — give it a new "
+            "config label instead of a _rep index."
+        )
+
+    # Input identity. Unknown hashes are reported, never treated as agreement.
+    new_input = input_fingerprint(method, new_label, project, concat_dir)
+    input_unknown: list[str] = []
+    for s in siblings:
+        sib_input = input_fingerprint(method, s.label, project, concat_dir)
+        if new_input is None or sib_input is None:
+            input_unknown.append(s.label)
+        elif sib_input != new_input:
+            raise ReplicateMismatch(
+                f"{new_label} consumed different input bytes from {s.label} "
+                f"({new_input[:12]}… vs {sib_input[:12]}…). Same prompt over a "
+                "changed bundle is a different condition, not a replicate — "
+                "give it a new config label."
+            )
+    return {"status": "ok", "fingerprint": new_fp,
+            "compared_to": [s.label for s in siblings],
+            "header_variance": variance,
+            "input_md5": new_input,
+            "input_unverified_against": input_unknown or None}
+
+
+def arm_delta(baseline_method: str, arm_method: str, project: str,
+              config: str, replicates: list[str],
+              concat_dir: Path = CONCAT_DIR) -> dict:
+    """Paired per-replicate delta between two arms, completeness-gated.
+
+    Use this rather than reading record paths directly. Ad-hoc analysis that
+    globs the filesystem will happily read a run whose phases 3-4 are still
+    executing; twice during the 2026-07-27 series that produced a wrong number
+    (a spurious +12 and a spurious -14). The gate belongs in the analysis path,
+    not only in the CLI.
+    """
+    usable = [r for r in replicates
+              if is_complete(baseline_method, f"{config}_{r}", project, concat_dir)
+              and is_complete(arm_method, f"{config}_{r}", project, concat_dir)]
+    skipped = [r for r in replicates if r not in usable]
+
+    deltas, base_sets, arm_sets = {}, [], []
+    for r in usable:
+        label = f"{config}_{r}"
+        b = slots(record_path(baseline_method, label, project, concat_dir))
+        a = slots(record_path(arm_method, label, project, concat_dir))
+        deltas[r] = len(a) - len(b)
+        base_sets.append(b)
+        arm_sets.append(a)
+
+    noise = None
+    if len(usable) >= 2:
+        # Noise across ALL replicates, not just the first two. A slot counts as
+        # varying if it is absent from any run, so this grows with replicate
+        # count — the pairwise figure understates it and the two must never be
+        # compared with each other.
+        def spread(sets):
+            return len(set.union(*sets) - set.intersection(*sets))
+        noise = max(spread(base_sets), spread(arm_sets))
+
+    verdict = "insufficient replicates"
+    if noise is not None and deltas:
+        smallest = min(deltas.values())
+        verdict = ("real" if smallest > noise
+                   else "marginal" if smallest > noise / 2
+                   else "not resolvable")
+
+    return {"project": project, "deltas": deltas, "noise": noise,
+            "verdict": verdict, "skipped_incomplete": skipped}
+
+
+def needs_replicate_label(runs: list[Run]) -> list[Run]:
+    """Model-based runs whose label lacks an r{N} suffix."""
+    return [r for r in runs if not r.deterministic and r.replicate is None]

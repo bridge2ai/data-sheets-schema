@@ -18,12 +18,15 @@ def cli():
     pass
 
 # Import and register subcommands
-from . import download, evaluate, utils, rocrate, schema, render
+from . import download, evaluate, utils, rocrate, schema, render, healthsheet, runs, provenance
 
 cli.add_command(download.download)
 cli.add_command(evaluate.evaluate)
 cli.add_command(utils.utils)
 cli.add_command(rocrate.rocrate)
+cli.add_command(healthsheet.healthsheet)
+cli.add_command(runs.runs)
+cli.add_command(provenance.provenance)
 cli.add_command(schema.schema)
 cli.add_command(render.render)
 

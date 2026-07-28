@@ -18,13 +18,15 @@ try:
     from src.download.preprocess_sources import (
         extract_pdf_text,
         extract_html_text,
-        preprocess_project
+        preprocess_project,
+        preprocess_manifest,
     )
 except ImportError as e:
     print(f"Warning: Could not import preprocess_sources: {e}", file=sys.stderr)
     extract_pdf_text = None
     extract_html_text = None
     preprocess_project = None
+    preprocess_manifest = None
 
 
 class TestPreprocessing(unittest.TestCase):
@@ -161,7 +163,7 @@ class TestPreprocessing(unittest.TestCase):
         subdir.mkdir()
         (subdir / "nested.txt").write_text("Nested content")
 
-        stats = preprocess_project(self.src_dir, self.dst_dir)
+        preprocess_project(self.src_dir, self.dst_dir)
 
         # Should not process files in subdirectories
         self.assertFalse((self.dst_dir / "subdir" / "nested.txt").exists())
@@ -189,6 +191,82 @@ class TestPreprocessing(unittest.TestCase):
         # Destination should have been created
         self.assertTrue(new_dst.exists())
         self.assertEqual(stats['copied'], 1)
+
+    def test_preprocess_manifest_builds_text_only_outputs(self):
+        raw_root = self.test_path / "raw"
+        project_raw = raw_root / "AI_READI"
+        project_raw.mkdir(parents=True)
+        (project_raw / "source.md").write_text(
+            "# Source  \r\n \tIndented content  \r\n" + "content  \r\n" * 100
+        )
+        manifest_file = self.test_path / "manifest.yaml"
+        manifest_file.write_text(
+            """
+version: 1
+default_minimum_characters: 100
+projects:
+  AI_READI:
+    - id: documentation
+      source_type: documentation
+      url: https://example.org/docs
+      raw_file: source.md
+      processed_file: documentation.txt
+      curation_note: Verified source note
+      verification_url: https://example.org/verification
+""".strip()
+        )
+        output_root = self.test_path / "processed"
+
+        stats = preprocess_manifest(
+            manifest_file,
+            raw_root,
+            output_root,
+            ["AI_READI"],
+        )
+
+        self.assertEqual(stats["errors"], 0)
+        output = output_root / "AI_READI" / "documentation.txt"
+        self.assertTrue(output.exists())
+        output_text = output.read_text()
+        self.assertIn("Source URL: https://example.org/docs", output_text)
+        self.assertIn("Curation note: Verified source note", output_text)
+        self.assertIn(
+            "Verification URL: https://example.org/verification",
+            output_text,
+        )
+        self.assertNotIn(" \n", output_text)
+        self.assertNotIn(" \t", output_text)
+        self.assertEqual(
+            [path.suffix for path in output.parent.iterdir()],
+            [".txt"],
+        )
+
+    def test_preprocess_manifest_rejects_short_extraction(self):
+        raw_root = self.test_path / "raw"
+        project_raw = raw_root / "VOICE"
+        project_raw.mkdir(parents=True)
+        (project_raw / "stub.txt").write_text("stub")
+        manifest_file = self.test_path / "manifest.yaml"
+        manifest_file.write_text(
+            """
+version: 1
+default_minimum_characters: 100
+projects:
+  VOICE:
+    - id: documentation
+      raw_file: stub.txt
+      processed_file: documentation.txt
+""".strip()
+        )
+
+        stats = preprocess_manifest(
+            manifest_file,
+            raw_root,
+            self.test_path / "processed",
+            ["VOICE"],
+        )
+
+        self.assertEqual(stats["errors"], 1)
 
 
 if __name__ == '__main__':
