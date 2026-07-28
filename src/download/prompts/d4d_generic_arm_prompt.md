@@ -1,0 +1,122 @@
+# D4D generic-arm generation prompt
+
+The **generic** arm's defining property: every Grand Challenge and every arm
+receives *this exact text*. Only the mechanical fields below are substituted —
+project name, arm label, method, input bundle, output paths. Nothing here is
+specific to a GC, a dataset, or an input set.
+
+That is the whole point. The comparator arm (**tuned**) carries GC-specific and
+input-set-specific content, and the difference between the two is what the study
+measures. Any GC-specific sentence added here silently converts the generic arm
+into a third condition and destroys the comparison — as happened to the
+2026-07-28 `-deprimed` series, which removed expectation statements but retained
+per-GC factual notes and is therefore neither generic nor tuned.
+
+Uniform decision rules are permitted and belong here, because applying one rule
+identically to every GC is part of the method rather than tuning. What is
+forbidden is a rule, fact, warning, or expectation that applies to some GCs and
+not others.
+
+**Editing rule:** a change to this file changes the generic arm for every
+project at once. Re-run the whole arm after editing it; do not edit it to fix
+one project's output.
+
+---
+
+## Substitution fields
+
+| Field | Meaning |
+|---|---|
+| `{PROJECT}` | AI_READI, CHORUS, CM4AI, or VOICE |
+| `{ARM}` | arm display name, e.g. `BASELINE (input documents only)` |
+| `{METHOD}` | output method directory, e.g. `claudecode_agent` |
+| `{BUNDLE}` | the single declared input bundle path |
+| `{LABEL}` | run label, e.g. `2026-07-28_claude-opus-5-generic_rep1` |
+| `{MANIFEST_LINE}` | the `# Source manifest:` header line for this arm |
+
+---
+
+## Prompt body
+
+Generate paired full and core D4D records for the {PROJECT} project.
+
+READ FIRST, IN THIS ORDER, AND FOLLOW EXACTLY:
+
+1. `.claude/agents/d4d-provenance-guard.md` — the factual evidence boundary.
+   Enforce it in every phase.
+2. `.claude/commands/d4d-full-core.md` — the four-phase playbook.
+
+Execution mode: four-phase project agent. Phase 1 full generation, Phase 2 core
+generation, Phase 3 source/provenance audit, Phase 4 strict reconciliation.
+Phase 2 must wait for a validated Phase 1 file.
+
+VERSION LABEL — use verbatim in every output path: {LABEL}
+
+ARM: {ARM}
+
+DECLARED INPUT BUNDLE — your only source of dataset facts:
+    {BUNDLE}
+
+Full schema: `src/data_sheets_schema/schema/data_sheets_schema_all.yaml` (class
+`Dataset`)
+Core schema: `src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml`
+(class `CoreDataset`)
+
+OUTPUTS — do not write outside these three:
+
+- Full:   `data/d4d_concatenated/{METHOD}/{LABEL}/{PROJECT}_d4d.yaml`
+- Core:   `data/d4d_concatenated/{METHOD}_core/{LABEL}/{PROJECT}_d4d_core.yaml`
+- Report: `data/d4d_concatenated/{METHOD}_core/{LABEL}/{PROJECT}_reconciliation.md`
+
+HEADER BLOCK — use exactly:
+
+    # D4D Datasheet for {PROJECT} Dataset
+    # Generation Method: schema-grounded agentic, phase 1
+    # Agent runtime: Claude Code
+    # Provider: Anthropic
+    # Model: claude-opus-5[1m]
+    # Mode: four-phase project agent, generic prompt
+    # Prompt: src/download/prompts/d4d_generic_arm_prompt.md (identical for all projects)
+    # Arm: {ARM}
+    # Source bundle: {BUNDLE}
+    {MANIFEST_LINE}
+    # Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+    # Prior D4D factual reuse: prohibited
+    # Temperature: 0.0
+    # Generated: 2026-07-28
+
+The core file uses "phase 2" and the core schema path in the corresponding lines.
+
+AFTER Phase 4, write a LIVE provenance record:
+
+    poetry run d4d provenance record --project {PROJECT} --method {METHOD} --label {LABEL} --input-bundle {BUNDLE}
+
+VALIDATE both files before finishing:
+
+    poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset <full>
+    poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml -C CoreDataset <core>
+
+ABSOLUTE CONSTRAINT — do not read, open, grep, or consult any previously
+generated D4D record, from any arm, any label, or any date. This includes
+everything under `data/d4d_concatenated/` and any `*_crate_d4d.yaml` or
+`*_crate_mapped_d4d.yaml` under `data/ro-crate_packages/`. Your only factual
+inputs are the declared bundle above and the schema files. Prior-D4D reuse is a
+defect under the provenance guard.
+
+UNIFORM DECISION RULES — these apply identically to every project and every arm:
+
+- Populate a slot only where the declared bundle supports it. Prefer omission
+  over inference: an absent slot is a correct answer when the evidence is
+  absent, and a plausible guess is not.
+- Where the declared bundle contains sources that disagree, represent what the
+  evidence states rather than silently selecting one. Do not merge distinct
+  entities into a single claim.
+- `Dataset` admits one referent. Choose the one the declared bundle best
+  supports, state that choice in the reconciliation report, and hold to it
+  consistently across both records.
+- There is no target slot count, no expected density, and no expected
+  relationship to any other arm or project. Apply your own judgment about what
+  the evidence supports.
+
+RETURN: full slot count, core slot count, whether both validated, and the
+reconciliation outcome. Return data, not prose.
