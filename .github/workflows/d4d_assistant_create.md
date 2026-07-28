@@ -86,7 +86,7 @@ This workflow is triggered when a user requests creation of a new D4D datasheet,
 
 **CRITICAL**: This assistant uses deterministic settings for reproducible D4D generation:
 
-- **Model**: `claude-sonnet-4-5-20250929` (date-pinned for consistency)
+- **Model**: `claude-opus-4-8` (pinned for consistency)
 - **Temperature**: `0.0` (maximum determinism - same input produces same output)
 - **Schema**: Local version-controlled file (`data_sheets_schema_all.yaml`)
 - **Prompts**: External version-controlled files (hashed for tracking)
@@ -201,7 +201,7 @@ make full-schema
 ```
 
 **Read validated reference examples:**
-- `data/d4d_concatenated/claudecode_agent/AI_READI_d4d.yaml` - Comprehensive validated example
+- `data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/AI_READI_d4d.yaml` - Comprehensive validated example
 - `data/d4d_concatenated/claudecode_agent/CHORUS_d4d.yaml` - Another validated example
 
 **What to observe:**
@@ -579,7 +579,57 @@ Quality Level: ACCEPTABLE
    PR creation is allowed.
 ```
 
-### 8. Generate HTML Preview
+### 8. Generate Paired D4D-core Record (When Requested)
+
+**When to run**: the issue asks for a D4D-core record, a "core" or "exchange layer"
+datasheet, or "full + core". Skip this step otherwise. This mirrors the repo's
+3-phase approach (`.claude/commands/d4d-full-core.md`): the full D4D from steps 1–7
+is Phase 1; this step is Phases 2 and 3.
+
+#### 8a. Phase 2 — Generate core from inputs + full D4D
+
+Inputs: the source documents AND the validated full D4D (`${OUTPUT_FILE}`). The core
+record is the semantic exchange layer subset, not a fresh independent extraction:
+
+1. Read `src/data_sheets_schema/schema/D4D_Core.yaml` for the exact `CoreDataset`
+   field inventory. Structural difference vs full: `distributions`
+   (CoreDistribution: bytes, hash, md5, sha256, path, format, encoding, media_type)
+   replaces the full schema's `file_collections`.
+2. For every core field that also exists in the full D4D, START from the full D4D's
+   value. Use the source documents to fill core fields the full record left empty
+   and to catch anything the full extraction missed.
+3. Do not include facts in core that are absent from both the full D4D and the
+   source documents.
+
+```bash
+CORE_OUTPUT_FILE="data/sheets_d4dassistant/${DATASET_NAME}_d4d_core.yaml"
+
+# Validate (NON-SKIPPABLE — fix and re-run until clean)
+poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml \
+  -C CoreDataset ${CORE_OUTPUT_FILE}
+```
+
+#### 8b. Phase 3 — Reconcile full ↔ core
+
+The pair must be consistent before the PR:
+
+1. **Overlapping scalar/identifier fields** (id, name, title, doi, license, version,
+   dates, grant numbers, URLs, counts): values MUST be identical in both files.
+   Resolve mismatches from the source documents (ground truth) and fix BOTH files.
+2. **Narrative fields**: core may condense but must never contradict the full
+   record — same facts, numbers, entities.
+3. **Back-port**: anything Phase 2 found in the documents that the full record
+   lacked goes INTO the full record (in the correct full-schema field).
+4. **Re-validate BOTH files** after any edit (full: `-C Dataset` as in step 7a;
+   core: `-C CoreDataset` as above).
+5. Write `data/sheets_d4dassistant/${DATASET_NAME}_reconciliation.md`: each
+   discrepancy found (field, full value, core value, resolution, files changed),
+   or an explicit "no divergences" statement.
+
+Include the core YAML and reconciliation report in the PR (step 10) alongside the
+full D4D, its metadata, and the HTML previews.
+
+### 9. Generate HTML Preview
 
 ```bash
 # Generate human-readable HTML from the YAML
@@ -587,9 +637,12 @@ poetry run python src/html/human_readable_renderer.py ${OUTPUT_FILE}
 
 # This creates <dataset_name>_d4d.html
 # Reviewers will use this to preview the datasheet in human-readable format
+
+# If a core record was generated (step 8), render it too
+poetry run python src/html/human_readable_renderer.py ${CORE_OUTPUT_FILE}
 ```
 
-### 9. Create Pull Request
+### 10. Create Pull Request
 
 **IMPORTANT**: Only create PR if both schema validation AND completeness validation passed.
 
@@ -636,6 +689,10 @@ Created new D4D datasheet for **${DATASET_NAME}** based on documentation from:
 ## Files Added
 - \`${OUTPUT_FILE}\` - D4D YAML datasheet
 - \`${OUTPUT_FILE%.yaml}.html\` - HTML preview
+<!-- If core record was generated (step 8), also list: -->
+<!-- - \`${CORE_OUTPUT_FILE}\` - D4D-core YAML (CoreDataset, semantic exchange layer) -->
+<!-- - \`${CORE_OUTPUT_FILE%.yaml}.html\` - core HTML preview -->
+<!-- - \`data/sheets_d4dassistant/${DATASET_NAME}_reconciliation.md\` - full↔core reconciliation report -->
 
 ## Validation
 - ✅ Schema validation passed
@@ -677,6 +734,11 @@ EOF
 git add ${OUTPUT_FILE}                           # D4D YAML
 git add ${OUTPUT_FILE%.yaml}_metadata.yaml       # Metadata
 git add ${OUTPUT_FILE%.yaml}.html                # HTML preview
+
+# If a core record was generated (step 8), also add:
+git add ${CORE_OUTPUT_FILE}                                          # D4D-core YAML
+git add ${CORE_OUTPUT_FILE%.yaml}.html                               # core HTML preview
+git add data/sheets_d4dassistant/${DATASET_NAME}_reconciliation.md   # reconciliation report
 ```
 
 **Commit message template**:
@@ -692,7 +754,7 @@ git commit -m "Add D4D datasheet for ${DATASET_NAME}
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
-### 10. Check Budget and Prepare Warning (If Needed)
+### 11. Check Budget and Prepare Warning (If Needed)
 
 Before posting your final comment to the GitHub issue, check the CBORG API budget:
 
@@ -709,7 +771,7 @@ BUDGET_WARNING=$(python3 scripts/check_budget.py)
 
 **Note**: The script handles missing API keys gracefully - if `ANTHROPIC_API_KEY` is not set, it will skip the check and exit cleanly.
 
-### 11. Notify User in GitHub Issue
+### 12. Notify User in GitHub Issue
 
 ```bash
 # Comment on the original issue with PR link and instructions
@@ -738,7 +800,7 @@ I've created a new D4D datasheet for **${DATASET_NAME}** and opened a pull reque
 - **Sections Populated**: <list major sections with content>
 
 ## Generation Details
-- **Model**: claude-sonnet-4-5-20250929 (deterministic)
+- **Model**: claude-opus-4-8 (deterministic)
 - **Temperature**: 0.0
 - **Quality Level**: <quality_level> (comprehensive/acceptable/minimal)
 - **Input Mode**: <file/url>

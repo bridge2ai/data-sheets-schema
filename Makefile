@@ -129,6 +129,8 @@ help: status
 	@echo "                                      (usage: PROJECT=AI_READI GENERATOR=gpt5)"
 	@echo "make validate-d4d-all              -- validate all D4D YAMLs"
 	@echo "                                      (usage: GENERATOR=gpt5)"
+	@echo "make validate-d4d-pair             -- validate Phase 4 full/core consistency"
+	@echo "                                      (usage: FULL=full.yaml CORE=core.yaml)"
 	@echo ""
 	@echo "════════════════════════════════════════════════════════════════"
 	@echo "  D4D Pipeline: HTML Generation"

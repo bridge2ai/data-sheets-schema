@@ -1,0 +1,345 @@
+Generate paired full D4D and D4D-core records for Bridge2AI Grand Challenge
+projects using a model-neutral, schema-grounded agent workflow with four ordered
+phases:
+
+1. Generate the full D4D directly from the input documents.
+2. Generate D4D-core from the same input documents plus the completed full D4D.
+3. Audit both records against the current sources and provenance boundary.
+4. Reconcile the full/core pair using schema-derived identity and consistency
+   rules.
+
+Phases 3 and 4 are required for production runs. Write a reconciliation report
+even when no discrepancies are found. Run the requested phases for all four
+projects (AI_READI, CHORUS, CM4AI, VOICE) unless the user names specific ones.
+
+Before any phase, read and enforce
+`.claude/agents/d4d-provenance-guard.md`.
+
+Two execution modes are supported:
+
+- **Independent mode:** one fresh agent context for Phase 1 and another for
+  Phase 2, followed by orchestrator-controlled Phase 3 and Phase 4.
+- **Four-phase project-agent mode:** one project agent runs full generation,
+  core generation, source/provenance audit, and strict reconciliation
+  sequentially. Phase 2 must still wait for a validated Phase 1 file and must
+  read both declared inputs.
+
+## Arguments
+
+- `$ARGUMENTS`: optional project name(s), and/or an output version label.
+- Output version label: `{YYYY-MM-DD}_{provider-model-settings}` (for example,
+  `2026-07-23_claude-opus-4.6-high` or
+  `2026-07-23_gpt-5.6-sol-ultra-fast`). If not given, construct it from today's
+  date and the selected model. All outputs for one run use the exact same label.
+- Never overwrite a populated version directory. For another run with the same
+  date and model, append `-r2`, `-r3`, and so on.
+
+## Inputs (per project)
+
+- Source documents: `data/preprocessed/concatenated/{PROJECT}_preprocessed.txt`
+  (selected by `data/preprocessed/source_manifest.yaml`; run
+  `make validate-preprocessing` first if inputs were re-downloaded)
+- Full schema: `src/data_sheets_schema/schema/data_sheets_schema_all.yaml` (class `Dataset`)
+- Core schema: `src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml` (class `CoreDataset`)
+
+## Outputs (per project)
+
+- Full: `data/d4d_concatenated/claudecode_agent/{VERSION}/{PROJECT}_d4d.yaml`
+- Core: `data/d4d_concatenated/claudecode_agent_core/{VERSION}/{PROJECT}_d4d_core.yaml`
+- Required production reconciliation report:
+  `data/d4d_concatenated/claudecode_agent_core/{VERSION}/{PROJECT}_reconciliation.md`
+
+Never overwrite a previous version's directory; a new run gets a new `{VERSION}`.
+
+## Factual Evidence Boundary
+
+The current source bundle and manifest are the factual source of truth. Schema
+files define structure, not dataset facts.
+
+The schemas are the sole structural authority. Full structure comes from class
+`Dataset` in `data_sheets_schema_all.yaml`; core structure comes from class
+`CoreDataset` in `data_sheets_schema_core_all.yaml`. Resolve inherited slots,
+class ranges, required fields, cardinality, inlining, `slot_usage`, and enums
+from those schemas. No prior YAML or embedded documentation example may supply
+or override structure.
+
+- Phase 1 must not read any prior generated full or core D4D.
+- Phase 2 may read only the exact Phase 1 full D4D from the same version label.
+- Phase 2 must not read an older core, even as a template.
+- Phase 3 may read only the current source bundle, manifest, schemas, and the
+  same-run full/core pair.
+- Phase 4 may read only the same Phase 3 inputs plus the Phase 3 audit findings
+  for that exact pair.
+- A fact found only in older generated YAML must be omitted.
+- Historical source documents remain allowed when the current manifest
+  explicitly selects them.
+
+Before launching an agent, the orchestrator may inspect output directory names
+only to choose a new version label. Do not put older D4D contents into an agent's
+context.
+
+## Runtime Cases
+
+### Claude Code
+
+- Use fresh Task/subagent contexts.
+- Either launch one project agent that performs all four phases sequentially,
+  or launch fresh phase agents with exact-path handoff.
+- Explicitly tell each agent that prior D4D content from the parent conversation
+  is forbidden evidence.
+- Record `Agent runtime: Claude Code`, `Provider: Anthropic`, and the exact model.
+
+### Codex / GPT
+
+The following launch instruction is for the outer orchestrator only. A worker
+already running in the fresh Codex context must execute its assigned phases
+directly and must not recursively invoke `codex`.
+
+Before launching, resolve the exact model slug, supported reasoning effort, and
+speed tier from the installed Codex model catalog. Preserve the user's requested
+labels when the catalog supports them; do not silently map `ultra` to another
+effort. Set `MODEL` and `EFFORT` to those exact values, then invoke each
+generation pass with:
+
+```bash
+MODEL="gpt-5.6-sol"
+EFFORT="ultra"
+
+codex -a never exec -m "$MODEL" \
+  -c "model_reasoning_effort=\"$EFFORT\"" \
+  -c 'service_tier="priority"' \
+  --enable fast_mode \
+  -s workspace-write -C "$PWD" "<PASS-SPECIFIC PROMPT>"
+```
+
+The values above are the GPT-5.6-Sol ultra-fast profile used on 2026-07-23.
+For another run, replace them only with values reported as supported by the
+current local model catalog. Omit `service_tier="priority"` and `fast_mode`
+unless the selected model supports the fast tier.
+
+For independent mode, use one fresh `codex exec` invocation per project per
+generation phase and run the two audits with exact-path handoff. For four-phase
+project-agent mode, use one invocation per project and enforce explicit phase
+gates. In either mode, Phase 2 must begin only after Phase 1 has produced and
+validated the full YAML.
+
+The prompt must name the exact allowed paths and state:
+
+> Do not search or read any prior D4D output. The only generated YAML you may
+> read is the exact same-run full/core path allowed for the current phase.
+
+Record `Agent runtime: Codex CLI`, `Provider: OpenAI`, the exact model,
+reasoning effort, and mode.
+
+## Phase 1 - Full D4D from input documents
+
+Follow the method in `.claude/commands/d4d-agent.md` (read it first). Summary of the
+non-negotiables:
+
+1. Derive and constrain structure directly from class `Dataset` in the full
+   schema. Follow inherited slots, class ranges, required fields, cardinality,
+   inlining, `slot_usage`, and enums. Do not read a prior D4D example or assume
+   a nested-object shape.
+2. Extract exact field names from the schema; `d4d:docExample` annotations are
+   illustrations, not defaults — every value must come from the source documents.
+3. Extract per the checklist in `d4d-agent.md` (identity, creators, purpose, tasks,
+   composition, collection, preprocessing, distribution, licensing, maintenance,
+   access, funding, ethics, uses, limitations).
+4. Validate (NON-SKIPPABLE, fix and re-run until clean):
+   ```bash
+   poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset <full_file>
+   poetry run linkml-term-validator validate-data <full_file> \
+     --schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
+     --target-class Dataset
+   ```
+
+File header:
+```yaml
+# D4D Datasheet for {PROJECT} Dataset
+# Generation Method: schema-grounded agentic, phase 1
+# Agent runtime: {RUNTIME}
+# Provider: {PROVIDER}
+# Model: {MODEL}
+# Reasoning effort: {EFFORT}
+# Mode: {MODE}
+# Source bundle: data/preprocessed/concatenated/{PROJECT}_preprocessed.txt
+# Source manifest: data/preprocessed/source_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Temperature: 0.0
+# Generated: {DATE}
+```
+
+In independent mode, the Phase 1 agent writes only the full YAML. It must not
+create a core record.
+
+## Phase 2 - D4D-core from input documents + full D4D
+
+Inputs to this phase: the current source documents AND the exact same-run Phase
+1 full D4D. No older full or core YAML is permitted. The core record is the
+semantic exchange layer subset (CoreDataset, ~79 fields), not a fresh
+independent extraction:
+
+1. Read `src/data_sheets_schema/schema/D4D_Core.yaml` and the merged core schema
+   to derive the exact `CoreDataset` field inventory and every nested class
+   shape. Follow inherited slots, ranges, cardinality, inlining, `slot_usage`,
+   and enums rather than copying a full-record structure mechanically.
+2. For every core field that also exists in the full D4D, START from the full D4D's
+   value. Consult the source documents to (a) fill core fields the full record left
+   empty, and (b) catch anything the full extraction missed. If the documents
+   support a value that is missing or different in the full D4D, use the source
+   documents as ground truth and report the discrepancy for Phase 3.
+3. Do not include facts in core that are absent from both the full D4D and the
+   source documents.
+4. Do not inspect an older core for field selection, wording, IDs, or values.
+   Derive core structure from `D4D_Core.yaml`.
+5. Validate (NON-SKIPPABLE):
+   ```bash
+   poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml -C CoreDataset <core_file>
+   poetry run linkml-term-validator validate-data <core_file> \
+     --schema src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml \
+     --target-class CoreDataset
+   ```
+
+File header:
+```yaml
+# D4D Core Datasheet for {PROJECT} Dataset
+# Generation Method: schema-grounded agentic, phase 2
+# Agent runtime: {RUNTIME}
+# Provider: {PROVIDER}
+# Schema: D4D Core (CoreDataset class), semantic exchange layer subset
+# Schema path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+# Model: {MODEL}
+# Reasoning effort: {EFFORT}
+# Mode: {MODE}
+# Sources: data/preprocessed/concatenated/{PROJECT}_preprocessed.txt + {full D4D path}
+# Source manifest: data/preprocessed/source_manifest.yaml
+# Prior D4D factual reuse: prohibited
+# Temperature: 0.0
+# Generated: {DATE}
+```
+
+In independent mode, the Phase 2 agent writes only the core YAML. It must not
+rewrite the full YAML.
+
+## Phase 3 - Source and provenance audit
+
+Phase 3 establishes the canonical factual content before mechanical
+reconciliation. It is not allowed to prefer a value merely because it appears
+in either generated record.
+
+1. Re-run schema and term validation for both outputs.
+2. Confirm from the agent's read history that no prior-run D4D, evaluation, or
+   reconciliation report was used.
+3. Check both records against the current source bundle and manifest:
+   - resolve source disagreements using authority, version, date, and scope;
+   - identify unsupported, stale, omitted, or mis-scoped assertions;
+   - verify repeated identifiers, versions, dates, counts, licenses, access
+     rules, people, and organizations are internally consistent in each file;
+   - keep historical values only when their historical scope is explicit.
+4. Back-port every source-supported Phase 2 discovery into the full record in
+   the correct full-schema slot. Correct the full record first whenever the
+   source audit changes a fact.
+5. Apply the same corrected facts to core where its schema permits them, but do
+   not shorten or paraphrase shared values in preparation for Phase 4.
+6. Re-validate both files after every correction and record the source and
+   provenance findings for the reconciliation report.
+
+## Phase 4 - Strict full/core reconciliation
+
+Phase 4 makes the Phase 3-audited full record canonical for every schema-
+identical slot and proves consistency across the pair.
+
+1. Derive the shared slots at runtime from `Dataset` and `CoreDataset` with
+   LinkML `SchemaView`. Do not maintain a hand-written field list.
+2. For every shared slot with the same induced range and cardinality:
+   - it must be present in both records or absent from both;
+   - its parsed YAML value must be deeply identical, including every nested
+     mapping value and list item in the same order;
+   - this rule includes narrative fields. Core must not condense, paraphrase,
+     reorder, or omit shared content.
+3. Handle shared slots whose schema ranges differ as explicit projections.
+   `resources` is `Dataset` in full and `CoreDataset` in core: match resources
+   by `id`, require equal coverage, and require deep identity for every nested
+   schema-identical slot. Full-only nested slots are omitted from the core
+   projection.
+4. Reconcile related, non-identical representations semantically:
+   - map full `file_collections` to core `distributions` and verify names,
+     descriptions, paths, formats, compression, checksums, byte counts, access
+     URLs, and release scope do not conflict;
+   - compare `total_file_count` and `total_size_bytes` with distribution-level
+     values when the represented scopes are the same;
+   - check `dialect`, formats, and `is_tabular` agree;
+   - check top-level identity/version/access facts agree with resources,
+     version history, distributions, and repeated statements;
+   - distinguish a historical release from a current release rather than
+     treating their different values as a contradiction.
+5. Use the schema-derived validator. After Phase 3 has made full canonical,
+   synchronization may be performed once:
+   ```bash
+   poetry run python -m data_sheets_schema.d4d_pair_consistency \
+     --full <full_file> --core <core_file> --sync-core
+   ```
+   Then run it without `--sync-core` as the final independent check:
+   ```bash
+   poetry run python -m data_sheets_schema.d4d_pair_consistency \
+     --full <full_file> --core <core_file>
+   ```
+   Validator warnings mark related content that still requires the semantic
+   review in step 4; warnings are not evidence that review occurred.
+6. Re-run schema and term validation for both records.
+7. Write `{PROJECT}_reconciliation.md` with separate Phase 3 and Phase 4
+   sections: source/provenance findings, schema-derived shared-slot count,
+   corrections, related-content mapping and review, files changed, all commands,
+   and final results. If nothing diverged, say so explicitly.
+
+In independent mode, the orchestrator may perform Phases 3 and 4 without another
+model invocation, but it must perform the same source review, deterministic
+validation, semantic related-content review, and reporting.
+
+## Provenance record (required, per project)
+
+After Phase 4 validates, emit a machine-readable provenance record:
+
+```bash
+poetry run d4d provenance record \
+  --project {PROJECT} --method {METHOD} --label {VERSION} \
+  --input-bundle {EXACT INPUT BUNDLE PATH}
+```
+
+Writes `{METHOD}_core/{VERSION}/{PROJECT}_provenance.yaml` capturing schema
+md5s, model and runtime identity, input bundle hash, repo commit, software
+versions, hardware, output hashes and slot counts.
+
+This is a **live** record: every field is observed at run time. It fails loudly
+if the input bundle is unreadable, because a run that cannot identify its own
+input has not produced reproducible output. Do not substitute a reconstructed
+record — `d4d provenance backfill` exists only for runs that predate this step,
+and it marks what it cannot recover rather than filling it in.
+
+## Completion criteria (per project)
+
+- Both YAML files pass their schema and term validations.
+- Every emitted structure is derived from and permitted by its applicable
+  schema.
+- Every schema-identical shared slot has deeply identical parsed YAML content
+  and identical presence in full and core.
+- Every projected or semantically related field has been mapped and reviewed
+  with zero unresolved contradictions within or between the two records.
+- The core file header names both its source-document bundle and full YAML input.
+- Both headers state that prior D4D factual reuse is prohibited.
+- The provenance audit confirms that no older full/core YAML was used.
+- The core header contains `Phase 4 reconciliation: completed`.
+- The Phase 3/4 reconciliation report is present.
+- The live provenance record is present and its `record_mode` is `live`.
+- Final summary to the user: per project, report full/core line counts as
+  informational metadata, never as a quality gate, plus validation status.
+
+## Settings
+
+- Temperature: 0.0; values only from current allowed sources; prefer
+  null/omission for unknowns.
+- Phase 1 projects may run in parallel. Phase 2 projects may run in parallel only
+  after all required full records exist. Never overlap phases for the same project.
+- Four-phase project agents may run in parallel with each other, but each agent
+  must execute its own four phases sequentially.

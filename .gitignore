@@ -140,3 +140,11 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .DS_Store
+
+# RO-Crate packages: keep the upstream archive (raw/), not the extracted tree.
+# CM4AI's extracted crate is ~47 MB, almost entirely per-file listing HTML
+# (ro-crate-preview.html up to 11.8 MB each). Re-extract from raw/*.zip.
+data/ro-crate_packages/*/crate/
+
+# Poster/slide artifacts are kept local-only and never committed to this repo.
+data/poster_assets/

@@ -87,7 +87,7 @@ This workflow is triggered when a user requests edits to an existing D4D datashe
 
 **IMPORTANT**: All assistant edits maintain deterministic settings for reproducibility:
 
-- **Model**: `claude-sonnet-4-5-20250929` (date-pinned)
+- **Model**: `claude-opus-4-8` (pinned)
 - **Temperature**: `0.0` (deterministic)
 - **Schema**: Local version-controlled file
 - **Prompts**: External version-controlled files
@@ -125,6 +125,16 @@ cat <path-to-datasheet>.yaml
 - Note which fields are already populated
 - Identify the sections that will be affected by the edit
 
+**Check for a paired D4D-core record:**
+```bash
+# Full and core records are paired (3-phase approach — see .claude/commands/d4d-full-core.md)
+find . -name "*<dataset-name>*_d4d_core.yaml"
+```
+- If a paired core record exists, read it too. Edits touching any field present in
+  BOTH records must be applied to BOTH files (see step 4), and both must be
+  re-validated (see step 6). The same applies in reverse when the user asks to
+  edit a core record that has a paired full record.
+
 ### 2. Understand Requested Changes
 
 **Clarify the Edit Request:**
@@ -149,7 +159,7 @@ make full-schema
 **CRITICAL**: Before making edits, verify you're using correct schema field names.
 
 **Read Reference Examples:**
-- `data/d4d_concatenated/claudecode_agent/AI_READI_d4d.yaml` - Validated example structure
+- `data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/AI_READI_d4d.yaml` - Validated example structure
 - Compare existing datasheet structure with reference examples
 - Note field naming patterns for classes you'll modify
 
@@ -287,7 +297,19 @@ python3 src/github/generate_d4d_metadata.py \
 # Validate against LinkML schema
 poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
   -C Dataset <edited-file>.yaml
+
+# If a paired core record was edited (see step 1), validate it too:
+poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml \
+  -C CoreDataset <edited-file>_core.yaml
 ```
+
+**Paired-record consistency (when a core record exists):**
+- Overlapping scalar/identifier fields (id, name, title, doi, license, version,
+  dates, grant numbers, URLs, counts) must remain IDENTICAL in both files after
+  the edit.
+- Narrative fields in core may be condensed but must not contradict the full record.
+- If a reconciliation report (`*_reconciliation.md`) exists alongside the pair,
+  append the edit's changes to it.
 
 **Understanding Validation Output:**
 - **Success**: No output or "✓ Validation passed" message
@@ -423,6 +445,9 @@ Updated D4D datasheet for **${DATASET_NAME}** based on user request in issue #<i
 ## Files Modified
 - \`<path-to-file>.yaml\` - D4D YAML datasheet
 - \`<path-to-file>.html\` - HTML preview (regenerated)
+<!-- If a paired core record was also updated: -->
+<!-- - \`<path-to-file>_core.yaml\` - D4D-core YAML (kept consistent with full record) -->
+<!-- - \`<path-to-file>_reconciliation.md\` - reconciliation report (updated) -->
 
 ## Source of Changes
 <!-- Describe where new information came from -->

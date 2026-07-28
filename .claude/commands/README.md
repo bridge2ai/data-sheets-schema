@@ -1,15 +1,20 @@
-# D4D Slash Commands and Agents
+# D4D Agent Playbooks
 
-Custom slash commands and conversational agents for D4D datasheet generation and schema analysis.
+Repository-local commands and conversational agents for D4D datasheet
+generation and schema analysis. The files live under `.claude/` for Claude Code
+compatibility, but the generation playbooks are model-neutral and may also be
+read and executed by Codex/GPT agents.
 
 ## Usage
 
 ### Slash Commands
 
-Type the command name in Claude Code to expand the instructions:
+In Claude Code, type the command name to expand the instructions. In Codex/GPT,
+tell the agent to read the corresponding command file before execution.
 
 ```
-/d4d-agent        # Agent approach with Task tool parallelization
+/d4d-agent        # Model-neutral project-agent approach (full D4D only)
+/d4d-full-core    # Model-neutral four-phase full/core production workflow
 /d4d-assistant    # Assistant approach following workflow methodology
 /d4d-webfetch     # Live URL fetching with WebFetch + ARTL
 /d4d-add-mapping  # Add D4D ↔ RO-Crate SSSOM mappings for new classes
@@ -35,6 +40,7 @@ Invoke agents by mentioning their purpose in conversation or using the Skill too
 | Command | Method | Input | Output |
 |---------|--------|-------|--------|
 | `/d4d-agent` | Task tool agents | Preprocessed files | `claudecode/` |
+| `/d4d-full-core` | Four phases: full generation, core generation, source/provenance audit, strict full/core reconciliation | Preprocessed files | `claudecode_agent/{version}/` + `claudecode_agent_core/{version}/` + reconciliation reports |
 | `/d4d-assistant` | In-session synthesis | Preprocessed files | `claudecode_assistant/` |
 | `/d4d-webfetch` | WebFetch + ARTL | Live URLs | `sheets_d4dassistant/` |
 | `/d4d-add-mapping` | Schema-driven SSSOM editing | D4D class names | New rows in canonical SSSOM + SKOS files; PR-ready branch |
@@ -48,6 +54,7 @@ Invoke agents by mentioning their purpose in conversation or using the Skill too
 | `schema-stats` | Schema statistics and quality metrics | 🟢 Green |
 | `d4d-schema-expert` | Schema structure and field definitions | 🟢 Green |
 | `d4d-validator` | D4D YAML validation and error checking | 🔵 Cyan |
+| `d4d-provenance-guard` | Prevent factual leakage from older generated D4Ds | Yellow |
 
 ### D4D Evaluation Agents
 
@@ -58,7 +65,8 @@ Invoke agents by mentioning their purpose in conversation or using the Skill too
 
 ## Choosing a Command
 
-- **`/d4d-agent`**: Best for parallel processing of multiple projects
+- **`/d4d-full-core`**: Best for production runs needing BOTH full D4D and D4D-core records. It generates full from input docs, derives core from docs + full, audits both against current sources, then enforces schema-derived shared-field identity and related-content consistency.
+- **`/d4d-agent`**: Best for parallel processing of multiple projects (full D4D only)
 - **`/d4d-assistant`**: Best for step-by-step control and debugging
 - **`/d4d-webfetch`**: Best when you need fresh content from URLs
 - **`/d4d-add-mapping`**: Best when adding a newly-introduced D4D class to the RO-Crate / FAIRSCAPE exchange layer (semantic + structural SSSOM rows + SKOS triples in one workflow)
@@ -68,5 +76,6 @@ Invoke agents by mentioning their purpose in conversation or using the Skill too
 - **`schema-stats`**: Get counts, breakdowns, quality metrics about the schema
 - **`d4d-schema-expert`**: Understand schema modules, fields, and development
 - **`d4d-validator`**: Validate D4D files and fix validation errors
+- **`d4d-provenance-guard`**: Enforce current-run evidence boundaries and prohibit reuse of older generated YAML facts
 - **`d4d-rubric10`**: Quality-based D4D evaluation (hierarchical rubric)
 - **`d4d-rubric20`**: FAIR compliance assessment (detailed questions)
