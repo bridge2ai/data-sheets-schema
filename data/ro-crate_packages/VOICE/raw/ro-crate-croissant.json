@@ -1,0 +1,1522 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "cr": "http://mlcommons.org/croissant/",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "sc": "https://schema.org/",
+    "dct": "http://purl.org/dc/terms/",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataBiases": "cr:dataBiases",
+    "dataCollection": "cr:dataCollection",
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "includes": "cr:includes",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform"
+  },
+  "@type": "sc:Dataset",
+  "name": "B2AI_Voice:_An_ethically-sourced,_diverse_voice_dataset_linked_to_health_information",
+  "description": "The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. Here we present Bridge2AI-Voice, a comprehensive collection of data derived from voice recordings with corresponding clinical information.\n\nBridge2AI-Voice v3.0 contains data for 833 participants across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.\n\t",
+  "dct:conformsTo": "http://mlcommons.org/croissant/RAI/1.0",
+  "license": "https://physionet.org/content/b2ai-voice/view-license/3.0.0/",
+  "citeAs": "Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., B\u00e9lisle-Pipon, J., Bahr, R., Watts, S., Bolser, D., Siu, J., Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., ... Ghosh, S. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.0.0). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/k81f-qr68",
+  "keywords": [
+    "voice",
+    "Voice as a biomarker",
+    "Voice dataset",
+    "Acoustic biomarker",
+    "Speech analysis",
+    "Voice recording",
+    "Human voice",
+    "Vocal health",
+    "Spectrogram",
+    "Mel spectrogram",
+    "MFCC (Mel-frequency cepstral coefficients)",
+    "Fundamental frequency (F0)",
+    "Phonetic posteriorgrams (PPGs)",
+    "Articulatory features",
+    "Acoustic features",
+    "Pitch detection",
+    "Loudness",
+    "Periodicity"
+  ],
+  "version": "3.0.0",
+  "creator": [
+    {
+      "@type": "sc:Person",
+      "name": "Yael Bensoussan"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Alexandros Sigaras"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Anais Rameau"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Olivier Elemento"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Maria Powell"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "David Dorr"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Philip Payne"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Vardit Ravitsky"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Jean-Christophe B\u00e9lisle-Pipon"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Ruth Bahr"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Stephanie Watts"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Donald Bolser"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Jennifer Siu"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Jordan Lerner-Ellis"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Frank Rudzicz"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Micah Boyer"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Yassmeen Abdel-Aty"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Toufeeq Ahmed Syed"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "James Anibal"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Dona Amraei"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Stephen Aradi"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Kirollos Armosh"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Ana Sophia Martinez"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Shaheen Awan"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Steven Bedrick"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Helena Beltran"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Alexander Bernier"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Moroni Berrios"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Isaac Bevers"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Alden Blatter"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Rahul Brito"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Amy Brown"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Johnathan Brown"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "L\u00e9o Cadillac"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Selina Casalino"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "John Costello"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Abhijeet Dalal"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Iris De Santiago"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Enrique Diaz-Ocampo"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Amanda Doherty-Kirby"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Mohamed Ebraheem"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Ellie Eiseman"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Mahmoud Elmahdy"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Renee English"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Emily Evangelista"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Kenneth Fletcher"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Hortense Gallois"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Gaelyn Garrett"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Alexander Gelbard"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Anna Goldenberg"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Karim Hanna"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "William Hersh"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Jennifer Jain"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Lochana Jayachandran"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Kaley Jenney"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Kathy Jenkins"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Stacy Jo"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Alistair Johnson"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Ayush Kalia"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Megha Kalia"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Zoha Khawa"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Cindy Kostelnik"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Alisa Krause"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Andrea Krussel"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Elisa Lapadula"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Genelle Leo"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Justin Levinsky"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Chloe Loewith"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Radhika Mahajan"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Vrishni Maharaj"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Siyu Miao"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "LeAnn Michaels"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Matthew Mifsud"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Marian Mikhael"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Elijah Moothedan"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Yosef Nafii"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Tempestt Neal"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Karlee Newberry"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Evan Ng"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Christopher Nickel"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Amanda Peltier"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Trevor Pharr"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Michaela Pnacekova"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Matthew Pontell"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Claire Premi-Bortolotto"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Parnaz Rafatjou"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "JM Rahman"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "John Ramos"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Sarah Rohde"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Michael de Riesthal"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Jillian Rossi"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Laurie Russell"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Samantha Salvi Cruz"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Joyce Samuel"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Suketu Shah"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Ahmed Shawkat"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Elizabeth Silberholz"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "John Stark"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Lala Su"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Shrramana Ganesh Sudhakar"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Duncan Sutherland"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Venkata Swarna Mukhi"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Jeffrey Tang"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Luka Taylor"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Jamie Toghranegar"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Julie Tu"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Megan Urbano"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Gavin Victor"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Kimberly Vinson"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Jordan Wilke"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Claire Wilson"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Madeleine Zanin"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Xijie Zeng"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Theresa Zesiewicz"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Robin Zhao"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Pantelis Zisimopoulos"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Satrajit Ghosh"
+    }
+  ],
+  "publisher": {
+    "@type": "sc:Organization",
+    "name": "PhysioNet"
+  },
+  "distribution": [
+    {
+      "@id": "#file-b2ai-voice-dataset-feature-ppgs",
+      "@type": "cr:FileObject",
+      "name": "ppgs.parquet",
+      "description": "a datafile description",
+      "contentUrl": "file:///features/ppgs.parquet",
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-feature-sparc-ema",
+      "@type": "cr:FileObject",
+      "name": "sparc_ema.parquet",
+      "description": "a datafile description",
+      "contentUrl": "file:///features/sparc_ema.parquet",
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-feature-sparc-loudness",
+      "@type": "cr:FileObject",
+      "name": "sparc_loudness.parquet",
+      "description": "a datafile description",
+      "contentUrl": "file:///features/sparc_loudness.parquet",
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-feature-sparc-periodicity",
+      "@type": "cr:FileObject",
+      "name": "sparc_loudness.parquet",
+      "description": "a datafile description",
+      "contentUrl": "file:///features/sparc_periodicity.parquet",
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-feature-sparc-pitch",
+      "@type": "cr:FileObject",
+      "name": "sparc_pitch.parquet",
+      "description": "a datafile description",
+      "contentUrl": "file:///features/sparc_pitch.parquet",
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-feature-torchaudio-mfcc",
+      "@type": "cr:FileObject",
+      "name": "torchaudio_mfcc.parquet",
+      "description": "a datafile description",
+      "contentUrl": "file:///features/torchaudio_mfcc.parquet",
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-feature-torchaudio-pitch",
+      "@type": "cr:FileObject",
+      "name": "torchaudio_spectrogram.parquet",
+      "description": "a datafile description",
+      "contentUrl": "file:///features/torchaudio_pitch.parquet",
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-feature-torchaudio-spectrogram",
+      "@type": "cr:FileObject",
+      "name": "torchaudio_spectrogram.parquet",
+      "description": "a datafile description",
+      "contentUrl": "file:///features/torchaudio_spectrogram.parquet",
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-feature-torchaudio-mel-spectrogram",
+      "@type": "cr:FileObject",
+      "name": "torchaudio_mel_spectrogram.parquet",
+      "description": "a datafile description",
+      "contentUrl": "file:///features/torchaudio_mel_spectrogram.parquet",
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-phenotype-confounders",
+      "@type": "cr:FileObject",
+      "name": "confounders.tsv",
+      "description": "A Dataset description",
+      "contentUrl": "file:///phenotype/confounders/confounders.tsv",
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-phenotype-demographics",
+      "@type": "cr:FileObject",
+      "name": "demographics.tsv",
+      "description": "A Dataset description",
+      "contentUrl": "file:///phenotype/demographics/demographics.tsv",
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-phenotype-diagnosis",
+      "@type": "cr:FileObject",
+      "name": "VOICE_Diagnosis_Tables",
+      "description": "A Dataset description",
+      "contentUrl": [],
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-phenotype-enrollment",
+      "@type": "cr:FileObject",
+      "name": "VOICE_Enrollment_Tables",
+      "description": "A Dataset description",
+      "contentUrl": [],
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-phenotype-questionnaire",
+      "@type": "cr:FileObject",
+      "name": "VOICE_Questionnaire_Tables",
+      "description": "A Dataset description",
+      "contentUrl": [],
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "#file-b2ai-voice-dataset-phenotype-task",
+      "@type": "cr:FileObject",
+      "name": "VOICE_Questionnaire_Tables",
+      "description": "A Dataset description",
+      "contentUrl": [],
+      "encodingFormat": "text/plain"
+    }
+  ],
+  "recordSet": [
+    {
+      "@id": "#recordset-b2ai-voice-schema-ppgs",
+      "@type": "cr:RecordSet",
+      "name": "PPGs_Schema",
+      "description": "Schema for B2AI VOICE ppgs.parquet",
+      "key": [
+        "#recordset-b2ai-voice-schema-ppgs/participant_id",
+        "#recordset-b2ai-voice-schema-ppgs/session_id",
+        "#recordset-b2ai-voice-schema-ppgs/task_name",
+        "#recordset-b2ai-voice-schema-ppgs/ppgs",
+        "#recordset-b2ai-voice-schema-ppgs/n_frames"
+      ],
+      "field": [
+        {
+          "@id": "#recordset-b2ai-voice-schema-ppgs/participant_id",
+          "@type": "cr:Field",
+          "name": "participant_id",
+          "description": "Column participant_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-ppgs"
+            },
+            "extract": {
+              "column": "participant_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-ppgs/session_id",
+          "@type": "cr:Field",
+          "name": "session_id",
+          "description": "Column session_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-ppgs"
+            },
+            "extract": {
+              "column": "session_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-ppgs/task_name",
+          "@type": "cr:Field",
+          "name": "task_name",
+          "description": "Column task_name",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-ppgs"
+            },
+            "extract": {
+              "column": "task_name"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-ppgs/ppgs",
+          "@type": "cr:Field",
+          "name": "ppgs",
+          "description": "Column ppgs",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-ppgs"
+            },
+            "extract": {
+              "column": "ppgs"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-ppgs/n_frames",
+          "@type": "cr:Field",
+          "name": "n_frames",
+          "description": "Column n_frames",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-ppgs"
+            },
+            "extract": {
+              "column": "n_frames"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@id": "#recordset-b2ai-voice-schema-sparc-ema",
+      "@type": "cr:RecordSet",
+      "name": "SPARC_EMA_Schema",
+      "description": "Schema for B2AI VOICE sparc_ema.parquet",
+      "key": [
+        "#recordset-b2ai-voice-schema-sparc-ema/participant_id",
+        "#recordset-b2ai-voice-schema-sparc-ema/session_id",
+        "#recordset-b2ai-voice-schema-sparc-ema/task_name",
+        "#recordset-b2ai-voice-schema-sparc-ema/ema",
+        "#recordset-b2ai-voice-schema-sparc-ema/n_frames"
+      ],
+      "field": [
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-ema/participant_id",
+          "@type": "cr:Field",
+          "name": "participant_id",
+          "description": "Column participant_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-ema"
+            },
+            "extract": {
+              "column": "participant_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-ema/session_id",
+          "@type": "cr:Field",
+          "name": "session_id",
+          "description": "Column session_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-ema"
+            },
+            "extract": {
+              "column": "session_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-ema/task_name",
+          "@type": "cr:Field",
+          "name": "task_name",
+          "description": "Column task_name",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-ema"
+            },
+            "extract": {
+              "column": "task_name"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-ema/ema",
+          "@type": "cr:Field",
+          "name": "ema",
+          "description": "Column ema",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-ema"
+            },
+            "extract": {
+              "column": "ema"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-ema/n_frames",
+          "@type": "cr:Field",
+          "name": "n_frames",
+          "description": "Column n_frames",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-ema"
+            },
+            "extract": {
+              "column": "n_frames"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@id": "#recordset-b2ai-voice-schema-sparc-loudness",
+      "@type": "cr:RecordSet",
+      "name": "SPARC_Loudness_Schema",
+      "description": "Schema for B2AI VOICE sparc_loudness.parquet",
+      "key": [
+        "#recordset-b2ai-voice-schema-sparc-loudness/participant_id",
+        "#recordset-b2ai-voice-schema-sparc-loudness/session_id",
+        "#recordset-b2ai-voice-schema-sparc-loudness/task_name",
+        "#recordset-b2ai-voice-schema-sparc-loudness/loudness",
+        "#recordset-b2ai-voice-schema-sparc-loudness/n_frames"
+      ],
+      "field": [
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-loudness/participant_id",
+          "@type": "cr:Field",
+          "name": "participant_id",
+          "description": "Column participant_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-loudness"
+            },
+            "extract": {
+              "column": "participant_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-loudness/session_id",
+          "@type": "cr:Field",
+          "name": "session_id",
+          "description": "Column session_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-loudness"
+            },
+            "extract": {
+              "column": "session_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-loudness/task_name",
+          "@type": "cr:Field",
+          "name": "task_name",
+          "description": "Column task_name",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-loudness"
+            },
+            "extract": {
+              "column": "task_name"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-loudness/loudness",
+          "@type": "cr:Field",
+          "name": "loudness",
+          "description": "Column loudness",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-loudness"
+            },
+            "extract": {
+              "column": "loudness"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-loudness/n_frames",
+          "@type": "cr:Field",
+          "name": "n_frames",
+          "description": "Column n_frames",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-loudness"
+            },
+            "extract": {
+              "column": "n_frames"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@id": "#recordset-b2ai-voice-schema-sparc-periodicity",
+      "@type": "cr:RecordSet",
+      "name": "SPARC_Periodicity_Schema",
+      "description": "Schema for B2AI VOICE sparc_periodicity.parquet",
+      "key": [
+        "#recordset-b2ai-voice-schema-sparc-periodicity/participant_id",
+        "#recordset-b2ai-voice-schema-sparc-periodicity/session_id",
+        "#recordset-b2ai-voice-schema-sparc-periodicity/task_name",
+        "#recordset-b2ai-voice-schema-sparc-periodicity/periodicity",
+        "#recordset-b2ai-voice-schema-sparc-periodicity/n_frames"
+      ],
+      "field": [
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-periodicity/participant_id",
+          "@type": "cr:Field",
+          "name": "participant_id",
+          "description": "Column participant_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-periodicity"
+            },
+            "extract": {
+              "column": "participant_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-periodicity/session_id",
+          "@type": "cr:Field",
+          "name": "session_id",
+          "description": "Column session_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-periodicity"
+            },
+            "extract": {
+              "column": "session_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-periodicity/task_name",
+          "@type": "cr:Field",
+          "name": "task_name",
+          "description": "Column task_name",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-periodicity"
+            },
+            "extract": {
+              "column": "task_name"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-periodicity/periodicity",
+          "@type": "cr:Field",
+          "name": "periodicity",
+          "description": "Column periodicity",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-periodicity"
+            },
+            "extract": {
+              "column": "periodicity"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-periodicity/n_frames",
+          "@type": "cr:Field",
+          "name": "n_frames",
+          "description": "Column n_frames",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-periodicity"
+            },
+            "extract": {
+              "column": "n_frames"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@id": "#recordset-b2ai-voice-schema-sparc-pitch",
+      "@type": "cr:RecordSet",
+      "name": "SPARC_Pitch_Schema",
+      "description": "Schema for B2AI VOICE sparc_pitch.parquet",
+      "key": [
+        "#recordset-b2ai-voice-schema-sparc-pitch/participant_id",
+        "#recordset-b2ai-voice-schema-sparc-pitch/session_id",
+        "#recordset-b2ai-voice-schema-sparc-pitch/task_name",
+        "#recordset-b2ai-voice-schema-sparc-pitch/pitch",
+        "#recordset-b2ai-voice-schema-sparc-pitch/n_frames"
+      ],
+      "field": [
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-pitch/participant_id",
+          "@type": "cr:Field",
+          "name": "participant_id",
+          "description": "Column participant_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-pitch"
+            },
+            "extract": {
+              "column": "participant_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-pitch/session_id",
+          "@type": "cr:Field",
+          "name": "session_id",
+          "description": "Column session_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-pitch"
+            },
+            "extract": {
+              "column": "session_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-pitch/task_name",
+          "@type": "cr:Field",
+          "name": "task_name",
+          "description": "Column task_name",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-pitch"
+            },
+            "extract": {
+              "column": "task_name"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-pitch/pitch",
+          "@type": "cr:Field",
+          "name": "pitch",
+          "description": "Column pitch",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-pitch"
+            },
+            "extract": {
+              "column": "pitch"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-sparc-pitch/n_frames",
+          "@type": "cr:Field",
+          "name": "n_frames",
+          "description": "Column n_frames",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-sparc-pitch"
+            },
+            "extract": {
+              "column": "n_frames"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@id": "#recordset-b2ai-voice-schema-torchaudio-mel-spectrogram",
+      "@type": "cr:RecordSet",
+      "name": "Torchaudio_Mel-Spectrogram_Schema",
+      "description": "Schema for B2AI VOICE torchaudio_mel_spectrogram.parquet",
+      "key": [
+        "#recordset-b2ai-voice-schema-torchaudio-mel-spectrogram/participant_id",
+        "#recordset-b2ai-voice-schema-torchaudio-mel-spectrogram/session_id",
+        "#recordset-b2ai-voice-schema-torchaudio-mel-spectrogram/task_name",
+        "#recordset-b2ai-voice-schema-torchaudio-mel-spectrogram/mel_spectrogram",
+        "#recordset-b2ai-voice-schema-torchaudio-mel-spectrogram/n_frames"
+      ],
+      "field": [
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-mel-spectrogram/participant_id",
+          "@type": "cr:Field",
+          "name": "participant_id",
+          "description": "Column participant_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-mel-spectrogram"
+            },
+            "extract": {
+              "column": "participant_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-mel-spectrogram/session_id",
+          "@type": "cr:Field",
+          "name": "session_id",
+          "description": "Column session_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-mel-spectrogram"
+            },
+            "extract": {
+              "column": "session_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-mel-spectrogram/task_name",
+          "@type": "cr:Field",
+          "name": "task_name",
+          "description": "Column task_name",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-mel-spectrogram"
+            },
+            "extract": {
+              "column": "task_name"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-mel-spectrogram/mel_spectrogram",
+          "@type": "cr:Field",
+          "name": "mel_spectrogram",
+          "description": "Column mel_spectrogram",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-mel-spectrogram"
+            },
+            "extract": {
+              "column": "mel_spectrogram"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-mel-spectrogram/n_frames",
+          "@type": "cr:Field",
+          "name": "n_frames",
+          "description": "Column n_frames",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-mel-spectrogram"
+            },
+            "extract": {
+              "column": "n_frames"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@id": "#recordset-b2ai-voice-schema-torchaudio-mfcc",
+      "@type": "cr:RecordSet",
+      "name": "Torchaudio_MFCC_Schema",
+      "description": "Schema for B2AI VOICE torchaudio_mfcc.parquet",
+      "key": [
+        "#recordset-b2ai-voice-schema-torchaudio-mfcc/participant_id",
+        "#recordset-b2ai-voice-schema-torchaudio-mfcc/session_id",
+        "#recordset-b2ai-voice-schema-torchaudio-mfcc/task_name",
+        "#recordset-b2ai-voice-schema-torchaudio-mfcc/mfcc",
+        "#recordset-b2ai-voice-schema-torchaudio-mfcc/n_frames"
+      ],
+      "field": [
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-mfcc/participant_id",
+          "@type": "cr:Field",
+          "name": "participant_id",
+          "description": "Column participant_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-mfcc"
+            },
+            "extract": {
+              "column": "participant_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-mfcc/session_id",
+          "@type": "cr:Field",
+          "name": "session_id",
+          "description": "Column session_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-mfcc"
+            },
+            "extract": {
+              "column": "session_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-mfcc/task_name",
+          "@type": "cr:Field",
+          "name": "task_name",
+          "description": "Column task_name",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-mfcc"
+            },
+            "extract": {
+              "column": "task_name"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-mfcc/mfcc",
+          "@type": "cr:Field",
+          "name": "mfcc",
+          "description": "Column mfcc",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-mfcc"
+            },
+            "extract": {
+              "column": "mfcc"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-mfcc/n_frames",
+          "@type": "cr:Field",
+          "name": "n_frames",
+          "description": "Column n_frames",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-mfcc"
+            },
+            "extract": {
+              "column": "n_frames"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@id": "#recordset-b2ai-voice-schema-torchaudio-pitch",
+      "@type": "cr:RecordSet",
+      "name": "Torchaudio_Pitch_Schema",
+      "description": "Schema for B2AI VOICE torchaudio_pitch.parquet",
+      "key": [
+        "#recordset-b2ai-voice-schema-torchaudio-pitch/participant_id",
+        "#recordset-b2ai-voice-schema-torchaudio-pitch/session_id",
+        "#recordset-b2ai-voice-schema-torchaudio-pitch/task_name",
+        "#recordset-b2ai-voice-schema-torchaudio-pitch/pitch",
+        "#recordset-b2ai-voice-schema-torchaudio-pitch/n_frames"
+      ],
+      "field": [
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-pitch/participant_id",
+          "@type": "cr:Field",
+          "name": "participant_id",
+          "description": "Column participant_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-pitch"
+            },
+            "extract": {
+              "column": "participant_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-pitch/session_id",
+          "@type": "cr:Field",
+          "name": "session_id",
+          "description": "Column session_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-pitch"
+            },
+            "extract": {
+              "column": "session_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-pitch/task_name",
+          "@type": "cr:Field",
+          "name": "task_name",
+          "description": "Column task_name",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-pitch"
+            },
+            "extract": {
+              "column": "task_name"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-pitch/pitch",
+          "@type": "cr:Field",
+          "name": "pitch",
+          "description": "Column pitch",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-pitch"
+            },
+            "extract": {
+              "column": "pitch"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-pitch/n_frames",
+          "@type": "cr:Field",
+          "name": "n_frames",
+          "description": "Column n_frames",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-pitch"
+            },
+            "extract": {
+              "column": "n_frames"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@id": "#recordset-b2ai-voice-schema-torchaudio-spectrogram",
+      "@type": "cr:RecordSet",
+      "name": "Torchaudio_Spectrogram_Schema",
+      "description": "Schema for B2AI VOICE torchaudio_spectrogram.parquet",
+      "key": [
+        "#recordset-b2ai-voice-schema-torchaudio-spectrogram/participant_id",
+        "#recordset-b2ai-voice-schema-torchaudio-spectrogram/session_id",
+        "#recordset-b2ai-voice-schema-torchaudio-spectrogram/task_name",
+        "#recordset-b2ai-voice-schema-torchaudio-spectrogram/spectrogram",
+        "#recordset-b2ai-voice-schema-torchaudio-spectrogram/n_frames"
+      ],
+      "field": [
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-spectrogram/participant_id",
+          "@type": "cr:Field",
+          "name": "participant_id",
+          "description": "Column participant_id",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-spectrogram"
+            },
+            "extract": {
+              "column": "participant_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-spectrogram/session_id",
+          "@type": "cr:Field",
+          "name": "session_id",
+          "description": "Column session_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-spectrogram"
+            },
+            "extract": {
+              "column": "session_id"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-spectrogram/task_name",
+          "@type": "cr:Field",
+          "name": "task_name",
+          "description": "Column task_name",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-spectrogram"
+            },
+            "extract": {
+              "column": "task_name"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-spectrogram/spectrogram",
+          "@type": "cr:Field",
+          "name": "spectrogram",
+          "description": "Column spectrogram",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-spectrogram"
+            },
+            "extract": {
+              "column": "spectrogram"
+            }
+          }
+        },
+        {
+          "@id": "#recordset-b2ai-voice-schema-torchaudio-spectrogram/n_frames",
+          "@type": "cr:Field",
+          "name": "n_frames",
+          "description": "Column n_frames",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "#file-b2ai-voice-dataset-feature-torchaudio-spectrogram"
+            },
+            "extract": {
+              "column": "n_frames"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "rai:dataCollection": "Prospective observational study conducted at multiple specialty clinics and academic hospitals across North America. Eligible adults presenting to voice, neurology, psychiatry and respiratory clinics, plus healthy controls, were screened against predefined inclusion and exclusion criteria. After informed consent, a standardized protocol was administered that combined structured voice and respiratory tasks such as sustained vowels, coughs and reading passages with demographic questions, health history, disease-specific questionnaires and other patient-reported outcomes. Data were captured on a mobile or tablet application and stored in REDCap, with most participants completing a single in-clinic session and a subset completing repeated sessions.",
+  "rai:dataCollectionType": [
+    "Direct measurement",
+    "Surveys",
+    "Self-reporting",
+    "Secondary Data analysis",
+    "Document analysis"
+  ],
+  "rai:dataCollectionMissingData": "Phenotype tables include a row for a participant only when at least one variable is non-missing, and participants may have repeated visits with differing responses. Questionnaire completion varies by participant and cohort, so some forms and items are systematically or sporadically missing. Some derived audio features could not be computed for all recordings due to quality or length constraints, and features relating to free speech or sensitive records have been removed. No additional imputation is applied in the released files.",
+  "rai:dataCollectionRawData": "The original raw data consist of high-quality voice, speech and respiratory audio waveforms recorded on tablet or smartphone devices with headset microphones when available, plus responses to structured demographic and medical history questionnaires, disease-specific validated questionnaires and other patient-reported outcomes, together with clinical diagnoses and other metadata extracted from electronic health records. The public feature-only PhysioNet release contains de-identified derived representations of the audio, such as spectrograms, mel spectrograms, MFCCs, articulatory and prosodic features and phonetic posteriorgrams, along with tabular phenotype files and data dictionaries; access to the underlying raw audio is available only through a separate controlled-access process.",
+  "rai:dataImputationProtocol": "The public datasets do not apply global statistical imputation to missing fields; instead, missing questionnaire responses, phenotype variables and derived features are left as explicit missing values or omitted rows. The data release team audited missingness and users can implement study-specific imputation or complete-case strategies appropriate to their analyses.",
+  "rai:dataManipulationProtocol": "Prior to release, data are transformed to reduce re-identification risk and align with regulatory and ethical requirements. Direct identifiers and high-risk quasi-identifiers are removed; dates are coarsened or rebased; geographic information is generalized to the country level; narrative text fields and transcripts of free speech are removed; and raw voice waveforms are withheld from this feature-only release. Additional filtering removes features for sensitive records and audio checks, and some derived features are dropped when processing fails or quality checks fail.",
+  "rai:dataPreprocessingProtocol": [
+    "Raw audio waveforms are converted to mono and resampled to 16 kHz using anti-aliasing filtering; they are then segmented by task and passed through quality checks.",
+    "From the standardized audio, multiple derived feature sets are computed including spectrograms, mel spectrograms, MFCCs, articulatory features using the Speech Articulatory Coding package, pitch and loudness estimates, acoustic features from openSMILE, phonetic and prosodic features from Praat and parselmouth, and phonetic posteriorgrams using a dedicated model; all are stored as dense tensors in Parquet files with participant, session and task identifiers.",
+    "Tabular phenotype and questionnaire files are exported from REDCap and merged using a dedicated open-source b2aiprep library, reorganizing the former single phenotype table into thematically organized TSV files with accompanying JSON data dictionaries; static per-recording feature summaries are provided in static_features.tsv, and de-identification and filtering steps are applied before packaging."
+  ],
+  "rai:dataAnnotationProtocol": "Annotations for this dataset consist primarily of clinical labels and questionnaire-derived measures associated with each participant and recording. Participants complete validated instruments such as VHI-10, PHQ-9, GAD-7, PANAS, respiratory and cough questionnaires and voice instruments, which generate numerical scores and categorical indicators according to each instrument's published scoring guidelines. Clinical investigators and care teams record diagnostic categories for voice, neurological, mood and respiratory conditions and other phenotype variables, drawing on clinical assessments and electronic health records; these labels are represented in disease-specific TSV files with accompanying JSON dictionaries. In addition, machine-generated transcripts of certain voice tasks and numerous automatically extracted acoustic and articulatory features provide further labels and descriptors at the recording level.",
+  "rai:dataAnnotationAnalysis": [
+    "Questionnaire-based labels are generated using the standard scoring rules for each validated instrument, yielding total and subscale scores that can be mapped to symptom-severity bands; the scoring logic is encoded in the REDCap instruments and documented in the data dictionaries.",
+    "Diagnostic labels are derived from clinical assessments and electronic health records rather than crowd workers, so there is no explicit inter-rater majority-vote scheme; however, diagnoses are treated as reference labels and may include multiple comorbid conditions per participant.",
+    "The data release team audited the combined phenotype and feature tables for internal consistency, missingness patterns and data entry issues, but per-annotator disagreement statistics or detailed label-uncertainty measures are not presently included in the released dataset."
+  ],
+  "rai:dataReleaseMaintenancePlan": [
+    "Dataset releases follow a static versioning scheme managed through PhysioNet and related platforms, with version numbers such as 1.0, 1.1, 2.0.0, 2.0.1 and 3.0.0 and associated DOIs for each snapshot and for the latest version.\nReleases are coordinated by the Bridge2AI-Voice project team and the MIT Laboratory for Computational Physiology; release notes document added participants, new feature sets, reorganized phenotype tables and corrections such as spectrogram reprocessing and authorship updates.\nFuture updates are planned as additional participants are enrolled and Spanish-language protocols are incorporated; older versions remain accessible for reproducibility while users are encouraged to adopt the latest version."
+  ],
+  "rai:personalSensitiveInformation": [
+    "The dataset encodes health-related information including diagnostic categories for voice disorders, neurological and neurodegenerative conditions, mood and psychiatric disorders and respiratory diseases, as well as symptom scores from questionnaires, which constitute sensitive personal health data.",
+    "Demographic variables such as age, sex and country of data collection are included in coarsened form, while finer-grained geographic identifiers, direct identifiers and many socio-economic and cultural details have been removed during de-identification to reduce re-identification risk.",
+    "Highly sensitive content including detailed narrative responses, some information about household income, traumatic life experiences and granular cultural identifiers has been removed entirely from this feature-only dataset; raw voice recordings, which are themselves biometric identifiers, are made available only under controlled access.",
+    "Use of the data is restricted to authorized researchers under a registered-access license and associated data use agreement that explicitly forbids attempts at re-identification, stigmatizing or discriminatory uses and applications such as surveillance or high-stakes individual decision making."
+  ],
+  "rai:dataBiases": [
+    "Sampling bias: participants are recruited from specialty clinics and associated institutions using a non-probability sampling strategy, with inclusion focused on specific disease cohorts and fluent English speakers; this produces clinically enriched case mixes that may not represent general population distributions.\nGeographic and cultural bias: data are collected at a limited number of North American sites, and although the project seeks diversity, it may under-represent speakers from other regions, cultures, languages and healthcare systems; early releases focus on English, with Spanish protocols planned but not yet fully represented.\nClinical spectrum bias: because participants are selected into disease cohorts where voice changes are expected, the prevalence and severity of conditions in the dataset differ from those in routine primary care or community settings, which may inflate model performance when evaluated within this dataset.\nDevice and environment bias: recordings are made using standardized but not identical hardware and primarily in clinical environments; future at-home collection or deployment on other devices may encounter different background noise, channel characteristics and user behavior.\nAlgorithmic bias in machine annotations: transcripts and some derived features rely on off-the-shelf models such as OpenAI Whisper and other audio toolkits whose performance may vary across demographic groups; the dataset team has not independently audited these tools for fairness, so downstream users should consider their biases when interpreting results."
+  ],
+  "rai:dataLimitations": [
+    "The feature-only release does not include raw audio waveforms or free-speech transcripts, which limits certain types of modeling and error analysis and may constrain the ability to reproduce end-to-end audio pipelines.\nThis version only includes an adult cohort; models trained solely on this dataset may not generalize to younger age groups or to languages beyond those represented.\nBecause of de-identification, some granular demographic and socio-economic variables, fine-grained location data and narrative context have been removed, which reduces the risk of re-identification but also limits detailed fairness assessments and certain confounder adjustments.\nThe dataset does not provide predefined train\u2013validation\u2013test splits or benchmarking tasks and does not include explicit per-instance label-uncertainty measures, so researchers must design their own evaluation protocols and handle label noise and missingness.\nThe registered-access and controlled-access governance structure is appropriate for privacy but may limit participation by some institutions or researchers and can complicate the reproducibility of pipelines that require both features and raw audio."
+  ],
+  "rai:dataUseCases": [
+    "Development, training and fine-tuning of machine-learning models that associate voice-derived features with diagnostic categories or symptom severity for conditions such as vocal fold pathology, neurological and neurodegenerative diseases, mood and anxiety disorders and respiratory illnesses.\nBenchmarking and validation of existing voice-biomarker algorithms by testing their performance on a clinically diverse, multi-site cohort with standardized tasks and rich phenotype data.\nExploratory research on acoustic, phonetic, prosodic and articulatory correlates of disease using de-identified derived features, including work on representation learning, domain adaptation and multimodal integration with other health data.\nMethodological research on fairness, robustness and AI safety in clinical voice models, including studies of bias related to demographic subgroups or recording conditions, subject to the ethical constraints in the data use agreement.\nThe dataset is explicitly not intended for operational decision making about specific individuals such as hiring, insurance pricing, law enforcement or surveillance, nor for attempts at re-identification or for uses likely to stigmatize individuals or groups."
+  ],
+  "rai:dataCollectionTimeframe": [
+    "Data collection for the adult flagship cohort began after project launch in 2023 and is ongoing across five North American sites toward an anticipated enrollment of approximately 3,000 participants by November 2026; the participants and recordings included in dataset version 3.0.0 were collected roughly between 2023 and 2025.",
+    "Dataset releases are static snapshots: v1.0 (initial public release in 2024), v1.1 (2025-01-17), v2.0.0 (2025-04-16), v2.0.1 (2025-08-18) and v3.0.0 (2025-12-16), each corresponding to a frozen state of the underlying data collection."
+  ]
+}

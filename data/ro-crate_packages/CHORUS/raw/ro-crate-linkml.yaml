@@ -1,0 +1,136 @@
+bytes: 1319413953331
+citation: 'The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical
+  Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset,
+  version 1.0 Beta. Harvard Dataverse, Apr. 2026.'
+collection_mechanisms:
+- description: "Data are derived from routine clinical care at participating hospitals\
+    \ under IRB oversight. Collection includes:\n\u2022\tElectronic health record\
+    \ extraction and transformation to OMOP common data model\n\u2022\tImaging metadata\
+    \ de-identification using RSNA Clinical Trial Processor and pixel-level de-identification\
+    \ using IbisWorks EICON. \n\u2022\tHigh-resolution physiologic waveform capture\
+    \ extraction and transformation to the WFDB standard, \n\u2022\tStandardized harmonization\
+    \ to common data model\nEthical safeguards include:\n\u2022\tIRB approval or waiver\
+    \ as appropriate\n\u2022\tCompliance with CHoRUS governance\n\u2022\tLayered privacy\
+    \ protection including de-identification, data use agreement, controlled access\
+    \ data repository with adherence to NIST 800-53 principles, audit-level protection,\
+    \ registration, role-based access controls, protection against data exfiltration.\n\
+    Data are not collected solely for research but repurposed from clinical workflows\
+    \ under ethical oversight.\n"
+conforms_to: D4D Schema
+created_by: "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3),\
+  \ Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3),\
+  \ Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8),\
+  \ Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2),\
+  \ Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6),\
+  \ Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13),\
+  \ Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie\
+  \ Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4),\
+  \ Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom\
+  \ J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6)\
+  \ on behalf of the CHoRUS Investigators\n\n(1) Massachusetts General Hospital, Harvard\
+  \ Medical School, Boston, Massachusetts, USA\n(2) Duke University, Durham, North\
+  \ Carolina, USA\n(3) University of Florida, Gainesville, Florida, USA\n(4) Tufts\
+  \ CTSI / Tufts Medical Center, Boston, Massachusetts, USA\n(5) University of Oregon,\
+  \ Eugene, Oregon, USA\n(6) University of Virginia, Charlottesville, Virginia, USA\n\
+  (7) Columbia University Irving Medical Center, New York, New York, USA\n(8) University\
+  \ of California, San Francisco, San Francisco, California, USA\n(9) David Geffen\
+  \ School of Medicine at UCLA, Los Angeles, California, USA\n(10) McWilliams School\
+  \ of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic,\
+  \ Rochester, Minnesota, USA\n(11) Mayo Clinic, Rochester, Minnesota, USA\n(12) Seattle\
+  \ Children\u2019s Hospital, Seattle, Washington, USA\n(13) Nationwide Children\u2019\
+  s Hospital / The Ohio State University, Columbus, Ohio, USA\n(14) Emory University,\
+  \ Atlanta, Georgia, USA\n(15) Massachusetts Institute of Technology, Cambridge,\
+  \ Massachusetts, USA"
+creators:
+- description: "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3),\
+    \ Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3),\
+    \ Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8),\
+    \ Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2),\
+    \ Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6),\
+    \ Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13),\
+    \ Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie\
+    \ Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4),\
+    \ Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14),\
+    \ Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6)\
+    \ on behalf of the CHoRUS Investigators\n\n(1) Massachusetts General Hospital,\
+    \ Harvard Medical School, Boston, Massachusetts, USA\n(2) Duke University, Durham,\
+    \ North Carolina, USA\n(3) University of Florida, Gainesville, Florida, USA\n\
+    (4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA\n(5) University\
+    \ of Oregon, Eugene, Oregon, USA\n(6) University of Virginia, Charlottesville,\
+    \ Virginia, USA\n(7) Columbia University Irving Medical Center, New York, New\
+    \ York, USA\n(8) University of California, San Francisco, San Francisco, California,\
+    \ USA\n(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA\n\
+    (10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas,\
+    \ USA; Mayo Clinic, Rochester, Minnesota, USA\n(11) Mayo Clinic, Rochester, Minnesota,\
+    \ USA\n(12) Seattle Children\u2019s Hospital, Seattle, Washington, USA\n(13) Nationwide\
+    \ Children\u2019s Hospital / The Ohio State University, Columbus, Ohio, USA\n\
+    (14) Emory University, Atlanta, Georgia, USA\n(15) Massachusetts Institute of\
+    \ Technology, Cambridge, Massachusetts, USA"
+description: "The Collaborative Hospital Repository Uniting Standards (CHoRUS) for\
+  \ Clinical Care AI is a clinical data network developing a flagship multi-hospital,\
+  \ multimodal, high-resolution dataset under the NIH Bridge2AI program. CHoRUS harmonizes\
+  \ electronic health record (EHR) data, imaging, high-resolution physiologic signals\
+  \ (including telemetry data and EEG where available), and tokenized note and report\
+  \ text (via OHNLP toolkit) with raw text retained locally across participating institutions\
+  \ using standardized data models and governance frameworks.\nThe repository is designed\
+  \ to enable secure, auditable, and reproducible artificial intelligence (AI) research\
+  \ to improve recovery from acute illness. Data are curated within a NIST 800-53\u2013\
+  aligned secure enclave architecture with role-based access controls, audit logging,\
+  \ and controlled-access governance review. CHoRUS supports AI model development,\
+  \ validation, benchmarking, and translational research while maintaining compliance\
+  \ with HIPAA and NIH data-sharing policies.\n"
+doi: https://doi.org/10.18130/V3/XNBOPG
+download_url: http://chorus4ai.org/dataset
+ethical_reviews:
+- description: "Eric S. Rosenthal, Michael J. Young, Ishan Williams,\_Ashley\_Cordes,\
+    \ and Barbara J. Evans in collaboration with the Mass General Brigham IRB with\_\
+    local context review by IRBs, HIPAA Privacy Officers, and institutional counsels\
+    \ at contributing medical centers."
+id: ark:59853/rocrate-chorus-ro-crate-package
+keywords:
+- Bridge2AI
+- CHoRUS
+- Electronic health records
+- physiological data
+- medical images
+known_biases:
+- description: "\u2022\tReferral bias from tertiary/quaternary academic centers\n\u2022\
+    \tSocioeconomic and demographic distribution reflective of participating institutions\n\
+    \u2022\tDocumentation bias in clinical notes\n\u2022\tMissingness not at random\
+    \ (MNAR) in laboratory, waveform, and imaging acquisition\n\u2022\tDifferential\
+    \ care pathways affecting label assignment (e.g., ICU vs non-ICU populations)\n\
+    \u2022\tTemporal trends related to evolving clinical practice\nBias assessment\
+    \ is ongoing and documented in dataset release notes\n"
+known_limitations:
+- description: "\u2022\tObservational data; and not randomized; collected as real-world\
+    \ clinical data, not through prospective research interactions with patient.\n\
+    \u2022\tDocumentation quality dependent on routine clinical workflows and data\
+    \ elements being collected in clinical practice.\n\u2022\tVariable sampling rates\
+    \ across real-world data from hospital waveform systems and middleware\n\u2022\
+    \tInstitutional heterogeneity in coding and clinical data collection practices\n\
+    \u2022\tLimited generalizability beyond participating hospitals\n\u2022\tNot appropriate\
+    \ for re-identification, contact tracing, or patient-level intervention\n\u2022\
+    \tHold-out splits are available for testing; training and validation in development\
+    \ splits require internal mechanisms to avoid overfitting\n"
+license: Data Use Agreement available at 'https://chorus4ai.org/dataset/'
+missing_data_documentation:
+- description: Variable sampling rates across real-world data from hospital waveform
+    systems and middleware
+name: CHoRUS RO-Crate Package
+publisher: B2AI CHoRUS
+sensitive_elements:
+- description: CHoRUS operates within a secure enclave environment aligned with NIST
+    800-53 controls.
+- description: De-identification consistent with HIPAA Safe Harbor
+- description: Removal or tokenization of direct identifiers
+- description: Date shifting or limited date fields when required
+- description: Role-based access control (RBAC)
+- description: Multi-factor authentication
+- description: Full audit logging of data access and queries
+- description: Prohibition of re-identification attempts
+- description: Data export restrictions and output review procedures to reduce risk
+    of re-identification
+- description: Re-identification risk is periodically assessed and mitigation strategies
+    updated as needed.
+title: CHoRUS RO-Crate Package
+version: 1.0 Beta

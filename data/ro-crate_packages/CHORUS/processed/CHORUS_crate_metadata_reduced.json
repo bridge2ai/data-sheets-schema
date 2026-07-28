@@ -1,0 +1,189 @@
+{
+ "@context": "https://w3id.org/ro/crate/1.2/context",
+ "@graph": [
+  {
+   "@id": "ro-crate-metadata.json",
+   "@type": "CreativeWork",
+   "conformsTo": {
+    "@id": "https://w3id.org/ro/crate/1.2"
+   },
+   "about": {
+    "@id": "ark:59853/rocrate-chorus-ro-crate-package/"
+   }
+  },
+  {
+   "@id": "ark:59853/rocrate-chorus-ro-crate-package/",
+   "@type": [
+    "https://w3id.org/EVI#Dataset",
+    "https://w3id.org/EVI#ROCrate"
+   ],
+   "name": "CHoRUS RO-Crate Package",
+   "identifier": "https://doi.org/10.18130/V3/XNBOPG",
+   "description": "The Collaborative Hospital Repository Uniting Standards (CHoRUS) for Clinical Care AI is a clinical data network developing a flagship multi-hospital, multimodal, high-resolution dataset under the NIH Bridge2AI program. CHoRUS harmonizes electronic health record (EHR) data, imaging, high-resolution physiologic signals (including telemetry data and EEG where available), and tokenized note and report text (via OHNLP toolkit) with raw text retained locally across participating institutions using standardized data models and governance frameworks.\nThe repository is designed to enable secure, auditable, and reproducible artificial intelligence (AI) research to improve recovery from acute illness. Data are curated within a NIST 800-53–aligned secure enclave architecture with role-based access controls, audit logging, and controlled-access governance review. CHoRUS supports AI model development, validation, benchmarking, and translational research while maintaining compliance with HIPAA and NIH data-sharing policies.\n",
+   "keywords": [
+    "Bridge2AI",
+    "CHoRUS",
+    "Electronic health records",
+    "physiological data",
+    "medical images"
+   ],
+   "version": "1.0 Beta",
+   "datePublished": "2026-04-03",
+   "isPartOf": [
+    {
+     "@id": "ark:59852/organization-bridge2ai-s6VouUf8Gkm"
+    }
+   ],
+   "hasPart": [
+    {
+     "@id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+     "@type": [
+      "https://w3id.org/EVI#Dataset",
+      "https://w3id.org/EVI#ROCrate"
+     ],
+     "name": "CHoRUS RO-Crate EHR SubRoCrate"
+    },
+    {
+     "@id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+     "@type": [
+      "https://w3id.org/EVI#Dataset",
+      "https://w3id.org/EVI#ROCrate"
+     ],
+     "name": "CHoRUS RO-Crate Waveforms SubRoCrate"
+    }
+   ],
+   "author": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators\n\n(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA\n(2) Duke University, Durham, North Carolina, USA\n(3) University of Florida, Gainesville, Florida, USA\n(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA\n(5) University of Oregon, Eugene, Oregon, USA\n(6) University of Virginia, Charlottesville, Virginia, USA\n(7) Columbia University Irving Medical Center, New York, New York, USA\n(8) University of California, San Francisco, San Francisco, California, USA\n(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA\n(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA\n(11) Mayo Clinic, Rochester, Minnesota, USA\n(12) Seattle Children’s Hospital, Seattle, Washington, USA\n(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA\n(14) Emory University, Atlanta, Georgia, USA\n(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA",
+   "publisher": "B2AI CHoRUS",
+   "principalInvestigator": "Eric Rosenthal, EROSENTHAL@mgh.harvard.edu",
+   "funder": "NIH Common Fund OT2OD032701",
+   "contactEmail": "Ciera McCrary, cmccrary@mgh.harvard.edu",
+   "citation": "The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset, version 1.0 Beta. Harvard Dataverse, Apr. 2026.",
+   "license": "Data Use Agreement available at 'https://chorus4ai.org/dataset/'",
+   "conditionsOfAccess": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx",
+   "copyrightNotice": "© 2026 THE GENERAL HOSPITAL CORPORATION D/B/A MASSACHUSETTS GENERAL HOSPITAL. Copyrights are owned by each subaward site for curation performed locally. Copyrights are jointly held for software jointly developed. All rights reserved",
+   "contentSize": "1.2 tb",
+   "ethicalReview": "Eric S. Rosenthal, Michael J. Young, Ishan Williams, Ashley Cordes, and Barbara J. Evans in collaboration with the Mass General Brigham IRB with local context review by IRBs, HIPAA Privacy Officers, and institutional counsels at contributing medical centers.",
+   "confidentialityLevel": "HL7:2V (very restricted)",
+   "irb": {
+    "@type": "Organization",
+    "name": "Mass General Brigham Institutional Review Board (MGB IRB)",
+    "contactPoint": {
+     "@type": "ContactPoint",
+     "contactType": "IRB Reliance and Compliance",
+     "email": "irbreliance@mgb.org",
+     "telephone": "+1-857-282-1900"
+    },
+    "address": {
+     "@type": "PostalAddress",
+     "streetAddress": "399 Revolution Drive, Suite 710",
+     "addressLocality": "Somerville",
+     "addressRegion": "MA",
+     "postalCode": "02145",
+     "addressCountry": "US"
+    }
+   },
+   "irbProtocolId": "#2022P000707",
+   "humanSubjectExemption": "HIPAA exemption 4 ((45 CFR 46.104(d)(4))",
+   "fdaRegulated": true,
+   "deidentified": true,
+   "humanSubjectResearch": "Yes",
+   "dataGovernanceCommittee": "Eric Rosenthal, EROSENTHAL@mgh.harvard.edu",
+   "rai:dataLimitations": "•\tObservational data; and not randomized; collected as real-world clinical data, not through prospective research interactions with patient.\n•\tDocumentation quality dependent on routine clinical workflows and data elements being collected in clinical practice.\n•\tVariable sampling rates across real-world data from hospital waveform systems and middleware\n•\tInstitutional heterogeneity in coding and clinical data collection practices\n•\tLimited generalizability beyond participating hospitals\n•\tNot appropriate for re-identification, contact tracing, or patient-level intervention\n•\tHold-out splits are available for testing; training and validation in development splits require internal mechanisms to avoid overfitting\n",
+   "rai:dataBiases": "•\tReferral bias from tertiary/quaternary academic centers\n•\tSocioeconomic and demographic distribution reflective of participating institutions\n•\tDocumentation bias in clinical notes\n•\tMissingness not at random (MNAR) in laboratory, waveform, and imaging acquisition\n•\tDifferential care pathways affecting label assignment (e.g., ICU vs non-ICU populations)\n•\tTemporal trends related to evolving clinical practice\nBias assessment is ongoing and documented in dataset release notes\n",
+   "rai:dataReleaseMaintenancePlan": "\n•\tVersioned dataset releases e.g., CHoRUS vX.Y)\n•\tRelease notes documenting schema changes, harmonization updates, and known issues\n•\tGovernance committee oversight for structural modifications\n•\tData upload\n•\tDeprecation policy includes:\no\tAdvance notice of schema changes\no\tBackward compatibility window where feasible\no\tArchive of prior versions within enclave where possible or incremental change records\nPrimary maintainers: CHoRUS Data Pillar in collaboration with institutional data stewards.\n",
+   "rai:dataCollection": "Data are derived from routine clinical care at participating hospitals under IRB oversight. Collection includes:\n•\tElectronic health record extraction and transformation to OMOP common data model\n•\tImaging metadata de-identification using RSNA Clinical Trial Processor and pixel-level de-identification using IbisWorks EICON. \n•\tHigh-resolution physiologic waveform capture extraction and transformation to the WFDB standard, \n•\tStandardized harmonization to common data model\nEthical safeguards include:\n•\tIRB approval or waiver as appropriate\n•\tCompliance with CHoRUS governance\n•\tLayered privacy protection including de-identification, data use agreement, controlled access data repository with adherence to NIST 800-53 principles, audit-level protection, registration, role-based access controls, protection against data exfiltration.\nData are not collected solely for research but repurposed from clinical workflows under ethical oversight.\n",
+   "rai:dataCollectionMissingData": "Variable sampling rates across real-world data from hospital waveform systems and middleware",
+   "rai:personalSensitiveInformation": [
+    "CHoRUS operates within a secure enclave environment aligned with NIST 800-53 controls.",
+    "De-identification consistent with HIPAA Safe Harbor",
+    "Removal or tokenization of direct identifiers",
+    "Date shifting or limited date fields when required",
+    "Role-based access control (RBAC)",
+    "Multi-factor authentication",
+    "Full audit logging of data access and queries",
+    "Prohibition of re-identification attempts",
+    "Data export restrictions and output review procedures to reduce risk of re-identification",
+    "Re-identification risk is periodically assessed and mitigation strategies updated as needed."
+   ],
+   "completeness": "Interim release with partial data. Not all patients in the CHoRUS full cohort are included. No DICOM images are included.",
+   "contentUrl": "http://chorus4ai.org/dataset",
+   "project_name": "CHoRUS",
+   "rai:conditionsOfAccess": "Access to CHoRUS data is governed through a controlled-access framework and requires:\n•\tProviding institutional affiliation and credentials\n•\tApproved research proposal reviewed by CHoRUS governance committee\n•\tData Use Agreement (DUA) executed between requestor institution and CHoRUS\n•\tIRB approval or exemption documentation, as applicable\n•\tCompliance with NIH Bridge2AI OT terms and applicable federal regulations\n•\tAccess restricted to secure enclave environment; no raw data export permitted unless explicitly approved\nData use may not be used for commercial purposes unless specifically authorized through a separate agreement consistent with governing award and consortium terms.\n",
+   "rai:potentialBiases": "•\tReferral bias from tertiary/quaternary academic centers\n•\tSocioeconomic and demographic distribution reflective of participating institutions\n•\tDocumentation bias in clinical notes\n•\tMissingness not at random (MNAR) in laboratory, waveform, and imaging acquisition\n•\tDifferential care pathways affecting label assignment (e.g., ICU vs non-ICU populations)\n•\tTemporal trends related to evolving clinical practice\nBias assessment is ongoing and documented in dataset release notes\n",
+   "rai:intendedUseCases": "\n•\tAI model training within enclave\n•\tModel validation and benchmarking\n•\tAlgorithm development and feature engineering\n•\tRetrospective hypothesis testing\n•\tFine-tuning of multimodal models\n•\tComparative effectiveness research\n•\tReinforcement learning and development of expert AI\n•\tMethodological research in trustworthy AI\n•\tTrial emulation or powering\nNot recommended\n•\tDirect translation of trained algorithms to real-time clinical deployment without validation or regulatory clearance\n•\tUse as sole evidence for clinical decision-making\n•\tPopulation inference beyond participating institutions\nUsage must align with approved research scope and governance policies.\n",
+   "rai:maintenancePlan": "\n•\tVersioned dataset releases e.g., CHoRUS vX.Y)\n•\tRelease notes documenting schema changes, harmonization updates, and known issues\n•\tGovernance committee oversight for structural modifications\n•\tData upload\n•\tDeprecation policy includes:\no\tAdvance notice of schema changes\no\tBackward compatibility window where feasible\no\tArchive of prior versions within enclave where possible or incremental change records\nPrimary maintainers: CHoRUS Data Pillar in collaboration with institutional data stewards.\n",
+   "releaseDate": "03/04/2026",
+   "ro-crate-metadata": "ro-crate-metadata.json"
+  },
+  {
+   "@id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+   "@type": [
+    "https://w3id.org/EVI#Dataset",
+    "https://w3id.org/EVI#ROCrate"
+   ],
+   "name": "CHoRUS RO-Crate Waveforms SubRoCrate",
+   "description": "Waveforms sub ro-crate for Bridge2AI CHoRUS RO-Crate Package",
+   "keywords": [
+    "Bridge2AI",
+    "CHoRUS",
+    "Electronic health records",
+    "physiological data",
+    "medical images"
+   ],
+   "version": "1.0 Beta",
+   "datePublished": "2026-04-03",
+   "isPartOf": [
+    {
+     "@id": "ark:59853/rocrate-chorus-ro-crate-package"
+    }
+   ],
+   "hasPart": [],
+   "author": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators\n\n(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA\n(2) Duke University, Durham, North Carolina, USA\n(3) University of Florida, Gainesville, Florida, USA\n(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA\n(5) University of Oregon, Eugene, Oregon, USA\n(6) University of Virginia, Charlottesville, Virginia, USA\n(7) Columbia University Irving Medical Center, New York, New York, USA\n(8) University of California, San Francisco, San Francisco, California, USA\n(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA\n(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA\n(11) Mayo Clinic, Rochester, Minnesota, USA\n(12) Seattle Children’s Hospital, Seattle, Washington, USA\n(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA\n(14) Emory University, Atlanta, Georgia, USA\n(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA",
+   "principalInvestigator": "PI Eric Rosenthal  EROSENTHAL@mgh.harvard.edu",
+   "funder": "NIH Common Fund OT2OD032701",
+   "contactEmail": "Ciera McCrary, cmccrary@mgh.harvard.edu",
+   "citation": "The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset, version 1.0 Beta. Harvard Dataverse, Apr. 2026.",
+   "license": "See Data Use Agreement",
+   "conditionsOfAccess": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx",
+   "copyrightNotice": "© 2026 THE GENERAL HOSPITAL CORPORATION D/B/A MASSACHUSETTS GENERAL HOSPITAL. Copyrights are owned by each subaward site for curation performed locally. Copyrights are jointly held for software jointly developed. All rights reserved",
+   "contentSize": "1.201567472832 tb",
+   "contentUrl": "https://chorus4ai.org/dataset/",
+   "ro-crate-metadata": "waveforms/ro-crate-metadata.json"
+  },
+  {
+   "@id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+   "@type": [
+    "https://w3id.org/EVI#Dataset",
+    "https://w3id.org/EVI#ROCrate"
+   ],
+   "name": "CHoRUS RO-Crate EHR SubRoCrate",
+   "description": "Electronic Health Records sub ro-crate for Bridge2AI CHoRUS RO-Crate Package",
+   "keywords": [
+    "Bridge2AI",
+    "CHoRUS",
+    "Electronic health records",
+    "physiological data",
+    "medical images"
+   ],
+   "version": "1.0 Beta",
+   "datePublished": "03/04/2026",
+   "isPartOf": [
+    {
+     "@id": "ark:59853/rocrate-chorus-ro-crate-package"
+    }
+   ],
+   "hasPart": [],
+   "author": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators\n\n(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA\n(2) Duke University, Durham, North Carolina, USA\n(3) University of Florida, Gainesville, Florida, USA\n(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA\n(5) University of Oregon, Eugene, Oregon, USA\n(6) University of Virginia, Charlottesville, Virginia, USA\n(7) Columbia University Irving Medical Center, New York, New York, USA\n(8) University of California, San Francisco, San Francisco, California, USA\n(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA\n(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA\n(11) Mayo Clinic, Rochester, Minnesota, USA\n(12) Seattle Children’s Hospital, Seattle, Washington, USA\n(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA\n(14) Emory University, Atlanta, Georgia, USA\n(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA",
+   "principalInvestigator": "PI Eric Rosenthal  EROSENTHAL@mgh.harvard.edu",
+   "funder": "NIH Common Fund OT2OD032701",
+   "contactEmail": "Ciera McCrary, cmccrary@mgh.harvard.edu",
+   "citation": "The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset, version 1.0 Beta. Harvard Dataverse, Apr. 2026.",
+   "license": "See Data Use Agreement",
+   "conditionsOfAccess": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx",
+   "copyrightNotice": "© 2026 THE GENERAL HOSPITAL CORPORATION D/B/A MASSACHUSETTS GENERAL HOSPITAL. Copyrights are owned by each subaward site for curation performed locally. Copyrights are jointly held for software jointly developed. All rights reserved",
+   "contentSize": "18.136671 mb",
+   "contentUrl": "https://chorus4ai.org/dataset/",
+   "ro-crate-metadata": "ehr/ro-crate-metadata.json"
+  }
+ ]
+}

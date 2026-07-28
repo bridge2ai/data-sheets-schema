@@ -1,0 +1,71 @@
+SOURCE METADATA
+Project: AI_READI
+Source ID: fairhub_dataset
+Source type: data resource
+Source URL: https://fairhub.io/datasets/2
+Raw file: data/raw/AI_READI/fairhub_dataset_2_row12.html
+Curation note: FAIRhub record for dataset v2.0.0 (2.01 TB, 165,051 files) and the version the input sheet selects, in two separate cells. The page itself states "This version of the dataset is no longer accessible. Please refer to the latest version." Superseded upstream by the v3.0.0 record captured as fairhub_dataset_v3; retain it only as evidence about the v2.0.0 release.
+--------------------------------------------------------------------------------
+Flagship Dataset of Type 2 Diabetes from the AI-READI Project
+FAIRhub
+Open main menu
+Find Datasets
+Share Datasets
+About
+Contact
+My Requests
+Flagship Dataset of Type 2 Diabetes from the AI-READI Project
+AI-READI Consortium
+The AI-READI project seeks to create and share a flagship ethically-sourced dataset of type 2 diabetes
+This version of the dataset is no longer accessible. Please refer to the
+latest version
+.
+About
+Healthsheet
+Study Dashboard
+Study Metadata
+Dataset Metadata
+Dataset Structure Preview
+Dataset Quality Dashboard
+Dataset Uses
+Usage statistics
+Views
+Cited by
+Access approved
+All versions
+Current version
+More info on how stats are collected....
+2.01 TB
+165,051
+Files
+License
+Health Data License
+Keywords
+Diabetes mellitus
+Machine Learning
+Artificial Intelligence
+Electrocardiography
+Continuous Glucose Monitoring
+Retinal imaging
+Eye exam
+Citation
+When using this resource, please cite:
+When using this resource, please follow the citation instructions provided at
+https://docs.aireadi.org/docs/2/citation
+Versions
+Version 3.0.0
+10.60775/fairhub.3
+Nov 17, 2025
+Version 2.0.0
+10.60775/fairhub.2
+Nov 8, 2024
+Version 1.0.0
+10.60775/fairhub.1
+May 3, 2024
+Dataset Impact
+Dataset Index
+FAIR score
+Citations
+Mentions
+Platform is currently in beta
+This repository is under review for potential modification in compliance with Administration directives.

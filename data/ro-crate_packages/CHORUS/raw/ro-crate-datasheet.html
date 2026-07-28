@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CHoRUS RO-Crate Package - RO-Crate Datasheet</title>
+    <style>
+      body {
+        font-family: "Helvetica", "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+        color: #333;
+        line-height: 1.5;
+        background-color: #f5f5f5;
+        /* Added for smooth transition */
+        transition: margin-left 0.3s ease-in-out;
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 12px;
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        /* Added for smooth transition */
+        transition: margin-left 0.3s ease-in-out;
+      }
+      header {
+        margin-bottom: 10px;
+        border-bottom: 2px solid #2c3e50;
+        padding-bottom: 8px;
+        background-color: #f8f9fa;
+        padding: 12px;
+        border-radius: 5px;
+      }
+      h1 {
+        font-size: 24px;
+        margin-bottom: 5px;
+        color: #2c3e50;
+      }
+      h2 {
+        font-size: 20px;
+        color: #2c3e50;
+        margin-top: 12px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 4px;
+      }
+      h3 {
+        font-size: 18px;
+        color: #2c3e50;
+        margin-top: 10px;
+        margin-bottom: 6px;
+      }
+      h4 {
+        font-size: 16px;
+        color: #2c3e50;
+        margin-top: 8px;
+        margin-bottom: 6px;
+      }
+      .summary-section {
+        background-color: #f8f9fa;
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      }
+      .summary-row {
+        display: flex;
+        margin-bottom: 6px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 4px;
+      }
+      .summary-label {
+        width: 230px;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      .summary-value {
+        flex: 1;
+      }
+      .section-header {
+        margin: 12px 0 8px 0;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #ddd;
+        color: #2c3e50;
+      }
+      .composition-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .composition-item {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 10px;
+        text-align: center;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+        width: calc(20% - 10px);
+        min-width: 120px;
+      }
+      .composition-count {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+        display: block;
+        margin-bottom: 5px;
+      }
+      .composition-label {
+        color: #555;
+      }
+      .subcrates-container {
+        margin-top: 15px;
+      }
+      .subcrate-summary {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      }
+      .subcrate-metadata {
+        margin-bottom: 8px;
+      }
+      .metadata-item {
+        margin-bottom: 3px;
+      }
+      .metadata-label {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-right: 10px;
+      }
+      .section-summary {
+        background-color: white;
+        border-radius: 4px;
+        padding: 10px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+        border: 1px solid #eaeaea;
+      }
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 10px;
+      }
+      .summary-item {
+        margin-bottom: 8px;
+      }
+      details {
+        margin-top: 8px;
+        border: 1px solid #eaeaea;
+        border-radius: 4px;
+        padding: 8px;
+      }
+      summary {
+        font-weight: bold;
+        cursor: pointer;
+        padding: 5px;
+        color: #2c3e50;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      .data-table th,
+      .data-table td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid #eaeaea;
+      }
+      .data-table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      .view-full-link {
+        margin-top: 8px;
+        text-align: right;
+      }
+      .view-full-link a {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: #2c3e50;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .view-full-link a:hover {
+        background-color: #1a252f;
+      }
+      .distribution-section,
+      .use-cases-section {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 15px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      }
+      .distribution-item,
+      .use-cases-item {
+        margin-bottom: 6px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 4px;
+      }
+      .distribution-label,
+      .use-cases-label {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 5px;
+      }
+      .publications-list {
+        margin-top: 5px;
+        padding-left: 15px;
+      }
+      .publications-list li {
+        margin-bottom: 8px;
+      }
+      .subcrate-error {
+        background-color: #fff0f0;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        border: 1px solid #ffcccb;
+      }
+      .subcrate-title {
+        border-bottom: 2px solid #2c3e50;
+        padding-bottom: 6px;
+        margin-bottom: 8px;
+        color: #2c3e50;
+      }
+      .sidebar-dropdown {
+        border: none;
+        padding: 0;
+        margin: 0;
+      }
+      .sidebar-dropdown summary {
+        padding: 12px 15px;
+        font-size: 18px;
+        color: #f1f1f1;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .sidebar-dropdown summary:hover {
+        background-color: #1a252f;
+      }
+      .sidebar-subnav-link {
+        padding-left: 30px !important;
+        font-size: 15px !important;
+      }
+      .composition-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 8px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+      }
+      .composition-card {
+        border: 1px solid #eaeaea;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      }
+      .card-header {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        border-bottom: 1px solid #eaeaea;
+        display: flex;
+        align-items: center;
+      }
+      .card-icon {
+        font-size: 20px;
+        margin-right: 10px;
+      }
+      .card-title {
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      .card-content {
+        padding: 8px 10px;
+      }
+      .card-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .stat-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .stat-label {
+        font-weight: bold;
+        color: #555;
+        min-width: 25px;
+        margin-right: 2px;
+      }
+
+      .stat-value {
+        color: #333;
+      }
+      .stat-detail {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 3px;
+        margin-left: 5px;
+      }
+
+      /* New compact styles */
+      .compact-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        margin-top: 6px;
+        margin-bottom: 6px;
+      }
+
+      .summary-card {
+        border: 1px solid #eaeaea;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      }
+
+      .stat-row {
+        margin-bottom: 4px;
+        display: flex;
+        font-size: 0.95em;
+      }
+
+      .indent {
+        margin-left: 12px;
+        margin-bottom: 4px;
+      }
+
+      .small {
+        font-size: 0.9em;
+        color: #666;
+      }
+
+      .compact-list {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .compact-list li {
+        margin-bottom: 4px;
+      }
+
+      .subcrate-composition h4 {
+        margin-top: 8px;
+        margin-bottom: 4px;
+      }
+
+      footer {
+        margin-top: 15px;
+        padding: 12px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        color: #555;
+        text-align: center;
+      }
+
+      footer a {
+        color: #2c3e50;
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+      .regulatory-section {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding: 0;
+      }
+
+      .regulatory-section h3 {
+        font-size: 18px;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .regulatory-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .regulatory-item {
+        background-color: #f8f9fa;
+        padding: 8px 10px;
+        border-radius: 4px;
+        border: none;
+      }
+
+      .regulatory-label {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-right: 5px;
+      }
+
+      .irb-detail {
+        background-color: #f8f9fa;
+        padding: 8px 10px;
+        border-radius: 4px;
+        margin-top: 8px;
+      }
+
+      .irb-org {
+        margin-top: 6px;
+      }
+
+      .irb-name {
+        font-weight: 600;
+        display: block;
+      }
+
+      .irb-contact {
+        margin-top: 4px;
+        font-size: 0.95em;
+        color: #555;
+      }
+
+      .irb-contact > * + *::before {
+        content: " | ";
+        color: #999;
+      }
+
+      .irb-contact-type {
+        font-style: italic;
+      }
+
+      .irb-address {
+        margin-top: 4px;
+        font-size: 0.9em;
+        color: #666;
+      }
+
+      .regulatory-exemptions {
+        background-color: #f8f9fa;
+        padding: 8px 10px;
+        border-radius: 4px;
+        margin-top: 8px;
+      }
+
+      .regulatory-exemptions p {
+        margin: 8px 0 0 0;
+        line-height: 1.5;
+      }
+
+      /* START: New styles for sidebar navigation */
+      #sidebar {
+        height: 100%;
+        width: 250px;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        background-color: #2c3e50;
+        overflow-x: hidden;
+        transition: transform 0.3s ease-in-out;
+        padding-top: 60px;
+        transform: translateX(-100%); /* Hidden by default */
+      }
+
+      #sidebar.active {
+        transform: translateX(0); /* Shown */
+      }
+
+      #sidebar a {
+        padding: 12px 15px;
+        text-decoration: none;
+        font-size: 18px;
+        color: #f1f1f1;
+        display: block;
+        transition: 0.2s;
+      }
+
+      #sidebar a:hover {
+        background-color: #1a252f;
+      }
+
+      #sidebar .sidebar-title {
+        padding: 10px 15px;
+        font-size: 22px;
+        color: white;
+        font-weight: bold;
+        border-bottom: 1px solid #4a627a;
+        margin-bottom: 10px;
+      }
+
+      #sidebar-toggle {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1001;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        cursor: pointer;
+        font-size: 20px;
+        border-radius: 4px;
+        transition: left 0.3s ease-in-out;
+      }
+
+      /* When sidebar is active, push content and toggle button to the right */
+      body.sidebar-active {
+        margin-left: 250px;
+      }
+
+      body.sidebar-active #sidebar-toggle {
+        left: 265px; /* 250px sidebar width + 15px margin */
+      }
+      /* END: New styles for sidebar navigation */
+
+      /* START: Executive Summary and AI-Readiness Score styles */
+      .executive-summary-section {
+        background-color: #e9ecef;
+        padding: 12px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        border: 1px solid #ced4da;
+      }
+
+      .executive-summary-section h2 {
+        font-size: 18px;
+        color: #2c3e50;
+        margin: 0 0 12px 0;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #2c3e50;
+      }
+
+      .summary-description {
+        font-size: 13px;
+        color: #495057;
+        margin-bottom: 8px;
+      }
+
+      .stat-access-data {
+        margin-top: auto;
+        padding-top: 8px;
+        text-align: left;
+      }
+
+      .access-data-btn {
+        display: inline-block;
+        padding: 6px 14px;
+        background-color: #2c3e50;
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        border-radius: 4px;
+        border: 1px solid #2c3e50;
+      }
+
+      .access-data-btn:hover {
+        background-color: #1a252f;
+        color: #ffffff;
+        text-decoration: none;
+      }
+
+      .exec-summary-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .exec-summary-item {
+        background-color: #f8f9fa;
+        padding: 8px 10px;
+        border-radius: 4px;
+        border: 1px solid #e9ecef;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .exec-summary-label {
+        font-weight: bold;
+        color: #2c3e50;
+        display: block;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 13px;
+      }
+
+      .exec-summary-item .stat-item {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 12px;
+      }
+
+      .stat-sub-label {
+        color: #495057;
+      }
+
+      .stat-sub-value {
+        color: #333;
+      }
+
+      .formats-list {
+        word-break: break-word;
+      }
+
+      /* AI-Ready Score Bars */
+      .aiready-bars {
+        margin-top: 2px;
+      }
+
+      .aiready-bar-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 4px;
+      }
+
+      .aiready-bar-label {
+        width: 90px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #444;
+      }
+
+      .aiready-bar-track {
+        flex: 1;
+        height: 12px;
+        background: #e0e0e0;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .aiready-bar-fill {
+        height: 100%;
+        border-radius: 2px;
+      }
+
+      .aiready-bar-score {
+        width: 30px;
+        font-size: 9px;
+        text-align: right;
+        color: #666;
+        margin-left: 6px;
+      }
+
+      .aiready-overall-row {
+        margin-top: 6px;
+        padding-top: 6px;
+        border-top: 1px solid #ddd;
+      }
+
+      .aiready-overall-row .aiready-bar-label {
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .aiready-overall-row .aiready-bar-score {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .view-details-link {
+        font-size: 11px;
+        font-weight: normal;
+        color: #2c3e50;
+        text-decoration: none;
+        margin-left: 5px;
+      }
+
+      .view-details-link:hover {
+        text-decoration: underline;
+      }
+      /* END: Executive Summary and AI-Readiness Score styles */
+
+      @media print {
+        body {
+          background-color: white;
+          margin-left: 0 !important; /* Reset margin for printing */
+        }
+        .container {
+          box-shadow: none;
+          max-width: 100%;
+          padding: 10px;
+        }
+        .view-full-link,
+        #sidebar,
+        #sidebar-toggle {
+          display: none; /* Hide interactive elements on print */
+        }
+        details {
+          margin-bottom: 20px;
+        }
+        details > summary {
+          list-style: none;
+        }
+        details > summary::marker,
+        details > summary::-webkit-details-marker {
+          display: none;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .compact-grid,
+        .regulatory-grid,
+        .exec-summary-grid {
+          grid-template-columns: 1fr;
+        }
+
+        /* On small screens, let the sidebar overlay the content instead of pushing it */
+        body.sidebar-active {
+          margin-left: 0;
+        }
+
+        body.sidebar-active #sidebar-toggle {
+          left: 15px; /* Keep toggle button in place */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- START: New HTML for Sidebar and Toggle Button -->
+    <button id="sidebar-toggle">☰</button>
+    <!-- Hamburger Icon -->
+
+    <nav id="sidebar">
+      <div class="sidebar-title">Navigation</div>
+      <a href="#datasheet-summary">Datasheet Summary</a>
+      <a href="#dataset-details">Dataset Details</a>
+      <a href="#ai-readiness">AI Ready Information</a>
+      <details class="sidebar-dropdown">
+        <summary>Composition</summary>
+        <a href="#composition" class="sidebar-subnav-link">All Datasets</a>
+        <a href="#subcrate-1" class="sidebar-subnav-link">CHoRUS RO-Crate Package</a>
+        <a href="#subcrate-2" class="sidebar-subnav-link">CHoRUS RO-Crate Waveforms SubRoCrate</a>
+        <a href="#subcrate-3" class="sidebar-subnav-link">CHoRUS RO-Crate EHR SubRoCrate</a>
+      </details>
+    </nav>
+    <!-- END: New HTML for Sidebar and Toggle Button -->
+
+    <div class="container">
+      <header>
+        <h1 id="project-title">CHoRUS RO-Crate Package</h1>
+        <div>Version: 1.0 Beta</div>
+      </header>
+
+      <!-- Executive Summary with AI-Readiness Score -->
+      <div id="datasheet-summary" class="executive-summary-section">
+    <h2>Datasheet Summary</h2>
+    <p class="summary-description">The Collaborative Hospital Repository Uniting Standards (CHoRUS) for Clinical Care AI is a clinical data network developing a flagship multi-hospital, multimodal, high-resolution dataset under the NIH Bridge2AI program. CHoRUS harmonizes electronic health record (EHR) data, imaging, high-resolution physiologic signals (including telemetry data and EEG where available), and tokenized note and report text (via OHNLP toolkit) with raw text retained locally across participating institutions using... <a href="#description" style="color: #2c3e50; font-size: 12px;">[read full description]</a></p>
+
+    <div class="exec-summary-grid">
+        <div class="exec-summary-item">
+            <span class="exec-summary-label">Dataset Statistics</span>
+            <div class="stat-item">
+                <strong class="stat-sub-label">Total Data Volume:</strong>
+                <span class="stat-sub-value">1.2 tb</span>
+            </div>
+            <div class="stat-item">
+                <strong class="stat-sub-label">Total Files:</strong>
+                <span class="stat-sub-value">N/A</span>
+            </div>
+            <div class="stat-item stat-access-data">
+                <a href="http://chorus4ai.org/dataset" class="access-data-btn" target="_blank" rel="noopener">Access Data</a>
+            </div>
+        </div>
+
+        <div class="exec-summary-item aiready-item">
+            <span class="exec-summary-label">AI-Readiness Score <a href="ai_ready_score.json" class="view-details-link">(View Details)</a></span>
+            <div class="aiready-bars">
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Fairness</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">4/4</div>
+                </div>
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Provenance</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">4/4</div>
+                </div>
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Characterization</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 80.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">4/5</div>
+                </div>
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Explainability</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">3/3</div>
+                </div>
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Ethics</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">4/4</div>
+                </div>
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Sustainability</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">4/4</div>
+                </div>
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Computability</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">4/4</div>
+                </div>
+                <div class="aiready-bar-row aiready-overall-row">
+                    <div class="aiready-bar-label">Overall</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 96.4%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">96%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+      <!-- Added id="dataset-details" to link to the section -->
+      <div id="dataset-details"><div class="summary-section">
+  <h2>Release Overview</h2>
+  <div class="summary-row">
+    <div class="summary-label">ROCrate ID</div>
+    <div class="summary-value" id="accession">
+ ark:59853/rocrate-chorus-ro-crate-package     </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">DOI</div>
+    <div class="summary-value" id="doi">
+      <a href="https://doi.org/10.18130/V3/XNBOPG" target="_blank">https://doi.org/10.18130/V3/XNBOPG</a>
+    </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Release Date</div>
+    <div class="summary-value" id="release-date">03/04/2026</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Size</div>
+    <div class="summary-value" id="content-size">1.2 tb</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Description</div>
+    <div class="summary-value" id="description">The Collaborative Hospital Repository Uniting Standards (CHoRUS) for Clinical Care AI is a clinical data network developing a flagship multi-hospital, multimodal, high-resolution dataset under the NIH Bridge2AI program. CHoRUS harmonizes electronic health record (EHR) data, imaging, high-resolution physiologic signals (including telemetry data and EEG where available), and tokenized note and report text (via OHNLP toolkit) with raw text retained locally across participating institutions using standardized data models and governance frameworks.
+The repository is designed to enable secure, auditable, and reproducible artificial intelligence (AI) research to improve recovery from acute illness. Data are curated within a NIST 800-53–aligned secure enclave architecture with role-based access controls, audit logging, and controlled-access governance review. CHoRUS supports AI model development, validation, benchmarking, and translational research while maintaining compliance with HIPAA and NIH data-sharing policies.
+</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Authors</div>
+    <div class="summary-value" id="authors">Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators
+
+(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA
+(2) Duke University, Durham, North Carolina, USA
+(3) University of Florida, Gainesville, Florida, USA
+(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA
+(5) University of Oregon, Eugene, Oregon, USA
+(6) University of Virginia, Charlottesville, Virginia, USA
+(7) Columbia University Irving Medical Center, New York, New York, USA
+(8) University of California, San Francisco, San Francisco, California, USA
+(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA
+(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA, Mayo Clinic, Rochester, Minnesota, USA
+(11) Mayo Clinic, Rochester, Minnesota, USA
+(12) Seattle Children’s Hospital, Seattle, Washington, USA
+(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA
+(14) Emory University, Atlanta, Georgia, USA
+(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Publisher</div>
+    <div class="summary-value" id="publisher">B2AI CHoRUS</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Principal Investigator</div>
+    <div class="summary-value" id="principal-investigator">
+      Eric Rosenthal, EROSENTHAL@mgh.harvard.edu
+    </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Contact Email</div>
+    <div class="summary-value" id="contact-email">
+      <a href="mailto:Ciera McCrary, cmccrary@mgh.harvard.edu">Ciera McCrary, cmccrary@mgh.harvard.edu</a>
+    </div>
+  </div>
+   <div class="summary-row">
+    <div class="summary-label">Data Governance Committee</div>
+    <div class="summary-value" id="data-governance">Eric Rosenthal, EROSENTHAL@mgh.harvard.edu</div>
+  </div>
+   <div class="summary-row">
+    <div class="summary-label">Ethical Review</div>
+    <div class="summary-value" id="data-governance">Eric S. Rosenthal, Michael J. Young, Ishan Williams, Ashley Cordes, and Barbara J. Evans in collaboration with the Mass General Brigham IRB with local context review by IRBs, HIPAA Privacy Officers, and institutional counsels at contributing medical centers.</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Copyright</div>
+    <div class="summary-value" id="copyright">© 2026 THE GENERAL HOSPITAL CORPORATION D/B/A MASSACHUSETTS GENERAL HOSPITAL. Copyrights are owned by each subaward site for curation performed locally. Copyrights are jointly held for software jointly developed. All rights reserved</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">License</div>
+    <div class="summary-value" id="license">
+      <a href="Data Use Agreement available at 'https://chorus4ai.org/dataset/'" target="_blank">Data Use Agreement available at 'https://chorus4ai.org/dataset/'</a>
+    </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Terms of Use</div>
+    <div class="summary-value" id="terms-of-use">https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">HL7 Confidentiality Level</div>
+    <div class="summary-value" id="confidentiality-level">
+      HL7:2V (very restricted)
+    </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Keywords</div>
+    <div class="summary-value" id="keywords">
+ Bridge2AI,
+      CHoRUS,
+      Electronic health records,
+      physiological data,
+      medical images     </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Cite As</div>
+    <div class="summary-value" id="citation">The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset, version 1.0 Beta. Harvard Dataverse, Apr. 2026.</div>
+  </div>
+
+  <div class="summary-row">
+    <div class="summary-label">Funding</div>
+    <div class="summary-value" id="funding">NIH Common Fund OT2OD032701</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Completeness</div>
+    <div class="summary-value" id="completeness">Interim release with partial data. Not all patients in the CHoRUS full cohort are included. No DICOM images are included.</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Related Publications</div>
+    <div class="summary-value" id="related-publications">
+ None     </div>
+  </div>
+
+  <div class="regulatory-section">
+    <h3>Human Subjects & Regulatory</h3>
+    <div class="regulatory-grid">
+      <div class="regulatory-item">
+        <span class="regulatory-label">Human Subjects Research:</span> Yes
+      </div>
+      <div class="regulatory-item">
+        <span class="regulatory-label">De-identified Samples:</span> Yes
+      </div>
+      <div class="regulatory-item">
+        <span class="regulatory-label">FDA Regulated:</span> Yes
+      </div>
+      <div class="regulatory-item">
+        <span class="regulatory-label">IRB Protocol ID:</span> #2022P000707
+      </div>
+    </div>
+
+    <div class="irb-detail">
+      <span class="regulatory-label">Institutional Review Board:</span>
+      <div class="irb-org">
+        <span class="irb-name">Mass General Brigham Institutional Review Board (MGB IRB)</span>
+        <div class="irb-contact">
+          <span class="irb-contact-type"
+            >IRB Reliance and Compliance</span
+          >
+           <a href="mailto:irbreliance@mgb.org"
+            >irbreliance@mgb.org</a
+          >
+           <span>+1-857-282-1900</span>
+        </div>
+         <div class="irb-address">
+399 Revolution Drive, Suite 710,  Somerville,  MA  02145 , US        </div>
+      </div>
+    </div>
+
+    <div class="regulatory-exemptions">
+      <span class="regulatory-label">Human Subjects Exemptions:</span>
+      <p>HIPAA exemption 4 ((45 CFR 46.104(d)(4))</p>
+    </div>
+  </div>
+</div></div>
+
+      <!-- Added id="ai-readiness" to link to the section -->
+      <div id="ai-readiness"><div class="section-header">
+  <h2>AI Ready Details</h2>
+</div>
+<div class="use-cases-section">
+  <div class="use-cases-item">
+    <div class="use-cases-label">Limitations:</div>
+    <div class="use-cases-value">•	Observational data; and not randomized; collected as real-world clinical data, not through prospective research interactions with patient.
+•	Documentation quality dependent on routine clinical workflows and data elements being collected in clinical practice.
+•	Variable sampling rates across real-world data from hospital waveform systems and middleware
+•	Institutional heterogeneity in coding and clinical data collection practices
+•	Limited generalizability beyond participating hospitals
+•	Not appropriate for re-identification, contact tracing, or patient-level intervention
+•	Hold-out splits are available for testing; training and validation in development splits require internal mechanisms to avoid overfitting
+</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Potential Sources of Bias:</div>
+    <div class="use-cases-value">•	Referral bias from tertiary/quaternary academic centers
+•	Socioeconomic and demographic distribution reflective of participating institutions
+•	Documentation bias in clinical notes
+•	Missingness not at random (MNAR) in laboratory, waveform, and imaging acquisition
+•	Differential care pathways affecting label assignment (e.g., ICU vs non-ICU populations)
+•	Temporal trends related to evolving clinical practice
+Bias assessment is ongoing and documented in dataset release notes
+</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Maintenance Plan:</div>
+    <div class="use-cases-value">
+•	Versioned dataset releases e.g., CHoRUS vX.Y)
+•	Release notes documenting schema changes, harmonization updates, and known issues
+•	Governance committee oversight for structural modifications
+•	Data upload
+•	Deprecation policy includes:
+o	Advance notice of schema changes
+o	Backward compatibility window where feasible
+o	Archive of prior versions within enclave where possible or incremental change records
+Primary maintainers: CHoRUS Data Pillar in collaboration with institutional data stewards.
+</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Data Collection:</div>
+    <div class="use-cases-value">Data are derived from routine clinical care at participating hospitals under IRB oversight. Collection includes:
+•	Electronic health record extraction and transformation to OMOP common data model
+•	Imaging metadata de-identification using RSNA Clinical Trial Processor and pixel-level de-identification using IbisWorks EICON. 
+•	High-resolution physiologic waveform capture extraction and transformation to the WFDB standard, 
+•	Standardized harmonization to common data model
+Ethical safeguards include:
+•	IRB approval or waiver as appropriate
+•	Compliance with CHoRUS governance
+•	Layered privacy protection including de-identification, data use agreement, controlled access data repository with adherence to NIST 800-53 principles, audit-level protection, registration, role-based access controls, protection against data exfiltration.
+Data are not collected solely for research but repurposed from clinical workflows under ethical oversight.
+</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Missing Data:</div>
+    <div class="use-cases-value">Variable sampling rates across real-world data from hospital waveform systems and middleware</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Personal/Sensitive Information:</div>
+    <div class="use-cases-value">CHoRUS operates within a secure enclave environment aligned with NIST 800-53 controls., De-identification consistent with HIPAA Safe Harbor, Removal or tokenization of direct identifiers, Date shifting or limited date fields when required, Role-based access control (RBAC), Multi-factor authentication, Full audit logging of data access and queries, Prohibition of re-identification attempts, Data export restrictions and output review procedures to reduce risk of re-identification, Re-identification risk is periodically assessed and mitigation strategies updated as needed.</div>
+  </div>
+</div></div>
+
+      <!-- Added id="composition" to link to the section -->
+      <div id="composition" class="section-header">
+        <h2>Composition (Datasets 3)</h2>
+      </div>
+
+      <div class="subcrates-container">
+   <div class="subcrate-summary" id="subcrate-1">
+    <h3 class="subcrate-title">CHoRUS RO-Crate Package</h3>
+    <div class="subcrate-metadata">
+      <div class="metadata-item">
+        <span class="metadata-label">ROCrate ID:</span>
+        <span class="metadata-value">
+ ark:59853/rocrate-chorus-ro-crate-package         </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Description:</span>
+        <span class="metadata-value">The Collaborative Hospital Repository Uniting Standards (CHoRUS) for Clinical Care AI is a clinical data network developing a flagship multi-hospital, multimodal, high-resolution dataset under the NIH Bridge2AI program. CHoRUS harmonizes electronic health record (EHR) data, imaging, high-resolution physiologic signals (including telemetry data and EEG where available), and tokenized note and report text (via OHNLP toolkit) with raw text retained locally across participating institutions using standardized data models and governance frameworks.
+The repository is designed to enable secure, auditable, and reproducible artificial intelligence (AI) research to improve recovery from acute illness. Data are curated within a NIST 800-53–aligned secure enclave architecture with role-based access controls, audit logging, and controlled-access governance review. CHoRUS supports AI model development, validation, benchmarking, and translational research while maintaining compliance with HIPAA and NIH data-sharing policies.
+</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Authors:</span>
+        <span class="metadata-value">Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators
+
+(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA
+(2) Duke University, Durham, North Carolina, USA
+(3) University of Florida, Gainesville, Florida, USA
+(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA
+(5) University of Oregon, Eugene, Oregon, USA
+(6) University of Virginia, Charlottesville, Virginia, USA
+(7) Columbia University Irving Medical Center, New York, New York, USA
+(8) University of California, San Francisco, San Francisco, California, USA
+(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA
+(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA
+(11) Mayo Clinic, Rochester, Minnesota, USA
+(12) Seattle Children’s Hospital, Seattle, Washington, USA
+(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA
+(14) Emory University, Atlanta, Georgia, USA
+(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Date:</span>
+        <span class="metadata-value"
+          >03/04/2026</span
+        >
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Size:</span>
+        <span class="metadata-value">1.2 tb</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">DOI:</span>
+        <span class="metadata-value">
+          <a href="https://doi.org/https://doi.org/10.18130/V3/XNBOPG" target="_blank"
+            >https://doi.org/10.18130/V3/XNBOPG</a
+          >
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Contact:</span>
+        <span class="metadata-value">
+           <a href="mailto:Ciera McCrary, cmccrary@mgh.harvard.edu">Ciera McCrary, cmccrary@mgh.harvard.edu</a>
+         </span>
+      </div>
+ 
+      <div class="metadata-item">
+        <span class="metadata-label">Copyright:</span>
+        <span class="metadata-value">© 2026 THE GENERAL HOSPITAL CORPORATION D/B/A MASSACHUSETTS GENERAL HOSPITAL. Copyrights are owned by each subaward site for curation performed locally. Copyrights are jointly held for software jointly developed. All rights reserved</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">License:</span>
+        <span class="metadata-value">
+          <a href="Data Use Agreement available at 'https://chorus4ai.org/dataset/'" target="_blank"
+            >Data Use Agreement available at 'https://chorus4ai.org/dataset/'</a
+          >
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Terms of Use:</span>
+        <span class="metadata-value">
+          <a href="https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx" target="_blank"
+            >https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx</a
+          >
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Keywords:</span>
+        <span class="metadata-value">
+ Bridge2AI, CHoRUS, Electronic health records, physiological data, medical images         </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Funding:</span>
+        <span class="metadata-value">
+ NIH Common Fund OT2OD032701         </span>
+      </div>
+    </div>
+
+    <div class="subcrate-composition">
+      <h4>Content Summary</h4>
+      <div class="compact-grid">
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">📊</span>
+            <span class="card-title">Files (3)</span>
+          </div>
+          <div class="card-content">
+            <div class="stat-row">
+              <span class="stat-label">Formats: </span>
+              <span class="stat-value"
+                >unknown
+                (3)</span
+              >
+            </div>
+             <div class="stat-row">
+              <span class="stat-label">Access: </span>
+              <span class="stat-value"
+                >Available
+                (3)</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">💻</span>
+            <span class="card-title"
+              >Software & Instruments (0)</span
+            >
+          </div>
+          <div class="card-content">
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">🧪</span>
+            <span class="card-title">Inputs (0)</span>
+          </div>
+          <div class="card-content">
+           </div>
+        </div>
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">⚙️</span>
+            <span class="card-title">Other Components</span>
+          </div>
+          <div class="card-content">
+            <div class="stat-row">
+              <span class="stat-label">Experiments: </span>
+              <span class="stat-value">0</span>
+            </div>
+             <div class="stat-row">
+              <span class="stat-label">Computations: </span>
+              <span class="stat-value">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Schemas: </span>
+              <span class="stat-value">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Other: </span>
+              <span class="stat-value">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="view-full-link">
+      <a href="/ro-crate-preview.html">View Full Dataset Details</a>
+    </div>
+  </div>
+  <div class="subcrate-summary" id="subcrate-2">
+    <h3 class="subcrate-title">CHoRUS RO-Crate Waveforms SubRoCrate</h3>
+    <div class="subcrate-metadata">
+      <div class="metadata-item">
+        <span class="metadata-label">ROCrate ID:</span>
+        <span class="metadata-value">
+ b9b41c72-0895-4ec2-9e39-8de2a83abcd6         </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Provenance ID:</span>
+        <span class="metadata-value">
+          <a href="waveforms/ro-crate-prov-graph.html">waveforms/ro-crate-prov-graph.html</a>
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Description:</span>
+        <span class="metadata-value">Waveforms sub ro-crate for Bridge2AI CHoRUS RO-Crate Package</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Authors:</span>
+        <span class="metadata-value">Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators
+
+(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA
+(2) Duke University, Durham, North Carolina, USA
+(3) University of Florida, Gainesville, Florida, USA
+(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA
+(5) University of Oregon, Eugene, Oregon, USA
+(6) University of Virginia, Charlottesville, Virginia, USA
+(7) Columbia University Irving Medical Center, New York, New York, USA
+(8) University of California, San Francisco, San Francisco, California, USA
+(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA
+(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA
+(11) Mayo Clinic, Rochester, Minnesota, USA
+(12) Seattle Children’s Hospital, Seattle, Washington, USA
+(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA
+(14) Emory University, Atlanta, Georgia, USA
+(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Date:</span>
+        <span class="metadata-value"
+          >03/04/2026</span
+        >
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Size:</span>
+        <span class="metadata-value">1201567472832</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">DOI:</span>
+        <span class="metadata-value">
+          <a href="https://doi.org/https://doi.org/10.18130/V3/XNBOPG" target="_blank"
+            >https://doi.org/10.18130/V3/XNBOPG</a
+          >
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Contact:</span>
+        <span class="metadata-value">
+           <a href="mailto:Ciera McCrary, cmccrary@mgh.harvard.edu">Ciera McCrary, cmccrary@mgh.harvard.edu</a>
+         </span>
+      </div>
+ 
+      <div class="metadata-item">
+        <span class="metadata-label">Copyright:</span>
+        <span class="metadata-value">© 2026 THE GENERAL HOSPITAL CORPORATION D/B/A MASSACHUSETTS GENERAL HOSPITAL. Copyrights are owned by each subaward site for curation performed locally. Copyrights are jointly held for software jointly developed. All rights reserved</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">License:</span>
+        <span class="metadata-value">
+          <a href="See Data Use Agreement" target="_blank"
+            >See Data Use Agreement</a
+          >
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Terms of Use:</span>
+        <span class="metadata-value">
+          <a href="https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx" target="_blank"
+            >https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx</a
+          >
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Keywords:</span>
+        <span class="metadata-value">
+ Bridge2AI, CHoRUS, Electronic health records, physiological data, medical images         </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Funding:</span>
+        <span class="metadata-value">
+ NIH Common Fund OT2OD032701         </span>
+      </div>
+    </div>
+
+    <div class="subcrate-composition">
+      <h4>Content Summary</h4>
+      <div class="compact-grid">
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">📊</span>
+            <span class="card-title">Files (1425)</span>
+          </div>
+          <div class="card-content">
+            <div class="stat-row">
+              <span class="stat-label">Formats: </span>
+              <span class="stat-value"
+                >unknown
+                (1), wfdb
+                (1424)</span
+              >
+            </div>
+             <div class="stat-row">
+              <span class="stat-label">Access: </span>
+              <span class="stat-value"
+                >Available
+                (1425)</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">💻</span>
+            <span class="card-title"
+              >Software & Instruments (0)</span
+            >
+          </div>
+          <div class="card-content">
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">🧪</span>
+            <span class="card-title">Inputs (0)</span>
+          </div>
+          <div class="card-content">
+           </div>
+        </div>
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">⚙️</span>
+            <span class="card-title">Other Components</span>
+          </div>
+          <div class="card-content">
+            <div class="stat-row">
+              <span class="stat-label">Experiments: </span>
+              <span class="stat-value">0</span>
+            </div>
+             <div class="stat-row">
+              <span class="stat-label">Computations: </span>
+              <span class="stat-value">1</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Schemas: </span>
+              <span class="stat-value">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Other: </span>
+              <span class="stat-value">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="view-full-link">
+      <a href="waveforms/ro-crate-preview.html">View Full Dataset Details</a>
+    </div>
+  </div>
+  <div class="subcrate-summary" id="subcrate-3">
+    <h3 class="subcrate-title">CHoRUS RO-Crate EHR SubRoCrate</h3>
+    <div class="subcrate-metadata">
+      <div class="metadata-item">
+        <span class="metadata-label">ROCrate ID:</span>
+        <span class="metadata-value">
+ 08cf7419-b94d-4508-8f64-c99c557351d7         </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Provenance ID:</span>
+        <span class="metadata-value">
+          <a href="ehr/ro-crate-prov-graph.html">ehr/ro-crate-prov-graph.html</a>
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Description:</span>
+        <span class="metadata-value">Electronic Health Records sub ro-crate for Bridge2AI CHoRUS RO-Crate Package</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Authors:</span>
+        <span class="metadata-value">Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators
+
+(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA
+(2) Duke University, Durham, North Carolina, USA
+(3) University of Florida, Gainesville, Florida, USA
+(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA
+(5) University of Oregon, Eugene, Oregon, USA
+(6) University of Virginia, Charlottesville, Virginia, USA
+(7) Columbia University Irving Medical Center, New York, New York, USA
+(8) University of California, San Francisco, San Francisco, California, USA
+(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA
+(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA
+(11) Mayo Clinic, Rochester, Minnesota, USA
+(12) Seattle Children’s Hospital, Seattle, Washington, USA
+(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA
+(14) Emory University, Atlanta, Georgia, USA
+(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Date:</span>
+        <span class="metadata-value"
+          >03/04/2026</span
+        >
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Size:</span>
+        <span class="metadata-value">18.136671 mb</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">DOI:</span>
+        <span class="metadata-value">
+          <a href="https://doi.org/https://doi.org/10.18130/V3/XNBOPG" target="_blank"
+            >https://doi.org/10.18130/V3/XNBOPG</a
+          >
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Contact:</span>
+        <span class="metadata-value">
+           <a href="mailto:Ciera McCrary, cmccrary@mgh.harvard.edu">Ciera McCrary, cmccrary@mgh.harvard.edu</a>
+         </span>
+      </div>
+ 
+      <div class="metadata-item">
+        <span class="metadata-label">Copyright:</span>
+        <span class="metadata-value">© 2026 THE GENERAL HOSPITAL CORPORATION D/B/A MASSACHUSETTS GENERAL HOSPITAL. Copyrights are owned by each subaward site for curation performed locally. Copyrights are jointly held for software jointly developed. All rights reserved</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">License:</span>
+        <span class="metadata-value">
+          <a href="See Data Use Agreement" target="_blank"
+            >See Data Use Agreement</a
+          >
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Terms of Use:</span>
+        <span class="metadata-value">
+          <a href="https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx" target="_blank"
+            >https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx</a
+          >
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Keywords:</span>
+        <span class="metadata-value">
+ Bridge2AI, CHoRUS, Electronic health records, physiological data, medical images         </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Funding:</span>
+        <span class="metadata-value">
+ NIH Common Fund OT2OD032701         </span>
+      </div>
+    </div>
+
+    <div class="subcrate-composition">
+      <h4>Content Summary</h4>
+      <div class="compact-grid">
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">📊</span>
+            <span class="card-title">Files (45)</span>
+          </div>
+          <div class="card-content">
+            <div class="stat-row">
+              <span class="stat-label">Formats: </span>
+              <span class="stat-value"
+                >unknown
+                (1), text/tab-separated-values
+                (44)</span
+              >
+            </div>
+             <div class="stat-row">
+              <span class="stat-label">Access: </span>
+              <span class="stat-value"
+                >Available
+                (45)</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">💻</span>
+            <span class="card-title"
+              >Software & Instruments (1)</span
+            >
+          </div>
+          <div class="card-content">
+            <div class="stat-row">
+              <span class="stat-label">Software: </span>
+              <span class="stat-value">1</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Instruments: </span>
+              <span class="stat-value">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">🧪</span>
+            <span class="card-title">Inputs (1)</span>
+          </div>
+          <div class="card-content">
+             <div class="stat-row">
+              <span class="stat-label">Datasets: </span>
+              <span class="stat-value"
+                >1</span
+              >
+            </div>
+            <div class="stat-row indent">
+              <span class="stat-value">
+unknown
+                <span class="small">(1)</span>              </span>
+            </div>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">⚙️</span>
+            <span class="card-title">Other Components</span>
+          </div>
+          <div class="card-content">
+            <div class="stat-row">
+              <span class="stat-label">Experiments: </span>
+              <span class="stat-value">0</span>
+            </div>
+             <div class="stat-row">
+              <span class="stat-label">Computations: </span>
+              <span class="stat-value">1</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Schemas: </span>
+              <span class="stat-value">44</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Other: </span>
+              <span class="stat-value">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="view-full-link">
+      <a href="ehr/ro-crate-preview.html">View Full Dataset Details</a>
+    </div>
+  </div>
+ </div> <div class="section-header">
+  <h2>Distribution Information</h2>
+</div>
+<div class="distribution-section">
+  <div class="distribution-item">
+    <div class="distribution-label">Publisher:</div>
+    <div class="distribution-value">B2AI CHoRUS</div>
+  </div>
+    <div class="distribution-item">
+    <div class="distribution-label">License:</div>
+    <div class="distribution-value">
+      <a href="Data Use Agreement available at 'https://chorus4ai.org/dataset/'" target="_blank">Data Use Agreement available at 'https://chorus4ai.org/dataset/'</a>
+    </div>
+  </div>
+    <div class="distribution-item">
+    <div class="distribution-label">Release Date:</div>
+    <div class="distribution-value">03/04/2026</div>
+  </div>
+   <div class="distribution-item">
+    <div class="distribution-label">Version:</div>
+    <div class="distribution-value">1.0 Beta</div>
+  </div>
+</div>
+    </div>
+    <footer>
+      Datasheet Provenance: This datasheet and associated metadata were
+      generated by the FAIRSCAPE AI-readiness platform (Al Manir, et al. 2024,
+      BioRXiv 2024.12.23.629818;
+      <a href="https://doi.org/10.1101/2024.12.23.629818" target="_blank"
+        >https://doi.org/10.1101/2024.12.23.629818</a
+      >).
+    </footer>
+
+    <!-- START: New JavaScript for Sidebar functionality -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("sidebar-toggle");
+        const sidebar = document.getElementById("sidebar");
+        const body = document.body;
+
+        toggleBtn.addEventListener("click", function () {
+          sidebar.classList.toggle("active");
+          body.classList.toggle("sidebar-active");
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,10 +1,17 @@
+SOURCE METADATA
+Project: AI_READI
+Source ID: irb_protocol
+Source type: IRB
+Source URL: https://docs.google.com/document/d/1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q/edit
+Raw file: data/raw/AI_READI/gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.docx
+--------------------------------------------------------------------------------
 The Human Subjects Division (HSD) strives to ensure that people with disabilities have access to all services and content. If you experience any accessibility-related issues with this form or any aspect of the application process, email hsdinfo@uw.edu for assistance.
 INSTRUCTIONS
 This form is only for studies that will be reviewed by the UW IRB. Before completing this form, check HSD’s website to confirm that this should not be reviewed by an external (non-UW) IRB.
 If you are requesting a determination about whether the planned activity is human subjects research or qualifies for exempt status, you may skip all questions except those marked with [DETERMINATION] For example 1.1. [DETERMINATION] must be answered. Do not upload consent materials for determinations in Zipline as HSD does not review or approve them.
-Answer all questions. If a question is not applicable to the research or if you believe you have already answered a question elsewhere in the application, state “NA” (and if applicable, refer to the question where you provided the information). If you do not answer a question, the IRB does not know whether the question was overlooked or whether it is not applicable. This may result in unnecessary “back and forth” for clarification. Use non-technical language as much as possible. 
-For collaborative or multi-site research, describe only the UW activities unless you are requesting that the UW IRB provide the review and oversight for non-UW collaborators or co-investigators as well. 
-You may reference other documents (such as a grant application) if they provide the requested information in non-technical language. Be sure to provide the document name, page(s), and specific sections, and upload it to Zipline. Also, describe any changes that may have occurred since the document was written (for example, changes that you’ve made during or after the grant review process). In some cases, you may need to provide additional details in the answer space as well as referencing a document. 
+Answer all questions. If a question is not applicable to the research or if you believe you have already answered a question elsewhere in the application, state “NA” (and if applicable, refer to the question where you provided the information). If you do not answer a question, the IRB does not know whether the question was overlooked or whether it is not applicable. This may result in unnecessary “back and forth” for clarification. Use non-technical language as much as possible.
+For collaborative or multi-site research, describe only the UW activities unless you are requesting that the UW IRB provide the review and oversight for non-UW collaborators or co-investigators as well.
+You may reference other documents (such as a grant application) if they provide the requested information in non-technical language. Be sure to provide the document name, page(s), and specific sections, and upload it to Zipline. Also, describe any changes that may have occurred since the document was written (for example, changes that you’ve made during or after the grant review process). In some cases, you may need to provide additional details in the answer space as well as referencing a document.
 NOTE: Do not convert this Word document to PDF. The ability to use “tracked changes” is required in order to modify your study and respond to screening requests
 INDEX
 1. Overview
@@ -21,7 +28,7 @@ INDEX
 12. Resources
 13. Other Approvals, Permissions, and Regulatory Issues
 1. OVERVIEW
-Study Title: 
+Study Title:
 1.1. [DETERMINATION]  Home institution. Identify the institution through which the lead researcher listed on the IRB application will conduct the research. Provide any helpful explanatory information.
 In general, the home institution is the institution (1) that provides the researcher’s paycheck and that considers them to be a paid employee, or (2) at which the researcher is a matriculated student. Scholars, faculty, fellows, and students who are visiting the UW and who are the lead researcher: identify your home institution and describe the purpose and duration of your UW visit, as well as the UW department/center with which you are affiliated while at the UW.
 Note that many UW clinical faculty members are paid employees of non-UW institutions.
@@ -36,7 +43,7 @@ Providing this information (if relevant) may significantly improve the efficienc
  No
  Yes → Briefly describe the other studies or applications and how they relate to the proposed activities. If the other applications were reviewed by the UW IRB, please also provide: the UW IRB number, the study title, and the lead researcher’s name.
 1.4. [DETERMINATION]  Externally-imposed urgency or time deadlines. Are there any externally-imposed deadlines or urgency that affect the proposed activity?
-HSD recognizes that everyone would like their IRB applications to be reviewed as quickly as possible. To ensure fairness, it is HSD policy to review applications in the order in which they are received. However, HSD will assign a higher priority to research with externally-imposed urgency that is beyond the control of the researcher. Researchers are encouraged to communicate as soon as possible with their HSD staff contact person when there is an urgent situation (in other words, before submitting the IRB application). Examples: a researcher plans to test an experimental vaccine that has just been developed for a newly emerging epidemic; a researcher has an unexpected opportunity to collect data from students when the end of the school year is only four weeks away. 
+HSD recognizes that everyone would like their IRB applications to be reviewed as quickly as possible. To ensure fairness, it is HSD policy to review applications in the order in which they are received. However, HSD will assign a higher priority to research with externally-imposed urgency that is beyond the control of the researcher. Researchers are encouraged to communicate as soon as possible with their HSD staff contact person when there is an urgent situation (in other words, before submitting the IRB application). Examples: a researcher plans to test an experimental vaccine that has just been developed for a newly emerging epidemic; a researcher has an unexpected opportunity to collect data from students when the end of the school year is only four weeks away.
 HSD may ask for documentation of the externally-imposed urgency. A higher priority should not be requested to compensate for a researcher’s failure to prepare an IRB application in a timely manner. Note that IRB review requires a certain minimum amount of time; without sufficient time, the IRB may not be able to review and approve an application by a deadline.
  No
  Yes → Briefly describe the urgency or deadline as well as the reason for it.
@@ -89,9 +96,9 @@ Indigenous people are defined in international or national legislation as having
 Examples: a reservation school or health clinic; recruiting during a tribal community gathering.
  No
  Yes → Name the tribe, tribal-focused organization, or similar community-based organization. The UW IRB expects that tribal/indigenous approval will be obtained before beginning the research. This may or may not involve approval from a tribal IRB. The study team and any collaborators/investigators are also responsible for identifying any tribal laws that may affect the research.
-2.7.	[DETERMINATION]  UW Medicine and UW Dentistry residents and fellows. Will the research involve UW Medicine or UW Dentistry residents or fellows as study subjects? 
+2.7.	[DETERMINATION]  UW Medicine and UW Dentistry residents and fellows. Will the research involve UW Medicine or UW Dentistry residents or fellows as study subjects?
  No
- Yes → (1) Describe in the Recruiting section (4.1) and Risks section (10.1) how you will ensure that residents feel free to truly make a voluntary decision about participation (i.e., no negative consequences from supervisors for saying “No”) and how you will ensure that any research data will not be used in the residents’ supervisor or program evaluation of them; AND (2) You must inform the UW HR Labor Relations representative who negotiates with the resident’s union about the study before beginning it. This is currently Jennifer Mallahan mallaj@uw.edu . 
+ Yes → (1) Describe in the Recruiting section (4.1) and Risks section (10.1) how you will ensure that residents feel free to truly make a voluntary decision about participation (i.e., no negative consequences from supervisors for saying “No”) and how you will ensure that any research data will not be used in the residents’ supervisor or program evaluation of them; AND (2) You must inform the UW HR Labor Relations representative who negotiates with the resident’s union about the study before beginning it. This is currently Jennifer Mallahan mallaj@uw.edu .
 2.8.	 [DETERMINATION]  Third party subjects. Will the research collect private identifiable information about individuals other than the study subjects? Common examples include: collecting medical history information or contact information about family members, friends, co-workers.
 “Identifiable” means any direct or indirect identifier that, alone or in combination, would allow you or another member of the research team to readily identify the person. For example, suppose that the research is about immigration history. If subjects are asked questions about their grandparents but are not asked for names or other information that would allow easy identification of the grandparents, then private identifiable information is not being collected about the grandparents and the grandparents are not subjects.
  No
@@ -125,7 +132,7 @@ Use of healthcare records – many states have laws that are similar to the fede
 Example: A school district may require researchers to obtain permission from the head district office as well as school principals before approaching teachers or students; a factory in China may allow researchers to interview factory workers but not allow the workers to be paid for their participation.
 3.5. [DETERMINATION]  If the PI is a student: Does the research involve traveling outside of the U.S.?
  No
- Yes → Confirm by checking the box that (1) you will register with the UW Office of Global Affairs before traveling; (2) you will notify your advisor when the registration is complete; and (3) you will request a UW Travel Waiver is the research involves travel to the list of countries requiring a UW Travel Waiver. 
+ Yes → Confirm by checking the box that (1) you will register with the UW Office of Global Affairs before traveling; (2) you will notify your advisor when the registration is complete; and (3) you will request a UW Travel Waiver is the research involves travel to the list of countries requiring a UW Travel Waiver.
  Confirmed
 4. RECRUITING AND SCREENING PARTICIPANTS
 4.1. [DETERMINATION]  Recruiting and screening. Describe how subjects will be identified, recruited, and screened. Include information about: how, when, where, and in what setting. Identify who (by position or role, not name) will approach and recruit subjects, and who will screen them for eligibility.
@@ -143,12 +150,12 @@ For the description of a video or a website, include a description of the possib
 Example: a study team member may have a dual role with the study population such as being their clinical care provider, teacher, laboratory directory or tribal leader in addition to recruiting them for their research.
  No
  Yes → Describe the nature of the relationship.
-4.4. Payment to participants. The IRB must evaluate subject payment for the possibility that it will unduly influence subjects to participate. Refer to GUIDANCE Subject Payment when designing subject payment plans. Provide the following information about your plans for paying research subjects in the text box below or note that the information can be found in the consent form. 
+4.4. Payment to participants. The IRB must evaluate subject payment for the possibility that it will unduly influence subjects to participate. Refer to GUIDANCE Subject Payment when designing subject payment plans. Provide the following information about your plans for paying research subjects in the text box below or note that the information can be found in the consent form.
 The total amount/value of the payment
 Schedule/timing of the payment [i.e., when will subjects receive the payment(s)]
 Purpose of the payment [e.g., reimbursement, compensation, incentive]
 Whether payment will be “pro-rated” so that participants who are unable to complete the research may still receive some part of the payment
-The IRB expects the consent process or study information provided to the subjects to include all of the above-listed information about payment, including the number and amount of payments, and especially when subjects can expect to receive payment. One of the most frequent complaints received by HSD is from subjects who expected to receive cash or a check on the day that they completed a study and who were angry or disappointed when payment took 6-8 weeks to reach them. 
+The IRB expects the consent process or study information provided to the subjects to include all of the above-listed information about payment, including the number and amount of payments, and especially when subjects can expect to receive payment. One of the most frequent complaints received by HSD is from subjects who expected to receive cash or a check on the day that they completed a study and who were angry or disappointed when payment took 6-8 weeks to reach them.
 Researchers should review current UW Financial Management requirements about when Social Security Numbers must be collected, and when research payment must be reported to the UW Tax Office and the IRS: https://finance.uw.edu/ps/how-pay/research-subjects.
 If your study involves the use of Amazon’s Mechanical Turk (MTurk), you must comply with the UW Procurement Services policy that no UW employee, family member, or student directly involved in the research will participate as a subject. The policy requires adding a qualifying question that asks whether the subject is a UW employee or family member, or UW student who is directly involved in the research. If they answer yes, they must be disqualified from MTurk activities.
 4.5. [DETERMINATION]  Non-monetary compensation. Describe any non-monetary compensation that will be provided. Example; extra credit for students; a toy for a child.
@@ -161,13 +168,13 @@ Examples: names and contact information; the information gathered from records t
 “Consent” includes: consent from individuals for their own participation; parental permission; assent from children; consent from a legally authorized representative for adult individuals who are unable to provide consent.
 Examples:
 For a study in which names and contact information will be obtained from a registry: the registry should have consent from the registry participants to release their names and contact information to researchers.
-For a study in which possible subjects are identified by screening records: there will be no consent process. 
+For a study in which possible subjects are identified by screening records: there will be no consent process.
 For a study in which individuals respond to an announcement and call into a study phone line: the study team person talking to the individual may obtain non-written consent to ask eligibility questions over the phone.
  No → Skip the rest of this section; go to question 5.1.
  Yes → Describe the consent process.
 4.7.a. Documentation of consent. Will a written or verifiable electronic signature from the subject on a consent form be used to document consent for the recruiting and screening procedures?
  No → Describe the information that will be provided during the consent process and for which procedures.
- Yes, written → If yes, and a written signature will be used to document consent: 
+ Yes, written → If yes, and a written signature will be used to document consent:
 Upload the consent form to Zipline.
  Yes, electronic → If yes, and an electronic signature will be used to document consent:
 Upload the consent form to Zipline.
@@ -207,8 +214,8 @@ Describe the minimum and maximum number of scans per subject, and over what time
 If you have already provided this information in Question 5.1, you do not need to repeat the information here.
 5.6. [DETERMINATION]  Identifiability of data and specimens. Answer these questions carefully and completely. This will allow HSD to accurately determine the type of review that is required and the relevant compliance requirements. Review the following definitions before answering the questions:
 Access means to view or perceive data, but not to possess or record it. See, in contrast, the definition of “obtain”.
-Identifiable means that the identity of an individual is or may be readily (1) ascertained by the researcher or any other member of the study team from specific data variables or from a combination of data variables, or (2) associated with the information. 
-Direct identifiers are direct links between a subject and data/specimens. Examples include (but are not limited to): name, date of birth, medical record number, email or IP address, pathology or surgery accession number, student number, or a collection of data that is (when taken together) identifiable. 
+Identifiable means that the identity of an individual is or may be readily (1) ascertained by the researcher or any other member of the study team from specific data variables or from a combination of data variables, or (2) associated with the information.
+Direct identifiers are direct links between a subject and data/specimens. Examples include (but are not limited to): name, date of birth, medical record number, email or IP address, pathology or surgery accession number, student number, or a collection of data that is (when taken together) identifiable.
 Indirect identifiers are information that links between direct identifiers and data/specimens. Examples: a subject code or pseudonym.
 Key refers to a single place where direct identifiers and indirect identifiers are linked together so that, for example, coded data can be identified as relating to a specific person. Example: a master list that contains the data code and the identifiers linked to the codes.
 Obtain means to possess or record in any fashion (writing, electronic document, video, email, voice recording, etc.) for research purposes and to retain for any length of time. This is different from accessing, which means to view or perceive data.
@@ -327,7 +334,7 @@ Describe whether you will return the results to the participants and, if yes, wh
 6. CHILDREN (MINORS) AND PARENTAL PERMISSION
 6.1. [DETERMINATION]  Involvement of minors. Does the research include minors (children)?
 Minor or child means someone who has not yet attained the legal age for consent for the research procedures, as described in the applicable laws of the jurisdiction in which the research will be conducted. This may or may not be the same as the definition used by funding agencies such as the National Institutes of Health.
-In Washington State the generic age of consent is 18, meaning that anyone under the age of 18 is considered a child. 
+In Washington State the generic age of consent is 18, meaning that anyone under the age of 18 is considered a child.
 There are some procedures for which the age of consent is much lower in Washington State.
 The generic age of consent may be different in other states, and in other countries.
  No → Go to Section 8.
@@ -349,7 +356,7 @@ Will parents be informed about the research beforehand even though active permis
 This is all that is required for minimal risk research.
 If both are checked explain:
 6.3. Children who are wards. Will any of the children be wards of the State or any other agency, institution, or entity?
- No 
+ No
  Yes → An advocate may need to be appointed for each child who is a ward. The advocate must be in addition to any other individual acting on behalf of the child as guardian or in loco parentis. The same individual can serve as advocate for all children who are wards.
 Describe who will be the advocate(s). The description must address the following points:
 Background and experience
@@ -360,7 +367,7 @@ This point is advisory only; there is no need to provide a response.
 7. ASSENT OF CHILDREN (MINORS)
 Go to Section 8 if your research does not involve children (minors).
 When designing assent processes and forms, researchers should first review the GUIDANCE Consent Protected and Vulnerable Populations and TIPSHEET Consent Assent and Legally Authorized Representative.
-7.1. Assent of children (minors). Though children do not have the legal capacity to “consent” to participate in research, they should be involved in the process if they are able to “assent” by having a study explained to them and/or by reading a simple form about the study, and then verbally expressing whether they want to participate. They may also provide a written assent if they are older. See GUIDANCE Consent Protected and Vulnerable Populations and WORKSHEET Children for circumstances in which a child’s assent may be unnecessary or inappropriate. 
+7.1. Assent of children (minors). Though children do not have the legal capacity to “consent” to participate in research, they should be involved in the process if they are able to “assent” by having a study explained to them and/or by reading a simple form about the study, and then verbally expressing whether they want to participate. They may also provide a written assent if they are older. See GUIDANCE Consent Protected and Vulnerable Populations and WORKSHEET Children for circumstances in which a child’s assent may be unnecessary or inappropriate.
 7.1.a. Will assent be obtained for:
  All research procedures and child groups → Go to question 7.2.
  None of the research procedures and child groups → Use the table below to provide justification, then skip to question 7.6.
@@ -380,10 +387,10 @@ If the answer is the same for all children groups or all procedures, collapse yo
 7.5.a. Describe how assent will be documented. If the children are functionally illiterate or are not fluent in English, include a description of the documentation process for them.
 7.5.b. Upload all assent materials (talking points, videos, forms, etc.) to Zipline. Assent materials are not required to provide all of the standard elements of adult consent; the information should be appropriate to the age, population, and research procedures. The documents should be in Word, if possible.
 7.6. Children who reach the legal age of consent during participation in longitudinal research.
-When children are enrolled at a young age and continue for many years, it is best practice to re-obtain assent (or to obtain it for the first time, if it was not obtained at the beginning of their participation). 
+When children are enrolled at a young age and continue for many years, it is best practice to re-obtain assent (or to obtain it for the first time, if it was not obtained at the beginning of their participation).
 When children reach the legal age of consent, informed consent must be obtained from the now-adult subject for (1) any ongoing interactions or interventions with the subjects, or (2) the continued analysis of specimens or data for which the subject’s identify is readily identifiable to the researcher, unless the IRB waives this requirement.
 7.6.a. Describe the plans (if any) to re-obtain assent from children.
-7.6.b. Describe the plans (if any) to obtain consent for children who reach the legal age of consent. 
+7.6.b. Describe the plans (if any) to obtain consent for children who reach the legal age of consent.
 If adult consent will be obtained from them, describe what will happen regarding now-adult subjects who cannot be contacted.
 If consent will not be obtained or will not be possible, explain why.
 7.7. Other regulatory requirements. (This is for information only; no answer or response is required.) Researchers are responsible for determining whether their research conducted in schools, with student records, or over the Internet comply with permission, consent, and inspection requirements of the following federal regulations:
@@ -399,7 +406,7 @@ Review the following definitions before answering the questions in this section.
 8.2. The consent process and characteristics. This series of questions is about whether consent will be obtained for all procedures except recruiting and screening, and, if yes, how.
 The issue of consent for recruiting and screening activities is address in question 4.7. You do not need to repeat your answer to question 4.7.
 8.2.a. Are there any procedures for which consent will not be obtained?
- No 
+ No
  Yes → Use the table below to identify the procedures for which consent will not be obtained. “All” is an acceptable answer for some studies.
 Be sure to consider all research procedures and plans, including future contact, and sharing/banking of data and specimens for future work.
 Table footnotes
@@ -417,8 +424,8 @@ Examples: Student participants being recruited into their teacher’s research; 
 Examples: a study coordinator will obtain consent instead of the subject’s physician; the researcher will not know which subjects agreed to participate; subjects will have two days to decide after hearing about the study.
 8.2.e. Information provided is tailored to the needs of the subject population. Describe the basis for concluding that the information that will be provided to subjects (via written or oral methods) is what a reasonable member of the subject population(s) would want to know. If the research consent materials contain a key information section, also describe the basis for concluding that the information present in that section is that which is most likely to assist the selected subject population with making a decision. See GUIDANCE Consent Key Information and EXAMPLE Key Information.
 For example: Consultation with publications about research subjects’ preferences, disease-focused nonprofit groups, patient interest groups, or other researchers/study staff with experience with the specific population. It may also involve directly consulting selected members of the study population.
-8.2.f. Ongoing process, new information, and reconsent. 
-For research that involves multiple or continued interaction with subjects over time, describe the opportunities (if any) that will be given to subjects to ask questions or to change their minds about participating. 
+8.2.f. Ongoing process, new information, and reconsent.
+For research that involves multiple or continued interaction with subjects over time, describe the opportunities (if any) that will be given to subjects to ask questions or to change their minds about participating.
 Throughout the course of the study, subjects may need to be notified about new information. This might take the form of a verbal or written communication or may require subjects to provide reconsent. When a modification is submitted in which subjects need to be informed about new information, describe the method and process the research team will use to provide this information.
 See TIPSHEET Consent Reconsent and Ongoing Subject Communication and GUIDANCE Consent Reconsent and Ongoing Subject Communication for details.
 8.3. Electronic presentation of consent information. Will any part of the consent-related information be provided electronically for some, or all of the subjects?
@@ -427,7 +434,7 @@ This refers to the use of electronic systems and processes instead of (or in add
  Yes → Answer questions 8.3.a. through 8.3.e.
 8.3.a. Describe the electronic consent methodology and the information that will be provided.
 All information materials must be made available to the IRB. Website content should be provided as a Word document. It is considered best practice to give subjects information about multi-page/multi-screen information that will help them assess how long it will take them to complete the process. For example, telling them that it will take about 15 minutes, or that it involves reading six screens or pages.
-8.3.b. Describe how the information can be navigated (if relevant). 
+8.3.b. Describe how the information can be navigated (if relevant).
 For example, will the subject be able to proceed forward or backward within the system, or to stop and continue at a later time?
 8.3.c. In a standard paper-based consent process, the subjects generally have the opportunity to go through the consent form with study staff and/or to ask study staff about any question they may have after reading the consent form. Describe what will be done, if anything, to facilitate the subject’s comprehension and opportunity to ask questions when consent information is presented electronically. Include a description of any provisions to help ensure privacy and confidentiality during this process.
 Examples: hyperlinks, help text, telephone calls, text messages or other type of electronic messaging, video conference, live chat with remotely located study team members.
@@ -471,7 +478,7 @@ Examples of solutions: Translated consent forms; use of the Short Form consent p
  Yes → Describe the process that will be used to ensure that the oral and written information provided to them during the consent process and throughout the study will be in a language readily understandable to them and (for written materials such as consent forms or questionnaires) at an appropriate reading/comprehension level.
 8.5.a. Interpretation. Describe how interpretation will be provided, and when. Also, describe the qualifications of the interpreter(s) - for example, background, experience, language proficiency in English and in the other language, certification, other credentials, familiarity with the research related vocabulary in English and the target language.
 8.5.b. Translations. Describe how translations will be obtained for all study materials (not just consent forms). Also, describe the method for ensuring that the translations meet the UW IRB’s requirement that translated documents will be linguistically accurate, at an appropriate reading level for the participant population, and culturally sensitive for the local in which they will be used.
- 	Check this box to confirm that before using them with subjects, you will upload in Zipline all translated consent materials that will be provided to subjects in written or electronic form (per HSD policy).
+	Check this box to confirm that before using them with subjects, you will upload in Zipline all translated consent materials that will be provided to subjects in written or electronic form (per HSD policy).
 If the IRB determines that your study is greater than minimal risk, or otherwise determines it is required, you will need to work with your translator to provide a TEMPLATE Translation Attestation. If the attestation is required, you will be informed by the IRB during the course of the review.
 8.6. [DETERMINATION]  Deception. Will information be deliberately withheld, or will false information be provided, to any of the subjects?
 NOTE: “Blinding” subjects to their study group/condition/arm is not considered to be deception, but not telling them ahead of time that they will be subjects to an intervention or about the purpose of the procedure(s) is deception.
@@ -481,7 +488,7 @@ Example: it may be necessary to deceive subjects about the purpose of the study 
 8.6.a. Will subjects be informed beforehand that they will be unaware of or misled regarding the nature or purposes of the research? (Note: this is not necessarily required.)
  No
  Yes
-8.6.b. Will subjects be debriefed later? (Note: this is not necessarily required.) 
+8.6.b. Will subjects be debriefed later? (Note: this is not necessarily required.)
  No → Provide your reasoning for not debriefing subjects.
  Yes → Describe how and when this will occur. Upload any debriefing materials, including talking points or a script, to Zipline.
 8.7. [DETERMINATION] Cognitively impaired adults, and other adults unable to consent. Will such individuals be included in the research?
@@ -508,7 +515,7 @@ For materials that cannot be uploaded: upload screenshots or written description
 9. PRIVACY AND CONFIDENTIALITY
 9.1. [DETERMINATION]  Privacy protections. Describe the steps that will be taken, if any, to address possible privacy concerns of subjects and potential subjects.
 Privacy refers to the sense of being in control of access that others have to ourselves. This can be an issue with respect to recruiting, consenting, sensitivity of the data being collected, and the method of data collection.
-Examples: 
+Examples:
 Many subjects will feel a violation of privacy if they receive a letter asking them to participate in a study because they have ____ medical condition, when their name, contact information, and medical condition were drawn from medical records without their consent. Example: the IRB expects that “cold call” recruitment letters will inform the subject about how their information was obtained.
 Recruiting subjects immediately prior to a sensitive or invasive procedure (e.g., in an outpatient surgery waiting room) will feel like an invasion of privacy to some individuals.
 Asking subjects about sensitive topics (e.g. details about sexual behavior) may feel like an invasion of privacy to some individuals.
@@ -541,10 +548,10 @@ See the “Research Records and Data” information in Section 8 of this documen
 Describe the magnitude, probability, duration, and/or reversibility of the harm, discomfort, or hazard, AND
 Describe how the risks will be reduced or managed. Do not describe data security protections here, these are already described in question 9.6.
 Consider possible physical, psychological, social, legal, and economic harms, including possible negative effects on financial standing, employability, insurability, educational advancement or reputation. For example, a breach of confidentiality might have these effects.
-Examples of “others”: embryo, fetus, or nursing child; family members; a specific group. 
+Examples of “others”: embryo, fetus, or nursing child; family members; a specific group.
 Ensure applicable risk information from any Investigator Brochures, Drug Package Inserts, and/or Device Manuals is included in your description.
-Do not include the risks of non-research procedures that are already being performed. 
-If the study design specifies that subjects will be assigned to a specific condition or intervention, then the condition or intervention is a research procedure - even if it is a standard of care. 
+Do not include the risks of non-research procedures that are already being performed.
+If the study design specifies that subjects will be assigned to a specific condition or intervention, then the condition or intervention is a research procedure - even if it is a standard of care.
 Examples of mitigation strategies: inclusion/exclusion criteria; taking blood samples to monitor something that indicates drug toxicity.
 As with all questions on this application, you may refer to uploaded documents.
 10.2. [DETERMINATION]  Reproductive risks. Are there any risks of the study procedures to subjects or partner of subjects related to pregnancy, fertility, lactation or effects on a fetus or neonate?
@@ -603,7 +610,7 @@ Examples of urgent results include very high calcium levels, highly elevated liv
 10.10.a.2. Explain which of these results will be offered to subjects.
 10.10.a.3. Explain which results will not be offered to subjects and provide the rationale for not offering these results.
 Reasons not to offer the results might include:
-There are serious questions regarding validity or reliability 
+There are serious questions regarding validity or reliability
 Returning the results has the potential to cause bias
 There are insufficient resources to communicate the results effectively and appropriately
 Knowledge of the result could cause psychosocial harm to subjects
@@ -666,7 +673,7 @@ Preliminary, exploratory or research development activities (such as pilot and f
 Expanded access use of a drug or device not yet approved for this purpose.
 Use of a Humanitarian Use Device.
 Other. Explain:
-The ability to understand and affect the course of complex, multisystem diseases has been limited by a lack of well-designed, high quality, large, and inclusive multimodal datasets. We propose to create such a dataset allowing ML approaches to provide critical insights int the endemic condition, type 2 diabetes mellitus. 
+The ability to understand and affect the course of complex, multisystem diseases has been limited by a lack of well-designed, high quality, large, and inclusive multimodal datasets. We propose to create such a dataset allowing ML approaches to provide critical insights int the endemic condition, type 2 diabetes mellitus.
 
 Our approach is to collect a cross-sectional dataset of 4,600 people across the US with dual
 balancing for self-reported race/ethnicity and four stages of diabetes severity. Building balanced
@@ -725,7 +732,7 @@ We will first screen for eligible participants using medical records data search
 Information about the study may be provided to potential subjects as follows:
 
 Mailed recruitment letters
-Over the 3+ years of study recruitment, approximately 50,000 invitation letters from each site will be sent by both mail and email to participants identified through the electronic medical record search as meeting study eligibility criteria. 
+Over the 3+ years of study recruitment, approximately 50,000 invitation letters from each site will be sent by both mail and email to participants identified through the electronic medical record search as meeting study eligibility criteria.
 
 UW and UCSD will provide a list of potential participants (names, addresses, age, sex, race/ethnicity, phone number, email addresses, diabetes status) identified through the electronic medical record search to UAB. UAB will add information for their own eligible patients. Using the combined UW, UCSD, and UAB dataset, UAB will select a stratified sample of potential participants based on the sampling scheme. Sampling is necessary to ensure steady enrollment through the recruitment process and to not overwhelm the study staff by inviting all potential participants at one. Once a sample has been selected, a dataset of patient names, clinical information, and patient contact information will be uploaded to a secure site at UAB for Oregon Health and Science University (OHSU) to download to an OHSU server. Although the data will be housed in the UW REDCap system, OHSU is responsible for uploading the combined UW, UCSD, and UAB dataset into REDCap for the purpose of creating patient-specific REDCap survey links and the distribution of REDCap email invitations. After generating patient-specific REDCap survey links, the complete dataset (now including patient-specific REDCap survey links) will be sent back to UAB to send participant information to Adapt Inc., an SSAE16 SOC SecurityCertified and HIPAA-compliant printing and fulfillment service, to send out the recruitment letters. It is necessary for the letters to contain the patient-specific REDCap survey links. The aforementioned process will occur on a recursive basis with UAB coordinating the selection of participants to achieve balancing of race/ethnicity, sex, and diabetes severity until the recruitment goals have been achieved.
 
@@ -761,7 +768,7 @@ These materials, if needed, will be developed at a later date and submitted to t
 As of now, our primary method of recruitment is based on electronic medical records search and contacting them via email, letter, and follow-up phone calls (please refer to 4.1). However, we may need to utilize other methods of recruitment listed in 4.1 if our recruitment rate is too low. In case we start relying on referrals from other clinics, registries, other community centers, and because we are trying to recruit a large number of participants, it is possible that the recruitment happens by word of mouth and we may recruit some participants who may be friends, colleagues, families, and relatives of our study staff. In addition, investigators who are also clinicians may have patients in their clinical practices who are eligible for participation.
 There will be a $200 stipend for participation, which will be provided when we receive the final data from participants and return of the study devices. The timing of the payment will typically be at least 2 weeks after the study visit, taking into account 10 days of home-based data collection using the devices provided in the study and additional time for devices to be returned to the study team vial mail. The payment will not be prorated. The amount may be changed in future years depending on the study funding. We will notify IRB in case there is any change in the stipend amount.
 
-Study will cover reasonable costs for parking, public transit, or rideshare fees (e.g., Uber or Lyft)  related to the study visit. 
+Study will cover reasonable costs for parking, public transit, or rideshare fees (e.g., Uber or Lyft)  related to the study visit.
 
 The same type and amount of compensation will be given to patients who are asked to come back in Year 4 of the study.
 N/A
@@ -769,10 +776,10 @@ N/A
 Electronic medical records will be accessed for pre-screening purposes (i.e., to determine age, diabetes status, and other eligibility criteria). Contact information of the participants (phone number, address, email) will be used to contact potential prospective participants. Data gathered during the screening process may be retained as part of the study data to facilitate future screening efforts and/or to contribute to study procedures and reduce duplication efforts.
 tudy visit will take approximately 3-4 hours. If requested by subjects, the visit can be performed over a couple of days instead of a single visit.
 
-Sample and Data Collection: 
+Sample and Data Collection:
 Following consent, we will collect demographic information, basic measurements (weight and height), and vitals. At the earliest possible time, we will collect blood and urine for testing. We will collect approximately 50-60 ml of blood (about 3-4 spoonfuls). In the event that the original blood and/or urine sample quantities were insufficient for the planned testing, we may bring the participant(s) back for an additional blood draw and/or urine sample collection. The list of tests based on blood and urine samples is in the section 5.4.
 
-Participants will not need to be fasting. We will ask the participant about their last per oral food or drink intake at the time of the study visit. A small snack and drink will be available for participants at any time during the study or after the visit. 
+Participants will not need to be fasting. We will ask the participant about their last per oral food or drink intake at the time of the study visit. A small snack and drink will be available for participants at any time during the study or after the visit.
 
 Questionnaires:
 Participants will fill out the following questionnaires:
@@ -805,10 +812,10 @@ To perform eye imaging, participants will receive on or two types of eye drops (
 Optical coherence tomography (OCT), fundus photography, fluorescence lifetime imaging ophthalmoscopy (FLIO), and optical coherence tomography angiography (OCTA) will be collected using multiple devices. All imaging will be performed using non-invasive imaging methods.
 
 Wearable and at-home devices:
-Study participants will have a continuous glucose monitoring device (CGM) applied to their abdomen and will be given a fitness tracking device for activity monitoring. We will use Dexcom CGM devices that collect glucose data over a 10-day period. Participants who are currently wearing a Dexcom G6 will have two options. The first option is to place an additional study Dexcom G6 sensor at least 3 inches away from their current sensor and injection site, wear it for 10 days and send back the transmitter to study staff to download data. The second option does not place an additional study sensor and instead uses the participant’s current Dexcom G6 device to get data through Clarity. The study will invite the participant with a unique code to share their Dexcom Clarity data with the study clinic. At the end of the 10 days, study staff will log into Dexcom Clarity and download the participant’s data. Patients who already wear Dexcom G6 sensor at the time of the visit will be given an option to allow download of the previously collected glucose values for up to 90 days prior to the study visit. After we capture the 10 days of data, up to 100 days total of glucose data will be collected through the application for subjects who agree to the additional data download, and the study clinic will terminate data sharing with the participant. Sharing with the study clinic will not disrupt their current sharing with any other clinic. 
+Study participants will have a continuous glucose monitoring device (CGM) applied to their abdomen and will be given a fitness tracking device for activity monitoring. We will use Dexcom CGM devices that collect glucose data over a 10-day period. Participants who are currently wearing a Dexcom G6 will have two options. The first option is to place an additional study Dexcom G6 sensor at least 3 inches away from their current sensor and injection site, wear it for 10 days and send back the transmitter to study staff to download data. The second option does not place an additional study sensor and instead uses the participant’s current Dexcom G6 device to get data through Clarity. The study will invite the participant with a unique code to share their Dexcom Clarity data with the study clinic. At the end of the 10 days, study staff will log into Dexcom Clarity and download the participant’s data. Patients who already wear Dexcom G6 sensor at the time of the visit will be given an option to allow download of the previously collected glucose values for up to 90 days prior to the study visit. After we capture the 10 days of data, up to 100 days total of glucose data will be collected through the application for subjects who agree to the additional data download, and the study clinic will terminate data sharing with the participant. Sharing with the study clinic will not disrupt their current sharing with any other clinic.
 
 
-Study participants will receive a small sensor (for environmental data monitoring) and place it at home for data collection for 10 days, and will be asked to return it with the CGM device by mail in a box provided by the study team. The participants will be sent home with instruction for the removal of the CGM device and return the devices back to the research site. 
+Study participants will receive a small sensor (for environmental data monitoring) and place it at home for data collection for 10 days, and will be asked to return it with the CGM device by mail in a box provided by the study team. The participants will be sent home with instruction for the removal of the CGM device and return the devices back to the research site.
 
 At-home Participation:
 The participants will wear the CGM and fitness tracker for 10 days. The participants will also place the environmental sensor in their homes for 10 days. At the end of the 10-day period, participants will need to mail all three devices back so we can obtain the data. Subjects will receive a reminder to return the CGM, fitness tracker, and environmental sensor via phone, text, or email, per their stated preference.
@@ -826,7 +833,7 @@ Data will be obtained from subjects, devices they will be asked to use, and thei
 Name, MRN, DOB, age, sex, race/ethnicity, address, phone number, driver’s license number, and email
 Age (DOB), sex, race/ethnicity, ZIP code (5 digits), driver’s license number
 All data.
-Collaborators at all institutions involved in the study will collect, analyze, and interpret data; collect specimens; be involved in preparation of manuscripts, presentations, grants, and other materials stemming from this research. 
+Collaborators at all institutions involved in the study will collect, analyze, and interpret data; collect specimens; be involved in preparation of manuscripts, presentations, grants, and other materials stemming from this research.
 UAB:
 Cynthia Owsley
 Nathan E. Miles Endowed Chair of Ophthalmology
@@ -834,29 +841,29 @@ University of Alabama, Birmingham
 cynthiaowsley@uabmc.edu
 205.325.8635
 
-JHU: 
+JHU:
 T Y. Alvin Liu
 Assistant Professor of Ophthalmology
 Johns Hopkins University
 tliu25@jhmi.edu
 410.287.1874
 
-OHSU: 
+OHSU:
 Shannon McWeeney
 Professor of Medicine, School of Medicine
 Oregon Health Sciences University
 mcweeney@ohsu.edu
 503.494.8347
 
-CALMI: 
+CALMI:
 Bhavesh Patel
-Assistant Research Professor 
+Assistant Research Professor
 California Medical Innovations Institute
 bpatel@calmi2.org
 
-UCSD: 
+UCSD:
 Linda Zangwill (Contact PI)
-Professor of Ophthalmology 
+Professor of Ophthalmology
 UC San Diego
 lzangwill@health.ucsd.edu
 
@@ -866,7 +873,7 @@ UC San Diego
 s1baxter@health.ucsd.edu
 
 
-Stanford: 
+Stanford:
 Michael Snyder
 Stanford W. Ascherman, Professor in Genetics
 Stanford University
@@ -877,11 +884,11 @@ PHI will be collected by directly viewing electronic medical records and direct 
 All PHI accessed or collected following enrollment.
 PHI obtained for the prescreening activities
 Subject codes, contact information/identifiers, deidentified data, unused specimen
-Data will be shared with the investigators in this project who are part of developing software for de-identifying, data uploading and data sharing.  
+Data will be shared with the investigators in this project who are part of developing software for de-identifying, data uploading and data sharing.
 
-The data includes responses to questionnaires, vitals and demographic information, cognitive testing, motor vehicle collision involvement, results from blood and urine tests, retinal images, read-out from wearables (CGM and fitness tracker), read-out from home environmental sensor, ECG, and cardiology, peripheral neuropathy, eye health, and endocrinology measures, genomic sequencing, raw imaging data such as retina scans. This will also include any previous relevant medical history that was obtained. 
+The data includes responses to questionnaires, vitals and demographic information, cognitive testing, motor vehicle collision involvement, results from blood and urine tests, retinal images, read-out from wearables (CGM and fitness tracker), read-out from home environmental sensor, ECG, and cardiology, peripheral neuropathy, eye health, and endocrinology measures, genomic sequencing, raw imaging data such as retina scans. This will also include any previous relevant medical history that was obtained.
 
-Biobank blood specimens will be stored at UAB as a repository. During this project we will create an infrastructure to decide who is allowed to request and receive the specimen for future research. 
+Biobank blood specimens will be stored at UAB as a repository. During this project we will create an infrastructure to decide who is allowed to request and receive the specimen for future research.
 
 There will be two databases for data distribution:
 The first will be deidentified, which will be publicly available.
@@ -901,7 +908,7 @@ CONSENT	is the process of informing potential subjects about the research and as
 CONSENT DOCUMENTATION	refers to how a subject’s decision to participate in the research is documented. This is typically obtained by having the subject sign a consent form.
 CONSENT FORM	is a document signed by subjects, by which they agree to participate in the research as described in the consent form and in the consent process.
 ELEMENTS OF CONSENT	are specific information that is required to be provided to subjects.
-CHARACTERISTICS OF CONSENT	are the qualities of the consent process as a whole. These are: 
+CHARACTERISTICS OF CONSENT	are the qualities of the consent process as a whole. These are:
 Consent must be legally effective.
 The process minimizes the possibility of coercion or undue influence.
 Subjects or their representatives must be given sufficient opportunity to discuss and consider participation.
@@ -925,7 +932,7 @@ Electronic consent:
 Subjects will be contacted by email, letter, or telephone call to ascertain their interest. Participants will be directed to our study interface (REDCap) where they will have the opportunity to read the consent documentation and give e-consent, request a phone call or video conference via a CRC to ask questions, or wait to sign the consent when they come to their in-person visit. No study-specific questionnaires, with the exception of the screening questionnaire, will be available to participants until consent has been given. Once signed, electronic consent will be automatically emailed to the subjects. Subjects will be able to request an additional copy from the study coordinator for the duration of the study.
 
 Our preferred method will be obtaining e-consent so that the participants can fill out surveys prior to the study visit in order to decrease the study visit duration. However, participants who wish to be consented in person will not be excluded and a copy will be mailed to them before their study visit.
-Subjects will be asked to confirm their understanding of study activities and requirements to ensure comprehension. 
+Subjects will be asked to confirm their understanding of study activities and requirements to ensure comprehension.
 We now included a table at the beginning of the consent form that clarifies which information will be publicly available, and which would require an application and approval process that would contain privacy protection. Since the beginning of the consent form describes the database, the PI believes that this is the best placement for the table and the preceding clarification.
 Our first line of recruitment is through medical records database search, so it is unlikely that we will have any previous relationship with participants. However, it is possible that we will have to rely on other forms of recruitment, such as referral based. Then, if the referral to the study comes from a research staff member who a has relationship with the potential participant, the actual recruitment and consenting process will be performed by a research staff member that does NOT have any pre-existing relationship with the participant.
 We have years of experience preparing consent forms for study subjects. There will also be a community advisory board that evaluates the consent forms and research protocols and their feedback will be considered in the modifications of the IRB as needed
@@ -936,8 +943,8 @@ Contact information for the study staff will be given in the recruitment materia
 E-consent is just an additional modality to the standard paper-based consent; subjects can choose which is easier and more accessible to them.
 Upon signing, the signed consent form will be automatically emailed to subjects. Subjects will be able to receive an additional copy of their signed e-consent by contacting study coordinator(s) at any time during the study.
 Study participants will have access to some of their clinical laboratory data via an online portal. This is not an interventional study, so significant new findings are not expected. Subjects will receive a card with the study visit information (e.g., vital signs, visual acuity), as described.
-Adult subject group1	Describe the procedures or data/specimen collection (if any) for which there will be NO documentation of consent	Will they be provided with a written statement describing the research (optional)? 
-(Check Yes or No)	Will they be provided with a written statement describing the research (optional)? 
+Adult subject group1	Describe the procedures or data/specimen collection (if any) for which there will be NO documentation of consent	Will they be provided with a written statement describing the research (optional)?
+(Check Yes or No)	Will they be provided with a written statement describing the research (optional)?
 (Check Yes or No)
 YES	NO
 For subjects who have difficulty viewing the study consent, a study team member will read the consent form for them. We still expect that a subject would be capable of signing the consent form. If a person is functionally illiterate, a study team member will sign and note the reason for missing subject signature in the presence of an impartial witness.
@@ -963,7 +970,7 @@ Fatigue – low risk – subjects may be fatigued from the study visit, which ma
 
 Blood draw – low risk – may cause bruising, fainting, pain, or infection. We will provide a small snack following blood collection to reduce a chance of fainting or weakness. Extremely rarely the puncture site may become infected, which could lead to hospitalization or death.
 
-CGM – low risk – may cause bruising, pain, or infection at the point of insertion; irritation due to prolonged presence of the monitor/adhesive on the skin (e.g., due to excessive sweating or tight clothing), or skin discoloration. If the CGM is uncomfortable, we will let the patients remove it and mail it back before the full 10 days have elapsed. 
+CGM – low risk – may cause bruising, pain, or infection at the point of insertion; irritation due to prolonged presence of the monitor/adhesive on the skin (e.g., due to excessive sweating or tight clothing), or skin discoloration. If the CGM is uncomfortable, we will let the patients remove it and mail it back before the full 10 days have elapsed.
 
 Fitness tracking – low risk – there is no known harm to wearing a fitness tracking device. The subjects will be educated by staff on sizing the devices to minimize the discomfort caused by ill-fitted wristbands.
 
@@ -984,7 +991,7 @@ N/A
 Subject may receive some direct benefit by being able to access the data generated by the study procedures (see section 10.10.b).
 Results obtained during the study visit may be clinically actionable, such as blood pressure or visual acuity/eye exam data and will be shared with the study participants in real time. Each participant will receive a card with these results at the end of the visit. This includes vision or life threatening actionable incidental findings, e.g., retinal detachment, disc edema, or tumors, identified during the visit. In such cases, patients will be referred for treatment.
 
-Due to delay in obtaining the laboratory results and lack of standard interpretation methods for other data (e.g., imaging), it is unlikely that these data would be clinically actionable. All clinical laboratory results will be uploaded on a yearly basis, and participants will be able to access them (but there may be a substantial lag between the study visit and the yearly upload). 
+Due to delay in obtaining the laboratory results and lack of standard interpretation methods for other data (e.g., imaging), it is unlikely that these data would be clinically actionable. All clinical laboratory results will be uploaded on a yearly basis, and participants will be able to access them (but there may be a substantial lag between the study visit and the yearly upload).
 
 CGM data will be shared with the participants, which may include data for up to 100 days of collection.
 Subjects will receive results obtained on site during the visit (e.g., blood pressure or vision exam results), CGM data, and laboratory testing results; however, laboratory testing results may not be available within the clinically actionable timeline. The laboratory testing results will be available to subjects through the study database that is updated and uploaded yearly. Each subject will receive an access code. Normal range of values will be available for the laboratory results. All abnormal laboratory results will be marked/flagged, and it will be recommended that subjects use the information and discuss the results with their primary care provider or specialist. Study will not provide interpretation of the data due to the high number of subjects.
@@ -997,7 +1004,7 @@ As stated in 10.10.b, participants will be able to access the data via an electr
 We do not have plans to share results with family members.
 There are no plans for the researchers involved in collecting the data set to develop any commercial products or file for patents. However, the data set will be publicly available with a commercial-friendly open-source license and there may be products or patents that are developed from it in the future.
 Subjects may incur costs for transport that will not be reimbursed if transportation fees exceed $25.
-Examples: 
+Examples:
 Research Study Coordinator: Obtain consent, administer surveys, blood draw. Will have previous experience coordinating clinical research and be a certified phlebotomist in WA.
 Undergraduate Research Assistant: Obtain consent, perform all study procedures. Will have had coursework in research methods, complete an orientation to human subjects protections given by the department, and will receive training from the PI or the graduate student project lead on obtaining consent and debriefing subjects.
 Acupuncturist: Perform acupuncture procedures and administer surveys. Must be licensed with WA State DoH and complete training in administering research surveys given by the project director, an experienced survey researcher.
@@ -1015,7 +1022,7 @@ Clinical research coordinator/study coordinator: Responsible for contacting and 
 Research assistant: Conduct study visits including collection of ophthalmologic images, provide training on study procedures such as continuous glucose monitoring or fitness tracker, ensure the return of all study materials (ex. Environmental sensor) under the direction of the study coordinator or project manager; responsible for data upload and management from each clinic visit
 
 Software engineer: Responsible for designing, implementing, and testing the different data
-curation pipelines 
+curation pipelines
 
 Cloud engineer: Responsible for cloud infrastructure customization, configuration and deployment including integrating, configuring, deploying, and managing centrally provided common cloud services
 

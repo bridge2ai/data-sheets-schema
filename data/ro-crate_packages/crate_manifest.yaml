@@ -1,0 +1,248 @@
+version: 1
+generated_at: "2026-07-24"
+description: >-
+  Upstream RO-Crate packages published by each Bridge2AI Grand Challenge.
+  These are additional D4D generation inputs, kept separate from the
+  document corpus in data/preprocessed/source_manifest.yaml so that
+  with-crate and without-crate generation arms can be compared.
+layout: >-
+  {PROJECT}/raw/       bytes exactly as downloaded from upstream
+  {PROJECT}/crate/     extracted archive, gitignored, re-creatable from raw/
+  {PROJECT}/processed/ normalized artifacts (d4d rocrate normalize)
+checksum_note: >-
+  md5 values are the upstream Dataverse-reported checksums; every file below
+  was verified byte-identical after download on 2026-07-24.
+document_corpus_policy_note: >-
+  Each project below declares `document_corpus`, read by
+  `rocrate_normalize.document_corpus_exclusions()` and enforced by
+  src/download/organized_dataset_extractor.py. `exclude` means: if the input
+  sheet cites this DOI, the downloader skips it rather than adding it to
+  data/raw/{PROJECT}/. This keeps the with-crate and without-crate arms
+  separable when the sheet cites a record whose purpose is to publish a crate.
+  It is deliberately per-project rather than blanket -- see CM4AI, where the
+  same kind of URL is a legitimate document-corpus source.
+
+projects:
+  CHORUS:
+    source_type: dataverse
+    dataset_url: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/XNBOPG
+    doi: 10.18130/V3/XNBOPG
+    dataset_title: >-
+      Data Manifest for Collaborative Hospital Repository Uniting Standards
+      (CHoRUS) April 2026
+    crate_version: 1.0 Beta
+    dataset_publication_date: "2026-04-21"
+    dataverse_version: "1.1"
+    captured_at: "2026-07-24"
+    archive: false
+    document_corpus: exclude
+    document_corpus_reason: >-
+      This Dataverse record exists to publish the crate -- its four files are
+      the crate itself, with no separate data payload. The sheet cell E16 was
+      added on 2026-07-27 (notes/UPSTREAM_SOURCE_DISCREPANCIES.md §6), so a
+      sheet-driven refresh would otherwise pull its landing page into
+      data/raw/CHORUS/. Measured 2026-07-28: the page yields 14,044 characters
+      of text against a CHORUS document bundle of ~36 KB -- a ~39% increase in
+      the smallest corpus, which alone would confound the arm comparison. It
+      carries the DUA link (chorus4ai.org/dataset) and the crate file names,
+      but not the IRB protocol, institution, or confidentiality level, which
+      appear only inside ro-crate-metadata.json. So the leak is partial, not
+      wholesale -- and still disqualifying, because CHORUS is the GC where the
+      crate contribution is largest and cleanest.
+    files:
+      - name: ro-crate-metadata.json
+        path: CHORUS/raw/ro-crate-metadata.json
+        dataverse_file_id: 120518
+        bytes: 20635
+        md5: 1887b74e0a1ae05a153d9b6816734439
+        role: crate metadata (RO-Crate 1.2 + EVI + rai:)
+      - name: ro-crate-linkml.yaml
+        path: CHORUS/raw/ro-crate-linkml.yaml
+        dataverse_file_id: 120512
+        bytes: 9686
+        md5: b51ba0cff2cce9b2bb5935dba9c3d63c
+        role: >-
+          D4D-shaped LinkML rendering; declares conforms_to "D4D Schema".
+          Validates against class Dataset after dropping the non-schema
+          top-level key `bytes`.
+      - name: ro-crate-datasheet.html
+        path: CHORUS/raw/ro-crate-datasheet.html
+        dataverse_file_id: 120510
+        bytes: 62113
+        md5: 661da7c2146af29791f653e674b4f0af
+        role: human-readable datasheet rendering
+      - name: ai_ready_score.json
+        path: CHORUS/raw/ai_ready_score.json
+        dataverse_file_id: 120511
+        bytes: 7654
+        md5: 8d4067d9e1192f580360e26737cec820
+        role: AI-readiness self-assessment
+
+  CM4AI:
+    source_type: dataverse
+    dataset_url: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    doi: 10.18130/V3/HIGT4C
+    dataset_title: >-
+      Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
+    dataset_publication_date: "2026-06-17"
+    dataverse_version: "2.0"
+    dataverse_version_released: "2026-07-15T20:28:19Z"
+    captured_at: "2026-07-24"
+    archive: true
+    document_corpus: allow
+    document_corpus_reason: >-
+      Deliberately NOT excluded, despite being the same kind of URL as CHORUS.
+      HIGT4C is the CM4AI data release itself; its landing page is already a
+      curated document-corpus source (source_manifest.yaml
+      june_2026_dataverse_release, captured 2026-07-24) and cell B16 now points
+      at it. The crate is not on that page -- it ships inside
+      cm4ai_release_metadata.zip, 1 of the 10 files. Excluding this DOI would
+      silently drop a legitimate input document and change the CM4AI baseline.
+    curation_note: >-
+      The CM4AI crate is not a standalone Dataverse file set. It ships inside
+      cm4ai_release_metadata.zip, one of the 10 files on the HIGT4C release.
+      The other 9 files are data payloads, three of which are 4-5 GB image
+      archives; only the metadata zip is downloaded here. The extracted tree
+      is ~47 MB, almost entirely per-modality ro-crate-preview.html file
+      listings, and is gitignored.
+    files:
+      - name: cm4ai_release_metadata.zip
+        path: CM4AI/raw/cm4ai_release_metadata.zip
+        dataverse_file_id: 120750
+        bytes: 1203765
+        md5: 318deb7c5edab0d2fa55e26fcb67b440
+        role: archive containing the crate
+    archive_contents:
+      - name: ro-crate-metadata.json
+        path: CM4AI/crate/ro-crate-metadata.json
+        bytes: 12242926
+        role: >-
+          crate metadata; 62 entities, but ~11.9 MB of it is hasPart and
+          EVI#outputs file inventories (18,789 and 17,849 entries on the
+          image crates alone). Requires reduction before use as generation
+          input.
+      - name: ro-crate-linkml.yaml
+        path: CM4AI/crate/ro-crate-linkml.yaml
+        bytes: 9484
+        role: >-
+          D4D-shaped LinkML rendering. Does not yet validate; see
+          notes/ROCRATE_INGESTION_STUDY.md for the four required repairs.
+      - name: ro-crate-datasheet.html
+        path: CM4AI/crate/ro-crate-datasheet.html
+        bytes: 125770
+        role: human-readable datasheet rendering
+      - name: ai_ready_score.json
+        path: CM4AI/crate/ai_ready_score.json
+        bytes: 6003
+        role: AI-readiness self-assessment
+      - name: "{modality}/ro-crate-preview.html + ro-crate-prov-graph.html"
+        role: >-
+          Per-modality sub-crate renderings for AP-MS, Images, mass-spec,
+          and Perturb-Seq. Previews are file listings up to 11.8 MB; excluded
+          from generation input.
+
+  AI_READI:
+    status: link_pending
+    note: URL to be supplied; not yet downloaded.
+    document_corpus: undecided
+    document_corpus_reason: >-
+      Decide when the crate link arrives. If it is published at a record the
+      input sheet cites (or comes to cite), set `exclude`; if the crate is one
+      file among a wider data release whose landing page is independently
+      useful, set `allow`, as for CM4AI. `undecided` is treated as `allow` --
+      it must not silently drop a source -- but is reported by
+      `document_corpus_exclusions()` so it cannot be forgotten.
+
+  VOICE:
+    source_type: supplied_locally
+    provenance_note: >-
+      Supplied as a local directory (voice-ro-crate-assets) on 2026-07-27
+      rather than downloaded from a repository, so unlike CHORUS and CM4AI
+      there is no upstream-published checksum to verify these files against.
+      The md5s below are of the copies as received. If a canonical published
+      location for this crate exists, record it here and re-verify.
+    describes_dataset: https://physionet.org/content/b2ai-voice/3.0.0/
+    doi: 10.13026/k81f-qr68
+    crate_id: ark:59853/rocrate-b2ai-voice-3.0.0
+    crate_version: 3.0.0
+    crate_date_published: "12/16/2025"
+    captured_at: "2026-07-27"
+    archive: false
+    document_corpus: allow
+    document_corpus_reason: >-
+      No exclusion is possible or needed: this crate was supplied as a local
+      directory, so it has no upstream record the sheet could cite. Its
+      `describes_dataset` (PhysioNet b2ai-voice/3.0.0) is a genuine document
+      corpus source in its own right and must stay -- the crate describes that
+      release, it is not published by it.
+    curation_note: >-
+      The crate describes PhysioNet release v3.0.0, not the current v3.1.0
+      that the document corpus prefers (see source_manifest.yaml
+      physionet_3_1_0). Treat crate-derived facts as evidence about 3.0.0.
+      Its date is written 12/16/2025 in an ambiguous format, consistent with
+      the mixed-format issue noted for the CHORUS crate.
+      Shares the ark:59853 identifier namespace with the CHORUS and CM4AI
+      crates, indicating the same generating pipeline.
+    structural_note: >-
+      Ships 8 artifacts, more than the other two crates, but is missing
+      ro-crate-linkml.yaml — the D4D-shaped rendering that the deterministic
+      arm consumes. The deterministic arm therefore cannot run for VOICE
+      without a Croissant/RAI-to-D4D mapping step; see
+      notes/D4D_GENERATION_ARMS.md.
+      Bulk profile also differs: 76% of ro-crate-metadata.json is 55
+      EVI:Schema data dictionaries (2,562 columns), not file inventories.
+    files:
+      - name: ro-crate-metadata.json
+        path: VOICE/raw/ro-crate-metadata.json
+        bytes: 726461
+        md5: 9c298155ee2804e2dbbc014f906a1649
+        role: >-
+          crate metadata; 75 entities. The root entity carries 20 rai:
+          fields plus irb, irbProtocolId, ethicalReview,
+          confidentialityLevel, deidentified, fdaRegulated, humanSubjects,
+          dataGovernanceCommittee, completeness, and conditionsOfAccess.
+          Richer governance content than the CHORUS crate.
+      - name: ro-crate-croissant.json
+        path: VOICE/raw/ro-crate-croissant.json
+        bytes: 55889
+        md5: bf722ae33287f2700548c9abfaf49ea4
+        role: >-
+          Croissant/RAI rendering. Verified to be a duplicate representation
+          rather than additional evidence: of its 15 rai: fields, 11 are
+          byte-identical to ro-crate-metadata.json and the other 4 differ
+          only by list-vs-string wrapping of the same text, while
+          ro-crate-metadata.json carries 5 rai: fields Croissant lacks.
+          Retained for completeness; deliberately not bundled, since it would
+          add size without information.
+      - name: ro-crate-datasheet.html
+        path: VOICE/raw/ro-crate-datasheet.html
+        bytes: 60894
+        md5: e244f17b1700445570ad5f92b003c9e6
+        role: human-readable datasheet rendering (withheld from the de novo arm)
+      - name: ai_ready_score.json
+        path: VOICE/raw/ai_ready_score.json
+        bytes: 9618
+        md5: eca844a9bcf4352e849f9c77b4246778
+        role: AI-readiness self-assessment
+      - name: ro-crate-preview.html
+        path: VOICE/raw/ro-crate-preview.html
+        bytes: 643092
+        md5: 3727275f97d205f3a40787ca0f46c3c6
+        role: file listing; excluded from generation input
+      - name: ro-crate-prov-graph.json
+        path: VOICE/raw/ro-crate-prov-graph.json
+        bytes: 1232
+        md5: 660650876d5d153c528318b4b52f5e89
+        role: provenance graph (not present in the other crates)
+      - name: ro-crate-prov-graph.html
+        path: VOICE/raw/ro-crate-prov-graph.html
+        bytes: 39813
+        md5: 36de3c3d54b1c8186f5bd840b05f19c2
+        role: provenance graph rendering
+      - name: ro-crate-merkle-tree.json
+        path: VOICE/raw/ro-crate-merkle-tree.json
+        bytes: 4045
+        md5: 370e9d17943e6c41db139f37db7af57e
+        role: >-
+          file integrity tree (not present in the other crates); root hash
+          also appears as evi:merkleRootHash on the crate entity

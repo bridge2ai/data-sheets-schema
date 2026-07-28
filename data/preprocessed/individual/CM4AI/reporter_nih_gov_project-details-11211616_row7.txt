@@ -1,1 +1,47 @@
-RePORT ⟩ RePORTERWe're sorry but RePORTER doesn't work properly without JavaScript enabled. Please enable it to continue.
+SOURCE METADATA
+Project: CM4AI
+Source ID: nih_reporter_project
+Source type: NIH project page
+Source URL: https://reporter.nih.gov/project-details/11211616
+Raw file: data/raw/CM4AI/reporter_nih_gov_project-details-11211616_row7.txt
+--------------------------------------------------------------------------------
+NIH RePORTER Project
+Source: https://reporter.nih.gov/project-details/11211616
+Application ID: 11211616
+Project number: 3OT2OD032742-01S2
+Core project number: OT2OD032742
+Title: Bridge2AI: Cell Maps for AI (CM4AI) Data Generation Project
+Principal investigator: IDEKER, TREY
+Organization: UNIVERSITY OF CALIFORNIA, SAN DIEGO
+Fiscal year: 2025
+Award amount: 5289382
+Project start: 2022-09-01T00:00:00
+Project end: 2026-08-31T00:00:00
+
+As part of the NIH Common Fund’s Bridge2AI program, the CM4AI data generation
+project seeks to map the spatiotemporal architecture of human cells and use these
+maps toward the grand challenge of interpretable genotype-phenotype learning. In
+genomics and precision medicine, machine learning models are often "black boxes,"
+predicting phenotypes from genotypes without understanding the mechanisms by
+which such translation occurs. To address this deficiency, project will launch a
+coordinated effort involving three complementary mapping approaches – proteomic
+mass spectrometry, cellular imaging, and genetic perturbation via CRISPR/Cas9 –
+creating a library of large-scale maps of cellular structure/function across
+demographic and disease contexts. These data will broadly stimulate research and
+development in "visible" machine learning systems informed by multi-scale cell and
+tissue architecture. In addition to data and tools, this project will implement a
+standards data management approach based on FAIR access and software principles,
+with deep provenance and replication packages for representation of cell maps and
+their underlying datasets; initiate a research program in ethical AI, especially as it
+relates to how maps will be used in genomic medicine and model interpretation; and
+stimulate a diverse portfolio of training opportunities in the emerging field of
+biomachine learning.
+
+Machine learning (ML) models show great promise in analyzing the human genome
+to make predictions, but the inner workings of these models are typically difficult-to-interpret "black boxes." To address this challenge, this Bridge2AI data generation
+project will generate a resource of matched data and tools to enable the creation of
+"visible" ML systems, which are not black boxes but are built directly on knowledge
+maps of cell and tissue architecture.
+
+Preferred terms:
+Address;Architecture;Black Box;Bridge to Artificial Intelligence;CRISPR/Cas technology;Cells;Cellular Structures;Computer software;Data;Data Set;Disease;Funding;Generations;Genetic;Genomic medicine;Genotype;Human;Human Genome;Knowledge;Learning;Libraries;Machine Learning;Maps;Mass Spectrum Analysis;Modeling;Phenotype;Proteomics;Research;Resources;System;Text;Tissues;Translations;United States National Institutes of Health;cellular imaging;data management;data standards;machine learning model;precision medicine;programs;research and development;responsible artificial intelligence;spatiotemporal imaging;tool;training opportunity

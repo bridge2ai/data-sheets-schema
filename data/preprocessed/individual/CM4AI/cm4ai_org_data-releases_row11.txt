@@ -1,0 +1,118 @@
+SOURCE METADATA
+Project: CM4AI
+Source ID: data_release_documentation
+Source type: documentation
+Source URL: https://cm4ai.org/data-releases/
+Raw file: data/raw/CM4AI/cm4ai_org_data-releases_row11.html
+Curation note: The page labels HIGT4C as the June 2026 release but displays June 17, 2025. Official Dataverse metadata reports publication date 2026-06-17 and version 2 release time 2026-07-15T20:28:19Z. The input sheet still selects the older K7TGEM release; the HIGT4C release itself is now captured as june_2026_dataverse_release.
+Verification URL: https://dataverse.lib.virginia.edu/api/datasets/:persistentId/?persistentId=doi:10.18130/V3/HIGT4C
+--------------------------------------------------------------------------------
+Data Releases – Cell Maps For AI (CM4AI)
+Home
+People
+Project Overview
+Tools
+Data Acquisition
+Teaming
+Standards
+Ethics
+Skills and Workforce
+Products
+Data Releases
+Tools
+Product Documentation
+Publications
+Learning
+Home
+People
+Project Overview
+Tools
+Data Acquisition
+Teaming
+Standards
+Ethics
+Skills and Workforce
+Products
+Data Releases
+Tools
+Product Documentation
+Publications
+Learning
+© 2019
+Data Releases
+Cell Maps for Artificial Intelligence (CM4AI) will deliver machine-readable hierarchical maps of cell architecture as AI-ready data, together with quarterly data releases of map-input data streams. CM4AI cell maps are produced from multimodal interrogation of chromatin modifiers, metabolic enzymes, and other proteins involved in cancer, neuropsychiatric, and cardiac disorders in disease-relevant cell lines under treated and untreated conditions, utilizing state-of-the-art mass spectrometry-based proteomics, spatial proteomics / cell imaging, and genetic perturbations via CRISPR/Cas9. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UT Austin, UA Birmingham, Simon Fraser University, and the Hastings Center, as part of the NIH Bridge2AI program.
+Documentation
+Data Insights
+Explore the numbers behind our innovative data generation project and see the impact we are making.
+Protein Interactions
+1,374
+Immunofluorescent Images
+53,788
+Total Proteins Investigated
+7,023
+genes targeted
+11,739
+Data volume
+21.4 TB
+CM4AI’s Flagship Datasets
+We are generating deep multi-modal data for a shared list of proteins across all cell types and treatment conditions to achieve an unparallelled level of biological insight
+Curated dataset for undifferentiated (parental) iPSCs and iPSC-derived neural progenitor cells (NPCs), neurons, and cardiomyocytes include:
+• Perturb-seq of
+>11,000 genes (whole-genome)
+• SEC-MS capturing
+~7,000 proteins
+• IF images (
+coming soon!
+)
+Curated datasets for TNBC cells under untreated (DMSO control), vorinostat, and paclitaxel conditions include:
+•SEC-MS capturing
+~7,000 proteins
+•IF images for
+523 proteins
+•Perturb-seq of
+200 genes
+•AP-MS interactomes (
+coming soon!
+)
+Our latest data release
+Explore all
+This repository is under review for potential modification in compliance with Administration directives.
+June 2026 Data Release (Beta)
+doi.org/10.18130/V3/HIGT4C
+This dataset is the June 2026 Data Release of CM4AI, the Functional Genomics Grand Challenge in the NIH Bridge2AI program.
+Released on:
+June 17, 2025
+Archive
+May 2024 Data Release
+March 2025 Data Release
+June 2025 Data Release
+October 2025 Data Release
+Frequently Asked Questions
+When will the next Data Release be available?
+CM4AI releases data quarterly, ensuring continuous updates to the cell maps and input data streams.
+What types of data does CM4AI provide?
+CM4AI provides hierarchical cell maps derived from various data streams, including:
+•
+Mass spectrometry-based proteomics
+•
+Spatial proteomics and cell imaging
+•
+Genetic perturbations using CRISPR/Cas9
+These datasets focus on chromatin modifiers, metabolic enzymes, and other proteins linked to cancer, neuropsychiatric, and cardiac disorders.
+How are the data obtained and processed for the CM4AI project?
+We use a combination of mapping techniques such as proteomic mass spectrometry, cellular imaging, and genetic perturbation via CRISPR/Cas9 to create a library of large-scale maps of cellular structure and function. These maps are then organized and made available for use in our Data Releases.
+Funding
+NIH funding award number: 1OT2OD032742-01
+Follow Us
+Contact Us
+Project-Related Inquiries:
+Swathi Thaker, PhD, UAB, Program Manager
+snthaker@uab.edu
+Website Support & Updates:
+Zhandos Sembay, UAB
+zsembay8@uab.edu
+© 2026 Cell Maps For AI (CM4AI)
+Privacy Notice
+Disclaimer
+This repository is under review for potential modification in compliance with Administration directives.
+Scroll Up
