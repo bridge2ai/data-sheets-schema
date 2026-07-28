@@ -1,0 +1,70 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: reconstructed
+record_generated_at: '2026-07-28T03:58:32+00:00'
+run:
+  label: 2026-07-27_claude-opus-5_rep2
+  project: AI_READI
+  method: claudecode_agent
+  arm: baseline
+  replicate: 2
+model:
+  generation_method: schema-grounded agentic, phase 1
+  agent_runtime: Claude Code
+  provider: Anthropic
+  model: claude-opus-5[1m]
+  reasoning_effort: not applicable
+  mode: four-phase project agent
+  temperature: '0.0'
+schema:
+  declared_version: 1.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_md5: 633a2d2c490364d66f45d8ee2959a329
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_md5: c23d85ec2abfa2178de2737278f690e1
+  merged_schema_carries_version: false
+  note: The version is declared in the source schema but the merged artefacts predate
+    it; they will carry it after the next `make full-schema`. Content md5s identify
+    exactly what was used.
+software:
+  note: reconstructed; versions are today's, not the run's
+repo:
+  commit: 0e19e85fe6a0b18038ba64bbff309d684bae2a9f
+  commit_short: 0e19e85f
+  branch: main
+  dirty: true
+  dirty_file_count: 368
+system:
+  note: not recorded at run time; the current machine is not evidence of what produced
+    this run
+inputs:
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 8aadffca28403aaa675e59b93721ea96
+  bundle_bytes: 420804
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: e633ee3827eb151efca663f14d0b2f5c
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-07-27_claude-opus-5_rep2/AI_READI_d4d.yaml
+    md5: 923e20ea8634ce23665e63c666ec3e3c
+    bytes: 134673
+    slots: 84
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep2/AI_READI_d4d_core.yaml
+    md5: 5d80360ae119592da2e97cb9b9e55058
+    bytes: 101529
+    slots: 69
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep2/AI_READI_reconciliation.md
+    md5: 612bd5d822cd93634ab988a7ace8a04f
+    bytes: 20393
+    slots: null
+unrecoverable:
+- field: system
+  reason: hardware was not captured when this run executed
+notes: null

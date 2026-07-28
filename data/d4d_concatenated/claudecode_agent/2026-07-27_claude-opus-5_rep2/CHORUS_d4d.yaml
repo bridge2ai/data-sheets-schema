@@ -1,0 +1,1295 @@
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: schema-grounded agentic, phase 1
+# Agent runtime: Claude Code
+# Provider: Anthropic
+# Model: claude-opus-5[1m]
+# Reasoning effort: not applicable
+# Mode: four-phase project agent
+# Source bundle: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+# Source manifest: data/preprocessed/source_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Temperature: 0.0
+# Generated: 2026-07-27
+
+id: https://chorus4ai.org/
+name: CHoRUS_for_Equitable_AI_Dataset
+title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS)
+  for Equitable AI
+description: >-
+  CHoRUS (Patient-Focused Collaborative Hospital Repository Uniting Standards) for
+  Equitable AI is one of four data generation projects in the NIH Common Fund
+  Bridge2AI consortium. It assembles a multi-center, multi-modal, high-resolution,
+  controlled-access dataset describing acute and critical care, intended to support
+  machine learning and artificial intelligence that characterizes acute and critical
+  illness, predicts complications, and measures treatment response. Data are
+  collected retrospectively from contributing hospitals and standardized primarily
+  to the OHDSI/OMOP Common Data Model, with additional modality-specific standards
+  (OHNLP for tokenized clinical notes, DICOM for imaging, WFDB for waveform
+  telemetry, EDF+ and Persyst for EEG). The project website describes an anticipated
+  final dataset of 100,000 patient admissions covering 9 data modalities from 14
+  data-contributing hospitals, assembled by 60+ consortium members across 20
+  institutions, and a current released dataset of 50,000 patient admissions from
+  ICU, PICU, and NICU settings comprising 1.6 billion rows of EHR OMOP data, 7,642
+  admissions with radiology data, and 23 Tb of waveform data. A separate holdout
+  test set is provisioned for external validation of models. The NIH RePORTER
+  abstract describes the target population as more than 100,000 critically ill
+  patients and organizes the work in three pillars: Data (standards, tool
+  development and optimization, data acquisition), Ethics (ethical and trustworthy
+  AI), and People (team science, skill and workforce development).
+page: https://chorus4ai.org/
+status: >-
+  Partially released and under active assembly. As of August 2025 the assembled
+  dataset covered 14 different hospitals with over 45,000 unique admissions; OMOP
+  and telemetry data resided in the cloud enclave, clinical notes were stored
+  locally with only tokens transferred, approximately 1,000 imaging studies were
+  available with de-identification in process for a larger cohort, and EEG
+  extraction was in process. The project website carries the notice "This repoitory
+  is under review for potential modification in compliance with Administration
+  directives."
+conforms_to: >-
+  OHDSI/OMOP Common Data Model for structured electronic health record data;
+  OHNLP for extracted and tokenized clinical notes; DICOM for imaging; WFDB
+  (PhysioNet schema, extended) for waveform telemetry; EDF+ and Persyst for EEG
+  waveforms.
+keywords:
+  - critical care
+  - acute care
+  - critical illness
+  - intensive care unit
+  - electronic health record
+  - OMOP Common Data Model
+  - waveform telemetry
+  - electroencephalography
+  - medical imaging
+  - clinical notes
+  - social determinants of health
+  - artificial intelligence
+  - machine learning
+  - Bridge2AI
+  - data standards
+  - data acquisition
+  - ethics
+  - trustworthiness
+  - workforce development
+  - treatment response
+  - multimodality
+
+external_resources:
+  - id: d4d:CHORUS-external-resources
+    name: External resources and dependencies
+    description: >-
+      The dataset is not self-contained. It is hosted in and accessed through a
+      controlled-access cloud enclave, and it depends on external data standards and
+      open-source tooling maintained inside and outside the project.
+    external_resources:
+      - >-
+        Bridge2AI AI/ML for Clinical Care Collaborative Cloud enclave, which hosts
+        OMOP and telemetry data and is where analysis is performed.
+      - >-
+        Azure cloud services, targeted by the CHoRUS containerized applications
+        (chorus-container-apps repository).
+      - >-
+        OHDSI/OMOP Common Data Model and the OHDSI tool stack, used for structured
+        clinical data.
+      - >-
+        OHNLP toolkit, used to extract and tokenize clinical notes.
+      - >-
+        DeGauss, used by the UF-Geocoding tool to geocode OMOP Location entities.
+      - >-
+        The chorus-ai GitHub organization (https://github.com/chorus-ai), which
+        houses software and tooling, validated semantic mappings, standard operating
+        procedures, and project management overviews.
+    restrictions:
+      - >-
+        Access to the enclave requires registration, a signed licensing agreement,
+        and a ".edu" email address.
+      - >-
+        Clinical notes remain stored locally at contributing sites; only tokens are
+        transferred into the enclave.
+
+file_collections:
+  - id: d4d:CHORUS-fc-demographics
+    name: Demographics
+    description: >-
+      Patient demographic data standardized to the OMOP Common Data Model. Access is
+      controlled.
+    collection_type:
+      - processed_data
+    conforms_to: OMOP Common Data Model
+    conforms_to_schema: OMOP schema
+  - id: d4d:CHORUS-fc-medication-administration
+    name: Medication administration
+    description: >-
+      Medication administration records, with dosing time-stamped upon each infusion
+      change or dose administration, standardized to the OMOP Common Data Model.
+      Access is controlled.
+    collection_type:
+      - processed_data
+    conforms_to: OMOP Common Data Model
+    conforms_to_schema: OMOP schema
+  - id: d4d:CHORUS-fc-procedures
+    name: Procedures
+    description: >-
+      Procedure records documented by providers, standardized to the OMOP Common
+      Data Model. Access is controlled.
+    collection_type:
+      - processed_data
+    conforms_to: OMOP Common Data Model
+    conforms_to_schema: OMOP schema
+  - id: d4d:CHORUS-fc-nursing-flowsheets
+    name: Nursing flowsheets
+    description: >-
+      High-frequency nursing flowsheet documentation standardized to the OMOP Common
+      Data Model. Access is controlled. The source table records that one of the
+      OMOP-standardized modalities publishes an OMOP schema with extensions, but the
+      source's tabular layout does not preserve which row that annotation applies to.
+    collection_type:
+      - processed_data
+    conforms_to: OMOP Common Data Model
+    conforms_to_schema: OMOP schema
+  - id: d4d:CHORUS-fc-diagnoses
+    name: Diagnoses
+    description: >-
+      Diagnosis records documented by providers, standardized to the OMOP Common
+      Data Model. Access is controlled.
+    collection_type:
+      - processed_data
+    conforms_to: OMOP Common Data Model
+    conforms_to_schema: OMOP schema
+  - id: d4d:CHORUS-fc-clinical-notes
+    name: Clinical notes
+    description: >-
+      Unstructured clinical notes extracted and tokenized using the OHNLP toolkit.
+      Access is controlled and metadata was listed as planned rather than available.
+      The notes themselves are stored locally at contributing sites; only tokens are
+      transferred to the enclave.
+    collection_type:
+      - processed_data
+    conforms_to: OHNLP
+    conforms_to_schema: OHNLP open source schema
+  - id: d4d:CHORUS-fc-imaging
+    name: Imaging
+    description: >-
+      Imaging studies drawn from hospital PACS systems in DICOM format. Access is
+      controlled and metadata was listed as planned rather than available. As of the
+      September 2025 informational webinar, approximately 1,000 images were
+      available, with de-identification in process for a larger cohort. The project
+      website reports 7,642 admissions with radiology data in the current released
+      dataset.
+    collection_type:
+      - processed_data
+    conforms_to: DICOM
+    conforms_to_schema: DICOM schema
+  - id: d4d:CHORUS-fc-waveform-telemetry
+    name: Waveform telemetry
+    description: >-
+      Physiological waveform telemetry captured from bedside monitors via
+      gateway/middleware, in WFDB format. Access is controlled. The project website
+      reports 23 Tb of waveform data in the current released dataset; the source does
+      not disambiguate the unit further, so no byte count is asserted here.
+    collection_type:
+      - processed_data
+    conforms_to: WFDB
+    conforms_to_schema: PhysioNet schema, extended
+  - id: d4d:CHORUS-fc-waveform-eeg
+    name: Waveform EEG
+    description: >-
+      Electroencephalography waveforms sourced from hospital EEG databases, in EDF+
+      and Persyst formats. Access is controlled and metadata was listed as planned
+      rather than available. As of the September 2025 informational webinar, EEG
+      extraction was in process.
+    collection_type:
+      - processed_data
+    conforms_to: EDF+ and Persyst
+    conforms_to_schema: Open source EDF+ and Persyst schema
+
+purposes:
+  - id: d4d:CHORUS-purpose-ai-ready-critical-care-data
+    name: Generate a publicly available, AI-ready critical care dataset
+    description: Primary purpose stated by the funded project.
+    response: >-
+      There is an urgent need for infrastructure to support artificial intelligence
+      and machine learning in critical care, and developing high-resolution
+      multi-center data sets is a critical first step towards actionable and
+      trustworthy AI. The project's overarching goal is to develop a publicly
+      available, AI-ready critical care dataset while ensuring the methods promote
+      privacy, accountability, and clinical benefit, and while promoting a new
+      generation of AI clinicians and scientists.
+  - id: d4d:CHORUS-purpose-diverse-ethically-sourced-data
+    name: Build the most diverse, high-resolution, ethically sourced AI-ready dataset
+    description: Goal statement of the CHoRUS Network.
+    response: >-
+      The goal of the CHoRUS Network is to develop the most diverse,
+      high-resolution, ethically sourced, AI-ready data set to answer the grand
+      challenge of improving recovery from acute illness.
+  - id: d4d:CHORUS-purpose-external-validation
+    name: Support external validation and marketplace adoption of clinical AI models
+    description: Purpose of the provisioned holdout test set.
+    response: >-
+      The dataset will also provision a holdout test set, accessible for model
+      external validation to aid marketplace adoption of AI-developed models for
+      implementation in acute and critical care.
+  - id: d4d:CHORUS-purpose-workforce-and-education
+    name: Support AI training and workforce development
+    description: >-
+      Purpose associated with the project's People pillar and with the
+      AIM-AHEAD Bridge2AI for Clinical Care Training Program.
+    response: >-
+      The project cultivates expertise in the lay and scientific community to improve
+      AI literacy and utilization through multimodal educational approaches, and is
+      dedicated to training engineers, data scientists, and clinicians. The
+      AIM-AHEAD Bridge2AI for Clinical Care Training Program expands access to
+      Bridge2AI CHoRUS data through engagement, AI training, and mentorship.
+
+tasks:
+  - id: d4d:CHORUS-task-characterize-critical-illness
+    name: Characterize acute and critical care illness
+    response: >-
+      The CHoRUS data generation project will meet the need of generating data for
+      ML/AI applications aimed at characterizing acute and critical care illness
+      among patients with acute or critical illness.
+  - id: d4d:CHORUS-task-predict-complications
+    name: Predict complications
+    response: >-
+      Generating data for ML/AI applications aimed at predicting complications among
+      patients with acute or critical illness. A visualization and annotation
+      environment will label data with targets important for prediction.
+  - id: d4d:CHORUS-task-measure-treatment-response
+    name: Measure treatment response
+    response: >-
+      Generating data for ML/AI applications aimed at measuring treatment response
+      among patients with acute or critical illness.
+  - id: d4d:CHORUS-task-improve-recovery-from-acute-illness
+    name: Improve recovery from acute illness
+    response: >-
+      The dataset is intended to answer the grand challenge of improving recovery
+      from acute illness, and to build ML- and AI-derived models to improve the care
+      and outcomes of patients requiring critical care.
+
+addressing_gaps:
+  - id: d4d:CHORUS-gap-critical-care-ai-infrastructure
+    name: Lack of infrastructure for AI/ML in critical care
+    response: >-
+      There is an urgent need for infrastructure to support artificial intelligence
+      and machine learning in critical care. Developing high-resolution multi-center
+      data sets is a critical first step towards actionable and trustworthy AI.
+  - id: d4d:CHORUS-gap-multicenter-multimodal-scale
+    name: Absence of a multi-center, multi-modal, high-resolution critical care dataset
+    response: >-
+      The project addresses multiple challenges relevant for acquiring an AI-ready
+      data set from more than 100,000 critically ill patients, including developing
+      capabilities across a multi-center network to acquire, standardize, tokenize,
+      store, visualize, and label structured electronic health record data, tokenized
+      unstructured electronic health record data, telemetry and EEG waveforms,
+      imaging, and social determinants of health.
+  - id: d4d:CHORUS-gap-legal-and-ethical-framework
+    name: Missing legal and ethical framework for collecting clinical data at scale
+    response: >-
+      The project will establish a legal framework for collecting data at scale,
+      perform community-facing ethics focus groups to determine what data is
+      appropriate for public sharing, and determine ethical and legal approaches to
+      manage privacy and bias while accounting for social determinants of health.
+  - id: d4d:CHORUS-gap-external-validation-holdout
+    name: No shared holdout data for external validation of clinical AI models
+    response: >-
+      The dataset provisions a holdout test set accessible for model external
+      validation, to aid marketplace adoption of AI-developed models for
+      implementation in acute and critical care.
+
+creators:
+  - id: d4d:CHORUS-creator-pi
+    name: Eric S. Rosenthal, Contact Principal Investigator
+    description: >-
+      Principal investigator recorded on NIH RePORTER for project 1OT2OD032701-01
+      (application ID 10472824), organization Massachusetts General Hospital, and
+      listed on the Bridge2AI CHoRUS leadership team.
+    principal_investigator: d4d:person-eric-s-rosenthal
+    affiliations:
+      - id: d4d:org-massachusetts-general-hospital
+        name: Massachusetts General Hospital
+    credit_roles:
+      - supervision
+      - funding_acquisition
+  - id: d4d:CHORUS-creator-leadership-team
+    name: Bridge2AI CHoRUS Leadership Team
+    description: >-
+      Leadership team listed for Bridge2AI CHoRUS: Eric Rosenthal (Massachusetts
+      General Hospital), Azra Bihorac (University of Florida), Xiaoqian Jiang
+      (UTHealth Houston), Yulia Strekalova (University of Florida), Parisa Rashidi
+      (University of Florida), and Manlik Kwong (Tufts University).
+    affiliations:
+      - id: d4d:org-massachusetts-general-hospital
+        name: Massachusetts General Hospital
+      - id: d4d:org-university-of-florida
+        name: University of Florida
+      - id: d4d:org-uthealth-houston
+        name: UTHealth Houston
+      - id: d4d:org-tufts-university
+        name: Tufts University
+    credit_roles:
+      - supervision
+      - project_administration
+  - id: d4d:CHORUS-creator-consortium
+    name: CHoRUS Consortium
+    description: >-
+      The CHoRUS consortium comprises 60+ members across 20 different institutions.
+      The collaboration spans 20 academic centers, of which 14 contribute as Data
+      Acquisition centers. Work is organized in sub-teams including Standards, Data
+      Acquisition, and Tooling, alongside ethics and workforce development efforts.
+      The project involves extensive collaboration between centers as well as through
+      the NIH Bridge2AI program, the NIH Bridge2AI Bridge Center, external biomedical
+      and clinical organizations, industry, and regulatory agencies.
+    credit_roles:
+      - conceptualization
+      - methodology
+      - software
+      - data_curation
+      - resources
+      - project_administration
+
+funders:
+  - id: d4d:CHORUS-funding
+    name: NIH Common Fund Bridge2AI program
+    description: >-
+      The project is funded by the NIH under award number OT2OD032701. NIH RePORTER
+      records project number 1OT2OD032701-01, core project number OT2OD032701,
+      application ID 10472824, awarding organization Massachusetts General Hospital,
+      fiscal year 2022, award amount 5,880,300, project start 2022-09-01, and project
+      end 2026-11-30. The project website states that the content is solely the
+      responsibility of the authors and does not necessarily represent the official
+      views of the NIH.
+    grantor: d4d:org-national-institutes-of-health
+    grants:
+      - id: d4d:CHORUS-grant-ot2od032701
+        name: >-
+          Bridge2AI: Patient-Focused Collaborative Hospital Repository Uniting
+          Standards (CHoRUS) for Equitable AI
+        grant_number: OT2OD032701
+        description: >-
+          NIH Common Fund Bridge2AI data generation award. Project number
+          1OT2OD032701-01; fiscal year 2022 award amount 5,880,300; project period
+          2022-09-01 to 2026-11-30.
+
+subsets:
+  - id: d4d:CHORUS-subset-holdout-test-set
+    name: CHoRUS holdout test set
+    description: >-
+      A holdout test set sequestered from the main dataset and made accessible for
+      external validation of models, to aid marketplace adoption of AI-developed
+      models for implementation in acute and critical care.
+    is_data_split: true
+
+instances:
+  - id: d4d:CHORUS-instance-patient-admissions
+    name: Patient admissions
+    description: >-
+      The project website reports 50,000 patient admissions from ICU, PICU, and NICU
+      settings in the current released dataset, against an anticipated final dataset
+      of 100,000 patient admissions. The September 2025 informational webinar reports
+      that, as of August 2025, the dataset covered 14 different hospitals with over
+      45,000 unique admissions. The NIH RePORTER abstract describes the target
+      population as more than 100,000 critically ill patients.
+    instance_type: >-
+      Hospital admission of a critically ill patient in an intensive care unit
+      (ICU), pediatric intensive care unit (PICU), or neonatal intensive care unit
+      (NICU)
+    counts: 50000
+  - id: d4d:CHORUS-instance-omop-ehr-rows
+    name: EHR OMOP data rows
+    description: >-
+      Rows of electronic health record data standardized to the OMOP Common Data
+      Model in the current released dataset, as reported on the project website.
+    instance_type: OMOP-standardized electronic health record record
+    counts: 1600000000
+  - id: d4d:CHORUS-instance-radiology-admissions
+    name: Admissions with radiology data
+    description: >-
+      Admissions in the current released dataset that include radiology data, as
+      reported on the project website.
+    instance_type: Hospital admission with associated radiology imaging
+    counts: 7642
+  - id: d4d:CHORUS-instance-imaging-studies
+    name: Imaging studies available
+    description: >-
+      As of the September 2025 informational webinar, approximately 1,000 images were
+      available, with de-identification in process for a larger cohort. This is a
+      point-in-time figure and is narrower in scope than the count of admissions with
+      radiology data reported on the project website.
+    instance_type: De-identified imaging study from hospital PACS
+    counts: 1000
+  - id: d4d:CHORUS-instance-modalities
+    name: Data modalities
+    description: >-
+      The project website reports 9 different data modalities. The informational
+      webinar enumerates them as demographics, medication administration, procedures,
+      nursing flowsheets, diagnoses, clinical notes, imaging, waveform telemetry, and
+      waveform EEG.
+    instance_type: Data modality
+    counts: 9
+
+known_biases:
+  - id: d4d:CHORUS-bias-contributing-site-selection
+    name: Selection of contributing sites and care settings
+    bias_type: selection_bias
+    bias_description: >-
+      Data are contributed by 14 data-acquisition hospitals within a collaboration of
+      20 academic centers, and cover inpatient ICU, PICU, and NICU admissions. The
+      dataset is therefore a sample drawn from participating academic centers and
+      acute/critical care settings rather than a population-level sample.
+    mitigation_strategy: >-
+      The project states that it will sample to ensure comprehensive sets of patient
+      conditions and clinical treatment strategies, that federated access will enable
+      sampling methods to ensure a balanced and diverse cohort, and that
+      patient-focused efforts will determine the ethical and legal approaches to
+      manage privacy and bias while accounting for social determinants of health. The
+      project also ensures that data elements feature appropriate contextual factors
+      such as geographic distance to the nearest hospital.
+
+known_limitations:
+  - id: d4d:CHORUS-limitation-incomplete-assembly
+    name: Dataset assembly incomplete relative to anticipated final size
+    limitation_type: coverage_limitation
+    limitation_description: >-
+      As of August 2025 the dataset covered 14 different hospitals with over 45,000
+      unique admissions, against an anticipated final dataset of 100,000 patient
+      admissions. Imaging was limited to approximately 1,000 available images with
+      de-identification in process for a larger cohort, and EEG extraction was in
+      process.
+    scope_impact: >-
+      Analyses relying on imaging or EEG modalities, or on the full anticipated
+      admission volume, may not be supportable at the time of the sources.
+    recommended_mitigation: >-
+      Confirm current modality availability and admission counts with the project
+      before designing analyses that depend on them.
+  - id: d4d:CHORUS-limitation-clinical-notes-locality
+    name: Clinical note text is not held in the shared enclave
+    limitation_type: integration_limitation
+    limitation_description: >-
+      OMOP and telemetry data reside in the enclave, but clinical notes are stored
+      locally at contributing sites, with only tokens transferred. Notes are extracted
+      and tokenized using the OHNLP toolkit.
+    scope_impact: >-
+      Analyses requiring full unstructured note text rather than tokens are
+      constrained by this arrangement.
+  - id: d4d:CHORUS-limitation-care-setting-scope
+    name: Scope restricted to acute and critical inpatient care
+    limitation_type: scope_limitation
+    limitation_description: >-
+      The dataset describes acute and critical care admissions (ICU, PICU, NICU) at
+      participating hospitals. It is aimed at characterizing acute and critical care
+      illness, predicting complications, and measuring treatment response, and is not
+      described as covering outpatient, primary care, or general population settings.
+  - id: d4d:CHORUS-limitation-metadata-schema-planned
+    name: Modality metadata is planned rather than available for some modalities
+    limitation_type: methodological_limitation
+    limitation_description: >-
+      The modality table in the informational webinar records metadata as planned
+      rather than present for several modalities, including clinical notes, imaging,
+      and waveform EEG. A published metadata schema is nonetheless named for every
+      modality.
+  - id: d4d:CHORUS-limitation-retrospective-timeframe
+    name: Retrospective collection with unstated underlying data timeframe
+    limitation_type: temporal_limitation
+    limitation_description: >-
+      Data collection is retrospective. The available sources describe the funded
+      project period (2022-09-01 to 2026-11-30) and give point-in-time dataset
+      snapshots (August 2025), but do not state the calendar range of the underlying
+      clinical encounters.
+
+confidential_elements:
+  - id: d4d:CHORUS-confidentiality
+    name: Confidential patient data
+    confidential_elements_present: true
+    confidentiality_details:
+      - >-
+        The dataset consists of clinical data about identifiable patient
+        encounters, including diagnoses, medications, procedures, nursing
+        documentation, clinical notes, imaging, and physiological waveforms.
+      - >-
+        All nine documented modalities are listed with controlled access control.
+      - >-
+        Community-facing ethics focus groups are performed to determine what data is
+        appropriate for public sharing.
+
+subpopulations:
+  - id: d4d:CHORUS-subpopulations
+    name: Identified subpopulations
+    subpopulation_elements_present: true
+    identification:
+      - >-
+        Care setting: admissions are identified as ICU, PICU, or NICU, distinguishing
+        adult, pediatric, and neonatal critical care populations.
+      - >-
+        Demographics are captured as an explicit modality standardized to the OMOP
+        Common Data Model.
+      - >-
+        Social determinants of health are an explicit data element category.
+      - >-
+        Contextual geographic factors such as distance to the nearest hospital are
+        included, supported by geocoding of OMOP Location entities.
+
+sensitive_elements:
+  - id: d4d:CHORUS-sensitive-elements
+    name: Sensitive data elements
+    sensitive_elements_present: true
+    sensitivity_details:
+      - Patient demographics.
+      - Diagnoses documented by providers.
+      - Medication administration records with dosing timestamps.
+      - Procedures documented by providers.
+      - High-frequency nursing flowsheet documentation.
+      - Unstructured clinical notes.
+      - Imaging studies drawn from hospital PACS.
+      - Physiological waveform telemetry and EEG waveforms.
+      - Social determinants of health and geographic location context.
+
+relationships:
+  - id: d4d:CHORUS-relationships
+    name: Cross-modal harmonization
+    relationship_details:
+      - >-
+        Unified standards harmonize multi-modal EHR, waveform, imaging, and text
+        data, with structured clinical data standardized to the OMOP Common Data
+        Model.
+      - >-
+        The project develops capabilities across a multi-center network to acquire,
+        standardize, tokenize, store, visualize, and label data of all these types.
+      - >-
+        Validated semantic mappings connect clinical data in various source formats
+        to international standards; these are maintained with documentation and
+        pooled tabular mappings in the chorus-mapping repository, with an associated
+        clinical validation standard operating procedure.
+
+splits:
+  - id: d4d:CHORUS-splits
+    name: Holdout test set
+    split_details:
+      - >-
+        The dataset provisions a holdout test set, accessible for model external
+        validation to aid marketplace adoption of AI-developed models for
+        implementation in acute and critical care.
+      - >-
+        Holdout datasets are sequestered for external validation as part of the
+        project's design.
+
+acquisition_methods:
+  - id: d4d:CHORUS-acquisition
+    name: Retrospective acquisition from hospital clinical systems
+    was_directly_observed: true
+    was_validated_verified: true
+    acquisition_details:
+      - >-
+        Data collection is retrospective; data are extracted from clinical systems at
+        contributing hospitals rather than generated for research.
+      - >-
+        Demographics, medication administration, procedures, nursing flowsheets, and
+        diagnoses are documented by clinicians in the electronic health record during
+        care; procedures and diagnoses are explicitly described as documentation by
+        providers, and nursing flowsheets as high-frequency documentation.
+      - >-
+        Imaging is acquired from hospital PACS systems.
+      - >-
+        Waveform telemetry is captured from bedside monitors via gateway/middleware.
+      - >-
+        EEG waveforms are drawn from hospital EEG databases.
+      - >-
+        Clinical notes are extracted and tokenized using the OHNLP toolkit.
+      - >-
+        Semantic mappings undergo validation, and standard operating procedures
+        undergo an internal validation and review process in the Chorus_SOP
+        repository.
+
+collection_mechanisms:
+  - id: d4d:CHORUS-collection-mechanisms
+    name: Extraction, standardization, and upload mechanisms
+    mechanism_details:
+      - >-
+        Data-contributing sites follow standard operating procedures published on the
+        Chorus_SOP documentation site, which provides an interactive workflow diagram
+        describing the step-by-step process for extracting and contributing clinical
+        data to CHoRUS, with dynamic links to SOP documents that have undergone
+        internal validation and review.
+      - >-
+        The chorus-extract-upload tooling is used to create and upload a CHoRUS Data
+        Extract.
+      - >-
+        Data acquisition has its own online SOP documentation (data_acq_SOP).
+      - >-
+        Containerized applications and configurations are deployed on Azure to support
+        CHoRUS services.
+      - >-
+        Characterization reports are produced and returned to sites following their
+        data submissions.
+      - >-
+        Site status and blocking issues are tracked through GitHub projects, with
+        sites submitting updates either through the GitHub interface or through a
+        Google Form that triggers a script calling the GitHub API to update status and
+        issue information.
+    used_software:
+      - id: d4d:software-chorus-extract-upload
+        name: chorus-extract-upload
+        description: >-
+          Repository with tools to create and upload a CHoRUS Data Extract. Written
+          in Python.
+        license: MIT
+      - id: d4d:software-chorus-container-apps
+        name: chorus-container-apps
+        description: >-
+          Set of dockerized container applications and associated configurations to
+          be deployed to support CHoRUS services on Azure. Written in JavaScript.
+      - id: d4d:software-chorus-sop
+        name: Chorus_SOP
+        description: >-
+          CHoRUS centralized SOP documentation site, written in MDX.
+        license: Apache-2.0
+      - id: d4d:software-data-acq-sop
+        name: data_acq_SOP
+        description: >-
+          An online documentation SOP for the Data Acquisition Module. Written in
+          JavaScript.
+      - id: d4d:software-chorus-reports
+        name: CHoRUSReports
+        description: >-
+          Repository dedicated to producing characterization reports to return to
+          sites following their data submissions. Written in R.
+
+sampling_strategies:
+  - id: d4d:CHORUS-sampling
+    name: Multi-center sampling for a balanced and diverse cohort
+    is_sample: true
+    source_data:
+      - >-
+        Clinical records of critically ill patients at 14 data-acquisition hospitals
+        within a collaboration of 20 academic centers.
+    strategies:
+      - >-
+        Establish a legal framework for collecting data at scale, sampling to ensure
+        comprehensive sets of patient conditions and clinical treatment strategies.
+      - >-
+        Federated access will enable sampling methods to ensure a balanced and
+        diverse cohort.
+      - >-
+        The goal is the most diverse, high-resolution, ethically sourced, AI-ready
+        data set for improving recovery from acute illness.
+
+data_collectors:
+  - id: d4d:CHORUS-data-collectors-sites
+    name: Data site managers at data-contributing hospitals
+    role: Data site manager
+    collector_details:
+      - >-
+        Fourteen of the twenty academic centers in the collaboration contribute as
+        Data Acquisition centers.
+      - >-
+        Data managers at data-contributing sites work from the Chorus_SOP page, which
+        describes the step-by-step process for extracting and contributing clinical
+        data, and post issues in the Standards and Data Acquisition discussion areas.
+      - >-
+        Sites provide regular status updates on their progress in creating and
+        curating a CHoRUS-specific clinical data extract.
+  - id: d4d:CHORUS-data-collectors-clinical
+    name: Clinical collaborators
+    role: Clinical collaborator
+    collector_details:
+      - >-
+        Clinical expertise contributes to semantic mapping and validation within
+        CHoRUS, through the chorus-mapping repository and an associated clinical
+        validation standard operating procedure.
+  - id: d4d:CHORUS-data-collectors-software
+    name: Software contributors
+    role: Software developer
+    collector_details:
+      - >-
+        Software contributors within CHoRUS have a broad range of expertise and have
+        produced open-source tooling for transforming and interacting with clinical
+        data. A web guide for contributors and users of the CHoRUS software packages
+        is compiled in the chorus-developer repository, and package versions,
+        maintainers, and other metadata are published on a package status page.
+
+collection_timeframes:
+  - id: d4d:CHORUS-collection-timeframe
+    name: Retrospective collection over the funded project period
+    timeframe_details:
+      - >-
+        Data collection is retrospective.
+      - >-
+        The funded project period recorded on NIH RePORTER runs from 2022-09-01 to
+        2026-11-30.
+      - >-
+        As of August 2025 the assembled dataset covered 14 different hospitals with
+        over 45,000 unique admissions.
+      - >-
+        The available sources do not state the calendar range of the underlying
+        clinical encounters, so the collection timeframe cannot be compared with the
+        creation timeframe of the underlying data.
+
+direct_collection:
+  - id: d4d:CHORUS-direct-collection
+    name: Indirect collection from hospital clinical systems
+    is_direct: false
+    collection_details:
+      - >-
+        Data are collected retrospectively from clinical systems at contributing
+        hospitals, including the electronic health record, PACS, bedside monitors and
+        their gateway/middleware, and hospital EEG databases, rather than directly
+        from the individuals in question.
+
+raw_data_sources:
+  - id: d4d:CHORUS-raw-source-ehr
+    name: Hospital electronic health records
+    source_description: >-
+      Structured electronic health record data from contributing hospitals, covering
+      demographics, medication administration with dosing time-stamped upon each
+      infusion change or dose administration, procedures documented by providers,
+      high-frequency nursing flowsheet documentation, and diagnoses documented by
+      providers.
+    source_type:
+      - electronic health record
+    access_details: >-
+      Extracted by data site managers under CHoRUS standard operating procedures and
+      standardized to the OMOP Common Data Model before transfer to the enclave.
+  - id: d4d:CHORUS-raw-source-notes
+    name: Unstructured clinical notes
+    source_description: >-
+      Unstructured clinical note text held in hospital electronic health record
+      systems.
+    source_type:
+      - electronic health record
+      - clinical text
+    access_details: >-
+      Clinical notes are stored locally at contributing sites; only tokens are
+      transferred to the enclave. Extraction and tokenization use the OHNLP toolkit.
+  - id: d4d:CHORUS-raw-source-pacs
+    name: Hospital PACS imaging
+    source_description: >-
+      Imaging studies held in hospital picture archiving and communication systems
+      (PACS).
+    source_type:
+      - medical imaging archive
+    raw_data_format:
+      - DICOM
+    access_details: >-
+      As of the September 2025 informational webinar, approximately 1,000 images were
+      available with de-identification in process for a larger cohort.
+  - id: d4d:CHORUS-raw-source-telemetry
+    name: Bedside monitor waveform telemetry
+    source_description: >-
+      Physiological waveform telemetry captured from bedside monitors and collected
+      through gateway/middleware systems.
+    source_type:
+      - bedside physiological monitoring
+    raw_data_format:
+      - WFDB
+  - id: d4d:CHORUS-raw-source-eeg
+    name: Hospital EEG databases
+    source_description: >-
+      Electroencephalography waveform recordings held in hospital EEG databases.
+    source_type:
+      - clinical neurophysiology database
+    raw_data_format:
+      - EDF+
+      - Persyst
+    access_details: >-
+      As of the September 2025 informational webinar, EEG extraction was in process.
+
+ethical_reviews:
+  - id: d4d:CHORUS-ethical-review
+    name: Ethics and trustworthy AI activities
+    description: >-
+      Ethics is one of the project's three pillars (Data, Ethics, People), described
+      as Ethical and Trustworthy AI.
+    review_details:
+      - >-
+        The project performs community-facing ethics focus groups to determine what
+        data is appropriate for public sharing.
+      - >-
+        The CHoRUS consortium evaluates community perspectives on clinical care AI to
+        find ways to increase trustworthiness of provenance and privacy in AI.
+      - >-
+        The project establishes a legal framework for collecting data at scale, and
+        new approaches are being created as the existing legal and regulatory
+        landscape is analyzed.
+      - >-
+        Patient-focused efforts determine the ethical and legal approaches to manage
+        privacy and bias, while accounting for social determinants of health.
+      - >-
+        The project draws expertise from disciplines including team science, law,
+        ethics, health services, biomedical science, engineering, and scientific
+        journal publications.
+      - >-
+        The available sources do not name an institutional review board or record an
+        ethics approval identifier for the dataset.
+
+data_protection_impacts:
+  - id: d4d:CHORUS-data-protection-impact
+    name: Privacy and re-identification risk management
+    impact_details:
+      - >-
+        Data are transformed using approaches that limit re-identification.
+      - >-
+        The project's overarching goal explicitly includes ensuring that the methods
+        promote privacy, accountability, and clinical benefit.
+      - >-
+        The consortium develops approaches to increase trustworthiness of provenance
+        and privacy in AI, analyzing the existing legal and regulatory landscape.
+      - >-
+        A privacy scan tool for medical records and a de-identification tool are
+        maintained in the project's software organization.
+
+human_subject_research:
+  id: d4d:CHORUS-human-subject-research
+  name: Human subjects research status
+  involves_human_subjects: true
+  special_populations:
+    - >-
+      Critically ill adult patients admitted to intensive care units.
+    - >-
+      Pediatric patients admitted to pediatric intensive care units (PICU).
+    - >-
+      Neonates admitted to neonatal intensive care units (NICU).
+  description: >-
+    The dataset comprises clinical data from critically ill patients; the NIH
+    RePORTER abstract describes acquiring an AI-ready data set from more than 100,000
+    critically ill patients. The available sources do not record an IRB approval
+    identifier or name an ethics review board for the dataset.
+
+at_risk_populations:
+  id: d4d:CHORUS-at-risk-populations
+  name: At-risk populations
+  at_risk_groups_included: true
+  special_protections:
+    - All nine documented data modalities are under controlled access.
+    - >-
+      Data are transformed using approaches that limit re-identification, and
+      clinical notes are tokenized rather than shared as free text.
+    - >-
+      Community-facing ethics focus groups determine what data is appropriate for
+      public sharing.
+  description: >-
+    The dataset covers critically ill patients, including pediatric (PICU) and
+    neonatal (NICU) admissions, who are unable to participate in care decisions at
+    the time of the encounter. The available sources do not describe assent
+    procedures or guardian consent arrangements.
+
+participant_privacy:
+  - id: d4d:CHORUS-participant-privacy
+    name: Privacy protections
+    anonymization_method:
+      - >-
+        Transformation of data using approaches that limit re-identification.
+      - >-
+        Tokenization of unstructured electronic health record text, with clinical
+        notes stored locally and only tokens transferred to the enclave.
+      - >-
+        De-identification of imaging, in process for the larger imaging cohort as of
+        September 2025.
+    reidentification_risk:
+      - >-
+        The project states that data are transformed using approaches that limit
+        re-identification. The available sources do not report a quantitative
+        re-identification risk assessment.
+    privacy_techniques:
+      - Controlled access to all documented data modalities.
+      - Tokenization of unstructured clinical text using the OHNLP toolkit.
+      - Automated privacy scanning of medical records.
+      - Image de-identification tooling.
+    data_linkage:
+      - >-
+        Data elements are augmented with contextual factors such as geographic
+        distance to the nearest hospital, supported by geocoding of OMOP Location
+        entities.
+
+preprocessing_strategies:
+  - id: d4d:CHORUS-preprocessing
+    name: Standardization, tokenization, and de-identification
+    preprocessing_details:
+      - >-
+        Acquired data are standardized to the OMOP Common Data Model.
+      - >-
+        Data are transformed using approaches that limit re-identification.
+      - >-
+        Unstructured electronic health record text is tokenized; clinical notes are
+        extracted and tokenized using the OHNLP toolkit.
+      - >-
+        Imaging is de-identified before broader release.
+      - >-
+        Waveforms are converted using CHoRUS waveform conversion scripts, with
+        telemetry expressed in WFDB (an extended PhysioNet schema) and EEG in EDF+ and
+        Persyst formats.
+      - >-
+        OMOP Location entities are geocoded so that data elements feature appropriate
+        contextual factors such as geographic distance to the nearest hospital.
+      - >-
+        Unified standards harmonize multi-modal EHR, waveform, imaging, and text
+        data.
+    used_software:
+      - id: d4d:software-ohnlp-toolkit
+        name: OHNLP toolkit
+        description: >-
+          Toolkit used to extract and tokenize clinical notes; the associated
+          published metadata schema is described as the OHNLP open source schema.
+      - id: d4d:software-chorus-waveform
+        name: chorus_waveform
+        description: >-
+          CHoRUS waveform documentation and various waveform conversion scripts.
+          Written as Jupyter notebooks.
+        license: MIT
+      - id: d4d:software-chorus-waveform-resources
+        name: chorus_waveform_resources
+        description: >-
+          Resources which support the preparation and release of waveforms.
+      - id: d4d:software-uf-geocoding
+        name: UF-Geocoding
+        description: >-
+          Open source code to geocode OMOP Location entities via DeGauss. Written in
+          Python and forked from bihorac-LAB/Exposome.
+        license: MIT
+      - id: d4d:software-ctp-deid
+        name: CTP-deid
+        description: De-identification repository in the CHoRUS software organization.
+
+cleaning_strategies:
+  - id: d4d:CHORUS-cleaning
+    name: Validation, mapping review, and site characterization feedback
+    cleaning_details:
+      - >-
+        Validated semantic mappings connect clinical data in various source formats
+        to international standards.
+      - >-
+        A clinical validation standard operating procedure governs contributions to
+        mapping efforts, with pooled tabular mappings maintained in the
+        chorus-mapping repository.
+      - >-
+        Standard operating procedures undergo an internal validation and review
+        process within the Chorus_SOP repository.
+      - >-
+        Characterization reports are produced and returned to sites following their
+        data submissions.
+
+labeling_strategies:
+  - id: d4d:CHORUS-labeling
+    name: Visualization and annotation environment
+    data_annotation_platform:
+      - >-
+        A visualization and annotation environment developed by the project.
+    labeling_details:
+      - >-
+        A visualization and annotation environment will label data with targets
+        important for prediction.
+      - >-
+        The project develops capabilities across a multi-center network to acquire,
+        standardize, tokenize, store, visualize, and label data.
+
+raw_sources:
+  - id: d4d:CHORUS-raw-data-retention
+    name: Location of source data
+    raw_data_details:
+      - >-
+        OMOP and telemetry data reside in the cloud enclave.
+      - >-
+        Clinical notes are stored locally at contributing sites; only tokens are
+        transferred to the enclave.
+      - >-
+        Source clinical systems (electronic health record, PACS, bedside monitor
+        middleware, hospital EEG databases) remain under the control of the
+        contributing hospitals.
+
+machine_annotation_tools:
+  - id: d4d:CHORUS-machine-annotation-tools
+    name: Automated processing and annotation tools
+    tools:
+      - OHNLP toolkit
+      - privacy_scan_tool
+      - CTP-deid
+      - UF-Geocoding
+    tool_descriptions:
+      - >-
+        OHNLP toolkit: used to extract and tokenize clinical notes, with an
+        associated open source metadata schema.
+      - >-
+        privacy_scan_tool: a privacy scan tool for medical records, written in
+        Python.
+      - >-
+        CTP-deid: a de-identification repository in the CHoRUS software organization.
+      - >-
+        UF-Geocoding: open source code to geocode OMOP Location entities via DeGauss,
+        written in Python.
+
+existing_uses:
+  - id: d4d:CHORUS-existing-uses
+    name: Existing uses
+    examples:
+      - >-
+        As of September 2025, the datasets are being used for training activities and
+        publications.
+      - >-
+        The AIM-AHEAD Bridge2AI for Clinical Care Training Program expands access to
+        Bridge2AI CHoRUS data through engagement, AI training, and mentorship,
+        equipping trainees to apply AI/ML methods to big data analysis using
+        multi-modal datasets from a broad range of cohort participants. Cohort 2 ran
+        from a program start date of 2025-11-17 to a program end date of 2026-07-31,
+        with up to 30 trainees selected.
+      - >-
+        Trainees receive hands-on training on the Bridge2AI AI/ML for Clinical Care
+        Network and Collaborative Cloud, including workshops on Jupyter notebooks,
+        the OHDSI tool stack, and the OHDSI/OMOP common data model, and develop
+        practical use cases, posters, conference abstracts, and manuscripts.
+
+other_tasks:
+  - id: d4d:CHORUS-other-tasks
+    name: Other potential tasks
+    task_details:
+      - >-
+        External validation of AI models developed elsewhere, using the provisioned
+        holdout test set.
+      - >-
+        Development and presentation of trainee-defined use cases suitable to apply
+        in Bridge2AI Data Topics.
+      - >-
+        Research incorporating social determinants of health and contextual factors
+        such as geographic distance to the nearest hospital.
+      - >-
+        Development of best practices for AI in health, in collaboration with the
+        other Bridge2AI data generation projects.
+
+future_use_impacts:
+  - id: d4d:CHORUS-future-use-impacts
+    name: Factors that may affect future use
+    impact_details:
+      - >-
+        The project website carries the notice that the repository is under review for
+        potential modification in compliance with Administration directives, which may
+        affect the availability or content of the resource.
+      - >-
+        Privacy and bias are treated as open questions requiring patient-focused
+        determination of ethical and legal approaches, accounting for social
+        determinants of health.
+      - >-
+        The composition of the dataset is set by which hospitals contribute data and
+        which care settings are covered, so downstream models may reflect the case mix
+        and practice patterns of participating academic critical care units.
+      - >-
+        Several modalities were incomplete at the time of the sources, so models built
+        on early releases may not generalize to later, larger releases.
+
+intended_uses:
+  - id: d4d:CHORUS-intended-uses
+    name: Intended uses
+    examples:
+      - >-
+        Building machine-learning and artificial-intelligence-derived models to
+        improve the care and outcomes of patients requiring critical care.
+      - >-
+        Characterizing acute and critical care illness, predicting complications, and
+        measuring treatment response.
+      - >-
+        External validation of AI models against a sequestered holdout test set to aid
+        marketplace adoption in acute and critical care.
+      - >-
+        Hands-on AI/ML training and workforce development for engineers, data
+        scientists, and clinicians.
+    use_category:
+      - clinical care AI research
+      - model external validation
+      - education and training
+    usage_notes: >-
+      Use is subject to controlled access: a signed licensing agreement, registration
+      with name, email, and institution, and a ".edu" email address are required, and
+      analysis is performed within the project's cloud enclave.
+
+distribution_formats:
+  - id: d4d:CHORUS-distribution-format
+    name: Controlled-access cloud enclave
+    description: >-
+      The dataset is made available through a controlled-access cloud enclave, the
+      Bridge2AI AI/ML for Clinical Care Collaborative Cloud, rather than as a
+      downloadable archive. OMOP and telemetry data reside in the enclave; clinical
+      notes remain stored locally at contributing sites with only tokens transferred.
+      Once access is granted and compute is provisioned, an email is sent to the
+      requester. Access control is listed as controlled for all nine documented data
+      modalities. Distribution formats follow the modality standards: OMOP for
+      structured EHR data, OHNLP for tokenized clinical notes, DICOM for imaging,
+      WFDB for waveform telemetry, and EDF+ and Persyst for EEG.
+    access_urls:
+      - https://chorus4ai.org/
+
+third_party_sharing:
+  - id: d4d:CHORUS-third-party-sharing
+    name: Sharing beyond the originating institutions
+    is_shared: true
+    description: >-
+      The project's overarching goal is a publicly available, AI-ready critical care
+      dataset, and access is extended to external users such as AIM-AHEAD Bridge2AI
+      for Clinical Care trainees, subject to registration, a signed licensing
+      agreement, and a ".edu" email address. A holdout test set is made accessible for
+      external validation of models developed by third parties.
+
+license_and_use_terms:
+  id: d4d:CHORUS-license-and-use-terms
+  name: License and terms of use
+  license_terms:
+    - >-
+      All participants must sign a licensing agreement, included in the access
+      registration form, before gaining access to the dataset.
+    - >-
+      In order to gain access to the dataset, a ".edu" email address is required.
+      This requirement is stated not to be a barrier to acceptance into the training
+      program, and program administrators will assist with access if needed.
+    - >-
+      Registration requires the requester's name, email, and institution; once access
+      is granted and compute is provisioned, an email is sent.
+    - >-
+      Access control is listed as controlled for all nine documented data modalities.
+    - >-
+      The CHoRUS for Equitable AI GitHub project is licensed under the MIT License;
+      this covers the project's software rather than the clinical dataset. Individual
+      repositories carry their own licenses, including Apache-2.0 for the Chorus_SOP
+      documentation site.
+  contact_person: d4d:person-jared-houghtaling
+  description: >-
+    The available sources describe an access licensing agreement but do not name a
+    specific data license or publish its text.
+
+regulatory_restrictions:
+  id: d4d:CHORUS-regulatory-restrictions
+  name: Regulatory and access restrictions
+  confidentiality_level: restricted
+  regulatory_restrictions:
+    - >-
+      The project website states: "This repoitory is under review for potential
+      modification in compliance with Administration directives."
+    - >-
+      The project establishes a legal framework for collecting data at scale, and
+      analyses the existing legal and regulatory landscape as new approaches are
+      created.
+    - >-
+      The project collaborates with regulatory agencies alongside the NIH Bridge2AI
+      program, the NIH Bridge2AI Bridge Center, external biomedical and clinical
+      organizations, and industry.
+  description: >-
+    All documented data modalities are under controlled access. The available sources
+    do not state a HIPAA compliance determination for the released dataset.
+
+maintainers:
+  - id: d4d:CHORUS-maintainer-mgh-program-management
+    name: CHoRUS program management, Massachusetts General Hospital
+    role: academic_institution
+    maintainer_details:
+      - >-
+        The project website lists Ciera McCrary, MGH, Program Manager as the contact,
+        with the email address cmccrary@mgh.havard.edu as printed on the site.
+      - >-
+        Massachusetts General Hospital is the awardee organization recorded on NIH
+        RePORTER for the funding award.
+  - id: d4d:CHORUS-maintainer-access-contacts
+    name: CHoRUS data access contacts
+    role: academic_institution
+    maintainer_details:
+      - >-
+        Requests for access are directed to dbold@emory.edu or
+        jared.houghtaling@tuftsmedicine.org.
+      - >-
+        The project's public-facing pages are https://chorus4ai.org/ and
+        www.bridge2ai.org/chorus.
+  - id: d4d:CHORUS-maintainer-consortium
+    name: CHoRUS consortium and sub-teams
+    role: academic_institution
+    maintainer_details:
+      - >-
+        The consortium comprises 60+ members across 20 different institutions, with
+        Standards, Data Acquisition, and Tooling sub-teams maintaining recordings and
+        documentation.
+      - >-
+        The chorus-ai GitHub organization hosts 28 repositories, and package versions,
+        maintainers, and other metadata about CHoRUS packages are published on a
+        package status page compiled in the chorus-developer repository.
+
+updates:
+  id: d4d:CHORUS-update-plan
+  name: Update plan
+  update_details:
+    - >-
+      The dataset is being assembled incrementally toward an anticipated final
+      dataset of 100,000 patient admissions, 9 data modalities, and 14 data
+      contributing hospitals.
+    - >-
+      As of August 2025 the dataset covered 14 different hospitals with over 45,000
+      unique admissions; imaging de-identification was in process for a larger
+      cohort and EEG extraction was in process.
+    - >-
+      Metadata was listed as planned rather than available for clinical notes,
+      imaging, and waveform EEG.
+    - >-
+      Data-contributing sites provide regular status updates on their progress in
+      creating and curating a CHoRUS-specific clinical data extract, submitted through
+      the GitHub interface or a Google Form, and tracked in the Standards Project and
+      the Data Acquisition Project.
+    - >-
+      The available sources do not state a fixed update or release frequency.
+
+version_access:
+  id: d4d:CHORUS-version-access
+  name: Version and release scope
+  version_details:
+    - >-
+      The available sources distinguish a "Current Released Dataset" (50,000 patient
+      admissions from ICU, PICU, and NICU; 1.6 billion rows of EHR OMOP data; 7,642
+      admissions with radiology data; 23 Tb waveform data) from an "Anticipated Final
+      Dataset" (100,000 patient admissions; 9 data modalities; 14 data contributing
+      hospitals).
+    - >-
+      No formal version identifier, DOI, or version history is published in the
+      available sources, and no statement is made about continued support for older
+      releases.
+
+extension_mechanism:
+  id: d4d:CHORUS-extension-mechanism
+  name: Contribution and extension mechanisms
+  contribution_url: https://github.com/chorus-ai
+  extension_details:
+    - >-
+      The chorus-ai GitHub organization houses software and tooling to interact with
+      and extract insight from clinical data in diverse formats, validated semantic
+      mappings for connecting clinical data in various source formats to
+      international standards, standard operating protocols instructing data
+      contributing sites about best practices for curating and delivering
+      interoperable datasets, and project management overviews tracking data delivery
+      statuses and task dependencies.
+    - >-
+      Clinical collaborators can contribute to mapping efforts through the
+      chorus-mapping repository, which holds documentation, pooled tabular mappings,
+      and an associated clinical validation SOP.
+    - >-
+      Issues arising in the creation or submission of a data extract can be posted in
+      the Standards Discussions or Data Acquisition Discussions areas.
+    - >-
+      A web guide for contributors and users of the CHoRUS software packages is
+      compiled in the chorus-developer repository.
+    - >-
+      Contact for inquiries and access requests: dbold@emory.edu or
+      jared.houghtaling@tuftsmedicine.org.
+
+is_deidentified:
+  id: d4d:CHORUS-deidentification
+  name: De-identification approach
+  method: >-
+    Transformation of data using approaches that limit re-identification, combined
+    with tokenization of unstructured clinical text and de-identification of imaging.
+  deidentification_details:
+    - >-
+      The project acquires data, standardizes it to the OMOP Common Data Model, and
+      transforms data using approaches that limit re-identification.
+    - >-
+      Clinical notes are extracted and tokenized using the OHNLP toolkit and are
+      stored locally at contributing sites, with only tokens transferred to the
+      enclave.
+    - >-
+      Imaging de-identification was in process for a larger cohort as of September
+      2025, with approximately 1,000 images available at that time.
+    - >-
+      A privacy scan tool for medical records and a de-identification repository are
+      maintained in the project's software organization.
+    - >-
+      Access to all documented data modalities remains controlled, so the available
+      sources do not describe the data as openly releasable de-identified data.

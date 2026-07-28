@@ -1,0 +1,193 @@
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: rocrate_static_map (no model)
+# Arm: deterministic — measures mapping fidelity, not extraction
+# Source crate: data/ro-crate_packages/CHORUS
+# Normalized from: data/ro-crate_packages/CHORUS/processed/CHORUS_crate_mapped_d4d.yaml
+# Crate manifest: data/ro-crate_packages/crate_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Model: none
+# Version: 2026-07-27_ourmap-v1
+title: CHoRUS RO-Crate Package
+description: 'The Collaborative Hospital Repository Uniting Standards (CHoRUS) for
+  Clinical Care AI is a clinical data network developing a flagship multi-hospital,
+  multimodal, high-resolution dataset under the NIH Bridge2AI program. CHoRUS harmonizes
+  electronic health record (EHR) data, imaging, high-resolution physiologic signals
+  (including telemetry data and EEG where available), and tokenized note and report
+  text (via OHNLP toolkit) with raw text retained locally across participating institutions
+  using standardized data models and governance frameworks.
+
+  The repository is designed to enable secure, auditable, and reproducible artificial
+  intelligence (AI) research to improve recovery from acute illness. Data are curated
+  within a NIST 800-53–aligned secure enclave architecture with role-based access
+  controls, audit logging, and controlled-access governance review. CHoRUS supports
+  AI model development, validation, benchmarking, and translational research while
+  maintaining compliance with HIPAA and NIH data-sharing policies.
+
+  '
+keywords:
+- Bridge2AI
+- CHoRUS
+- Electronic health records
+- physiological data
+- medical images
+publisher: B2AI CHoRUS
+version: 1.0 Beta
+license: Data Use Agreement available at 'https://chorus4ai.org/dataset/'
+download_url: http://chorus4ai.org/dataset
+issued: '2026-04-03T00:00:00Z'
+doi: https://doi.org/10.18130/V3/XNBOPG
+resources:
+- id: 08cf7419-b94d-4508-8f64-c99c557351d7
+  name: CHoRUS RO-Crate EHR SubRoCrate
+- id: b9b41c72-0895-4ec2-9e39-8de2a83abcd6
+  name: CHoRUS RO-Crate Waveforms SubRoCrate
+creators:
+- description: 'Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3),
+    Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3),
+    Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8),
+    Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2),
+    Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6),
+    Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13),
+    Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie
+    Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4),
+    Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom
+    J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6)
+    on behalf of the CHoRUS Investigators
+
+
+    (1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts,
+    USA
+
+    (2) Duke University, Durham, North Carolina, USA
+
+    (3) University of Florida, Gainesville, Florida, USA
+
+    (4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA
+
+    (5) University of Oregon, Eugene, Oregon, USA
+
+    (6) University of Virginia, Charlottesville, Virginia, USA
+
+    (7) Columbia University Irving Medical Center, New York, New York, USA
+
+    (8) University of California, San Francisco, San Francisco, California, USA
+
+    (9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA
+
+    (10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas,
+    USA; Mayo Clinic, Rochester, Minnesota, USA
+
+    (11) Mayo Clinic, Rochester, Minnesota, USA
+
+    (12) Seattle Children’s Hospital, Seattle, Washington, USA
+
+    (13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio,
+    USA
+
+    (14) Emory University, Atlanta, Georgia, USA
+
+    (15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA'
+funders:
+- name: NIH Common Fund OT2OD032701
+known_biases:
+- description: "•\tReferral bias from tertiary/quaternary academic centers\n•\tSocioeconomic\
+    \ and demographic distribution reflective of participating institutions\n•\tDocumentation\
+    \ bias in clinical notes\n•\tMissingness not at random (MNAR) in laboratory, waveform,\
+    \ and imaging acquisition\n•\tDifferential care pathways affecting label assignment\
+    \ (e.g., ICU vs non-ICU populations)\n•\tTemporal trends related to evolving clinical\
+    \ practice\nBias assessment is ongoing and documented in dataset release notes\n"
+known_limitations:
+- description: "•\tObservational data; and not randomized; collected as real-world\
+    \ clinical data, not through prospective research interactions with patient.\n\
+    •\tDocumentation quality dependent on routine clinical workflows and data elements\
+    \ being collected in clinical practice.\n•\tVariable sampling rates across real-world\
+    \ data from hospital waveform systems and middleware\n•\tInstitutional heterogeneity\
+    \ in coding and clinical data collection practices\n•\tLimited generalizability\
+    \ beyond participating hospitals\n•\tNot appropriate for re-identification, contact\
+    \ tracing, or patient-level intervention\n•\tHold-out splits are available for\
+    \ testing; training and validation in development splits require internal mechanisms\
+    \ to avoid overfitting\n"
+updates:
+  description: "\n•\tVersioned dataset releases e.g., CHoRUS vX.Y)\n•\tRelease notes\
+    \ documenting schema changes, harmonization updates, and known issues\n•\tGovernance\
+    \ committee oversight for structural modifications\n•\tData upload\n•\tDeprecation\
+    \ policy includes:\no\tAdvance notice of schema changes\no\tBackward compatibility\
+    \ window where feasible\no\tArchive of prior versions within enclave where possible\
+    \ or incremental change records\nPrimary maintainers: CHoRUS Data Pillar in collaboration\
+    \ with institutional data stewards.\n"
+sensitive_elements:
+- name: CHoRUS operates within a secure enclave environment aligned with NIST 800-53
+    controls.
+- name: De-identification consistent with HIPAA Safe Harbor
+- name: Removal or tokenization of direct identifiers
+- name: Date shifting or limited date fields when required
+- name: Role-based access control (RBAC)
+- name: Multi-factor authentication
+- name: Full audit logging of data access and queries
+- name: Prohibition of re-identification attempts
+- name: Data export restrictions and output review procedures to reduce risk of re-identification
+- name: Re-identification risk is periodically assessed and mitigation strategies
+    updated as needed.
+confidential_elements:
+- name: CHoRUS operates within a secure enclave environment aligned with NIST 800-53
+    controls.
+- name: De-identification consistent with HIPAA Safe Harbor
+- name: Removal or tokenization of direct identifiers
+- name: Date shifting or limited date fields when required
+- name: Role-based access control (RBAC)
+- name: Multi-factor authentication
+- name: Full audit logging of data access and queries
+- name: Prohibition of re-identification attempts
+- name: Data export restrictions and output review procedures to reduce risk of re-identification
+- name: Re-identification risk is periodically assessed and mitigation strategies
+    updated as needed.
+regulatory_restrictions:
+  name: https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx
+acquisition_methods:
+- description: "Data are derived from routine clinical care at participating hospitals\
+    \ under IRB oversight. Collection includes:\n•\tElectronic health record extraction\
+    \ and transformation to OMOP common data model\n•\tImaging metadata de-identification\
+    \ using RSNA Clinical Trial Processor and pixel-level de-identification using\
+    \ IbisWorks EICON. \n•\tHigh-resolution physiologic waveform capture extraction\
+    \ and transformation to the WFDB standard, \n•\tStandardized harmonization to\
+    \ common data model\nEthical safeguards include:\n•\tIRB approval or waiver as\
+    \ appropriate\n•\tCompliance with CHoRUS governance\n•\tLayered privacy protection\
+    \ including de-identification, data use agreement, controlled access data repository\
+    \ with adherence to NIST 800-53 principles, audit-level protection, registration,\
+    \ role-based access controls, protection against data exfiltration.\nData are\
+    \ not collected solely for research but repurposed from clinical workflows under\
+    \ ethical oversight.\n"
+collection_mechanisms:
+- description: "Data are derived from routine clinical care at participating hospitals\
+    \ under IRB oversight. Collection includes:\n•\tElectronic health record extraction\
+    \ and transformation to OMOP common data model\n•\tImaging metadata de-identification\
+    \ using RSNA Clinical Trial Processor and pixel-level de-identification using\
+    \ IbisWorks EICON. \n•\tHigh-resolution physiologic waveform capture extraction\
+    \ and transformation to the WFDB standard, \n•\tStandardized harmonization to\
+    \ common data model\nEthical safeguards include:\n•\tIRB approval or waiver as\
+    \ appropriate\n•\tCompliance with CHoRUS governance\n•\tLayered privacy protection\
+    \ including de-identification, data use agreement, controlled access data repository\
+    \ with adherence to NIST 800-53 principles, audit-level protection, registration,\
+    \ role-based access controls, protection against data exfiltration.\nData are\
+    \ not collected solely for research but repurposed from clinical workflows under\
+    \ ethical oversight.\n"
+missing_data_documentation:
+- name: Variable sampling rates across real-world data from hospital waveform systems
+    and middleware
+license_and_use_terms:
+  name: Data Use Agreement available at 'https://chorus4ai.org/dataset/'
+ip_restrictions:
+  name: https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx
+extension_mechanism:
+  name: Data Use Agreement available at 'https://chorus4ai.org/dataset/'
+retention_limit:
+  name: https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx
+version_access:
+  name: 1.0 Beta
+subsets:
+- id: 08cf7419-b94d-4508-8f64-c99c557351d7
+  name: CHoRUS RO-Crate EHR SubRoCrate
+- id: b9b41c72-0895-4ec2-9e39-8de2a83abcd6
+  name: CHoRUS RO-Crate Waveforms SubRoCrate
+id: https://doi.org/10.18130/V3/XNBOPG
