@@ -166,12 +166,26 @@ def resolve_prompt(spec: RunSpec) -> str:
 def _model_settings() -> dict[str, Any]:
     cfg = load_generation_config()
     m = (cfg.get("model") or {}) if isinstance(cfg, dict) else {}
-    return {
-        "name": m.get("name") or "claude-opus-5",
+    name = m.get("name") or "claude-opus-5"
+    settings = {
+        "name": name,
         "temperature": float(m.get("temperature", 0.0)),
         "max_tokens": int(m.get("max_tokens", DEFAULT_MAX_TOKENS)),
         "config_path": str(DETERMINISTIC_CONFIG),
+        "temperature_applies": accepts_temperature(name),
     }
+    if not settings["temperature_applies"]:
+        # The config declares temperature 0.0 and this model refuses the
+        # parameter, so the declared value is inert. Recording that here means
+        # the provenance says "not applicable" instead of restating a setting
+        # that never reached the request.
+        settings["temperature_note"] = (
+            f"{name} rejects `temperature` (400: deprecated for this model), "
+            f"so the {settings['temperature']} declared in "
+            f"{DETERMINISTIC_CONFIG} is not sent and does not apply. Sampling "
+            "for this model family is selected by model-name suffix "
+            "(-low/-medium/-high/-xhigh/-max), not by parameter.")
+    return settings
 
 
 @dataclass
@@ -312,14 +326,60 @@ def plan(spec: RunSpec) -> dict[str, Any]:
     }
 
 
+CBORG_BASE_URL = "https://api.cborg.lbl.gov"
+
+# Models that reject `temperature` outright. claude-opus-5 returns
+# 400 "`temperature` is deprecated for this model", so sending it fails the
+# request rather than being ignored. Sampling control for these models is
+# expressed as a model-name suffix (-low/-medium/-high/-xhigh/-max) rather
+# than a request parameter.
+NO_TEMPERATURE_MODELS = ("claude-opus-5", "claude-opus-4-6", "claude-opus-4-7",
+                         "claude-opus-4-8", "claude-fable-5")
+
+
+def accepts_temperature(model: str) -> bool:
+    """Whether this model will accept a `temperature` parameter."""
+    base = model.split("/")[-1]
+    return not any(base.startswith(m) for m in NO_TEMPERATURE_MODELS)
+
+
 def _client():
-    key = os.environ.get("ANTHROPIC_API_KEY")
-    if not key:
-        raise RuntimeError(
-            "ANTHROPIC_API_KEY is not set. Export it, or use plan() / "
-            "`d4d api plan` to inspect requests without calling the API.")
+    """Anthropic-shaped client, pointed at CBORG when a CBORG key is present.
+
+    CBORG is an LBL proxy that exposes *both* an OpenAI-style
+    `/v1/chat/completions` and an Anthropic-native `/v1/messages`. Verified
+    2026-07-29: the native endpoint returns real `stop_reason` and `usage`
+    fields, so the six-phase code runs against it unchanged. Using the OpenAI
+    shape instead would have meant re-expressing the truncation guard
+    (`stop_reason == "max_tokens"` becomes `finish_reason == "length"`) and
+    losing the cache_control blocks the cost model depends on.
+
+    ANTHROPIC_API_KEY still wins when set, so a direct-to-Anthropic run stays
+    possible and the two are distinguishable in the provenance record.
+    """
+    direct = os.environ.get("ANTHROPIC_API_KEY")
+    cborg = os.environ.get("CBORG_API_KEY")
     import anthropic
-    return anthropic.Anthropic(api_key=key)
+    if direct:
+        return anthropic.Anthropic(api_key=direct)
+    if cborg:
+        return anthropic.Anthropic(api_key=cborg, base_url=CBORG_BASE_URL)
+    raise RuntimeError(
+        "No API key found. Set CBORG_API_KEY (LBL proxy) or ANTHROPIC_API_KEY, "
+        "or use plan() / `d4d api plan` to inspect requests without calling "
+        "the API. Note that a non-login shell does not read ~/.bashrc; invoke "
+        "via `bash -lc` or put the key in the repo .env.")
+
+
+def provider_identity() -> dict[str, Any]:
+    """Which endpoint a run will actually reach — recorded in provenance."""
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        return {"provider": "Anthropic", "base_url": "https://api.anthropic.com",
+                "key_env": "ANTHROPIC_API_KEY"}
+    if os.environ.get("CBORG_API_KEY"):
+        return {"provider": "LBL CBORG (proxy to Anthropic)",
+                "base_url": CBORG_BASE_URL, "key_env": "CBORG_API_KEY"}
+    return {"provider": None, "base_url": None, "key_env": None}
 
 
 def _extract(text: str, kind: str) -> str:
@@ -371,12 +431,19 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
     sees the real problem.
     """
     import anthropic
+    # Omitted rather than defaulted: claude-opus-5 rejects the parameter with
+    # 400 "`temperature` is deprecated for this model", so passing 0.0 fails
+    # the request. Sending it only where the model accepts it keeps one code
+    # path for both.
+    kwargs: dict[str, Any] = {"model": model, "max_tokens": max_tokens,
+                              "system": system, "messages": messages}
+    if temperature is not None and accepts_temperature(model):
+        kwargs["temperature"] = temperature
+
     last: Exception | None = None
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
-            return client.messages.create(
-                model=model, max_tokens=max_tokens, temperature=temperature,
-                system=system, messages=messages)
+            return client.messages.create(**kwargs)
         except Exception as exc:                      # noqa: BLE001 - re-raised
             transient = isinstance(exc, (
                 getattr(anthropic, "RateLimitError", ()),
@@ -491,18 +558,41 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         prompt_paths=spec.prompt_files,
         schema_digest_md5=schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
         extra_notes=[
-            f"Generated via {RUNTIME}; temperature {settings['temperature']} was "
-            "set on the request and is therefore observed, not asserted.",
+            (f"Generated via {RUNTIME}; temperature {settings['temperature']} "
+             "was set on the request and is therefore observed, not asserted."
+             if settings["temperature_applies"]
+             else f"Generated via {RUNTIME}. {settings['temperature_note']}"),
             f"Model settings read from {settings['config_path']}.",
+            f"Endpoint: {provider_identity()['provider']} at "
+            f"{provider_identity()['base_url']}.",
         ] + ([f"Resumed run; phases skipped as already present: {', '.join(skipped)}."]
              if skipped else []))
+    ident = provider_identity()
     rec.data["model"] = {
         "generation_method": "schema-grounded API, six phases",
-        "agent_runtime": RUNTIME, "provider": PROVIDER,
-        "model": settings["name"], "temperature": settings["temperature"],
+        "agent_runtime": RUNTIME,
+        "provider": ident["provider"] or PROVIDER,
+        "base_url": ident["base_url"],
+        "model": settings["name"],
         "max_tokens_by_phase": PHASE_MAX_TOKENS,
-        "temperature_basis": "set on the API request and observed",
     }
+    if settings["temperature_applies"]:
+        rec.data["model"]["temperature"] = settings["temperature"]
+        rec.data["model"]["temperature_basis"] = (
+            "set on the API request and observed")
+    else:
+        # Do not record a temperature the request never carried. Writing 0.0
+        # here would recreate exactly the unverified claim this module was
+        # built to eliminate — the Claude Code headers assert 0.0 for a
+        # runtime that never exposed the setting.
+        rec.data["model"]["temperature"] = None
+        rec.data["model"]["temperature_basis"] = "not applicable to this model"
+        rec.data.setdefault("unverified", None)
+        rec.data["unverified"] = (rec.data.get("unverified") or []) + [{
+            "field": "model.temperature",
+            "value": None,
+            "reason": settings["temperature_note"],
+        }]
     rec.data["api_usage"] = usage
     rec.data["phases_skipped"] = skipped or None
     rec.data["record_generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")

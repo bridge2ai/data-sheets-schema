@@ -258,8 +258,13 @@ class TestExecuteOffline(unittest.TestCase):
         d = _yaml.safe_load((self.out / "CHORUS_d4d_metadata.yaml").read_text())
         self.assertEqual(d["record_mode"], "live")
         self.assertEqual(d["model"]["agent_runtime"], RUNTIME)
+        # claude-opus-5 rejects `temperature`, so the record must say the
+        # parameter does not apply rather than restate an inert config value.
         self.assertEqual(d["model"]["temperature_basis"],
-                         "set on the API request and observed")
+                         "not applicable to this model")
+        self.assertIsNone(d["model"]["temperature"])
+        self.assertTrue(any(u["field"] == "model.temperature"
+                            for u in (d.get("unverified") or [])))
         self.assertEqual(len(d["prompts"]["files"]), 1)
         self.assertEqual(len(d["prompts"]["files"][0]["sha256"]), 64)
         self.assertEqual(len(d["api_usage"]), 6)
@@ -274,7 +279,8 @@ class TestExecuteOffline(unittest.TestCase):
             parts = kw["messages"][0]["content"]
             cached = [p for p in parts if p.get("cache_control")]
             self.assertEqual(len(cached), 2)
-            self.assertEqual(kw["temperature"], 0.0)
+            # temperature must be absent for models that reject it
+            self.assertNotIn("temperature", kw)
             self.assertEqual(kw["model"], "claude-opus-5")
             # every phase must be given a limit large enough for its artifact
             self.assertGreaterEqual(kw["max_tokens"], 12000)
