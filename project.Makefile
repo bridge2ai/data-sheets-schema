@@ -10,9 +10,13 @@ RAW_DIR = data/raw
 PREPROCESSED_DIR = data/preprocessed
 PREPROCESSED_INDIVIDUAL_DIR = $(PREPROCESSED_DIR)/individual
 PREPROCESSED_CONCAT_DIR = $(PREPROCESSED_DIR)/concatenated
+SOURCE_MANIFEST = $(PREPROCESSED_DIR)/source_manifest.yaml
 D4D_INDIVIDUAL_DIR = data/d4d_individual
 D4D_CONCAT_DIR = data/d4d_concatenated
+D4D_INDIVIDUAL_CONCAT_DIR = $(D4D_CONCAT_DIR)/gpt5_individual_records
 D4D_HTML_DIR = data/d4d_html
+SYNC ?=
+D4D_PAIR_SYNC_ARG = $(if $(filter 1 true yes,$(SYNC)),--sync-core,)
 
 # Projects
 PROJECTS = AI_READI CHORUS CM4AI VOICE
@@ -40,7 +44,8 @@ download-sources:
 	@mkdir -p $(RAW_DIR)
 	$(RUN) python -m src.download.organized_dataset_extractor \
 		"$(BRIDGE2AI_SHEET_URL)" \
-		-o $(RAW_DIR)
+		-o $(RAW_DIR) \
+		--manifest $(SOURCE_MANIFEST)
 	@echo ""
 	@echo "✅ Download complete! Files saved to $(RAW_DIR)/"
 	@echo "Run 'make data-status' to see results"
@@ -62,21 +67,22 @@ endif
 	@mkdir -p $(RAW_DIR)
 	$(RUN) python -m src.download.organized_dataset_extractor \
 		"$(SHEET_URL)" \
-		-o $(RAW_DIR)
+		-o $(RAW_DIR) \
+		--manifest $(SOURCE_MANIFEST)
 
 # ============================================================================
 # D4D Pipeline: Step 1 - Preprocess source documents
 # ============================================================================
 
 # Preprocess raw sources into text-ready format for D4D generation
-# - .txt, .json, .md: Copied as-is
-# - .pdf: Extracted to text using pdfminer
-# - .html: Skipped (downloader already creates .txt versions)
+# The source manifest selects one canonical raw artifact per live-sheet URL.
+# Every active output is normalized to .txt.
 preprocess-sources:
 	$(RUN) python src/download/preprocess_sources.py \
 		-i $(RAW_DIR) \
 		-o $(PREPROCESSED_INDIVIDUAL_DIR) \
-		-p $(PROJECTS)
+		-p $(PROJECTS) \
+		--manifest $(SOURCE_MANIFEST)
 
 # Validate preprocessing quality (check for empty files, stubs, data loss)
 validate-preprocessing:
@@ -84,13 +90,15 @@ validate-preprocessing:
 	$(RUN) python src/download/validate_preprocessing_quality.py \
 		--raw-dir $(RAW_DIR) \
 		--preprocessed-dir $(PREPROCESSED_INDIVIDUAL_DIR) \
-		--projects $(PROJECTS)
+		--projects $(PROJECTS) \
+		--manifest $(SOURCE_MANIFEST)
 
 # Full download + preprocess + validate pipeline
 download-and-preprocess:
 	$(MAKE) download-sources
 	$(MAKE) preprocess-sources
 	$(MAKE) validate-preprocessing
+	$(MAKE) concat-preprocessed
 
 # Generate minimal example files for all classes
 # For each file in the list, populate it with an id field
@@ -167,7 +175,7 @@ data-status:
 	@echo "─────────────────────────────────────────────────────────────────"
 	@if [ -d "$(PREPROCESSED_CONCAT_DIR)" ]; then \
 		for project in $(PROJECTS); do \
-			file="$(PREPROCESSED_CONCAT_DIR)/$${project}_concatenated.txt"; \
+				file="$(PREPROCESSED_CONCAT_DIR)/$${project}_preprocessed.txt"; \
 			if [ -f "$$file" ]; then \
 				lines=$$(wc -l < "$$file" | tr -d ' '); \
 				size=$$(ls -lh "$$file" | awk '{print $$5}'); \
@@ -613,14 +621,14 @@ d4d-output-diagnostic:
 # D4D Pipeline: Step 2 - Concatenate preprocessed files
 # ============================================================================
 
-# Concatenate individual D4D YAMLs by project
-# This creates a single file per project from data/d4d_individual/gpt5/
+# Concatenate legacy individual D4D YAMLs by project.
+# These are generated D4D records, not preprocessed source documents.
 concat-extracted:
 	@echo "Concatenating individual D4D YAMLs by project..."
-	@mkdir -p $(PREPROCESSED_CONCAT_DIR)
+	@mkdir -p $(D4D_INDIVIDUAL_CONCAT_DIR)
 	@for project in $(PROJECTS); do \
 		input_dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
-		output_file="$(PREPROCESSED_CONCAT_DIR)/$${project}_concatenated.txt"; \
+		output_file="$(D4D_INDIVIDUAL_CONCAT_DIR)/$${project}_d4d_records.txt"; \
 		if [ -d "$$input_dir" ] && [ -n "$$(ls -A $$input_dir 2>/dev/null)" ]; then \
 			echo "Processing $$project..."; \
 			$(RUN) python src/download/concatenate_documents.py -i "$$input_dir" -o "$$output_file" || exit 1; \
@@ -628,7 +636,7 @@ concat-extracted:
 			echo "⚠️  Skipping $$project (no D4D files found)"; \
 		fi \
 	done
-	@echo "✅ All D4D YAMLs concatenated to $(PREPROCESSED_CONCAT_DIR)/"
+	@echo "✅ All D4D YAMLs concatenated to $(D4D_INDIVIDUAL_CONCAT_DIR)/"
 
 # Concatenate preprocessed individual files (for creating input to D4D agent)
 # This creates a single file per project from data/preprocessed/individual/
@@ -637,10 +645,15 @@ concat-preprocessed:
 	@mkdir -p $(PREPROCESSED_CONCAT_DIR)
 	@for project in $(PROJECTS); do \
 		input_dir="$(PREPROCESSED_INDIVIDUAL_DIR)/$$project"; \
-		output_file="$(PREPROCESSED_CONCAT_DIR)/$${project}_preprocessed.txt"; \
-		if [ -d "$$input_dir" ] && [ -n "$$(ls -A $$input_dir 2>/dev/null)" ]; then \
-			echo "Processing $$project..."; \
-			$(RUN) python src/download/concatenate_documents.py -i "$$input_dir" -o "$$output_file" || exit 1; \
+			output_file="$(PREPROCESSED_CONCAT_DIR)/$${project}_preprocessed.txt"; \
+			if [ -d "$$input_dir" ] && [ -n "$$(ls -A $$input_dir 2>/dev/null)" ]; then \
+				echo "Processing $$project..."; \
+				$(RUN) python src/download/concatenate_documents.py \
+					-i "$$input_dir" \
+					-o "$$output_file" \
+					-e .txt \
+					--manifest $(SOURCE_MANIFEST) \
+					--project "$$project" || exit 1; \
 		else \
 			echo "⚠️  Skipping $$project (no preprocessed files found)"; \
 		fi \
@@ -1011,6 +1024,20 @@ endif
 	@echo "Validating $(FILE) against D4D schema..."
 	$(RUN) linkml-validate -s $(SOURCE_SCHEMA_PATH) -C Dataset $(FILE)
 	@echo "✅ Validation successful!"
+
+# Validate Phase 4 consistency for one full/core pair.
+# Usage: make validate-d4d-pair FULL=path/to/full.yaml CORE=path/to/core.yaml
+# Set SYNC=1 only after Phase 3 has source-audited the full record.
+validate-d4d-pair:
+ifndef FULL
+	$(error FULL is not defined. Usage: make validate-d4d-pair FULL=path/to/full.yaml CORE=path/to/core.yaml)
+endif
+ifndef CORE
+	$(error CORE is not defined. Usage: make validate-d4d-pair FULL=path/to/full.yaml CORE=path/to/core.yaml)
+endif
+	$(RUN) python -m data_sheets_schema.d4d_pair_consistency \
+		--full "$(FULL)" \
+		--core "$(CORE)" $(D4D_PAIR_SYNC_ARG)
 
 # Validate all D4D YAMLs for a specific project
 # Usage: make validate-d4d-project PROJECT=AI_READI GENERATOR=gpt5

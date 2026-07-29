@@ -9,11 +9,14 @@ Handles:
 - .docx: Extract text using python-docx
 """
 import argparse
+import json
+import re
 import shutil
 from pathlib import Path
 from pdfminer.high_level import extract_text
 from bs4 import BeautifulSoup
 from docx import Document
+import yaml
 
 from data_sheets_schema.constants import PROJECTS
 
@@ -38,7 +41,7 @@ def extract_html_text(html_path: Path) -> str:
         for script in soup(["script", "style", "noscript"]):
             script.decompose()
 
-        text = soup.get_text()
+        text = soup.get_text(separator="\n")
         # Clean up whitespace
         lines = (line.strip() for line in text.splitlines())
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
@@ -64,6 +67,160 @@ def extract_docx_text(docx_path: Path) -> str:
     except Exception as e:
         print(f"    ⚠️  Error extracting DOCX {docx_path.name}: {e}")
         return ""
+
+
+def load_source_manifest(manifest_path: Path) -> dict:
+    """Load and minimally validate the canonical source manifest."""
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(manifest, dict) or not isinstance(
+        manifest.get("projects"), dict
+    ):
+        raise ValueError(
+            f"Invalid source manifest (missing projects mapping): {manifest_path}"
+        )
+    return manifest
+
+
+def extract_source_text(source_path: Path) -> str:
+    """Convert one supported raw source artifact to text."""
+    suffix = source_path.suffix.lower()
+    if suffix in {".txt", ".md"}:
+        return source_path.read_text(encoding="utf-8", errors="ignore")
+    if suffix == ".json":
+        data = json.loads(source_path.read_text(encoding="utf-8"))
+        return json.dumps(data, indent=2, ensure_ascii=False)
+    if suffix == ".pdf":
+        return extract_pdf_text(source_path)
+    if suffix == ".html":
+        return extract_html_text(source_path)
+    if suffix == ".docx":
+        return extract_docx_text(source_path)
+    raise ValueError(f"Unsupported source format: {source_path}")
+
+
+def normalize_extracted_text(text: str) -> str:
+    """Normalize line endings and remove extractor-introduced trailing spaces."""
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    lines = []
+    for line in normalized.splitlines():
+        cleaned = line.rstrip()
+        cleaned = re.sub(r"^ +(?=\t)", "", cleaned)
+        lines.append(cleaned)
+    return "\n".join(lines).strip()
+
+
+def preprocess_manifest(
+    manifest_path: Path,
+    input_dir: Path,
+    output_dir: Path,
+    projects=None,
+) -> dict:
+    """Build a canonical text-only processed set from a source manifest."""
+    manifest = load_source_manifest(manifest_path)
+    selected_projects = set(projects or manifest["projects"].keys())
+    default_minimum = int(manifest.get("default_minimum_characters", 500))
+    stats = {
+        "processed": 0,
+        "errors": 0,
+        "projects": {},
+    }
+
+    unknown = selected_projects - set(manifest["projects"])
+    if unknown:
+        raise ValueError(
+            f"Projects not present in {manifest_path}: {sorted(unknown)}"
+        )
+
+    for project, entries in manifest["projects"].items():
+        if project not in selected_projects:
+            continue
+        if not isinstance(entries, list):
+            raise ValueError(f"Manifest project {project} must contain a list")
+
+        seen_ids = set()
+        seen_outputs = set()
+        project_stats = {"processed": 0, "errors": 0}
+        destination_dir = output_dir / project
+        destination_dir.mkdir(parents=True, exist_ok=True)
+
+        print(f"\n📁 {project} ({len(entries)} canonical sources)")
+        for entry in entries:
+            source_id = entry.get("id")
+            raw_name = entry.get("raw_file")
+            processed_name = entry.get("processed_file")
+            if not source_id or not raw_name or not processed_name:
+                raise ValueError(
+                    f"{project} manifest entries require id, raw_file, "
+                    "and processed_file"
+                )
+            if source_id in seen_ids:
+                raise ValueError(f"Duplicate source id for {project}: {source_id}")
+            if processed_name in seen_outputs:
+                raise ValueError(
+                    f"Duplicate processed filename for {project}: {processed_name}"
+                )
+            if Path(processed_name).suffix.lower() != ".txt":
+                raise ValueError(
+                    f"Canonical processed output must be .txt: {processed_name}"
+                )
+            seen_ids.add(source_id)
+            seen_outputs.add(processed_name)
+
+            source_path = input_dir / project / raw_name
+            destination_path = destination_dir / processed_name
+            if not source_path.exists():
+                print(f"    ❌ Missing raw source: {source_path}")
+                project_stats["errors"] += 1
+                stats["errors"] += 1
+                continue
+
+            try:
+                text = normalize_extracted_text(
+                    extract_source_text(source_path)
+                )
+                minimum = int(
+                    entry.get("minimum_characters", default_minimum)
+                )
+                if len(text) < minimum:
+                    raise ValueError(
+                        f"extracted {len(text)} characters; minimum is {minimum}"
+                    )
+
+                metadata = [
+                    "SOURCE METADATA",
+                    f"Project: {project}",
+                    f"Source ID: {source_id}",
+                    f"Source type: {entry.get('source_type', '')}",
+                    f"Source URL: {entry.get('url', '')}",
+                    f"Raw file: {source_path}",
+                ]
+                if entry.get("curation_note"):
+                    metadata.append(
+                        f"Curation note: {entry['curation_note']}"
+                    )
+                if entry.get("verification_url"):
+                    metadata.append(
+                        f"Verification URL: {entry['verification_url']}"
+                    )
+                metadata.extend(["-" * 80, ""])
+                destination_path.write_text(
+                    "\n".join(metadata) + text + "\n",
+                    encoding="utf-8",
+                )
+                print(
+                    f"    ✓ {raw_name} → {processed_name} "
+                    f"({len(text):,} chars)"
+                )
+                project_stats["processed"] += 1
+                stats["processed"] += 1
+            except Exception as e:
+                print(f"    ❌ {raw_name}: {e}")
+                project_stats["errors"] += 1
+                stats["errors"] += 1
+
+        stats["projects"][project] = project_stats
+
+    return stats
 
 
 def preprocess_project(src_dir: Path, dst_dir: Path) -> dict:
@@ -192,6 +349,14 @@ def main():
         default=PROJECTS,
         help="Projects to process (default: all)"
     )
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        help=(
+            "Canonical source manifest. When provided, only listed sources are "
+            "processed and every output is normalized to .txt"
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -203,6 +368,24 @@ def main():
     print()
 
     total_stats = {"copied": 0, "pdf_extracted": 0, "html_extracted": 0, "docx_extracted": 0, "skipped": 0, "errors": 0}
+
+    if args.manifest:
+        manifest_stats = preprocess_manifest(
+            args.manifest,
+            args.input_dir,
+            args.output_dir,
+            args.projects,
+        )
+        print("\n" + "=" * 60)
+        print("  Canonical Preprocessing Summary")
+        print("=" * 60)
+        print(f"  Processed: {manifest_stats['processed']} files")
+        print(f"  Errors:    {manifest_stats['errors']} files")
+        if manifest_stats["errors"]:
+            raise SystemExit(1)
+        print()
+        print("✅ Canonical preprocessing complete!")
+        return
 
     for project in args.projects:
         print(f"\n📁 {project}")

@@ -7,10 +7,43 @@ in a deterministic, reproducible order (alphabetically sorted by filename).
 """
 
 import argparse
-import os
 from pathlib import Path
 from typing import List, Optional
-import mimetypes
+import yaml
+
+
+def files_from_manifest(
+    manifest_path: Path,
+    project: str,
+    input_dir: Path,
+) -> List[Path]:
+    """Resolve the canonical processed files for one project."""
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    projects = manifest.get("projects") if isinstance(manifest, dict) else None
+    if not isinstance(projects, dict) or project not in projects:
+        raise ValueError(
+            f"Project {project!r} is not present in manifest {manifest_path}"
+        )
+
+    files = []
+    seen = set()
+    for entry in projects[project]:
+        filename = entry.get("processed_file")
+        if not filename:
+            raise ValueError(
+                f"Manifest entry for {project} is missing processed_file"
+            )
+        if filename in seen:
+            raise ValueError(
+                f"Duplicate processed_file for {project}: {filename}"
+            )
+        if Path(filename).suffix.lower() != ".txt":
+            raise ValueError(
+                f"Canonical concatenation only accepts .txt files: {filename}"
+            )
+        seen.add(filename)
+        files.append(input_dir / filename)
+    return files
 
 
 class DocumentConcatenator:
@@ -121,7 +154,9 @@ class DocumentConcatenator:
                    extensions: Optional[List[str]] = None,
                    recursive: bool = False,
                    include_headers: bool = True,
-                   include_summary: bool = True) -> dict:
+                   include_summary: bool = True,
+                   files: Optional[List[Path]] = None,
+                   selection_manifest: Optional[Path] = None) -> dict:
         """
         Concatenate documents from input directory to output file.
 
@@ -136,8 +171,16 @@ class DocumentConcatenator:
         Returns:
             Dictionary with concatenation statistics
         """
-        # Get sorted list of files
-        files = self.get_files_sorted(input_dir, extensions, recursive)
+        # Get sorted list of files unless an explicit manifest order is supplied.
+        if files is None:
+            files = self.get_files_sorted(input_dir, extensions, recursive)
+        else:
+            missing = [file_path for file_path in files if not file_path.is_file()]
+            if missing:
+                raise FileNotFoundError(
+                    "Manifest-selected files are missing: "
+                    + ", ".join(str(path) for path in missing)
+                )
 
         if not files:
             raise ValueError(f"No files found in {input_dir}" +
@@ -166,6 +209,8 @@ class DocumentConcatenator:
                 out_f.write(f"Total Files: {len(files)}\n")
                 out_f.write(f"Extensions: {extensions if extensions else 'All'}\n")
                 out_f.write(f"Recursive: {recursive}\n")
+                if selection_manifest:
+                    out_f.write(f"Selection Manifest: {selection_manifest}\n")
                 out_f.write("=" * 80 + "\n\n")
 
                 # Write table of contents
@@ -208,7 +253,7 @@ class DocumentConcatenator:
                     print(f"  ⚠️  {error_msg}")
                     out_f.write(f"\n{error_msg}\n")
 
-        print(f"\n✅ Concatenation complete!")
+        print("\n✅ Concatenation complete!")
         print(f"   Output: {output_file}")
         print(f"   Total files: {stats['total_files']}")
         print(f"   Total size: {stats['total_size']:,} bytes")
@@ -277,6 +322,15 @@ Examples:
         default="\n\n" + "="*80 + "\n\n",
         help='Separator to use between files (default: double newline with separator line)'
     )
+    parser.add_argument(
+        '--manifest',
+        type=Path,
+        help='Canonical source manifest used to select processed .txt files'
+    )
+    parser.add_argument(
+        '--project',
+        help='Project key in --manifest (required when --manifest is used)'
+    )
 
     args = parser.parse_args()
 
@@ -285,13 +339,25 @@ Examples:
 
     # Run concatenation
     try:
-        stats = concatenator.concatenate(
+        selected_files = None
+        if args.manifest:
+            if not args.project:
+                parser.error("--project is required when --manifest is used")
+            selected_files = files_from_manifest(
+                args.manifest,
+                args.project,
+                args.input_dir,
+            )
+
+        concatenator.concatenate(
             input_dir=args.input_dir,
             output_file=args.output,
             extensions=args.extensions,
             recursive=args.recursive,
             include_headers=not args.no_headers,
-            include_summary=not args.no_summary
+            include_summary=not args.no_summary,
+            files=selected_files,
+            selection_manifest=args.manifest,
         )
 
         return 0

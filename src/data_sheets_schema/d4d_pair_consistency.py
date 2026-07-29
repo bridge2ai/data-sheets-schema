@@ -1,0 +1,661 @@
+"""Validate and synchronize paired full and core D4D records.
+
+Phase 4 of the agentic D4D workflow uses the LinkML schemas to derive which
+root slots have identical value structures. Those slots must have deeply equal
+YAML content in the full and core records. Slots with different ranges, such as
+``resources``, are compared as schema-compatible projections.
+"""
+
+from __future__ import annotations
+
+import argparse
+import copy
+import json
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+
+import yaml
+from linkml_runtime.linkml_model.meta import SlotDefinition
+from linkml_runtime.utils.schemaview import SchemaView
+
+
+DEFAULT_FULL_SCHEMA = Path(
+    "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+)
+DEFAULT_CORE_SCHEMA = Path(
+    "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+)
+FULL_CLASS = "Dataset"
+CORE_CLASS = "CoreDataset"
+PHASE4_HEADER = "# Phase 4 reconciliation: completed"
+
+
+@dataclass(frozen=True)
+class PairSchema:
+    """Schema-derived rules for comparing a full/core pair."""
+
+    full_view: SchemaView
+    core_view: SchemaView
+    identity_slots: Tuple[str, ...]
+    projected_slots: Tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ConsistencyIssue:
+    """One full/core consistency problem."""
+
+    code: str
+    path: str
+    message: str
+
+
+@dataclass
+class PairConsistencyReport:
+    """Result of validating one full/core pair."""
+
+    identity_slots: Tuple[str, ...]
+    projected_slots: Tuple[str, ...]
+    errors: List[ConsistencyIssue] = field(default_factory=list)
+    warnings: List[ConsistencyIssue] = field(default_factory=list)
+
+    @property
+    def passed(self) -> bool:
+        return not self.errors
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "passed": self.passed,
+            "identity_slot_count": len(self.identity_slots),
+            "identity_slots": list(self.identity_slots),
+            "projected_slots": list(self.projected_slots),
+            "errors": [asdict(issue) for issue in self.errors],
+            "warnings": [asdict(issue) for issue in self.warnings],
+        }
+
+
+def _normalized_bool(value: Optional[bool]) -> bool:
+    return bool(value)
+
+
+def _slot_value_signature(slot: SlotDefinition) -> Tuple[Any, ...]:
+    """Return properties that determine a slot's YAML value structure."""
+
+    return (
+        slot.range,
+        _normalized_bool(slot.multivalued),
+        _normalized_bool(slot.required),
+        slot.minimum_cardinality,
+        slot.maximum_cardinality,
+        _normalized_bool(slot.inlined_as_list),
+    )
+
+
+def load_pair_schema(
+    full_schema: Path = DEFAULT_FULL_SCHEMA,
+    core_schema: Path = DEFAULT_CORE_SCHEMA,
+) -> PairSchema:
+    """Load schemas and derive strict-identity versus projected shared slots."""
+
+    full_view = SchemaView(str(full_schema))
+    core_view = SchemaView(str(core_schema))
+    full_slots = {
+        slot.name: slot for slot in full_view.class_induced_slots(FULL_CLASS)
+    }
+    core_slots = {
+        slot.name: slot for slot in core_view.class_induced_slots(CORE_CLASS)
+    }
+
+    identity_slots = []
+    projected_slots = []
+    for name in sorted(full_slots.keys() & core_slots.keys()):
+        if _slot_value_signature(full_slots[name]) == _slot_value_signature(
+            core_slots[name]
+        ):
+            identity_slots.append(name)
+        else:
+            projected_slots.append(name)
+
+    return PairSchema(
+        full_view=full_view,
+        core_view=core_view,
+        identity_slots=tuple(identity_slots),
+        projected_slots=tuple(projected_slots),
+    )
+
+
+def _first_difference(
+    full_value: Any, core_value: Any, path: str
+) -> Optional[Tuple[str, str]]:
+    """Return the first deep difference, preserving list-order significance."""
+
+    if type(full_value) is not type(core_value):
+        return (
+            path,
+            f"type differs: full={type(full_value).__name__}, "
+            f"core={type(core_value).__name__}",
+        )
+
+    if isinstance(full_value, Mapping):
+        full_keys = set(full_value)
+        core_keys = set(core_value)
+        if full_keys != core_keys:
+            missing_core = sorted(full_keys - core_keys)
+            missing_full = sorted(core_keys - full_keys)
+            return (
+                path,
+                "mapping keys differ: "
+                f"missing from core={missing_core}, missing from full={missing_full}",
+            )
+        for key in full_value:
+            difference = _first_difference(
+                full_value[key], core_value[key], f"{path}.{key}"
+            )
+            if difference:
+                return difference
+        return None
+
+    if isinstance(full_value, list):
+        if len(full_value) != len(core_value):
+            return (
+                path,
+                f"list length differs: full={len(full_value)}, "
+                f"core={len(core_value)}",
+            )
+        for index, (full_item, core_item) in enumerate(
+            zip(full_value, core_value)
+        ):
+            difference = _first_difference(
+                full_item, core_item, f"{path}[{index}]"
+            )
+            if difference:
+                return difference
+        return None
+
+    if full_value != core_value:
+        return (
+            path,
+            f"value differs: full={full_value!r}, core={core_value!r}",
+        )
+    return None
+
+
+def _append_identity_errors(
+    report: PairConsistencyReport,
+    full_data: Mapping[str, Any],
+    core_data: Mapping[str, Any],
+    slots: Iterable[str],
+    path: str = "$",
+) -> None:
+    for slot in slots:
+        full_present = slot in full_data
+        core_present = slot in core_data
+        slot_path = f"{path}.{slot}"
+        if full_present != core_present:
+            present_in = "full" if full_present else "core"
+            report.errors.append(
+                ConsistencyIssue(
+                    code="shared-slot-presence",
+                    path=slot_path,
+                    message=(
+                        "schema-identical slot is present only in "
+                        f"{present_in}; it must be present in both or neither"
+                    ),
+                )
+            )
+            continue
+        if not full_present:
+            continue
+
+        difference = _first_difference(
+            full_data[slot], core_data[slot], slot_path
+        )
+        if difference:
+            difference_path, message = difference
+            report.errors.append(
+                ConsistencyIssue(
+                    code="shared-slot-content",
+                    path=difference_path,
+                    message=message,
+                )
+            )
+
+
+def _index_by_id(
+    items: Sequence[Any], path: str, report: PairConsistencyReport
+) -> Dict[str, Mapping[str, Any]]:
+    indexed: Dict[str, Mapping[str, Any]] = {}
+    for index, item in enumerate(items):
+        item_path = f"{path}[{index}]"
+        if not isinstance(item, Mapping):
+            report.errors.append(
+                ConsistencyIssue(
+                    code="projected-item-type",
+                    path=item_path,
+                    message="projected resource must be a mapping",
+                )
+            )
+            continue
+        item_id = item.get("id")
+        if not isinstance(item_id, str) or not item_id:
+            report.errors.append(
+                ConsistencyIssue(
+                    code="projected-item-id",
+                    path=f"{item_path}.id",
+                    message="projected resource requires a non-empty string id",
+                )
+            )
+            continue
+        if item_id in indexed:
+            report.errors.append(
+                ConsistencyIssue(
+                    code="projected-item-duplicate",
+                    path=f"{item_path}.id",
+                    message=f"duplicate resource id: {item_id}",
+                )
+            )
+            continue
+        indexed[item_id] = item
+    return indexed
+
+
+def _append_resource_projection_errors(
+    report: PairConsistencyReport,
+    full_resources: Any,
+    core_resources: Any,
+    identity_slots: Iterable[str],
+    path: str = "$.resources",
+) -> None:
+    if not isinstance(full_resources, list) or not isinstance(
+        core_resources, list
+    ):
+        report.errors.append(
+            ConsistencyIssue(
+                code="resource-projection-type",
+                path=path,
+                message="full and core resources must both be lists",
+            )
+        )
+        return
+
+    full_by_id = _index_by_id(full_resources, f"{path}.full", report)
+    core_by_id = _index_by_id(core_resources, f"{path}.core", report)
+    full_ids = set(full_by_id)
+    core_ids = set(core_by_id)
+    if full_ids != core_ids:
+        report.errors.append(
+            ConsistencyIssue(
+                code="resource-projection-coverage",
+                path=path,
+                message=(
+                    "resource ids differ: "
+                    f"missing from core={sorted(full_ids - core_ids)}, "
+                    f"missing from full={sorted(core_ids - full_ids)}"
+                ),
+            )
+        )
+
+    for item_id in sorted(full_ids & core_ids):
+        full_item = full_by_id[item_id]
+        core_item = core_by_id[item_id]
+        item_path = f"{path}[id={item_id!r}]"
+        _append_identity_errors(
+            report,
+            full_item,
+            core_item,
+            identity_slots,
+            path=item_path,
+        )
+
+        full_nested = full_item.get("resources")
+        core_nested = core_item.get("resources")
+        if (full_nested is None) != (core_nested is None):
+            report.errors.append(
+                ConsistencyIssue(
+                    code="resource-projection-presence",
+                    path=f"{item_path}.resources",
+                    message=(
+                        "nested resources are present in only one projected "
+                        "resource"
+                    ),
+                )
+            )
+        elif full_nested is not None:
+            _append_resource_projection_errors(
+                report,
+                full_nested,
+                core_nested,
+                identity_slots,
+                path=f"{item_path}.resources",
+            )
+
+
+def _related_match(
+    distribution: Mapping[str, Any],
+    collections: Sequence[Mapping[str, Any]],
+) -> Tuple[Optional[Mapping[str, Any]], Optional[str]]:
+    for key in ("id", "path", "name"):
+        value = distribution.get(key)
+        if value in (None, ""):
+            continue
+        matches = [item for item in collections if item.get(key) == value]
+        if len(matches) == 1:
+            return matches[0], key
+        if len(matches) > 1:
+            return None, f"ambiguous {key}"
+    return None, None
+
+
+def _append_distribution_relation_issues(
+    report: PairConsistencyReport,
+    full_data: Mapping[str, Any],
+    core_data: Mapping[str, Any],
+) -> None:
+    collections = full_data.get("file_collections")
+    distributions = core_data.get("distributions")
+    if not collections and not distributions:
+        return
+    if not isinstance(collections, list) or not collections:
+        report.errors.append(
+            ConsistencyIssue(
+                code="distribution-relation-presence",
+                path="$.file_collections",
+                message=(
+                    "core distributions exist without full file_collections"
+                ),
+            )
+        )
+        return
+    if not isinstance(distributions, list) or not distributions:
+        report.errors.append(
+            ConsistencyIssue(
+                code="distribution-relation-presence",
+                path="$.distributions",
+                message=(
+                    "full file_collections exist without core distributions"
+                ),
+            )
+        )
+        return
+
+    mapping_collections = [
+        item for item in collections if isinstance(item, Mapping)
+    ]
+    matched = 0
+    unmatched = []
+    for index, distribution in enumerate(distributions):
+        if not isinstance(distribution, Mapping):
+            report.errors.append(
+                ConsistencyIssue(
+                    code="distribution-item-type",
+                    path=f"$.distributions[{index}]",
+                    message="distribution must be a mapping",
+                )
+            )
+            continue
+        collection, match_basis = _related_match(
+            distribution, mapping_collections
+        )
+        if collection is None:
+            unmatched.append(index)
+            continue
+        matched += 1
+        relation_path = f"$.distributions[{index}]"
+        for field_name in ("path", "compression"):
+            if (
+                field_name in distribution
+                and field_name in collection
+                and distribution[field_name] != collection[field_name]
+            ):
+                report.errors.append(
+                    ConsistencyIssue(
+                        code="distribution-related-content",
+                        path=f"{relation_path}.{field_name}",
+                        message=(
+                            f"value conflicts with matched file_collection "
+                            f"({match_basis}): full={collection[field_name]!r}, "
+                            f"core={distribution[field_name]!r}"
+                        ),
+                    )
+                )
+        if (
+            "bytes" in distribution
+            and "total_bytes" in collection
+            and distribution["bytes"] != collection["total_bytes"]
+        ):
+            report.errors.append(
+                ConsistencyIssue(
+                    code="distribution-related-content",
+                    path=f"{relation_path}.bytes",
+                    message=(
+                        "value conflicts with matched "
+                        "file_collection.total_bytes: "
+                        f"full={collection['total_bytes']!r}, "
+                        f"core={distribution['bytes']!r}"
+                    ),
+                )
+            )
+
+    report.warnings.append(
+        ConsistencyIssue(
+            code="semantic-review-required",
+            path="$.file_collections <-> $.distributions",
+            message=(
+                "Phase 4 must semantically review related distribution "
+                f"content; deterministic matches={matched}, "
+                f"unmatched core distributions={unmatched}"
+            ),
+        )
+    )
+
+
+def validate_pair_data(
+    full_data: Mapping[str, Any],
+    core_data: Mapping[str, Any],
+    pair_schema: PairSchema,
+) -> PairConsistencyReport:
+    """Validate strict shared content and schema-related projections."""
+
+    report = PairConsistencyReport(
+        identity_slots=pair_schema.identity_slots,
+        projected_slots=pair_schema.projected_slots,
+    )
+    _append_identity_errors(
+        report,
+        full_data,
+        core_data,
+        pair_schema.identity_slots,
+    )
+
+    if "resources" in pair_schema.projected_slots:
+        full_present = "resources" in full_data
+        core_present = "resources" in core_data
+        if full_present != core_present:
+            report.errors.append(
+                ConsistencyIssue(
+                    code="resource-projection-presence",
+                    path="$.resources",
+                    message=(
+                        "resources must be represented in both records when "
+                        "present in either record"
+                    ),
+                )
+            )
+        elif full_present:
+            _append_resource_projection_errors(
+                report,
+                full_data["resources"],
+                core_data["resources"],
+                pair_schema.identity_slots,
+            )
+
+    _append_distribution_relation_issues(report, full_data, core_data)
+    return report
+
+
+def _project_resource(
+    full_item: Mapping[str, Any],
+    existing_core_item: Optional[Mapping[str, Any]],
+    identity_slots: Iterable[str],
+) -> Dict[str, Any]:
+    allowed = set(identity_slots)
+    projected: Dict[str, Any] = {}
+    for key, value in full_item.items():
+        if key in allowed:
+            projected[key] = copy.deepcopy(value)
+        elif key == "resources" and isinstance(value, list):
+            existing_nested = {}
+            if existing_core_item and isinstance(
+                existing_core_item.get("resources"), list
+            ):
+                existing_nested = {
+                    item.get("id"): item
+                    for item in existing_core_item["resources"]
+                    if isinstance(item, Mapping) and isinstance(item.get("id"), str)
+                }
+            projected["resources"] = [
+                _project_resource(
+                    item,
+                    existing_nested.get(item.get("id")),
+                    identity_slots,
+                )
+                for item in value
+                if isinstance(item, Mapping)
+            ]
+
+    if existing_core_item:
+        for core_only_slot in ("dialect", "distributions"):
+            if core_only_slot in existing_core_item:
+                projected[core_only_slot] = copy.deepcopy(
+                    existing_core_item[core_only_slot]
+                )
+    return projected
+
+
+def synchronize_core_data(
+    full_data: Mapping[str, Any],
+    core_data: Mapping[str, Any],
+    pair_schema: PairSchema,
+) -> Dict[str, Any]:
+    """Copy schema-identical values from a source-audited full record to core."""
+
+    synchronized = copy.deepcopy(dict(core_data))
+    for slot in pair_schema.identity_slots:
+        if slot in full_data:
+            synchronized[slot] = copy.deepcopy(full_data[slot])
+        else:
+            synchronized.pop(slot, None)
+
+    if "resources" in pair_schema.projected_slots:
+        if "resources" not in full_data:
+            synchronized.pop("resources", None)
+        else:
+            existing_resources = {
+                item.get("id"): item
+                for item in synchronized.get("resources", [])
+                if isinstance(item, Mapping) and isinstance(item.get("id"), str)
+            }
+            synchronized["resources"] = [
+                _project_resource(
+                    item,
+                    existing_resources.get(item.get("id")),
+                    pair_schema.identity_slots,
+                )
+                for item in full_data["resources"]
+                if isinstance(item, Mapping)
+            ]
+    return synchronized
+
+
+def _load_yaml_mapping(path: Path) -> Dict[str, Any]:
+    loaded = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(loaded, dict):
+        raise ValueError(f"{path} must contain a YAML mapping")
+    return loaded
+
+
+def _read_comment_header(path: Path) -> List[str]:
+    header = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("#"):
+            header.append(line)
+            continue
+        if not line.strip() and header:
+            header.append(line)
+            continue
+        break
+    return header
+
+
+def _write_synchronized_core(
+    path: Path, core_data: Mapping[str, Any]
+) -> None:
+    header = _read_comment_header(path)
+    if PHASE4_HEADER not in header:
+        header.append(PHASE4_HEADER)
+    body = yaml.safe_dump(
+        dict(core_data),
+        allow_unicode=True,
+        default_flow_style=False,
+        sort_keys=False,
+        width=100,
+    ).rstrip()
+    path.write_text("\n".join(header + [body, ""]), encoding="utf-8")
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Validate Phase 4 consistency between a full D4D and D4D-core pair."
+        )
+    )
+    parser.add_argument("--full", type=Path, required=True)
+    parser.add_argument("--core", type=Path, required=True)
+    parser.add_argument(
+        "--full-schema", type=Path, default=DEFAULT_FULL_SCHEMA
+    )
+    parser.add_argument(
+        "--core-schema", type=Path, default=DEFAULT_CORE_SCHEMA
+    )
+    parser.add_argument(
+        "--sync-core",
+        action="store_true",
+        help=(
+            "Copy schema-identical slots and projected resources from full to "
+            "core before validation. Use only after the full record passes the "
+            "Phase 3 source audit."
+        ),
+    )
+    parser.add_argument("--json", action="store_true", dest="as_json")
+    return parser
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    args = _build_parser().parse_args(argv)
+    pair_schema = load_pair_schema(args.full_schema, args.core_schema)
+    full_data = _load_yaml_mapping(args.full)
+    core_data = _load_yaml_mapping(args.core)
+
+    if args.sync_core:
+        core_data = synchronize_core_data(full_data, core_data, pair_schema)
+        _write_synchronized_core(args.core, core_data)
+
+    report = validate_pair_data(full_data, core_data, pair_schema)
+    if args.as_json:
+        print(json.dumps(report.to_dict(), indent=2))
+    else:
+        status = "PASS" if report.passed else "FAIL"
+        print(
+            f"{status}: {len(report.identity_slots)} schema-identical slots; "
+            f"projected slots={list(report.projected_slots)}"
+        )
+        for issue in report.errors:
+            print(f"ERROR [{issue.code}] {issue.path}: {issue.message}")
+        for issue in report.warnings:
+            print(f"WARNING [{issue.code}] {issue.path}: {issue.message}")
+
+    return 0 if report.passed else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
