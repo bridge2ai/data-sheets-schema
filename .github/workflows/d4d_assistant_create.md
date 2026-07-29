@@ -202,7 +202,7 @@ make full-schema
 
 **Read validated reference examples:**
 - `data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/AI_READI_d4d.yaml` - Comprehensive validated example
-- `data/d4d_concatenated/claudecode_agent/CHORUS_d4d.yaml` - Another validated example
+- `data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/CHORUS_d4d.yaml` - Another validated example
 
 **What to observe:**
 - How `purposes`, `tasks`, `addressing_gaps`, `creators`, `funders` are structured
