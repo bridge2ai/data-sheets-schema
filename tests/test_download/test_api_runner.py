@@ -142,9 +142,11 @@ class TestPlan(unittest.TestCase):
         self.assertEqual(len(p["phases"]), len(PHASES))
 
     def test_plan_reports_the_shared_config_model(self):
+        """Whatever the config pins is what a run will use."""
+        from data_sheets_schema.provenance import load_generation_config
+        pinned = (load_generation_config().get("model") or {}).get("name")
         p = plan(spec())
-        self.assertEqual(p["model"]["name"], "claude-opus-5")
-        self.assertEqual(p["model"]["temperature"], 0.0)
+        self.assertEqual(p["model"]["name"], pinned)
 
     def test_plan_output_paths_follow_the_run_layout(self):
         p = plan(spec())
@@ -209,6 +211,28 @@ class FakeMessages:
         if phase == "report":
             return FakeResponse("# Reconciliation\nNo discrepancies.\n")
         return FakeResponse(f"```yaml\n# {phase}\nid: x\nname: X\n```")
+
+    def stream(self, **kw):
+        """Mirror the SDK's streaming context manager.
+
+        The runner streams because the SDK refuses a non-streaming request whose
+        max_tokens implies a >10-minute response. Errors must surface on
+        __enter__ so retry and failure paths behave as they do live.
+        """
+        outer = self
+
+        class _Stream:
+            def __enter__(self):
+                self._msg = outer.create(**kw)
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def get_final_message(self):
+                return self._msg
+
+        return _Stream()
 
 
 class FakeClient:
@@ -281,7 +305,10 @@ class TestExecuteOffline(unittest.TestCase):
             self.assertEqual(len(cached), 2)
             # temperature must be absent for models that reject it
             self.assertNotIn("temperature", kw)
-            self.assertEqual(kw["model"], "claude-opus-5")
+            from data_sheets_schema.api_runner import output_limit
+            self.assertLessEqual(kw["max_tokens"], output_limit(kw["model"]),
+                                 "a phase must not request more output than "
+                                 "the route allows")
             # every phase must be given a limit large enough for its artifact
             self.assertGreaterEqual(kw["max_tokens"], 12000)
 

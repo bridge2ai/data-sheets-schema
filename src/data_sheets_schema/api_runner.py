@@ -336,6 +336,30 @@ CBORG_BASE_URL = "https://api.cborg.lbl.gov"
 NO_TEMPERATURE_MODELS = ("claude-opus-5", "claude-opus-4-6", "claude-opus-4-7",
                          "claude-opus-4-8", "claude-fable-5")
 
+# Output ceilings differ sharply between CBORG routes for the same model:
+# claude-opus-5 is 1M in / 128k out, while google/claude-opus-5-high is
+# 200k / 64k. Requesting more than a route allows is a 400, and the `full`
+# phase asks for exactly 64k, so the request must be clamped rather than
+# assumed to fit.
+MODEL_OUTPUT_LIMIT = {
+    "claude-opus-5": 128000,
+    "claude-opus-4-8": 128000,
+    "claude-opus-4-7": 128000,
+    "claude-opus-4-6": 128000,
+}
+DEFAULT_OUTPUT_LIMIT = 64000
+
+
+def output_limit(model: str) -> int:
+    """Largest max_tokens this route accepts.
+
+    Prefixed routes (`google/…`, `amazon/…`) are the lower-limit rebroadcasts,
+    so only the bare identifiers get the raised ceiling.
+    """
+    if "/" in model:
+        return DEFAULT_OUTPUT_LIMIT
+    return MODEL_OUTPUT_LIMIT.get(model, DEFAULT_OUTPUT_LIMIT)
+
 
 def accepts_temperature(model: str) -> bool:
     """Whether this model will accept a `temperature` parameter."""
@@ -435,7 +459,8 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
     # 400 "`temperature` is deprecated for this model", so passing 0.0 fails
     # the request. Sending it only where the model accepts it keeps one code
     # path for both.
-    kwargs: dict[str, Any] = {"model": model, "max_tokens": max_tokens,
+    kwargs: dict[str, Any] = {"model": model,
+                              "max_tokens": min(max_tokens, output_limit(model)),
                               "system": system, "messages": messages}
     if temperature is not None and accepts_temperature(model):
         kwargs["temperature"] = temperature
@@ -443,7 +468,14 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
     last: Exception | None = None
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
-            return client.messages.create(**kwargs)
+            # Streamed, not because we consume tokens incrementally but because
+            # the SDK refuses a non-streaming request whose max_tokens implies a
+            # response longer than 10 minutes — and the `full` phase asks for
+            # 64k. get_final_message() reassembles the whole Message, so
+            # stop_reason and usage stay available and the truncation guard and
+            # cache accounting are unaffected.
+            with client.messages.stream(**kwargs) as stream:
+                return stream.get_final_message()
         except Exception as exc:                      # noqa: BLE001 - re-raised
             transient = isinstance(exc, (
                 getattr(anthropic, "RateLimitError", ()),
