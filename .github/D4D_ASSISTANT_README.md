@@ -105,7 +105,7 @@ Only authorized users can trigger the assistant by mentioning `@d4dassistant`.
 
 ## Technical Details
 
-- **Agent**: Powered by Claude Code via `dragon-ai-agent/run-goose-obo` GitHub Action
+- **Agent**: Four-phase generation via `d4d api run` (`src/data_sheets_schema/api_runner.py`), run directly in the workflow. Previously used the `dragon-ai-agent/run-claude-obo` action, which no longer exists — see issue #172.
 - **Schema**: Uses LinkML schema from `src/data_sheets_schema/schema/`
 - **Validation**: Runs `make test-examples` to ensure schema compliance
 - **Examples**: References `src/data/examples/valid/` for guidance
