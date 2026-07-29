@@ -202,6 +202,12 @@ class D4DEvaluation:
     rubric20_total: float
     rubric20_max: int
     rubric20_percentage: float
+    # Run label, e.g. "2026-07-28_claude-opus-5-generic_rep1". None for methods
+    # stored flat (one record per method). Without it, three replicates of one
+    # method collapse onto the same key and silently overwrite each other —
+    # which is why every score here was previously one unlabelled row per
+    # (project, method).
+    label: Optional[str] = None
 
 
 class D4DEvaluator:
@@ -387,7 +393,8 @@ class D4DEvaluator:
         else:
             return "Unknown"
 
-    def evaluate_d4d_file(self, file_path: Path, project: str, method: str) -> D4DEvaluation:
+    def evaluate_d4d_file(self, file_path: Path, project: str, method: str,
+                          label: Optional[str] = None) -> D4DEvaluation:
         """Evaluate a single D4D YAML file using both rubrics"""
 
         # Load D4D data
@@ -427,55 +434,74 @@ class D4DEvaluator:
             rubric10_percentage=rubric10_percentage,
             rubric20_total=rubric20_total,
             rubric20_max=rubric20_max,
-            rubric20_percentage=rubric20_percentage
+            rubric20_percentage=rubric20_percentage,
+            label=label,
         )
 
-    def evaluate_all_projects(self, base_dir: Path, projects: List[str], methods: List[str]) -> List[D4DEvaluation]:
-        """Evaluate all D4D files for given projects and methods"""
+    @staticmethod
+    def discover_records(base_dir: Path, project: str,
+                         method: str) -> List[Tuple[Optional[str], Path]]:
+        """Every record for one (project, method), as (label, path) pairs.
 
+        Replaces a hardcoded per-method path table that assumed one record per
+        method. Generation outputs moved into run-labelled directories
+        (`{method}/{label}/{PROJECT}_d4d.yaml`), which left that table pointing
+        at paths that no longer exist — `--method claudecode_agent` evaluated
+        zero files while reporting success.
+
+        Both layouts are supported, because they both still exist: `curated`,
+        `gpt5` and `claudecode` remain flat, and `label` is None for those.
+        Discovery is by glob rather than by an enumerated method list, so arms
+        added later (crate, healthsheet, crate_only) work without an edit here.
+        """
+        method_dir = base_dir / "d4d_concatenated" / method
+        if not method_dir.is_dir():
+            return []
+
+        # Filename depends on the method, not the layout.
+        if method == "curated":
+            stems = [f"{project}_curated.yaml"]
+        elif method.endswith("_core"):
+            stems = [f"{project}_d4d_core.yaml"]
+        else:
+            stems = [f"{project}_d4d.yaml"]
+
+        found: List[Tuple[Optional[str], Path]] = []
+        for stem in stems:
+            flat = method_dir / stem
+            if flat.is_file():
+                found.append((None, flat))
+            for sub in sorted(p for p in method_dir.iterdir() if p.is_dir()):
+                nested = sub / stem
+                if nested.is_file():
+                    found.append((sub.name, nested))
+        return found
+
+    def evaluate_all_projects(self, base_dir: Path, projects: List[str],
+                              methods: List[str]) -> List[D4DEvaluation]:
+        """Evaluate every discovered record for the given projects and methods."""
         evaluations = []
 
         for project in projects:
             for method in methods:
-                # Determine file path based on method
-                # Curated files use {PROJECT}_curated.yaml naming
-                # Other methods use {PROJECT}_d4d.yaml naming
-                if method == "curated":
-                    file_path = base_dir / "d4d_concatenated" / \
-                        "curated" / f"{project}_curated.yaml"
-                elif method == "gpt5":
-                    file_path = base_dir / "d4d_concatenated" / \
-                        "gpt5" / f"{project}_d4d.yaml"
-                elif method == "claudecode":
-                    file_path = base_dir / "d4d_concatenated" / \
-                        "claudecode" / f"{project}_d4d.yaml"
-                elif method == "claudecode_agent":
-                    file_path = base_dir / "d4d_concatenated" / \
-                        "claudecode_agent" / f"{project}_d4d.yaml"
-                elif method == "claudecode_agent_core":
-                    file_path = base_dir / "d4d_concatenated" / \
-                        "claudecode_agent_core" / f"{project}_d4d_core.yaml"
-                else:
-                    print(f"Unknown method: {method}")
+                records = self.discover_records(base_dir, project, method)
+                if not records:
+                    print(f"No records found for {project}/{method}")
                     continue
 
-                # Check if file exists
-                if not file_path.exists():
-                    print(
-                        f"Skipping {project}/{method}: file not found at {file_path}")
-                    continue
+                for label, file_path in records:
+                    tag = f"{project}/{method}" + (f"/{label}" if label else "")
 
-                # Validate before evaluating; skip on failure so the batch
-                # report only contains evaluations of valid YAML.
-                if not validate_d4d_yaml(file_path, method):
-                    print(
-                        f"Skipping evaluation for {project}/{method}: validation failed."
-                    )
-                    continue
+                    # Validate before evaluating; skip on failure so the batch
+                    # report only contains evaluations of valid YAML.
+                    if not validate_d4d_yaml(file_path, method):
+                        print(f"Skipping evaluation for {tag}: validation failed.")
+                        continue
 
-                print(f"Evaluating {project}/{method}...")
-                evaluation = self.evaluate_d4d_file(file_path, project, method)
-                evaluations.append(evaluation)
+                    print(f"Evaluating {tag}...")
+                    evaluation = self.evaluate_d4d_file(
+                        file_path, project, method, label=label)
+                    evaluations.append(evaluation)
 
         return evaluations
 
@@ -669,7 +695,8 @@ class D4DEvaluator:
 
             # Header
             writer.writerow([
-                'project', 'method', 'rubric10_total', 'rubric10_max', 'rubric10_percentage',
+                'project', 'method', 'label',
+                'rubric10_total', 'rubric10_max', 'rubric10_percentage',
                 'rubric20_total', 'rubric20_max', 'rubric20_percentage'
             ])
 
@@ -678,6 +705,7 @@ class D4DEvaluator:
                 writer.writerow([
                     eval.project,
                     eval.method,
+                    eval.label or '',
                     eval.rubric10_total,
                     eval.rubric10_max,
                     eval.rubric10_percentage,
@@ -697,6 +725,7 @@ class D4DEvaluator:
             eval_dict = {
                 'project': eval.project,
                 'method': eval.method,
+                'label': eval.label,
                 'file_path': eval.file_path,
                 'timestamp': eval.timestamp,
                 'rubric10': {
@@ -811,8 +840,14 @@ def main():
     for evaluation in evaluations:
         # For individual files, use sanitized filename
         safe_project = evaluation.project.replace("/", "_").replace(" ", "_")
-        detail_path = detailed_dir / \
-            f"{safe_project}_{evaluation.method}_evaluation.md"
+        # The label must be in the filename. Without it, replicates of one
+        # method write to the same path and only the last one survives — the
+        # report would silently describe one arbitrary run while appearing to
+        # cover them all.
+        parts = [safe_project, evaluation.method]
+        if evaluation.label:
+            parts.append(evaluation.label.replace("/", "_"))
+        detail_path = detailed_dir / f"{'_'.join(parts)}_evaluation.md"
         evaluator.generate_detailed_report(evaluation, detail_path)
 
     # Export scores
