@@ -171,3 +171,51 @@ class TestSharedConfigConvergence(unittest.TestCase):
         facts = prompt_facts(None)
         self.assertIsNone(facts["paths"])
         self.assertIn("not recoverable", facts["note"])
+
+
+class TestCuratedIsNotAReference(unittest.TestCase):
+    """`curated` was asserted to be a manual gold standard. It is not.
+
+    These records came from a ChatGPT chat session. The claim mattered because
+    REFERENCE_METHODS is read programmatically — scoring or validation work
+    would have treated a generation arm as ground truth.
+    """
+
+    def test_reference_methods_is_empty(self):
+        from data_sheets_schema.constants import REFERENCE_METHODS
+        self.assertEqual(REFERENCE_METHODS, [],
+                         "nothing in this repo has earned a reference tier")
+
+    def test_curated_is_not_claimed_as_a_reference(self):
+        from data_sheets_schema.constants import REFERENCE_METHODS
+        self.assertNotIn("curated", REFERENCE_METHODS)
+
+    def test_curated_remains_a_known_method(self):
+        """It is still a comparison arm; only its status changed."""
+        from data_sheets_schema.constants import METHODS
+        self.assertIn("curated", METHODS)
+
+    def test_provenance_note_records_what_it_actually_is(self):
+        from data_sheets_schema.constants.methods import CURATED_PROVENANCE_NOTE
+        low = CURATED_PROVENANCE_NOTE.lower()
+        self.assertIn("chatgpt", low)
+        self.assertIn("not hand-curated", low)
+        self.assertIn("superseded", low)
+
+    def test_every_curated_record_has_a_provenance_file(self):
+        from pathlib import Path
+        import yaml as _yaml
+        d = Path("data/d4d_concatenated/curated")
+        if not d.exists():
+            self.skipTest("curated records not present")
+        for f in d.glob("*_curated.yaml"):
+            prov = f.parent / f"{f.name.split('_curated')[0]}_curated_provenance.yaml"
+            self.assertTrue(prov.exists(), f"no provenance for {f.name}")
+            rec = _yaml.safe_load(prov.read_text())
+            self.assertEqual(rec["record_mode"], "reconstructed")
+            self.assertEqual(rec["model"]["provider"], "OpenAI")
+            # the things that cannot be known must be named, not guessed
+            fields = {u["field"] for u in rec["unrecoverable"]}
+            self.assertIn("model.model", fields)
+            self.assertIn("prompts", fields)
+            self.assertIsNone(rec["model"]["model"])

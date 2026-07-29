@@ -5,7 +5,12 @@ This module centralizes the various methods used for generating D4D datasheets.
 
 # D4D generation methods
 METHODS = [
-    "curated",                  # Hand-curated reference datasheets
+    # Despite the name, these were NOT hand-curated. They were produced through
+    # a ChatGPT chat interface by pasting in the prompt, schema and input docs,
+    # which makes this a generation arm like any other. The identifier is kept
+    # because published URLs and rendered output already use it; see
+    # CURATED_PROVENANCE_NOTE below and issue #177.
+    "curated",                  # ChatGPT chat interface (see note below)
     "gpt5",                     # GPT-5 generated
     "claudecode",               # Claude Code deterministic (legacy API-based)
     "claudecode_agent",         # Claude Code agent (current - v5+)
@@ -33,8 +38,27 @@ API_METHODS = ["gpt5", "claudecode"]
 # Interactive methods
 INTERACTIVE_METHODS = ["claudecode_agent", "claudecode_assistant"]
 
-# Reference methods (not generated)
-REFERENCE_METHODS = ["curated"]
+# Reference methods — records not produced by a generation run, usable as
+# ground truth.
+#
+# Deliberately empty. `curated` was listed here, which asserted programmatically
+# that a ChatGPT-chat arm was the reference; anything scoring or validating
+# against REFERENCE_METHODS would have treated it as truth. Nothing in the repo
+# currently earns this tier: every D4D record present was produced by some
+# generator. Leave it empty until something does.
+REFERENCE_METHODS: list[str] = []
+
+# What the `curated` records actually are, recorded here because the files
+# themselves carry no provenance headers at all.
+CURATED_PROVENANCE_NOTE = (
+    "Generated through a ChatGPT chat interface by pasting in the prompt, "
+    "schema and input documents. Not hand-curated and not a reference. The "
+    "records also document superseded releases — AI-READI v2.0.0 (1,067 "
+    "participants), VOICE v2.0 (442 participants), CM4AI B35XWX v1.4 — so "
+    "they are not comparable to records generated from the current corpus, "
+    "which describes AI-READI v3.0.0, VOICE 3.1.0 (833 participants) and "
+    "CM4AI HIGT4C. There is no CHORUS record. See issue #177."
+)
 
 
 # ---------------------------------------------------------------------------

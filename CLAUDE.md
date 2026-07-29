@@ -230,9 +230,16 @@ make gen-d4d-html
 | claudecode_assistant | Alternative | Interactive refinement | ⭐⭐⭐⭐⭐ | Medium |
 | claudecode | Legacy | API automation | ⭐⭐⭐ | Medium |
 | gpt5 | Comparison | Benchmarking | ⭐⭐ | Slow |
-| curated | Reference | Gold standard | ⭐⭐⭐⭐⭐ | Manual |
+| curated | Comparison | ChatGPT chat arm — **not** a gold standard | ⭐⭐ | Manual paste |
 
 **Key finding**: claudecode_agent outperforms GPT-5 by 3.26× on multi-document synthesis.
+
+⚠️ **`curated` is a misnomer.** Those records were generated through a ChatGPT
+chat interface by pasting in the prompt, schema and input docs — they were not
+hand-curated and are not a reference. They also document superseded releases
+(AI-READI v2.0.0, VOICE v2.0, CM4AI B35XWX v1.4), so scoring current output
+against them penalises correct facts as errors. There is no CHORUS record.
+**The repository has no gold standard.** See issue #177.
 
 **Use claudecode_agent for new datasheets**:
 ```bash

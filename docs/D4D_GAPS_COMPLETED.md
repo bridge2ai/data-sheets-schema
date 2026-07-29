@@ -199,7 +199,7 @@ Multiple generation methods coexisted without clear documentation of:
    | claudecode_assistant | Alternative | Interactive refinement | ⭐⭐⭐⭐⭐ | Medium | Interactive |
    | claudecode | Legacy | Deterministic API | ⭐⭐⭐ | Medium | API costs |
    | gpt5 | Comparison | Benchmarking | ⭐⭐ | Slow | API costs |
-   | curated | Reference | Gold standard | ⭐⭐⭐⭐⭐ | N/A | Manual |
+   | curated | Comparison | ChatGPT chat arm, not a gold standard (see #177) | ⭐⭐ | N/A | Manual paste |
 
 4. **When to Use Each Method** - Decision matrix
 
