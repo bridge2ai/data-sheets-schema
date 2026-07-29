@@ -1,6 +1,7 @@
 """API generation commands — four-phase D4D runs over the Anthropic API."""
 
 import json
+import sys
 from pathlib import Path
 
 import click
@@ -128,3 +129,76 @@ def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
     click.echo(f"✓ {res['project']} {res['label']}")
     for k, v in res["outputs"].items():
         click.echo(f"   {k:6} {v}")
+
+
+@api.command("batch")
+@click.option("--projects", default="AI_READI,CHORUS,CM4AI,VOICE", show_default=True,
+              help="comma-separated")
+@click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
+              show_default=True)
+@click.option("--condition", type=click.Choice(["generic", "tuned"]),
+              default="generic", show_default=True)
+@click.option("--replicates", type=int, default=3, show_default=True)
+@click.option("--label-prefix", required=True,
+              help="e.g. 2026-07-29_claude-opus-5-api-generic; _rep{N} is appended")
+@click.option("--dry-run", is_flag=True, help="cost the sweep without calling the API")
+@click.option("--continue-on-error", is_flag=True,
+              help="keep going after a failed run instead of stopping")
+@click.option("--yes", is_flag=True)
+def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
+              continue_on_error, yes):
+    """Run a sweep of projects x replicates, reporting cumulative cost.
+
+    Each run resumes independently, so a sweep interrupted partway costs only
+    the unfinished phases to complete rather than restarting.
+    """
+    from data_sheets_schema.api_runner import execute, plan
+
+    names = [p.strip() for p in projects.split(",") if p.strip()]
+    specs = []
+    for p in names:
+        for n in range(1, replicates + 1):
+            s = _spec(p, arm, f"{label_prefix}_rep{n}", condition)
+            if not s.bundle.exists():
+                raise click.ClickException(
+                    f"bundle not found for {p}: {s.bundle}")
+            specs.append(s)
+
+    plans = [plan(s) for s in specs]
+    total = sum(x["approx_total_input_tokens"] for x in plans)
+    click.echo(f"📦 {len(specs)} runs — {len(names)} projects x {replicates} "
+               f"replicates, arm={arm}, condition={condition}")
+    for s, x in zip(specs, plans):
+        click.echo(f"   {s.project:9} {s.label:44} ~{x['approx_total_input_tokens']:>8,} tok")
+    click.echo(f"   {'TOTAL':9} {'':44} ~{total:>8,} input tokens (uncached)")
+
+    if dry_run:
+        return
+    if not yes and not click.confirm(f"Run {len(specs)} billed generations?"):
+        click.echo("aborted")
+        return
+
+    ok, failed, spent_in, spent_out = [], [], 0, 0
+    for i, s in enumerate(specs, 1):
+        click.echo(f"\n[{i}/{len(specs)}] {s.project} {s.label}")
+        try:
+            res = execute(s)
+            spent_in += sum(u["input_tokens"] or 0 for u in res["usage"])
+            spent_out += sum(u["output_tokens"] or 0 for u in res["usage"])
+            cached = sum(u["cache_read"] or 0 for u in res["usage"])
+            note = f"  (resumed, skipped {len(res['skipped'])})" if res["skipped"] else ""
+            click.echo(f"   ✓ in={spent_in:,} out={spent_out:,} cache_read={cached:,}{note}")
+            ok.append(s.label)
+        except Exception as exc:                       # noqa: BLE001
+            click.echo(f"   ❌ {type(exc).__name__}: {exc}", err=True)
+            failed.append((s.project, s.label, str(exc)))
+            if not continue_on_error:
+                click.echo("stopping; re-run to resume unfinished phases", err=True)
+                break
+
+    click.echo(f"\n{len(ok)} succeeded, {len(failed)} failed")
+    click.echo(f"tokens: {spent_in:,} in, {spent_out:,} out")
+    for p, lbl, err in failed:
+        click.echo(f"   {p} {lbl}: {err[:90]}")
+    if failed:
+        sys.exit(1)

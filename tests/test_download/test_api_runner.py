@@ -12,6 +12,7 @@ from pathlib import Path
 from data_sheets_schema import schema_digest
 from data_sheets_schema.api_runner import (
     GENERIC_PROMPT,
+    PHASE_INSTRUCTIONS,
     PHASES,
     RUNTIME,
     RunSpec,
@@ -115,7 +116,7 @@ class TestPhaseAssembly(unittest.TestCase):
         self.assertIn("CoreDataset", req.cached_blocks[0]["text"])
 
     def test_other_phases_use_the_full_class_digest(self):
-        for ph in ("full", "audit", "reconcile"):
+        for ph in ("full", "audit", "reconcile_full", "report"):
             req = build_phase(spec(), ph, carry={})
             self.assertIn("`Dataset`", req.cached_blocks[0]["text"], ph)
 
@@ -185,23 +186,29 @@ class FakeResponse:
 
 
 class FakeMessages:
-    """Returns a plausible payload per phase, in call order."""
+    """Returns a plausible payload per phase, keyed by the instruction sent."""
 
-    def __init__(self):
+    def __init__(self, fail_on=None, exc=None):
         self.calls = []
+        self.fail_on, self.exc = fail_on, exc
 
     def create(self, **kw):
         self.calls.append(kw)
-        n = len(self.calls)
-        if n in (1, 2):
-            return FakeResponse("```yaml\nid: x\nname: X\n```")
-        if n == 3:
+        blob = " ".join(p.get("text", "") for p in kw["messages"][0]["content"])
+        # Match the actual instruction text. Substring-matching "Phase 3" fails:
+        # the prompt body itself enumerates all four playbook phases, so every
+        # request contains every phase number.
+        phase = next((ph for ph, instr in PHASE_INSTRUCTIONS.items()
+                      if instr in blob), None)
+        if phase is None:
+            raise AssertionError("could not identify the phase from the request")
+        if self.fail_on == phase:
+            raise self.exc or RuntimeError("boom")
+        if phase == "audit":
             return FakeResponse('{"findings": [], "summary": "none"}')
-        return FakeResponse(json.dumps({
-            "full_yaml": "# header\nid: x\nname: X\n",
-            "core_yaml": "# header\nid: x\n",
-            "report_markdown": "# Reconciliation\nNo discrepancies.\n",
-        }))
+        if phase == "report":
+            return FakeResponse("# Reconciliation\nNo discrepancies.\n")
+        return FakeResponse(f"```yaml\n# {phase}\nid: x\nname: X\n```")
 
 
 class FakeClient:
@@ -229,14 +236,20 @@ class TestExecuteOffline(unittest.TestCase):
         api_runner._client = lambda: FakeClient()
         self.addCleanup(lambda: setattr(api_runner, "_client", self._client))
 
-    def test_execute_writes_all_four_artifacts(self):
+    def test_execute_writes_every_artifact(self):
         s = spec(out_dir=self.out)
         res = self.api.execute(s)
         for p in (s.full_path, s.core_path, s.report_path):
             self.assertTrue(p.exists(), f"missing {p}")
         self.assertTrue((self.out / "CHORUS_d4d_metadata.yaml").exists(),
                         "provenance record not written")
-        self.assertEqual(len(res["usage"]), 4)
+        self.assertEqual(len(res["usage"]), 6)
+
+    def test_progress_file_is_removed_on_success(self):
+        s = spec(out_dir=self.out)
+        self.api.execute(s)
+        self.assertFalse(self.api._progress_path(s).exists(),
+                         "a completed run must not leave resume state behind")
 
     def test_provenance_record_is_live_and_names_the_prompt(self):
         import yaml as _yaml
@@ -249,17 +262,128 @@ class TestExecuteOffline(unittest.TestCase):
                          "set on the API request and observed")
         self.assertEqual(len(d["prompts"]["files"]), 1)
         self.assertEqual(len(d["prompts"]["files"][0]["sha256"]), 64)
-        self.assertEqual(len(d["api_usage"]), 4)
+        self.assertEqual(len(d["api_usage"]), 6)
 
     def test_every_phase_sends_the_cached_prefix(self):
         s = spec(out_dir=self.out)
         client = FakeClient()
         self.api._client = lambda: client
         self.api.execute(s)
-        self.assertEqual(len(client.messages.calls), 4)
+        self.assertEqual(len(client.messages.calls), 6)
         for kw in client.messages.calls:
             parts = kw["messages"][0]["content"]
             cached = [p for p in parts if p.get("cache_control")]
             self.assertEqual(len(cached), 2)
             self.assertEqual(kw["temperature"], 0.0)
             self.assertEqual(kw["model"], "claude-opus-5")
+            # every phase must be given a limit large enough for its artifact
+            self.assertGreaterEqual(kw["max_tokens"], 12000)
+
+
+class TestResumeAndRetry(unittest.TestCase):
+    """A six-phase run costs real money; a failure must not discard the rest."""
+
+    def setUp(self):
+        import tempfile
+        from data_sheets_schema import api_runner
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.out = Path(self.tmp.name) / "out"
+        self.api = api_runner
+
+    def test_failure_midway_keeps_completed_artifacts(self):
+        s = spec(out_dir=self.out)
+        client = FakeClient()
+        client.messages = FakeMessages(fail_on="reconcile_core")
+        with self.assertRaises(RuntimeError):
+            self.api.execute(s, client=client)
+        self.assertTrue(s.full_path.exists(), "phase 1 output was discarded")
+        self.assertTrue(s.core_path.exists(), "phase 2 output was discarded")
+        self.assertTrue(self.api._progress_path(s).exists(),
+                        "no resume state written")
+
+    def test_resume_skips_completed_phases(self):
+        s = spec(out_dir=self.out)
+        first = FakeClient(); first.messages = FakeMessages(fail_on="report")
+        with self.assertRaises(RuntimeError):
+            self.api.execute(s, client=first)
+        done_first = len(first.messages.calls)
+
+        second = FakeClient()
+        res = self.api.execute(s, client=second)
+        self.assertLess(len(second.messages.calls), done_first,
+                        "resume re-ran work that was already paid for")
+        self.assertTrue(res["skipped"], "nothing reported as skipped")
+        self.assertTrue(s.report_path.exists())
+
+    def test_resume_false_redoes_everything(self):
+        s = spec(out_dir=self.out)
+        self.api.execute(s, client=FakeClient())
+        again = FakeClient()
+        self.api.execute(s, client=again, resume=False)
+        self.assertEqual(len(again.messages.calls), 6)
+
+    def test_corrupt_progress_file_is_ignored_not_fatal(self):
+        s = spec(out_dir=self.out)
+        p = self.api._progress_path(s)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text("{not json", encoding="utf-8")
+        res = self.api.execute(s, client=FakeClient())
+        self.assertEqual(len(res["usage"]), 6)
+
+    def test_truncated_output_raises_rather_than_writing(self):
+        """A truncated record can validate while being silently incomplete."""
+        class Truncated(FakeResponse):
+            def __init__(self, text):
+                super().__init__(text)
+                self.stop_reason = "max_tokens"
+
+        class TruncMessages(FakeMessages):
+            def create(self, **kw):
+                super().create(**kw)
+                return Truncated("```yaml\nid: x\n```")
+
+        s = spec(out_dir=self.out)
+        client = FakeClient(); client.messages = TruncMessages()
+        with self.assertRaises(RuntimeError) as ctx:
+            self.api.execute(s, client=client)
+        self.assertIn("max_tokens", str(ctx.exception))
+        self.assertFalse(s.full_path.exists(), "truncated record was written")
+
+    def test_transient_errors_are_retried(self):
+        import anthropic
+        calls = {"n": 0}
+
+        def flaky(**kw):
+            calls["n"] += 1
+            if calls["n"] < 3:
+                raise anthropic.APIConnectionError(request=None)
+            return FakeResponse("```yaml\nid: x\n```")
+
+        client = FakeClient()
+        client.messages.create = flaky
+        out = self.api._call_with_retry(
+            client, model="m", max_tokens=100, temperature=0.0,
+            system="s", messages=[{"role": "user", "content": []}],
+            sleep=lambda _: None)
+        self.assertEqual(calls["n"], 3)
+        self.assertIsNotNone(out)
+
+    def test_auth_errors_are_not_retried(self):
+        """An invalid key fails identically every time; retrying just delays it."""
+        calls = {"n": 0}
+
+        def bad_key(**kw):
+            calls["n"] += 1
+            err = Exception("invalid x-api-key")
+            err.status_code = 401
+            raise err
+
+        client = FakeClient()
+        client.messages.create = bad_key
+        with self.assertRaises(Exception):
+            self.api._call_with_retry(
+                client, model="m", max_tokens=100, temperature=0.0,
+                system="s", messages=[{"role": "user", "content": []}],
+                sleep=lambda _: None)
+        self.assertEqual(calls["n"], 1)

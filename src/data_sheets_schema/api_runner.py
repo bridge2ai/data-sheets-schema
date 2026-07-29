@@ -30,6 +30,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -51,9 +52,28 @@ CONCAT_DIR = Path("data/d4d_concatenated")
 
 RUNTIME = "Claude API (direct)"
 PROVIDER = "Anthropic"
-DEFAULT_MAX_TOKENS = 16000
 
-PHASES = ("full", "core", "audit", "reconcile")
+# One artifact per call. An earlier design had a single `reconcile` phase return
+# full + core + report in one JSON object; measured against 112 real records
+# that demands 31k-68k output tokens in a single response, which is not a limit
+# to raise but a shape to abandon. Splitting it also means every phase writes
+# something, so a failure costs one call rather than the whole run.
+PHASES = ("full", "core", "audit", "reconcile_full", "reconcile_core", "report")
+
+# Derived from the largest artifact of each kind across 112 full, 104 core and
+# 97 report records already generated, plus ~40% headroom. A guessed ceiling is
+# how the previous design truncated five of six projects mid-YAML.
+PHASE_MAX_TOKENS = {
+    "full": 64000, "reconcile_full": 64000,
+    "core": 56000, "reconcile_core": 56000,
+    "audit": 12000, "report": 12000,
+}
+DEFAULT_MAX_TOKENS = 64000
+
+# The API is called four to six times per run over minutes; transient 429s and
+# 5xx are expected rather than exceptional.
+MAX_ATTEMPTS = 5
+BACKOFF_BASE_SECONDS = 2
 
 
 @dataclass
@@ -188,12 +208,39 @@ PHASE_INSTRUCTIONS = {
         "list of {severity, record, slot, issue}) and `summary`: any slot whose "
         "value the bundle does not support, any omission the bundle clearly "
         "supports, and any internal inconsistency. Output only JSON."),
-    "reconcile": (
-        "Phase 4. Given the audit findings, emit a JSON object with keys "
-        "`full_yaml`, `core_yaml` and `report_markdown`. The two YAML values are "
-        "the corrected records in full; `report_markdown` is the reconciliation "
-        "report, which must be written even when nothing changed. Output only "
-        "JSON."),
+    "reconcile_full": (
+        "Phase 4a. Apply the audit findings that concern the FULL record and "
+        "emit the corrected full record in its entirety, header block included. "
+        "If no finding requires a change, emit it unchanged. Output only YAML."),
+    "reconcile_core": (
+        "Phase 4b. Apply the audit findings that concern the CORE record and "
+        "emit the corrected core record in its entirety, header block included. "
+        "It must remain consistent with the reconciled full record supplied "
+        "below and assert nothing the full record does not support. If no "
+        "finding requires a change, emit it unchanged. Output only YAML."),
+    "report": (
+        "Phase 4c. Write the reconciliation report as Markdown: what the audit "
+        "found, what was changed in each record and why, and what was left "
+        "as-is and why. Write it even when nothing changed. Output only "
+        "Markdown."),
+}
+
+# What each phase produces, and where it lands. Writing as we go is what makes a
+# mid-run failure cost one call instead of six.
+PHASE_ARTIFACT = {
+    "full": "full", "reconcile_full": "full",
+    "core": "core", "reconcile_core": "core",
+    "report": "report",
+}
+
+# What each phase needs carried forward from earlier ones.
+PHASE_NEEDS = {
+    "full": (),
+    "core": ("Completed full record",),
+    "audit": ("Completed full record", "Completed core record"),
+    "reconcile_full": ("Completed full record", "Audit findings"),
+    "reconcile_core": ("Reconciled full record", "Completed core record", "Audit findings"),
+    "report": ("Audit findings",),
 }
 
 
@@ -281,51 +328,162 @@ def _extract(text: str, kind: str) -> str:
     return (fence.group(1) if fence else text).strip()
 
 
-def execute(spec: RunSpec, *, dry_run: bool = False) -> dict[str, Any]:
-    """Run all four phases and write the outputs plus a live provenance record."""
+PROGRESS_SUFFIX = "_api_progress.json"
+
+
+def _progress_path(spec: RunSpec) -> Path:
+    base = spec.out_dir or spec.full_path.parent
+    return base / f"{spec.project}{PROGRESS_SUFFIX}"
+
+
+def _load_progress(spec: RunSpec) -> dict[str, Any]:
+    p = _progress_path(spec)
+    if not p.exists():
+        return {}
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}          # a corrupt progress file means redo, never crash
+
+
+def _save_progress(spec: RunSpec, completed: list[str],
+                   audit: str | None) -> None:
+    p = _progress_path(spec)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    data: dict[str, Any] = {"completed": completed, "label": spec.label}
+    if audit:
+        data["Audit findings"] = audit
+    p.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+def _artifact_path(spec: RunSpec, artifact: str) -> Path:
+    return {"full": spec.full_path, "core": spec.core_path,
+            "report": spec.report_path}[artifact]
+
+
+def _call_with_retry(client, *, model, max_tokens, temperature, system, messages,
+                     sleep=time.sleep):
+    """One API call, retrying transient failures.
+
+    Retries rate limits, connection errors and 5xx. Does not retry 4xx other
+    than 429: an invalid key or a malformed request will fail identically on
+    every attempt, and retrying only multiplies the delay before the operator
+    sees the real problem.
+    """
+    import anthropic
+    last: Exception | None = None
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            return client.messages.create(
+                model=model, max_tokens=max_tokens, temperature=temperature,
+                system=system, messages=messages)
+        except Exception as exc:                      # noqa: BLE001 - re-raised
+            transient = isinstance(exc, (
+                getattr(anthropic, "RateLimitError", ()),
+                getattr(anthropic, "APIConnectionError", ()),
+                getattr(anthropic, "InternalServerError", ()),
+            ))
+            status = getattr(exc, "status_code", None)
+            if status is not None and 500 <= status < 600:
+                transient = True
+            if not transient or attempt == MAX_ATTEMPTS:
+                raise
+            last = exc
+            sleep(BACKOFF_BASE_SECONDS ** attempt)
+    raise last  # unreachable; keeps type checkers honest
+
+
+def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
+            client=None) -> dict[str, Any]:
+    """Run the phases, writing each artifact as it completes.
+
+    ``resume`` skips phases whose artifact already exists, so a run that failed
+    at phase 5 costs one call to finish rather than six. Set it False to force
+    a clean regeneration.
+    """
     if dry_run:
         return plan(spec)
 
-    # record_path_for, not runs.record_path: the latter returns Path | None
-    # because it locates an existing record, and we are choosing where to write
-    # a new one.
     from data_sheets_schema.provenance import build_record, record_path_for
 
     settings = _model_settings()
-    client = _client()
-    carry: dict[str, str] = {}
+    client = client or _client()
     usage: list[dict[str, Any]] = []
-    results: dict[str, str] = {}
+    skipped: list[str] = []
+    carry: dict[str, str] = {}
+
+    # Resume from an explicit progress file rather than inferring from
+    # artifacts. A `full` record on disk may be pre- or post-reconciliation and
+    # nothing in the file distinguishes them, so guessing would silently skip
+    # reconciliation or redo it.
+    progress = _load_progress(spec) if resume else {}
+    done = set(progress.get("completed", []))
+    carry: dict[str, str] = {}
+    if "Audit findings" in progress:
+        carry["Audit findings"] = progress["Audit findings"]
+    for artifact, name in (("full", "Completed full record"),
+                           ("core", "Completed core record")):
+        path = _artifact_path(spec, artifact)
+        if path.exists():
+            carry[name] = path.read_text(encoding="utf-8")
+    if "reconcile_full" in done and "Completed full record" in carry:
+        carry["Reconciled full record"] = carry["Completed full record"]
 
     for ph in PHASES:
-        req = build_phase(spec, ph, carry=carry)
-        resp = client.messages.create(
+        artifact = PHASE_ARTIFACT.get(ph)
+        target = _artifact_path(spec, artifact) if artifact else None
+
+        if ph in done:
+            skipped.append(ph)
+            continue
+
+        needed = {k: carry[k] for k in PHASE_NEEDS[ph] if k in carry}
+        req = build_phase(spec, ph, carry=needed)
+        resp = _call_with_retry(
+            client,
             model=settings["name"],
-            max_tokens=settings["max_tokens"],
+            max_tokens=PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
             temperature=settings["temperature"],
             system=req.system,
-            messages=req.messages,
-        )
-        text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
-        results[ph] = text
-        usage.append({"phase": ph,
-                      "input_tokens": getattr(resp.usage, "input_tokens", None),
-                      "output_tokens": getattr(resp.usage, "output_tokens", None),
-                      "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
-                      "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None)})
-        if ph == "full":
-            carry = {"Completed full record": _extract(text, "yaml")}
-        elif ph == "core":
-            carry = dict(carry, **{"Completed core record": _extract(text, "yaml")})
-        elif ph == "audit":
-            carry = dict(carry, **{"Audit findings": _extract(text, "json")})
+            messages=req.messages)
 
-    final = json.loads(_extract(results["reconcile"], "json"))
-    for path, key in ((spec.full_path, "full_yaml"),
-                      (spec.core_path, "core_yaml"),
-                      (spec.report_path, "report_markdown")):
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(final[key], encoding="utf-8")
+        text = "".join(b.text for b in resp.content
+                       if getattr(b, "type", "") == "text")
+        usage.append({
+            "phase": ph,
+            "input_tokens": getattr(resp.usage, "input_tokens", None),
+            "output_tokens": getattr(resp.usage, "output_tokens", None),
+            "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
+            "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
+            "max_tokens": PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
+            "stop_reason": getattr(resp, "stop_reason", None),
+        })
+
+        # A truncated record is worse than none: it validates as broken YAML or,
+        # worse, as a shorter valid record. Fail loudly rather than write it.
+        if getattr(resp, "stop_reason", None) == "max_tokens":
+            raise RuntimeError(
+                f"phase {ph!r} hit max_tokens "
+                f"({PHASE_MAX_TOKENS.get(ph)}); output truncated. Raise the "
+                f"limit for this phase rather than writing a partial record.")
+
+        body = _extract(text, "json" if ph == "audit" else
+                        ("md" if ph == "report" else "yaml"))
+        if ph == "audit":
+            carry["Audit findings"] = body
+        elif artifact:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(body, encoding="utf-8")
+            label = {"full": "Completed full record",
+                     "core": "Completed core record",
+                     "report": "Reconciliation report"}[artifact]
+            if ph == "reconcile_full":
+                label = "Reconciled full record"
+            carry[label] = body
+
+        done.add(ph)
+        _save_progress(spec, [x for x in PHASES if x in done],
+                       carry.get("Audit findings"))
 
     rec = build_record(
         spec.project, spec.method, spec.label, mode="live",
@@ -336,21 +494,26 @@ def execute(spec: RunSpec, *, dry_run: bool = False) -> dict[str, Any]:
             f"Generated via {RUNTIME}; temperature {settings['temperature']} was "
             "set on the request and is therefore observed, not asserted.",
             f"Model settings read from {settings['config_path']}.",
-        ])
+        ] + ([f"Resumed run; phases skipped as already present: {', '.join(skipped)}."]
+             if skipped else []))
     rec.data["model"] = {
-        "generation_method": "schema-grounded API, four phases",
+        "generation_method": "schema-grounded API, six phases",
         "agent_runtime": RUNTIME, "provider": PROVIDER,
         "model": settings["name"], "temperature": settings["temperature"],
-        "max_tokens": settings["max_tokens"],
+        "max_tokens_by_phase": PHASE_MAX_TOKENS,
         "temperature_basis": "set on the API request and observed",
     }
     rec.data["api_usage"] = usage
+    rec.data["phases_skipped"] = skipped or None
     rec.data["record_generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+    _progress_path(spec).unlink(missing_ok=True)   # run completed
+
     prov_path = (spec.out_dir / f"{spec.project}_d4d_metadata.yaml" if spec.out_dir
                  else record_path_for(spec.project, spec.method, spec.label))
     rec.write(prov_path)
 
     return {"label": spec.label, "project": spec.project, "usage": usage,
-            "outputs": {k: str(v) for k, v in
-                        (("full", spec.full_path), ("core", spec.core_path),
-                         ("report", spec.report_path))}}
+            "skipped": skipped,
+            "outputs": {"full": str(spec.full_path), "core": str(spec.core_path),
+                        "report": str(spec.report_path)}}
