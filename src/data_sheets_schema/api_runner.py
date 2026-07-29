@@ -286,7 +286,10 @@ def execute(spec: RunSpec, *, dry_run: bool = False) -> dict[str, Any]:
     if dry_run:
         return plan(spec)
 
-    from data_sheets_schema.provenance import build_record, record_path
+    # record_path_for, not runs.record_path: the latter returns Path | None
+    # because it locates an existing record, and we are choosing where to write
+    # a new one.
+    from data_sheets_schema.provenance import build_record, record_path_for
 
     settings = _model_settings()
     client = _client()
@@ -344,7 +347,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False) -> dict[str, Any]:
     rec.data["api_usage"] = usage
     rec.data["record_generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     prov_path = (spec.out_dir / f"{spec.project}_d4d_metadata.yaml" if spec.out_dir
-                 else record_path(spec.method, spec.label, spec.project))
+                 else record_path_for(spec.project, spec.method, spec.label))
     rec.write(prov_path)
 
     return {"label": spec.label, "project": spec.project, "usage": usage,
