@@ -1,0 +1,129 @@
+{
+  "name": "AI-Ready Score for B2AI Voice: An ethically-sourced, diverse voice dataset linked to health information",
+  "fairness": {
+    "findable": {
+      "has_content": true,
+      "details": "Dataset has DOI: https://doi.org/10.13026/k81f-qr68"
+    },
+    "accessible": {
+      "has_content": true,
+      "details": "The RO-Crate's JSON-LD metadata is machine-readable and publicly accessible by design."
+    },
+    "interoperable": {
+      "has_content": true,
+      "details": "The dataset uses the schema.org vocabulary within the RO-Crate framework and conforms to the Croissant RAI specification for interoperability."
+    },
+    "reusable": {
+      "has_content": true,
+      "details": "License: https://physionet.org/content/b2ai-voice/view-license/3.0.0/"
+    }
+  },
+  "provenance": {
+    "transparent": {
+      "has_content": true,
+      "details": "15 dataset(s) documented"
+    },
+    "traceable": {
+      "has_content": true,
+      "details": "2 computation/experiment steps documented"
+    },
+    "interpretable": {
+      "has_content": true,
+      "details": "1 software instances documented"
+    },
+    "key_actors_identified": {
+      "has_content": true,
+      "details": "117 authors, Publisher: PhysioNet, PI: Yael Bensoussan"
+    }
+  },
+  "characterization": {
+    "semantics": {
+      "has_content": true,
+      "details": "Data is semantically described using the schema.org vocabulary within a machine-readable RO-Crate."
+    },
+    "statistics": {
+      "has_content": true,
+      "details": "Total size: 12.9 GB"
+    },
+    "standards": {
+      "has_content": true,
+      "details": "55 schema(s) documented"
+    },
+    "potential_sources_of_bias": {
+      "has_content": true,
+      "details": "Sampling bias: participants are recruited from specialty clinics and associated institutions using a non-probability sampling strategy, with inclusion focused on specific disease cohorts and fluent En..."
+    },
+    "data_quality": {
+      "has_content": true,
+      "details": "Phenotype tables include a row for a participant only when at least one variable is non-missing, and participants may have repeated visits with differing responses. Questionnaire completion varies by ..."
+    }
+  },
+  "pre_model_explainability": {
+    "data_documentation_template": {
+      "has_content": true,
+      "details": "Documentation is provided via the RO-Crate's structured JSON-LD metadata, this HTML Datasheet, and Croissant RAI properties."
+    },
+    "fit_for_purpose": {
+      "has_content": true,
+      "details": "Use cases: Development, training and fine-tuning of machine-learning models that associate voice-derived features with diagnostic categories or symptom severity for conditions such as vocal fold pathology, neurological and neurodegenerative diseases, mood and anxiety disorders and respiratory illnesses.\nBenchmarking and validation of existing voice-biomarker algorithms by testing their performance on a clinically diverse, multi-site cohort with standardized tasks and rich phenotype data.\nExploratory research on acoustic, phonetic, prosodic and articulatory correlates of disease using de-identified derived features, including work on representation learning, domain adaptation and multimodal integration with other health data.\nMethodological research on fairness, robustness and AI safety in clinical voice models, including studies of bias related to demographic subgroups or recording conditions, subject to the ethical constraints in the data use agreement.\nThe dataset is explicitly not intended for operational decision making about specific individuals such as hiring, insurance pricing, law enforcement or surveillance, nor for attempts at re-identification or for uses likely to stigmatize individuals or groups., Limitations: The feature-only release does not include raw audio waveforms or free-speech transcripts, which limits certain types of modeling and error analysis and may constrain the ability to reproduce end-to-end audio pipelines.\nThis version only includes an adult cohort; models trained solely on this dataset may not generalize to younger age groups or to languages beyond those represented.\nBecause of de-identification, some granular demographic and socio-economic variables, fine-grained location data and narrative context have been removed, which reduces the risk of re-identification but also limits detailed fairness assessments and certain confounder adjustments.\nThe dataset does not provide predefined train\u2013validation\u2013test splits or benchmarking tasks and does not include explicit per-instance label-uncertainty measures, so researchers must design their own evaluation protocols and handle label noise and missingness.\nThe registered-access and controlled-access governance structure is appropriate for privacy but may limit participation by some institutions or researchers and can complicate the reproducibility of pipelines that require both features and raw audio."
+    },
+    "verifiable": {
+      "has_content": true,
+      "details": "65% of files have checksums (11/17)"
+    }
+  },
+  "ethics": {
+    "ethically_acquired": {
+      "has_content": true,
+      "details": "Data collection: Prospective observational study conducted at multiple specialty clinics and academic hospitals across North America. Eligible adults presenting to voice, neurology, psychiatry and respiratory clinics, plus healthy controls, were screened against predefined inclusion and exclusion criteria. After informed consent, a standardized protocol was administered that combined structured voice and respiratory tasks such as sustained vowels, coughs and reading passages with demographic questions, health history, disease-specific questionnaires and other patient-reported outcomes. Data were captured on a mobile or tablet application and stored in REDCap, with most participants completing a single in-clinic session and a subset completing repeated sessions., Human subject info: Yes"
+    },
+    "ethically_managed": {
+      "has_content": true,
+      "details": "Ethical review: Ethical Review by Vardit Ravitsky at the Hastings Center for Bioethics, Governance: Satrajit Ghosh"
+    },
+    "ethically_disseminated": {
+      "has_content": true,
+      "details": "License: https://physionet.org/content/b2ai-voice/view-license/3.0.0/, Sensitive info: ['The dataset encodes health-related information including diagnostic categories for voice disorders, neurological and neurodegenerative conditions, mood and psychiatric disorders and respiratory diseases, as well as symptom scores from questionnaires, which constitute sensitive personal health data.', 'Demographic variables such as age, sex and country of data collection are included in coarsened form, while finer-grained geographic identifiers, direct identifiers and many socio-economic and cultural details have been removed during de-identification to reduce re-identification risk.', 'Highly sensitive content including detailed narrative responses, some information about household income, traumatic life experiences and granular cultural identifiers has been removed entirely from this feature-only dataset; raw voice recordings, which are themselves biometric identifiers, are made available only under controlled access.', 'Use of the data is restricted to authorized researchers under a registered-access license and associated data use agreement that explicitly forbids attempts at re-identification, stigmatizing or discriminatory uses and applications such as surveillance or high-stakes individual decision making.']"
+    },
+    "secure": {
+      "has_content": true,
+      "details": "Confidentiality level: Limited dataset available with Data Use Agreement"
+    }
+  },
+  "sustainability": {
+    "persistent": {
+      "has_content": true,
+      "details": "Dataset has DOI: https://doi.org/10.13026/k81f-qr68"
+    },
+    "domain_appropriate": {
+      "has_content": true,
+      "details": "Maintenance plan: Dataset releases follow a static versioning scheme managed through PhysioNet and related platforms, with version numbers such as 1.0, 1.1, 2.0.0, 2.0.1 and 3.0.0 and associated DOIs for each snapshot and for the latest version.\nReleases are coordinated by the Bridge2AI-Voice project team and the MIT Laboratory for Computational Physiology; release notes document added participants, new feature sets, reorganized phenotype tables and corrections such as spectrogram reprocessing and authorship updates.\nFuture updates are planned as additional participants are enrolled and Spanish-language protocols are incorporated; older versions remain accessible for reproducibility while users are encouraged to adopt the latest version."
+    },
+    "well_governed": {
+      "has_content": true,
+      "details": "Governance committee: Satrajit Ghosh"
+    },
+    "associated": {
+      "has_content": true,
+      "details": "All data, software, and computations are explicitly linked within the RO-Crate's provenance graph."
+    }
+  },
+  "computability": {
+    "standardized": {
+      "has_content": true,
+      "details": "Formats: .py, text/tab-separated-values"
+    },
+    "computationally_accessible": {
+      "has_content": true,
+      "details": "Publisher: PhysioNet"
+    },
+    "portable": {
+      "has_content": true,
+      "details": "The dataset is packaged as a self-contained RO-Crate, a standard designed for portability across systems."
+    },
+    "contextualized": {
+      "has_content": true,
+      "details": "Context is provided by the RO-Crate's graph structure and detailed in properties such as rai:dataLimitations."
+    }
+  }
+}

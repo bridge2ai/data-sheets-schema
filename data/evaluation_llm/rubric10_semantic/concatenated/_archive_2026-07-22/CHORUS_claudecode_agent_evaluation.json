@@ -1,0 +1,506 @@
+{
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "d4d_file": "data/d4d_concatenated/claudecode_agent/CHORUS_d4d.yaml",
+  "project": "CHORUS",
+  "method": "claudecode_agent",
+  "evaluation_timestamp": "2026-05-13T00:00:00Z",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "summary_scores": {
+    "total_score": 42.0,
+    "total_max_score": 50,
+    "overall_percentage": 84.0
+  },
+  "element_scores": [
+    {
+      "id": 1,
+      "name": "Dataset Discovery and Identification",
+      "description": "Can a user or system discover and uniquely identify this dataset?",
+      "element_score": 4.0,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, or URI)",
+          "score": 0,
+          "evidence": "id: https://chorus4ai.org/",
+          "quality_note": "URL identifier present but not a proper persistent identifier (DOI, RRID, or UUID). This is a landing page URL, not a DOI or other standard persistent identifier format.",
+          "semantic_validation": {
+            "doi_format_check": "not_present",
+            "rrid_format_check": "not_present",
+            "plausibility": "URL identifier lacks persistence guarantees of DOI/RRID systems"
+          }
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "score": 1,
+          "evidence": "title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI",
+          "quality_note": "Excellent title and highly comprehensive description with specific details"
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "score": 1,
+          "evidence": "keywords: 28 keywords",
+          "quality_note": "Comprehensive keyword set covering all relevant dimensions"
+        },
+        {
+          "name": "Landing Page and Resources",
+          "score": 1,
+          "evidence": "page: https://chorus4ai.org/; 8 external resources",
+          "quality_note": "Active landing page plus extensive external resources"
+        },
+        {
+          "name": "Hierarchical Structure",
+          "score": 1,
+          "evidence": "6 distinct subsets (OMOP EHR, WFDB waveforms, DICOM imaging, OHNLP notes, EEG, training subset)",
+          "quality_note": "Well-structured hierarchical organization with 6 modality-based subsets"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Dataset Access and Retrieval",
+      "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
+      "element_score": 4.0,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Access Policy and IP Restrictions Defined",
+          "score": 1,
+          "evidence": "license: Controlled Access - Data Use Agreement Required",
+          "quality_note": "Clear controlled access policy with specific requirements"
+        },
+        {
+          "name": "Regulatory Restrictions and Confidentiality Level Specified",
+          "score": 1,
+          "evidence": "Regulatory compliance: HIPAA, 45 CFR 46, institutional regulations, NIH ethical AI requirements",
+          "quality_note": "Comprehensive regulatory compliance documentation"
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "score": 0,
+          "evidence": "Landing page URL provided but no direct download URL; access via secure enclave",
+          "quality_note": "Appropriate for controlled access but no public download URL"
+        },
+        {
+          "name": "Distribution Formats and File Types Specified",
+          "score": 1,
+          "evidence": "5 formats: OMOP CDM, WFDB, DICOM, OHNLP tokenized, EDF+/Persyst",
+          "quality_note": "Comprehensive format specification with standard formats and schemas"
+        },
+        {
+          "name": "Related Datasets and External Resources Linked",
+          "score": 1,
+          "evidence": "8 external resources including GitHub org (28 repos), OHDSI, Bridge2AI, publication DOI",
+          "quality_note": "Excellent external resource linkage"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Data Reuse and Interoperability",
+      "description": "Is sufficient information provided to reuse and integrate the dataset with others?",
+      "element_score": 5.0,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "License Terms Allow Reuse",
+          "score": 1,
+          "evidence": "Controlled access with DUA specifying research use permissions",
+          "quality_note": "Clear license allowing reuse for approved research"
+        },
+        {
+          "name": "Data Formats Are Standardized",
+          "score": 1,
+          "evidence": "All 5 modalities use international standards: OMOP, WFDB, DICOM, OHNLP, EDF+/Persyst",
+          "quality_note": "Exemplary use of standardized formats"
+        },
+        {
+          "name": "Schema or Ontology Conformance Stated",
+          "score": 1,
+          "evidence": "OMOP CDM, DICOM, WFDB/PhysioNet, OHNLP, EDF+/Persyst schemas with validation",
+          "quality_note": "Comprehensive schema conformance with validation"
+        },
+        {
+          "name": "Variable Metadata with Identifiers Defined",
+          "score": 1,
+          "evidence": "OMOP vocabulary and concept IDs; published schemas for all 5 modalities",
+          "quality_note": "Variable-level metadata through OMOP CDM and published schemas"
+        },
+        {
+          "name": "Use Guidance Provided",
+          "score": 1,
+          "evidence": "4 intended uses, 3 discouraged uses with detailed rationale",
+          "quality_note": "Comprehensive use guidance covering technical, ethical, temporal considerations"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Ethical Use and Privacy Safeguards",
+      "description": "Does the dataset provide clear information about consent, privacy, and ethical oversight?",
+      "element_score": 4.0,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "IRB or Ethics Review Documented",
+          "score": 1,
+          "evidence": "IRBs at 14 centers, community ethics focus groups, legal/ethical advisory teams",
+          "quality_note": "Comprehensive multi-layered ethics oversight"
+        },
+        {
+          "name": "Deidentification Method Described",
+          "score": 1,
+          "evidence": "5 methods: re-id limitation, privacy_scan_tool, OHNLP tokenization, DICOM de-id, DeGauss geocoding",
+          "quality_note": "Multiple deidentification methods across all modalities"
+        },
+        {
+          "name": "Privacy Protections Beyond Deidentification",
+          "score": 1,
+          "evidence": "Secure enclave, DUA prohibiting re-identification, community ethics focus groups, federated access",
+          "quality_note": "Multi-layered privacy protections: technical, legal, governance, architectural"
+        },
+        {
+          "name": "Informed Consent Obtained from Participants",
+          "score": 0,
+          "evidence": "No explicit mention of consent procedures",
+          "quality_note": "Retrospective collection but consent procedures not documented"
+        },
+        {
+          "name": "Vulnerable Populations and Compensation Documented",
+          "score": 1,
+          "evidence": "Pediatric/neonatal ICU patients with community ethics focus groups and SDOH framework",
+          "quality_note": "Vulnerable populations acknowledged with appropriate protections"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Data Composition and Structure",
+      "description": "Can the dataset structure, modality, and population be understood from metadata?",
+      "element_score": 5.0,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Cohort or Subpopulations Characteristics Described",
+          "score": 1,
+          "evidence": "ICU/PICU/NICU patients, 14 hospitals, 45K+ current/100K+ target with SDOH",
+          "quality_note": "Comprehensive population description with diversity measures"
+        },
+        {
+          "name": "Number of Instances or Samples Reported",
+          "score": 1,
+          "evidence": "45K+ admissions, 50K released, 100K+ target, 1.6B OMOP rows, 23TB waveforms, 7,642 radiology",
+          "quality_note": "Highly specific instance counts across multiple dimensions"
+        },
+        {
+          "name": "Variable-Level Metadata and Tabular Flag",
+          "score": 1,
+          "evidence": "OMOP CDM tabular structure with 1.6B rows and OHDSI tool stack",
+          "quality_note": "Tabular structure confirmed with comprehensive variable metadata"
+        },
+        {
+          "name": "Data Topics or Conditions Represented",
+          "score": 1,
+          "evidence": "Acute/critical illness, complication prediction, treatment response in ICU/PICU/NICU",
+          "quality_note": "Clear clinical topics and research focus"
+        },
+        {
+          "name": "Data Quality Issues and Anomalies Documented",
+          "score": 1,
+          "evidence": "Transparent documentation of ongoing expansion, incomplete modalities, federated sampling",
+          "quality_note": "Current completeness status and ongoing processes clearly stated"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Data Provenance and Version Tracking",
+      "description": "Can a user determine dataset versions, update history, and provenance?",
+      "element_score": 3.0,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Dataset Version Number Provided",
+          "score": 0,
+          "evidence": "No version field",
+          "quality_note": "Version numbering scheme not documented"
+        },
+        {
+          "name": "Version Access Methods Documented",
+          "score": 0,
+          "evidence": "No version access documentation",
+          "quality_note": "Version access mechanisms not described"
+        },
+        {
+          "name": "Change Descriptions and Errata Provided",
+          "score": 1,
+          "evidence": "Current status (Aug 2025) vs target documented with GitHub tracking",
+          "quality_note": "Current status clear but historical change log absent"
+        },
+        {
+          "name": "Update Schedule or Frequency Indicated",
+          "score": 1,
+          "evidence": "Continuous updates through November 30, 2026 with regular status tracking",
+          "quality_note": "Clear update schedule through specific end date"
+        },
+        {
+          "name": "Provenance and Source Derivation Documented",
+          "score": 1,
+          "evidence": "4 source types from 14 centers with transformation pipelines documented",
+          "quality_note": "Comprehensive provenance documentation"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Scientific Motivation and Funding Transparency",
+      "description": "Does the metadata clearly state why the dataset exists and who funded it?",
+      "element_score": 5.0,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Motivation or Purpose for Dataset Creation",
+          "score": 1,
+          "evidence": "4 purposes + 4 research gaps addressed",
+          "quality_note": "Exceptional motivation documentation"
+        },
+        {
+          "name": "Primary Research Objectives or Tasks",
+          "score": 1,
+          "evidence": "5 detailed tasks with clear descriptions",
+          "quality_note": "Comprehensive research objectives"
+        },
+        {
+          "name": "Funding Sources and Mechanisms Listed",
+          "score": 1,
+          "evidence": "NIH Common Fund Bridge2AI with detailed grant info including $5,880,300 total funding",
+          "quality_note": "Comprehensive funding documentation"
+        },
+        {
+          "name": "Grant IDs or Award Numbers Present",
+          "score": 1,
+          "evidence": "OT2OD032701 (1OT2OD032701-01) with NIH RePORTER link",
+          "quality_note": "Grant number documented in multiple locations with valid NIH format"
+        },
+        {
+          "name": "Creators and Acknowledgements Documented",
+          "score": 1,
+          "evidence": "19 creators with roles and institutional affiliations",
+          "quality_note": "Comprehensive creator documentation across multiple roles"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Technical Transparency",
+      "description": "Can data collection and processing steps be replicated or understood?",
+      "element_score": 5.0,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Collection Mechanisms and Settings Described",
+          "score": 1,
+          "evidence": "4 collection mechanisms with specific systems and volumes",
+          "quality_note": "Comprehensive collection documentation"
+        },
+        {
+          "name": "Data Acquisition Methods Listed",
+          "score": 1,
+          "evidence": "5 acquisition methods for all modalities with volumes and schemas",
+          "quality_note": "Detailed acquisition methods with complete modality coverage"
+        },
+        {
+          "name": "Preprocessing, Cleaning, and Labeling Strategies",
+          "score": 1,
+          "evidence": "5 preprocessing + 2 cleaning + 1 labeling strategies",
+          "quality_note": "Comprehensive processing documentation with specific tools and SOPs"
+        },
+        {
+          "name": "Software and Tools Documented",
+          "score": 1,
+          "evidence": "7 tools including OHDSI, OHNLP, chorus_waveform, privacy_scan_tool, DeGauss",
+          "quality_note": "Extensive tool documentation with GitHub organization (28 repos)"
+        },
+        {
+          "name": "External Standards and Resources Referenced",
+          "score": 1,
+          "evidence": "8 resources including Chorus_SOP, GitHub, OHDSI, publication DOI 10.1007/s12028-024-02007",
+          "quality_note": "Comprehensive external resources with publication DOI"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Dataset Evaluation and Limitations Disclosure",
+      "description": "Does the metadata communicate known risks, biases, or dataset limitations?",
+      "element_score": 4.0,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Known Limitations Documented",
+          "score": 1,
+          "evidence": "Ongoing expansion limitations, incomplete modalities, partial availability documented",
+          "quality_note": "Transparent limitation documentation with current/target metrics"
+        },
+        {
+          "name": "Systematic Biases Identified and Described",
+          "score": 0,
+          "evidence": "No explicit bias analysis beyond equity focus",
+          "quality_note": "Equity efforts documented but systematic bias analysis absent"
+        },
+        {
+          "name": "Data Anomalies and Quality Issues Noted",
+          "score": 1,
+          "evidence": "Ongoing QA, harmonization challenges, schema validation needs documented",
+          "quality_note": "Quality issues acknowledged with harmonization complexity"
+        },
+        {
+          "name": "Sensitive Content and Warnings Provided",
+          "score": 1,
+          "evidence": "4 sensitive element categories with detailed sensitivity_details",
+          "quality_note": "Comprehensive sensitive content documentation"
+        },
+        {
+          "name": "Ethical Review Details Including Conflicts",
+          "score": 1,
+          "evidence": "IRB at 14 centers, community ethics, legal/ethical advisory, regulatory compliance",
+          "quality_note": "Comprehensive ethical review documentation"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Cross-Platform and Community Integration",
+      "description": "Does the dataset connect to wider data ecosystems, repositories, or standards?",
+      "element_score": 5.0,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Dataset Published on a Recognized Platform",
+          "score": 1,
+          "evidence": "Secure enclave (Azure) + NIH Bridge2AI + GitHub organization (28 repos)",
+          "quality_note": "Appropriate platform for controlled access sensitive data"
+        },
+        {
+          "name": "Citation and DOI for Cross-referencing",
+          "score": 1,
+          "evidence": "Publication DOI 10.1007/s12028-024-02007 + grant number OT2OD032701",
+          "quality_note": "Citable publication DOI in peer-reviewed journal"
+        },
+        {
+          "name": "Community Standards or Schema Conformance",
+          "score": 1,
+          "evidence": "5 standards: OMOP (OHDSI), DICOM, WFDB/PhysioNet, OHNLP, EDF+/Persyst",
+          "quality_note": "Exemplary community standards conformance"
+        },
+        {
+          "name": "Outreach Materials and Documentation Links",
+          "score": 1,
+          "evidence": "Chorus_SOP, AIM-AHEAD training (2 cohorts), 28 GitHub repos, websites",
+          "quality_note": "Comprehensive outreach and documentation"
+        },
+        {
+          "name": "Related Datasets with Typed Relationships",
+          "score": 1,
+          "evidence": "Bridge2AI ecosystem (4 projects), OHDSI network, federated multi-center structure",
+          "quality_note": "Integration with Bridge2AI and OHDSI ecosystems"
+        }
+      ]
+    }
+  ],
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "correctness",
+        "severity": "medium",
+        "description": "Dataset identifier is URL rather than standard persistent identifier",
+        "fields_involved": [
+          "id"
+        ],
+        "recommendation": "Register dataset with DataCite for DOI"
+      },
+      {
+        "type": "consistency",
+        "severity": "medium",
+        "description": "human_subject_research=True but informed consent not documented",
+        "fields_involved": [
+          "human_subject_research",
+          "informed_consent"
+        ],
+        "recommendation": "Add consent procedure documentation"
+      },
+      {
+        "type": "content_accuracy",
+        "severity": "low",
+        "description": "No systematic bias analysis despite multi-center critical care dataset",
+        "fields_involved": [
+          "known_biases"
+        ],
+        "recommendation": "Document potential systematic biases"
+      },
+      {
+        "type": "semantic_understanding",
+        "severity": "low",
+        "description": "Version tracking absent despite ongoing expansion",
+        "fields_involved": [
+          "version"
+        ],
+        "recommendation": "Implement version numbering scheme"
+      }
+    ],
+    "semantic_insights": [
+      "Exceptional multi-modal integration with 5 international standards",
+      "Comprehensive ethical framework with 14 IRBs + community ethics",
+      "Grant OT2OD032701 follows NIH format correctly",
+      "Transparent about current limitations and ongoing processes",
+      "Strong community integration: OHDSI, Bridge2AI, AIM-AHEAD, PhysioNet",
+      "Federated architecture ensures geographic/institutional diversity",
+      "Publication DOI provides citable reference",
+      "GitHub organization (28 repos) demonstrates open science practices",
+      "Multi-layered privacy protection",
+      "SDOH inclusion with privacy-preserving geocoding"
+    ],
+    "consistency_checks": {
+      "passed": [
+        "human_subject_research=True AND IRB documented",
+        "Sensitive data AND de-identification methods",
+        "Controlled access AND DUA specified",
+        "Grant format valid: OT2OD032701",
+        "Multi-modal data AND appropriate standards",
+        "Publication DOI format valid: 10.1007/s12028-024-02007"
+      ],
+      "failed": [
+        "human_subject_research=True BUT consent not documented",
+        "URL identifier instead of persistent DOI/RRID",
+        "No version number despite ongoing expansion",
+        "No systematic bias analysis"
+      ],
+      "warnings": [
+        "No direct download URL (controlled access)",
+        "Clinical notes local only (tokens in enclave)",
+        "Some modalities incomplete (Aug 2025)",
+        "No dataset-specific DOI"
+      ]
+    },
+    "correctness_validations": {
+      "doi_format": "publication_doi_valid but dataset_doi_absent",
+      "grant_number_format": "valid - OT2OD032701 matches NIH pattern",
+      "rrid_format": "not_present",
+      "url_validity": "all_valid"
+    }
+  },
+  "recommendations": [
+    "Register dataset with DOI through DataCite",
+    "Document informed consent procedures for retrospective collection",
+    "Implement version numbering scheme (e.g., v1.0 = 45K, v2.0 = 100K)",
+    "Add systematic bias analysis section",
+    "Document version access methods once versioning implemented",
+    "Clarify conflicts of interest disclosure",
+    "Consider dataset-specific DOI in addition to publication DOI",
+    "Document historical change log as dataset evolves"
+  ]
+}

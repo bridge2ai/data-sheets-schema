@@ -1,0 +1,74 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: reconstructed
+record_generated_at: '2026-07-28T03:58:30+00:00'
+run:
+  label: 2026-07-23_gpt-5.5-high-fast-r3
+  project: CM4AI
+  method: claudecode_agent
+  arm: baseline
+  replicate: null
+model:
+  generation_method: schema-grounded agentic, phase 1
+  agent_runtime: Codex CLI
+  provider: OpenAI
+  model: gpt-5.5
+  reasoning_effort: high
+  mode: fast
+  temperature: '0.0'
+schema:
+  declared_version: 1.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_md5: 633a2d2c490364d66f45d8ee2959a329
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_md5: c23d85ec2abfa2178de2737278f690e1
+  merged_schema_carries_version: false
+  note: The version is declared in the source schema but the merged artefacts predate
+    it; they will carry it after the next `make full-schema`. Content md5s identify
+    exactly what was used.
+software:
+  note: reconstructed; versions are today's, not the run's
+repo:
+  commit: 0e19e85fe6a0b18038ba64bbff309d684bae2a9f
+  commit_short: 0e19e85f
+  branch: main
+  dirty: true
+  dirty_file_count: 368
+system:
+  note: not recorded at run time; the current machine is not evidence of what produced
+    this run
+inputs:
+  bundle_path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+  bundle_md5: null
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: null
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-07-23_gpt-5.5-high-fast-r3/CM4AI_d4d.yaml
+    md5: fbe4cd058f3009df411a55f710ad040e
+    bytes: 46918
+    slots: 73
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r3/CM4AI_d4d_core.yaml
+    md5: 067118a18bc2bc693c88eee59ca82864
+    bytes: 36566
+    slots: 66
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r3/CM4AI_reconciliation.md
+    md5: 3aab2279c29dfe41fe4e0e0210e45c25
+    bytes: 2765
+    slots: null
+unrecoverable:
+- field: inputs.bundle_md5
+  reason: the input bundles were regenerated on 2026-07-24 and 2026-07-27; the bytes
+    this run consumed are not recoverable, and hashing the current file would assert
+    a false provenance claim
+- field: inputs.source_manifest.md5
+  reason: manifest has been edited since this run
+- field: system
+  reason: hardware was not captured when this run executed
+notes: null

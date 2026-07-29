@@ -1,0 +1,89 @@
+{
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "d4d_file": "data/d4d_concatenated/claudecode_agent/CM4AI_d4d.yaml",
+  "project": "CM4AI",
+  "method": "claudecode_agent",
+  "evaluation_timestamp": "2026-05-14T01:59:17.007134Z",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "summary_scores": {
+    "total_score": 46,
+    "total_max_score": 50,
+    "overall_percentage": 92.0
+  },
+  "element_scores": [
+    {
+      "id": 1,
+      "name": "Dataset Discovery and Identification",
+      "description": "Can a user or system discover and uniquely identify this dataset?",
+      "element_score": 5,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, or URI)",
+          "score": 1,
+          "evidence": "id: https://doi.org/10.18130/V3/DXWOS5",
+          "quality_note": "Valid DOI with correct format (10.18130 prefix matches Harvard Dataverse/UVA LibraData). Multiple additional DOIs provided for version releases.",
+          "semantic_validation": {
+            "format_valid": true,
+            "prefix_plausible": true,
+            "registrar": "Harvard Dataverse (UVA LibraData)",
+            "issues": []
+          }
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "score": 1,
+          "evidence": "title: Cell Maps for Artificial Intelligence (CM4AI); description: 1,820 characters covering mission, data types, cell lines, multimodal integration, MuSIC pipeline, RO-Crate packaging, and Nature publication",
+          "quality_note": "Comprehensive description with specific technical details: 100 chromatin modifiers, 100 metabolic enzymes, multiple data streams (IF, AP-MS, SEC-MS, CRISPR), cell lines (MDA-MB-468, KOLF2.1J), and peer-reviewed validation (Nature 2025)",
+          "semantic_validation": {
+            "length": 1820,
+            "specificity": "high",
+            "actionable": true,
+            "issues": []
+          }
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "score": 1,
+          "evidence": "keywords: 26 terms including Cell Maps, AI-Ready Data, Bridge2AI, Functional Genomics, Protein-Protein Interactions, Spatial Proteomics, CRISPR Perturbation, specific cell lines (MDA-MB-468, KOLF2.1J), techniques (AP-MS, SEC-MS, Immunofluorescence), standards (FAIR, RO-Crate, FAIRSCAPE), methods (Deep Learning, Integrative Structure Modeling)",
+          "quality_note": "Excellent coverage: domain (functional genomics), methods (AP-MS, SEC-MS, IF, CRISPR), cell types (breast cancer, iPSC), standards (FAIR, RO-Crate), diseases (Breast Cancer), and techniques (Deep Learning, Visible Neural Networks)",
+          "semantic_validation": {
+            "count": 26,
+            "coverage": "comprehensive",
+            "domain_relevant": true,
+            "issues": []
+          }
+        },
+        {
+          "name": "Landing Page and Resources (page, hierarchical resources)",
+          "score": 1,
+          "evidence": "page: https://www.cm4ai.org; distribution_formats with access_urls including DOI landing pages, NDEx, U-BRITE platform, MassIVE, NCBI SRA",
+          "quality_note": "Official project website plus multiple access points: UVA Dataverse (DOIs with landing pages), NDEx for visualization, MassIVE for MS data, NCBI SRA for sequence data. Hierarchical resource structure via RO-Crate packages.",
+          "semantic_validation": {
+            "landing_page_valid": true,
+            "multiple_access_points": true,
+            "hierarchical_structure": true,
+            "issues": []
+          }
+        },
+        {
+          "name": "Hierarchical Structure (parent datasets, relationships)",
+          "score": 1,
+          "evidence": "RO-Crate packages with hierarchical structure; multiple release versions (V0.5, V1.4, V2.1, October 2025); subsets defined (IF images, AP-MS, SEC-MS, CRISPR atlas, MuSIC cell maps); instances organized by cell line and treatment condition",
+          "quality_note": "Clear hierarchical organization: project-level RO-Crates containing data subsets, versioned releases with DOIs, parent-child relationships between raw data and integrated cell maps. Temporal versioning with quarterly updates.",
+          "semantic_validation": {
+            "version_hierarchy": true,
+            "data_subset_structure": true,
+            "relationships_typed": true,
+            "issues": []
+          }
+        }
+      ]
+    }
+  ]
+}

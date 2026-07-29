@@ -46,9 +46,9 @@ class TestDownloadCLI(unittest.TestCase):
                     "sources",
                     "--project",
                     "AI_READI",
-                    "--output-dir",
-                    str(self.test_path / "raw"),
-                ],
+                "--output-dir",
+                str(self.test_path / "raw"),
+            ],
             )
 
         self.assertEqual(result.exit_code, 0, msg=result.output)
@@ -56,10 +56,15 @@ class TestDownloadCLI(unittest.TestCase):
             captured_argv,
             [[
                 "organized_dataset_extractor.py",
-                "--output-dir",
+                "https://docs.google.com/spreadsheets/d/"
+                "1jBD6sTp6TDemy6v75PGAHSVz5yfIAXZ8zdDPbmOGATM/"
+                "export?format=csv",
+                "-o",
                 str(self.test_path / "raw"),
                 "--projects",
                 "AI_READI",
+                "--manifest",
+                "data/preprocessed/source_manifest.yaml",
             ]],
         )
         self.assertEqual(sys.argv, original_argv)
@@ -100,6 +105,8 @@ class TestDownloadCLI(unittest.TestCase):
                 str(self.test_path / "raw"),
                 "-o",
                 str(self.test_path / "preprocessed"),
+                "--manifest",
+                "data/preprocessed/source_manifest.yaml",
                 "-p",
                 "CHORUS",
             ]],
@@ -143,6 +150,12 @@ class TestDownloadCLI(unittest.TestCase):
                 str(project_dir),
                 "-o",
                 str(self.test_path / "VOICE.txt"),
+                "-e",
+                ".txt",
+                "--manifest",
+                "data/preprocessed/source_manifest.yaml",
+                "--project",
+                "VOICE",
             ]],
         )
         self.assertEqual(sys.argv, original_argv)

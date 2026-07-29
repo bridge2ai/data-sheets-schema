@@ -1,0 +1,15 @@
+{
+  "type": "DOI Collection",
+  "source_url": "https://aireadi.org/publications",
+  "row": 2,
+  "dois": [
+    {
+      "doi": "10.1038/s42255-024-01165-x",
+      "url": "https://doi.org/10.1038/s42255-024-01165-x"
+    },
+    {
+      "doi": "10.1136/bmjopen-2024-097449",
+      "url": "https://doi.org/10.1136/bmjopen-2024-097449"
+    }
+  ]
+}

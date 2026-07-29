@@ -1,0 +1,63 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: reconstructed
+record_generated_at: '2026-07-28T03:58:29+00:00'
+run:
+  label: 2026-07-23_gpt-5.5-high-fast-r2
+  project: AI_READI
+  method: claudecode_agent
+  arm: baseline
+  replicate: null
+model:
+  generation_method: Codex CLI Agentic
+  model: gpt-5.5
+  reasoning_effort: high
+  mode: fast
+  temperature: '0.0'
+schema:
+  declared_version: 1.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_md5: 633a2d2c490364d66f45d8ee2959a329
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_md5: c23d85ec2abfa2178de2737278f690e1
+  merged_schema_carries_version: false
+  note: The version is declared in the source schema but the merged artefacts predate
+    it; they will carry it after the next `make full-schema`. Content md5s identify
+    exactly what was used.
+software:
+  note: reconstructed; versions are today's, not the run's
+repo:
+  commit: 0e19e85fe6a0b18038ba64bbff309d684bae2a9f
+  commit_short: 0e19e85f
+  branch: main
+  dirty: true
+  dirty_file_count: 368
+system:
+  note: not recorded at run time; the current machine is not evidence of what produced
+    this run
+inputs:
+  bundle_path: null
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: null
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-07-23_gpt-5.5-high-fast-r2/AI_READI_d4d.yaml
+    md5: 1d729ccd52b75dcfd74c21394b5d392f
+    bytes: 115100
+    slots: 63
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r2/AI_READI_d4d_core.yaml
+    md5: 329f8e90c7162ea9ab2af21c6b8b2d77
+    bytes: 83167
+    slots: 57
+  report: null
+unrecoverable:
+- field: inputs.source_manifest.md5
+  reason: manifest has been edited since this run
+- field: system
+  reason: hardware was not captured when this run executed
+notes: null

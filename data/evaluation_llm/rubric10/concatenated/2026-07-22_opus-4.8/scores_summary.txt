@@ -1,0 +1,32 @@
+# rubric10 scores — publication run 2026-07-22
+
+[claudecode]
+  AI_READI   34/50  (68.0%)
+  CHORUS     18/50  (36.0%)
+  CM4AI      33/50  (66.0%)
+  VOICE      37/50  (74.0%)
+
+[claudecode_agent]
+  AI_READI   41/50  (82.0%)
+  CHORUS     40.5/50  (81.0%)
+  CM4AI      39.0/50  (78.0%)
+  VOICE      47/50  (94.0%)
+
+[claudecode_agent_core]
+  AI_READI   41.0/50  (82.0%)
+  CHORUS     40.0/50  (80.0%)
+  CM4AI      34.0/50  (68.0%)
+  VOICE      47.0/50  (94.0%)
+
+[claudecode_assistant]
+  AI_READI   39/50  (78.0%)
+  CHORUS     35/50  (70.0%)
+  CM4AI      33/50  (66.0%)
+  VOICE      37/50  (74.0%)
+
+[gpt5]
+  AI_READI   3/50  (6.0%)
+  CHORUS     5/50  (10.0%)
+  CM4AI      28/50  (56.0%)
+  VOICE      1/50  (2.0%)
+

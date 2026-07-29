@@ -21,11 +21,17 @@ You are an expert on validating D4D schemas and data files using LinkML validati
 Validates D4D YAML data files against the schema.
 
 ```bash
-# Validate a single D4D file
+# Validate a single full D4D file
 poetry run linkml-validate \
   -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
   -C Dataset \
   path/to/file_d4d.yaml
+
+# Validate a D4D-core file (semantic exchange layer subset)
+poetry run linkml-validate \
+  -s src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml \
+  -C CoreDataset \
+  path/to/file_d4d_core.yaml
 
 # Using Makefile target
 make validate-d4d FILE=path/to/file_d4d.yaml
@@ -48,7 +54,8 @@ poetry run linkml-term-validator validate-schema \
 # Validate data against ontology constraints
 poetry run linkml-term-validator validate-data \
   path/to/file_d4d.yaml \
-  --schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  --schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
+  --target-class Dataset
 ```
 
 ### 3. linkml-reference-validator (Text Quote Validation)
@@ -66,7 +73,28 @@ Source documents are in `data/preprocessed/`:
 - `data/preprocessed/individual/{PROJECT}/` - Individual preprocessed files
 - `data/preprocessed/concatenated/` - Concatenated documents
 
-### 4. Schema Linting
+### 4. Full/Core Pair Consistency
+
+Derives shared slots from the full and core LinkML schemas. It requires deeply
+identical parsed YAML content for schema-identical slots and checks projected
+resources plus deterministic file-collection/distribution relations.
+
+```bash
+poetry run python -m data_sheets_schema.d4d_pair_consistency \
+  --full path/to/PROJECT_d4d.yaml \
+  --core path/to/PROJECT_d4d_core.yaml
+
+# Only after Phase 3 has audited full against current sources:
+poetry run python -m data_sheets_schema.d4d_pair_consistency \
+  --full path/to/PROJECT_d4d.yaml \
+  --core path/to/PROJECT_d4d_core.yaml \
+  --sync-core
+```
+
+The validator's related-content warnings require a semantic Phase 4 review;
+they are not automatically resolved.
+
+### 5. Schema Linting
 Checks schema syntax and best practices.
 
 ```bash
@@ -97,7 +125,13 @@ poetry run linkml-lint src/data_sheets_schema/schema/D4D_Composition.yaml
 3. **Term validation** (if using ontology terms): Verify ontology references
    ```bash
    poetry run linkml-term-validator validate-data file.yaml \
-     --schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+     --schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
+     --target-class Dataset
+   ```
+
+4. **Pair validation** (for full/core production pairs):
+   ```bash
+   make validate-d4d-pair FULL=path/to/full.yaml CORE=path/to/core.yaml
    ```
 
 ### For Schema Files
@@ -218,6 +252,7 @@ enums:
 Before committing D4D changes:
 
 - [ ] Run `make validate-d4d FILE=<file>` on changed D4D files
+- [ ] Run `make validate-d4d-pair FULL=<full> CORE=<core>` on paired records
 - [ ] Run `make lint-modules` if schema modules changed
 - [ ] Run `make check-sync` to verify schema synchronization
 - [ ] Run `make test` for complete test suite

@@ -1,0 +1,434 @@
+{
+  "rubric": "rubric20-semantic",
+  "version": "1.0",
+  "d4d_file": "data/d4d_concatenated/claudecode_agent/AI_READI_d4d.yaml",
+  "project": "AI_READI",
+  "method": "claudecode_agent",
+  "evaluation_timestamp": "2026-05-13T00:00:00Z",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "consistency",
+        "severity": "low",
+        "description": "human_subject_research.involves_human_subjects=True and ethical_reviews present - consistent and well-documented",
+        "fields_involved": ["human_subject_research", "ethical_reviews"],
+        "recommendation": "No action needed - ethics documentation is comprehensive"
+      },
+      {
+        "type": "correctness",
+        "severity": "low",
+        "description": "DOI prefix 10.57895 is valid for FAIRhub - matches expected registrar pattern",
+        "fields_involved": ["doi"],
+        "recommendation": "No action needed - DOI format is correct"
+      },
+      {
+        "type": "correctness",
+        "severity": "low",
+        "description": "Grant number OT2OD032644 follows NIH format correctly (Type OT2, Institute OD)",
+        "fields_involved": ["funders"],
+        "recommendation": "No action needed - grant number format is valid"
+      },
+      {
+        "type": "consistency",
+        "severity": "low",
+        "description": "License CC BY-NC 4.0 appropriately restrictive for sensitive health data with dual-tier access (public/controlled)",
+        "fields_involved": ["license_and_use_terms", "subsets"],
+        "recommendation": "No action needed - license aligns with data sensitivity"
+      }
+    ],
+    "semantic_insights": [
+      "Description provides exceptional detail: 4,000 participants, triple-balanced design, multi-modal data across 10+ domains",
+      "IRB approval documented with specific protocol number (STUDY00016228) and institutional reliance agreements",
+      "FAIRhub DOI prefix (10.57895) correctly used for datasets hosted at fairhub.io",
+      "NIH grant number OT2OD032644 correctly formatted for Other Transaction type 2 from NIH Office of the Director",
+      "Funding details comprehensive with exact amounts, opportunity number, and project dates",
+      "Collection mechanisms document multi-site harmonization with standardized protocols",
+      "Preprocessing strategies demonstrate FAIR compliance with OMOP CDM, DICOM, mHealth standards",
+      "Temporal consistency maintained across enrollment timeline and version releases"
+    ],
+    "consistency_checks": {
+      "passed": 24,
+      "failed": 0,
+      "warnings": 0
+    },
+    "correctness_validations": {
+      "doi_format": "valid",
+      "grant_number_format": "valid",
+      "rrid_format": "not_present",
+      "url_validity": "all_valid"
+    }
+  },
+  "overall_score": {
+    "total_points": 79,
+    "max_points": 84,
+    "percentage": 94.0
+  },
+  "categories": [
+    {
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "description": "Proportion of mandatory schema fields populated",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥90% fields populated",
+          "evidence": "id, title (512 chars), description, keywords (19 terms), license all present with exceptional detail",
+          "quality_note": "All mandatory fields comprehensively populated",
+          "semantic_checks": {
+            "correctness": "ID is valid FAIRhub URL, license is standard CC designation",
+            "consistency": "Keywords match description content, license appropriate for health data"
+          }
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "description": "Narrative field content length",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": ">200 chars",
+          "evidence": "description: 512 chars | purposes avg: 310 chars",
+          "quality_note": "All narrative fields exceed 200 characters with substantive content",
+          "semantic_checks": {
+            "correctness": "Content length reflects genuine detail, not padding",
+            "consistency": "Maintains consistent terminology across fields"
+          }
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "description": "Number of unique keywords",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥8 keywords",
+          "evidence": "19 keywords spanning disease, methodology, data types, principles",
+          "quality_note": "Comprehensive keyword coverage",
+          "semantic_checks": {
+            "correctness": "All keywords domain-appropriate",
+            "consistency": "Keywords align with description"
+          }
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "description": "Distribution format diversity",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": ">3 file types",
+          "evidence": "4 formats: DICOM, CSV, mHealth, XML",
+          "quality_note": "Excellent format diversity for multimodal data",
+          "semantic_checks": {
+            "correctness": "Industry-standard formats for respective data types",
+            "consistency": "Formats align with acquisition methods"
+          }
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "description": "Instance count metadata",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "4,000 target enrollment with subpopulation stratification documented",
+          "quality_note": "Clear instance count documentation",
+          "semantic_checks": {
+            "correctness": "Instance counts realistic for multi-site study",
+            "consistency": "Subpopulation counts consistent with stratification design"
+          }
+        }
+      ],
+      "category_score": 21,
+      "category_max": 21
+    },
+    {
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "description": "Persistent identifiers",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "DOI 10.57895/fairhub.2, Zenodo DOI, publication DOIs",
+          "quality_note": "Multiple persistent identifiers ensuring findability",
+          "semantic_checks": {
+            "correctness": "All DOI prefixes match known registrars",
+            "consistency": "All identifiers point to AI-READI resources"
+          }
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "description": "Funding and creator details",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Funders with grants + creators with affiliations",
+          "evidence": "NIH grant OT2OD032644, exact amounts, 20 creators with affiliations",
+          "quality_note": "Comprehensive funding and creator documentation",
+          "semantic_checks": {
+            "correctness": "Grant number follows NIH format, dates logically ordered",
+            "consistency": "Creator institutions match collection sites"
+          }
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "description": "Human subjects protections",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Comprehensive ethics documentation",
+          "evidence": "IRB STUDY00016228, consent, Community Advisory Board, two-tier access",
+          "quality_note": "Exemplary ethics covering all dimensions",
+          "semantic_checks": {
+            "correctness": "IRB number follows UW format, multi-site reliance appropriate",
+            "consistency": "Ethics aligns with data governance and access tiers"
+          }
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements and Governance Documentation",
+          "description": "License and access policies",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License + restrictions + confidentiality",
+          "evidence": "CC BY-NC 4.0 + DUA, use restrictions, access mechanisms documented",
+          "quality_note": "Comprehensive governance framework",
+          "semantic_checks": {
+            "correctness": "CC BY-NC 4.0 is standard license, DUA appropriate for sensitive data",
+            "consistency": "License restrictions align with ethical commitments"
+          }
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "description": "Standards compliance",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Standard formats + schema compliance",
+          "evidence": "OMOP CDM, DICOM, mHealth, RxNorm, ICD-10",
+          "quality_note": "Outstanding interoperability through comprehensive standards",
+          "semantic_checks": {
+            "correctness": "All standards are industry-recognized and appropriate",
+            "consistency": "Standards align with AI-ready claims"
+          }
+        }
+      ],
+      "category_score": 21,
+      "category_max": 22
+    },
+    {
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "description": "Software and tools documentation",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Comprehensive strategies with software",
+          "evidence": "12 acquisition methods with specific devices: Dexcom G6, Garmin, Philips, REDCap, MoCA Duo, 7 imaging systems",
+          "quality_note": "Exceptional device and software documentation",
+          "semantic_checks": {
+            "correctness": "All manufacturers/models are real medical equipment",
+            "consistency": "Tools align with data types"
+          }
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "description": "Collection process completeness",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Full protocol with methods, collectors, timeframes",
+          "evidence": "5 collection mechanisms, 12 acquisition methods with technical specs, coordinator training, timeline July 2023-Nov 2026",
+          "quality_note": "Comprehensive protocol with operational detail",
+          "semantic_checks": {
+            "correctness": "Timeline internally consistent, ICD-10 codes correct, visit duration realistic",
+            "consistency": "Mechanisms align with methods, sites match creator institutions"
+          }
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "description": "Versioning infrastructure",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Comprehensive versioning with release notes",
+          "evidence": "Pilot May 2024, v1.0.0 Nov 2024, v2.0.0, v3.0.0, version-specific docs",
+          "quality_note": "Excellent version history with clear timeline",
+          "semantic_checks": {
+            "correctness": "Version timeline logically ordered",
+            "consistency": "Releases align with enrollment timeline"
+          }
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "description": "Publication linkage",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Multiple references and dataset citation",
+          "evidence": "BMJ Open DOI, Nature Metabolism DOI, Zenodo DOI, NIH RePORTER, dataset DOI",
+          "quality_note": "Strong publication linkage",
+          "semantic_checks": {
+            "correctness": "All DOI prefixes correct",
+            "consistency": "Publications directly relevant to dataset"
+          }
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "description": "Demographic characterization",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Detailed demographics and inclusion/exclusion",
+          "evidence": "4,000 participants, triple-balanced (4 races × 2 sexes × 4 severities), inclusion/exclusion criteria, transparency about non-representativeness",
+          "quality_note": "Exemplary multi-dimensional demographic detail",
+          "semantic_checks": {
+            "correctness": "Demographic categories standard, sample size feasible",
+            "consistency": "Subpopulation targets align with stratification design"
+          }
+        }
+      ],
+      "category_score": 25,
+      "category_max": 25
+    },
+    {
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "description": "Persistent URLs",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "9 external resources with multiple persistent access points",
+          "quality_note": "Excellent findability",
+          "semantic_checks": {
+            "correctness": "URL structures valid for appropriate domains",
+            "consistency": "All links point to AI-READI resources"
+          }
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "description": "Access instructions",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Fully defined access path",
+          "evidence": "Public download via FAIRhub + CC BY-NC, controlled access via DUA with UW",
+          "quality_note": "Comprehensive dual-tier access documentation",
+          "semantic_checks": {
+            "correctness": "Two-tier model appropriate for mixed sensitivity data",
+            "consistency": "Access tiers align with data sensitivity"
+          }
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "description": "License terms clarity",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License explicitly defines reuse terms",
+          "evidence": "CC BY-NC 4.0 with explicit permissions/restrictions, custom license prohibitions documented",
+          "quality_note": "Exemplary license clarity",
+          "semantic_checks": {
+            "correctness": "CC BY-NC summary accurate",
+            "consistency": "License terms align with intended/discouraged uses"
+          }
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "description": "Provenance tracking",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Structured version control with timestamps",
+          "evidence": "Release dates, data cutoff dates, version-specific docs, update rationale",
+          "quality_note": "Excellent provenance with structured versioning",
+          "semantic_checks": {
+            "correctness": "Timeline consistent with enrollment",
+            "consistency": "Provenance chain coherent from source to release"
+          }
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "description": "Cross-platform links",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "Links to FAIRhub, project sites, Bridge2AI, NIH RePORTER, Zenodo, journals",
+          "quality_note": "Excellent cross-platform integration",
+          "semantic_checks": {
+            "correctness": "Platform choices appropriate for purposes",
+            "consistency": "Linkage supports FAIR principles"
+          }
+        }
+      ],
+      "category_score": 12,
+      "category_max": 13
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Outstanding structural completeness with all fields comprehensively populated",
+      "Exemplary ethics documentation with IRB approval, consent, Community Advisory Board",
+      "Comprehensive FAIR compliance with multiple persistent identifiers and dual-tier access",
+      "Excellent interoperability through OMOP CDM, DICOM, mHealth, RxNorm, ICD-10 standards",
+      "Exceptional technical documentation with 12 acquisition methods and specific devices",
+      "Well-documented version history with structured release timeline",
+      "Detailed demographic characterization with triple-balanced design transparency",
+      "Strong funding documentation with NIH grant numbers and exact amounts",
+      "Comprehensive collection protocol covering full workflow with specific timeline",
+      "Multiple associated publications providing external validation"
+    ],
+    "weaknesses": [
+      "Software versions and repository links not included",
+      "Controlled access procedures described as 'in development'",
+      "RRID identifiers not present for software/tools",
+      "Participant compensation not documented",
+      "Vulnerable population safeguards not explicitly detailed"
+    ],
+    "recommendations": [
+      "Add software version numbers and repository links",
+      "Document participant compensation structure",
+      "Add RRID identifiers for research resources",
+      "Finalize and document controlled access procedures",
+      "Explicitly document vulnerable population safeguards"
+    ]
+  },
+  "metadata": {
+    "evaluator_id": "rubric20-semantic-evaluator-v1",
+    "rubric_hash": "sha256-rubric20-semantic",
+    "d4d_file_hash": "sha256-AI_READI_d4d"
+  }
+}

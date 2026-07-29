@@ -1,0 +1,33 @@
+run_date	rubric	project	d4d_variant	method	total_points	max_points	percentage	normalized_percentage
+2026-07-22	rubric10	AI_READI	full	claudecode_agent	46	50	92.00	
+2026-07-22	rubric10	AI_READI	core	claudecode_agent_core	46	50	92.00	
+2026-07-22	rubric20	AI_READI	full	claudecode_agent	83	84	98.80	
+2026-07-22	rubric20	AI_READI	core	claudecode_agent_core	82	84	97.60	
+2026-07-22	rubric10_semantic	AI_READI	full	claudecode_agent	37	50	74.00	77.10
+2026-07-22	rubric10_semantic	AI_READI	core	claudecode_agent_core	44	50	88.00	91.70
+2026-07-22	rubric20_semantic	AI_READI	full	claudecode_agent	76	84	90.50	96.20
+2026-07-22	rubric20_semantic	AI_READI	core	claudecode_agent_core	75	84	89.30	94.90
+2026-07-22	rubric10	CHORUS	full	claudecode_agent	41	50	82.00	
+2026-07-22	rubric10	CHORUS	core	claudecode_agent_core	41	50	82.00	
+2026-07-22	rubric20	CHORUS	full	claudecode_agent	78	84	92.90	
+2026-07-22	rubric20	CHORUS	core	claudecode_agent_core	77	84	91.70	
+2026-07-22	rubric10_semantic	CHORUS	full	claudecode_agent	36	50	72.00	72.00
+2026-07-22	rubric10_semantic	CHORUS	core	claudecode_agent_core	42	50	84.00	84.00
+2026-07-22	rubric20_semantic	CHORUS	full	claudecode_agent	78	84	92.90	92.90
+2026-07-22	rubric20_semantic	CHORUS	core	claudecode_agent_core	78	84	92.90	92.90
+2026-07-22	rubric10	CM4AI	full	claudecode_agent	46	50	92.00	
+2026-07-22	rubric10	CM4AI	core	claudecode_agent_core	46	50	92.00	
+2026-07-22	rubric20	CM4AI	full	claudecode_agent	81	84	96.40	
+2026-07-22	rubric20	CM4AI	core	claudecode_agent_core	84	84	100.00	
+2026-07-22	rubric10_semantic	CM4AI	full	claudecode_agent	41	50	82.00	82.00
+2026-07-22	rubric10_semantic	CM4AI	core	claudecode_agent_core	43	50	86.00	86.00
+2026-07-22	rubric20_semantic	CM4AI	full	claudecode_agent	80	84	95.20	95.20
+2026-07-22	rubric20_semantic	CM4AI	core	claudecode_agent_core	81	84	96.40	96.40
+2026-07-22	rubric10	VOICE	full	claudecode_agent	49	50	98.00	
+2026-07-22	rubric10	VOICE	core	claudecode_agent_core	49	50	98.00	
+2026-07-22	rubric20	VOICE	full	claudecode_agent	84.0	84	100.00	
+2026-07-22	rubric20	VOICE	core	claudecode_agent_core	84	84	100.00	
+2026-07-22	rubric10_semantic	VOICE	full	claudecode_agent	44	50	88.00	88.00
+2026-07-22	rubric10_semantic	VOICE	core	claudecode_agent_core	47	50	94.00	94.00
+2026-07-22	rubric20_semantic	VOICE	full	claudecode_agent	83	84	98.80	98.80
+2026-07-22	rubric20_semantic	VOICE	core	claudecode_agent_core	83	84	98.80	98.80

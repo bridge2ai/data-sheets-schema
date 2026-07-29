@@ -1,0 +1,37 @@
+{
+  "@type": "evi:EvidenceGraph",
+  "@id": "ark:59853/b2ai-voice-dataset-feature-ppgs-evidence-graph",
+  "owner": "ark:59853/b2ai-voice-dataset-feature-ppgs",
+  "description": "Evidence graph for ppgs.parquet",
+  "name": "Evidence Graph - ppgs.parquet",
+  "@graph": {
+    "@id": "ark:59853/b2ai-voice-dataset-feature-ppgs",
+    "@type": [
+      "prov:Entity",
+      "https://w3id.org/EVI#Dataset"
+    ],
+    "name": "ppgs.parquet",
+    "description": "a datafile description",
+    "generatedBy": {
+      "@id": "ark:59853/computation-b2ai-voice-features-processing",
+      "@type": [
+        "prov:Activity",
+        "https://w3id.org/EVI#Computation"
+      ],
+      "name": "VOICE Features Processing",
+      "description": "Processing step for taking raw data and converting it into spectrograms and features using the b2ai-prep",
+      "usedDataset": [],
+      "usedSoftware": [
+        {
+          "@id": "ark:59853/b2ai-voice-software-b2aiprep",
+          "@type": [
+            "prov:Entity",
+            "https://w3id.org/EVI#Software"
+          ],
+          "name": "B2AIPrep Library",
+          "description": "A simple Python package to prepare acoustic data for the Bridge2AI voice project."
+        }
+      ]
+    }
+  }
+}

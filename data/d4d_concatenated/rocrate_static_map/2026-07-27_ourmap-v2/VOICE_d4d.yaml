@@ -1,0 +1,560 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: rocrate_static_map (no model)
+# Arm: deterministic — measures mapping fidelity, not extraction
+# Source crate: data/ro-crate_packages/VOICE
+# Normalized from: data/ro-crate_packages/VOICE/processed/VOICE_crate_mapped_d4d.yaml
+# Crate manifest: data/ro-crate_packages/crate_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Model: none
+# Version: 2026-07-27_ourmap-v2
+title: 'B2AI Voice: An ethically-sourced, diverse voice dataset linked to health information'
+description: "The human voice contains complex acoustic markers which have been linked\
+  \ to important health conditions including dementia, mood disorders, and cancer.\
+  \ When viewed as a biomarker, voice is a promising characteristic to measure as\
+  \ it is simple to collect, cost-effective, and has broad clinical utility. Recent\
+  \ advances in artificial intelligence have provided techniques to extract previously\
+  \ unknown prognostically useful information from dense data elements such as images.\
+  \ The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset\
+  \ to enable future research in artificial intelligence and support critical insights\
+  \ into the use of voice as a biomarker of health. Here we present Bridge2AI-Voice,\
+  \ a comprehensive collection of data derived from voice recordings with corresponding\
+  \ clinical information.\n\nBridge2AI-Voice v3.0 contains data for 833 participants\
+  \ across five sites in North America. Participants were selected based on known\
+  \ conditions which manifest within the voice waveform including voice disorders,\
+  \ neurological disorders, mood disorders, and respiratory disorders. The release\
+  \ contains data considered low risk, including derivations such as spectrograms\
+  \ but not the original voice recordings. Detailed demographic, clinical, and validated\
+  \ questionnaire data are also made available.\n\t"
+keywords:
+- voice
+- Voice as a biomarker
+- Voice dataset
+- Acoustic biomarker
+- Speech analysis
+- Voice recording
+- Human voice
+- Vocal health
+- Spectrogram
+- Mel spectrogram
+- MFCC (Mel-frequency cepstral coefficients)
+- Fundamental frequency (F0)
+- Phonetic posteriorgrams (PPGs)
+- Articulatory features
+- Acoustic features
+- Pitch detection
+- Loudness
+- Periodicity
+publisher: PhysioNet
+version: 3.0.0
+license: https://physionet.org/content/b2ai-voice/view-license/3.0.0/
+download_url: file:///features/ppgs.parquet
+issued: '2025-12-16T00:00:00Z'
+doi: https://doi.org/10.13026/k81f-qr68
+creators:
+- name: Yael Bensoussan
+- name: Alexandros Sigaras
+- name: Anais Rameau
+- name: Olivier Elemento
+- name: Maria Powell
+- name: David Dorr
+- name: Philip Payne
+- name: Vardit Ravitsky
+- name: Jean-Christophe Bélisle-Pipon
+- name: Ruth Bahr
+- name: Stephanie Watts
+- name: Donald Bolser
+- name: Jennifer Siu
+- name: Jordan Lerner-Ellis
+- name: Frank Rudzicz
+- name: Micah Boyer
+- name: Yassmeen Abdel-Aty
+- name: Toufeeq Ahmed Syed
+- name: James Anibal
+- name: Dona Amraei
+- name: Stephen Aradi
+- name: Kirollos Armosh
+- name: Ana Sophia Martinez
+- name: Shaheen Awan
+- name: Steven Bedrick
+- name: Helena Beltran
+- name: Alexander Bernier
+- name: Moroni Berrios
+- name: Isaac Bevers
+- name: Alden Blatter
+- name: Rahul Brito
+- name: Amy Brown
+- name: Johnathan Brown
+- name: Léo Cadillac
+- name: Selina Casalino
+- name: John Costello
+- name: Abhijeet Dalal
+- name: Iris De Santiago
+- name: Enrique Diaz-Ocampo
+- name: Amanda Doherty-Kirby
+- name: Mohamed Ebraheem
+- name: Ellie Eiseman
+- name: Mahmoud Elmahdy
+- name: Renee English
+- name: Emily Evangelista
+- name: Kenneth Fletcher
+- name: Hortense Gallois
+- name: Gaelyn Garrett
+- name: Alexander Gelbard
+- name: Anna Goldenberg
+- name: Karim Hanna
+- name: William Hersh
+- name: Jennifer Jain
+- name: Lochana Jayachandran
+- name: Kaley Jenney
+- name: Kathy Jenkins
+- name: Stacy Jo
+- name: Alistair Johnson
+- name: Ayush Kalia
+- name: Megha Kalia
+- name: Zoha Khawa
+- name: Cindy Kostelnik
+- name: Alisa Krause
+- name: Andrea Krussel
+- name: Elisa Lapadula
+- name: Genelle Leo
+- name: Justin Levinsky
+- name: Chloe Loewith
+- name: Radhika Mahajan
+- name: Vrishni Maharaj
+- name: Siyu Miao
+- name: LeAnn Michaels
+- name: Matthew Mifsud
+- name: Marian Mikhael
+- name: Elijah Moothedan
+- name: Yosef Nafii
+- name: Tempestt Neal
+- name: Karlee Newberry
+- name: Evan Ng
+- name: Christopher Nickel
+- name: Amanda Peltier
+- name: Trevor Pharr
+- name: Michaela Pnacekova
+- name: Matthew Pontell
+- name: Claire Premi-Bortolotto
+- name: Parnaz Rafatjou
+- name: JM Rahman
+- name: John Ramos
+- name: Sarah Rohde
+- name: Michael de Riesthal
+- name: Jillian Rossi
+- name: Laurie Russell
+- name: Samantha Salvi Cruz
+- name: Joyce Samuel
+- name: Suketu Shah
+- name: Ahmed Shawkat
+- name: Elizabeth Silberholz
+- name: John Stark
+- name: Lala Su
+- name: Shrramana Ganesh Sudhakar
+- name: Duncan Sutherland
+- name: Venkata Swarna Mukhi
+- name: Jeffrey Tang
+- name: Luka Taylor
+- name: Jamie Toghranegar
+- name: Julie Tu
+- name: Megan Urbano
+- name: Gavin Victor
+- name: Kimberly Vinson
+- name: Jordan Wilke
+- name: Claire Wilson
+- name: Madeleine Zanin
+- name: Xijie Zeng
+- name: Theresa Zesiewicz
+- name: Robin Zhao
+- name: Pantelis Zisimopoulos
+- name: Satrajit Ghosh
+created_by: Yael Bensoussan; Alexandros Sigaras; Anais Rameau; Olivier Elemento; Maria
+  Powell; David Dorr; Philip Payne; Vardit Ravitsky; Jean-Christophe Bélisle-Pipon;
+  Ruth Bahr; Stephanie Watts; Donald Bolser; Jennifer Siu; Jordan Lerner-Ellis; Frank
+  Rudzicz; Micah Boyer; Yassmeen Abdel-Aty; Toufeeq Ahmed Syed; James Anibal; Dona
+  Amraei; Stephen Aradi; Kirollos Armosh; Ana Sophia Martinez; Shaheen Awan; Steven
+  Bedrick; Helena Beltran; Alexander Bernier; Moroni Berrios; Isaac Bevers; Alden
+  Blatter; Rahul Brito; Amy Brown; Johnathan Brown; Léo Cadillac; Selina Casalino;
+  John Costello; Abhijeet Dalal; Iris De Santiago; Enrique Diaz-Ocampo; Amanda Doherty-Kirby;
+  Mohamed Ebraheem; Ellie Eiseman; Mahmoud Elmahdy; Renee English; Emily Evangelista;
+  Kenneth Fletcher; Hortense Gallois; Gaelyn Garrett; Alexander Gelbard; Anna Goldenberg;
+  Karim Hanna; William Hersh; Jennifer Jain; Lochana Jayachandran; Kaley Jenney; Kathy
+  Jenkins; Stacy Jo; Alistair Johnson; Ayush Kalia; Megha Kalia; Zoha Khawa; Cindy
+  Kostelnik; Alisa Krause; Andrea Krussel; Elisa Lapadula; Genelle Leo; Justin Levinsky;
+  Chloe Loewith; Radhika Mahajan; Vrishni Maharaj; Siyu Miao; LeAnn Michaels; Matthew
+  Mifsud; Marian Mikhael; Elijah Moothedan; Yosef Nafii; Tempestt Neal; Karlee Newberry;
+  Evan Ng; Christopher Nickel; Amanda Peltier; Trevor Pharr; Michaela Pnacekova; Matthew
+  Pontell; Claire Premi-Bortolotto; Parnaz Rafatjou; JM Rahman; John Ramos; Sarah
+  Rohde; Michael de Riesthal; Jillian Rossi; Laurie Russell; Samantha Salvi Cruz;
+  Joyce Samuel; Suketu Shah; Ahmed Shawkat; Elizabeth Silberholz; John Stark; Lala
+  Su; Shrramana Ganesh Sudhakar; Duncan Sutherland; Venkata Swarna Mukhi; Jeffrey
+  Tang; Luka Taylor; Jamie Toghranegar; Julie Tu; Megan Urbano; Gavin Victor; Kimberly
+  Vinson; Jordan Wilke; Claire Wilson; Madeleine Zanin; Xijie Zeng; Theresa Zesiewicz;
+  Robin Zhao; Pantelis Zisimopoulos; Satrajit Ghosh
+funders:
+- name: 'Funded by the NIH Common Fund. Award #3Tf-OTOD03272001S2'
+purposes:
+- description: 'Development, training and fine-tuning of machine-learning models that
+    associate voice-derived features with diagnostic categories or symptom severity
+    for conditions such as vocal fold pathology, neurological and neurodegenerative
+    diseases, mood and anxiety disorders and respiratory illnesses.
+
+    Benchmarking and validation of existing voice-biomarker algorithms by testing
+    their performance on a clinically diverse, multi-site cohort with standardized
+    tasks and rich phenotype data.
+
+    Exploratory research on acoustic, phonetic, prosodic and articulatory correlates
+    of disease using de-identified derived features, including work on representation
+    learning, domain adaptation and multimodal integration with other health data.
+
+    Methodological research on fairness, robustness and AI safety in clinical voice
+    models, including studies of bias related to demographic subgroups or recording
+    conditions, subject to the ethical constraints in the data use agreement.
+
+    The dataset is explicitly not intended for operational decision making about specific
+    individuals such as hiring, insurance pricing, law enforcement or surveillance,
+    nor for attempts at re-identification or for uses likely to stigmatize individuals
+    or groups.'
+tasks:
+- description: 'Development, training and fine-tuning of machine-learning models that
+    associate voice-derived features with diagnostic categories or symptom severity
+    for conditions such as vocal fold pathology, neurological and neurodegenerative
+    diseases, mood and anxiety disorders and respiratory illnesses.
+
+    Benchmarking and validation of existing voice-biomarker algorithms by testing
+    their performance on a clinically diverse, multi-site cohort with standardized
+    tasks and rich phenotype data.
+
+    Exploratory research on acoustic, phonetic, prosodic and articulatory correlates
+    of disease using de-identified derived features, including work on representation
+    learning, domain adaptation and multimodal integration with other health data.
+
+    Methodological research on fairness, robustness and AI safety in clinical voice
+    models, including studies of bias related to demographic subgroups or recording
+    conditions, subject to the ethical constraints in the data use agreement.
+
+    The dataset is explicitly not intended for operational decision making about specific
+    individuals such as hiring, insurance pricing, law enforcement or surveillance,
+    nor for attempts at re-identification or for uses likely to stigmatize individuals
+    or groups.'
+intended_uses:
+- description: 'Development, training and fine-tuning of machine-learning models that
+    associate voice-derived features with diagnostic categories or symptom severity
+    for conditions such as vocal fold pathology, neurological and neurodegenerative
+    diseases, mood and anxiety disorders and respiratory illnesses.
+
+    Benchmarking and validation of existing voice-biomarker algorithms by testing
+    their performance on a clinically diverse, multi-site cohort with standardized
+    tasks and rich phenotype data.
+
+    Exploratory research on acoustic, phonetic, prosodic and articulatory correlates
+    of disease using de-identified derived features, including work on representation
+    learning, domain adaptation and multimodal integration with other health data.
+
+    Methodological research on fairness, robustness and AI safety in clinical voice
+    models, including studies of bias related to demographic subgroups or recording
+    conditions, subject to the ethical constraints in the data use agreement.
+
+    The dataset is explicitly not intended for operational decision making about specific
+    individuals such as hiring, insurance pricing, law enforcement or surveillance,
+    nor for attempts at re-identification or for uses likely to stigmatize individuals
+    or groups.'
+existing_uses:
+- description: 'Development, training and fine-tuning of machine-learning models that
+    associate voice-derived features with diagnostic categories or symptom severity
+    for conditions such as vocal fold pathology, neurological and neurodegenerative
+    diseases, mood and anxiety disorders and respiratory illnesses.
+
+    Benchmarking and validation of existing voice-biomarker algorithms by testing
+    their performance on a clinically diverse, multi-site cohort with standardized
+    tasks and rich phenotype data.
+
+    Exploratory research on acoustic, phonetic, prosodic and articulatory correlates
+    of disease using de-identified derived features, including work on representation
+    learning, domain adaptation and multimodal integration with other health data.
+
+    Methodological research on fairness, robustness and AI safety in clinical voice
+    models, including studies of bias related to demographic subgroups or recording
+    conditions, subject to the ethical constraints in the data use agreement.
+
+    The dataset is explicitly not intended for operational decision making about specific
+    individuals such as hiring, insurance pricing, law enforcement or surveillance,
+    nor for attempts at re-identification or for uses likely to stigmatize individuals
+    or groups.'
+other_tasks:
+- description: 'Development, training and fine-tuning of machine-learning models that
+    associate voice-derived features with diagnostic categories or symptom severity
+    for conditions such as vocal fold pathology, neurological and neurodegenerative
+    diseases, mood and anxiety disorders and respiratory illnesses.
+
+    Benchmarking and validation of existing voice-biomarker algorithms by testing
+    their performance on a clinically diverse, multi-site cohort with standardized
+    tasks and rich phenotype data.
+
+    Exploratory research on acoustic, phonetic, prosodic and articulatory correlates
+    of disease using de-identified derived features, including work on representation
+    learning, domain adaptation and multimodal integration with other health data.
+
+    Methodological research on fairness, robustness and AI safety in clinical voice
+    models, including studies of bias related to demographic subgroups or recording
+    conditions, subject to the ethical constraints in the data use agreement.
+
+    The dataset is explicitly not intended for operational decision making about specific
+    individuals such as hiring, insurance pricing, law enforcement or surveillance,
+    nor for attempts at re-identification or for uses likely to stigmatize individuals
+    or groups.'
+future_use_impacts:
+- description: The project aims to create an ethically sourced, diverse voice dataset
+    to support research on using voice as an accessible, low-cost biomarker for screening,
+    diagnosis and monitoring of a broad range of health conditions, potentially improving
+    early detection and care for underserved populations. At the same time, the consortium
+    explicitly recognizes the risks associated with voice data, including privacy
+    loss, misuse of voice biometrics and algorithmic harms such as discrimination
+    in hiring, insurance or surveillance contexts; these risks motivate a governance
+    framework with IRB oversight, rigorous de-identification, separation of feature-only
+    and raw-audio tiers and usage restrictions encoded in the registered-access license
+    and data use agreement. Dataset documentation and ongoing ethics workstreams are
+    intended to help downstream users reason about these risks and design responsible
+    analyses and models.
+known_biases:
+- description: 'Sampling bias: participants are recruited from specialty clinics and
+    associated institutions using a non-probability sampling strategy, with inclusion
+    focused on specific disease cohorts and fluent English speakers; this produces
+    clinically enriched case mixes that may not represent general population distributions.
+
+    Geographic and cultural bias: data are collected at a limited number of North
+    American sites, and although the project seeks diversity, it may under-represent
+    speakers from other regions, cultures, languages and healthcare systems; early
+    releases focus on English, with Spanish protocols planned but not yet fully represented.
+
+    Clinical spectrum bias: because participants are selected into disease cohorts
+    where voice changes are expected, the prevalence and severity of conditions in
+    the dataset differ from those in routine primary care or community settings, which
+    may inflate model performance when evaluated within this dataset.
+
+    Device and environment bias: recordings are made using standardized but not identical
+    hardware and primarily in clinical environments; future at-home collection or
+    deployment on other devices may encounter different background noise, channel
+    characteristics and user behavior.
+
+    Algorithmic bias in machine annotations: transcripts and some derived features
+    rely on off-the-shelf models such as OpenAI Whisper and other audio toolkits whose
+    performance may vary across demographic groups; the dataset team has not independently
+    audited these tools for fairness, so downstream users should consider their biases
+    when interpreting results.'
+known_limitations:
+- description: 'The feature-only release does not include raw audio waveforms or free-speech
+    transcripts, which limits certain types of modeling and error analysis and may
+    constrain the ability to reproduce end-to-end audio pipelines.
+
+    This version only includes an adult cohort; models trained solely on this dataset
+    may not generalize to younger age groups or to languages beyond those represented.
+
+    Because of de-identification, some granular demographic and socio-economic variables,
+    fine-grained location data and narrative context have been removed, which reduces
+    the risk of re-identification but also limits detailed fairness assessments and
+    certain confounder adjustments.
+
+    The dataset does not provide predefined train–validation–test splits or benchmarking
+    tasks and does not include explicit per-instance label-uncertainty measures, so
+    researchers must design their own evaluation protocols and handle label noise
+    and missingness.
+
+    The registered-access and controlled-access governance structure is appropriate
+    for privacy but may limit participation by some institutions or researchers and
+    can complicate the reproducibility of pipelines that require both features and
+    raw audio.'
+updates:
+  description: 'Dataset releases follow a static versioning scheme managed through
+    PhysioNet and related platforms, with version numbers such as 1.0, 1.1, 2.0.0,
+    2.0.1 and 3.0.0 and associated DOIs for each snapshot and for the latest version.
+
+    Releases are coordinated by the Bridge2AI-Voice project team and the MIT Laboratory
+    for Computational Physiology; release notes document added participants, new feature
+    sets, reorganized phenotype tables and corrections such as spectrogram reprocessing
+    and authorship updates.
+
+    Future updates are planned as additional participants are enrolled and Spanish-language
+    protocols are incorporated; older versions remain accessible for reproducibility
+    while users are encouraged to adopt the latest version.'
+sensitive_elements:
+- description: The dataset encodes health-related information including diagnostic
+    categories for voice disorders, neurological and neurodegenerative conditions,
+    mood and psychiatric disorders and respiratory diseases, as well as symptom scores
+    from questionnaires, which constitute sensitive personal health data.
+- description: Demographic variables such as age, sex and country of data collection
+    are included in coarsened form, while finer-grained geographic identifiers, direct
+    identifiers and many socio-economic and cultural details have been removed during
+    de-identification to reduce re-identification risk.
+- description: Highly sensitive content including detailed narrative responses, some
+    information about household income, traumatic life experiences and granular cultural
+    identifiers has been removed entirely from this feature-only dataset; raw voice
+    recordings, which are themselves biometric identifiers, are made available only
+    under controlled access.
+- description: Use of the data is restricted to authorized researchers under a registered-access
+    license and associated data use agreement that explicitly forbids attempts at
+    re-identification, stigmatizing or discriminatory uses and applications such as
+    surveillance or high-stakes individual decision making.
+confidential_elements:
+- description: The dataset encodes health-related information including diagnostic
+    categories for voice disorders, neurological and neurodegenerative conditions,
+    mood and psychiatric disorders and respiratory diseases, as well as symptom scores
+    from questionnaires, which constitute sensitive personal health data.
+- description: Demographic variables such as age, sex and country of data collection
+    are included in coarsened form, while finer-grained geographic identifiers, direct
+    identifiers and many socio-economic and cultural details have been removed during
+    de-identification to reduce re-identification risk.
+- description: Highly sensitive content including detailed narrative responses, some
+    information about household income, traumatic life experiences and granular cultural
+    identifiers has been removed entirely from this feature-only dataset; raw voice
+    recordings, which are themselves biometric identifiers, are made available only
+    under controlled access.
+- description: Use of the data is restricted to authorized researchers under a registered-access
+    license and associated data use agreement that explicitly forbids attempts at
+    re-identification, stigmatizing or discriminatory uses and applications such as
+    surveillance or high-stakes individual decision making.
+data_protection_impacts:
+- description: The project aims to create an ethically sourced, diverse voice dataset
+    to support research on using voice as an accessible, low-cost biomarker for screening,
+    diagnosis and monitoring of a broad range of health conditions, potentially improving
+    early detection and care for underserved populations. At the same time, the consortium
+    explicitly recognizes the risks associated with voice data, including privacy
+    loss, misuse of voice biometrics and algorithmic harms such as discrimination
+    in hiring, insurance or surveillance contexts; these risks motivate a governance
+    framework with IRB oversight, rigorous de-identification, separation of feature-only
+    and raw-audio tiers and usage restrictions encoded in the registered-access license
+    and data use agreement. Dataset documentation and ongoing ethics workstreams are
+    intended to help downstream users reason about these risks and design responsible
+    analyses and models.
+regulatory_restrictions:
+  name: https://physionet.org/content/b2ai-voice/view-dua/3.0.0/
+acquisition_methods:
+- description: Prospective observational study conducted at multiple specialty clinics
+    and academic hospitals across North America. Eligible adults presenting to voice,
+    neurology, psychiatry and respiratory clinics, plus healthy controls, were screened
+    against predefined inclusion and exclusion criteria. After informed consent, a
+    standardized protocol was administered that combined structured voice and respiratory
+    tasks such as sustained vowels, coughs and reading passages with demographic questions,
+    health history, disease-specific questionnaires and other patient-reported outcomes.
+    Data were captured on a mobile or tablet application and stored in REDCap, with
+    most participants completing a single in-clinic session and a subset completing
+    repeated sessions.
+collection_mechanisms:
+- description: Prospective observational study conducted at multiple specialty clinics
+    and academic hospitals across North America. Eligible adults presenting to voice,
+    neurology, psychiatry and respiratory clinics, plus healthy controls, were screened
+    against predefined inclusion and exclusion criteria. After informed consent, a
+    standardized protocol was administered that combined structured voice and respiratory
+    tasks such as sustained vowels, coughs and reading passages with demographic questions,
+    health history, disease-specific questionnaires and other patient-reported outcomes.
+    Data were captured on a mobile or tablet application and stored in REDCap, with
+    most participants completing a single in-clinic session and a subset completing
+    repeated sessions.
+collection_timeframes:
+- description: Data collection for the adult flagship cohort began after project launch
+    in 2023 and is ongoing across five North American sites toward an anticipated
+    enrollment of approximately 3,000 participants by November 2026; the participants
+    and recordings included in dataset version 3.0.0 were collected roughly between
+    2023 and 2025.
+- description: 'Dataset releases are static snapshots: v1.0 (initial public release
+    in 2024), v1.1 (2025-01-17), v2.0.0 (2025-04-16), v2.0.1 (2025-08-18) and v3.0.0
+    (2025-12-16), each corresponding to a frozen state of the underlying data collection.'
+raw_data_sources:
+- source_description: The original raw data consist of high-quality voice, speech
+    and respiratory audio waveforms recorded on tablet or smartphone devices with
+    headset microphones when available, plus responses to structured demographic and
+    medical history questionnaires, disease-specific validated questionnaires and
+    other patient-reported outcomes, together with clinical diagnoses and other metadata
+    extracted from electronic health records. The public feature-only PhysioNet release
+    contains de-identified derived representations of the audio, such as spectrograms,
+    mel spectrograms, MFCCs, articulatory and prosodic features and phonetic posteriorgrams,
+    along with tabular phenotype files and data dictionaries; access to the underlying
+    raw audio is available only through a separate controlled-access process.
+missing_data_documentation:
+- description: Phenotype tables include a row for a participant only when at least
+    one variable is non-missing, and participants may have repeated visits with differing
+    responses. Questionnaire completion varies by participant and cohort, so some
+    forms and items are systematically or sporadically missing. Some derived audio
+    features could not be computed for all recordings due to quality or length constraints,
+    and features relating to free speech or sensitive records have been removed. No
+    additional imputation is applied in the released files.
+cleaning_strategies:
+- description: Prior to release, data are transformed to reduce re-identification
+    risk and align with regulatory and ethical requirements. Direct identifiers and
+    high-risk quasi-identifiers are removed; dates are coarsened or rebased; geographic
+    information is generalized to the country level; narrative text fields and transcripts
+    of free speech are removed; and raw voice waveforms are withheld from this feature-only
+    release. Additional filtering removes features for sensitive records and audio
+    checks, and some derived features are dropped when processing fails or quality
+    checks fail.
+preprocessing_strategies:
+- description: Raw audio waveforms are converted to mono and resampled to 16 kHz using
+    anti-aliasing filtering; they are then segmented by task and passed through quality
+    checks.; From the standardized audio, multiple derived feature sets are computed
+    including spectrograms, mel spectrograms, MFCCs, articulatory features using the
+    Speech Articulatory Coding package, pitch and loudness estimates, acoustic features
+    from openSMILE, phonetic and prosodic features from Praat and parselmouth, and
+    phonetic posteriorgrams using a dedicated model; all are stored as dense tensors
+    in Parquet files with participant, session and task identifiers.; Tabular phenotype
+    and questionnaire files are exported from REDCap and merged using a dedicated
+    open-source b2aiprep library, reorganizing the former single phenotype table into
+    thematically organized TSV files with accompanying JSON data dictionaries; static
+    per-recording feature summaries are provided in static_features.tsv, and de-identification
+    and filtering steps are applied before packaging.
+raw_sources:
+- description: The original raw data consist of high-quality voice, speech and respiratory
+    audio waveforms recorded on tablet or smartphone devices with headset microphones
+    when available, plus responses to structured demographic and medical history questionnaires,
+    disease-specific validated questionnaires and other patient-reported outcomes,
+    together with clinical diagnoses and other metadata extracted from electronic
+    health records. The public feature-only PhysioNet release contains de-identified
+    derived representations of the audio, such as spectrograms, mel spectrograms,
+    MFCCs, articulatory and prosodic features and phonetic posteriorgrams, along with
+    tabular phenotype files and data dictionaries; access to the underlying raw audio
+    is available only through a separate controlled-access process.
+labeling_strategies:
+- description: Annotations for this dataset consist primarily of clinical labels and
+    questionnaire-derived measures associated with each participant and recording.
+    Participants complete validated instruments such as VHI-10, PHQ-9, GAD-7, PANAS,
+    respiratory and cough questionnaires and voice instruments, which generate numerical
+    scores and categorical indicators according to each instrument's published scoring
+    guidelines. Clinical investigators and care teams record diagnostic categories
+    for voice, neurological, mood and respiratory conditions and other phenotype variables,
+    drawing on clinical assessments and electronic health records; these labels are
+    represented in disease-specific TSV files with accompanying JSON dictionaries.
+    In addition, machine-generated transcripts of certain voice tasks and numerous
+    automatically extracted acoustic and articulatory features provide further labels
+    and descriptors at the recording level.
+annotation_analyses:
+- description: Questionnaire-based labels are generated using the standard scoring
+    rules for each validated instrument, yielding total and subscale scores that can
+    be mapped to symptom-severity bands; the scoring logic is encoded in the REDCap
+    instruments and documented in the data dictionaries.; Diagnostic labels are derived
+    from clinical assessments and electronic health records rather than crowd workers,
+    so there is no explicit inter-rater majority-vote scheme; however, diagnoses are
+    treated as reference labels and may include multiple comorbid conditions per participant.;
+    The data release team audited the combined phenotype and feature tables for internal
+    consistency, missingness patterns and data entry issues, but per-annotator disagreement
+    statistics or detailed label-uncertainty measures are not presently included in
+    the released dataset.
+ethical_reviews:
+- name: Ethical Review by Vardit Ravitsky at the Hastings Center for Bioethics
+license_and_use_terms:
+  name: https://physionet.org/content/b2ai-voice/view-license/3.0.0/
+ip_restrictions:
+  name: https://physionet.org/content/b2ai-voice/view-dua/3.0.0/
+extension_mechanism:
+  name: https://physionet.org/content/b2ai-voice/view-license/3.0.0/
+retention_limit:
+  name: https://physionet.org/content/b2ai-voice/view-dua/3.0.0/
+version_access:
+  name: 3.0.0
+name: 'B2AI Voice: An ethically-sourced, diverse voice dataset linked to health information'
+citation: 'Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr,
+  D., Payne, P., Ravitsky, V., Bélisle-Pipon, J., Bahr, R., Watts, S., Bolser, D.,
+  Siu, J., Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T.,
+  Anibal, J., ... Ghosh, S. (2025). Bridge2AI-Voice: An ethically-sourced, diverse
+  voice dataset linked to health information (version 3.0.0). PhysioNet. RRID:SCR_007345.
+  https://doi.org/10.13026/k81f-qr68'
+id: https://doi.org/10.13026/k81f-qr68

@@ -1,3 +1,11 @@
+SOURCE METADATA
+Project: CM4AI
+Source ID: june_2025_dataverse_release
+Source type: historical data release
+Source URL: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R
+Raw file: data/raw/CM4AI/dataverse_10.18130_V3_F3TD5R_row19.html
+Curation note: Historical supplement retained because the current release page only names the June 2025 release; it does not preserve this release's DOI, revision notes, file inventory, checksums, composition, or version metadata.
+--------------------------------------------------------------------------------
 Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta) - Cell Maps for Artificial Intelligence
 Skip to main content
 Toggle navigation
@@ -7,7 +15,8 @@ About
 User Guide
 Support
 Log In
-Cell Maps for Artificial IntelligenceThis collection is under review for potential modification in compliance with Administration directives.
+Cell Maps for Artificial Intelligence
+This collection is under review for potential modification in compliance with Administration directives.
 University of Virginia Dataverse
 >
 LibraData: UVa's Scholarly Research
@@ -16,16 +25,21 @@ School of Medicine
 >
 Cell Maps for Artificial Intelligence
 >
-Info – The "DRAFT" version was not found. This is version "2.1".
+Info
+– The "DRAFT" version was not found. This is version "2.1".
 Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
 Version 2.1
-Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacco B; Pratt D; Qian G; Schaffer L; Sigaeva A; Thaker S; Zhang Y; Bélisle-Pipon JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Payne-Foster P; Ratcliffe S; Ravitsky V; Sali A; Schulz W; Ideker T, 2025, "Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)", https://doi.org/10.18130/V3/F3TD5R, University of Virginia Dataverse, V2
+Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacco B; Pratt D; Qian G; Schaffer L; Sigaeva A; Thaker S; Zhang Y; Bélisle-Pipon JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Payne-Foster P; Ratcliffe S; Ravitsky V; Sali A; Schulz W; Ideker T, 2025, "Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)",
+https://doi.org/10.18130/V3/F3TD5R
+, University of Virginia Dataverse, V2
 Cite Dataset
 Download EndNote XML
 Download RIS
 Download BibTeX
 View Styled Citation
-Learn about Data Citation Standards.
+Learn about
+Data Citation Standards
+.
 Access Dataset
 The dataset is too large to download. Please select the files you need from the files table.
 Contact Owner
@@ -38,15 +52,23 @@ This dataset is a revision of the June 2025 Data Release of Cell Maps for Artifi
 This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs, neurons, cardiomyocytes, and treated and untreated MDA-MB468 breast cancer cells; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel).
 External Data Links
 Access external data resources related to this dataset:
-Sequence Read Archive (SRA) Data: NCBI BioProject
-Mass Spectrometry Data (Human iPSCs): MassIVE Repository
-Mass Spectrometry Data (Human Cancer Cells): MassIVE Repository
+Sequence Read Archive (SRA) Data:
+NCBI BioProject
+Mass Spectrometry Data (Human iPSCs):
+MassIVE Repository
+Mass Spectrometry Data (Human Cancer Cells):
+MassIVE Repository
 Data Governance & Ethics
-Human Subjects: No
-De-identified Samples: Yes
-FDA Regulated: No
-Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu)
-Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+Human Subjects:
+No
+De-identified Samples:
+Yes
+FDA Regulated:
+No
+Data Governance Committee:
+Jillian Parker (jillianparker@health.ucsd.edu)
+Ethical Review:
+Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
 Completeness
 These data are not yet in completed final form:
 Some datasets are under temporary pre-publication embargo
@@ -84,18 +106,24 @@ References: Clark T, Parker J, Schaffer L, Obernier K, Al Manir S, Churas CP, Da
 License/Data Use Agreement
 CC BY-NC-SA 4.0
 ui-button
-FilesMetadataTermsVersions
+Files
+Metadata
+Terms
+Versions
 Change View
-TableTree
+Table
+Tree
 Search
 Filter by
-File Type: All
+File Type:
+All
 All
 Text (12)
 Data (5)
 Archive (3)
 Metadata (1)
-Access: All
+Access:
+All
 All
 Public (21)
 Sort
@@ -108,7 +136,8 @@ Type
 1 to 10 of 21 Files
 Download
 release-ro-crate-datasheet.html
-HTML - 89.5 KB
+HTML
+- 89.5 KB
 Published Jul 1, 2025
 20 Downloads
 MD5: 599c9ece9b88b3ce797b82463b4a1eb4
@@ -127,7 +156,8 @@ Download BibTeX
 Explore Options
 HTML Previewer
 release-ro-crate-metadata.json
-RO-Crate metadata - 35.0 KB
+RO-Crate metadata
+- 35.0 KB
 Published Jul 1, 2025
 24 Downloads
 MD5: 99f9e00053bff3020fd9832a3a518bbb
@@ -144,7 +174,9 @@ Download EndNote XML
 Download RIS
 Download BibTeX
 cm4ai_ifimages_MDA-MB-468_paclitaxel.zip
-Images/ZIP Archive - 3.8 GB
+Images/
+ZIP Archive
+- 3.8 GB
 Published Oct 22, 2025
 1 Download
 MD5: 0d972b80744344ddeede516a0cf6e3d7
@@ -161,7 +193,9 @@ Download EndNote XML
 Download RIS
 Download BibTeX
 cm4ai_ifimages_MDA-MB-468_untreated.zip
-Images/ZIP Archive - 4.6 GB
+Images/
+ZIP Archive
+- 4.6 GB
 Published Oct 22, 2025
 0 Downloads
 MD5: a98affcc05429650c6bb3906cd836d55
@@ -178,7 +212,9 @@ Download EndNote XML
 Download RIS
 Download BibTeX
 cm4ai_ifimages_MDA-MB-468_vorinostat.zip
-Images/ZIP Archive - 4.2 GB
+Images/
+ZIP Archive
+- 4.2 GB
 Published Oct 22, 2025
 0 Downloads
 MD5: ad4e68ccc14b0f3349dad3321e7b81b2
@@ -195,7 +231,9 @@ Download EndNote XML
 Download RIS
 Download BibTeX
 Images-paclitaxel-provenance-graph.html
-Images/paclitaxel/HTML - 39.2 KB
+Images/paclitaxel/
+HTML
+- 39.2 KB
 Published Jul 1, 2025
 7 Downloads
 MD5: e38e63e4c8dfc5808a5ffa2d7829fc38
@@ -214,7 +252,9 @@ Download BibTeX
 Explore Options
 HTML Previewer
 Images-untreated-provenance-graph.html
-Images/untreated/HTML - 39.2 KB
+Images/untreated/
+HTML
+- 39.2 KB
 Published Jul 1, 2025
 1 Download
 MD5: 1a3b510f74d3f8647e07c6559ce64ee8
@@ -233,7 +273,9 @@ Download BibTeX
 Explore Options
 HTML Previewer
 Images-vorinostat-provenance-graph.html
-Images/vorinostat/HTML - 39.2 KB
+Images/vorinostat/
+HTML
+- 39.2 KB
 Published Jul 1, 2025
 3 Downloads
 MD5: 58935fe4e254b31d33fed019f24c7668
@@ -252,7 +294,9 @@ Download BibTeX
 Explore Options
 HTML Previewer
 mass-spec-cancer-cells-provenance-graph.html
-mass-spec/cancer-cells/HTML - 41.7 KB
+mass-spec/cancer-cells/
+HTML
+- 41.7 KB
 Published Jul 1, 2025
 9 Downloads
 MD5: 931ad9b552562024cb84ebe62d1f1838
@@ -272,7 +316,9 @@ Download BibTeX
 Explore Options
 HTML Previewer
 mass-spec-cancer-cells-ro-crate-metadata.json
-mass-spec/cancer-cells/JSON - 343.4 KB
+mass-spec/cancer-cells/
+JSON
+- 343.4 KB
 Published Jul 1, 2025
 6 Downloads
 MD5: 3a7063bb391ea5e05a32ba5da5f4b2f8
@@ -286,7 +332,18 @@ Data File Citation
 Download EndNote XML
 Download RIS
 Download BibTeX
-FP123NEFiles Per Page Rows Per Page102550
+F
+P
+1
+2
+3
+N
+E
+Files Per Page
+Rows Per Page
+10
+25
+50
 Export Metadata
 OAI_ORE
 DataCite
@@ -304,53 +361,86 @@ Publication Date
 Title
 Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
 Author
-Clark T (University of Virginia) - ORCID: https://orcid.org/0000-0003-4060-7360
-Parker J (University of California, San Diego) - ORCID: https://orcid.org/0000-0003-4535-3486
-Al Manir S (University of Virginia) - ORCID: https://orcid.org/0000-0003-4647-3877
+Clark T (University of Virginia) - ORCID:
+https://orcid.org/0000-0003-4060-7360
+Parker J (University of California, San Diego) - ORCID:
+https://orcid.org/0000-0003-4535-3486
+Al Manir S (University of Virginia) - ORCID:
+https://orcid.org/0000-0003-4647-3877
 Axelsson U (KTH Royal Institute of Technology,)
-Ballllosero Navarro F (Stanford University) - ORCID: https://orcid.org/0000-0002-4180-422X
+Ballllosero Navarro F (Stanford University) - ORCID:
+https://orcid.org/0000-0002-4180-422X
 Chinn B (University of California San Diego)
 Churas CP (University of California San Diego) https://orcid.org/0000-0001-9998-705X
-Dailamy A (University of California, San Diego) - ORCID: https://orcid.org/0000-0002-6711-8260
-Doctor Y (University of California, San Diego) - ORCID: https://orcid.org/0009-0009-0483-7506
+Dailamy A (University of California, San Diego) - ORCID:
+https://orcid.org/0000-0002-6711-8260
+Doctor Y (University of California, San Diego) - ORCID:
+https://orcid.org/0009-0009-0483-7506
 Fall J (KTH - Royal Institute of Technology)
-Forget A (University of California San Francisco) - ORCID: https://orcid.org/0000-0003-0223-0312
-Gao J (University of California San Diego) - ORCID: https://orcid.org/0000-0002-6311-3526
-Hansen JN (Stanford University) - ORCID: https://orcid.org/0000-0002-4650-9094
+Forget A (University of California San Francisco) - ORCID:
+https://orcid.org/0000-0003-0223-0312
+Gao J (University of California San Diego) - ORCID:
+https://orcid.org/0000-0002-6311-3526
+Hansen JN (Stanford University) - ORCID:
+https://orcid.org/0000-0002-4650-9094
 Hu M (University of California San Diego) https://orcid.org/0000-0002-1571-8029
 Johannesson A (KTH - Royal Institute of Technology)
 Khaliq H (University of California San Diego)
-Lee YH (University of California San Diego) - ORCID: https://orcid.org/0000-0003-0917-355X
+Lee YH (University of California San Diego) - ORCID:
+https://orcid.org/0000-0003-0917-355X
 Lenkiewicz J (University of California San Diego) https://orcid.org/0000-0001-7252-8638
-Levinson MA (University of Virginia) - ORCID: https://orcid.org/0000-0003-0384-8499
-Marquez C (University of California San Diego) - ORCID: 0000-0003-3960-420X
-Metallo C (University of California San Diego) - ORCID: https://orcid.org/0000-0003-2404-3040
+Levinson MA (University of Virginia) - ORCID:
+https://orcid.org/0000-0003-0384-8499
+Marquez C (University of California San Diego) - ORCID:
+0000-0003-3960-420X
+Metallo C (University of California San Diego) - ORCID:
+https://orcid.org/0000-0003-2404-3040
 Muralidharan M (University of California San Francisco)
 Nourreddine S (University of California San Diego) https://orcid.org/0000-0003-3881-7588
-Niestroy J (University of Virginia) - ORCID: https://orcid.org/0000-0002-1103-3882
-Obernier K (University of California San Francisco) - ORCID: https://orcid.org/0000-0002-4025-1299
+Niestroy J (University of Virginia) - ORCID:
+https://orcid.org/0000-0002-1103-3882
+Obernier K (University of California San Francisco) - ORCID:
+https://orcid.org/0000-0002-4025-1299
 Pan E (University of California San Diego)
 Polacco B (University of California San Francisco)
-Pratt D (University of California San Diego) - ORCID: https://orcid.org/0000-0002-1471-9513
-Qian G (University of California San Diego) - ORCID: https://orcid.org/0009-0005-4217-2745
-Schaffer L (University of California San Diego) - ORCID: https://orcid.org/0000-0001-6339-9141
-Sigaeva A (KTH Royal Institute of Technology) - ORCID: https://orcid.org/0000-0003-3361-3797
-Thaker S (University of Alabama at Birmingham) - ORCID: https://orcid.org/0000-0001-6730-2773
+Pratt D (University of California San Diego) - ORCID:
+https://orcid.org/0000-0002-1471-9513
+Qian G (University of California San Diego) - ORCID:
+https://orcid.org/0009-0005-4217-2745
+Schaffer L (University of California San Diego) - ORCID:
+https://orcid.org/0000-0001-6339-9141
+Sigaeva A (KTH Royal Institute of Technology) - ORCID:
+https://orcid.org/0000-0003-3361-3797
+Thaker S (University of Alabama at Birmingham) - ORCID:
+https://orcid.org/0000-0001-6730-2773
 Zhang Y (University of California San Diego)
-Bélisle-Pipon JC (Simon Fraser University) - ORCID: https://orcid.org/0000-0002-8965-8153
-Brandt C (Yale University) - ORCID: https://orcid.org/0000-0001-8179-1796
-Chen JY (The University of Alabama at Birmingham) - ORCID: https://orcid.org/0000-0002-6112-415X
-Ding Y (University of Texas at Austin) - ORCID: https://orcid.org/0000-0003-2567-2009
-Fodeh S (Yale University) - ORCID: https://orcid.org/0000-0003-4664-3143
-Krogan N (University of California San Francisco) - ORCID: https://orcid.org/0000-0003-4902-337X
-Lundberg E (Stanford University) - ORCID: https://orcid.org/0000-0001-7034-0850
+Bélisle-Pipon JC (Simon Fraser University) - ORCID:
+https://orcid.org/0000-0002-8965-8153
+Brandt C (Yale University) - ORCID:
+https://orcid.org/0000-0001-8179-1796
+Chen JY (The University of Alabama at Birmingham) - ORCID:
+https://orcid.org/0000-0002-6112-415X
+Ding Y (University of Texas at Austin) - ORCID:
+https://orcid.org/0000-0003-2567-2009
+Fodeh S (Yale University) - ORCID:
+https://orcid.org/0000-0003-4664-3143
+Krogan N (University of California San Francisco) - ORCID:
+https://orcid.org/0000-0003-4902-337X
+Lundberg E (Stanford University) - ORCID:
+https://orcid.org/0000-0001-7034-0850
 Mali P (University of California San Diego) https://orcid.org/0000-0002-3383-1287
-Payne-Foster P (University of Alabama) - ORCID: https://orcid.org/0000-0002-3508-3577
-Ratcliffe S (University of Virginia) - ORCID: https://orcid.org/0000-0002-6644-8284
-Ravitsky V (University of Montreal) - ORCID: https://orcid.org/0000-0002-7080-8801
-Sali A (University of California San Diego) - ORCID: https://orcid.org/0000-0003-0435-6197
-Schulz W (Yale University) - ORCID: https://orcid.org/0000-0002-2048-4028
-Ideker T (University of California San Diego) - ORCID: https://orcid.org/0000-0002-1708-8454
+Payne-Foster P (University of Alabama) - ORCID:
+https://orcid.org/0000-0002-3508-3577
+Ratcliffe S (University of Virginia) - ORCID:
+https://orcid.org/0000-0002-6644-8284
+Ravitsky V (University of Montreal) - ORCID:
+https://orcid.org/0000-0002-7080-8801
+Sali A (University of California San Diego) - ORCID:
+https://orcid.org/0000-0003-0435-6197
+Schulz W (Yale University) - ORCID:
+https://orcid.org/0000-0002-2048-4028
+Ideker T (University of California San Diego) - ORCID:
+https://orcid.org/0000-0002-1708-8454
 Point of Contact
 Use email button above to contact.
 Ideker Trey (University of California San Diego)
@@ -360,15 +450,23 @@ This dataset is a revision of the June 2025 Data Release of Cell Maps for Artifi
 This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs, neurons, cardiomyocytes, and treated and untreated MDA-MB468 breast cancer cells; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel).
 External Data Links
 Access external data resources related to this dataset:
-Sequence Read Archive (SRA) Data: NCBI BioProject
-Mass Spectrometry Data (Human iPSCs): MassIVE Repository
-Mass Spectrometry Data (Human Cancer Cells): MassIVE Repository
+Sequence Read Archive (SRA) Data:
+NCBI BioProject
+Mass Spectrometry Data (Human iPSCs):
+MassIVE Repository
+Mass Spectrometry Data (Human Cancer Cells):
+MassIVE Repository
 Data Governance & Ethics
-Human Subjects: No
-De-identified Samples: Yes
-FDA Regulated: No
-Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu)
-Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+Human Subjects:
+No
+De-identified Samples:
+Yes
+FDA Regulated:
+No
+Data Governance Committee:
+Jillian Parker (jillianparker@health.ucsd.edu)
+Ethical Review:
+Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
 Completeness
 These data are not yet in completed final form:
 Some datasets are under temporary pre-publication embargo
@@ -400,35 +498,82 @@ Does not represent all biological variants which may be seen in the population a
 Subject
 Medicine, Health and Life Sciences
 Keyword
-AI http://purl.obolibrary.org/obo/NCIT_C16309 (NCI Thesaurus)
-affinity purification http://www.bioassayontology.org/bao#BAO_0002603 (BioAssay Ontology (BAO))
-AP-MS http://www.ebi.ac.uk/swo/SWO_1100012 (Software Ontology)
-artificial intelligence http://purl.obolibrary.org/obo/NCIT_C16309 (NCI Thesaurus)
-breast cancer http://purl.bioontology.org/ontology/LNC/LA14283-8 (LOINC)
+AI
+http://purl.obolibrary.org/obo/NCIT_C16309
+(NCI Thesaurus)
+affinity purification
+http://www.bioassayontology.org/bao#BAO_0002603
+(BioAssay Ontology (BAO))
+AP-MS
+http://www.ebi.ac.uk/swo/SWO_1100012
+(Software Ontology)
+artificial intelligence
+http://purl.obolibrary.org/obo/NCIT_C16309
+(NCI Thesaurus)
+breast cancer
+http://purl.bioontology.org/ontology/LNC/LA14283-8
+(LOINC)
 Bridge2AI
-cardiomyocyte http://purl.obolibrary.org/obo/CL_0000746
+cardiomyocyte
+http://purl.obolibrary.org/obo/CL_0000746
 CM4AI
-CRISPR/Cas9 http://www.bioassayontology.org/bao#BAO_0010249 (Bioassay Ontology (BAO))
-induced pluripotent stem cell http://www.ebi.ac.uk/efo/EFO_0004905 (Experimental Factor Ontology (EFO))
-iPSC http://www.ebi.ac.uk/efo/EFO_0004905 (Experimental Factor Ontology (EFO))
+CRISPR/Cas9
+http://www.bioassayontology.org/bao#BAO_0010249
+(Bioassay Ontology (BAO))
+induced pluripotent stem cell
+http://www.ebi.ac.uk/efo/EFO_0004905
+(Experimental Factor Ontology (EFO))
+iPSC
+http://www.ebi.ac.uk/efo/EFO_0004905
+(Experimental Factor Ontology (EFO))
 KOLF2.1J
-machine learning http://purl.obolibrary.org/obo/OBI_0002587 (Ontology of Biomedical Investigations (OBI)) http://purl.obolibrary.org/obo/obi.owl
-mass spectroscopy http://purl.bioontology.org/ontology/MESH/D013058 (Medical Subject Headings (MeSH))
+machine learning
+http://purl.obolibrary.org/obo/OBI_0002587
+(Ontology of Biomedical Investigations (OBI))
+http://purl.obolibrary.org/obo/obi.owl
+mass spectroscopy
+http://purl.bioontology.org/ontology/MESH/D013058
+(Medical Subject Headings (MeSH))
 MDA-MB-468
-neural progenitor cell http://purl.obolibrary.org/obo/CL_0011020 (Cell Ontology (CL))
-NPC http://purl.obolibrary.org/obo/CL_0011020 (Cell Ontology (CL)) http://purl.obolibrary.org/obo/cl.owl
-neuron http://purl.obolibrary.org/obo/CL_0000540 (Cell Ontology (CL)) http://purl.obolibrary.org/obo/cl.owl
-paclitaxel http://purl.obolibrary.org/obo/CHEBI_45863 (Chemical Entitites of Biological Interest (CHEBI))
-perturb-seq http://www.ebi.ac.uk/efo/EFO_0008860 (Experimental Factor Ontology (EFO))
-perturbation sequencing http://www.ebi.ac.uk/efo/EFO_0008860 (Experimental Factor Ontology (EFO))
-protein-protein interaction http://purl.obolibrary.org/obo/NCIT_C18469 (NCI Thesaurus (NCIT))
-protein localization http://purl.obolibrary.org/obo/GO_0008104 (Gene Ontology (GO)) http://purl.obolibrary.org/obo/go/extensions/go-plus.owl
-single-cell RNA sequencing http://www.ebi.ac.uk/efo/EFO_0008913 (Experimental Factor Ontology (EFO))
-scRNAseq http://www.ebi.ac.uk/efo/EFO_0008913 (Experimental Factor Ontology (EFO))
+neural progenitor cell
+http://purl.obolibrary.org/obo/CL_0011020
+(Cell Ontology (CL))
+NPC
+http://purl.obolibrary.org/obo/CL_0011020
+(Cell Ontology (CL))
+http://purl.obolibrary.org/obo/cl.owl
+neuron
+http://purl.obolibrary.org/obo/CL_0000540
+(Cell Ontology (CL))
+http://purl.obolibrary.org/obo/cl.owl
+paclitaxel
+http://purl.obolibrary.org/obo/CHEBI_45863
+(Chemical Entitites of Biological Interest (CHEBI))
+perturb-seq
+http://www.ebi.ac.uk/efo/EFO_0008860
+(Experimental Factor Ontology (EFO))
+perturbation sequencing
+http://www.ebi.ac.uk/efo/EFO_0008860
+(Experimental Factor Ontology (EFO))
+protein-protein interaction
+http://purl.obolibrary.org/obo/NCIT_C18469
+(NCI Thesaurus (NCIT))
+protein localization
+http://purl.obolibrary.org/obo/GO_0008104
+(Gene Ontology (GO))
+http://purl.obolibrary.org/obo/go/extensions/go-plus.owl
+single-cell RNA sequencing
+http://www.ebi.ac.uk/efo/EFO_0008913
+(Experimental Factor Ontology (EFO))
+scRNAseq
+http://www.ebi.ac.uk/efo/EFO_0008913
+(Experimental Factor Ontology (EFO))
 SEC-MS
 size exclusion chromatography
 subcellular imaging
-vorinostat http://purl.obolibrary.org/obo/CHEBI_45716 (Chemical Entitites of Biological Interest (CHEBI))
+vorinostat
+http://purl.obolibrary.org/obo/CHEBI_45716
+(Chemical Entitites of Biological Interest (CHEBI))
 Related Publication
 References: Clark T, Parker J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Bélisle-Pipon JC, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. 2024. doi http://doi.org/10.1101/2024.05.21.589311
 Nourreddine S, Doctor Y, Dailamy A, Forget A, Lee YH, Chinn B, Khaliq H, Polacco B, Muralidharan M, Pan E, Zhang Y, Sigaeva A, Hansen JN, Gao J, Parker JA, Obernier K, Clark T, Chen JY, Metallo C, Lundberg E, Ideker T, Krogan N, Mali P. A PERTURBATION CELL ATLAS OF HUMAN INDUCED PLURIPOTENT STEM CELLS. bioRxiv. 2024 Nov 4;2024.11.03.621734. PMCID: PMC11580897 doi https://doi.org/10.1101/2024.11.03.621734
@@ -444,26 +589,38 @@ Deposit Date
 2025-02-27
 Dataset Terms
 License/Data Use Agreement
-Our Community Norms as well as good scientific practices expect that proper credit is given via citation. Please use the data citation shown on the dataset page.
+Our
+Community Norms
+as well as good scientific practices expect that proper credit is given via citation. Please use the data citation shown on the dataset page.
 CC BY-NC-SA 4.0
 View Differences
 Direct
-Dataset VersionSummaryVersion NoteContributorsPublished onNo records found.Edit File
+Dataset Version
+Summary
+Version Note
+Contributors
+Published on
+No records found.
+Edit File
 This file has already been deleted (or replaced) in the current version. It may not be edited.
 Close
 Restrict Access
 Restricting limits access to published files. People who want to use the restricted files can request access by default.
 If you disable request access, you must add information about access to the Terms of Access field.
-Learn about restricting files and dataset access in the User Guide.
+Learn about restricting files and dataset access in the
+User Guide
+.
 Request Access
 Enable access request
 You must enable request access or add terms of access to restrict file access.
 Terms of Access for Restricted Files
 Save Changes
 Cancel
-Edit EmbargoThe selected file or files have already been published. Contact an administrator to change the embargo date or reason of the file or files.
+Edit Embargo
+The selected file or files have already been published. Contact an administrator to change the embargo date or reason of the file or files.
 Cancel
-Edit Retention PeriodThe selected file or files have already been published. Contact an administrator to change the retention period date or reason of the file or files.
+Edit Retention Period
+The selected file or files have already been published. Contact an administrator to change the retention period date or reason of the file or files.
 Cancel
 Delete Files
 The file will be deleted after you click on the Delete button.
@@ -481,7 +638,9 @@ Close
 Continue
 Cancel
 Dataset Citations
-Citations for this dataset are retrieved from Crossref via DataCite using Make Data Count standards. For more information about dataset metrics, please refer to the User Guide.
+Citations for this dataset are retrieved from Crossref via DataCite using Make Data Count standards. For more information about dataset metrics, please refer to the
+User Guide
+.
 Sorry, no citations were found.
 Close
 Inaccessible Files Selected
@@ -494,17 +653,21 @@ You may request access to any restricted file(s) by clicking the Request Access 
 Close
 Download Options
 The files selected are too large to download as a ZIP.
-You can select individual files that are below the 953.7 MB download limit from the files table, or use the Data Access API for programmatic access to the files.
+You can select individual files that are below the 953.7 MB download limit from the files table, or use the
+Data Access API
+for programmatic access to the files.
 Select File(s)
 Please select a file or files to be downloaded.
 Close
 Inaccessible Files Selected
 The selected file(s) may not be downloaded because you have not been granted access or the file(s) have a retention period that has expired.
-Click Continue to download the files you have access to download.Continue
+Click Continue to download the files you have access to download.
+Continue
 Cancel
 Ineligible Files Selected
 Some file(s) cannot be transferred. (They are restricted, embargoed, with an expired retention period, or not Globus accessible.)
-Click Continue to transfer the elligible files.Continue
+Click Continue to transfer the elligible files.
+Continue
 Cancel
 Delete Dataset
 Are you sure you want to delete this dataset and all of its files? You cannot undelete this dataset.
@@ -552,15 +715,20 @@ Embargoed files cannot be accessed. Please select an unembargoed file or files f
 Close
 Edit Tags
 Select existing file tags or create new tags to describe your files. Each file can have more than one tag.
-Save ChangesCancel
+Save Changes
+Cancel
 Request Access
-You need to Log In to request access.
+You need to
+Log In
+to request access.
 Close
 Dataset Terms
 Please confirm and/or complete the information needed below in order to request access to files in this dataset.
 This dataset is made available under the following terms. Please confirm and/or complete the information needed below in order to continue.
 License/Data Use Agreement
-Our Community Norms as well as good scientific practices expect that proper credit is given via citation. Please use the data citation shown on the dataset page.
+Our
+Community Norms
+as well as good scientific practices expect that proper credit is given via citation. Please use the data citation shown on the dataset page.
 CC BY-NC-SA 4.0
 Preview Guestbook
 Upon downloading files the guestbook asks for the following information.
@@ -569,12 +737,14 @@ Collected Data
 Account Information
 Close
 Package File Download
-Use the Download URL in a Wget command or a download manager to download this package file. Download via web browser is not recommended. User Guide - Downloading a Dataverse Package via URL
+Use the Download URL in a Wget command or a download manager to download this package file. Download via web browser is not recommended.
+User Guide - Downloading a Dataverse Package via URL
 Download URL
 https://dataverse.lib.virginia.edu/api/access/datafile/
 Close
 Compute Batch
-Clear Batchui-button
+Clear Batch
+ui-button
 Dataset
 Persistent Identifier
 Change Compute Batch
@@ -587,7 +757,8 @@ Cancel
 Publish Dataset
 Are you sure you want to republish this dataset?
 Select if this is a minor or major version update.
-Minor Release (2.2)Major Release (3.0)
+Minor Release (2.2)
+Major Release (3.0)
 Continue
 Cancel
 Publish Dataset
@@ -608,7 +779,10 @@ Continue
 Cancel
 Add/Edit a Version Note
 Styled Citation
-Copyright © 2025, by the Rector and Visitors of the University of Virginia | Terms of Use |  Privacy Policy
+Copyright © 2025, by the Rector and Visitors of the University of Virginia |
+Terms of Use
+|
+Privacy Policy
 Powered by
 v. 6.6 build 1829-192cdc4
 Contact University of Virginia Dataverse Support

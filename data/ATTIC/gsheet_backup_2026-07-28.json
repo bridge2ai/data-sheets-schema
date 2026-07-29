@@ -1,0 +1,113 @@
+{
+ "spreadsheetId": "1jBD6sTp6TDemy6v75PGAHSVz5yfIAXZ8zdDPbmOGATM",
+ "range": "Sheet1!A1:F30",
+ "captured": "2026-07-28",
+ "values": [
+  [
+   "",
+   "CM4AI",
+   "VOICE",
+   "AI-READI",
+   "CHORUS"
+  ],
+  [
+   "publication",
+   "https://www.nature.com/articles/s41586-025-08878-3",
+   "https://pmc.ncbi.nlm.nih.gov/articles/PMC12037532/",
+   "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11800295/pdf/bmjopen-2024-097449.pdf"
+  ],
+  [
+   "publication 2",
+   "",
+   "",
+   "https://www.nature.com/articles/s42255-024-01165-x.pdf"
+  ],
+  [
+   "preprint",
+   "https://www.biorxiv.org/content/10.1101/2024.05.21.589311v1"
+  ],
+  [
+   "white paper",
+   "",
+   "https://drive.google.com/file/d/1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5/view?usp=sharing"
+  ],
+  [],
+  [
+   "NIH project page",
+   "https://reporter.nih.gov/project-details/11211616",
+   "https://reporter.nih.gov/project-details/11376382",
+   "https://reporter.nih.gov/project-details/10471118",
+   "https://reporter.nih.gov/project-details/10472824"
+  ],
+  [
+   "proposal"
+  ],
+  [
+   "tutorial",
+   "",
+   "",
+   "",
+   "https://www.aim-ahead.net/media/jnzdnid3/bridge2ai-for-clinical-care-informational-webinar-cohort-2.pdf"
+  ],
+  [
+   "documentation 1",
+   "https://cm4ai.org/",
+   "https://docs.b2ai-voice.org/ ",
+   "https://docs.aireadi.org/docs/2/about"
+  ],
+  [
+   "documentation 2",
+   "https://cm4ai.org/data-releases/",
+   "",
+   "https://zenodo.org/records/10642459/files/AI-READI-LICENSE-v1.0.pdf?download=1",
+   "https://chorus4ai.org/"
+  ],
+  [
+   "documentation 3",
+   "",
+   "",
+   "https://fairhub.io/datasets/2"
+  ],
+  [
+   "IRB",
+   "",
+   "https://docs.google.com/document/d/1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN/edit",
+   "https://docs.google.com/document/d/1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q/edit"
+  ],
+  [
+   "DUA",
+   "",
+   "https://drive.google.com/file/d/1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA/view?usp=sharing"
+  ],
+  [
+   "License",
+   "https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en"
+  ],
+  [
+   "data resource 1",
+   "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/K7TGEM",
+   "",
+   "https://fairhub.io/datasets/2"
+  ],
+  [
+   "data resource 2",
+   "",
+   "https://physionet.org/content/b2ai-voice/1.1/"
+  ],
+  [
+   "data resource 3",
+   "",
+   "https://physionet.org/content/b2ai-voice/3.0.0/"
+  ],
+  [
+   "metadata"
+  ],
+  [],
+  [],
+  [
+   "",
+   "",
+   "Here is the d4d stuff for voice: https://docs.b2ai-voice.org/ and the underlying repo: https://github.com/eipm/bridge2ai-docs/tree/main/docs"
+  ]
+ ]
+}

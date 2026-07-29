@@ -1,0 +1,408 @@
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: schema-grounded agentic, phase 1
+# Agent runtime: Codex CLI
+# Provider: OpenAI
+# Model: gpt-5.6-sol
+# Reasoning effort: ultra
+# Mode: fast
+# Source bundle: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+# Source manifest: data/preprocessed/source_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Temperature: 0.0
+# Generated: 2026-07-23
+
+id: https://chorus4ai.org/
+name: CHoRUS Dataset
+title: "Bridge2AI: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI"
+description: >-
+  CHoRUS is a multicenter, multimodal, high-resolution retrospective clinical
+  dataset for acute and critical care AI. The project website's Current
+  Released Dataset snapshot reports 50,000 patient admissions from ICU, PICU,
+  and NICU, 1.6 Billion rows of EHR OMOP data, 7,642 admissions with radiology
+  data, and 23 Tb of waveform data. Its Anticipated Final Dataset snapshot
+  lists 100,000 patient admissions, 9 data modalities, and 14
+  data-contributing hospitals. The August 2025 webinar describes access as
+  controlled.
+page: https://chorus4ai.org/
+status: Current Released Dataset
+keywords:
+  - acute care
+  - critical care
+  - artificial intelligence
+  - machine learning
+  - electronic health record
+  - OMOP
+  - clinical notes
+  - imaging
+  - waveform telemetry
+  - EEG
+
+external_resources:
+  - name: NIH RePORTER project record
+    description: >-
+      Official project record for application 10472824 and project number
+      1OT2OD032701-01.
+    external_resources:
+      - https://reporter.nih.gov/project-details/10472824
+  - name: AIM-AHEAD Bridge2AI for Clinical Care Cohort 2 webinar
+    description: >-
+      Tutorial dated September 9, 2025 that contains an explicitly dated
+      August 2025 CHoRUS dataset and access snapshot.
+    external_resources:
+      - https://www.aim-ahead.net/media/jnzdnid3/bridge2ai-for-clinical-care-informational-webinar-cohort-2.pdf
+  - name: CHoRUS project website
+    description: >-
+      Project documentation containing the Current Released Dataset and
+      Anticipated Final Dataset snapshots.
+    external_resources:
+      - https://chorus4ai.org/
+  - name: Historical CHoRUS GitHub organization overview
+    description: >-
+      Documentation captured on 2025-11-14 and retained by the current source
+      manifest for repository, SOP, standards, contributor-role, and
+      software-tooling detail.
+    external_resources:
+      - https://github.com/chorus-ai#table-of-contents
+
+purposes:
+  - name: Acute and critical care AI infrastructure
+    response: >-
+      Build the network, tools, standards, data, and education needed for
+      machine-learning and artificial-intelligence models intended to improve
+      the care, outcomes, and recovery of patients with acute or critical
+      illness.
+  - name: AI-ready critical care dataset
+    response: >-
+      Develop a publicly available, AI-ready critical care dataset as an
+      ultimate project goal while promoting privacy, accountability, and
+      clinical benefit.
+
+tasks:
+  - name: Acute and critical illness modeling
+    response: >-
+      Support AI/ML applications that characterize acute and critical illness,
+      predict complications, and measure treatment response.
+  - name: External model validation
+    response: >-
+      The funded project planned a holdout test set for external validation of
+      AI-developed models.
+
+addressing_gaps:
+  - name: Multicenter critical care AI infrastructure gap
+    response: >-
+      Address the need for high-resolution multicenter data and infrastructure
+      for actionable and trustworthy AI/ML in critical care.
+
+creators:
+  - name: Eric S. Rosenthal
+    description: >-
+      Principal investigator identified by NIH RePORTER; affiliated with
+      Massachusetts General Hospital.
+
+funders:
+  - name: NIH Common Fund Bridge2AI
+    description: >-
+      NIH-funded Bridge2AI data-generation project. NIH RePORTER lists fiscal
+      year 2022, award amount 5880300, project start
+      2022-09-01T00:00:00, and project end 2026-11-30T00:00:00.
+    grants:
+      - id: https://reporter.nih.gov/project-details/10472824
+        name: CHoRUS award
+        grant_number: OT2OD032701
+        description: >-
+          Application ID 10472824; project number 1OT2OD032701-01; core
+          project number OT2OD032701.
+
+instances:
+  - name: Current released patient admissions
+    instance_type: patient admission
+    counts: 50000
+    description: >-
+      The project website's Current Released Dataset snapshot reports 50,000
+      patient admissions from ICU, PICU, and NICU.
+  - name: Current released EHR OMOP rows
+    instance_type: EHR OMOP row
+    description: >-
+      The project website's Current Released Dataset snapshot reports
+      1.6 Billion rows of EHR OMOP data.
+  - name: Current released admissions with radiology data
+    instance_type: patient admission with radiology data
+    counts: 7642
+    description: >-
+      The project website's Current Released Dataset snapshot reports 7,642
+      admissions with radiology data.
+  - name: Anticipated final patient admissions
+    instance_type: anticipated patient admission
+    counts: 100000
+    description: >-
+      The project website labels 100,000 patient admissions as an Anticipated
+      Final Dataset target, not a current released count.
+  - name: Anticipated final data modalities
+    instance_type: anticipated data modality
+    counts: 9
+    description: >-
+      The project website labels 9 different data modalities as an Anticipated
+      Final Dataset target.
+
+known_limitations:
+  - name: Historical clinical-note availability
+    limitation_type: temporal_limitation
+    limitation_description: >-
+      As of August 2025, clinical notes were stored locally except for tokens.
+    scope_impact: >-
+      This is a dated statement about what was available in the enclave, not a
+      claim about the current status of full clinical notes.
+  - name: Historical imaging availability and de-identification
+    limitation_type: temporal_limitation
+    limitation_description: >-
+      As of August 2025, 1000 images were available and de-identification was
+      in process for a larger cohort.
+    scope_impact: >-
+      The current project website separately reports 7,642 admissions with
+      radiology data; image count and admission count are different measures.
+  - name: Historical EEG extraction status
+    limitation_type: temporal_limitation
+    limitation_description: >-
+      EEG extraction was in process as of August 2025.
+    scope_impact: >-
+      The source bundle does not give a later current EEG extraction status.
+
+subpopulations:
+  - name: Critical care settings in the current release
+    subpopulation_elements_present: true
+    identification:
+      - ICU admissions
+      - PICU admissions
+      - NICU admissions
+    description: >-
+      The Current Released Dataset snapshot identifies these three admission
+      settings but does not provide a count for each setting.
+
+acquisition_methods:
+  - name: Retrospective multicenter clinical data acquisition
+    acquisition_details:
+      - >-
+        The dataset uses retrospective data collection across 14 different
+        hospitals.
+      - >-
+        The funded project describes acquisition of structured EHR data,
+        tokenized unstructured EHR data, telemetry and EEG waveforms, imaging,
+        and social determinants of health.
+
+collection_mechanisms:
+  - name: Electronic health records
+    mechanism_details:
+      - >-
+        Structured EHR data include demographics, medication administration,
+        provider-documented procedures and diagnoses, and high-frequency
+        nursing flowsheets.
+      - >-
+        Clinical notes are extracted and tokenized using the OHNLP toolkit.
+  - name: Radiology imaging
+    mechanism_details:
+      - Imaging is acquired from PACS and represented with DICOM.
+  - name: Waveform telemetry
+    mechanism_details:
+      - >-
+        Telemetry waveforms come from bedside monitors and
+        gateway/middleware and use WFDB with a PhysioNet-extended schema.
+  - name: EEG waveforms
+    mechanism_details:
+      - >-
+        EEG waveforms come from hospital databases and use EDF+ and Persyst.
+
+sampling_strategies:
+  - name: Planned comprehensive and diverse sampling
+    strategies:
+      - >-
+        The funded project planned sampling to cover comprehensive sets of
+        patient conditions and clinical treatment strategies.
+      - >-
+        Historical project documentation describes federated access intended
+        to support sampling for a balanced and diverse cohort.
+
+data_collectors:
+  - name: Data-contributing hospitals
+    role: Clinical data contributing sites
+    collector_details:
+      - >-
+        The Anticipated Final Dataset snapshot identifies 14
+        data-contributing hospitals; the source bundle does not name all 14.
+
+collection_timeframes:
+  - name: Retrospective collection
+    timeframe_details:
+      - The CHoRUS dataset is described as a retrospective data collection.
+      - >-
+        The source bundle does not provide dates delimiting the underlying
+        clinical-data collection period.
+
+raw_data_sources:
+  - name: Electronic health record systems
+    source_description: >-
+      Structured and unstructured electronic health record data from
+      participating hospitals.
+    source_type:
+      - structured EHR
+      - unstructured clinical notes
+  - name: Picture archiving and communication systems
+    source_description: Imaging acquired from hospital PACS.
+    source_type:
+      - medical imaging
+  - name: Bedside monitoring systems
+    source_description: >-
+      Telemetry waveforms acquired from bedside monitors and
+      gateway/middleware.
+    source_type:
+      - waveform telemetry
+  - name: Hospital EEG databases
+    source_description: EEG waveforms acquired from hospital databases.
+    source_type:
+      - EEG waveform
+
+human_subject_research:
+  involves_human_subjects: true
+  description: >-
+    The dataset contains retrospective clinical data from patient admissions
+    involving acute and critical care. The source bundle does not provide an
+    IRB identifier, IRB approval status, consent details, or a HIPAA
+    determination.
+
+participant_privacy:
+  - name: Privacy and re-identification safeguards
+    anonymization_method:
+      - >-
+        The funded project describes transforming data using approaches that
+        limit re-identification.
+      - >-
+        As of August 2025, clinical notes were stored locally except for
+        tokens, and imaging de-identification was in process for a larger
+        cohort.
+
+preprocessing_strategies:
+  - name: Multimodal standardization and privacy transformation
+    preprocessing_details:
+      - Structured EHR data are standardized to the OMOP Common Data Model.
+      - Clinical notes are extracted and tokenized using the OHNLP toolkit.
+      - >-
+        Data are transformed using approaches intended to limit
+        re-identification.
+      - >-
+        Historical project documentation describes harmonization of EHR,
+        waveform, imaging, and text data through unified standards.
+
+labeling_strategies:
+  - name: Planned prediction-target labeling
+    labeling_details:
+      - >-
+        The funded project planned to acquire, standardize, store, visualize,
+        and label data.
+      - >-
+        Historical project documentation describes a visualization and
+        annotation environment intended to label data with targets important
+        for prediction.
+
+raw_sources:
+  - name: Availability of source clinical data
+    raw_data_details:
+      - The August 2025 webinar describes the dataset as controlled access.
+      - >-
+        As of August 2025, OMOP and telemetry were in the enclave, while
+        clinical notes were stored locally except for tokens.
+      - >-
+        As of August 2025, imaging de-identification for a larger cohort and
+        EEG extraction were still in process.
+
+existing_uses:
+  - name: Uses reported in August 2025
+    examples:
+      - Training activities
+      - Publications
+
+future_use_impacts:
+  - name: Privacy and bias considerations
+    impact_details:
+      - >-
+        Patient-focused ethical and legal work is intended to manage privacy
+        and bias while accounting for social determinants of health.
+
+intended_uses:
+  - name: Research and model development
+    use_category:
+      - research
+    examples:
+      - Characterizing acute and critical illness
+      - Predicting complications
+      - Measuring treatment response
+      - Improving recovery from acute illness
+    usage_notes: >-
+      The project emphasizes actionable and trustworthy AI and clinical
+      benefit.
+  - name: External validation
+    use_category:
+      - research
+    examples:
+      - External validation of AI-developed models
+    usage_notes: >-
+      A holdout test set for external validation is a planned project outcome;
+      the source bundle does not establish that it is currently available.
+  - name: Education and training
+    use_category:
+      - educational
+    examples:
+      - AI/ML training using CHoRUS data and tools
+
+distribution_formats:
+  - name: Structured EHR data
+    description: >-
+      EHR data standardized to the OMOP Common Data Model. The current website
+      reports 1.6 Billion EHR OMOP rows; the August 2025 webinar describes
+      access as controlled.
+  - name: Tokenized clinical notes
+    description: >-
+      Clinical notes extracted and tokenized with the OHNLP toolkit. As of
+      August 2025, notes were stored locally except for tokens and access was
+      controlled.
+  - name: Radiology imaging
+    description: >-
+      Imaging from PACS represented with DICOM. The current website reports
+      7,642 admissions with radiology data; the August 2025 webinar describes
+      access as controlled.
+  - name: Waveform telemetry
+    description: >-
+      Bedside-monitor and gateway/middleware telemetry represented with WFDB
+      and a PhysioNet-extended schema. The current website reports 23 Tb of
+      waveform data; the August 2025 webinar describes access as controlled.
+  - name: EEG waveforms
+    description: >-
+      EEG from hospital databases represented with EDF+ and Persyst. Extraction
+      was in process and access was controlled as of August 2025.
+
+license_and_use_terms:
+  name: Controlled access terms
+  license_terms:
+    - >-
+      The August 2025 webinar describes the clinical dataset as controlled
+      access.
+    - >-
+      In the AIM-AHEAD training-program context, participants must sign a
+      licensing agreement before gaining dataset access.
+    - >-
+      Historical documentation captured on 2025-11-14 directs access requests
+      to dbold@emory.edu or jared.houghtaling@tuftsmedicine.org; the source
+      bundle does not establish these as current contacts.
+    - >-
+      The source bundle does not name a license for the clinical dataset. The
+      MIT and Apache-2.0 statements in the historical GitHub snapshot apply to
+      project or software repositories, not to the clinical dataset.
+
+is_deidentified:
+  name: De-identification status described by the source bundle
+  deidentification_details:
+    - >-
+      The funded project describes transformations intended to limit
+      re-identification.
+    - >-
+      Imaging de-identification for a larger cohort was still in process as of
+      August 2025.

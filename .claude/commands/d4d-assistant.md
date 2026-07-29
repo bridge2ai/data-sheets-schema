@@ -1,5 +1,14 @@
-Generate D4D datasheets using the Claude Code Assistant deterministic approach,
-following the GitHub Actions workflow methodology with preprocessed source documents.
+Generate D4D datasheets in the current assistant session, following the GitHub
+Actions workflow methodology with preprocessed source documents. This mode can
+run under Claude Code or Codex/GPT; record the actual runtime and model.
+
+> Note: this command produces FULL D4D records only. For paired full + D4D-core
+> generation, use `/d4d-full-core` (two ordered generation phases followed by a
+> source/provenance audit and strict schema-derived pair reconciliation).
+
+Before generation, read and enforce
+`.claude/agents/d4d-provenance-guard.md`. In particular, do not read or borrow
+facts from any prior generated D4D.
 
 ## Workflow Reference
 
@@ -11,28 +20,33 @@ output formatting guidelines.
 
 ### Concatenated Sources (for comprehensive D4Ds - RECOMMENDED)
 Location: data/preprocessed/concatenated/
-- AI_READI_preprocessed.txt (245K, 13 source files)
-- CHORUS_preprocessed.txt (70K, 6 source files)
-- CM4AI_preprocessed.txt (161K, 8 source files)
-- VOICE_preprocessed.txt (89K, 9 source files)
+- AI_READI_preprocessed.txt (238K, 7 source files)
+- CHORUS_preprocessed.txt (35K, 4 source files)
+- CM4AI_preprocessed.txt (287K, 9 source files)
+- VOICE_preprocessed.txt (295K, 9 source files)
 
-Use concatenated files to generate ONE comprehensive D4D per project.
+The source inventory and document order are defined in
+`data/preprocessed/source_manifest.yaml`. Use the concatenated files to generate
+ONE comprehensive D4D per project.
 
 ### Individual Sources (for per-document D4Ds)
 Location: data/preprocessed/individual/{PROJECT}/
 
 Example files:
-- AI_READI: `docs_aireadi_org_docs-2_row10.txt`, `fairhub_row12.json`, `e097449.full_row2.txt`
-- CHORUS: `CHoRUS for Equitable AI.txt`, `aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.txt`
-- CM4AI: `dataverse_10.18130_V3_B35XWX_row13.txt`, `2024.05.21.589311v1.full.txt`
-- VOICE: `physionet_b2ai-voice_1.1_row14.txt`, `B2AI-Voice_DTUA_2025.txt`
+- AI_READI: `bmjopen-2024-097449_row2.txt`, `fairhub_dataset_2_row12.txt`, `gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt`
+- CHORUS: `reporter_nih_gov_project-details-10472824_row7.txt`, `bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt`, `chorus4ai_org_row11.txt`, `github_chorus_ai_overview_2025-11-14.txt`
+- CM4AI: `www_nature_com_articles-s41586-025-08878-3_row2.txt`, `cm4ai_org_data-releases_row11.txt`, `dataverse_10.18130_V3_B35XWX_row16.txt`, `dataverse_10.18130_V3_F3TD5R_row19.txt`, `dataverse_10.18130_V3_K7TGEM_row16.txt`
+- VOICE: `physionet_b2ai-voice_1.1_row17.txt`, `gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt`, `github_eipm_bridge2ai-docs_README_row22.txt`
 
 Use individual files to generate separate D4D per source document.
 
 ## Output Locations
 
-- Concatenated: data/d4d_concatenated/claudecode_assistant/{PROJECT}_d4d.yaml
-- Individual: data/d4d_individual/claudecode_assistant/{PROJECT}/{source_file}_d4d.yaml
+- Concatenated: data/d4d_concatenated/claudecode_assistant/{VERSION}/{PROJECT}_d4d.yaml
+- Individual: data/d4d_individual/claudecode_assistant/{VERSION}/{PROJECT}/{source_file}_d4d.yaml
+
+Use a `{YYYY-MM-DD}_{model}` version label and never overwrite a prior version
+directory.
 
 ## Generation Process
 
@@ -64,7 +78,7 @@ Follow the workflow in .github/workflows/d4d_assistant_create.md:
    - Fix any validation errors before proceeding
 
 6. **Validate Ontology Terms** (Step 5b)
-   - Run: poetry run linkml-term-validator validate-data <file> --schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+   - Run: poetry run linkml-term-validator validate-data <file> --schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml --target-class Dataset
    - Verifies enum values using ontology terms (DUO, AIO, etc.) are valid
    - See d4d-validator agent for detailed term validation guidance
    - Fix any term validation warnings
@@ -75,10 +89,15 @@ Follow the workflow in .github/workflows/d4d_assistant_create.md:
 
 ```yaml
 # D4D Datasheet for {PROJECT} Dataset
-# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Generation Method: schema-grounded assistant, in-session synthesis
+# Agent runtime: {Claude Code|Codex CLI}
+# Provider: {Anthropic|OpenAI}
+# Model: {MODEL}
 # Workflow: .github/workflows/d4d_assistant_create.md
-# Source: data/preprocessed/concatenated/{PROJECT}_preprocessed.txt
+# Source bundle: data/preprocessed/concatenated/{PROJECT}_preprocessed.txt
+# Source manifest: data/preprocessed/source_manifest.yaml
 # Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
 # Temperature: 0.0
 # Generated: {DATE}
 ```
@@ -91,6 +110,7 @@ Follow the workflow in .github/workflows/d4d_assistant_create.md:
 - Enum fields: Only use values defined in schema enums
 - Dates: Use ISO 8601 format (YYYY-MM-DD)
 - DataSubset inherits from Dataset (requires id field)
+- Older generated full/core D4D records are forbidden factual inputs
 
 ## Validation
 
@@ -101,7 +121,9 @@ poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_a
 
 ### Ontology Term Validation (Required)
 ```bash
-poetry run linkml-term-validator validate-data <file> --schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+poetry run linkml-term-validator validate-data <file> \
+  --schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
+  --target-class Dataset
 ```
 
 All D4Ds must pass both validations before completion.

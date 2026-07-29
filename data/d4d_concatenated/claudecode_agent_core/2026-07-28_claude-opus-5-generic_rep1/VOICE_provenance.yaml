@@ -1,0 +1,75 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-07-28T19:31:06+00:00'
+run:
+  label: 2026-07-28_claude-opus-5-generic_rep1
+  project: VOICE
+  method: claudecode_agent
+  arm: baseline
+  replicate: 1
+model:
+  generation_method: schema-grounded agentic, phase 1
+  agent_runtime: Claude Code
+  provider: Anthropic
+  model: claude-opus-5[1m]
+  mode: four-phase project agent, generic prompt
+  temperature: '0.0'
+schema:
+  declared_version: 1.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_md5: 633a2d2c490364d66f45d8ee2959a329
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_md5: c23d85ec2abfa2178de2737278f690e1
+  merged_schema_carries_version: false
+  note: The version is declared in the source schema but the merged artefacts predate
+    it; they will carry it after the next `make full-schema`. Content md5s identify
+    exactly what was used.
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: ea11de34922a490fb53a3c40f0507ea0a2207c20
+  commit_short: ea11de34
+  branch: d4d-deprimed-replication-and-corpus-provenance
+  dirty: true
+  dirty_file_count: 92
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+  bundle_md5: e637eb752ee8cab5f9f7a52782250469
+  bundle_bytes: 377706
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: ab62657ae5ca24d62258c2d2634a425b
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d.yaml
+    md5: b330893fc08b4aef2aa15bb829e0f4c6
+    bytes: 136880
+    slots: 76
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d_core.yaml
+    md5: 278e09f0dd477681c185f4c28546ae82
+    bytes: 111446
+    slots: 65
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/VOICE_reconciliation.md
+    md5: 6dafc7e9c35495b9a17b59296c86e068
+    bytes: 20028
+    slots: null
+unrecoverable: null
+notes: null

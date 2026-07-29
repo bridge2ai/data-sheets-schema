@@ -42,6 +42,8 @@ Options:
 | --- | --- |
 | `--project` | Required. One of `AI_READI`, `CHORUS`, `CM4AI`, `VOICE` |
 | `--output-dir PATH` | Output directory for downloads. Default: `data/raw` |
+| `--sheet-url URL_OR_PATH` | Public CSV export URL or local CSV file. Defaults to the Bridge2AI GC input sheet |
+| `--manifest PATH` | Stage downloads and promote only canonical artifacts, retaining valid prior fallbacks. Default: `data/preprocessed/source_manifest.yaml` |
 
 ### `d4d download preprocess`
 
@@ -58,6 +60,7 @@ Options:
 | `--project` | Optional. Restrict preprocessing to one project |
 | `--input-dir PATH` | Raw download directory. Default: `data/raw` |
 | `--output-dir PATH` | Preprocessed output directory. Default: `data/preprocessed/individual` |
+| `--manifest PATH` | Canonical source selection manifest. Default: `data/preprocessed/source_manifest.yaml` |
 
 ### `d4d download concatenate`
 
@@ -74,6 +77,15 @@ Options:
 | `--project` | Required. One of `AI_READI`, `CHORUS`, `CM4AI`, `VOICE` |
 | `--input-dir PATH` | Preprocessed input directory. Default: `data/preprocessed/individual` |
 | `--output-file PATH` | Output path. Default: `data/preprocessed/concatenated/{PROJECT}_preprocessed.txt` |
+| `--manifest PATH` | Canonical source selection manifest. Default: `data/preprocessed/source_manifest.yaml` |
+
+The manifest fixes the active source inventory, normalizes every processed
+artifact to `.txt`, and supplies a deterministic concatenation order. To run the
+repository-level workflow for all four projects:
+
+```bash
+make download-and-preprocess
+```
 
 ## `d4d evaluate`
 

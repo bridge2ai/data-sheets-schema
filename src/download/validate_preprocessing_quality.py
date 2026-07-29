@@ -12,8 +12,9 @@ This script compares raw source files against preprocessed outputs to detect:
 import argparse
 import json
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 from dataclasses import dataclass
+import yaml
 
 
 @dataclass
@@ -74,7 +75,8 @@ def is_stub_content(path: Path, min_chars: int = 500) -> bool:
             'sign in',
             'file edit view tools help',
             'unsaved changes to drive',
-            'tab  external'
+            'tab  external',
+            "doesn't work properly without javascript",
         ]
 
         # If file is small and has stub indicators
@@ -87,7 +89,8 @@ def is_stub_content(path: Path, min_chars: int = 500) -> bool:
 
 
 def validate_file(raw_file: Path, preprocessed_file: Path,
-                 min_ratio: float = 0.01, min_chars: int = 500) -> FileQuality:
+                 min_ratio: float = 0.01, min_chars: int = 500,
+                 check_size_ratio: bool = True) -> FileQuality:
     """
     Validate a single preprocessed file against its raw source.
 
@@ -119,7 +122,11 @@ def validate_file(raw_file: Path, preprocessed_file: Path,
     elif is_stub:
         is_problematic = True
         issue = f"Stub file ({char_count} chars)"
-    elif raw_file.suffix.lower() in ['.pdf', '.html'] and size_ratio < min_ratio:
+    elif (
+        check_size_ratio
+        and raw_file.suffix.lower() in ['.pdf', '.html']
+        and size_ratio < min_ratio
+    ):
         is_problematic = True
         issue = f"Significant data loss ({size_ratio:.1%} retained)"
 
@@ -206,6 +213,100 @@ def validate_project(raw_dir: Path, preprocessed_dir: Path,
     return results
 
 
+def validate_manifest_project(
+    manifest: dict,
+    raw_root: Path,
+    preprocessed_root: Path,
+    project: str,
+) -> Dict:
+    """Validate only canonical manifest sources and reject active extras."""
+    entries = manifest.get("projects", {}).get(project)
+    if entries is None:
+        return {"error": f"Project not found in source manifest: {project}"}
+
+    raw_dir = raw_root / project
+    preprocessed_dir = preprocessed_root / project
+    default_minimum = int(manifest.get("default_minimum_characters", 500))
+    results = {
+        "project": project,
+        "files_checked": 0,
+        "problematic_files": 0,
+        "empty_files": 0,
+        "stub_files": 0,
+        "low_extraction_rate": 0,
+        "missing_outputs": 0,
+        "unexpected_outputs": 0,
+        "quality_reports": [],
+    }
+    expected_outputs = set()
+
+    for entry in entries:
+        raw_file = raw_dir / entry["raw_file"]
+        processed_file = preprocessed_dir / entry["processed_file"]
+        expected_outputs.add(entry["processed_file"])
+
+        if not raw_file.exists():
+            results["missing_outputs"] += 1
+            results["quality_reports"].append({
+                "raw_file": raw_file.name,
+                "raw_size": 0,
+                "issue": "Missing canonical raw source",
+                "status": "missing",
+            })
+            continue
+        if not processed_file.exists():
+            results["missing_outputs"] += 1
+            results["quality_reports"].append({
+                "raw_file": raw_file.name,
+                "raw_size": get_file_size(raw_file),
+                "issue": f"Missing canonical output: {processed_file.name}",
+                "status": "missing",
+            })
+            continue
+
+        quality = validate_file(
+            raw_file,
+            processed_file,
+            min_chars=int(
+                entry.get("minimum_characters", default_minimum)
+            ),
+            check_size_ratio=False,
+        )
+        results["files_checked"] += 1
+        if quality.is_problematic:
+            results["problematic_files"] += 1
+            if quality.is_empty:
+                results["empty_files"] += 1
+            elif quality.is_stub:
+                results["stub_files"] += 1
+            results["quality_reports"].append({
+                "raw_file": raw_file.name,
+                "preprocessed_file": processed_file.name,
+                "raw_size": quality.raw_size,
+                "preprocessed_size": quality.preprocessed_size,
+                "size_ratio": f"{quality.size_ratio:.1%}",
+                "issue": quality.issue,
+                "status": "problematic",
+            })
+
+    if preprocessed_dir.exists():
+        actual_outputs = {
+            path.name
+            for path in preprocessed_dir.iterdir()
+            if path.is_file() and not path.name.startswith(".")
+        }
+        for filename in sorted(actual_outputs - expected_outputs):
+            results["unexpected_outputs"] += 1
+            results["quality_reports"].append({
+                "raw_file": filename,
+                "raw_size": get_file_size(preprocessed_dir / filename),
+                "issue": "Unexpected active output not selected by manifest",
+                "status": "unexpected",
+            })
+
+    return results
+
+
 def format_size(bytes_size: int) -> str:
     """Format byte size as human-readable string."""
     for unit in ['B', 'KB', 'MB', 'GB']:
@@ -232,11 +333,17 @@ def print_report(results: Dict):
     print(f"    - Stub:           {results['stub_files']}")
     print(f"    - Low extraction: {results['low_extraction_rate']}")
     print(f"  Missing outputs:    {results['missing_outputs']}")
+    if "unexpected_outputs" in results:
+        print(f"  Unexpected outputs: {results['unexpected_outputs']}")
 
-    if results["problematic_files"] > 0 or results["missing_outputs"] > 0:
+    if (
+        results["problematic_files"] > 0
+        or results["missing_outputs"] > 0
+        or results.get("unexpected_outputs", 0) > 0
+    ):
         print("\n  ⚠️  Issues Found:")
         for report in results["quality_reports"]:
-            if report["status"] == "missing":
+            if report["status"] in {"missing", "unexpected"}:
                 print(f"    • {report['raw_file']} ({format_size(report['raw_size'])}) - {report['issue']}")
             else:
                 print(f"    • {report['raw_file']} ({format_size(report['raw_size'])}) → "
@@ -278,6 +385,15 @@ def main():
         action="store_true",
         help="Output results as JSON"
     )
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        help=(
+            "Canonical source manifest. Size-ratio warnings are disabled in "
+            "manifest mode because compressed PDF/HTML byte ratios are not "
+            "reliable extraction-quality measures"
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -287,21 +403,42 @@ def main():
     print(f"Raw directory:         {args.raw_dir}")
     print(f"Preprocessed directory: {args.preprocessed_dir}")
     print(f"Min extraction ratio:  {args.min_ratio:.1%}")
+    if args.manifest:
+        print(f"Source manifest:       {args.manifest}")
 
     all_results = []
     total_issues = 0
+    manifest = None
+    if args.manifest:
+        manifest = yaml.safe_load(args.manifest.read_text(encoding="utf-8"))
 
     for project in args.projects:
-        raw_dir = args.raw_dir / project
-        preprocessed_dir = args.preprocessed_dir / project
-
-        results = validate_project(raw_dir, preprocessed_dir, project, args.min_ratio)
+        if manifest:
+            results = validate_manifest_project(
+                manifest,
+                args.raw_dir,
+                args.preprocessed_dir,
+                project,
+            )
+        else:
+            raw_dir = args.raw_dir / project
+            preprocessed_dir = args.preprocessed_dir / project
+            results = validate_project(
+                raw_dir,
+                preprocessed_dir,
+                project,
+                args.min_ratio,
+            )
         all_results.append(results)
 
         if not args.json:
             print_report(results)
 
-        total_issues += results.get("problematic_files", 0) + results.get("missing_outputs", 0)
+        total_issues += (
+            results.get("problematic_files", 0)
+            + results.get("missing_outputs", 0)
+            + results.get("unexpected_outputs", 0)
+        )
 
     if args.json:
         print(json.dumps(all_results, indent=2))
@@ -313,10 +450,15 @@ def main():
         total_checked = sum(r.get("files_checked", 0) for r in all_results)
         total_problematic = sum(r.get("problematic_files", 0) for r in all_results)
         total_missing = sum(r.get("missing_outputs", 0) for r in all_results)
+        total_unexpected = sum(
+            r.get("unexpected_outputs", 0) for r in all_results
+        )
 
         print(f"  Total files checked: {total_checked}")
         print(f"  Problematic files:   {total_problematic}")
         print(f"  Missing outputs:     {total_missing}")
+        if args.manifest:
+            print(f"  Unexpected outputs:  {total_unexpected}")
 
         if total_issues == 0:
             print("\n✅ All preprocessing quality checks passed!")

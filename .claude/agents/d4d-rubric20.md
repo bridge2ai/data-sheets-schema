@@ -7,7 +7,7 @@ description: |
     - "Score FAIR compliance using rubric20"
     - "Run rubric20 quality assessment"
     - "Assess data quality with rubric20"
-model: claude-sonnet-4-5-20250929
+model: claude-fable-5
 color: purple
 ---
 
@@ -369,7 +369,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
   "method": "<generation_method>",
   "evaluation_timestamp": "<ISO 8601 timestamp>",
   "model": {
-    "name": "claude-sonnet-4-5-20250929",
+    "name": "claude-fable-5",
     "temperature": 0.0,
     "evaluation_type": "llm_as_judge"
   },
@@ -657,7 +657,7 @@ The agent will iterate through files, evaluate each one, and save results.
 **This agent provides fully reproducible evaluations:**
 - Same D4D file → Same quality score every time
 - Temperature: 0.0 (fully deterministic)
-- Model: claude-sonnet-4-5-20250929 (date-pinned)
+- Model: claude-fable-5 (pinned)
 - Rubric: Version-controlled in `data/rubric/rubric20.txt`
 - All within Claude Code conversation
 
@@ -674,7 +674,7 @@ See `notes/RUBRIC_AGENT_USAGE.md` for comprehensive usage examples.
 ## Notes
 
 - **Temperature Setting:** 0.0 for fully deterministic, reproducible quality assessments
-- **Model:** claude-sonnet-4-5-20250929 (date-pinned for consistency)
+- **Model:** claude-fable-5 (pinned for consistency)
 - **Platform-Specific:** Some questions apply only to specific platforms (noted in "applies_to" field)
 - **Complement Rubric10:** Rubric20 provides more granular quality assessment than rubric10's hierarchical structure
 - **Cost:** ~$0.10-0.30 per file evaluation via Anthropic API

@@ -1,0 +1,854 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: schema-grounded agentic, phase 1
+# Agent runtime: Codex CLI
+# Provider: OpenAI
+# Model: gpt-5.5
+# Reasoning effort: high
+# Mode: fast
+# Source bundle: data/preprocessed/concatenated/VOICE_preprocessed.txt
+# Source manifest: data/preprocessed/source_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Temperature: 0.0
+# Generated: 2026-07-23
+id: https://doi.org/10.13026/k81f-qr68
+name: Bridge2AI-Voice
+title: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information"
+description: >-
+  Bridge2AI-Voice is an NIH Bridge2AI flagship dataset and consortium effort
+  for voice as a biomarker of health. The adult PhysioNet v3.0.0 release
+  contains derived audio features and phenotypic information for 833 adult
+  participants collected across five sites in North America. Participants were
+  selected from disease groups where voice waveform changes are clinically
+  relevant, including voice disorders, neurological disorders, mood disorders,
+  and respiratory disorders. The public registered-access release contains
+  lower-risk derivations such as spectrograms and other acoustic features rather
+  than original voice recordings, and includes demographic, clinical, validated
+  questionnaire, diagnosis, enrollment, and task metadata.
+doi: 10.13026/k81f-qr68
+version: 3.0.0
+issued: "2025-12-16T00:00:00Z"
+download_url: https://physionet.org/content/b2ai-voice/3.0.0/
+page: https://physionet.org/content/b2ai-voice/3.0.0/
+publisher: https://physionet.org
+license: Bridge2AI Voice Registered Access License
+keywords:
+  - bridge2ai
+  - voice
+  - voice biomarkers
+  - speech
+  - cough
+  - respiratory sounds
+  - acoustic features
+  - health information
+  - artificial intelligence
+language: English
+is_tabular: true
+citation: >-
+  Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M.,
+  Dorr, D., Payne, P., Ravitsky, V., Belisle-Pipon, J., Bahr, R.,
+  Watts, S., Bolser, D., Siu, J., Lerner-Ellis, J., Rudzicz, F.,
+  Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., ... Ghosh, S.
+  (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset
+  linked to health information (version 3.0.0). PhysioNet. RRID:SCR_007345.
+  https://doi.org/10.13026/k81f-qr68
+file_collections:
+  - id: https://doi.org/10.13026/k81f-qr68#features-parquet
+    name: Derived audio feature parquet files
+    collection_type:
+      - processed_data
+    path: features/
+    description: >-
+      Dense derived audio feature files released as Parquet, including
+      ppgs.parquet, sparc_ema.parquet, sparc_loudness.parquet,
+      sparc_periodicity.parquet, sparc_pitch.parquet,
+      torchaudio_spectrogram.parquet, torchaudio_mfcc.parquet,
+      torchaudio_pitch.parquet, and torchaudio_mel_spectrogram.parquet.
+  - id: https://doi.org/10.13026/k81f-qr68#static-features
+    name: Static audio features
+    collection_type:
+      - processed_data
+    path: features/static_features.tsv
+    description: >-
+      Static features derived from raw audio, with one row per unique recording,
+      accompanied by a JSON data dictionary.
+  - id: https://doi.org/10.13026/k81f-qr68#phenotype
+    name: Phenotype tables and dictionaries
+    collection_type:
+      - metadata
+      - processed_data
+    path: phenotype/
+    description: >-
+      Phenotype subfolders contain TSV tables and matching JSON data
+      dictionaries for confounders, demographics, diagnosis, enrollment,
+      questionnaires, and task metadata.
+  - id: https://doi.org/10.13026/k81f-qr68#documentation
+    name: Dataset documentation
+    collection_type:
+      - documentation
+    path: README.md, CHANGES.md, dataset_description.json
+    description: >-
+      Documentation files describe dataset organization, release changes, and
+      dataset-level metadata.
+purposes:
+  - id: https://doi.org/10.13026/k81f-qr68#purpose-voice-ai
+    name: Enable voice AI research
+    response: >-
+      The dataset was created to fuel research and discovery in voice
+      biomarkers by providing a large, ethically sourced, multi-institutional
+      voice dataset linked to health information.
+  - id: https://doi.org/10.13026/k81f-qr68#purpose-clinical-models
+    name: Support clinically applicable AI and ML models
+    response: >-
+      The dataset is intended to support development, benchmarking,
+      pretraining, fine-tuning, and validation of machine-learning models for
+      screening, diagnosis, and monitoring of health conditions through voice
+      biomarkers.
+tasks:
+  - id: https://doi.org/10.13026/k81f-qr68#task-disease-classification
+    name: Disease detection and classification from voice-derived data
+    response: >-
+      Source documentation describes predefined tasks and labels for training
+      machine-learning models for disease detection and classification using
+      diagnostic categories such as vocal pathologies, neurological disorders,
+      psychiatric conditions, and respiratory disorders.
+  - id: https://doi.org/10.13026/k81f-qr68#task-biomarker-discovery
+    name: Voice biomarker discovery and validation
+    response: >-
+      The dataset supports research into acoustic markers associated with
+      disease status and health biomarkers, including voice, speech, cough, and
+      breathing sounds linked to clinical information.
+addressing_gaps:
+  - id: https://doi.org/10.13026/k81f-qr68#gap-scale-standards
+    name: Lack of large standardized voice-health datasets
+    response: >-
+      The sources describe prior voice AI studies as limited by small to
+      medium-sized datasets, limited demographic reporting, lack of
+      standardized data collection protocols, and insufficient linkage to
+      multimodal health metadata.
+creators:
+  - id: https://doi.org/10.13026/k81f-qr68#creator-consortium
+    name: Bridge2AI-Voice Consortium
+    description: >-
+      Multi-institutional consortium with investigators, clinicians, scholars,
+      trainees, voice experts, AI and machine-learning specialists, data
+      scientists, software engineers, social scientists, and ethicists.
+    credit_roles:
+      - conceptualization
+      - methodology
+      - software
+      - validation
+      - investigation
+      - resources
+      - data_curation
+      - supervision
+      - project_administration
+      - funding_acquisition
+    principal_investigator: Yael Bensoussan
+    affiliations:
+      - id: https://www.usf.edu
+        name: University of South Florida
+      - id: https://weill.cornell.edu
+        name: Weill Cornell Medicine
+      - id: https://www.ohsu.edu
+        name: Oregon Health & Science University
+      - id: https://www.mit.edu
+        name: Massachusetts Institute of Technology
+      - id: https://www.utoronto.ca
+        name: University of Toronto
+      - id: https://www.sickkids.ca
+        name: Hospital for Sick Children
+      - id: https://www.sfu.ca
+        name: Simon Fraser University
+      - id: https://www.thehastingscenter.org
+        name: The Hastings Center
+      - id: https://wustl.edu
+        name: Washington University in St. Louis
+      - id: https://www.ufl.edu
+        name: University of Florida
+      - id: https://www.vumc.org
+        name: Vanderbilt University Medical Center
+  - id: https://doi.org/10.13026/k81f-qr68#creator-tools
+    name: Bridge2AI-Voice tools and software team
+    description: >-
+      The project includes software and IT infrastructure leads from Weill
+      Cornell Medicine, and the source documents identify the b2aiprep library
+      as open-source software used to process raw audio and merge source data
+      into phenotype files.
+    credit_roles:
+      - software
+      - data_curation
+      - methodology
+funders:
+  - id: https://doi.org/10.13026/k81f-qr68#funding-bridge2ai
+    name: NIH Bridge2AI Common Fund support
+    grantor: NIH Common Fund Bridge2AI Program
+    grants:
+      - id: https://reporter.nih.gov/project-details/11376382
+        name: "Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before"
+        grant_number: 3OT2OD032720-01S3
+      - id: https://doi.org/10.13026/k81f-qr68#grant-3ot2od032720-01s1
+        name: "Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before"
+        grant_number: 3OT2OD032720-01S1
+      - id: https://doi.org/10.13026/k81f-qr68#grant-u24eb037545
+        grant_number: U24EB037545
+      - id: https://doi.org/10.13026/k81f-qr68#grant-r01eb030362
+        grant_number: R01EB030362
+    description: >-
+      The PhysioNet pages state support from the National Institute of
+      Biomedical Imaging and Bioengineering, the National Heart Lung and Blood
+      Institute, and the NIH Office of the Director; the NIH RePORTER source
+      identifies project number 3OT2OD032720-01S3 and core project number
+      OT2OD032720.
+instances:
+  - id: https://doi.org/10.13026/k81f-qr68#instance-participants
+    name: Adult participants
+    instance_type: person
+    counts: 833
+    label: true
+    label_description: >-
+      Diagnostic labels are based on clinical assessment by local clinicians,
+      EHR review, prescriptions, imaging, audio, or other appropriate clinical
+      work-up depending on cohort.
+    description: >-
+      Bridge2AI-Voice v3.0.0 contains data for 833 adult participants across
+      five sites in North America.
+  - id: https://doi.org/10.13026/k81f-qr68#instance-recordings
+    name: Voice-derived recordings
+    instance_type: derived audio recording feature
+    counts: 61937
+    description: >-
+      Project documentation describes version 3.0 as containing approximately
+      61,937 voice-derived recordings from 833 adult participants.
+subpopulations:
+  - id: https://doi.org/10.13026/k81f-qr68#subpopulations-disease
+    name: Disease cohort categories
+    subpopulation_elements_present: true
+    identification:
+      - >-
+        Participants were selected based on membership in predetermined disease
+        groups: voice disorders, neurological and neurodegenerative disorders,
+        mood and psychiatric disorders, respiratory disorders, and pediatric
+        voice and speech disorders.
+    distribution:
+      - >-
+        The public data releases do not contain equal distributions of disease
+        categories, and further releases are expected to contain additional data.
+  - id: https://doi.org/10.13026/k81f-qr68#subpopulations-demographics
+    name: Demographic subpopulations
+    subpopulation_elements_present: true
+    identification:
+      - >-
+        Source documentation identifies age, gender, sex, ethnicity, and
+        socioeconomic status as demographic subpopulations collected or
+        represented in study metadata.
+sensitive_elements:
+  - id: https://doi.org/10.13026/k81f-qr68#sensitive-health-voice
+    name: Voice and health information sensitivity
+    sensitive_elements_present: true
+    sensitivity_details:
+      - >-
+        Source documents describe voice as potentially identifiable and describe
+        health, diagnosis, demographic, mental health, traumatic life
+        experiences, and other sensitive information as requiring removal or
+        controlled access when re-identification risk is heightened.
+confidential_elements:
+  - id: https://doi.org/10.13026/k81f-qr68#confidentiality
+    name: Confidentiality protections
+    confidential_elements_present: true
+    confidentiality_details:
+      - >-
+        The Data Transfer and Use Agreement describes the data as personally
+        identifiable information covered under a Certificate of Confidentiality,
+        with administrative, technical, and physical safeguards required for
+        access and use.
+content_warnings:
+  - id: https://doi.org/10.13026/k81f-qr68#content-warning-health
+    name: Health and psychiatric questionnaire content
+    content_warnings_present: true
+    warnings:
+      - >-
+        The IRB protocol notes that questions for some disease cohorts, such as
+        mood disorders, depression, and anxiety, may cause discomfort or trigger
+        negative emotions.
+anomalies:
+  - id: https://doi.org/10.13026/k81f-qr68#anomaly-feature-generation
+    name: Missing derived features for some records
+    anomaly_details:
+      - >-
+        The v3.0.0 PhysioNet documentation states that some files could not
+        generate certain features because of length or other issues and are not
+        included in the bundled data.
+known_biases:
+  - id: https://doi.org/10.13026/k81f-qr68#bias-selection-site
+    name: Site and recruitment selection bias
+    bias_type: selection_bias
+    bias_description: >-
+      Participants were screened for different disorders based on site, and
+      groups less proximal to collection sites or with less trust in the
+      medical system or AI may have been less likely to be recruited.
+    mitigation_strategy: >-
+      Source documentation says the project hopes to improve representativeness
+      through remote collection and recruiting approaches that control for more
+      variables.
+    affected_subsets:
+      - Disease cohorts
+      - Geographic collection sites
+      - Demographic groups
+  - id: https://doi.org/10.13026/k81f-qr68#bias-measurement-device
+    name: Device and diagnostic practice variation
+    bias_type: measurement_bias
+    bias_description: >-
+      Source documentation identifies noise artifacts, variations in diagnostic
+      practices, inaccurate questionnaire responses, underreporting, and device
+      differences as possible confounders.
+known_limitations:
+  - id: https://doi.org/10.13026/k81f-qr68#limitation-raw-audio
+    name: Public release omits raw audio
+    limitation_type: scope_limitation
+    limitation_description: >-
+      The registered-access adult PhysioNet release contains derived features
+      rather than the original raw voice recordings; raw audio requires a
+      separate controlled-access process.
+    scope_impact: >-
+      Analyses needing waveforms must request controlled access rather than use
+      the public registered-access feature release alone.
+  - id: https://doi.org/10.13026/k81f-qr68#limitation-representativeness
+    name: Limited representativeness
+    limitation_type: representativeness_limitation
+    limitation_description: >-
+      The sources state that the dataset is a sample of a larger ongoing
+      collection and is not representative because it was collected at a
+      limited number of geographic locations.
+  - id: https://doi.org/10.13026/k81f-qr68#limitation-splits
+    name: No recommended predefined data splits
+    limitation_type: methodological_limitation
+    limitation_description: >-
+      Source documentation states that researchers are encouraged to create
+      their own training, validation, and testing splits.
+relationships:
+  - id: https://doi.org/10.13026/k81f-qr68#relationship-participant-session
+    name: Participant sessions
+    description: >-
+      Participant identifiers, session identifiers, and task names associate
+      derived feature rows with participant recording sessions; some
+      participants may have more than one session.
+splits:
+  - id: https://doi.org/10.13026/k81f-qr68#splits-none
+    name: No predefined recommended splits
+    description: >-
+      Source documentation states that there are predefined tasks and labels,
+      but no predefined recommended splits for training, validation, or testing.
+acquisition_methods:
+  - id: https://doi.org/10.13026/k81f-qr68#acquisition-clinic-app
+    name: Direct participant collection through app-based protocol
+    description: >-
+      Participants at specialty clinics were screened, consented, and asked to
+      complete demographic forms, health questionnaires, confounder questions,
+      disease-specific instruments, and voice recording tasks using a custom
+      app on a tablet with a headset when possible.
+collection_mechanisms:
+  - id: https://doi.org/10.13026/k81f-qr68#mechanism-app
+    name: Bridge2AI-Voice app, REDCap, and clinical review
+    description: >-
+      Adult data collection used a custom Bridge2AI-Voice app on an iPad or
+      related web/iOS app infrastructure, with questionnaire and clinical data
+      managed through REDCap and diagnosis validation by clinicians using EHR,
+      imaging, audio, prescriptions, or clinical work-up.
+  - id: https://doi.org/10.13026/k81f-qr68#mechanism-pediatric
+    name: ReproSchema-UI for pediatric protocol
+    description: >-
+      Project documentation states that pediatric data are collected using
+      ReproSchema-UI with the Bridge2AI-Voice pediatric protocol and transformed
+      into REDCap format before BIDS conversion.
+sampling_strategies:
+  - id: https://doi.org/10.13026/k81f-qr68#sampling-non-probability
+    name: Non-probability clinical sample
+    description: >-
+      Source documentation identifies the sampling method as a non-probability
+      sample recruited from specialty clinics and participating facilities, with
+      future or ongoing remote and broader recruitment.
+data_collectors:
+  - id: https://doi.org/10.13026/k81f-qr68#collectors-research-clinical
+    name: Research teams and clinicians
+    description: >-
+      Research teams, including medical, graduate, or undergraduate students,
+      coordinated with clinicians and doctors to identify participants and
+      collect data; clinicians and doctors were listed under the IRB as
+      co-investigators.
+collection_timeframes:
+  - id: https://doi.org/10.13026/k81f-qr68#timeframe-v3
+    name: v3 adult release collection duration
+    description: >-
+      Source documentation states that the dataset data were collected over a
+      period of 12 months.
+  - id: https://doi.org/10.13026/k81f-qr68#timeframe-feasibility
+    name: Feasibility app study
+    description: >-
+      A feasibility study was conducted at the University of South Florida
+      Health Voice Center from June 5, 2023 through July 28, 2023.
+direct_collection:
+  - id: https://doi.org/10.13026/k81f-qr68#direct-collection
+    name: Direct collection from participants
+    description: >-
+      Source documentation states that data were collected directly from
+      individuals, and that participants went through an IRB-approved consent
+      process.
+collection_notifications:
+  - id: https://doi.org/10.13026/k81f-qr68#notification
+    name: Participant notification
+    description: >-
+      Participants were informed during consent about the Bridge2AI-Voice app,
+      the purpose of data collection, what data were collected, methods used to
+      secure the data, and information used for the study.
+collection_consents:
+  - id: https://doi.org/10.13026/k81f-qr68#consent
+    name: Prospective informed consent
+    description: >-
+      Participants consented to collection and use of their data through
+      prospective informed consent; consent could occur on paper, in the app,
+      through REDCap surveys, or remotely depending on protocol circumstances.
+consent_revocations:
+  - id: https://doi.org/10.13026/k81f-qr68#revocation
+    name: Withdrawal before completion
+    description: >-
+      Participants are informed that they may withdraw from the study at any
+      point; if they withdraw during or before voice data collection, their data
+      will not be included in the database, but research data cannot be removed
+      once the voice data collection process is completed.
+missing_data_documentation:
+  - id: https://doi.org/10.13026/k81f-qr68#missingness
+    name: Missingness and optional responses
+    description: >-
+      Some questions are optional, data collection irregularities may lead to
+      missing information, phenotype files only contain rows for a participant
+      when at least one column is not missing, and an internal missingness table
+      is included with the dataset.
+raw_data_sources:
+  - id: https://doi.org/10.13026/k81f-qr68#raw-audio-questionnaires
+    name: Raw audio, questionnaire, EHR, and clinical validation inputs
+    source_description: >-
+      Voice, speech, cough, and breathing audio; self-reported questionnaires;
+      medical history; EHR-derived clinical information; imaging; and
+      clinician validation inputs.
+    description: >-
+      Raw inputs include voice, speech, cough, and breathing audio; self-reported
+      demographic and medical history questionnaires; disease-specific validated
+      questionnaires; and clinical information accessed through EHR platforms
+      for gold-standard validation of diagnoses and symptoms.
+ethical_reviews:
+  - id: https://doi.org/10.13026/k81f-qr68#ethical-review-usf
+    name: USF IRB and subsite IRB review
+    description: >-
+      Data collection and sharing were approved by the University of South
+      Florida Institutional Review Board, and documentation describes approval
+      through the USF Single IRB and subsite IRBs through the Single IRB process.
+data_protection_impacts:
+  - id: https://doi.org/10.13026/k81f-qr68#dpia
+    name: Data protection impact analysis status
+    description: >-
+      Source documentation states that no analysis of potential impact of the
+      dataset and its use on data subjects had been conducted.
+human_subject_research:
+  id: https://doi.org/10.13026/k81f-qr68#human-subjects
+  name: Human subjects research
+  description: >-
+    The dataset relates to human participants and is derived from an
+    observational cohort study with IRB-approved consent and data-sharing
+    procedures.
+informed_consent:
+  - id: https://doi.org/10.13026/k81f-qr68#informed-consent
+    name: Informed consent for collection and sharing
+    description: >-
+      Participants were duly informed and agreed to data collection and use via
+      prospective informed consent, including consent to share acquired research
+      data through secure database access mechanisms.
+at_risk_populations:
+  id: https://doi.org/10.13026/k81f-qr68#at-risk
+  name: Clinical and pediatric cohorts
+  description: >-
+    Adult participants include people with voice, neurological,
+    mood/psychiatric, and respiratory disorders. Project documentation also
+    describes a pediatric cohort, with pediatric participants recruited from the
+    Hospital for Sick Children and grouped by age.
+participant_privacy:
+  - id: https://doi.org/10.13026/k81f-qr68#privacy-deidentification
+    name: De-identification and privacy controls
+    description: >-
+      Publicly released adult data exclude raw audio, remove HIPAA Safe Harbor
+      identifiers, remove state/province while retaining country, remove or
+      generalize geographic and narrative text fields, and remove sensitive
+      elements identified as presenting re-identification risk.
+participant_compensation:
+  - id: https://doi.org/10.13026/k81f-qr68#compensation
+    name: Participant compensation
+    description: >-
+      Source documentation states that participants currently receive electronic
+      gift cards: $40 for a data collection session under 90 minutes, $80 for a
+      session over 90 minutes, for no more than 3 sessions and maximum
+      compensation of $120.
+preprocessing_strategies:
+  - id: https://doi.org/10.13026/k81f-qr68#preprocessing-audio
+    name: Audio standardization and feature extraction
+    preprocessing_details:
+      - >-
+        Raw audio was converted to monaural audio and resampled to 16 kHz with
+        a Butterworth anti-aliasing filter.
+      - >-
+        Derived features include spectrograms, MFCCs, Mel spectrograms,
+        articulatory features from Speech Articulatory Coding, acoustic
+        features from openSMILE, phonetic and prosodic features from
+        Parselmouth and Praat, phonetic posteriorgrams, and transcriptions
+        generated with OpenAI Whisper Large.
+    used_software:
+      - id: https://github.com/sensein/b2aiprep
+        name: b2aiprep
+        version: 3.0.0
+        url: https://github.com/sensein/b2aiprep
+      - id: https://github.com/audeering/opensmile
+        name: openSMILE
+      - id: https://www.fon.hum.uva.nl/praat/
+        name: Praat
+      - id: https://github.com/YannickJadoul/Parselmouth
+        name: Parselmouth
+      - id: https://pytorch.org/audio/
+        name: torchaudio
+cleaning_strategies:
+  - id: https://doi.org/10.13026/k81f-qr68#cleaning-none
+    name: Cleaning status
+    cleaning_details:
+      - >-
+        Source documentation states that there was no preprocessing for
+        cleaning the data, distinct from de-identification and feature
+        extraction.
+labeling_strategies:
+  - id: https://doi.org/10.13026/k81f-qr68#labeling-clinician
+    name: Clinician diagnostic labels
+    data_annotation_protocol:
+      - Per Bridge2AI protocols and ICD-10 codes.
+    annotations_per_item: 1
+    labeling_details:
+      - >-
+        Diagnostic labels are clinical assessments. At each site, a local
+        clinician provided diagnosis based on clinical interview and appropriate
+        work-up; psychiatric cohort assessments could use EHR records or active
+        prescriptions by an appropriately licensed clinician.
+raw_sources:
+  - id: https://doi.org/10.13026/k81f-qr68#raw-source-controlled
+    name: Controlled raw audio source
+    access_url: https://www.synapse.org/Synapse:syn72370534/
+    raw_data_details:
+      - >-
+        The v3.0.0 PhysioNet page states that the public adult dataset does not
+        contain raw audio and that raw audio access is a more involved process
+        requiring institutional sign off through the access committee.
+annotation_analyses:
+  - id: https://doi.org/10.13026/k81f-qr68#annotation-audit
+    name: Missingness and consistency audit
+    annotation_quality_details:
+      - >-
+        The dataset has been audited internally for missingness and consistency
+        by the data release team; transcription was generated using off-the-shelf
+        models that had not been audited for correctness.
+machine_annotation_tools:
+  - id: https://doi.org/10.13026/k81f-qr68#machine-tools
+    name: Machine-generated features and transcripts
+    tools:
+      - OpenAI Whisper Large
+      - openSMILE
+      - Praat
+      - Parselmouth
+      - torchaudio
+      - Speech Articulatory Coding
+      - ppgs
+    tool_descriptions:
+      - >-
+        Whisper Large generated transcriptions; openSMILE, Praat, Parselmouth,
+        torchaudio, Speech Articulatory Coding, and ppgs generated derived
+        audio and phonetic features.
+existing_uses:
+  - id: https://doi.org/10.13026/k81f-qr68#existing-use-summer-school
+    name: Bridge2AI training use
+    examples:
+      - >-
+        A restricted version of the dataset containing raw audio has been used
+        in the Bridge2AI Summer School and hackathon.
+use_repository:
+  - id: https://doi.org/10.13026/k81f-qr68#repository-none
+    name: Use repository status
+    repository_details:
+      - >-
+        Source documentation states that there is no repository linking to all
+        papers or systems that use the dataset, aside from general scholarly
+        discovery services.
+other_tasks:
+  - id: https://doi.org/10.13026/k81f-qr68#task-protocol
+    name: Acoustic and questionnaire protocol tasks
+    task_details:
+      - >-
+        Documentation lists 22 acoustic tasks recorded through the app,
+        including breathing sounds, cough, prolonged vowel, maximum phonation
+        time, glides, loudness, diadochokinesis, passages, free speech, picture
+        description, Stroop, productive vocabulary, and pediatric speech tasks.
+future_use_impacts:
+  - id: https://doi.org/10.13026/k81f-qr68#future-impact-skews
+    name: Dataset skews and future fairness risk
+    impact_details:
+      - >-
+        Future users should consider disorder-category, site, and demographic
+        skews and the multivariate distribution when assessing suitability for
+        particular questions.
+discouraged_uses:
+  - id: https://doi.org/10.13026/k81f-qr68#discouraged-harm
+    name: Harmful or non-research uses
+    discouragement_details:
+      - >-
+        The dataset should not be used for attempts to re-identify participants,
+        purposes that could foreseeably cause harm or stigmatization, hiring
+        decisions, insurance premium adjustments, surveillance, or other
+        non-clinical applications that could lead to discrimination or harm.
+intended_uses:
+  - id: https://doi.org/10.13026/k81f-qr68#intended-research
+    name: Commercial and non-commercial research by authorized researchers
+    use_category:
+      - research
+      - health AI
+      - voice biomarker discovery
+    examples:
+      - >-
+        Development, benchmarking, validation, pretraining, and fine-tuning of
+        clinically applicable machine-learning models using voice-derived data.
+    usage_notes: >-
+      Users must satisfy the applicable registered or controlled access
+      requirements and follow the Bridge2AI-Voice access agreements.
+prohibited_uses:
+  - id: https://doi.org/10.13026/k81f-qr68#prohibited-reidentification
+    name: Re-identification and unauthorized sharing
+    prohibition_reason:
+      - >-
+        Data access terms prohibit re-identification attempts, actions that
+        could reasonably lead to re-identification, unauthorized third-party
+        disclosure, sale, lease, loan, or access outside authorized persons.
+distribution_formats:
+  - id: https://doi.org/10.13026/k81f-qr68#formats
+    name: Parquet, TSV, JSON, Markdown, and dataset metadata
+    access_urls:
+      - https://physionet.org/content/b2ai-voice/3.0.0/
+    description: >-
+      Files include Parquet feature files, TSV phenotype tables, JSON data
+      dictionaries and dataset metadata, README, and CHANGES documentation.
+distribution_dates:
+  - id: https://doi.org/10.13026/k81f-qr68#release-dates
+    name: PhysioNet version releases
+    release_dates:
+      - "1.1: Jan. 17, 2025"
+      - "2.0.0: April 16, 2025"
+      - "2.0.1: Aug. 18, 2025"
+      - "3.0.0: Dec. 16, 2025"
+      - "3.1.0: May 1, 2026"
+third_party_sharing:
+  - id: https://doi.org/10.13026/k81f-qr68#third-party-sharing
+    name: Broad researcher distribution with access controls
+    is_shared: true
+    description: >-
+      Source documentation states that the dataset will be distributed broadly
+      to individuals outside the creating entity, subject to registered or
+      controlled access requirements.
+license_and_use_terms:
+  id: https://doi.org/10.13026/k81f-qr68#license-terms
+  name: Bridge2AI Voice access agreements
+  license_terms:
+    - >-
+      Registered access requires PhysioNet credentialing and signing the
+      Bridge2AI-Voice Registered Access Agreement.
+    - >-
+      Raw audio controlled access requires a Data Access Request Form, Data Use
+      Agreement, Data Access Compliance Office review, and institutional Data
+      Use and Transfer Agreement upon approval.
+    - >-
+      The Data Transfer and Use Agreement permits data use only for the
+      authorized project by authorized persons and requires appropriate
+      safeguards, acknowledgement of the provider, and no unauthorized third
+      party disclosure.
+  data_use_permission:
+    - health_medical_biomedical_research
+    - ethics_approval_required
+    - institution_specific
+    - project_specific
+    - user_specific
+  contact_person: DACO@b2ai-voice.org
+ip_restrictions:
+  id: https://doi.org/10.13026/k81f-qr68#ip-restrictions
+  name: Intellectual property terms
+  restrictions:
+    - >-
+      Users may not use intellectual property protection, database rights, or
+      related rights in ways that prevent or limit access to any element of the
+      data or research conclusions derived from it.
+    - >-
+      Sale of all or part of the data is not permitted under the access
+      agreement terms described in the source documentation.
+regulatory_restrictions:
+  id: https://doi.org/10.13026/k81f-qr68#regulatory-restrictions
+  name: Regulatory and confidentiality restrictions
+  regulatory_restrictions:
+    - >-
+      Source documentation states that no export controls apply to the dataset.
+    - >-
+      Data are covered under a Certificate of Confidentiality, and raw audio
+      access requires institutional sign-off and access committee review.
+  hipaa_compliant: compliant
+  confidentiality_level: restricted
+maintainers:
+  - id: https://doi.org/10.13026/k81f-qr68#maintainer-physionet
+    name: MIT Laboratory for Computational Physiology
+    role: academic_institution
+    maintainer_details:
+      - >-
+        The PhysioNet page states that the dataset is maintained by the MIT
+        Laboratory for Computational Physiology.
+  - id: https://doi.org/10.13026/k81f-qr68#maintainer-nih
+    name: NIH Bridge2AI project
+    role: government_agency
+    maintainer_details:
+      - >-
+        Source documentation states that the dataset is supported by NIH via the
+        Bridge2AI project.
+errata:
+  - id: https://doi.org/10.13026/k81f-qr68#errata-none
+    name: No erratum reported
+    erratum_details:
+      - >-
+        Source documentation states that there is no erratum and that a
+        changelog for each dataset version is published online with the dataset
+        metadata.
+updates:
+  id: https://doi.org/10.13026/k81f-qr68#updates
+  name: Static versioned releases
+  frequency: semi-annual
+  update_details:
+    - >-
+      Source documentation states that further versions are released as static
+      versions on a semi-annual, twice-yearly basis, with communication through
+      platform news items and standard communication channels.
+retention_limit:
+  id: https://doi.org/10.13026/k81f-qr68#retention
+  name: Research retention
+  retention_period: Indefinite while useful for research
+  retention_details:
+    - >-
+      Source documentation states that once data are contributed, they will be
+      retained as long as useful for research purposes, possibly indefinitely.
+version_access:
+  id: https://doi.org/10.13026/k81f-qr68#version-access
+  name: PhysioNet version access
+  latest_version_doi: https://doi.org/10.13026/37yb-1t42
+  versions_available:
+    - "1.1"
+    - "2.0.0"
+    - "2.0.1"
+    - "3.0.0"
+    - "3.1.0"
+  version_details:
+    - >-
+      The source bundle includes historical PhysioNet v1.1 and v3.0.0 pages;
+      the v3.0.0 page states that v3.1.0, released May 1, 2026, is the latest
+      version and gives the latest-version DOI.
+extension_mechanism:
+  id: https://doi.org/10.13026/k81f-qr68#extension
+  name: Dataset and software extension mechanisms
+  contribution_url: https://github.com/sensein/b2aiprep
+  extension_details:
+    - >-
+      Derivative datasets may be published referencing the original source, and
+      preprocessing software can be extended through open-source repository
+      discussions, issues, and pull requests.
+is_deidentified:
+  id: https://doi.org/10.13026/k81f-qr68#deidentified
+  name: De-identified registered-access feature release
+  identifiable_elements_present: false
+  method: HIPAA Safe Harbor removal plus additional sensitivity-based exclusions
+  identifiers_removed:
+    - Names
+    - Geographic locators below country level
+    - Dates at resolution finer than years
+    - Phone and fax numbers
+    - Email addresses
+    - IP addresses
+    - Social Security Numbers
+    - Medical record numbers
+    - Health plan beneficiary numbers
+    - Device identifiers
+    - License numbers
+    - Account numbers
+    - Vehicle identifiers
+    - Website URLs
+    - Full face photos
+    - Biometric identifiers
+    - Narrative text fields
+    - Raw voice recordings from registered-access feature release
+  deidentification_details:
+    - >-
+      State and province were removed, country of data collection was retained,
+      and spectrogram-like features were excluded when audio contained free
+      speech or otherwise posed a sensitivity risk.
+variables:
+  - id: https://doi.org/10.13026/k81f-qr68#var-participant-id
+    variable_name: participant_id
+    data_type: identifier
+    description: Unique identifier for the participant in feature records.
+    is_identifier: true
+    is_sensitive: true
+  - id: https://doi.org/10.13026/k81f-qr68#var-session-id
+    variable_name: session_id
+    data_type: identifier
+    description: Unique identifier for the recording session in feature records.
+    is_identifier: true
+    is_sensitive: true
+  - id: https://doi.org/10.13026/k81f-qr68#var-task-name
+    variable_name: task_name
+    data_type: categorical
+    description: Acoustic or speech task performed for a feature record.
+    examples:
+      - Prolonged Vowel
+      - Voluntary Cough
+      - Rainbow Passage
+      - Picture Description
+  - id: https://doi.org/10.13026/k81f-qr68#var-n-frames
+    variable_name: n_frames
+    data_type: integer
+    description: Number of time frames associated with a feature tensor.
+  - id: https://doi.org/10.13026/k81f-qr68#var-tensor-data
+    variable_name: tensor_data
+    data_type: array
+    description: Feature tensor data stored in Parquet feature files.
+  - id: https://doi.org/10.13026/k81f-qr68#var-demographics
+    variable_name: demographics
+    data_type: object
+    description: Demographic fields collected from participants and released as TSV plus JSON dictionary files.
+  - id: https://doi.org/10.13026/k81f-qr68#var-diagnosis
+    variable_name: diagnosis
+    data_type: object
+    description: Diagnosis tables and dictionaries for disease-specific cohorts.
+  - id: https://doi.org/10.13026/k81f-qr68#var-questionnaire
+    variable_name: questionnaire_responses
+    data_type: object
+    description: Validated questionnaire and patient-reported outcome responses.
+external_resources:
+  - id: https://doi.org/10.13026/k81f-qr68#resource-physionet
+    name: PhysioNet v3.0.0 dataset page
+    external_resources:
+      - https://physionet.org/content/b2ai-voice/3.0.0/
+    archival: true
+    restrictions:
+      - Credentialed users must sign the DUA to access files.
+  - id: https://doi.org/10.13026/k81f-qr68#resource-docs
+    name: Bridge2AI-Voice documentation
+    external_resources:
+      - https://docs.b2ai-voice.org/
+  - id: https://doi.org/10.13026/k81f-qr68#resource-synapse
+    name: Controlled raw audio Synapse resource
+    external_resources:
+      - https://www.synapse.org/Synapse:syn72370534/
+    restrictions:
+      - Requires institutional sign-off and access committee review.

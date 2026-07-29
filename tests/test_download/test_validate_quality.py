@@ -21,6 +21,7 @@ try:
         is_stub_content,
         validate_file,
         validate_project,
+        validate_manifest_project,
         format_size,
         FileQuality
     )
@@ -31,6 +32,7 @@ except ImportError as e:
     is_stub_content = None
     validate_file = None
     validate_project = None
+    validate_manifest_project = None
     format_size = None
     FileQuality = None
 
@@ -257,6 +259,33 @@ class TestValidationQuality(unittest.TestCase):
         self.assertEqual(quality.preprocessed_size, 500)
         self.assertEqual(quality.size_ratio, 0.5)
         self.assertFalse(quality.is_problematic)
+
+    def test_manifest_validation_ignores_binary_size_ratio_and_finds_extras(self):
+        raw_file = self.raw_dir / "source.pdf"
+        raw_file.write_text("x" * 100000)
+        processed_file = self.preprocessed_dir / "source.txt"
+        processed_file.write_text("usable text " * 100)
+        (self.preprocessed_dir / "stale.txt").write_text("old")
+        manifest = {
+            "default_minimum_characters": 500,
+            "projects": {
+                "TEST_PROJECT": [{
+                    "id": "source",
+                    "raw_file": "source.pdf",
+                    "processed_file": "source.txt",
+                }]
+            },
+        }
+
+        results = validate_manifest_project(
+            manifest,
+            self.test_path / "raw",
+            self.test_path / "preprocessed" / "individual",
+            "TEST_PROJECT",
+        )
+
+        self.assertEqual(results["problematic_files"], 0)
+        self.assertEqual(results["unexpected_outputs"], 1)
 
 
 if __name__ == '__main__':

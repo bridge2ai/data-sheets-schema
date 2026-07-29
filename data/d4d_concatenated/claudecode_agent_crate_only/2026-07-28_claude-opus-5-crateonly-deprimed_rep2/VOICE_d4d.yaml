@@ -1,0 +1,1556 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: schema-grounded agentic, phase 1
+# Agent runtime: Claude Code
+# Provider: Anthropic
+# Model: claude-opus-5[1m]
+# Mode: four-phase project agent, crate-only, de-primed
+# Arm: CRATE-ONLY (RO-Crate evidence alone; document corpus withheld)
+# Source bundle: data/preprocessed/concatenated/VOICE_crate_only.txt
+# Source manifest: not used (crate-only arm; single declared source bundle)
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Temperature: 0.0
+# Generated: 2026-07-28
+
+id: ark:59853/rocrate-b2ai-voice-3.0.0
+name: 'B2AI Voice: An ethically-sourced, diverse voice dataset linked to health information'
+title: 'B2AI Voice: An ethically-sourced, diverse voice dataset linked to health information'
+description: >-
+  The human voice contains complex acoustic markers which have been linked to important
+  health conditions including dementia, mood disorders, and cancer. When viewed as a
+  biomarker, voice is a promising characteristic to measure as it is simple to collect,
+  cost-effective, and has broad clinical utility. Recent advances in artificial intelligence
+  have provided techniques to extract previously unknown prognostically useful information
+  from dense data elements such as images. The Bridge2AI-Voice project seeks to create an
+  ethically sourced flagship dataset to enable future research in artificial intelligence
+  and support critical insights into the use of voice as a biomarker of health. Here we
+  present Bridge2AI-Voice, a comprehensive collection of data derived from voice recordings
+  with corresponding clinical information.
+
+
+  Bridge2AI-Voice v3.0 contains data for 833 participants across five sites in North
+  America. Participants were selected based on known conditions which manifest within the
+  voice waveform including voice disorders, neurological disorders, mood disorders, and
+  respiratory disorders. The release contains data considered low risk, including
+  derivations such as spectrograms but not the original voice recordings. Detailed
+  demographic, clinical, and validated questionnaire data are also made available.
+version: 3.0.0
+doi: https://doi.org/10.13026/k81f-qr68
+license: https://physionet.org/content/b2ai-voice/view-license/3.0.0/
+publisher: PhysioNet
+issued: '2025-12-16T00:00:00Z'
+language: en
+conforms_to: https://w3id.org/ro/crate/1.2
+is_tabular: true
+total_size_bytes: 13789023450
+citation: 'Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D.,
+  Payne, P., Ravitsky, V., Bélisle-Pipon, J., Bahr, R., Watts, S., Bolser, D., Siu, J.,
+  Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., ...
+  Ghosh, S. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to
+  health information (version 3.0.0). PhysioNet. RRID:SCR_007345.
+  https://doi.org/10.13026/k81f-qr68'
+keywords:
+  - voice
+  - Voice as a biomarker
+  - Voice dataset
+  - Acoustic biomarker
+  - Speech analysis
+  - Voice recording
+  - Human voice
+  - Vocal health
+  - Spectrogram
+  - Mel spectrogram
+  - MFCC (Mel-frequency cepstral coefficients)
+  - Fundamental frequency (F0)
+  - Phonetic posteriorgrams (PPGs)
+  - Articulatory features
+  - Acoustic features
+  - Pitch detection
+  - Loudness
+  - Periodicity
+
+purposes:
+  - name: Enable AI research on voice as a biomarker of health
+    description: >-
+      Primary purpose declared by the crate for creating the dataset.
+    response: >-
+      The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to
+      enable future research in artificial intelligence and to support critical insights
+      into the use of voice as a biomarker of health, given that the human voice contains
+      complex acoustic markers linked to health conditions including dementia, mood
+      disorders and cancer.
+  - name: Support accessible, low-cost health screening research
+    description: >-
+      Societal purpose stated in the crate's responsible-AI social impact statement.
+    response: >-
+      The project aims to create an ethically sourced, diverse voice dataset to support
+      research on using voice as an accessible, low-cost biomarker for screening, diagnosis
+      and monitoring of a broad range of health conditions, potentially improving early
+      detection and care for underserved populations.
+
+tasks:
+  - name: Voice-derived diagnostic and severity modelling
+    description: Machine-learning tasks the crate names as intended for the dataset.
+    response: >-
+      Development, training and fine-tuning of machine-learning models that associate
+      voice-derived features with diagnostic categories or symptom severity for conditions
+      such as vocal fold pathology, neurological and neurodegenerative diseases, mood and
+      anxiety disorders and respiratory illnesses.
+  - name: Benchmarking and validation of voice-biomarker algorithms
+    description: Evaluation task named by the crate.
+    response: >-
+      Benchmarking and validation of existing voice-biomarker algorithms by testing their
+      performance on a clinically diverse, multi-site cohort with standardized tasks and
+      rich phenotype data.
+
+addressing_gaps:
+  - name: Absence of an ethically sourced, diverse clinical voice dataset
+    description: Gap the dataset was created to fill, as stated in the crate description.
+    response: >-
+      Recent advances in artificial intelligence provide techniques to extract previously
+      unknown prognostically useful information from dense data elements, but an ethically
+      sourced flagship voice dataset linked to clinical information was needed to enable
+      that research. The crate positions Bridge2AI-Voice as that resource: a comprehensive
+      collection of data derived from voice recordings with corresponding clinical
+      information, collected under IRB oversight with a governance framework and
+      de-identification tiering.
+  - name: Lack of clinically enriched voice data spanning multiple disorder families
+    description: Coverage gap addressed by the participant selection strategy.
+    response: >-
+      Participants were selected based on known conditions which manifest within the voice
+      waveform, including voice disorders, neurological disorders, mood disorders and
+      respiratory disorders, producing a multi-site cohort that spans disorder families
+      rather than a single condition.
+
+creators:
+  - name: Yael Bensoussan
+    description: >-
+      Listed as an author of the dataset and recorded in the crate as the principal
+      investigator.
+    principal_investigator: Yael Bensoussan
+  - name: Alexandros Sigaras
+  - name: Anais Rameau
+  - name: Olivier Elemento
+  - name: Maria Powell
+  - name: David Dorr
+  - name: Philip Payne
+  - name: Vardit Ravitsky
+    description: >-
+      Listed as an author; the crate also records the ethical review as conducted by Vardit
+      Ravitsky at the Hastings Center for Bioethics.
+  - name: Jean-Christophe Bélisle-Pipon
+  - name: Ruth Bahr
+  - name: Stephanie Watts
+  - name: Donald Bolser
+  - name: Jennifer Siu
+  - name: Jordan Lerner-Ellis
+  - name: Frank Rudzicz
+  - name: Micah Boyer
+  - name: Yassmeen Abdel-Aty
+  - name: Toufeeq Ahmed Syed
+  - name: James Anibal
+  - name: Dona Amraei
+  - name: Stephen Aradi
+  - name: Kirollos Armosh
+  - name: Ana Sophia Martinez
+  - name: Shaheen Awan
+  - name: Steven Bedrick
+  - name: Helena Beltran
+  - name: Alexander Bernier
+  - name: Moroni Berrios
+  - name: Isaac Bevers
+  - name: Alden Blatter
+  - name: Rahul Brito
+  - name: Amy Brown
+  - name: Johnathan Brown
+  - name: Léo Cadillac
+  - name: Selina Casalino
+  - name: John Costello
+  - name: Abhijeet Dalal
+  - name: Iris De Santiago
+  - name: Enrique Diaz-Ocampo
+  - name: Amanda Doherty-Kirby
+  - name: Mohamed Ebraheem
+  - name: Ellie Eiseman
+  - name: Mahmoud Elmahdy
+  - name: Renee English
+  - name: Emily Evangelista
+  - name: Kenneth Fletcher
+  - name: Hortense Gallois
+  - name: Gaelyn Garrett
+  - name: Alexander Gelbard
+  - name: Anna Goldenberg
+  - name: Karim Hanna
+  - name: William Hersh
+  - name: Jennifer Jain
+  - name: Lochana Jayachandran
+  - name: Kaley Jenney
+  - name: Kathy Jenkins
+  - name: Stacy Jo
+  - name: Alistair Johnson
+  - name: Ayush Kalia
+  - name: Megha Kalia
+  - name: Zoha Khawa
+  - name: Cindy Kostelnik
+  - name: Alisa Krause
+  - name: Andrea Krussel
+  - name: Elisa Lapadula
+  - name: Genelle Leo
+  - name: Justin Levinsky
+  - name: Chloe Loewith
+  - name: Radhika Mahajan
+  - name: Vrishni Maharaj
+  - name: Siyu Miao
+  - name: LeAnn Michaels
+  - name: Matthew Mifsud
+  - name: Marian Mikhael
+  - name: Elijah Moothedan
+  - name: Yosef Nafii
+  - name: Tempestt Neal
+  - name: Karlee Newberry
+  - name: Evan Ng
+  - name: Christopher Nickel
+  - name: Amanda Peltier
+  - name: Trevor Pharr
+  - name: Michaela Pnacekova
+  - name: Matthew Pontell
+  - name: Claire Premi-Bortolotto
+  - name: Parnaz Rafatjou
+  - name: JM Rahman
+  - name: John Ramos
+  - name: Sarah Rohde
+  - name: Michael de Riesthal
+  - name: Jillian Rossi
+  - name: Laurie Russell
+  - name: Samantha Salvi Cruz
+  - name: Joyce Samuel
+  - name: Suketu Shah
+  - name: Ahmed Shawkat
+  - name: Elizabeth Silberholz
+  - name: John Stark
+  - name: Lala Su
+  - name: Shrramana Ganesh Sudhakar
+  - name: Duncan Sutherland
+  - name: Venkata Swarna Mukhi
+  - name: Jeffrey Tang
+  - name: Luka Taylor
+  - name: Jamie Toghranegar
+  - name: Julie Tu
+  - name: Megan Urbano
+  - name: Gavin Victor
+  - name: Kimberly Vinson
+  - name: Jordan Wilke
+  - name: Claire Wilson
+  - name: Madeleine Zanin
+  - name: Xijie Zeng
+  - name: Theresa Zesiewicz
+  - name: Robin Zhao
+  - name: Pantelis Zisimopoulos
+  - name: Satrajit Ghosh
+    description: >-
+      Listed as an author; the crate also records Satrajit Ghosh as the data governance
+      committee contact.
+
+funders:
+  - name: NIH Common Fund
+    description: >-
+      The crate states verbatim, 'Funded by the NIH Common Fund. Award
+      #3Tf-OTOD03272001S2'.
+    grantor: NIH Common Fund
+    grants:
+      - id: grant-3Tf-OTOD03272001S2
+        name: NIH Common Fund award supporting Bridge2AI-Voice
+        grant_number: 3Tf-OTOD03272001S2
+
+instances:
+  - name: Participant
+    instance_type: participant
+    counts: 833
+    description: >-
+      Bridge2AI-Voice v3.0 contains data for 833 participants across five sites in North
+      America, selected based on known conditions which manifest within the voice waveform
+      including voice disorders, neurological disorders, mood disorders and respiratory
+      disorders, together with healthy controls. Participants are keyed by participant_id
+      across every released feature and phenotype table.
+    label: true
+    label_description: >-
+      Each participant carries clinical labels (diagnostic categories recorded by clinical
+      investigators and care teams from clinical assessments and electronic health records)
+      and questionnaire-derived measures scored according to each validated instrument's
+      published scoring guidelines.
+  - name: Session
+    instance_type: data collection session
+    description: >-
+      Most participants completed a single in-clinic session and a subset completed
+      repeated sessions; sessions are keyed by session_id and carry attributes such as
+      assigned tasks, duration, status, control-participant flag and who completed the
+      session.
+  - name: Recording-derived feature record
+    instance_type: per-recording derived acoustic feature record
+    description: >-
+      Rows in the released Parquet feature tables, keyed by participant_id, session_id and
+      task_name, each holding a dense derived representation of one recorded acoustic task
+      together with a frame count.
+    label: true
+    label_description: >-
+      Machine-generated transcripts of certain structured voice tasks and numerous
+      automatically extracted acoustic and articulatory features provide further labels and
+      descriptors at the recording level.
+    missing_information:
+      - name: Content withheld from the feature-only release
+        missing:
+          - Raw voice, speech and respiratory audio waveforms
+          - Transcripts of free-speech audio
+          - Narrative text fields
+          - Fine-grained geographic identifiers and direct identifiers
+          - Some socio-economic and cultural detail, including some household income and
+            traumatic life experience content
+        why_missing:
+          - Raw voice recordings are themselves biometric identifiers and are made
+            available only under a separate controlled-access process.
+          - Direct identifiers and high-risk quasi-identifiers are removed, dates are
+            coarsened or rebased and geographic information is generalized to the country
+            level to reduce re-identification risk.
+          - Some derived features were dropped where processing failed or quality checks
+            failed, and features relating to free speech or sensitive records were removed.
+
+anomalies:
+  - name: Derived features missing for some recordings
+    description: >-
+      Data-level irregularities the crate reports for the released feature tables.
+    anomaly_details:
+      - Some derived audio features could not be computed for all recordings due to quality
+        or length constraints.
+      - Additional filtering removes features for sensitive records and audio checks, and
+        some derived features are dropped when processing fails or quality checks fail.
+      - Phenotype tables include a row for a participant only when at least one variable is
+        non-missing, so participants are not uniformly represented across tables.
+
+known_biases:
+  - name: Sampling bias
+    bias_type: sampling_bias
+    bias_description: >-
+      Participants are recruited from specialty clinics and associated institutions using a
+      non-probability sampling strategy, with inclusion focused on specific disease cohorts
+      and fluent English speakers; this produces clinically enriched case mixes that may not
+      represent general population distributions.
+  - name: Geographic and cultural bias
+    bias_type: representation_bias
+    bias_description: >-
+      Data are collected at a limited number of North American sites, and although the
+      project seeks diversity, it may under-represent speakers from other regions, cultures,
+      languages and healthcare systems; early releases focus on English, with Spanish
+      protocols planned but not yet fully represented.
+  - name: Clinical spectrum bias
+    bias_type: selection_bias
+    bias_description: >-
+      Because participants are selected into disease cohorts where voice changes are
+      expected, the prevalence and severity of conditions in the dataset differ from those
+      in routine primary care or community settings, which may inflate model performance
+      when evaluated within this dataset.
+  - name: Device and environment bias
+    bias_type: measurement_bias
+    bias_description: >-
+      Recordings are made using standardized but not identical hardware and primarily in
+      clinical environments; future at-home collection or deployment on other devices may
+      encounter different background noise, channel characteristics and user behavior.
+  - name: Algorithmic bias in machine annotations
+    bias_type: algorithmic_bias
+    bias_description: >-
+      Transcripts and some derived features rely on off-the-shelf models such as OpenAI
+      Whisper and other audio toolkits whose performance may vary across demographic groups;
+      the dataset team has not independently audited these tools for fairness, so downstream
+      users should consider their biases when interpreting results.
+    mitigation_strategy: >-
+      The crate discloses the machine annotation tool inventory so downstream users can
+      reason about tool-specific bias; no independent fairness audit of these tools is
+      reported.
+
+known_limitations:
+  - name: Feature-only release without raw audio
+    limitation_type: scope_limitation
+    limitation_description: >-
+      The feature-only release does not include raw audio waveforms or free-speech
+      transcripts, which limits certain types of modeling and error analysis and may
+      constrain the ability to reproduce end-to-end audio pipelines.
+  - name: Adult, largely English-language cohort
+    limitation_type: representativeness_limitation
+    limitation_description: >-
+      This version only includes an adult cohort; models trained solely on this dataset may
+      not generalize to younger age groups or to languages beyond those represented.
+  - name: De-identification reduces variable granularity
+    limitation_type: resolution_limitation
+    limitation_description: >-
+      Because of de-identification, some granular demographic and socio-economic variables,
+      fine-grained location data and narrative context have been removed, which reduces the
+      risk of re-identification but also limits detailed fairness assessments and certain
+      confounder adjustments.
+  - name: No predefined splits, benchmarks or label-uncertainty measures
+    limitation_type: methodological_limitation
+    limitation_description: >-
+      The dataset does not provide predefined train-validation-test splits or benchmarking
+      tasks and does not include explicit per-instance label-uncertainty measures, so
+      researchers must design their own evaluation protocols and handle label noise and
+      missingness.
+    recommended_mitigation: >-
+      Researchers must design their own evaluation protocols and handle label noise and
+      missingness.
+  - name: Access governance constrains reuse and reproducibility
+    limitation_type: integration_limitation
+    limitation_description: >-
+      The registered-access and controlled-access governance structure is appropriate for
+      privacy but may limit participation by some institutions or researchers and can
+      complicate the reproducibility of pipelines that require both features and raw audio.
+
+confidential_elements:
+  - name: Limited dataset released under a Data Use Agreement
+    confidential_elements_present: true
+    confidentiality_details:
+      - 'Confidentiality level recorded by the crate: limited dataset available with Data
+        Use Agreement.'
+      - Use of the data is restricted to authorized researchers under a registered-access
+        license and associated data use agreement.
+      - Raw voice recordings, which are themselves biometric identifiers, are made available
+        only under controlled access, separately from this feature-only release.
+
+content_warnings:
+  - name: Sensitive narrative content removed before release
+    content_warnings_present: false
+    warnings:
+      - Highly sensitive content including detailed narrative responses, some information
+        about household income, traumatic life experiences and granular cultural identifiers
+        has been removed entirely from this feature-only dataset.
+      - Released content does retain diagnostic categories for psychiatric, mood,
+        neurological and respiratory conditions and symptom scores from validated
+        instruments.
+
+subpopulations:
+  - name: Clinical cohorts
+    subpopulation_elements_present: true
+    description: >-
+      Disease and control cohorts for which the crate declares dedicated phenotype table
+      schemas.
+    identification:
+      - Adhd adult
+      - Airway stenosis
+      - Amyotrophic lateral sclerosis
+      - Anxiety
+      - Benign lesions
+      - Bipolar disorder
+      - Cognitive impairment
+      - Control
+      - Copd and asthma
+      - Depression
+      - Glottic insufficiency
+      - Laryngeal cancer
+      - Laryngeal dystonia
+      - Laryngitis
+      - Muscle tension dysphonia
+      - Parkinsons disease
+      - Precancerous lesions
+      - Psychiatric history
+      - Ptsd adult
+      - Unexplained chronic cough
+      - Unilateral vocal fold paralysis
+    distribution:
+      - The crate declares a separate column-level schema for each cohort but does not
+        report per-cohort participant counts.
+  - name: Demographic subgroups
+    subpopulation_elements_present: true
+    description: >-
+      Demographic axes retained in coarsened form after de-identification.
+    identification:
+      - Age
+      - Sex
+      - Country of data collection
+    distribution:
+      - Demographic variables are included in coarsened form only; finer-grained geographic
+        identifiers and many socio-economic and cultural details have been removed, and the
+        crate reports no distribution statistics for these subgroups.
+
+sensitive_elements:
+  - name: Sensitive personal health and demographic content
+    sensitive_elements_present: true
+    sensitivity_details:
+      - The dataset encodes health-related information including diagnostic categories for
+        voice disorders, neurological and neurodegenerative conditions, mood and psychiatric
+        disorders and respiratory diseases, as well as symptom scores from questionnaires,
+        which constitute sensitive personal health data.
+      - Demographic variables such as age, sex and country of data collection are included
+        in coarsened form, while finer-grained geographic identifiers, direct identifiers
+        and many socio-economic and cultural details have been removed during
+        de-identification to reduce re-identification risk.
+      - Highly sensitive content including detailed narrative responses, some information
+        about household income, traumatic life experiences and granular cultural identifiers
+        has been removed entirely from this feature-only dataset; raw voice recordings,
+        which are themselves biometric identifiers, are made available only under controlled
+        access.
+      - Use of the data is restricted to authorized researchers under a registered-access
+        license and associated data use agreement that explicitly forbids attempts at
+        re-identification, stigmatizing or discriminatory uses and applications such as
+        surveillance or high-stakes individual decision making.
+
+relationships:
+  - name: Participant, session, task and recording linkage
+    relationship_details:
+      - Every released Parquet feature table is keyed by participant_id, session_id and
+        task_name, so feature records join to one another and to the phenotype tables on
+        those keys.
+      - Phenotype tables are keyed by participant_id, with session-scoped tables carrying
+        their own session identifier columns (for example acoustic_task_session_id,
+        harvard_sentences_session_id, mph_session_id, voice_perception_session_id).
+      - Participants may contribute multiple sessions over time, and a participant may have
+        repeated visits with differing responses.
+      - Each recording is associated with one set of clinical labels and questionnaire
+        responses derived from a single participant.
+
+splits:
+  - name: No predefined data splits
+    split_details:
+      - The dataset does not provide predefined train-validation-test splits or benchmarking
+        tasks, so researchers must design their own evaluation protocols.
+
+acquisition_methods:
+  - name: Mixed direct measurement, self-report and derivation
+    was_directly_observed: true
+    was_reported_by_subjects: true
+    was_inferred_derived: true
+    was_validated_verified: true
+    acquisition_details:
+      - 'Data collection types declared by the crate: direct measurement; surveys;
+        self-reporting; secondary data analysis; document analysis.'
+      - Voice, speech and respiratory audio were recorded directly from participants during
+        standardized in-clinic tasks.
+      - Demographic questions, health history, disease-specific questionnaires and other
+        patient-reported outcomes were self-reported by participants.
+      - Released acoustic representations are inferred or derived from the raw audio by
+        automated feature-extraction pipelines.
+      - Clinical diagnoses and other metadata were extracted from electronic health records
+        and clinical assessments, and the release team audited the combined phenotype and
+        feature tables for internal consistency, missingness patterns and data entry issues.
+
+collection_mechanisms:
+  - name: In-clinic mobile application capture with REDCap storage
+    mechanism_details:
+      - Data were captured on a mobile or tablet application and stored in REDCap.
+      - 'Collection and annotation platforms declared by the crate: a custom Bridge2AI-Voice
+        mobile and tablet application used for in-clinic collection of acoustic tasks and
+        questionnaires; a REDCap-based data capture system used to manage clinical and
+        phenotype data; electronic health record systems used as a source of some
+        gold-standard diagnostic information; and open-source preprocessing and curation
+        tools, including the b2aiprep library, used to merge and organize annotations with
+        derived features.'
+      - Audio was recorded on tablet or smartphone devices with headset microphones when
+        available.
+
+sampling_strategies:
+  - name: Non-probability clinical cohort sampling
+    is_sample: true
+    is_random: false
+    is_representative: false
+    source_data:
+      - Adults presenting to voice, neurology, psychiatry and respiratory clinics at
+        multiple specialty clinics and academic hospitals across North America, plus healthy
+        controls.
+    strategies:
+      - Eligible adults were screened against predefined inclusion and exclusion criteria
+        before consent.
+      - Inclusion focused on specific disease cohorts and fluent English speakers.
+      - Participants were selected based on known conditions which manifest within the voice
+        waveform, including voice disorders, neurological disorders, mood disorders and
+        respiratory disorders.
+    why_not_representative:
+      - Participants are recruited from specialty clinics and associated institutions using
+        a non-probability sampling strategy, producing clinically enriched case mixes that
+        may not represent general population distributions.
+      - Because participants are selected into disease cohorts where voice changes are
+        expected, the prevalence and severity of conditions in the dataset differ from those
+        in routine primary care or community settings.
+      - Data are collected at a limited number of North American sites and may
+        under-represent speakers from other regions, cultures, languages and healthcare
+        systems.
+
+data_collectors:
+  - name: Clinicians and research staff at participating North American institutions
+    role: clinical investigator and research staff
+    collector_details:
+      - Clinical annotations, including diagnostic labels and certain phenotype variables,
+        are created by clinicians and research staff at participating North American
+        institutions spanning otolaryngology, neurology, neuroscience, pulmonology and
+        allied health disciplines.
+      - Detailed demographic breakdowns of the collecting and annotating staff are not
+        provided in the crate.
+      - Per-annotator identity is not exposed; the crate does not record which specific
+        clinician or staff member entered a label.
+  - name: Study participants
+    role: self-reporting participant
+    collector_details:
+      - Questionnaire-based labels reflect self-reported information from participants
+        themselves, whose demographics are captured in coarsened form in the phenotype
+        tables, for example age bands, sex and country of data collection.
+
+collection_timeframes:
+  - name: Adult flagship cohort collection window
+    timeframe_details:
+      - Data collection for the adult flagship cohort began after project launch in 2023 and
+        is ongoing across five North American sites toward an anticipated enrollment of
+        approximately 3,000 participants by November 2026; the participants and recordings
+        included in dataset version 3.0.0 were collected roughly between 2023 and 2025.
+  - name: Release snapshot schedule
+    timeframe_details:
+      - 'Dataset releases are static snapshots: v1.0 (initial public release in 2024), v1.1
+        (2025-01-17), v2.0.0 (2025-04-16), v2.0.1 (2025-08-18) and v3.0.0 (2025-12-16), each
+        corresponding to a frozen state of the underlying data collection.'
+
+direct_collection:
+  - name: Data collected directly from participants
+    is_direct: true
+    collection_details:
+      - After informed consent, a standardized protocol was administered directly to
+        participants, combining structured voice and respiratory tasks such as sustained
+        vowels, coughs and reading passages with demographic questions, health history,
+        disease-specific questionnaires and other patient-reported outcomes.
+      - Some content was obtained indirectly from third-party systems, namely clinical
+        diagnoses and other metadata extracted from electronic health records.
+
+collection_consents:
+  - name: Informed consent prior to protocol administration
+    consent_details:
+      - The crate states that the standardized collection protocol was administered after
+        informed consent.
+      - The crate does not include the consent forms, consent language or a description of
+        the consent scope.
+
+missing_data_documentation:
+  - name: Missingness in phenotype tables and derived features
+    missing_data_patterns:
+      - Phenotype tables include a row for a participant only when at least one variable is
+        non-missing, and participants may have repeated visits with differing responses.
+      - Questionnaire completion varies by participant and cohort, so some forms and items
+        are systematically or sporadically missing.
+      - Some derived audio features could not be computed for all recordings.
+    missing_data_causes:
+      - Variation in questionnaire completion by participant and cohort.
+      - Audio quality or length constraints preventing feature computation.
+      - Deliberate removal of features relating to free speech or sensitive records.
+    handling_strategy: >-
+      No additional imputation is applied in the released files; missing values are left
+      explicit or the corresponding rows are omitted.
+
+raw_data_sources:
+  - name: Underlying raw voice, questionnaire and clinical record sources
+    source_description: >-
+      The original raw data consist of high-quality voice, speech and respiratory audio
+      waveforms recorded on tablet or smartphone devices with headset microphones when
+      available, plus responses to structured demographic and medical history
+      questionnaires, disease-specific validated questionnaires and other patient-reported
+      outcomes, together with clinical diagnoses and other metadata extracted from
+      electronic health records.
+    source_type:
+      - Voice, speech and respiratory audio recordings
+      - Structured demographic and medical history questionnaires
+      - Disease-specific validated questionnaires and patient-reported outcomes
+      - Electronic health records
+    raw_data_format:
+      - Audio waveforms
+      - REDCap questionnaire responses
+    access_details: >-
+      The public feature-only PhysioNet release contains de-identified derived
+      representations of the audio; access to the underlying raw audio is available only
+      through a separate controlled-access process.
+
+raw_sources:
+  - name: Availability of the raw audio tier
+    raw_data_details:
+      - Raw voice waveforms are withheld from this feature-only release.
+      - Access to the underlying raw audio is available only through a separate
+        controlled-access process; the crate does not give a URL or application procedure
+        for that process.
+
+ethical_reviews:
+  - name: Institutional Review Board review
+    reviewing_organization: University of South Florida Institutional Review Board
+    review_details:
+      - 'Reviewing body recorded by the crate: University of South Florida Institutional
+        Review Board, 3702 Spectrum Blvd., Suite 165 Usf, Tampa, FL 33620, US.'
+      - 'IRB contact recorded by the crate: RSCH-IRB@usf.edu, telephone (813) 974-5638.'
+      - The crate records human subject research as 'Yes' and human subject exemption as
+        'No'.
+      - The crate's irbProtocolId field is present but empty, so no protocol number is
+        available from this source.
+  - name: Bioethics review
+    reviewing_organization: The Hastings Center for Bioethics
+    contact_person: Vardit Ravitsky
+    review_details:
+      - 'The crate records the ethical review verbatim as: Ethical Review by Vardit Ravitsky
+        at the Hastings Center for Bioethics.'
+
+data_protection_impacts:
+  - name: Re-identification and misuse risk management
+    impact_details:
+      - The consortium explicitly recognizes the risks associated with voice data, including
+        privacy loss, misuse of voice biometrics and algorithmic harms such as
+        discrimination in hiring, insurance or surveillance contexts.
+      - These risks motivate a governance framework with IRB oversight, rigorous
+        de-identification, separation of feature-only and raw-audio tiers and usage
+        restrictions encoded in the registered-access license and data use agreement.
+      - Dataset documentation and ongoing ethics workstreams are intended to help downstream
+        users reason about these risks and design responsible analyses and models.
+
+human_subject_research:
+  name: Human subject research status
+  involves_human_subjects: true
+  irb_approval:
+    - The crate records human subject research as 'Yes' and human subject exemption as 'No'.
+    - The crate's irbProtocolId field is empty, so no IRB protocol identifier is available
+      from this source.
+  ethics_review_board:
+    - University of South Florida Institutional Review Board
+    - Ethical Review by Vardit Ravitsky at the Hastings Center for Bioethics
+  special_populations:
+    - This version includes an adult cohort only.
+    - Enumerated clinical cohorts include cognitive impairment, psychiatric history, PTSD,
+      bipolar disorder, depression, anxiety, Parkinson's disease, amyotrophic lateral
+      sclerosis and laryngeal cancer.
+  regulatory_compliance:
+    - 'FDA regulated: false.'
+    - 'De-identified: true.'
+    - 'Confidentiality level: limited dataset available with Data Use Agreement.'
+
+informed_consent:
+  - name: Participant informed consent
+    consent_obtained: true
+    consent_documentation:
+      - The crate states that a standardized protocol was administered after informed
+        consent; consent forms, templates and consent-scope language are not included in the
+        crate.
+
+at_risk_populations:
+  name: Clinically vulnerable participants
+  at_risk_groups_included: true
+  description: >-
+    The crate enumerates disease cohorts that include people with cognitive impairment,
+    psychiatric history, PTSD, bipolar disorder, depression, anxiety, Parkinson's disease,
+    amyotrophic lateral sclerosis and laryngeal cancer. Only an adult cohort is included in
+    this version.
+  special_protections:
+    - Direct identifiers and high-risk quasi-identifiers are removed, dates are coarsened or
+      rebased, geographic information is generalized to the country level, narrative text
+      fields and free-speech transcripts are removed, and raw voice waveforms are withheld
+      from this release.
+    - Access is restricted to authorized researchers under a registered-access license and
+      data use agreement that forbids re-identification, stigmatizing or discriminatory
+      uses, surveillance and high-stakes individual decision making.
+    - The crate records no assent procedures or guardian-consent arrangements, consistent
+      with an adult-only cohort.
+
+participant_privacy:
+  - name: De-identification and re-identification risk controls
+    anonymization_method:
+      - Direct identifiers and high-risk quasi-identifiers are removed.
+      - Dates are coarsened or rebased.
+      - Geographic information is generalized to the country level.
+      - Narrative text fields and transcripts of free speech are removed.
+      - Raw voice waveforms are withheld from this feature-only release.
+    reidentification_risk:
+      - Raw voice recordings are themselves biometric identifiers and are therefore released
+        only under controlled access.
+      - Removal of granular demographic, socio-economic, location and narrative content
+        reduces re-identification risk but also limits detailed fairness assessments and
+        certain confounder adjustments.
+    privacy_techniques:
+      - Tiered release separating feature-only public data from controlled-access raw audio.
+      - Additional filtering that removes features for sensitive records and audio checks.
+      - Registered-access licensing with a data use agreement forbidding re-identification
+        attempts.
+    data_linkage:
+      - Released tables are linked only by pseudonymous participant_id, session_id and
+        task_name keys.
+
+preprocessing_strategies:
+  - name: Audio standardization and segmentation
+    preprocessing_details:
+      - Raw audio waveforms are converted to mono and resampled to 16 kHz using
+        anti-aliasing filtering; they are then segmented by task and passed through quality
+        checks.
+  - name: Derived acoustic feature extraction
+    preprocessing_details:
+      - From the standardized audio, multiple derived feature sets are computed including
+        spectrograms, mel spectrograms, MFCCs, articulatory features using the Speech
+        Articulatory Coding package, pitch and loudness estimates, acoustic features from
+        openSMILE, phonetic and prosodic features from Praat and parselmouth, and phonetic
+        posteriorgrams using a dedicated model; all are stored as dense tensors in Parquet
+        files with participant, session and task identifiers.
+  - name: Phenotype export, merge and reorganization
+    preprocessing_details:
+      - Tabular phenotype and questionnaire files are exported from REDCap and merged using
+        a dedicated open-source b2aiprep library, reorganizing the former single phenotype
+        table into thematically organized TSV files with accompanying JSON data
+        dictionaries; static per-recording feature summaries are provided in
+        static_features.tsv, and de-identification and filtering steps are applied before
+        packaging.
+  - name: VOICE Features Processing
+    description: >-
+      Computation activity recorded in the crate provenance graph that generated the nine
+      released Parquet feature tables.
+    preprocessing_details:
+      - 'Crate description: processing step for taking raw data and converting it into
+        spectrograms and features using the b2ai-prep.'
+      - 'Recorded as run by: Alastair; dateCreated 2026-01-29.'
+      - 'Generated entities: ppgs.parquet, sparc_ema.parquet, sparc_loudness.parquet, the
+        sparc periodicity table, sparc_pitch.parquet, torchaudio_mfcc.parquet, the
+        torchaudio pitch table, torchaudio_spectrogram.parquet and
+        torchaudio_mel_spectrogram.parquet.'
+    used_software:
+      - id: ark:59853/b2ai-voice-software-b2aiprep
+        name: B2AIPrep Library
+        description: >-
+          A simple Python package to prepare acoustic data for the Bridge2AI voice project.
+        version: 3.0.2
+        url: https://github.com/sensein/b2aiprep
+  - name: VOICE Phenotype Ingest
+    description: >-
+      Computation activity recorded in the crate provenance graph that generated the
+      released phenotype tables.
+    preprocessing_details:
+      - 'Crate description: dumping and reformatting phenotype information from Redcap
+        database into b2ai-voice phenotype extracts.'
+      - 'Recorded as run by: Alastair; dateCreated 2025-12-16.'
+      - 'Generated entities: confounders.tsv, demographics.tsv, the VOICE diagnosis tables,
+        the VOICE enrollment tables, the VOICE questionnaire tables and the VOICE task
+        tables.'
+    used_software:
+      - id: ark:59853/b2ai-voice-software-b2aiprep
+        name: B2AIPrep Library
+        description: >-
+          A simple Python package to prepare acoustic data for the Bridge2AI voice project.
+        version: 3.0.2
+        url: https://github.com/sensein/b2aiprep
+
+cleaning_strategies:
+  - name: De-identification and regulatory alignment transforms
+    cleaning_details:
+      - Prior to release, data are transformed to reduce re-identification risk and align
+        with regulatory and ethical requirements.
+      - Direct identifiers and high-risk quasi-identifiers are removed; dates are coarsened
+        or rebased; geographic information is generalized to the country level; narrative
+        text fields and transcripts of free speech are removed; and raw voice waveforms are
+        withheld from this feature-only release.
+  - name: Quality filtering of derived features
+    cleaning_details:
+      - Additional filtering removes features for sensitive records and audio checks, and
+        some derived features are dropped when processing fails or quality checks fail.
+      - Segmented audio is passed through quality checks before feature extraction.
+
+labeling_strategies:
+  - name: Clinical, questionnaire and machine-generated labelling
+    data_annotation_platform:
+      - Custom Bridge2AI-Voice mobile and tablet application used for in-clinic collection
+        of acoustic tasks and questionnaires.
+      - REDCap-based data capture system used to manage clinical and phenotype data.
+      - Electronic health record systems used as a source of some gold-standard diagnostic
+        information.
+      - Open-source preprocessing and curation tools, including the b2aiprep library, used
+        to merge and organize annotations with derived features.
+    data_annotation_protocol:
+      - Annotations for this dataset consist primarily of clinical labels and
+        questionnaire-derived measures associated with each participant and recording.
+      - Participants complete validated instruments such as VHI-10, PHQ-9, GAD-7, PANAS,
+        respiratory and cough questionnaires and voice instruments, which generate numerical
+        scores and categorical indicators according to each instrument's published scoring
+        guidelines.
+      - Clinical investigators and care teams record diagnostic categories for voice,
+        neurological, mood and respiratory conditions and other phenotype variables, drawing
+        on clinical assessments and electronic health records; these labels are represented
+        in disease-specific TSV files with accompanying JSON dictionaries.
+      - Machine-generated transcripts of certain voice tasks and numerous automatically
+        extracted acoustic and articulatory features provide further labels and descriptors
+        at the recording level.
+    annotations_per_item: 1
+    inter_annotator_agreement: >-
+      Diagnostic labels are derived from clinical assessments and electronic health records
+      rather than crowd workers, so there is no explicit inter-rater majority-vote scheme;
+      there is no crowd-sourced labeling and the crate does not report multiple independent
+      human ratings per individual recording or per-annotator disagreement statistics.
+    annotator_demographics:
+      - Clinical annotations, including diagnostic labels and certain phenotype variables,
+        are created by clinicians and research staff at participating North American
+        institutions spanning otolaryngology, neurology, neuroscience, pulmonology and
+        allied health disciplines; detailed demographic breakdowns of annotators are not
+        provided in the public documentation.
+      - Questionnaire-based labels reflect self-reported information from participants
+        themselves, whose demographics are captured in coarsened form in the phenotype
+        tables, for example age bands, sex and country of data collection; however,
+        per-annotator demographic information, such as which specific clinician or staff
+        member entered a label, is not exposed.
+    labeling_details:
+      - Each recording is associated with one set of clinical labels and questionnaire
+        responses derived from a single participant, although participants may contribute
+        multiple sessions over time.
+      - Diagnoses are treated as reference labels and may include multiple comorbid
+        conditions per participant.
+
+imputation_protocols:
+  - name: No global imputation applied
+    imputation_method:
+      - The public datasets do not apply global statistical imputation to missing fields.
+      - Missing questionnaire responses, phenotype variables and derived features are left
+        as explicit missing values or omitted rows.
+    imputation_rationale: >-
+      The data release team audited missingness so that users can implement study-specific
+      imputation or complete-case strategies appropriate to their analyses.
+
+annotation_analyses:
+  - name: Label generation, reference status and quality audit
+    analysis_method: >-
+      Questionnaire-based labels are generated using the standard scoring rules for each
+      validated instrument, yielding total and subscale scores that can be mapped to
+      symptom-severity bands; the scoring logic is encoded in the REDCap instruments and
+      documented in the data dictionaries.
+    disagreement_patterns:
+      - Diagnostic labels are derived from clinical assessments and electronic health
+        records rather than crowd workers, so there is no explicit inter-rater majority-vote
+        scheme; however, diagnoses are treated as reference labels and may include multiple
+        comorbid conditions per participant.
+    annotation_quality_details:
+      - The data release team audited the combined phenotype and feature tables for internal
+        consistency, missingness patterns and data entry issues, but per-annotator
+        disagreement statistics or detailed label-uncertainty measures are not presently
+        included in the released dataset.
+
+machine_annotation_tools:
+  - name: Automated feature extraction and transcription toolchain
+    tools:
+      - OpenSMILE
+      - Praat and parselmouth
+      - TorchAudio
+      - Speech Articulatory Coding (sparc)
+      - Phonetic posteriorgram models
+      - OpenAI Whisper Large
+      - b2aiprep
+    tool_descriptions:
+      - OpenSMILE for extraction of acoustic feature sets capturing temporal dynamics and
+        spectral characteristics.
+      - Praat and the parselmouth interface for phonetic and prosodic feature extraction,
+        including measures of fundamental frequency, formants and voice quality.
+      - TorchAudio-based pipelines for computing spectrograms, mel spectrograms, MFCCs and
+        pitch tracks.
+      - Speech Articulatory Coding (sparc) package for estimating articulatory kinematics
+        and related features.
+      - Phonetic posteriorgram models that produce time-varying distributions over phonetic
+        units for each recording.
+      - OpenAI Whisper Large for automatic speech transcription of structured speech tasks,
+        with transcripts from free-speech audio removed before release.
+      - The open-source b2aiprep library for orchestrating preprocessing, feature extraction
+        and merging of phenotype data into the released files.
+    tool_accuracy:
+      - The crate reports no accuracy figures for these tools.
+      - Transcripts and some derived features rely on off-the-shelf models whose performance
+        may vary across demographic groups; the dataset team has not independently audited
+        these tools for fairness.
+    used_software:
+      - id: ark:59853/b2ai-voice-software-b2aiprep
+        name: B2AIPrep Library
+        description: >-
+          A simple Python package to prepare acoustic data for the Bridge2AI voice project.
+        version: 3.0.2
+        url: https://github.com/sensein/b2aiprep
+
+intended_uses:
+  - name: Intended research uses declared by the crate
+    use_category:
+      - Clinical machine-learning model development
+      - Algorithm benchmarking and validation
+      - Exploratory acoustic and phenotypic research
+      - Fairness, robustness and AI safety methodology research
+    examples:
+      - Development, training and fine-tuning of machine-learning models that associate
+        voice-derived features with diagnostic categories or symptom severity for conditions
+        such as vocal fold pathology, neurological and neurodegenerative diseases, mood and
+        anxiety disorders and respiratory illnesses.
+      - Benchmarking and validation of existing voice-biomarker algorithms by testing their
+        performance on a clinically diverse, multi-site cohort with standardized tasks and
+        rich phenotype data.
+      - Exploratory research on acoustic, phonetic, prosodic and articulatory correlates of
+        disease using de-identified derived features, including work on representation
+        learning, domain adaptation and multimodal integration with other health data.
+      - Methodological research on fairness, robustness and AI safety in clinical voice
+        models, including studies of bias related to demographic subgroups or recording
+        conditions, subject to the ethical constraints in the data use agreement.
+    usage_notes: >-
+      All uses are subject to the ethical constraints in the registered-access license and
+      data use agreement. Because the dataset provides no predefined splits, benchmarking
+      tasks or per-instance label-uncertainty measures, users must design their own
+      evaluation protocols and handle label noise and missingness.
+
+other_tasks:
+  - name: Additional research tasks supported by the release
+    task_details:
+      - Exploratory research on acoustic, phonetic, prosodic and articulatory correlates of
+        disease using de-identified derived features, including work on representation
+        learning, domain adaptation and multimodal integration with other health data.
+      - Methodological research on fairness, robustness and AI safety in clinical voice
+        models, including studies of bias related to demographic subgroups or recording
+        conditions.
+
+future_use_impacts:
+  - name: Risks that may affect future uses
+    impact_details:
+      - The consortium explicitly recognizes the risks associated with voice data, including
+        privacy loss, misuse of voice biometrics and algorithmic harms such as
+        discrimination in hiring, insurance or surveillance contexts.
+      - Clinically enriched case mixes may inflate model performance when models are
+        evaluated within this dataset relative to routine primary care or community
+        settings.
+      - Future at-home collection or deployment on other devices may encounter different
+        background noise, channel characteristics and user behavior than the clinical
+        recording conditions represented here.
+      - Models trained solely on this dataset may not generalize to younger age groups or to
+        languages beyond those represented.
+
+discouraged_uses:
+  - name: Uses the crate states the dataset is not intended for
+    discouragement_details:
+      - The dataset is explicitly not intended for operational decision making about
+        specific individuals such as hiring, insurance pricing, law enforcement or
+        surveillance.
+      - It is not intended for attempts at re-identification or for uses likely to
+        stigmatize individuals or groups.
+      - Reproducing end-to-end audio pipelines and certain error analyses are constrained
+        because raw audio waveforms and free-speech transcripts are not part of this
+        release.
+
+prohibited_uses:
+  - name: Uses forbidden by the registered-access licence and data use agreement
+    description: >-
+      Restrictions the crate reports as explicitly encoded in the licence and data use
+      agreement governing this release.
+    prohibition_reason:
+      - Use of the data is restricted to authorized researchers under a registered-access
+        license and associated data use agreement that explicitly forbids attempts at
+        re-identification.
+      - The agreement forbids stigmatizing or discriminatory uses.
+      - The agreement forbids applications such as surveillance or high-stakes individual
+        decision making.
+
+distribution_formats:
+  - name: Parquet derived-feature tables
+    description: >-
+      Derived acoustic representations stored as dense tensors in Parquet files keyed by
+      participant, session and task identifiers, each with a declared column-level schema.
+    access_urls:
+      - https://doi.org/10.13026/k81f-qr68
+  - name: TSV phenotype tables with JSON data dictionaries
+    description: >-
+      Tabular phenotype and questionnaire files exported from REDCap and reorganized into
+      thematically organized TSV files with accompanying JSON data dictionaries; static
+      per-recording feature summaries are provided in static_features.tsv.
+    access_urls:
+      - https://doi.org/10.13026/k81f-qr68
+
+distribution_dates:
+  - name: PhysioNet release history
+    release_dates:
+      - v1.0 (initial public release in 2024)
+      - v1.1 (2025-01-17)
+      - v2.0.0 (2025-04-16)
+      - v2.0.1 (2025-08-18)
+      - v3.0.0 (2025-12-16)
+
+third_party_sharing:
+  - name: Public distribution through PhysioNet under registered access
+    is_shared: true
+    description: >-
+      The dataset is published by PhysioNet and distributed beyond the collecting team to
+      authorized researchers who accept the registered-access licence and data use
+      agreement. Releases are coordinated by the Bridge2AI-Voice project team and the MIT
+      Laboratory for Computational Physiology.
+
+license_and_use_terms:
+  name: Registered-access licence and data use agreement
+  data_use_permission:
+    - health_medical_biomedical_research
+    - user_specific
+  license_terms:
+    - 'Licence: https://physionet.org/content/b2ai-voice/view-license/3.0.0/'
+    - 'Conditions of access (data use agreement):
+      https://physionet.org/content/b2ai-voice/view-dua/3.0.0/'
+    - 'Confidentiality level: limited dataset available with Data Use Agreement.'
+    - Use of the data is restricted to authorized researchers under a registered-access
+      license and associated data use agreement that explicitly forbids attempts at
+      re-identification, stigmatizing or discriminatory uses and applications such as
+      surveillance or high-stakes individual decision making.
+    - 'Copyright notice: Copyright (c) 2026 University of South Florida all rights
+      reserved.'
+
+ip_restrictions:
+  name: Copyright assertion
+  restrictions:
+    - 'Copyright (c) 2026 University of South Florida all rights reserved.'
+
+regulatory_restrictions:
+  name: Regulatory and governance status
+  confidentiality_level: restricted
+  governance_committee_contact: Satrajit Ghosh
+  regulatory_restrictions:
+    - 'FDA regulated: false.'
+    - 'Human subject research: Yes; human subject exemption: No.'
+    - Access is limited to a registered-access tier with a data use agreement; raw audio is
+      released only through a separate controlled-access process.
+  other_compliance:
+    - 'De-identified: true.'
+    - 'Data governance committee contact recorded by the crate: Satrajit Ghosh.'
+    - The crate makes no statement about HIPAA status.
+
+maintainers:
+  - name: Bridge2AI-Voice project team
+    role: researcher
+    maintainer_details:
+      - Releases are coordinated by the Bridge2AI-Voice project team and the MIT Laboratory
+        for Computational Physiology.
+      - 'Project contact recorded by the crate: https://b2ai-voice.org/contact-us/'
+      - 'Data governance committee contact recorded by the crate: Satrajit Ghosh.'
+  - name: MIT Laboratory for Computational Physiology
+    role: academic_institution
+    maintainer_details:
+      - Named alongside the Bridge2AI-Voice project team as coordinating dataset releases.
+  - name: PhysioNet
+    role: academic_institution
+    maintainer_details:
+      - Recorded as the publisher of the dataset and the platform through which the static
+        versioning scheme and DOIs are managed.
+
+errata:
+  - name: Corrections documented in release notes
+    erratum_details:
+      - Release notes document added participants, new feature sets, reorganized phenotype
+        tables and corrections such as spectrogram reprocessing and authorship updates.
+      - The crate does not provide a URL for the release notes or an itemized erratum list.
+
+updates:
+  name: Release and update plan
+  frequency: >-
+    Static versioned snapshots rather than a fixed calendar cadence; new versions are issued
+    as additional participants are enrolled.
+  update_details:
+    - Dataset releases follow a static versioning scheme managed through PhysioNet and
+      related platforms, with version numbers such as 1.0, 1.1, 2.0.0, 2.0.1 and 3.0.0 and
+      associated DOIs for each snapshot and for the latest version.
+    - Future updates are planned as additional participants are enrolled and
+      Spanish-language protocols are incorporated.
+    - Collection is ongoing toward an anticipated enrollment of approximately 3,000
+      participants by November 2026.
+
+retention_limit:
+  name: Retention of superseded versions
+  retention_details:
+    - Older versions remain accessible for reproducibility while users are encouraged to
+      adopt the latest version.
+    - The crate states no retention limit or planned deletion date.
+
+version_access:
+  name: Versioning and access to prior releases
+  latest_version_doi: https://doi.org/10.13026/k81f-qr68
+  versions_available:
+    - '1.0'
+    - '1.1'
+    - 2.0.0
+    - 2.0.1
+    - 3.0.0
+  version_details:
+    - Dataset releases are static snapshots with associated DOIs for each snapshot and for
+      the latest version.
+    - This record describes version 3.0.0, published 2025-12-16, whose DOI is
+      https://doi.org/10.13026/k81f-qr68.
+    - Older versions remain accessible for reproducibility.
+
+is_deidentified:
+  name: De-identification status
+  identifiable_elements_present: false
+  method: >-
+    Prior to release, data are transformed to reduce re-identification risk and align with
+    regulatory and ethical requirements, and the crate records the release as de-identified.
+  identifiers_removed:
+    - Direct identifiers
+    - High-risk quasi-identifiers
+    - Fine-grained geographic identifiers (generalized to the country level)
+    - Narrative text fields and transcripts of free speech
+    - Raw voice waveforms (withheld from this release; biometric identifiers)
+    - Detailed narrative responses, some household income information, traumatic life
+      experience content and granular cultural identifiers
+  deidentification_details:
+    - Dates are coarsened or rebased.
+    - Additional filtering removes features for sensitive records and audio checks.
+    - Released tables retain only pseudonymous participant, session and task identifiers.
+    - De-identification also limits detailed fairness assessments and certain confounder
+      adjustments.
+
+variables:
+  - variable_name: participant_id
+    name: participant_id
+    description: >-
+      Pseudonymous participant key present in every released feature table and phenotype
+      table; the join key across the release.
+    data_type: identifier
+    is_identifier: true
+  - variable_name: session_id
+    name: session_id
+    description: >-
+      Session key present in the feature tables and the session-scoped phenotype tables;
+      participants may contribute multiple sessions.
+    data_type: identifier
+    is_identifier: true
+  - variable_name: task_name
+    name: task_name
+    description: >-
+      Name of the standardized acoustic task to which a feature row corresponds.
+    data_type: string
+  - variable_name: n_frames
+    name: n_frames
+    description: >-
+      Frame count of the derived feature tensor for a recording; present in every Parquet
+      feature schema.
+    data_type: integer
+  - variable_name: ppgs
+    name: ppgs
+    description: >-
+      Phonetic posteriorgram tensor produced by a dedicated phonetic posteriorgram model;
+      the payload column of ppgs.parquet.
+    data_type: array
+    derivation: Computed by the VOICE Features Processing step using the b2aiprep library.
+  - variable_name: ema
+    name: ema
+    description: >-
+      Articulatory kinematic (electromagnetic-articulography-style) features estimated by
+      the Speech Articulatory Coding package; the payload column of sparc_ema.parquet.
+    data_type: array
+    derivation: Computed by the VOICE Features Processing step using the b2aiprep library.
+  - variable_name: loudness
+    name: loudness
+    description: >-
+      Loudness estimates from the Speech Articulatory Coding package; the payload column of
+      sparc_loudness.parquet.
+    data_type: array
+    derivation: Computed by the VOICE Features Processing step using the b2aiprep library.
+  - variable_name: periodicity
+    name: periodicity
+    description: >-
+      Periodicity estimates from the Speech Articulatory Coding package; the payload column
+      of the sparc periodicity table.
+    data_type: array
+    derivation: Computed by the VOICE Features Processing step using the b2aiprep library.
+  - variable_name: pitch
+    name: pitch
+    description: >-
+      Pitch track; the payload column of both the sparc pitch table and the torchaudio pitch
+      table.
+    data_type: array
+    derivation: Computed by the VOICE Features Processing step using the b2aiprep library.
+  - variable_name: mfcc
+    name: mfcc
+    description: >-
+      Mel-frequency cepstral coefficients; the payload column of torchaudio_mfcc.parquet.
+    data_type: array
+    derivation: Computed by the VOICE Features Processing step using the b2aiprep library.
+  - variable_name: spectrogram
+    name: spectrogram
+    description: >-
+      Spectrogram tensor; the payload column of torchaudio_spectrogram.parquet.
+    data_type: array
+    derivation: Computed by the VOICE Features Processing step using the b2aiprep library.
+  - variable_name: mel_spectrogram
+    name: mel_spectrogram
+    description: >-
+      Mel spectrogram tensor; the payload column of torchaudio_mel_spectrogram.parquet.
+    data_type: array
+    derivation: Computed by the VOICE Features Processing step using the b2aiprep library.
+  - variable_name: transcription
+    name: transcription
+    description: >-
+      Machine-generated transcript column in the static features table; transcripts of
+      free-speech audio were removed before release.
+    data_type: string
+    is_sensitive: true
+    derivation: Produced with OpenAI Whisper Large for structured speech tasks.
+  - variable_name: selected_language
+    name: selected_language
+    description: Language selected by the participant, recorded in the participant table.
+    data_type: categorical
+  - variable_name: session_is_control_participant
+    name: session_is_control_participant
+    description: >-
+      Flag in the session table distinguishing healthy-control sessions from disease-cohort
+      sessions.
+    data_type: boolean
+  - variable_name: diagnosis_c_ac
+    name: diagnosis_c_ac
+    description: Diagnostic indicator column in the control cohort phenotype table.
+    data_type: categorical
+  - variable_name: acoustic_task_name
+    name: acoustic_task_name
+    description: >-
+      Name of the acoustic task administered, recorded in the acoustic task phenotype table
+      alongside task cohort, duration, identifier, session identifier and status.
+    data_type: categorical
+
+related_datasets:
+  - target_dataset: Bridge2AI-Voice (PhysioNet b2ai-voice) version 2.0.1, released 2025-08-18
+    relationship_type: is_new_version_of
+    description: >-
+      Version 3.0.0 supersedes the v2.0.1 static snapshot in the PhysioNet release series
+      (v1.0, v1.1, v2.0.0, v2.0.1, v3.0.0); older versions remain accessible for
+      reproducibility.
+  - target_dataset: Bridge2AI-Voice raw audio and free-speech transcript collection (controlled access)
+    relationship_type: derives_from
+    description: >-
+      The released feature tables are de-identified derived representations computed from
+      raw voice, speech and respiratory audio waveforms; access to that underlying raw audio
+      is available only through a separate controlled-access process.
+
+external_resources:
+  - name: PhysioNet distribution, licence and data use agreement
+    description: >-
+      PhysioNet publishes the dataset and hosts its licence and data use agreement pages;
+      the static versioning scheme and per-version DOIs are managed through PhysioNet.
+    archival: true
+    future_guarantees:
+      - Older versions remain accessible for reproducibility while users are encouraged to
+        adopt the latest version.
+    restrictions:
+      - Registered access limited to authorized researchers.
+      - Acceptance of the data use agreement is required.
+    external_resources:
+      - https://doi.org/10.13026/k81f-qr68
+      - https://physionet.org/content/b2ai-voice/view-license/3.0.0/
+      - https://physionet.org/content/b2ai-voice/view-dua/3.0.0/
+  - name: b2aiprep open-source preparation library
+    description: >-
+      Open-source library used to orchestrate preprocessing, feature extraction and the
+      merge of phenotype data into the released files.
+    external_resources:
+      - https://github.com/sensein/b2aiprep
+    used_software:
+      - id: ark:59853/b2ai-voice-software-b2aiprep
+        name: B2AIPrep Library
+        description: >-
+          A simple Python package to prepare acoustic data for the Bridge2AI voice project.
+        version: 3.0.2
+        url: https://github.com/sensein/b2aiprep
+  - name: Bridge2AI-Voice project contact
+    description: Contact point recorded by the crate for the project.
+    external_resources:
+      - https://b2ai-voice.org/contact-us/
+
+file_collections:
+  - id: ark:59853/b2ai-voice-dataset-feature-ppgs
+    name: ppgs.parquet
+    description: >-
+      Phonetic posteriorgram feature table; dense tensors keyed by participant_id,
+      session_id and task_name with a frame count. Generated by the VOICE Features
+      Processing computation.
+    collection_type:
+      - processed_data
+    file_count: 1
+    total_bytes: 1924570748
+    path: file:///features/ppgs.parquet
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+    conforms_to_schema: ark:59853/b2ai-voice-schema-ppgs
+  - id: ark:59853/b2ai-voice-dataset-feature-sparc-ema
+    name: sparc_ema.parquet
+    description: >-
+      Speech Articulatory Coding articulatory-kinematics feature table keyed by
+      participant_id, session_id and task_name. Generated by the VOICE Features Processing
+      computation.
+    collection_type:
+      - processed_data
+    file_count: 1
+    total_bytes: 489789806
+    path: file:///features/sparc_ema.parquet
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+    conforms_to_schema: ark:59853/b2ai-voice-schema-sparc-ema
+  - id: ark:59853/b2ai-voice-dataset-feature-sparc-loudness
+    name: sparc_loudness.parquet
+    description: >-
+      Speech Articulatory Coding loudness feature table keyed by participant_id, session_id
+      and task_name. Generated by the VOICE Features Processing computation.
+    collection_type:
+      - processed_data
+    file_count: 1
+    total_bytes: 44560637
+    path: file:///features/sparc_loudness.parquet
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+    conforms_to_schema: ark:59853/b2ai-voice-schema-sparc-loudness
+  - id: ark:59853/b2ai-voice-dataset-feature-sparc-periodicity
+    name: sparc_loudness.parquet
+    description: >-
+      Speech Articulatory Coding periodicity feature table keyed by participant_id,
+      session_id and task_name. Generated by the VOICE Features Processing computation.
+      Recorded inconsistency in the source crate - this entity carries the name
+      'sparc_loudness.parquet' while its content URL and its declared schema are those of
+      the periodicity table; the name is reproduced here as declared.
+    collection_type:
+      - processed_data
+    file_count: 1
+    total_bytes: 46082006
+    path: file:///features/sparc_periodicity.parquet
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+    conforms_to_schema: ark:59853/b2ai-voice-schema-sparc-periodicity
+  - id: ark:59853/b2ai-voice-dataset-feature-sparc-pitch
+    name: sparc_pitch.parquet
+    description: >-
+      Speech Articulatory Coding pitch feature table keyed by participant_id, session_id and
+      task_name. Generated by the VOICE Features Processing computation. Recorded
+      inconsistency in the source crate - this entity is dated 2025-08-18 while every other
+      released entity and the crate root are dated 2025-12-16.
+    collection_type:
+      - processed_data
+    file_count: 1
+    total_bytes: 30238017
+    path: file:///features/sparc_pitch.parquet
+    version: 3.0.0
+    issued: '2025-08-18T00:00:00Z'
+    conforms_to_schema: ark:59853/b2ai-voice-schema-sparc-pitch
+  - id: ark:59853/b2ai-voice-dataset-feature-torchaudio-mfcc
+    name: torchaudio_mfcc.parquet
+    description: >-
+      TorchAudio mel-frequency cepstral coefficient feature table keyed by participant_id,
+      session_id and task_name. Generated by the VOICE Features Processing computation.
+    collection_type:
+      - processed_data
+    file_count: 1
+    total_bytes: 2471231943
+    path: file:///features/torchaudio_mfcc.parquet
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+    conforms_to_schema: ark:59853/b2ai-voice-schema-torchaudio-mfcc
+  - id: ark:59853/b2ai-voice-dataset-feature-torchaudio-pitch
+    name: torchaudio_spectrogram.parquet
+    description: >-
+      TorchAudio pitch-track feature table keyed by participant_id, session_id and
+      task_name. Generated by the VOICE Features Processing computation. Recorded
+      inconsistency in the source crate - this entity carries the name
+      'torchaudio_spectrogram.parquet' while its content URL and its declared schema are
+      those of the pitch table; the name is reproduced here as declared.
+    collection_type:
+      - processed_data
+    file_count: 1
+    total_bytes: 35527542
+    path: file:///features/torchaudio_pitch.parquet
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+    conforms_to_schema: ark:59853/b2ai-voice-schema-torchaudio-pitch
+  - id: ark:59853/b2ai-voice-dataset-feature-torchaudio-spectrogram
+    name: torchaudio_spectrogram.parquet
+    description: >-
+      TorchAudio spectrogram feature table keyed by participant_id, session_id and
+      task_name. Generated by the VOICE Features Processing computation.
+    collection_type:
+      - processed_data
+    file_count: 1
+    total_bytes: 6368594794
+    path: file:///features/torchaudio_spectrogram.parquet
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+    conforms_to_schema: ark:59853/b2ai-voice-schema-torchaudio-spectrogram
+  - id: ark:59853/b2ai-voice-dataset-feature-torchaudio-mel-spectrogram
+    name: torchaudio_mel_spectrogram.parquet
+    description: >-
+      TorchAudio mel spectrogram feature table keyed by participant_id, session_id and
+      task_name. Generated by the VOICE Features Processing computation.
+    collection_type:
+      - processed_data
+    file_count: 1
+    total_bytes: 2377493590
+    path: file:///features/torchaudio_mel_spectrogram.parquet
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+    conforms_to_schema: ark:59853/b2ai-voice-schema-torchaudio-mel-spectrogram
+  - id: ark:59853/b2ai-voice-dataset-phenotype-confounders
+    name: confounders.tsv
+    description: >-
+      Tab-separated confounder table produced by the VOICE Phenotype Ingest computation from
+      the REDCap database. The crate's description field for this entity is the placeholder
+      text 'A Dataset description'.
+    collection_type:
+      - processed_data
+    file_count: 1
+    total_bytes: 721577
+    path: file:///phenotype/confounders/confounders.tsv
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+  - id: ark:59853/b2ai-voice-dataset-phenotype-demographics
+    name: demographics.tsv
+    description: >-
+      Tab-separated demographics table produced by the VOICE Phenotype Ingest computation
+      from the REDCap database. The crate's description field for this entity is the
+      placeholder text 'A Dataset description'.
+    collection_type:
+      - processed_data
+    file_count: 1
+    total_bytes: 212790
+    path: file:///phenotype/demographics/demographics.tsv
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+  - id: ark:59853/b2ai-voice-dataset-phenotype-diagnosis
+    name: VOICE Diagnosis Tables
+    description: >-
+      Group of tab-separated diagnosis tables produced by the VOICE Phenotype Ingest
+      computation. The crate declares no content URL, file count or size for this group and
+      gives it the placeholder description 'A Dataset description'. The crate separately
+      declares per-cohort column schemas (for example for ADHD adult, airway stenosis,
+      amyotrophic lateral sclerosis, anxiety, benign lesions, bipolar disorder, cognitive
+      impairment, control, COPD and asthma, depression, glottic insufficiency, laryngeal
+      cancer, laryngeal dystonia, laryngitis, muscle tension dysphonia, Parkinson's disease,
+      precancerous lesions, psychiatric history, PTSD adult, unexplained chronic cough and
+      unilateral vocal fold paralysis) but does not link any schema entity to this table
+      group, so the correspondence is not asserted by the crate.
+    collection_type:
+      - processed_data
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+  - id: ark:59853/b2ai-voice-dataset-phenotype-enrollment
+    name: VOICE Enrollment Tables
+    description: >-
+      Group of tab-separated enrollment tables produced by the VOICE Phenotype Ingest
+      computation. The crate declares no content URL, file count or size for this group and
+      gives it the placeholder description 'A Dataset description'. The crate separately
+      declares eligibility, enrollment form and participant column schemas but does not link
+      any schema entity to this table group, so the correspondence is not asserted by the
+      crate.
+    collection_type:
+      - processed_data
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+  - id: ark:59853/b2ai-voice-dataset-phenotype-questionnaire
+    name: VOICE Questionnaire Tables
+    description: >-
+      Group of tab-separated questionnaire tables produced by the VOICE Phenotype Ingest
+      computation. The crate declares no content URL, file count or size for this group and
+      gives it the placeholder description 'A Dataset description'. The crate separately
+      declares validated-instrument column schemas (for example VHI-10, PHQ-9, GAD-7, PANAS,
+      custom affect scale, DSM-5 adult, dyspnea index, Leicester cough questionnaire,
+      productive vocabulary and voice perception) but does not link any schema entity to this
+      table group, so the correspondence is not asserted by the crate.
+    collection_type:
+      - processed_data
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'
+  - id: ark:59853/b2ai-voice-dataset-phenotype-task
+    name: VOICE Questionnaire Tables
+    description: >-
+      Group of tab-separated task tables produced by the VOICE Phenotype Ingest computation.
+      Recorded inconsistency in the source crate - this entity carries the same name as the
+      questionnaire table group, 'VOICE Questionnaire Tables'; the name is reproduced here
+      as declared. The crate declares no content URL, file count or size for this group and
+      gives it the placeholder description 'A Dataset description'. The crate separately
+      declares acoustic task, recording, session, Harvard sentences, random item generation,
+      Stroop and Winograd column schemas but does not link any schema entity to this table
+      group, so the correspondence is not asserted by the crate.
+    collection_type:
+      - processed_data
+    version: 3.0.0
+    issued: '2025-12-16T00:00:00Z'

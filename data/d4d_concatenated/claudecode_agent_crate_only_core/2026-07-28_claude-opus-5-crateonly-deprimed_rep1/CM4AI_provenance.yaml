@@ -1,0 +1,75 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-07-28T18:55:56+00:00'
+run:
+  label: 2026-07-28_claude-opus-5-crateonly-deprimed_rep1
+  project: CM4AI
+  method: claudecode_agent_crate_only
+  arm: crate_only
+  replicate: 1
+model:
+  generation_method: schema-grounded agentic, phase 1
+  agent_runtime: Claude Code
+  provider: Anthropic
+  model: claude-opus-5[1m]
+  mode: four-phase project agent, crate-only, de-primed, pinned-referent
+  temperature: '0.0'
+schema:
+  declared_version: 1.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_md5: 633a2d2c490364d66f45d8ee2959a329
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_md5: c23d85ec2abfa2178de2737278f690e1
+  merged_schema_carries_version: false
+  note: The version is declared in the source schema but the merged artefacts predate
+    it; they will carry it after the next `make full-schema`. Content md5s identify
+    exactly what was used.
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: 0e19e85fe6a0b18038ba64bbff309d684bae2a9f
+  commit_short: 0e19e85f
+  branch: main
+  dirty: true
+  dirty_file_count: 380
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/CM4AI_crate_only.txt
+  bundle_md5: 965b0aa654facd9992fda14ff4535a25
+  bundle_bytes: 115604
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: e633ee3827eb151efca663f14d0b2f5c
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CM4AI_d4d.yaml
+    md5: b79fe80ce26ebe0989972f6703b8e4c1
+    bytes: 68554
+    slots: 60
+  core:
+    path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CM4AI_d4d_core.yaml
+    md5: 50a08727f409479e4a95df073578843b
+    bytes: 61271
+    slots: 55
+  report:
+    path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CM4AI_reconciliation.md
+    md5: 2acd0158f200854e7b2ed45113b34c94
+    bytes: 19778
+    slots: null
+unrecoverable: null
+notes: null

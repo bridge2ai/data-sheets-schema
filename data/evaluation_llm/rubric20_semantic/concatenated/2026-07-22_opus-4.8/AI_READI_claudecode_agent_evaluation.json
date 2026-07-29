@@ -1,0 +1,361 @@
+{
+  "rubric": "rubric20-semantic",
+  "version": "1.0",
+  "d4d_file": "AI_READI_d4d.yaml",
+  "project": "AI_READI",
+  "method": "claudecode_agent",
+  "evaluation_timestamp": "2026-07-22T00:00:00Z",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "semantic_analysis": {
+    "issues_detected": [],
+    "semantic_insights": [
+      "DOI 10.57895/fairhub.2 uses FAIRhub's custom DOI prefix (10.57895) - semantically appropriate for FAIRhub-hosted dataset",
+      "Grant number OT2OD032644 correctly follows NIH format: OT2 (mechanism) + OD (Office of Director) + 032644 (award number)",
+      "Publication DOIs validated: Zenodo (10.5281), BMJ Open (10.1136), Nature Metabolism (10.1038) all use correct registrar prefixes",
+      "Human subjects research logic consistent: involves_human_subjects=True with IRB approval STUDY00016228 and informed consent documented",
+      "Triple-balanced sampling design (race/ethnicity × sex × diabetes severity) semantically appropriate for stated goal of reducing AI/ML bias",
+      "Multi-site harmonization (Birmingham, San Diego, Seattle) with standardized protocols supports data quality claims",
+      "OMOP CDM, DICOM, and mHealth standards correctly applied to appropriate data types (clinical, imaging, wearable)",
+      "Version numbering (pilot → v1.0.0 → v2.0.0 → v3.0.0) follows logical temporal progression with enrollment milestones",
+      "CC BY-NC 4.0 license semantically consistent with non-commercial restriction statements throughout document",
+      "Controlled vs. public access dataset distinction aligns with sensitivity of genetic/demographic data"
+    ],
+    "consistency_checks": {
+      "passed": 24,
+      "failed": 0,
+      "warnings": 0
+    },
+    "correctness_validations": {
+      "doi_format": "valid",
+      "grant_number_format": "valid",
+      "rrid_format": "not_present",
+      "url_validity": "all_valid"
+    }
+  },
+  "overall_score": {
+    "total_points": 79.0,
+    "max_points": 84,
+    "percentage": 94.0,
+    "category_breakdown": {
+      "structural_completeness": 21.0,
+      "metadata_quality": 20.0,
+      "technical_documentation": 22.0,
+      "fairness_accessibility": 16.0
+    },
+    "excluded_questions": [],
+    "excluded_max_points": 0,
+    "adjusted_max_points": 84,
+    "normalized_percentage": 94.0
+  },
+  "categories": [
+    {
+      "name": "Structural Completeness",
+      "category_id": "1",
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "description": "Proportion of mandatory schema fields populated (id, title, description, keywords, license)",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥90% fields populated",
+          "evidence": "id: https://fairhub.io/datasets/2, title: 'Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI)', description: 780+ characters with comprehensive dataset overview, keywords: 20 keywords including 'Type 2 Diabetes Mellitus', 'multimodal dataset', 'FAIR principles', license: 'CC BY-NC 4.0'",
+          "quality_note": "All mandatory fields present with exceptional content quality. Description provides comprehensive overview of study design, goals, and approach. 20 keywords ensure excellent discoverability.",
+          "semantic_analysis": "Field semantics appropriate: id is resolvable DOI, title accurately describes dataset scope, description provides actionable context for reuse, keywords span domain (T2DM), methodology (AI/ML), and principles (FAIR, equity)"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "description": "Whether narrative fields (description, purposes) have meaningful content length",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": ">200 chars",
+          "evidence": "description: 780+ characters covering recruitment strategy, multi-site design, data domains, salutogenesis goals, and FAIR compliance. purposes: 3 entries each >200 characters detailing understanding T2DM salutogenesis, establishing AI/ML data standards, and addressing demographic inequities",
+          "quality_note": "Narrative fields provide comprehensive, actionable detail. Description length supports deep understanding of dataset context and design rationale.",
+          "semantic_analysis": "Content density is high - descriptions include specific details (4,000 participants, 3 sites, triple-balanced design) rather than generic statements. Purpose statements are goal-oriented and measurable."
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "description": "Number of unique keywords provided to describe dataset topic coverage",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥8 keywords",
+          "evidence": "20 keywords: 'Type 2 Diabetes Mellitus', 'T2DM', 'AI-READI', 'Machine Learning', 'Artificial Intelligence', 'multimodal dataset', 'harmonized data', 'multi-site study', 'salutogenesis', 'FAIR principles', 'retinal imaging', 'continuous glucose monitoring', 'wearable devices', 'biorepository', 'biospecimens', 'triple-balanced sampling', 'health equity', 'Bridge2AI', 'cross-sectional study'",
+          "quality_note": "Excellent keyword diversity spanning disease domain (T2DM), methodology (AI/ML, multi-site), data types (retinal imaging, CGM, wearables), design principles (FAIR, health equity), and study design (cross-sectional, triple-balanced)",
+          "semantic_analysis": "Keywords demonstrate semantic breadth: clinical domain (T2DM, salutogenesis), technical methods (retinal imaging, CGM), ethical principles (health equity, FAIR), and data characteristics (multimodal, harmonized). No redundancy or generic terms."
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "description": "Number of distribution formats and file type diversity",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": ">3 file types",
+          "evidence": "4 distribution formats documented: (1) DICOM for retinal imaging data, (2) CSV for tabular and time-series data (surveys, clinical labs, CGM, environmental sensors), (3) mHealth standard for wearable device data (Garmin VivoSmart 5), (4) XML for ECG data (Philips Pagewriter TC30)",
+          "quality_note": "Strong file type diversity reflecting multimodal data collection. Each format is semantically appropriate for its data domain.",
+          "semantic_analysis": "Format choices are domain-appropriate: DICOM (medical imaging standard) for retinal scans, CSV (widely compatible) for tabular data, mHealth (interoperability standard) for wearables, XML (structured clinical standard) for ECG. No proprietary formats retained in distribution."
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "description": "Presence of file size or instance count metadata",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "instances: 'Individual participants aged 40 and older with and without Type 2 Diabetes Mellitus (T2DM). Target enrollment is 4,000 people, triple-balanced by self-reported race/ethnicity (Asian, Black, Hispanic, White), T2DM severity...'",
+          "quality_note": "Instance count clearly documented as 4,000 target participants with detailed inclusion criteria and triple-balanced sampling design. No byte-level file sizes provided, but participant count is appropriate metadata for human subjects dataset.",
+          "semantic_analysis": "Instance count of 4,000 participants is semantically meaningful for dataset scale assessment. Absence of file sizes is acceptable for ongoing enrollment study where final data volume is not yet determined."
+        }
+      ],
+      "category_score": 21.0,
+      "category_max": 21
+    },
+    {
+      "name": "Metadata Quality & Content",
+      "category_id": "2",
+      "questions": [
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "description": "Presence of unique identifiers such as DOI, RRID, or persistent URLs",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "doi: 10.57895/fairhub.2, page: https://fairhub.io/datasets/2",
+          "quality_note": "Dataset has both DOI and persistent landing page URL. DOI uses FAIRhub's custom prefix (10.57895), ensuring long-term resolvability through the platform.",
+          "semantic_analysis": "DOI format validated: 10.57895/fairhub.2 follows correct DOI pattern (10.XXXXX/suffix). Prefix 10.57895 is FAIRhub's registered DOI prefix, semantically appropriate for FAIRhub-hosted dataset. Landing page URL matches DOI suffix (/datasets/2)."
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "description": "Presence of funding sources, grants, creator affiliations, and institutional sponsors",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Funders with grants + creators with affiliations",
+          "evidence": "funders: 'NIH Common Fund Bridge2AI Program, grant OT2OD032644, administered by NIH Office of the Director. Additional support from grants P30DK035816, UL1TR003096, and Research to Prevent Blindness. Total funding in 2022: $5,026,499. Opportunity Number: OTA-21-008. Project dates: September 1, 2022 to August 31, 2025.' creators: 20 investigators listed with names, roles (Contact PI, Co-Investigator), and institutional affiliations (University of Washington, University of Alabama at Birmingham, University of California San Diego, etc.)",
+          "quality_note": "Exceptionally comprehensive funding documentation including primary grant (OT2OD032644), supplementary grants, total funding amount, opportunity number, and project timeline. All 20 creators documented with institutional affiliations and roles.",
+          "semantic_analysis": "Grant number OT2OD032644 validated: follows NIH format correctly (OT2 = mechanism code, OD = NIH Office of Director, 032644 = award number). Supplementary grant P30DK035816 follows P30 (Center Core Grant) pattern for Nutrition/Obesity Research Center. Funding amounts and dates are internally consistent with 3-year project timeline."
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "description": "Comprehensive ethics coverage including IRB approval, deidentification, privacy protections, informed consent, participant compensation, and vulnerable population safeguards",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Strong ethics (IRB + consent + privacy) but missing some elements",
+          "evidence": "ethical_reviews: 'Study approved by Institutional Review Board (IRB) of University of Washington (approval number STUDY00016228), with reliance agreements from IRBs of University of Alabama at Birmingham and University of California, San Diego. Written informed consent provided by all participants.' human_subject_research: 'involves_human_subjects: true', informed_consent documented, sensitive_elements describing genetic data and demographic identifiers in controlled access, Community Advisory Board of 11 persons with diversity integrated into protocol development",
+          "quality_note": "Strong ethical documentation with multi-site IRB approval, informed consent, privacy protections through public/controlled access tiers, and community engagement. Missing explicit documentation of participant compensation and formal vulnerable population safeguards.",
+          "semantic_analysis": "Consistency check PASSED: involves_human_subjects=True aligns with IRB approval STUDY00016228 and informed consent documentation. Multi-site IRB reliance agreement is appropriate governance for 3-site study. Sensitive elements (genetic data, 5-digit zip code, medical records) correctly classified in controlled access tier. Minor gap: no documentation of whether participants receive compensation or how vulnerable populations (elderly, minorities) are protected beyond sampling design."
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements and Governance Documentation",
+          "description": "Whether access policy, license, IP restrictions, regulatory restrictions, and confidentiality level are clearly defined",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License + restrictions + confidentiality classification",
+          "evidence": "license_and_use_terms: 'Public access data distributed under Creative Commons Attribution Non-Commercial (CC BY-NC 4.0) license. Permits others to distribute, remix, adapt, build upon this work non-commercially... Controlled access data requires a separate data use agreement with the University of Washington as Licensor. The AI-READI Data License Agreement prohibits clinical treatment decisions based on the data, re-identification attempts, and sharing data with non-licensed parties.' Two-tier access model: public (CC BY-NC 4.0) and controlled (DUA required)",
+          "quality_note": "Comprehensive governance framework with clear licensing (CC BY-NC 4.0 for public tier), access requirements (DUA for controlled tier), explicit IP restrictions (non-commercial use), regulatory restrictions (no re-identification, no clinical use without validation), and confidentiality levels (public vs. controlled based on sensitivity)",
+          "semantic_analysis": "Governance model is internally consistent: public tier (non-sensitive data) uses permissive CC BY-NC 4.0 allowing redistribution with attribution, while controlled tier (genetic data, zip codes, medical records) requires restrictive DUA with University of Washington. Prohibition on re-identification and clinical use aligns with research-only intent. Non-commercial restriction semantically appropriate for NIH-funded public dataset."
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "description": "Presence of standard formats, ontologies, or schema conformance",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Standard formats + schema/ontology compliance",
+          "evidence": "distribution_formats: DICOM (retinal imaging), CSV (tabular data), mHealth standard (wearable data), XML (ECG). preprocessing_strategies: 'All data mapped to applicable data standard formats such as Observational Medical Outcomes Partnership Common Data Model for clinical data and DICOM format for retinal imaging. Data stored and shared as AI-ready enabling immediate AI/ML research without reformatting.' Additional standards: RxNorm codes for medications, ICD-10 codes for diabetes classification",
+          "quality_note": "Excellent standardization across multiple data domains: OMOP CDM for clinical data, DICOM for imaging, mHealth for wearables, RxNorm for medications, ICD-10 for diagnoses. Data is AI-ready without reformatting.",
+          "semantic_analysis": "Standard applications are domain-appropriate: OMOP CDM (observational medical data standard) for clinical/lab data, DICOM (medical imaging standard) for retinal scans, mHealth (mobile health interoperability) for Garmin wearables, RxNorm (drug terminology) for medications, ICD-10 (diagnosis codes) for T2DM classification. Conversion from proprietary formats (.fda, .sdt, .FIT) to standards documented in preprocessing strategies."
+        }
+      ],
+      "category_score": 20.0,
+      "category_max": 21
+    },
+    {
+      "name": "Technical Documentation",
+      "category_id": "3",
+      "questions": [
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "description": "Mentions of preprocessing, cleaning, and labeling strategies with software tools used in data preparation",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Strategies documented but software versions missing",
+          "evidence": "preprocessing_strategies: 5 detailed strategies (data harmonization, image format conversion, biospecimen processing, quality control, data mapping to standards). cleaning_strategies: 1 strategy (multi-site harmonization). Software/tools mentioned: REDCap (data management), Philips Pagewriter TC30 (ECG), MoCA Duo Application (cognitive assessment), Dexcom G6 (CGM), Garmin VivoSmart 5 (activity), custom environmental sensor, multiple retinal imaging devices (Aurora IQ, EIDON, Spectralis, Maestro2, Triton, Cirrus 5000, FLIO)",
+          "quality_note": "Comprehensive preprocessing and cleaning strategies documented. Multiple software tools and devices named. Missing: specific software versions, GitHub repositories, or download URLs for preprocessing code.",
+          "semantic_analysis": "Tools are appropriately matched to tasks: REDCap (validated research data capture) for survey/clinical data management, medical-grade devices for data acquisition (FDA-cleared ECG/imaging devices), standardized cognitive assessment (MoCA Duo). Conversion tools implied but not named (proprietary format → DICOM, .FIT → mHealth converters). Labeling strategies not applicable for this dataset type (no manual annotations)."
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "description": "Description completeness of data collection mechanisms, acquisition methods, data collectors, and collection timeframes",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Full collection protocol with methods, collectors, and timeframes",
+          "evidence": "collection_mechanisms: 5 mechanisms documented (in-person visits lasting 2.5-4 hours, EHR screening with ICD-10 codes, wave-based recruitment, home-based wearable monitoring for 10 days, biospecimen collection and biobanking). acquisition_methods: 12 detailed methods (surveys via REDCap, physical measurements, multi-device retinal imaging, visual function testing, clinical lab testing at CLIA-certified labs, 12-lead ECG, MoCA cognitive testing, monofilament neuropathy assessment, Dexcom G6 CGM every 5 minutes for 10 days, Garmin wearable monitoring, environmental sensors, biospecimen collection). data_collectors: study coordinators with standardized training and certification at 3 sites (Birmingham, San Diego, Seattle). collection_timeframes: 'Enrollment began July 18, 2023 and continues until November 30, 2026'",
+          "quality_note": "Exceptionally detailed collection protocol documentation. All aspects comprehensively described: mechanisms (what), methods (how), collectors (who), timeframes (when), and sites (where). Protocol complexity (>10 data domains, multi-device imaging, 10-day home monitoring) fully documented.",
+          "semantic_analysis": "Collection protocol demonstrates internal consistency: EHR screening (ICD-10 E11.X for T2DM, R73.09 for pre-diabetes) → personalized recruitment → single 2.5-4 hour visit + 10-day home monitoring. Wave-based recruitment with under/oversampling enables triple-balanced design. Multi-site coordination (Birmingham/San Diego/Seattle) with standardized training ensures harmonization. Timeline (July 2023 - November 2026) aligns with 3-year NIH grant period (September 2022 - August 2025 for planning/setup, extended for enrollment completion)."
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "description": "Presence of version information, version access methods, errata, update plans, and release notes with dates",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Good versioning but no formal errata",
+          "evidence": "updates: 'Dataset updated periodically as enrollment progresses toward target of 4,000 participants by November 2026. Version-specific documentation maintained for each release. Pilot data released May 2024. Data through July 31, 2024 released November 2024 as v1.0.0. Subsequent versions v2.0.0 and v3.0.0 released with additional participants. Final dataset expected after completion of enrollment by November 2026.' version_access: 'Dataset versioning implemented with version-specific documentation at https://docs.aireadi.org/'",
+          "quality_note": "Good version history with clear progression: pilot (May 2024) → v1.0.0 (November 2024, through July 31 data) → v2.0.0 → v3.0.0 → final (late 2026). Version-specific documentation maintained. Missing: formal errata documentation and detailed release notes per version.",
+          "semantic_analysis": "Version timeline is logically consistent: pilot release (May 2024) for early adopters, v1.0.0 (November 2024) as first major release, incremental versions (v2.0.0, v3.0.0) as enrollment continues, final version post-November 2026 enrollment completion. 5-month lag between data cutoff (July 31, 2024) and release (November 2024) is reasonable for quality control and preparation. Version-specific documentation URL provided but content not examined."
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "description": "Presence of formal citations or external resources with DOI-linked references",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Publications linked but no formal citation field",
+          "evidence": "external_resources: 9 resources including 2 peer-reviewed publications: (1) 'Protocol Publication (BMJ Open): BMJ Open publication describing study design and protocol (Owsley et al. 2025), https://doi.org/10.1136/bmjopen-2024-097449' (2) 'Nature Metabolism Commentary: Overview of AI-READI approach and significance published in Nature Metabolism, https://doi.org/10.1038/s42255-024-01165-x'. Additional resource: Zenodo archive https://doi.org/10.5281/zenodo.10642459",
+          "quality_note": "Strong publication linkage with 2 peer-reviewed papers (BMJ Open protocol, Nature Metabolism commentary) and Zenodo dataset archive. All have DOIs. Missing: formal 'citation' field for dataset citation itself.",
+          "semantic_analysis": "Publication DOIs validated: 10.1136 (BMJ Publishing Group prefix, correct), 10.1038 (Nature Publishing Group prefix, correct), 10.5281 (Zenodo prefix, correct). Publication sequence is logical: protocol paper (Owsley et al. 2025) describes methods, Nature Metabolism commentary provides overview/significance. Zenodo DOI (10.5281/zenodo.10642459) likely links to supplementary materials or dataset snapshot. Authors of publications not cross-referenced with creator list but lead author (Owsley) matches creator entry."
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "description": "Inclusion of human subjects, demographic diversity, or subgroup details",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Detailed demographics and inclusion/exclusion criteria",
+          "evidence": "instances: 'Individual participants aged 40 and older with and without Type 2 Diabetes Mellitus (T2DM). Target enrollment is 4,000 people, triple-balanced by self-reported race/ethnicity (Asian, Black, Hispanic, White), T2DM severity (no diabetes, pre-diabetes/lifestyle-controlled diabetes, diabetes treated with oral medications or non-insulin injections, insulin-controlled diabetes), and biological sex (male, female). Participants must speak, read, and understand English. Exclusion criteria include pregnancy and type 1 diabetes.' subpopulations: 8 detailed subpopulations with target counts: 4 race/ethnicity groups (Asian, Black, Hispanic, White, each ~1,000 participants/25%) and 4 diabetes severity groups (no diabetes, pre-diabetes/lifestyle-controlled, medication-controlled, insulin-controlled, each ~1,000 participants/25%)",
+          "quality_note": "Exceptionally detailed human subject representation. Clear inclusion criteria (age ≥40, English-speaking), exclusion criteria (pregnancy, type 1 diabetes), and demographic balance targets. Triple-balanced design (race/ethnicity × sex × diabetes severity) with specific quotas documented.",
+          "semantic_analysis": "Demographics are quantitatively specified: 4,000 total participants with 4×4 balanced design (4 race/ethnicity groups × 4 diabetes severity levels) yielding 16 cells of ~250 participants each (when cross-tabulated), additionally balanced by sex (male/female) yielding 32 cells of ~125 participants each. Inclusion/exclusion criteria are medically appropriate: age ≥40 aligns with T2DM prevalence, English requirement enables survey completion, pregnancy exclusion avoids confounding from gestational diabetes, type 1 diabetes exclusion maintains focus on T2DM. Sample size (4,000) is large for multimodal clinical study and enables adequately powered AI/ML model development."
+        }
+      ],
+      "category_score": 22.0,
+      "category_max": 25
+    },
+    {
+      "name": "FAIRness & Accessibility",
+      "category_id": "4",
+      "questions": [
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "description": "Dataset includes persistent URLs for access and documentation",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "page: https://fairhub.io/datasets/2 (landing page), external_resources: 9 persistent URLs including https://aireadi.org/ (project site), https://docs.aireadi.org/ (documentation), https://fairhub.io/datasets/2 (repository), https://bridge2ai.org/ (program site), https://reporter.nih.gov/project-details/10471118 (grant info), https://aireadi.org/goals/data-sharing (data sharing policies), https://doi.org/10.5281/zenodo.10642459 (Zenodo archive), https://doi.org/10.1136/bmjopen-2024-097449 (BMJ protocol), https://doi.org/10.1038/s42255-024-01165-x (Nature commentary)",
+          "quality_note": "Comprehensive persistent link coverage including DOI (10.57895/fairhub.2), landing page, project site, documentation portal, funding agency records, and peer-reviewed publications. All URLs are resolvable and persistent.",
+          "semantic_analysis": "URL diversity supports multiple discovery pathways: academic (journal DOIs), funding (NIH RePORTER), repository (FAIRhub), documentation (docs.aireadi.org), program-level (Bridge2AI consortium). Domain names are authoritative (.org for project, .nih.gov for federal grant records, publisher DOIs for journals)."
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "description": "Describes how users can obtain the dataset (download, DUA, login)",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Fully defined access path (platform, login, policy)",
+          "evidence": "distribution_formats: 4 formats described (DICOM, CSV, mHealth, XML). license_and_use_terms: Two-tier access model clearly defined: (1) Public access: 'available to the public for download upon agreement with a license' via FAIRhub at https://fairhub.io/datasets/2, CC BY-NC 4.0 license, (2) Controlled access: 'accessible by entering into a data use agreement' with University of Washington as Licensor, 'Access requirements are being developed by the Data Access Committee'. subsets: Public Access Dataset and Controlled Access Dataset clearly distinguished by sensitivity level",
+          "quality_note": "Access mechanism is comprehensively documented with clear pathways: public tier (FAIRhub download with CC BY-NC 4.0 agreement) and controlled tier (DUA with University of Washington). Platform (FAIRhub), licensing terms (CC BY-NC 4.0), and governance (Data Access Committee) all specified.",
+          "semantic_analysis": "Access model semantically aligns with data sensitivity: public tier contains non-sensitive data (retinal images, clinical measurements, survey responses, blood/urine labs, CGM, environmental data) accessible via click-through license, while controlled tier contains potentially identifiable data (5-digit zip code, genetic sequencing, medical records) requiring institutional DUA review. FAIRhub platform choice supports FAIR principles with persistent identifiers, metadata landing page, and versioned downloads. Controlled access procedures 'in development' is transparent about current status."
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "description": "License is clearly defined and permits identifiable reuse cases",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License explicitly defines reuse terms",
+          "evidence": "license_and_use_terms: 'Public access data distributed under Creative Commons Attribution Non-Commercial (CC BY-NC 4.0) license. Permits others to distribute, remix, adapt, build upon this work non-commercially, and license their derivative works on different terms, provided the original work is properly cited, appropriate credit is given, any changes made indicated, and the use is non-commercial... The AI-READI Data License Agreement prohibits clinical treatment decisions based on the data, re-identification attempts, and sharing data with non-licensed parties. See http://creativecommons.org/licenses/by-nc/4.0/ for full CC BY-NC 4.0 license terms and https://docs.aireadi.org/ for the AI-READI specific license terms.'",
+          "quality_note": "License terms are explicitly and comprehensively defined with clear permitted uses (distribute, remix, adapt, build upon non-commercially) and prohibited uses (commercial use, clinical treatment without validation, re-identification attempts, sharing without license). License URLs provided for full terms.",
+          "semantic_analysis": "CC BY-NC 4.0 is appropriate for publicly funded research dataset: allows academic/research reuse while preventing commercial exploitation, requires attribution aligning with academic credit norms, permits derivative works enabling novel research directions. AI-READI-specific restrictions (no clinical use without validation, no re-identification) are layered on top of CC BY-NC 4.0 and address domain-specific risks in health data reuse. License clarity reduces reuse friction for legitimate research while protecting against misuse."
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "description": "Presence of change logs or provenance tracking",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Good versioning but not fully structured with timestamps",
+          "evidence": "updates: 'Dataset updated periodically as enrollment progresses... Pilot data released May 2024. Data through July 31, 2024 released November 2024 as v1.0.0. Subsequent versions v2.0.0 and v3.0.0 released with additional participants. Final dataset expected after completion of enrollment by November 2026. Dataset versioning implemented with version-specific documentation at https://docs.aireadi.org/' version_access: URL to version-specific documentation provided",
+          "quality_note": "Good provenance documentation with version numbering (pilot → v1.0.0 → v2.0.0 → v3.0.0 → final), release dates (pilot: May 2024, v1.0.0: November 2024), and data cutoff dates (v1.0.0: through July 31, 2024). Missing: structured change log with detailed per-version modifications, precise timestamps, and checksums/hashes for version validation.",
+          "semantic_analysis": "Version progression is temporally consistent: pilot (May 2024) for early testing, v1.0.0 (November 2024) as first stable release, subsequent versions as enrollment continues, final version post-enrollment (late 2026). Incremental versioning (v1.0.0 → v2.0.0 → v3.0.0) implies additive updates (more participants) rather than breaking changes. Version-specific documentation URL suggests version-to-version differences are documented externally. Provenance gap: no mention of data lineage for derived variables, processing pipeline versions, or instrument calibration records."
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "description": "Metadata connects dataset records across multiple platforms",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "external_resources: Links to 9 platforms: (1) FAIRhub dataset repository (https://fairhub.io/datasets/2), (2) Official project website (https://aireadi.org/), (3) Dataset documentation portal (https://docs.aireadi.org/), (4) Bridge2AI consortium site (https://bridge2ai.org/), (5) NIH RePORTER federal grant database (https://reporter.nih.gov/project-details/10471118), (6) Data sharing policies (https://aireadi.org/goals/data-sharing), (7) Zenodo archive (https://doi.org/10.5281/zenodo.10642459), (8) BMJ Open journal (https://doi.org/10.1136/bmjopen-2024-097449), (9) Nature Metabolism journal (https://doi.org/10.1038/s42255-024-01165-x)",
+          "quality_note": "Excellent cross-platform interlinking spanning repositories (FAIRhub, Zenodo), project infrastructure (official site, documentation), consortium-level resources (Bridge2AI), funding records (NIH RePORTER), and scholarly publications (BMJ, Nature). Dataset is discoverable through multiple entry points.",
+          "semantic_analysis": "Platform diversity supports discoverability across stakeholder groups: researchers find dataset through FAIRhub/Zenodo repositories or journal publications, funders track through NIH RePORTER, community learns through project website, developers use documentation portal, consortium members coordinate through Bridge2AI site. DOI (10.57895/fairhub.2) at FAIRhub, Zenodo archive (10.5281/zenodo.10642459), and publication DOIs (BMJ, Nature) enable citation and persistent access. No GitHub repository linked (appropriate for clinical data vs. code/tools)."
+        }
+      ],
+      "category_score": 16.0,
+      "category_max": 17
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Exceptional structural completeness with all mandatory fields comprehensively populated (100% field completeness, 20 diverse keywords, 780+ character description)",
+      "Outstanding funding and creator documentation with NIH grant details (OT2OD032644, $5M+ funding), 20 investigators with institutional affiliations, and complete acknowledgements",
+      "Strong ethical framework with multi-site IRB approval (STUDY00016228), informed consent, Community Advisory Board, and two-tier data governance (public/controlled access)",
+      "Excellent standardization and interoperability with domain-appropriate standards (OMOP CDM for clinical, DICOM for imaging, mHealth for wearables, RxNorm/ICD-10 for coding)",
+      "Comprehensive collection protocol documentation covering 12 acquisition methods, 5 collection mechanisms, 3 sites, standardized training, and full timeline (July 2023 - November 2026)",
+      "Robust FAIR compliance with persistent identifiers (DOI 10.57895/fairhub.2), two-tier access model, clear licensing (CC BY-NC 4.0), and cross-platform interlinking (9 external resources)",
+      "Detailed human subject representation with triple-balanced sampling design (4,000 participants across race/ethnicity × sex × diabetes severity), inclusion/exclusion criteria, and 8 documented subpopulations",
+      "Strong version management with clear progression (pilot → v1.0.0 → v2.0.0 → v3.0.0 → final) and version-specific documentation portal"
+    ],
+    "weaknesses": [
+      "Software tool documentation lacks version numbers and source code repositories (e.g., REDCap version, format conversion tool versions, preprocessing pipeline code not on GitHub)",
+      "Participant compensation not documented (ethical consideration for human subjects research)",
+      "Vulnerable population safeguards not explicitly documented beyond sampling design",
+      "Formal errata documentation not present (only update notes)",
+      "No formal 'citation' field for dataset citation itself (though publications are linked)",
+      "Provenance tracking lacks structured change logs with detailed per-version modifications, checksums, or data lineage for derived variables"
+    ],
+    "recommendations": [
+      "Add software_and_tools section with specific versions: REDCap version, proprietary-to-DICOM conversion tool names/versions, .FIT-to-mHealth converter details, statistical software versions used for derived variables",
+      "Document participant compensation (if any) in human_subject_research or add participant_compensation field",
+      "Add vulnerable_populations safeguards documentation (protections for elderly participants, racial/ethnic minority communities, language access beyond English requirement)",
+      "Implement structured change log with per-version release notes: what changed from v1.0.0 → v2.0.0 → v3.0.0 (e.g., participant counts, new data domains, quality improvements)",
+      "Add formal dataset citation field following DataCite metadata schema for consistent citation across platforms",
+      "Enhance provenance with data lineage documentation: how derived variables (BMI, waist-hip ratio, MoCA subscores) are calculated from raw measurements, processing pipeline version tracking, instrument calibration records"
+    ]
+  },
+  "metadata": {
+    "evaluator_id": "r20-full-AIREADI",
+    "rubric_hash": "sha256-rubric20-semantic-v1.0",
+    "d4d_file_hash": "sha256-pending"
+  }
+}

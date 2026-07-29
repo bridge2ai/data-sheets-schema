@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>B2AI Voice: An ethically-sourced, diverse voice dataset linked to health information - RO-Crate Datasheet</title>
+    <style>
+      body {
+        font-family: "Helvetica", "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+        color: #333;
+        line-height: 1.5;
+        background-color: #f5f5f5;
+        /* Added for smooth transition */
+        transition: margin-left 0.3s ease-in-out;
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 12px;
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        /* Added for smooth transition */
+        transition: margin-left 0.3s ease-in-out;
+      }
+      header {
+        margin-bottom: 10px;
+        border-bottom: 2px solid #2c3e50;
+        padding-bottom: 8px;
+        background-color: #f8f9fa;
+        padding: 12px;
+        border-radius: 5px;
+      }
+      h1 {
+        font-size: 24px;
+        margin-bottom: 5px;
+        color: #2c3e50;
+      }
+      h2 {
+        font-size: 20px;
+        color: #2c3e50;
+        margin-top: 12px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 4px;
+      }
+      h3 {
+        font-size: 18px;
+        color: #2c3e50;
+        margin-top: 10px;
+        margin-bottom: 6px;
+      }
+      h4 {
+        font-size: 16px;
+        color: #2c3e50;
+        margin-top: 8px;
+        margin-bottom: 6px;
+      }
+      .summary-section {
+        background-color: #f8f9fa;
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      }
+      .summary-row {
+        display: flex;
+        margin-bottom: 6px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 4px;
+      }
+      .summary-label {
+        width: 230px;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      .summary-value {
+        flex: 1;
+      }
+      .section-header {
+        margin: 12px 0 8px 0;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #ddd;
+        color: #2c3e50;
+      }
+      .composition-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .composition-item {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 10px;
+        text-align: center;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+        width: calc(20% - 10px);
+        min-width: 120px;
+      }
+      .composition-count {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+        display: block;
+        margin-bottom: 5px;
+      }
+      .composition-label {
+        color: #555;
+      }
+      .subcrates-container {
+        margin-top: 15px;
+      }
+      .subcrate-summary {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      }
+      .subcrate-metadata {
+        margin-bottom: 8px;
+      }
+      .metadata-item {
+        margin-bottom: 3px;
+      }
+      .metadata-label {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-right: 10px;
+      }
+      .section-summary {
+        background-color: white;
+        border-radius: 4px;
+        padding: 10px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+        border: 1px solid #eaeaea;
+      }
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 10px;
+      }
+      .summary-item {
+        margin-bottom: 8px;
+      }
+      details {
+        margin-top: 8px;
+        border: 1px solid #eaeaea;
+        border-radius: 4px;
+        padding: 8px;
+      }
+      summary {
+        font-weight: bold;
+        cursor: pointer;
+        padding: 5px;
+        color: #2c3e50;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      .data-table th,
+      .data-table td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid #eaeaea;
+      }
+      .data-table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      .view-full-link {
+        margin-top: 8px;
+        text-align: right;
+      }
+      .view-full-link a {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: #2c3e50;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .view-full-link a:hover {
+        background-color: #1a252f;
+      }
+      .distribution-section,
+      .use-cases-section {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 15px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      }
+      .distribution-item,
+      .use-cases-item {
+        margin-bottom: 6px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 4px;
+      }
+      .distribution-label,
+      .use-cases-label {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 5px;
+      }
+      .publications-list {
+        margin-top: 5px;
+        padding-left: 15px;
+      }
+      .publications-list li {
+        margin-bottom: 8px;
+      }
+      .subcrate-error {
+        background-color: #fff0f0;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        border: 1px solid #ffcccb;
+      }
+      .subcrate-title {
+        border-bottom: 2px solid #2c3e50;
+        padding-bottom: 6px;
+        margin-bottom: 8px;
+        color: #2c3e50;
+      }
+      .composition-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 8px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+      }
+      .composition-card {
+        border: 1px solid #eaeaea;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      }
+      .card-header {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        border-bottom: 1px solid #eaeaea;
+        display: flex;
+        align-items: center;
+      }
+      .card-icon {
+        font-size: 20px;
+        margin-right: 10px;
+      }
+      .card-title {
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      .card-content {
+        padding: 8px 10px;
+      }
+      .card-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .stat-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .stat-label {
+        font-weight: bold;
+        color: #555;
+        min-width: 25px;
+        margin-right: 2px;
+      }
+
+      .stat-value {
+        color: #333;
+      }
+      .stat-detail {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 3px;
+        margin-left: 5px;
+      }
+
+      /* New compact styles */
+      .compact-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        margin-top: 6px;
+        margin-bottom: 6px;
+      }
+
+      .summary-card {
+        border: 1px solid #eaeaea;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      }
+
+      .stat-row {
+        margin-bottom: 4px;
+        display: flex;
+        font-size: 0.95em;
+      }
+
+      .indent {
+        margin-left: 12px;
+        margin-bottom: 4px;
+      }
+
+      .small {
+        font-size: 0.9em;
+        color: #666;
+      }
+
+      .compact-list {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .compact-list li {
+        margin-bottom: 4px;
+      }
+
+      .subcrate-composition h4 {
+        margin-top: 8px;
+        margin-bottom: 4px;
+      }
+
+      footer {
+        margin-top: 15px;
+        padding: 12px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        color: #555;
+        text-align: center;
+      }
+
+      footer a {
+        color: #2c3e50;
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+      .regulatory-section {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding: 0;
+      }
+
+      .regulatory-section h3 {
+        font-size: 18px;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .regulatory-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .regulatory-item {
+        background-color: #f8f9fa;
+        padding: 8px 10px;
+        border-radius: 4px;
+        border: none;
+      }
+
+      .regulatory-label {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-right: 5px;
+      }
+
+      .irb-detail {
+        background-color: #f8f9fa;
+        padding: 8px 10px;
+        border-radius: 4px;
+        margin-top: 8px;
+      }
+
+      .irb-org {
+        margin-top: 6px;
+      }
+
+      .irb-name {
+        font-weight: 600;
+        display: block;
+      }
+
+      .irb-contact {
+        margin-top: 4px;
+        font-size: 0.95em;
+        color: #555;
+      }
+
+      .irb-contact > * + *::before {
+        content: " | ";
+        color: #999;
+      }
+
+      .irb-contact-type {
+        font-style: italic;
+      }
+
+      .irb-address {
+        margin-top: 4px;
+        font-size: 0.9em;
+        color: #666;
+      }
+
+      .regulatory-exemptions {
+        background-color: #f8f9fa;
+        padding: 8px 10px;
+        border-radius: 4px;
+        margin-top: 8px;
+      }
+
+      .regulatory-exemptions p {
+        margin: 8px 0 0 0;
+        line-height: 1.5;
+      }
+
+      /* START: New styles for sidebar navigation */
+      #sidebar {
+        height: 100%;
+        width: 250px;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        background-color: #2c3e50;
+        overflow-x: hidden;
+        transition: transform 0.3s ease-in-out;
+        padding-top: 60px;
+        transform: translateX(-100%); /* Hidden by default */
+      }
+
+      #sidebar.active {
+        transform: translateX(0); /* Shown */
+      }
+
+      #sidebar a {
+        padding: 12px 15px;
+        text-decoration: none;
+        font-size: 18px;
+        color: #f1f1f1;
+        display: block;
+        transition: 0.2s;
+      }
+
+      #sidebar a:hover {
+        background-color: #1a252f;
+      }
+
+      #sidebar .sidebar-title {
+        padding: 10px 15px;
+        font-size: 22px;
+        color: white;
+        font-weight: bold;
+        border-bottom: 1px solid #4a627a;
+        margin-bottom: 10px;
+      }
+
+      #sidebar-toggle {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1001;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        cursor: pointer;
+        font-size: 20px;
+        border-radius: 4px;
+        transition: left 0.3s ease-in-out;
+      }
+
+      /* When sidebar is active, push content and toggle button to the right */
+      body.sidebar-active {
+        margin-left: 250px;
+      }
+
+      body.sidebar-active #sidebar-toggle {
+        left: 265px; /* 250px sidebar width + 15px margin */
+      }
+      /* END: New styles for sidebar navigation */
+
+      /* START: Executive Summary and AI-Readiness Score styles */
+      .executive-summary-section {
+        background-color: #e9ecef;
+        padding: 12px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        border: 1px solid #ced4da;
+      }
+
+      .executive-summary-section h2 {
+        font-size: 18px;
+        color: #2c3e50;
+        margin: 0 0 12px 0;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #2c3e50;
+      }
+
+      .summary-description {
+        font-size: 13px;
+        color: #495057;
+        margin-bottom: 8px;
+      }
+
+      .exec-summary-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .exec-summary-item {
+        background-color: #f8f9fa;
+        padding: 8px 10px;
+        border-radius: 4px;
+        border: 1px solid #e9ecef;
+      }
+
+      .exec-summary-label {
+        font-weight: bold;
+        color: #2c3e50;
+        display: block;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 13px;
+      }
+
+      .exec-summary-item .stat-item {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 12px;
+      }
+
+      .stat-sub-label {
+        color: #495057;
+      }
+
+      .stat-sub-value {
+        color: #333;
+      }
+
+      .formats-list {
+        word-break: break-word;
+      }
+
+      /* AI-Ready Score Bars */
+      .aiready-bars {
+        margin-top: 2px;
+      }
+
+      .aiready-bar-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 4px;
+      }
+
+      .aiready-bar-label {
+        width: 90px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #444;
+      }
+
+      .aiready-bar-track {
+        flex: 1;
+        height: 12px;
+        background: #e0e0e0;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .aiready-bar-fill {
+        height: 100%;
+        border-radius: 2px;
+      }
+
+      .aiready-bar-score {
+        width: 30px;
+        font-size: 9px;
+        text-align: right;
+        color: #666;
+        margin-left: 6px;
+      }
+
+      .aiready-overall-row {
+        margin-top: 6px;
+        padding-top: 6px;
+        border-top: 1px solid #ddd;
+      }
+
+      .aiready-overall-row .aiready-bar-label {
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .aiready-overall-row .aiready-bar-score {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .view-details-link {
+        font-size: 11px;
+        font-weight: normal;
+        color: #2c3e50;
+        text-decoration: none;
+        margin-left: 5px;
+      }
+
+      .view-details-link:hover {
+        text-decoration: underline;
+      }
+      /* END: Executive Summary and AI-Readiness Score styles */
+
+      @media print {
+        body {
+          background-color: white;
+          margin-left: 0 !important; /* Reset margin for printing */
+        }
+        .container {
+          box-shadow: none;
+          max-width: 100%;
+          padding: 10px;
+        }
+        .view-full-link,
+        #sidebar,
+        #sidebar-toggle {
+          display: none; /* Hide interactive elements on print */
+        }
+        details {
+          margin-bottom: 20px;
+        }
+        details > summary {
+          list-style: none;
+        }
+        details > summary::marker,
+        details > summary::-webkit-details-marker {
+          display: none;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .compact-grid,
+        .regulatory-grid,
+        .exec-summary-grid {
+          grid-template-columns: 1fr;
+        }
+
+        /* On small screens, let the sidebar overlay the content instead of pushing it */
+        body.sidebar-active {
+          margin-left: 0;
+        }
+
+        body.sidebar-active #sidebar-toggle {
+          left: 15px; /* Keep toggle button in place */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- START: New HTML for Sidebar and Toggle Button -->
+    <button id="sidebar-toggle">☰</button>
+    <!-- Hamburger Icon -->
+
+    <nav id="sidebar">
+      <div class="sidebar-title">Navigation</div>
+      <a href="#datasheet-summary">Datasheet Summary</a>
+      <a href="#dataset-details">Dataset Details</a>
+      <a href="#ai-readiness">AI Ready Information</a>
+      <a href="#composition">Composition</a>
+    </nav>
+    <!-- END: New HTML for Sidebar and Toggle Button -->
+
+    <div class="container">
+      <header>
+        <h1 id="project-title">B2AI Voice: An ethically-sourced, diverse voice dataset linked to health information</h1>
+        <div>Version: 3.0.0</div>
+      </header>
+
+      <!-- Executive Summary with AI-Readiness Score -->
+      <div id="datasheet-summary" class="executive-summary-section">
+    <h2>Datasheet Summary</h2>
+    <p class="summary-description">The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI-Voice... <a href="#description" style="color: #2c3e50; font-size: 12px;">[read full description]</a></p>
+
+    <div class="exec-summary-grid">
+        <div class="exec-summary-item">
+            <span class="exec-summary-label">Dataset Statistics</span>
+            <div class="stat-item">
+                <strong class="stat-sub-label">Total Data Volume:</strong>
+                <span class="stat-sub-value">12.9 GB</span>
+            </div>
+            <div class="stat-item">
+                <strong class="stat-sub-label">Total Files:</strong>
+                <span class="stat-sub-value">N/A</span>
+            </div>
+        </div>
+
+        <div class="exec-summary-item aiready-item">
+            <span class="exec-summary-label">AI-Readiness Score <a href="ai_ready_score.json" class="view-details-link">(View Details)</a></span>
+            <div class="aiready-bars">
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Fairness</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">4/4</div>
+                </div>
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Provenance</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">4/4</div>
+                </div>
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Characterization</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">5/5</div>
+                </div>
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Explainability</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">3/3</div>
+                </div>
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Ethics</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">4/4</div>
+                </div>
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Sustainability</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">4/4</div>
+                </div>
+                <div class="aiready-bar-row">
+                    <div class="aiready-bar-label">Computability</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">4/4</div>
+                </div>
+                <div class="aiready-bar-row aiready-overall-row">
+                    <div class="aiready-bar-label">Overall</div>
+                    <div class="aiready-bar-track">
+                        <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                    </div>
+                    <div class="aiready-bar-score">100%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+      <!-- Added id="dataset-details" to link to the section -->
+      <div id="dataset-details"><div class="summary-section">
+  <h2>Release Overview</h2>
+  <div class="summary-row">
+    <div class="summary-label">ROCrate ID</div>
+    <div class="summary-value" id="accession">
+ ark:59853/rocrate-b2ai-voice-3.0.0     </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">DOI</div>
+    <div class="summary-value" id="doi">
+      <a href="https://doi.org/10.13026/k81f-qr68" target="_blank">https://doi.org/10.13026/k81f-qr68</a>
+    </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Release Date</div>
+    <div class="summary-value" id="release-date">12/16/2025</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Size</div>
+    <div class="summary-value" id="content-size">12.9 GB</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Description</div>
+    <div class="summary-value" id="description">The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. Here we present Bridge2AI-Voice, a comprehensive collection of data derived from voice recordings with corresponding clinical information.
+
+Bridge2AI-Voice v3.0 contains data for 833 participants across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.
+	</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Authors</div>
+    <div class="summary-value" id="authors">Yael Bensoussan, Alexandros Sigaras, Anais Rameau, Olivier Elemento, Maria Powell, David Dorr, Philip Payne, Vardit Ravitsky, Jean-Christophe Bélisle-Pipon, Ruth Bahr, Stephanie Watts, Donald Bolser, Jennifer Siu, Jordan Lerner-Ellis, Frank Rudzicz, Micah Boyer, Yassmeen Abdel-Aty, Toufeeq Ahmed Syed, James Anibal, Dona Amraei, Stephen Aradi, Kirollos Armosh, Ana Sophia Martinez, Shaheen Awan, Steven Bedrick, Helena Beltran, Alexander Bernier, Moroni Berrios, Isaac Bevers, Alden Blatter, Rahul Brito, Amy Brown, Johnathan Brown, Léo Cadillac, Selina Casalino, John Costello, Abhijeet Dalal, Iris De Santiago, Enrique Diaz-Ocampo, Amanda Doherty-Kirby, Mohamed Ebraheem, Ellie Eiseman, Mahmoud Elmahdy, Renee English, Emily Evangelista, Kenneth Fletcher, Hortense Gallois, Gaelyn Garrett, Alexander Gelbard, Anna Goldenberg, Karim Hanna, William Hersh, Jennifer Jain, Lochana Jayachandran, Kaley Jenney, Kathy Jenkins, Stacy Jo, Alistair Johnson, Ayush Kalia, Megha Kalia, Zoha Khawa, Cindy Kostelnik, Alisa Krause, Andrea Krussel, Elisa Lapadula, Genelle Leo, Justin Levinsky, Chloe Loewith, Radhika Mahajan, Vrishni Maharaj, Siyu Miao, LeAnn Michaels, Matthew Mifsud, Marian Mikhael, Elijah Moothedan, Yosef Nafii, Tempestt Neal, Karlee Newberry, Evan Ng, Christopher Nickel, Amanda Peltier, Trevor Pharr, Michaela Pnacekova, Matthew Pontell, Claire Premi-Bortolotto, Parnaz Rafatjou, JM Rahman, John Ramos, Sarah Rohde, Michael de Riesthal, Jillian Rossi, Laurie Russell, Samantha Salvi Cruz, Joyce Samuel, Suketu Shah, Ahmed Shawkat, Elizabeth Silberholz, John Stark, Lala Su, Shrramana Ganesh Sudhakar, Duncan Sutherland, Venkata Swarna Mukhi, Jeffrey Tang, Luka Taylor, Jamie Toghranegar, Julie Tu, Megan Urbano, Gavin Victor, Kimberly Vinson, Jordan Wilke, Claire Wilson, Madeleine Zanin, Xijie Zeng, Theresa Zesiewicz, Robin Zhao, Pantelis Zisimopoulos, Satrajit Ghosh</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Publisher</div>
+    <div class="summary-value" id="publisher">PhysioNet</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Principal Investigator</div>
+    <div class="summary-value" id="principal-investigator">
+      Yael Bensoussan; 
+    </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Data Governance Committee</div>
+    <div class="summary-value" id="data-governance">Satrajit Ghosh</div>
+  </div>
+   <div class="summary-row">
+    <div class="summary-label">Ethical Review</div>
+    <div class="summary-value" id="data-governance">Ethical Review by Vardit Ravitsky at the Hastings Center for Bioethics</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Copyright</div>
+    <div class="summary-value" id="copyright">Copyright © 2026 University of South Florida all rights reserved</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">License</div>
+    <div class="summary-value" id="license">
+      <a href="https://physionet.org/content/b2ai-voice/view-license/3.0.0/" target="_blank">https://physionet.org/content/b2ai-voice/view-license/3.0.0/</a>
+    </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Terms of Use</div>
+    <div class="summary-value" id="terms-of-use">https://physionet.org/content/b2ai-voice/view-dua/3.0.0/</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">HL7 Confidentiality Level</div>
+    <div class="summary-value" id="confidentiality-level">
+      Limited dataset available with Data Use Agreement
+    </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Keywords</div>
+    <div class="summary-value" id="keywords">
+ voice,
+      Voice as a biomarker,
+      Voice dataset,
+      Acoustic biomarker,
+      Speech analysis,
+      Voice recording,
+      Human voice,
+      Vocal health,
+      Spectrogram,
+      Mel spectrogram,
+      MFCC (Mel-frequency cepstral coefficients),
+      Fundamental frequency (F0),
+      Phonetic posteriorgrams (PPGs),
+      Articulatory features,
+      Acoustic features,
+      Pitch detection,
+      Loudness,
+      Periodicity     </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Cite As</div>
+    <div class="summary-value" id="citation">Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., Bélisle-Pipon, J., Bahr, R., Watts, S., Bolser, D., Siu, J., Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., ... Ghosh, S. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.0.0). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/k81f-qr68</div>
+  </div>
+
+  <div class="summary-row">
+    <div class="summary-label">Funding</div>
+    <div class="summary-value" id="funding">Funded by the NIH Common Fund. Award #3Tf-OTOD03272001S2</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Completeness</div>
+    <div class="summary-value" id="completeness"></div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Related Publications</div>
+    <div class="summary-value" id="related-publications">
+      <ul class="publications-list">
+        <li>Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., Bélisle-Pipon, J., Bahr, R., Watts, S., Bolser, D., Siu, J., Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., ... Ghosh, S. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.0.0). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/k81f-qr68</li>
+        <li>Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... & Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="regulatory-section">
+    <h3>Human Subjects & Regulatory</h3>
+    <div class="regulatory-grid">
+      <div class="regulatory-item">
+        <span class="regulatory-label">Human Subjects Research:</span> Yes
+      </div>
+      <div class="regulatory-item">
+        <span class="regulatory-label">De-identified Samples:</span> Yes
+      </div>
+      <div class="regulatory-item">
+        <span class="regulatory-label">FDA Regulated:</span> No
+      </div>
+      <div class="regulatory-item">
+        <span class="regulatory-label">IRB Protocol ID:</span> N/A
+      </div>
+    </div>
+
+    <div class="irb-detail">
+      <span class="regulatory-label">Institutional Review Board:</span>
+        <div class="irb-org">
+          <span class="irb-name">University of South Florida Institutional Review Board</span>
+          <div class="irb-contact">
+              <span class="irb-contact-type">(813) 974-5638</span>
+              <a href="mailto:RSCH-IRB@usf.edu">RSCH-IRB@usf.edu</a>
+              <span>(813) 974-5638</span>
+          </div>
+          <div class="irb-address">
+3702 Spectrum Blvd., Suite 165 Usf, Tampa, FL 33620, US          </div>
+        </div>
+    </div>
+
+    <div class="regulatory-exemptions">
+      <span class="regulatory-label">Human Subjects Exemptions:</span>
+      <p>No</p>
+    </div>
+  </div>
+</div></div>
+
+      <!-- Added id="ai-readiness" to link to the section -->
+      <div id="ai-readiness"><div class="section-header">
+  <h2>AI Ready Details</h2>
+</div>
+<div class="use-cases-section">
+  <div class="use-cases-item">
+    <div class="use-cases-label">Intended Uses:</div>
+    <div class="use-cases-value">Development, training and fine-tuning of machine-learning models that associate voice-derived features with diagnostic categories or symptom severity for conditions such as vocal fold pathology, neurological and neurodegenerative diseases, mood and anxiety disorders and respiratory illnesses.
+Benchmarking and validation of existing voice-biomarker algorithms by testing their performance on a clinically diverse, multi-site cohort with standardized tasks and rich phenotype data.
+Exploratory research on acoustic, phonetic, prosodic and articulatory correlates of disease using de-identified derived features, including work on representation learning, domain adaptation and multimodal integration with other health data.
+Methodological research on fairness, robustness and AI safety in clinical voice models, including studies of bias related to demographic subgroups or recording conditions, subject to the ethical constraints in the data use agreement.
+The dataset is explicitly not intended for operational decision making about specific individuals such as hiring, insurance pricing, law enforcement or surveillance, nor for attempts at re-identification or for uses likely to stigmatize individuals or groups.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Limitations:</div>
+    <div class="use-cases-value">The feature-only release does not include raw audio waveforms or free-speech transcripts, which limits certain types of modeling and error analysis and may constrain the ability to reproduce end-to-end audio pipelines.
+This version only includes an adult cohort; models trained solely on this dataset may not generalize to younger age groups or to languages beyond those represented.
+Because of de-identification, some granular demographic and socio-economic variables, fine-grained location data and narrative context have been removed, which reduces the risk of re-identification but also limits detailed fairness assessments and certain confounder adjustments.
+The dataset does not provide predefined train–validation–test splits or benchmarking tasks and does not include explicit per-instance label-uncertainty measures, so researchers must design their own evaluation protocols and handle label noise and missingness.
+The registered-access and controlled-access governance structure is appropriate for privacy but may limit participation by some institutions or researchers and can complicate the reproducibility of pipelines that require both features and raw audio.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Potential Sources of Bias:</div>
+    <div class="use-cases-value">Sampling bias: participants are recruited from specialty clinics and associated institutions using a non-probability sampling strategy, with inclusion focused on specific disease cohorts and fluent English speakers; this produces clinically enriched case mixes that may not represent general population distributions.
+Geographic and cultural bias: data are collected at a limited number of North American sites, and although the project seeks diversity, it may under-represent speakers from other regions, cultures, languages and healthcare systems; early releases focus on English, with Spanish protocols planned but not yet fully represented.
+Clinical spectrum bias: because participants are selected into disease cohorts where voice changes are expected, the prevalence and severity of conditions in the dataset differ from those in routine primary care or community settings, which may inflate model performance when evaluated within this dataset.
+Device and environment bias: recordings are made using standardized but not identical hardware and primarily in clinical environments; future at-home collection or deployment on other devices may encounter different background noise, channel characteristics and user behavior.
+Algorithmic bias in machine annotations: transcripts and some derived features rely on off-the-shelf models such as OpenAI Whisper and other audio toolkits whose performance may vary across demographic groups; the dataset team has not independently audited these tools for fairness, so downstream users should consider their biases when interpreting results.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Maintenance Plan:</div>
+    <div class="use-cases-value">Dataset releases follow a static versioning scheme managed through PhysioNet and related platforms, with version numbers such as 1.0, 1.1, 2.0.0, 2.0.1 and 3.0.0 and associated DOIs for each snapshot and for the latest version.
+Releases are coordinated by the Bridge2AI-Voice project team and the MIT Laboratory for Computational Physiology; release notes document added participants, new feature sets, reorganized phenotype tables and corrections such as spectrogram reprocessing and authorship updates.
+Future updates are planned as additional participants are enrolled and Spanish-language protocols are incorporated; older versions remain accessible for reproducibility while users are encouraged to adopt the latest version.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Data Collection:</div>
+    <div class="use-cases-value">Prospective observational study conducted at multiple specialty clinics and academic hospitals across North America. Eligible adults presenting to voice, neurology, psychiatry and respiratory clinics, plus healthy controls, were screened against predefined inclusion and exclusion criteria. After informed consent, a standardized protocol was administered that combined structured voice and respiratory tasks such as sustained vowels, coughs and reading passages with demographic questions, health history, disease-specific questionnaires and other patient-reported outcomes. Data were captured on a mobile or tablet application and stored in REDCap, with most participants completing a single in-clinic session and a subset completing repeated sessions.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Data Collection Type:</div>
+    <div class="use-cases-value">Direct measurement, Surveys, Self-reporting, Secondary Data analysis, Document analysis</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Missing Data:</div>
+    <div class="use-cases-value">Phenotype tables include a row for a participant only when at least one variable is non-missing, and participants may have repeated visits with differing responses. Questionnaire completion varies by participant and cohort, so some forms and items are systematically or sporadically missing. Some derived audio features could not be computed for all recordings due to quality or length constraints, and features relating to free speech or sensitive records have been removed. No additional imputation is applied in the released files.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Raw Data:</div>
+    <div class="use-cases-value">The original raw data consist of high-quality voice, speech and respiratory audio waveforms recorded on tablet or smartphone devices with headset microphones when available, plus responses to structured demographic and medical history questionnaires, disease-specific validated questionnaires and other patient-reported outcomes, together with clinical diagnoses and other metadata extracted from electronic health records. The public feature-only PhysioNet release contains de-identified derived representations of the audio, such as spectrograms, mel spectrograms, MFCCs, articulatory and prosodic features and phonetic posteriorgrams, along with tabular phenotype files and data dictionaries; access to the underlying raw audio is available only through a separate controlled-access process.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Collection Timeframe:</div>
+    <div class="use-cases-value">Data collection for the adult flagship cohort began after project launch in 2023 and is ongoing across five North American sites toward an anticipated enrollment of approximately 3,000 participants by November 2026; the participants and recordings included in dataset version 3.0.0 were collected roughly between 2023 and 2025., Dataset releases are static snapshots: v1.0 (initial public release in 2024), v1.1 (2025-01-17), v2.0.0 (2025-04-16), v2.0.1 (2025-08-18) and v3.0.0 (2025-12-16), each corresponding to a frozen state of the underlying data collection.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Imputation Protocol:</div>
+    <div class="use-cases-value">The public datasets do not apply global statistical imputation to missing fields; instead, missing questionnaire responses, phenotype variables and derived features are left as explicit missing values or omitted rows. The data release team audited missingness and users can implement study-specific imputation or complete-case strategies appropriate to their analyses.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Manipulation Protocol:</div>
+    <div class="use-cases-value">Prior to release, data are transformed to reduce re-identification risk and align with regulatory and ethical requirements. Direct identifiers and high-risk quasi-identifiers are removed; dates are coarsened or rebased; geographic information is generalized to the country level; narrative text fields and transcripts of free speech are removed; and raw voice waveforms are withheld from this feature-only release. Additional filtering removes features for sensitive records and audio checks, and some derived features are dropped when processing fails or quality checks fail.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Preprocessing Protocol:</div>
+    <div class="use-cases-value">Raw audio waveforms are converted to mono and resampled to 16 kHz using anti-aliasing filtering; they are then segmented by task and passed through quality checks., From the standardized audio, multiple derived feature sets are computed including spectrograms, mel spectrograms, MFCCs, articulatory features using the Speech Articulatory Coding package, pitch and loudness estimates, acoustic features from openSMILE, phonetic and prosodic features from Praat and parselmouth, and phonetic posteriorgrams using a dedicated model; all are stored as dense tensors in Parquet files with participant, session and task identifiers., Tabular phenotype and questionnaire files are exported from REDCap and merged using a dedicated open-source b2aiprep library, reorganizing the former single phenotype table into thematically organized TSV files with accompanying JSON data dictionaries; static per-recording feature summaries are provided in static_features.tsv, and de-identification and filtering steps are applied before packaging.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Annotation Protocol:</div>
+    <div class="use-cases-value">Annotations for this dataset consist primarily of clinical labels and questionnaire-derived measures associated with each participant and recording. Participants complete validated instruments such as VHI-10, PHQ-9, GAD-7, PANAS, respiratory and cough questionnaires and voice instruments, which generate numerical scores and categorical indicators according to each instrument's published scoring guidelines. Clinical investigators and care teams record diagnostic categories for voice, neurological, mood and respiratory conditions and other phenotype variables, drawing on clinical assessments and electronic health records; these labels are represented in disease-specific TSV files with accompanying JSON dictionaries. In addition, machine-generated transcripts of certain voice tasks and numerous automatically extracted acoustic and articulatory features provide further labels and descriptors at the recording level.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Annotation Analysis:</div>
+    <div class="use-cases-value">Questionnaire-based labels are generated using the standard scoring rules for each validated instrument, yielding total and subscale scores that can be mapped to symptom-severity bands; the scoring logic is encoded in the REDCap instruments and documented in the data dictionaries., Diagnostic labels are derived from clinical assessments and electronic health records rather than crowd workers, so there is no explicit inter-rater majority-vote scheme; however, diagnoses are treated as reference labels and may include multiple comorbid conditions per participant., The data release team audited the combined phenotype and feature tables for internal consistency, missingness patterns and data entry issues, but per-annotator disagreement statistics or detailed label-uncertainty measures are not presently included in the released dataset.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Personal/Sensitive Information:</div>
+    <div class="use-cases-value">The dataset encodes health-related information including diagnostic categories for voice disorders, neurological and neurodegenerative conditions, mood and psychiatric disorders and respiratory diseases, as well as symptom scores from questionnaires, which constitute sensitive personal health data., Demographic variables such as age, sex and country of data collection are included in coarsened form, while finer-grained geographic identifiers, direct identifiers and many socio-economic and cultural details have been removed during de-identification to reduce re-identification risk., Highly sensitive content including detailed narrative responses, some information about household income, traumatic life experiences and granular cultural identifiers has been removed entirely from this feature-only dataset; raw voice recordings, which are themselves biometric identifiers, are made available only under controlled access., Use of the data is restricted to authorized researchers under a registered-access license and associated data use agreement that explicitly forbids attempts at re-identification, stigmatizing or discriminatory uses and applications such as surveillance or high-stakes individual decision making.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Social Impact:</div>
+    <div class="use-cases-value">The project aims to create an ethically sourced, diverse voice dataset to support research on using voice as an accessible, low-cost biomarker for screening, diagnosis and monitoring of a broad range of health conditions, potentially improving early detection and care for underserved populations. At the same time, the consortium explicitly recognizes the risks associated with voice data, including privacy loss, misuse of voice biometrics and algorithmic harms such as discrimination in hiring, insurance or surveillance contexts; these risks motivate a governance framework with IRB oversight, rigorous de-identification, separation of feature-only and raw-audio tiers and usage restrictions encoded in the registered-access license and data use agreement. Dataset documentation and ongoing ethics workstreams are intended to help downstream users reason about these risks and design responsible analyses and models.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Annotations Per Item:</div>
+    <div class="use-cases-value">Each recording is associated with one set of clinical labels and questionnaire responses derived from a single participant, although participants may contribute multiple sessions over time; there is no crowd-sourced labeling and the documentation does not report multiple independent human ratings per individual recording.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Annotator Demographics:</div>
+    <div class="use-cases-value">Clinical annotations, including diagnostic labels and certain phenotype variables, are created by clinicians and research staff at participating North American institutions spanning otolaryngology, neurology, neuroscience, pulmonology and allied health disciplines; detailed demographic breakdowns of annotators are not provided in the public documentation., Questionnaire-based labels reflect self-reported information from participants themselves, whose demographics are captured in coarsened form in the phenotype tables, for example age bands, sex and country of data collection; however, per-annotator demographic information, such as which specific clinician or staff member entered a label, is not exposed.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Machine Annotation Tools:</div>
+    <div class="use-cases-value">OpenSMILE for extraction of acoustic feature sets capturing temporal dynamics and spectral characteristics., Praat and the parselmouth interface for phonetic and prosodic feature extraction, including measures of fundamental frequency, formants and voice quality., TorchAudio-based pipelines for computing spectrograms, mel spectrograms, MFCCs and pitch tracks., Speech Articulatory Coding (sparc) package for estimating articulatory kinematics and related features., Phonetic posteriorgram models that produce time-varying distributions over phonetic units for each recording., OpenAI Whisper Large for automatic speech transcription of structured speech tasks, with transcripts from free-speech audio removed before release., The open-source b2aiprep library for orchestrating preprocessing, feature extraction and merging of phenotype data into the released files.</div>
+  </div>
+</div></div>
+
+      <!-- Added id="composition" to link to the section -->
+      <div id="composition" class="section-header">
+        <h2>Composition (Datasets 1)</h2>
+      </div>
+
+      <div class="subcrates-container">
+   <div class="subcrate-summary">
+    <h3 class="subcrate-title">B2AI Voice: An ethically-sourced, diverse voice dataset linked to health information</h3>
+    <div class="subcrate-metadata">
+      <div class="metadata-item">
+        <span class="metadata-label">ROCrate ID:</span>
+        <span class="metadata-value">
+ ark:59853/rocrate-b2ai-voice-3.0.0         </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Provenance ID:</span>
+        <span class="metadata-value">
+          <a href="ro-crate-prov-graph.html">ro-crate-prov-graph.html</a>
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Description:</span>
+        <span class="metadata-value">The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. Here we present Bridge2AI-Voice, a comprehensive collection of data derived from voice recordings with corresponding clinical information.
+
+Bridge2AI-Voice v3.0 contains data for 833 participants across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.
+	</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Authors:</span>
+        <span class="metadata-value">Yael Bensoussan, Alexandros Sigaras, Anais Rameau, Olivier Elemento, Maria Powell, David Dorr, Philip Payne, Vardit Ravitsky, Jean-Christophe Bélisle-Pipon, Ruth Bahr, Stephanie Watts, Donald Bolser, Jennifer Siu, Jordan Lerner-Ellis, Frank Rudzicz, Micah Boyer, Yassmeen Abdel-Aty, Toufeeq Ahmed Syed, James Anibal, Dona Amraei, Stephen Aradi, Kirollos Armosh, Ana Sophia Martinez, Shaheen Awan, Steven Bedrick, Helena Beltran, Alexander Bernier, Moroni Berrios, Isaac Bevers, Alden Blatter, Rahul Brito, Amy Brown, Johnathan Brown, Léo Cadillac, Selina Casalino, John Costello, Abhijeet Dalal, Iris De Santiago, Enrique Diaz-Ocampo, Amanda Doherty-Kirby, Mohamed Ebraheem, Ellie Eiseman, Mahmoud Elmahdy, Renee English, Emily Evangelista, Kenneth Fletcher, Hortense Gallois, Gaelyn Garrett, Alexander Gelbard, Anna Goldenberg, Karim Hanna, William Hersh, Jennifer Jain, Lochana Jayachandran, Kaley Jenney, Kathy Jenkins, Stacy Jo, Alistair Johnson, Ayush Kalia, Megha Kalia, Zoha Khawa, Cindy Kostelnik, Alisa Krause, Andrea Krussel, Elisa Lapadula, Genelle Leo, Justin Levinsky, Chloe Loewith, Radhika Mahajan, Vrishni Maharaj, Siyu Miao, LeAnn Michaels, Matthew Mifsud, Marian Mikhael, Elijah Moothedan, Yosef Nafii, Tempestt Neal, Karlee Newberry, Evan Ng, Christopher Nickel, Amanda Peltier, Trevor Pharr, Michaela Pnacekova, Matthew Pontell, Claire Premi-Bortolotto, Parnaz Rafatjou, JM Rahman, John Ramos, Sarah Rohde, Michael de Riesthal, Jillian Rossi, Laurie Russell, Samantha Salvi Cruz, Joyce Samuel, Suketu Shah, Ahmed Shawkat, Elizabeth Silberholz, John Stark, Lala Su, Shrramana Ganesh Sudhakar, Duncan Sutherland, Venkata Swarna Mukhi, Jeffrey Tang, Luka Taylor, Jamie Toghranegar, Julie Tu, Megan Urbano, Gavin Victor, Kimberly Vinson, Jordan Wilke, Claire Wilson, Madeleine Zanin, Xijie Zeng, Theresa Zesiewicz, Robin Zhao, Pantelis Zisimopoulos, Satrajit Ghosh</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Date:</span>
+        <span class="metadata-value"
+          >12/16/2025</span
+        >
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Size:</span>
+        <span class="metadata-value">12.9 GB</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">DOI:</span>
+        <span class="metadata-value">
+          <a href="https://doi.org/https://doi.org/10.13026/k81f-qr68" target="_blank"
+            >https://doi.org/10.13026/k81f-qr68</a
+          >
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Contact:</span>
+        <span class="metadata-value">
+ Not specified
+        </span>
+      </div>
+ 
+      <div class="metadata-item">
+        <span class="metadata-label">Copyright:</span>
+        <span class="metadata-value">Copyright © 2026 University of South Florida all rights reserved</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">License:</span>
+        <span class="metadata-value">
+          <a href="https://physionet.org/content/b2ai-voice/view-license/3.0.0/" target="_blank"
+            >https://physionet.org/content/b2ai-voice/view-license/3.0.0/</a
+          >
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Terms of Use:</span>
+        <span class="metadata-value">
+          <a href="https://physionet.org/content/b2ai-voice/view-dua/3.0.0/" target="_blank"
+            >https://physionet.org/content/b2ai-voice/view-dua/3.0.0/</a
+          >
+        </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Keywords:</span>
+        <span class="metadata-value">
+ voice, Voice as a biomarker, Voice dataset, Acoustic biomarker, Speech analysis, Voice recording, Human voice, Vocal health, Spectrogram, Mel spectrogram, MFCC (Mel-frequency cepstral coefficients), Fundamental frequency (F0), Phonetic posteriorgrams (PPGs), Articulatory features, Acoustic features, Pitch detection, Loudness, Periodicity         </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Funding:</span>
+        <span class="metadata-value">
+ Funded by the NIH Common Fund. Award #3Tf-OTOD03272001S2         </span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Related Publications:</span>
+        <span class="metadata-value">
+          <ul class="compact-list">
+            <li>
+ Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., Bélisle-Pipon, J., Bahr, R., Watts, S., Bolser, D., Siu, J., Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., ... Ghosh, S. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.0.0). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/k81f-qr68             </li>
+            <li>
+ Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... & Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.             </li>
+          </ul>
+        </span>
+      </div>
+    </div>
+
+    <div class="subcrate-composition">
+      <h4>Content Summary</h4>
+      <div class="compact-grid">
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">📊</span>
+            <span class="card-title">Files (16)</span>
+          </div>
+          <div class="card-content">
+            <div class="stat-row">
+              <span class="stat-label">Formats: </span>
+              <span class="stat-value"
+                >unknown
+                (1), 
+                (9), text/tab-separated-values
+                (6)</span
+              >
+            </div>
+             <div class="stat-row">
+              <span class="stat-label">Access: </span>
+              <span class="stat-value"
+                >No link
+                (5), Available
+                (11)</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">💻</span>
+            <span class="card-title"
+              >Software & Instruments (1)</span
+            >
+          </div>
+          <div class="card-content">
+            <div class="stat-row">
+              <span class="stat-label">Software: </span>
+              <span class="stat-value">1</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Instruments: </span>
+              <span class="stat-value">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">🧪</span>
+            <span class="card-title">Inputs (0)</span>
+          </div>
+          <div class="card-content">
+           </div>
+        </div>
+        <div class="summary-card">
+          <div class="card-header">
+            <span class="card-icon">⚙️</span>
+            <span class="card-title">Other Components</span>
+          </div>
+          <div class="card-content">
+            <div class="stat-row">
+              <span class="stat-label">Experiments: </span>
+              <span class="stat-value">0</span>
+            </div>
+             <div class="stat-row">
+              <span class="stat-label">Computations: </span>
+              <span class="stat-value">2</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Schemas: </span>
+              <span class="stat-value">55</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Other: </span>
+              <span class="stat-value">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+ </div> <div class="section-header">
+  <h2>Distribution Information</h2>
+</div>
+<div class="distribution-section">
+  <div class="distribution-item">
+    <div class="distribution-label">Publisher:</div>
+    <div class="distribution-value">PhysioNet</div>
+  </div>
+    <div class="distribution-item">
+    <div class="distribution-label">License:</div>
+    <div class="distribution-value">
+      <a href="https://physionet.org/content/b2ai-voice/view-license/3.0.0/" target="_blank">https://physionet.org/content/b2ai-voice/view-license/3.0.0/</a>
+    </div>
+  </div>
+    <div class="distribution-item">
+    <div class="distribution-label">Release Date:</div>
+    <div class="distribution-value">12/16/2025</div>
+  </div>
+   <div class="distribution-item">
+    <div class="distribution-label">Version:</div>
+    <div class="distribution-value">3.0.0</div>
+  </div>
+</div>
+    </div>
+    <footer>
+      Datasheet Provenance: This datasheet and associated metadata were
+      generated by the FAIRSCAPE AI-readiness platform (Al Manir, et al. 2024,
+      BioRXiv 2024.12.23.629818;
+      <a href="https://doi.org/10.1101/2024.12.23.629818" target="_blank"
+        >https://doi.org/10.1101/2024.12.23.629818</a
+      >).
+    </footer>
+
+    <!-- START: New JavaScript for Sidebar functionality -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("sidebar-toggle");
+        const sidebar = document.getElementById("sidebar");
+        const body = document.body;
+
+        toggleBtn.addEventListener("click", function () {
+          sidebar.classList.toggle("active");
+          body.classList.toggle("sidebar-active");
+        });
+      });
+    </script>
+  </body>
+</html>

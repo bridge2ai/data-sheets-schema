@@ -1,0 +1,349 @@
+# Normalized from the upstream crate's own LinkML rendering.
+# Source: data/ro-crate_packages/CM4AI/crate/ro-crate-linkml.yaml
+# Tool: d4d rocrate normalize — see the changes report alongside.
+# No facts added; repairs only.
+citation: Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn
+  B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson
+  A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Metallo C; Muralidharan M; Nourreddine
+  S; Niestroy J; Obernier K; Pan E; Park, S; Polacco B; Pratt D; Qian G; Schaffer,
+  LV; Sigaeva A; Thaker S; Zhang Y; Zhao, X; Bélisle-Pipon JC; Brandt C; Chen JY;
+  Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Payne-Foster P; Ratcliffe S; Ravitsky
+  V; Sali A; Schulz W; Ideker T, 2025, "Cell Maps for Artificial Intelligence - June
+  2026 Data Release (Beta)", https://doi.org/10.18130/V3/HIGT4C , https://dataverse.lib.virginia.edu/,
+  V1
+collection_mechanisms:
+- description: 'Data collection processes are generally described in Clark T et al.
+    (2024) "Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture
+    from Disease-Relevant Cell Lines" bioRxiv 2024.05.21.589311; doi: https://doi.org/10.1101/2024.05.21.589311.
+    Additional data collection details will be subsequently published once finalized. '
+collection_timeframes:
+- description: 9/1/2022
+- description: 6/1/2026
+conforms_to: D4D Schema
+created_by: Clark, T, Parker, J, Al Manir, S, Axelsson, U, Ballllosero Navarro, F,
+  Chinn, B, Churas, CP, Dailamy, A, Doctor, Y, Fall, J, Forget, A, Gao, J, Hansen,
+  JN, Hu, M, Johannesson, A, Khaliq, H, Lee, YH, Lenkiewicz, J, Levinson, MA, Marquez,
+  C, Metallo, C, Muralidharan, M, Nourreddine, S, Niestroy, J, Obernier, K, Pan, E,
+  Polacco, B, Pratt, D, Qian, G, Schaffer, L, Sigaeva, A, Thaker, S, Zhang, Y, Bélisle-Pipon,
+  JC, Brandt, C, Chen, JY, Ding, Y, Fodeh, S, Krogan, N, Lundberg, E, Mali, P, Payne-Foster,
+  P, Ratcliffe, S, Ravitsky, V, Sali, A, Schulz, W, Ideker, T
+creators:
+- id: https://orcid.org/0000-0003-4060-7360
+  name: Clark, T
+  affiliations:
+  - id: urn:d4d:org:university-of-virginia
+    name: University of Virginia
+- id: https://orcid.org/0000-0003-4535-3486
+  name: Parker, J
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California, San Diego
+- id: https://orcid.org/0000-0003-4647-3877
+  name: Al Manir, S
+  affiliations:
+  - id: urn:d4d:org:university-of-virginia
+    name: University of Virginia
+- description: Axelsson, U
+- id: https://orcid.org/0000-0002-4180-422X
+  name: Ballllosero Navarro, F
+  affiliations:
+  - id: urn:d4d:org:stanford-university
+    name: Stanford University
+- description: Chinn, B
+- id: https://orcid.org/0000-0001-9998-705X
+  name: Churas, CP
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- id: https://orcid.org/0000-0002-6711-8260
+  name: Dailamy, A
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California, San Diego
+- id: https://orcid.org/0009-0009-0483-7506
+  name: Doctor, Y
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California, San Diego
+- description: Fall, J
+- id: https://orcid.org/0000-0003-0223-0312
+  name: Forget, A
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-francisco
+    name: University of California San Francisco
+- id: https://orcid.org/0000-0002-6311-3526
+  name: Gao, J
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- id: https://orcid.org/0000-0002-4650-9094
+  name: Hansen, JN
+  affiliations:
+  - id: urn:d4d:org:stanford-university
+    name: Stanford University
+- id: https://orcid.org/0000-0002-1571-8029
+  name: Hu, M
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- description: Johannesson, A
+- description: Khaliq, H
+- id: https://orcid.org/0000-0003-0917-355X
+  name: Lee, YH
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- id: https://orcid.org/0000-0001-7252-8638
+  name: Lenkiewicz, J
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- id: https://orcid.org/0000-0003-0384-8499
+  name: Levinson, MA
+  affiliations:
+  - id: urn:d4d:org:university-of-virginia
+    name: University of Virginia
+- id: https://orcid.org/0000-0003-3960-420X
+  name: Marquez, C
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- id: https://orcid.org/0000-0003-2404-3040
+  name: Metallo, C
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- description: Muralidharan, M
+- id: https://orcid.org/0000-0003-3881-7588
+  name: Nourreddine, S
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- id: https://orcid.org/0000-0002-1103-3882
+  name: Niestroy, J
+  affiliations:
+  - id: urn:d4d:org:university-of-virginia
+    name: University of Virginia
+- id: https://orcid.org/0000-0002-4025-1299
+  name: Obernier, K
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-francisco
+    name: University of California San Francisco
+- description: Pan, E
+- description: Polacco, B
+- id: https://orcid.org/0000-0002-1471-9513
+  name: Pratt, D
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- id: https://orcid.org/0009-0005-4217-2745
+  name: Qian, G
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- id: https://orcid.org/0000-0001-6339-9141
+  name: Schaffer, L
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- id: https://orcid.org/0000-0003-3361-3797
+  name: Sigaeva, A
+  affiliations:
+  - id: urn:d4d:org:kth-royal-institute-of-technology
+    name: KTH Royal Institute of Technology
+- id: https://orcid.org/0000-0001-6730-2773
+  name: Thaker, S
+  affiliations:
+  - id: urn:d4d:org:university-of-alabama-at-birmingham
+    name: University of Alabama at Birmingham
+- description: Zhang, Y
+- id: https://orcid.org/0000-0002-8965-8153
+  name: Bélisle-Pipon, JC
+  affiliations:
+  - id: urn:d4d:org:simon-fraser-university
+    name: Simon Fraser University
+- id: https://orcid.org/0000-0001-8179-1796
+  name: Brandt, C
+  affiliations:
+  - id: urn:d4d:org:yale-university
+    name: Yale University
+- id: https://orcid.org/0000-0002-6112-415X
+  name: Chen, JY
+  affiliations:
+  - id: urn:d4d:org:the-university-of-alabama-at-birmingham
+    name: The University of Alabama at Birmingham
+- id: https://orcid.org/0000-0003-2567-2009
+  name: Ding, Y
+  affiliations:
+  - id: urn:d4d:org:university-of-texas-at-austin
+    name: University of Texas at Austin
+- id: https://orcid.org/0000-0003-4664-3143
+  name: Fodeh, S
+  affiliations:
+  - id: urn:d4d:org:yale-university
+    name: Yale University
+- id: https://orcid.org/0000-0003-4902-337X
+  name: Krogan, N
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-francisco
+    name: University of California San Francisco
+- id: https://orcid.org/0000-0001-7034-0850
+  name: Lundberg, E
+  affiliations:
+  - id: urn:d4d:org:stanford-university
+    name: Stanford University
+- id: https://orcid.org/0000-0002-3383-1287
+  name: Mali, P
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- id: https://orcid.org/0000-0002-3508-3577
+  name: Payne-Foster, P
+  affiliations:
+  - id: urn:d4d:org:university-of-alabama
+    name: University of Alabama
+- id: https://orcid.org/0000-0002-6644-8284
+  name: Ratcliffe, S
+  affiliations:
+  - id: urn:d4d:org:university-of-virginia
+    name: University of Virginia
+- id: https://orcid.org/0000-0002-7080-8801
+  name: Ravitsky, V
+  affiliations:
+  - id: urn:d4d:org:university-of-montreal
+    name: University of Montreal
+- id: https://orcid.org/0000-0003-0435-6197
+  name: Sali, A
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+- id: https://orcid.org/0000-0002-2048-4028
+  name: Schulz, W
+  affiliations:
+  - id: urn:d4d:org:yale-university
+    name: Yale University
+- id: https://orcid.org/0000-0002-1708-8454
+  name: Ideker, T
+  affiliations:
+  - id: urn:d4d:org:university-of-california-san-diego
+    name: University of California San Diego
+description: This dataset is the June 2026 Data Release of Cell Maps for Artificial
+  Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the
+  NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated
+  KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived
+  NPCs, neurons, and cardiomyocytes; AP-MS data in MDA-MB-468 breast cancer cells
+  in the presence of chemotherapy (vorinostat and paclitaxel); and IF images in MDA-MB-468
+  breast cancer cells in the presence and absence of chemotherapy (vorinostat and
+  paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata
+  as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented
+  here will be augmented regularly through the end of the project. CM4AI is a collaboration
+  of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and
+  the Hastings Center.
+discouraged_uses:
+- description: These laboratory data are not to be used in clinical decision-making
+    or in any context involving patient care without appropriate regulatory oversight
+    and approval.
+distribution_formats:
+- description: .d
+- description: .d directory group
+- description: .tsv
+- description: .xml
+- description: TSV
+- description: csv
+- description: executable
+- description: fastq.gz
+- description: h5
+- description: h5ad
+- description: image/jpeg
+- description: pdf
+- description: unknown
+doi: https://doi.org/10.18130/V3/HIGT4C
+ethical_reviews:
+- description: Vardit Ravistky ravitskyv@thehastingscenter.org and Jean-Christophe
+    Belisle-Pipon jean-christophe_belisle-pipon@sfu.ca.
+id: ark:59853/rocrate-cell-maps-for-artificial-intelligence-June-2026-data-release
+intended_uses:
+- description: 'AI-ready datasets to support research in functional genomics, AI/machine
+    learning model training, cellular process analysis, cell architectural changes,
+    and interactions in presence of specific disease processes, treatment conditions,
+    or genetic perturbations. A major goal is to enable biologically-driven, interpretable
+    ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and
+    Kuenzi et al. 2020 (PMID: 33096023).'
+keywords:
+- AI
+- affinity purification
+- AP-MS
+- artificial intelligence
+- breast cancer
+- Bridge2AI
+- cardiomyocyte
+- CM4AI
+- CRISPR/Cas9
+- induced pluripotent stem cell
+- iPSC
+- KOLF2.1J
+- machine learning
+- mass spectroscopy
+- MDA-MB-468
+- neural progenitor cell
+- NPC
+- neuron
+- paclitaxel
+- perturb-seq
+- perturbation sequencing
+- protein-protein interaction
+- protein localization
+- single-cell RNA sequencing
+- scRNAseq
+- SEC-MS
+- size exclusion chromatography
+- subcellular imaging
+- vorinostat
+- Artificial intelligence
+- Breast cancer
+- CRISPR perturbation
+- Cell maps
+- IPSC
+- Machine learning
+- Mass spectroscopy
+- Perturb-seq
+- Protein-protein interaction
+- cell maps
+known_biases:
+- description: Data in this release was derived from commercially available de-identified
+    human cell lines, and does not represent all biological variants which may be
+    seen in the population at large.
+known_limitations:
+- description: This is an interim release. It does not contain predicted cell maps,
+    which will be added in future releases. The current release is most suitable for
+    bioinformatics analysis of the individual datasets. Requires domain expertise
+    for meaningful analysis.
+license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+missing_data_documentation:
+- description: Some datasets are under temporary pre-publication embargo. Protein-protein
+    interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq
+    data interrogate sets of proteins which incompletely overlap. Computed cell maps
+    not included in this release.
+name: Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
+prohibited_uses:
+- description: These laboratory data are not to be used in clinical decision-making
+    or in any context involving patient care without appropriate regulatory oversight
+    and approval.
+publisher: https://dataverse.lib.virginia.edu/
+purposes:
+- description: 'AI-ready datasets to support research in functional genomics, AI/machine
+    learning model training, cellular process analysis, cell architectural changes,
+    and interactions in presence of specific disease processes, treatment conditions,
+    or genetic perturbations. A major goal is to enable biologically-driven, interpretable
+    ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and
+    Kuenzi et al. 2020 (PMID: 33096023).'
+tasks:
+- description: 'AI-ready datasets to support research in functional genomics, AI/machine
+    learning model training, cellular process analysis, cell architectural changes,
+    and interactions in presence of specific disease processes, treatment conditions,
+    or genetic perturbations. A major goal is to enable biologically-driven, interpretable
+    ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and
+    Kuenzi et al. 2020 (PMID: 33096023).'
+title: Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
+version: '1.0'
+total_size_bytes: 21880281392742

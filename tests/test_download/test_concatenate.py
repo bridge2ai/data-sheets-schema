@@ -15,10 +15,14 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 try:
-    from src.download.concatenate_documents import DocumentConcatenator
+    from src.download.concatenate_documents import (
+        DocumentConcatenator,
+        files_from_manifest,
+    )
 except ImportError as e:
     print(f"Warning: Could not import concatenate_documents: {e}", file=sys.stderr)
     DocumentConcatenator = None
+    files_from_manifest = None
 
 
 class TestDocumentConcatenation(unittest.TestCase):
@@ -141,6 +145,51 @@ class TestDocumentConcatenation(unittest.TestCase):
         files = concatenator.get_files_sorted(empty_dir, extensions=['.txt'])
 
         self.assertEqual(len(files), 0)
+
+    def test_files_from_manifest_selects_only_canonical_text(self):
+        manifest = self.test_path / "manifest.yaml"
+        manifest.write_text(
+            """
+projects:
+  VOICE:
+    - id: one
+      processed_file: file1.txt
+    - id: two
+      processed_file: file2.txt
+""".strip()
+        )
+
+        files = files_from_manifest(manifest, "VOICE", self.test_path)
+
+        self.assertEqual(
+            [path.name for path in files],
+            ["file1.txt", "file2.txt"],
+        )
+
+    def test_manifest_concatenation_excludes_unselected_files(self):
+        manifest = self.test_path / "manifest.yaml"
+        manifest.write_text(
+            """
+projects:
+  VOICE:
+    - id: one
+      processed_file: file1.txt
+""".strip()
+        )
+        selected = files_from_manifest(manifest, "VOICE", self.test_path)
+        output = self.test_path / "output.txt"
+
+        DocumentConcatenator().concatenate(
+            self.test_path,
+            output,
+            files=selected,
+            selection_manifest=manifest,
+        )
+
+        content = output.read_text()
+        self.assertIn("Content of file 1", content)
+        self.assertNotIn("Content of file 2", content)
+        self.assertNotIn("Markdown file", content)
 
 
 if __name__ == '__main__':

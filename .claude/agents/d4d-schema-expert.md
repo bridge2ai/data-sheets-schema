@@ -23,6 +23,18 @@ All schema files are in `src/data_sheets_schema/schema/`:
 - **`data_sheets_schema.yaml`** (12KB) - Main schema that imports all modules
 - **`data_sheets_schema_all.yaml`** (679KB) - Fully merged schema with all imports resolved (DO NOT EDIT - auto-generated)
 
+### Core (Semantic Exchange Layer) Schema Files
+- **`D4D_Core.yaml`** - Core exchange module: `CoreDataset`, `CoreDistribution`,
+  `CoreDatasetCollection` — the SKOS-mapped exchange subset (~79 CoreDataset fields)
+- **`data_sheets_schema_core.yaml`** - Top-level core schema (imports D4D_Core)
+- **`data_sheets_schema_core_all.yaml`** - Merged core schema (DO NOT EDIT - auto-generated)
+
+Key structural difference vs the full schema: `CoreDistribution` promotes file-level
+slots (bytes, hash, md5, sha256, path, format, encoding, media_type) to a class
+(`distributions` slot), replacing the full schema's `file_collections`. Core D4D
+records validate against class `CoreDataset`; paired full/core generation and
+reconciliation is handled by the `/d4d-full-core` command.
+
 ### Base Module
 - **`D4D_Base_import.yaml`** (18KB) - Base classes used by all modules:
   - `NamedThing` - Base for all named entities
@@ -138,7 +150,11 @@ make test-schema
 
 ### Validate D4D YAML data
 ```bash
+# Full D4D record
 poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset data.yaml
+
+# D4D-core record (semantic exchange layer)
+poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml -C CoreDataset data_core.yaml
 ```
 
 ## Key Design Patterns

@@ -1,0 +1,72 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-07-28T04:13:45+00:00'
+run:
+  label: 2026-07-28_claude-opus-5-crateonly_rep1
+  project: CHORUS
+  method: claudecode_agent_crate_only
+  arm: crate_only
+  replicate: 1
+model:
+  generation_method: schema-grounded agentic, phase 1
+  agent_runtime: Claude Code
+  provider: Anthropic
+  model: claude-opus-5[1m]
+  reasoning_effort: not applicable
+  mode: four-phase project agent, crate-only
+  temperature: '0.0'
+schema:
+  declared_version: 1.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_md5: 633a2d2c490364d66f45d8ee2959a329
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_md5: c23d85ec2abfa2178de2737278f690e1
+  merged_schema_carries_version: false
+  note: The version is declared in the source schema but the merged artefacts predate
+    it; they will carry it after the next `make full-schema`. Content md5s identify
+    exactly what was used.
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: 0e19e85fe6a0b18038ba64bbff309d684bae2a9f
+  commit_short: 0e19e85f
+  branch: main
+  dirty: true
+  dirty_file_count: 370
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/CHORUS_crate_only.txt
+  bundle_md5: 06ad867c85e1d1ba0818c34e5bbaec29
+  bundle_bytes: 29696
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: e633ee3827eb151efca663f14d0b2f5c
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly_rep1/CHORUS_d4d.yaml
+    md5: 019b296803d34510eb0628bd009e95a8
+    bytes: 48626
+    slots: 56
+  core:
+    path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep1/CHORUS_d4d_core.yaml
+    md5: ba4d0b790a8f466555c48c3f20cc0337
+    bytes: 40341
+    slots: 48
+  report: null
+unrecoverable: null
+notes: null

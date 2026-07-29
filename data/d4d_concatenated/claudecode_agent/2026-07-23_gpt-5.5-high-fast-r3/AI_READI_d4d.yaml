@@ -1,0 +1,1217 @@
+# D4D Datasheet for AI_READI Dataset
+# Generation Method: schema-grounded agentic, phase 1
+# Agent runtime: Codex CLI
+# Provider: OpenAI
+# Model: gpt-5.5
+# Reasoning effort: high
+# Mode: fast
+# Source bundle: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+# Source manifest: data/preprocessed/source_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Temperature: 0.0
+# Generated: 2026-07-23
+id: https://fairhub.io/datasets/2
+name: ai-readi-flagship-type-2-diabetes-dataset
+title: Flagship Dataset of Type 2 Diabetes from the AI-READI Project
+description: AI-READI is a Bridge2AI data generation project and dataset for type 2 diabetes mellitus. The dataset consists
+  of data collected from individuals with and without T2DM and harmonized across three data collection sites. It is designed
+  for future AI and machine learning studies of pathogenesis and salutogenesis in T2DM, with a cross-sectional target enrollment
+  of 4,000 people aged 40 and older, balanced by race/ethnicity, T2DM severity, and biological sex.
+doi: 10.60775/fairhub.3
+page: https://fairhub.io/datasets/2
+download_url: https://fairhub.io/datasets/2
+license: Health Data License; license terms for reusing the AI-READI dataset at doi:10.5281/zenodo.10642459
+publisher: https://fairhub.io
+issued: '2025-11-17T00:00:00Z'
+last_updated_on: '2026-06-04T00:00:00Z'
+version: 3.0.0
+language: English
+keywords:
+- Diabetes mellitus
+- Machine Learning
+- Artificial Intelligence
+- Electrocardiography
+- Continuous Glucose Monitoring
+- Retinal imaging
+- Eye exam
+- type 2 diabetes mellitus
+- salutogenesis
+- FAIR principles
+citation: When using this resource, cite the dataset according to the citation instructions at https://docs.aireadi.org/docs/2/citation.
+total_file_count: 165051
+total_size_bytes: 2010000000000
+external_resources:
+- id: https://fairhub.io/datasets/2#external-fairhub
+  name: FAIRhub dataset landing page
+  external_resources:
+  - https://fairhub.io/datasets/2
+  restrictions:
+  - Access is mediated by FAIRhub. The public release has fewer access requirements; controlled access requires legal and
+    privacy use agreements or a data use agreement.
+  archival: false
+- id: https://fairhub.io/datasets/2#external-docs
+  name: AI-READI dataset documentation
+  external_resources:
+  - https://docs.aireadi.org/docs/2/about
+  restrictions:
+  - The selected documentation page states that v2.0.0 documentation is no longer accessible and points users to v3.0.0.
+  archival: true
+- id: https://fairhub.io/datasets/2#external-license
+  name: AI-READI data license agreement
+  external_resources:
+  - https://doi.org/10.5281/zenodo.10642459
+  - https://zenodo.org/records/10642459/files/AI-READI-LICENSE-v1.0.pdf?download=1
+  restrictions:
+  - Use is governed by the University of Washington data license agreement.
+  archival: true
+- id: https://fairhub.io/datasets/2#external-github
+  name: AI-READI GitHub organization
+  external_resources:
+  - https://github.com/AI-READI
+  restrictions:
+  - Source documents identify GitHub as part of the project blueprint resources.
+  archival: false
+- id: https://fairhub.io/datasets/2#external-aireadi
+  name: AI-READI project website
+  external_resources:
+  - https://aireadi.org
+  restrictions:
+  - Project website and data-sharing information are referenced by the source documents.
+  archival: false
+file_collections:
+- id: https://fairhub.io/datasets/2#files-all
+  name: FAIRhub current dataset files
+  title: Current FAIRhub version file collection
+  description: FAIRhub reports the current dataset as 2.01 TB with 165,051 files.
+  path: https://fairhub.io/datasets/2
+  collection_type:
+  - processed_data
+  - metadata
+  file_count: 165051
+  total_bytes: 2010000000000
+  download_url: https://fairhub.io/datasets/2
+  doi: 10.60775/fairhub.3
+  version: 3.0.0
+  issued: '2025-11-17T00:00:00Z'
+  license: Health Data License
+- id: https://fairhub.io/datasets/2#files-public
+  name: Public-access release
+  description: Annual deidentified public releases are made available through FAIRhub with fewer access requirements. The
+    public set is stripped of Protected Health Information via HIPAA Safe Harbor and also removes sex and race/ethnicity to
+    reduce stigmatization risks.
+  path: https://fairhub.io/datasets/2
+  collection_type:
+  - processed_data
+  license: Health Data License
+- id: https://fairhub.io/datasets/2#files-controlled
+  name: Controlled-access release
+  description: The controlled-access set contains all data available in the public set plus more sensitive data, including
+    data elements such as 5-digit ZIP code, sex, race, ethnicity, genetic sequencing data, past health records, medications,
+    and traffic and accident reports. Access requires legal and privacy use agreements or a project approval process.
+  path: https://fairhub.io/datasets/2
+  collection_type:
+  - processed_data
+  license: Health Data License
+- id: https://fairhub.io/datasets/2#files-docs
+  name: Dataset documentation
+  description: Versioned dataset documentation complements the FAIRhub landing page and describes access, license prerequisites,
+    Healthsheet-style dataset documentation, AI-readiness, changelog, and additional resources.
+  path: https://docs.aireadi.org/docs/2/about
+  collection_type:
+  - documentation
+  - metadata
+  last_updated_on: '2026-06-04T00:00:00Z'
+- id: https://fairhub.io/datasets/2#files-license
+  name: AI-READI License v1.0
+  description: University of Washington data license agreement for downloading, installing, or using AI-READI data.
+  path: https://zenodo.org/records/10642459/files/AI-READI-LICENSE-v1.0.pdf?download=1
+  collection_type:
+  - documentation
+  doi: 10.5281/zenodo.10642459
+purposes:
+- id: https://fairhub.io/datasets/2#purpose-ai-ml
+  name: AI/ML-ready T2DM dataset
+  response: Collect and publicly share a multimodal, AI-ready dataset for studying pathogenesis and salutogenesis of type
+    2 diabetes mellitus.
+- id: https://fairhub.io/datasets/2#purpose-salutogenesis
+  name: T2DM salutogenesis
+  response: Support research on pathways from disease to health and health resilience in T2DM.
+- id: https://fairhub.io/datasets/2#purpose-standards
+  name: Reusable data-generation blueprint
+  response: Establish standards, best practices, and guidelines for collection, preparation, documentation, and sharing of
+    AI-ready biomedical datasets.
+- id: https://fairhub.io/datasets/2#purpose-workforce
+  name: AI workforce development
+  response: Increase access to and quality of AI/ML research by recruiting and training personnel at the intersection of biomedicine
+    and AI.
+tasks:
+- id: https://fairhub.io/datasets/2#task-trajectory
+  name: Disease trajectory modeling
+  response: Enable downstream pseudotime manifold analysis and other AI/ML approaches to infer T2DM trajectories from participants
+    with differing disease severity.
+- id: https://fairhub.io/datasets/2#task-multimodal
+  name: Multimodal model development
+  response: Support AI model development across survey, clinical, retinal imaging, ECG, CGM, physical activity, environmental,
+    biospecimen, laboratory, cognitive, and EHR-derived domains.
+- id: https://fairhub.io/datasets/2#task-fairification
+  name: FAIR data preparation
+  response: Demonstrate methods for making diverse clinical research data findable, accessible, interoperable, reusable, and
+    AI-ready.
+addressing_gaps:
+- id: https://fairhub.io/datasets/2#gap-diverse-ai-ready
+  name: Lack of diverse AI-ready T2DM data
+  response: 'The sources identify a major barrier: lack of large, diverse, well-characterized, AI-ready datasets for T2DM
+    and complex multi-organ disease research.'
+- id: https://fairhub.io/datasets/2#gap-underrepresentation
+  name: Under-representation in diabetes research
+  response: The cohort is intentionally balanced by race/ethnicity, sex, and diabetes severity to address limitations of previous
+    epidemiological studies and clinical trials on T2DM.
+- id: https://fairhub.io/datasets/2#gap-documentation
+  name: Reusable clinical data documentation
+  response: The project develops and evaluates documentation approaches such as datasheets and healthsheets so AI developers
+    can understand provenance, intended use, and maintenance.
+creators:
+- id: https://fairhub.io/datasets/2#creator-consortium
+  name: AI-READI Consortium
+  description: Multidisciplinary project consortium credited on the Nature Metabolism article and FAIRhub dataset page.
+  affiliations:
+  - &id001
+    id: https://fairhub.io/datasets/2#org-uw
+    name: University of Washington
+  - &id002
+    id: https://fairhub.io/datasets/2#org-uab
+    name: University of Alabama at Birmingham
+  - &id003
+    id: https://fairhub.io/datasets/2#org-ucsd
+    name: University of California, San Diego
+  - &id004
+    id: https://fairhub.io/datasets/2#org-ohsu
+    name: Oregon Health Sciences University
+  - &id005
+    id: https://fairhub.io/datasets/2#org-calmi
+    name: California Medical Innovations Institute
+  - &id006
+    id: https://fairhub.io/datasets/2#org-stanford
+    name: Stanford University
+  - &id007
+    id: https://fairhub.io/datasets/2#org-jhu
+    name: Johns Hopkins University
+  credit_roles:
+  - conceptualization
+  - methodology
+  - investigation
+  - resources
+  - data_curation
+  - software
+  - project_administration
+  - supervision
+  - funding_acquisition
+- id: https://fairhub.io/datasets/2#creator-aaron-lee
+  name: Aaron Lee
+  principal_investigator: Aaron Lee
+  affiliations:
+  - *id001
+  credit_roles:
+  - supervision
+  - funding_acquisition
+  - project_administration
+- id: https://fairhub.io/datasets/2#creator-cynthia-owsley
+  name: Cynthia Owsley
+  principal_investigator: Cynthia Owsley
+  affiliations:
+  - *id002
+  credit_roles:
+  - conceptualization
+  - methodology
+  - writing_original_draft
+  - supervision
+- id: https://fairhub.io/datasets/2#creator-linda-zangwill
+  name: Linda Zangwill
+  principal_investigator: Linda Zangwill
+  affiliations:
+  - *id003
+  credit_roles:
+  - conceptualization
+  - methodology
+  - supervision
+- id: https://fairhub.io/datasets/2#creator-sally-baxter
+  name: Sally Baxter
+  principal_investigator: Sally Baxter
+  affiliations:
+  - *id003
+  credit_roles:
+  - conceptualization
+  - methodology
+  - software
+  - data_curation
+- id: https://fairhub.io/datasets/2#creator-shannon-mcweeney
+  name: Shannon McWeeney
+  principal_investigator: Shannon McWeeney
+  affiliations:
+  - *id004
+  credit_roles:
+  - software
+  - data_curation
+  - methodology
+- id: https://fairhub.io/datasets/2#creator-bhavesh-patel
+  name: Bhavesh Patel
+  principal_investigator: Bhavesh Patel
+  affiliations:
+  - *id005
+  credit_roles:
+  - software
+  - methodology
+- id: https://fairhub.io/datasets/2#creator-michael-snyder
+  name: Michael Snyder
+  principal_investigator: Michael Snyder
+  affiliations:
+  - *id006
+  credit_roles:
+  - methodology
+  - resources
+- id: https://fairhub.io/datasets/2#creator-ty-alvin-liu
+  name: T. Y. Alvin Liu
+  principal_investigator: T. Y. Alvin Liu
+  affiliations:
+  - *id007
+  credit_roles:
+  - methodology
+  - investigation
+funders:
+- id: https://fairhub.io/datasets/2#funder-nih-bridge2ai
+  name: NIH Common Fund Bridge2AI
+  description: NIH RePORTER lists application 10471118 with project number 1OT2OD032644-01, fiscal year 2022, award amount
+    5026499, and project dates 2022-09-01 to 2025-08-31. The BMJ paper also names OT2OD032644, P30DK035816, UL1TR003096, and
+    Research to Prevent Blindness.
+  grantor: NIH Common Fund Bridge2AI
+  grants:
+  - id: https://reporter.nih.gov/project-details/10471118
+    grant_number: 1OT2OD032644-01
+    name: 'Bridge2AI: Salutogenesis Data Generation Project'
+  - id: https://fairhub.io/datasets/2#grant-ot2od032644
+    grant_number: OT2OD032644
+    name: Core project number OT2OD032644
+  - id: https://fairhub.io/datasets/2#grant-p30dk035816
+    grant_number: P30DK035816
+    name: NIH grant P30DK035816
+  - id: https://fairhub.io/datasets/2#grant-ul1tr003096
+    grant_number: UL1TR003096
+    name: NIH grant UL1TR003096
+- id: https://fairhub.io/datasets/2#funder-rpb
+  name: Research to Prevent Blindness
+  description: Named in the BMJ Open funding statement.
+  grantor: Research to Prevent Blindness
+subsets:
+- id: https://fairhub.io/datasets/2#subset-public
+  name: Public-access dataset
+  title: Public AI-READI release
+  description: Subset released with fewer access requirements after removal of PHI and removal of sex and race/ethnicity in
+    the public set.
+  is_data_split: false
+  is_subpopulation: false
+- id: https://fairhub.io/datasets/2#subset-controlled
+  name: Controlled-access dataset
+  title: Controlled AI-READI release
+  description: Subset containing sensitive elements beyond the public dataset, including 5-digit ZIP code, sex, race, ethnicity,
+    genetic sequencing data, past health records, medications, and traffic and accident reports.
+  is_data_split: false
+  is_subpopulation: false
+- id: https://fairhub.io/datasets/2#subset-biorepository
+  name: Biorepository specimens
+  title: AI-READI biospecimen repository
+  description: Blood derivatives, urine, plasma, serum, buffy coats, PAXgene RNA tubes, and PBMC materials processed for clinical
+    lab testing, biobanking, future proteomics, metabolomics, genomics, gene expression, immunology, and iPSC-related studies.
+  is_data_split: false
+  is_subpopulation: false
+instances:
+- id: https://fairhub.io/datasets/2#instance-participants
+  name: Study participants
+  instance_type: person participant records
+  counts: 4000
+  label: false
+  label_description: Target enrollment is 4,000 people aged 40 and older, balanced by self-reported race/ethnicity, T2DM severity,
+    and biological sex.
+- id: https://fairhub.io/datasets/2#instance-surveys
+  name: Questionnaire responses
+  instance_type: survey responses
+  label: false
+  label_description: Screening, demographic, CES-D-10, PAID-5, diabetes self-care, diet, smoking/alcohol/vaping/marijuana
+    use, general health, social determinants of health, medications, and visual impairment/eye care access questionnaires.
+- id: https://fairhub.io/datasets/2#instance-clinical
+  name: Clinical and physical measurements
+  instance_type: clinical measurements
+  label: false
+  label_description: Vitals, height, weight, waist and hip circumference, BMI, waist-hip ratio, visual acuity, contrast sensitivity,
+    monofilament test, cognitive screening, ECG, and laboratory assays.
+- id: https://fairhub.io/datasets/2#instance-retinal
+  name: Retinal imaging records
+  instance_type: retinal images and imaging metadata
+  label: false
+  label_description: Both eyes are imaged using fundus photography, FLIO, OCT, and OCTA devices; many images are stored or
+    converted to DICOM.
+- id: https://fairhub.io/datasets/2#instance-wearables
+  name: At-home monitoring streams
+  instance_type: device time series
+  label: false
+  label_description: Dexcom G6 CGM, Garmin Vivosmart 5 physical activity monitoring, and a custom environmental sensor used
+    for 10 days after the visit.
+- id: https://fairhub.io/datasets/2#instance-biospecimens
+  name: Biospecimens and laboratory results
+  instance_type: specimen-derived data
+  label: false
+  label_description: Blood and urine samples support CBC, HbA1c, lipids, CRP, CMP12, NT-proBNP, troponin-T, C-peptide, insulin,
+    urine albumin/creatinine, and future biorepository uses.
+anomalies:
+- id: https://fairhub.io/datasets/2#anomaly-pilot-balance
+  name: Pilot release balance caveat
+  anomaly_details:
+  - Dataset documentation notes that, because enrollment is ongoing, the pilot release and periodic releases may not have
+    achieved balanced distribution across groups.
+- id: https://fairhub.io/datasets/2#anomaly-device-conversion
+  name: Device format conversion
+  anomaly_details:
+  - Some retinal imaging and device outputs are exported in proprietary or raw formats and converted to DICOM or mHealth standards
+    prior to FAIRhub upload.
+known_biases:
+- id: https://fairhub.io/datasets/2#bias-volunteer
+  name: Volunteer bias
+  bias_type: selection_bias
+  bias_description: The protocol notes that participants are volunteers, creating volunteer bias that may limit generalizability
+    among people not represented in the study population.
+  mitigation_strategy: Recruitment is monitored and adjusted by under- and oversampling groups as needed.
+- id: https://fairhub.io/datasets/2#bias-language
+  name: English language eligibility
+  bias_type: representation_bias
+  bias_description: Participants are initially required to speak, read, and understand English; this may challenge recruitment
+    of Hispanic and/or Asian participants.
+  mitigation_strategy: The IRB protocol describes potential Spanish consent translation and native Spanish-speaking research
+    staff if recruitment goals for Hispanic participants are not met.
+- id: https://fairhub.io/datasets/2#bias-recruitment-black-men
+  name: Under-recruitment risk
+  bias_type: sampling_bias
+  bias_description: The protocol notes that recruiting Black men into studies is more difficult than recruiting other populations
+    while this population bears a disproportionate T2DM burden.
+  mitigation_strategy: Implement new recruitment strategies if race/ethnicity balancing becomes a challenge.
+known_limitations:
+- id: https://fairhub.io/datasets/2#limitation-biorepository
+  name: Finite biospecimen availability
+  limitation_type: scope_limitation
+  limitation_description: The protocol identifies a finite number of biorepository samples to share with scientists.
+  scope_impact: Ancillary biospecimen studies may require review and prioritization.
+  recommended_mitigation: Develop procedures for reviewing and prioritizing written requests before the biorepository is complete.
+- id: https://fairhub.io/datasets/2#limitation-ongoing
+  name: Ongoing enrollment and release timing
+  limitation_type: temporal_limitation
+  limitation_description: Enrollment and annual releases are ongoing; early releases may not reflect the final balanced design.
+  scope_impact: Users should interpret pilot and interim releases with enrollment status in mind.
+  recommended_mitigation: Consult versioned documentation and release dates.
+- id: https://fairhub.io/datasets/2#limitation-generalizability
+  name: Cross-sectional volunteer cohort
+  limitation_type: representativeness_limitation
+  limitation_description: The main study is cross-sectional and volunteer-based at three U.S. health-system sites.
+  scope_impact: Generalizability may be limited for groups outside the recruitment frame or people who do not participate.
+  recommended_mitigation: Use source-provided cohort variables and limitations when designing analyses.
+- id: https://fairhub.io/datasets/2#limitation-biorepository-processing
+  name: PBMC processing time variable
+  limitation_type: methodological_limitation
+  limitation_description: Centralized processing of CPT tubes at UAB introduces an additional time variable for PBMC isolation
+    and cryopreservation from UW and UCSD participants.
+  scope_impact: PBMC-derived downstream measures may need to account for processing logistics.
+  recommended_mitigation: Use standardized handling documentation and processing metadata.
+confidential_elements:
+- id: https://fairhub.io/datasets/2#confidential-phi
+  name: Protected health information
+  confidential_elements_present: true
+  confidentiality_details:
+  - PHI is used for screening, recruitment, and study data collection through EHR review and direct collection from subjects.
+  - The public dataset is deidentified and stripped of PHI by the Safe Harbor method.
+- id: https://fairhub.io/datasets/2#confidential-identifiers
+  name: Direct and indirect identifiers
+  confidential_elements_present: true
+  confidentiality_details:
+  - Source IRB materials list name, MRN, DOB, age, sex, race/ethnicity, address, phone number, driver license number, email,
+    subject codes, and contact information as collected or stored for study purposes.
+content_warnings:
+- id: https://fairhub.io/datasets/2#warning-health
+  name: Health and sensitive clinical content
+  content_warnings_present: true
+  warnings:
+  - The dataset concerns diabetes, clinical laboratory results, eye health, cognitive testing, mental health survey items,
+    substance use questions, social determinants of health, EHR data, driving/accident records, and genomic data in controlled
+    access.
+subpopulations:
+- id: https://fairhub.io/datasets/2#subpop-race-ethnicity
+  name: Race and ethnicity balancing groups
+  subpopulation_elements_present: true
+  identification:
+  - Asian, Black, White, and Hispanic groups are targeted in approximately equal proportions.
+  distribution:
+  - The design is triple-balanced across race/ethnicity, T2DM severity, and biological sex, though site-specific prevalence
+    affects recruitment.
+- id: https://fairhub.io/datasets/2#subpop-diabetes-severity
+  name: T2DM severity groups
+  subpopulation_elements_present: true
+  identification:
+  - No diabetes, pre-diabetes/lifestyle-controlled diabetes, diabetes treated with oral medications or non-insulin injections,
+    and insulin-controlled diabetes.
+  distribution:
+  - The study population is designed to be balanced across these four diabetes severity categories.
+- id: https://fairhub.io/datasets/2#subpop-sex
+  name: Biological sex groups
+  subpopulation_elements_present: true
+  identification:
+  - Male and female biological sex categories are used in the protocol balancing scheme.
+  distribution:
+  - Biological sex is part of the triple-balanced recruitment design.
+sensitive_elements:
+- id: https://fairhub.io/datasets/2#sensitive-controlled
+  name: Controlled-access variables
+  sensitive_elements_present: true
+  sensitivity_details:
+  - Controlled-access data include 5-digit ZIP code, sex, race, ethnicity, genetic sequencing data, past health records, medications,
+    and traffic and accident reports.
+- id: https://fairhub.io/datasets/2#sensitive-genomic
+  name: Genomic data and biospecimens
+  sensitive_elements_present: true
+  sensitivity_details:
+  - The IRB source states the research will generate genomic data and includes stored biospecimens for future studies.
+relationships:
+- id: https://fairhub.io/datasets/2#relationship-public-controlled
+  name: Public and controlled set relationship
+  relationship_details:
+  - The controlled-access dataset contains all data in the public set plus more sensitive data.
+- id: https://fairhub.io/datasets/2#relationship-docs-fairhub
+  name: Documentation complements FAIRhub
+  relationship_details:
+  - Versioned documentation is intended to complement the information on the FAIRhub dataset landing page.
+splits:
+- id: https://fairhub.io/datasets/2#split-not-ml
+  name: No source-specified ML train/test split
+  split_details:
+  - The source bundle describes public and controlled access releases, not a machine-learning train, validation, or test split.
+acquisition_methods:
+- id: https://fairhub.io/datasets/2#acq-direct-derived
+  name: Direct, reported, EHR-derived, and device-derived acquisition
+  was_directly_observed: true
+  was_reported_by_subjects: true
+  was_inferred_derived: true
+  was_validated_verified: true
+  acquisition_details:
+  - Data are obtained from subjects, devices, specimens, medical records, and Department of Licensing driving/accident records.
+  - T2DM and pre-diabetes are identified by screening EHRs for ICD-10 codes R73.09 and E11.X.
+collection_mechanisms:
+- id: https://fairhub.io/datasets/2#collection-protocol
+  name: Single-visit and at-home protocol
+  mechanism_details:
+  - Participants complete questionnaires, a 3-4 hour on-site visit, and 10 days of at-home CGM, fitness tracker, and environmental
+    sensor monitoring.
+  - The BMJ protocol describes a single visit lasting 2.5 to 4 hours, with questionnaires completed online or in person.
+- id: https://fairhub.io/datasets/2#collection-recruitment
+  name: Recruitment through EHR-based waves
+  mechanism_details:
+  - Recruitment pools are identified from EHR searches at UAB, UCSD, and UW and invited by mail, email, REDCap links, access
+    codes, QR codes, and follow-up calls.
+- id: https://fairhub.io/datasets/2#collection-upload
+  name: FAIRhub upload and quality control
+  mechanism_details:
+  - Data managers at each site are responsible for quality control before uploading to FAIRhub at regular intervals.
+sampling_strategies:
+- id: https://fairhub.io/datasets/2#sampling-balanced
+  name: Triple-balanced stratified sampling
+  is_sample: true
+  is_random: false
+  source_data:
+  - Electronic health records from UAB, UCSD, and UW health systems from 2020 to 2025.
+  is_representative: false
+  why_not_representative:
+  - The protocol intentionally does not target the demographic distribution of the U.S. population; it targets balance across
+    selected race/ethnicity, T2DM severity, and biological sex groups.
+  strategies:
+  - Recruit in waves using stratified samples based on race/ethnicity, sex, diabetes severity, and site.
+  - Monitor recruitment diversity and adjust by under- and oversampling as needed.
+data_collectors:
+- id: https://fairhub.io/datasets/2#collector-site-staff
+  name: Site research staff
+  role: clinical research coordinators and study staff
+  collector_details:
+  - Research coordinators contact and consent participants, conduct visits, collect ophthalmologic images, train participants
+    on CGM and fitness trackers, and ensure return of study materials.
+- id: https://fairhub.io/datasets/2#collector-data-manager
+  name: Data managers
+  role: data manager
+  collector_details:
+  - Data managers oversee quality control at each site before upload to FAIRhub.
+  - Database managers ingest data into REDCap and extract for processing.
+- id: https://fairhub.io/datasets/2#collector-lab
+  name: Phlebotomists and lab assistants
+  role: biospecimen collection and processing
+  collector_details:
+  - Phlebotomists collect blood from participants; lab assistants process and ship samples.
+- id: https://fairhub.io/datasets/2#collector-engineering
+  name: Software and cloud engineers
+  role: data curation infrastructure
+  collector_details:
+  - Software engineers design, implement, and test data curation pipelines; cloud engineers configure and manage cloud infrastructure
+    and services.
+collection_timeframes:
+- id: https://fairhub.io/datasets/2#time-project
+  name: NIH award project period
+  start_date: '2022-09-01'
+  end_date: '2025-08-31'
+  timeframe_details:
+  - NIH RePORTER lists project start 2022-09-01 and project end 2025-08-31.
+- id: https://fairhub.io/datasets/2#time-enrollment
+  name: Participant enrollment period
+  start_date: '2023-07-18'
+  end_date: '2026-11-30'
+  timeframe_details:
+  - Enrollment began 18 July 2023 and is planned to continue until 30 November 2026.
+- id: https://fairhub.io/datasets/2#time-formal-collection
+  name: Formal data collection start
+  start_date: '2023-12-01'
+  timeframe_details:
+  - Preliminary pilot enrollment occurred from 18 July 2023 to 30 November 2023; formal data collection began on 1 December
+    2023.
+- id: https://fairhub.io/datasets/2#time-releases
+  name: Dataset release dates
+  timeframe_details:
+  - Version 1.0.0 was released May 3, 2024; version 2.0.0 on November 8, 2024; version 3.0.0 on November 17, 2025.
+direct_collection:
+- id: https://fairhub.io/datasets/2#direct-subjects
+  name: Direct participant data collection
+  is_direct: true
+  collection_details:
+  - Participants provide questionnaires, physical measures, blood, urine, imaging, CGM, activity, environmental, ECG, cognitive,
+    and study visit data.
+collection_notifications:
+- id: https://fairhub.io/datasets/2#notify-recruitment
+  name: Recruitment and reminder communications
+  notification_details:
+  - Potential participants receive invitation letters, emails, REDCap links or access codes, and follow-up phone calls.
+  - Enrolled subjects receive appointment and device return reminders by email, text, phone, or letter.
+collection_consents:
+- id: https://fairhub.io/datasets/2#consent-written
+  name: Written informed consent
+  consent_details:
+  - The BMJ protocol states written informed consent is provided by all participants.
+  - Consent may be electronic through UW REDCap or in person at the study visit.
+- id: https://fairhub.io/datasets/2#consent-hipaa
+  name: HIPAA authorization
+  consent_details:
+  - The IRB protocol confirms use of UW Medicine HIPAA Authorization for UW Medicine PHI and electronic authorization where
+    applicable.
+consent_revocations:
+- id: https://fairhub.io/datasets/2#revocation-right
+  name: Right to change participation
+  revocation_details:
+  - Study subjects have the opportunity to ask questions throughout the study and are reminded that they have the right to
+    change their mind about study participation.
+missing_data_documentation:
+- id: https://fairhub.io/datasets/2#missing-release-balance
+  name: Interim release completeness
+  missing_data_patterns:
+  - Pilot and periodic releases may not yet achieve balanced distribution across groups because enrollment is ongoing.
+  missing_data_causes:
+  - Ongoing recruitment and release cadence.
+  handling_strategy: Consult versioned documentation and interpret each release in context of enrollment status.
+- id: https://fairhub.io/datasets/2#missing-followup-budget
+  name: Year 4 follow-up collection
+  missing_data_patterns:
+  - For the planned 10% Year 4 follow-up, no new variables will be added, but not all variables may be collected due to budget
+    constraints.
+  missing_data_causes:
+  - Budget constraints for follow-up visit data collection.
+  handling_strategy: Use release documentation to determine which follow-up variables are present.
+raw_data_sources:
+- id: https://fairhub.io/datasets/2#raw-ehr
+  name: Electronic health records
+  source_description: EHRs are screened for recruitment, age, diabetes status, eligibility, general health, eye health, medical/surgical
+    history, diabetes, medications, lab records, and previous medical imaging.
+  source_type:
+  - electronic health record
+  access_details: Accessed by participating study sites for screening, recruitment, and data collection under IRB/HIPAA processes.
+  raw_data_format:
+  - EHR records
+  - ICD-10 diagnosis codes
+- id: https://fairhub.io/datasets/2#raw-subjects
+  name: Participant-reported questionnaires
+  source_description: Participant responses to screening, demographic, depression, diabetes, diet, substance use, general
+    health, SDoH, medication, and eye-care surveys.
+  source_type:
+  - participant report
+  - survey
+  access_details: Collected through REDCap or paper forms after consent.
+  raw_data_format:
+  - REDCap
+  - CSV
+- id: https://fairhub.io/datasets/2#raw-devices
+  name: Clinical and monitoring devices
+  source_description: ECG, MoCA, retinal imaging devices, Dexcom G6 CGM, Garmin Vivosmart 5, and environmental sensors.
+  source_type:
+  - medical device
+  - wearable device
+  - environmental sensor
+  access_details: Collected during study visits and 10-day at-home monitoring.
+  raw_data_format:
+  - XML
+  - CSV
+  - DICOM
+  - FIT
+  - FDA
+  - SDT
+  - mHealth standard
+- id: https://fairhub.io/datasets/2#raw-specimens
+  name: Blood and urine specimens
+  source_description: Blood and urine specimens are processed locally and centrally for clinical lab testing, biobanking,
+    and future omics and immunology studies.
+  source_type:
+  - biospecimen
+  - laboratory assay
+  access_details: Collected during the study encounter and processed at local labs, UW NORC, and UAB CCTS.
+  raw_data_format:
+  - CSV
+  - specimen repository records
+- id: https://fairhub.io/datasets/2#raw-dol
+  name: Driving and accident records
+  source_description: Driving and accident records are obtained from the Department of Licensing for the last three years.
+  source_type:
+  - administrative record
+  access_details: Obtained under study approval; no additional approvals beyond IRB are noted in the protocol.
+  raw_data_format:
+  - administrative records
+ethical_reviews:
+- id: https://fairhub.io/datasets/2#ethics-uw-irb
+  name: University of Washington IRB approval
+  reviewing_organization: University of Washington
+  review_details:
+  - Approved by the Institutional Review Board of the University of Washington under approval number STUDY00016228, including
+    reliance agreements with UAB and UCSD IRBs.
+- id: https://fairhub.io/datasets/2#ethics-advisory
+  name: Community Advisory Board involvement
+  review_details:
+  - A Community Advisory Board of 11 persons from the three sites, including race and ethnicity diversity represented in the
+    AI-READI sample, contributes to protocol development.
+- id: https://fairhub.io/datasets/2#ethics-bioethics
+  name: Bioethics and ELSI integration
+  review_details:
+  - The project includes guidance from bioethicists and considers ethical, legal, and social implications at every stage of
+    the project cycle.
+data_protection_impacts:
+- id: https://fairhub.io/datasets/2#dpi-reidentification
+  name: Reidentification prevention
+  impact_details:
+  - AI algorithms can infer patient characteristics and could facilitate individual-level identification; the project implements
+    a robust dissemination system, strict license agreement, and data watermarking for public and controlled sets.
+- id: https://fairhub.io/datasets/2#dpi-privacy-storage
+  name: Storage and access controls
+  impact_details:
+  - Identifiable information is kept on encrypted computers or servers, or in locked cabinets/rooms with restricted access
+    at all sites. Only authorized research personnel have access to identifiable information.
+human_subject_research:
+  id: https://fairhub.io/datasets/2#human-subject-research
+  name: Human subjects research
+  involves_human_subjects: true
+  irb_approval:
+  - University of Washington IRB approval number STUDY00016228.
+  ethics_review_board:
+  - University of Washington IRB with reliance agreements for University of Alabama at Birmingham and University of California,
+    San Diego.
+  special_populations:
+  - Adults aged 40 and older with and without T2DM; the sources state Native American cohort engagement is planned through
+    tribal consultation rather than active tribal recruitment in the IRB excerpt.
+  regulatory_compliance:
+  - HIPAA authorization and safeguards for PHI.
+  - NIH Genomic Data Sharing security best practices are incorporated into the data license security obligations.
+informed_consent:
+- id: https://fairhub.io/datasets/2#informed-consent
+  name: Informed consent process
+  consent_obtained: true
+  consent_type:
+  - written informed consent
+  - electronic consent
+  - in-person consent
+  consent_documentation:
+  - Participants can review consent documentation in REDCap, give e-consent, request a call or video conference, or wait to
+    sign in person.
+  - Once signed, electronic consent is automatically emailed to subjects and additional copies may be requested.
+  withdrawal_mechanism:
+  - Subjects are reminded that they have the right to change their mind about study participation.
+  consent_scope:
+  - Participation in the study protocol, data/specimen collection, future sharing and research uses as described in the IRB
+    protocol, and repository/data sharing.
+at_risk_populations:
+  id: https://fairhub.io/datasets/2#at-risk-populations
+  name: Equity and at-risk population considerations
+  at_risk_groups_included: true
+  special_protections:
+  - The project uses a Community Advisory Board and bioethics guidance.
+  - The public set removes sex and race/ethnicity to reduce stigmatization risks.
+  - The project planned engagement with the Native Biodata Consortium to understand AI/AN data governance and participation
+    issues.
+  assent_procedures:
+  - The source bundle describes adult participants; child assent is not applicable to the dataset described.
+  guardian_consent:
+  - The source bundle describes adult participants aged 40 and older.
+participant_privacy:
+- id: https://fairhub.io/datasets/2#privacy-deidentification
+  name: Public release deidentification
+  anonymization_method:
+  - HIPAA Safe Harbor method for public set deidentification.
+  reidentification_risk:
+  - The source bundle notes AI algorithms can infer individual characteristics and could facilitate individual-level identification.
+  privacy_techniques:
+  - PHI stripping
+  - removal of sex and race/ethnicity from public set
+  - strict license agreement
+  - data watermarking
+  - encrypted servers
+  - restricted access
+  data_linkage:
+  - Identifiers and study data may be stored separately with maintained links for study operations; controlled access protects
+    sensitive variables.
+participant_compensation:
+- id: https://fairhub.io/datasets/2#compensation-stipend
+  name: Participant stipend and travel support
+  compensation_provided: true
+  compensation_type:
+  - stipend
+  - parking, public transit, or rideshare support
+  compensation_amount:
+  - $200 stipend after final data and return of study devices.
+  - Reasonable parking, public transit, or rideshare fees related to the study visit are covered; subjects may incur costs
+    if transportation fees exceed $25.
+  compensation_rationale:
+  - Compensation is tied to study participation and return of devices after the 10-day at-home collection period.
+preprocessing_strategies:
+- id: https://fairhub.io/datasets/2#preprocess-ai-ready
+  name: AI-ready harmonization
+  preprocessing_details:
+  - All data are stored and shared through FAIRhub as AI-ready, enabling immediate AI/ML research without reformatting and
+    preprocessing.
+  - The dataset is harmonized across three data collection sites and mapped to applicable standard formats.
+- id: https://fairhub.io/datasets/2#preprocess-standards
+  name: Standards mapping
+  preprocessing_details:
+  - Clinical data are mapped to OMOP Common Data Model where applicable; retinal imaging uses DICOM; some proprietary device
+    data are transformed to standard model formats before FAIRhub upload.
+cleaning_strategies:
+- id: https://fairhub.io/datasets/2#cleaning-site-qc
+  name: Site quality control
+  cleaning_details:
+  - The Data Manager at each data site is responsible for quality control of all data before upload to FAIRhub.
+  - Research personnel complete protocol training, certification, and practice subject administration before data collection.
+labeling_strategies:
+- id: https://fairhub.io/datasets/2#labeling-clinical
+  name: Clinical and severity labels
+  data_annotation_protocol:
+  - Diabetes and pre-diabetes are identified by EHR screening with ICD-10 diagnosis codes R73.09 and E11.X.
+  - Participant groups include no diabetes, pre-diabetes/lifestyle-controlled diabetes, non-insulin controlled diabetes, and
+    insulin-controlled diabetes.
+  labeling_details:
+  - The dataset includes measured clinical values and status variables rather than externally crowdsourced labels.
+raw_sources:
+- id: https://fairhub.io/datasets/2#raw-data-fairhub
+  name: Raw and transformed data before FAIRhub release
+  access_url: https://fairhub.io/datasets/2
+  raw_data_details:
+  - Images are exported from devices in raw format and some require conversion to DICOM before upload.
+  - ECG is exported as XML; MoCA scores and laboratory results are provided in CSV; wearable and environmental sensor data
+    are exported or transformed before release.
+imputation_protocols:
+- id: https://fairhub.io/datasets/2#imputation-not-specified
+  name: No source-specified imputation protocol
+  imputation_method:
+  - The allowed source bundle does not specify an imputation protocol for missing values.
+  imputation_rationale: Omitted except to record that no source-supported imputation method was identified.
+annotation_analyses:
+- id: https://fairhub.io/datasets/2#annotation-not-specified
+  name: No source-specified inter-annotator analysis
+  analysis_method: The allowed source bundle does not describe a manual annotation workflow with inter-annotator agreement
+    for the dataset.
+  annotation_quality_details:
+  - Clinical values, device outputs, and questionnaire responses are collected through standardized protocols rather than
+    annotation by multiple independent annotators.
+machine_annotation_tools:
+- id: https://fairhub.io/datasets/2#machine-tools-not-specified
+  name: No source-specified machine annotation tools
+  tools:
+  - No machine annotation tool was identified in the allowed source bundle.
+  tool_descriptions:
+  - The source bundle describes data curation pipelines and standards mapping, not automated labeling tools.
+existing_uses:
+- id: https://fairhub.io/datasets/2#existing-nature
+  name: Dataset introduction and blueprint publication
+  examples:
+  - The Nature Metabolism article introduces the AI-READI dataset and preliminary blueprint for AI-ready data collection,
+    preparation, and sharing.
+- id: https://fairhub.io/datasets/2#existing-bmj
+  name: Protocol publication
+  examples:
+  - The BMJ Open article reports the cross-sectional design and protocol for AI-READI.
+use_repository:
+- id: https://fairhub.io/datasets/2#repo-fairhub
+  name: FAIRhub
+  repository_url: https://fairhub.io/datasets/2
+  repository_details:
+  - FAIRhub is the access point for annual AI-READI releases and dataset metadata.
+- id: https://fairhub.io/datasets/2#repo-zenodo
+  name: AI-READI Zenodo community
+  repository_url: https://zenodo.org/communities/aireadi
+  repository_details:
+  - The Nature Metabolism source names the Zenodo community as a project blueprint resource.
+- id: https://fairhub.io/datasets/2#repo-github
+  name: AI-READI GitHub
+  repository_url: https://github.com/AI-READI
+  repository_details:
+  - The Nature Metabolism source names the AI-READI GitHub organization as a project blueprint resource.
+other_tasks:
+- id: https://fairhub.io/datasets/2#other-workforce
+  name: Workforce training and internships
+  task_details:
+  - AI-READI hosts a year-long research internship with a two-week data science/programming bootcamp and mentored research;
+    the 2023-2024 inaugural cohort consisted of 10 interns.
+future_use_impacts:
+- id: https://fairhub.io/datasets/2#impact-ai-research
+  name: AI/ML research impact
+  impact_details:
+  - The dataset is expected to support novel discoveries into T2DM pathogenesis and salutogenesis and provide off-the-shelf
+    AI-ready data for healthcare research.
+- id: https://fairhub.io/datasets/2#impact-products
+  name: Commercial downstream possibility
+  impact_details:
+  - The IRB protocol states the collecting researchers do not plan commercial products or patents, but the dataset will be
+    publicly available with a commercial-friendly open-source license and future products or patents may be developed from
+    it.
+discouraged_uses:
+- id: https://fairhub.io/datasets/2#discourage-clinical
+  name: Clinical decision-making from data
+  discouragement_details:
+  - The license prohibits making clinical treatment decisions based on the Data because it is intended solely as a research
+    resource.
+- id: https://fairhub.io/datasets/2#discourage-reidentify
+  name: Reidentification or harm
+  discouragement_details:
+  - The license prohibits attempts to identify or contact data subjects, extract identifying information, establish group
+    membership, compromise confidentiality, or otherwise cause harm.
+intended_uses:
+- id: https://fairhub.io/datasets/2#intended-research
+  name: Research and AI/ML development
+  examples:
+  - AI/ML research into T2DM pathogenesis and salutogenesis.
+  - Development of models, algorithms, and programs that do not contain the Data or modified Data.
+  usage_notes: Licensee must comply with the AI-READI data license and acknowledge the source and funders in publications.
+  use_category:
+  - research
+  - machine learning
+  - artificial intelligence
+  - biomedical research
+- id: https://fairhub.io/datasets/2#intended-blueprint
+  name: Dataset generation blueprint reuse
+  examples:
+  - Use AI-READI standards, documentation, FAIRification, and data-sharing practices as a model for future medical or health
+    datasets targeted for AI/ML.
+  usage_notes: Blueprint resources are disseminated through publications, Zenodo, GitHub, and the project website.
+  use_category:
+  - standards
+  - data management
+  - FAIR data
+prohibited_uses:
+- id: https://fairhub.io/datasets/2#prohibit-treatment
+  name: Clinical treatment decisions
+  prohibition_reason:
+  - The license states licensees shall not make clinical treatment decisions based on the Data.
+- id: https://fairhub.io/datasets/2#prohibit-reidentify
+  name: Reidentification and contact
+  prohibition_reason:
+  - The license prohibits using the Data to compromise confidentiality, identify or contact individuals, extract identifying
+    information, establish group membership, or harm data subjects.
+- id: https://fairhub.io/datasets/2#prohibit-redistribution
+  name: Unauthorized data sharing
+  prohibition_reason:
+  - The license prohibits transfer, sublicensing, sale, assignment, display, sharing, or conveyance of Data or derivative
+    works to third parties except to another licensee bound to identical terms for collaboration.
+distribution_formats:
+- id: https://fairhub.io/datasets/2#format-csv
+  name: CSV tables
+  description: MoCA outputs, blood and urine lab results, and environmental sensor data are described as CSV.
+  access_urls:
+  - https://fairhub.io/datasets/2
+- id: https://fairhub.io/datasets/2#format-xml
+  name: XML ECG
+  description: ECG data are exported in XML.
+  access_urls:
+  - https://fairhub.io/datasets/2
+- id: https://fairhub.io/datasets/2#format-dicom
+  name: DICOM retinal imaging
+  description: Retinal imaging uses DICOM; several exported proprietary formats are converted to DICOM for the dataset.
+  access_urls:
+  - https://fairhub.io/datasets/2
+- id: https://fairhub.io/datasets/2#format-fit
+  name: FIT and mHealth wearable data
+  description: Garmin Vivosmart 5 data are exported in FIT format and converted to an mHealth standard for the dataset.
+  access_urls:
+  - https://fairhub.io/datasets/2
+- id: https://fairhub.io/datasets/2#format-docs
+  name: Documentation and license documents
+  description: Dataset documentation and license terms are provided as web documentation and a PDF license agreement.
+  access_urls:
+  - https://docs.aireadi.org/docs/2/about
+  - https://doi.org/10.5281/zenodo.10642459
+distribution_dates:
+- id: https://fairhub.io/datasets/2#release-v1
+  name: Version 1.0.0 release
+  description: FAIRhub lists version 1.0.0 with DOI 10.60775/fairhub.1 released May 3, 2024.
+  release_dates:
+  - '2024-05-03'
+- id: https://fairhub.io/datasets/2#release-v2
+  name: Version 2.0.0 release
+  description: FAIRhub lists version 2.0.0 with DOI 10.60775/fairhub.2 released November 8, 2024.
+  release_dates:
+  - '2024-11-08'
+- id: https://fairhub.io/datasets/2#release-v3
+  name: Version 3.0.0 release
+  description: FAIRhub lists version 3.0.0 with DOI 10.60775/fairhub.3 released November 17, 2025.
+  release_dates:
+  - '2025-11-17'
+third_party_sharing:
+- id: https://fairhub.io/datasets/2#third-party-licensees
+  name: Sharing with other licensees only
+  description: The license permits sharing Data with another licensee bound by identical terms for collaboration, but otherwise
+    restricts transfer, sublicensing, sale, assignment, display, sharing, or conveyance.
+  is_shared: true
+- id: https://fairhub.io/datasets/2#third-party-models
+  name: Model distribution
+  description: Models, algorithms, and programs developed using the Data may be distributed if they do not contain Data or
+    modified Data and reasonable efforts are taken to minimize memorization or reconstruction of Data.
+  is_shared: true
+license_and_use_terms:
+  id: https://fairhub.io/datasets/2#license-terms
+  name: AI-READI Health Data License
+  license_terms:
+  - University of Washington is the licensor.
+  - The license grants a non-exclusive and non-transferable license to download, reproduce, use, and create derivative works
+    from the Data for research and commercial purposes.
+  - All copies are subject to the agreement.
+  - Licensees must acknowledge the source and funder in publications.
+  - The agreement terminates upon breach and requires deletion of Data copies after termination.
+  data_use_permission:
+  - general_research_use
+  - health_medical_biomedical_research
+  - ethics_approval_required
+  - collaboration_required
+  - publication_required
+  description: Health Data License for AI-READI data; source manifest retains DOI 10.5281/zenodo.10642459.
+ip_restrictions:
+  id: https://fairhub.io/datasets/2#ip-restrictions
+  name: Ownership and derivative restrictions
+  restrictions:
+  - Title to the Data and industrial and intellectual property rights remain with Licensor and suppliers.
+  - Models may be distributed if they do not contain Data or modified Data and reasonable efforts are taken to reduce data
+    reconstruction risk.
+regulatory_restrictions:
+  id: https://fairhub.io/datasets/2#regulatory-restrictions
+  name: Privacy, HIPAA, and GDS-related restrictions
+  regulatory_restrictions:
+  - Controlled-access data require legal/privacy use agreements or a DUA.
+  - The license requires compliance with NIH security best practices for controlled-access data subject to the NIH Genomic
+    Data Sharing policy.
+  - The public set is deidentified with HIPAA Safe Harbor.
+  hipaa_compliant: compliant
+  other_compliance:
+  - NIH Genomic Data Sharing security best practices.
+  confidentiality_level: restricted
+maintainers:
+- id: https://fairhub.io/datasets/2#maintainer-consortium
+  name: AI-READI Consortium
+  role: academic_institution
+  maintainer_details:
+  - FAIRhub lists AI-READI Consortium as dataset creator.
+  - Dataset documentation and FAIRhub provide versioned release and access information.
+- id: https://fairhub.io/datasets/2#maintainer-fairhub
+  name: FAIRhub platform
+  role: other
+  maintainer_details:
+  - FAIRhub hosts the dataset landing page, metadata, version list, and access workflows.
+errata:
+- id: https://fairhub.io/datasets/2#erratum-doc-access
+  name: Documentation access note
+  erratum_details:
+  - The selected documentation source states that v2.0.0 documentation is no longer accessible and directs users to the latest
+    v3.0.0 documentation.
+- id: https://fairhub.io/datasets/2#erratum-beta
+  name: Repository beta/review notice
+  erratum_details:
+  - The FAIRhub source states the platform is currently in beta and the repository is under review for potential modification
+    in compliance with Administration directives.
+updates:
+  id: https://fairhub.io/datasets/2#updates
+  name: Annual release cadence
+  frequency: approximately yearly
+  update_details:
+  - Deidentified data are released approximately yearly in public and controlled-access sets.
+  - The source lists releases in May 2024, November 2024, and November 2025.
+retention_limit:
+  id: https://fairhub.io/datasets/2#retention
+  name: Specimen and data retention
+  retention_details:
+  - Biobanked samples are stored at UAB CCTS and will be available according to procedures and policies in development.
+  - The license requires deletion of Data copies after termination for breach.
+version_access:
+  id: https://fairhub.io/datasets/2#version-access
+  name: FAIRhub version access
+  latest_version_doi: https://doi.org/10.60775/fairhub.3
+  versions_available:
+  - Version 1.0.0, DOI 10.60775/fairhub.1, May 3, 2024.
+  - Version 2.0.0, DOI 10.60775/fairhub.2, November 8, 2024.
+  - Version 3.0.0, DOI 10.60775/fairhub.3, November 17, 2025.
+  version_details:
+  - FAIRhub states the displayed version is no longer accessible and points to the latest version.
+extension_mechanism:
+  id: https://fairhub.io/datasets/2#extension
+  name: Future research and specimen request mechanisms
+  contribution_url: https://fairhub.io/datasets/2
+  extension_details:
+  - The biorepository will develop procedures for reviewing and prioritizing written requests.
+  - Future sharing of data and specimens is overseen by principal investigators and lead co-investigators at participating
+    institutions and by project committee approval for controlled data.
+variables:
+- id: https://fairhub.io/datasets/2#var-diabetes-status
+  name: diabetes_status
+  variable_name: diabetes_status
+  data_type: categorical
+  categories:
+  - no diabetes
+  - pre-diabetes/lifestyle-controlled diabetes
+  - diabetes treated with oral medications or non-insulin injections
+  - insulin-controlled diabetes
+  is_sensitive: false
+  measurement_technique: EHR screening and study questionnaire
+  quality_notes:
+  - Used in triple-balanced recruitment.
+- id: https://fairhub.io/datasets/2#var-race-ethnicity
+  name: race_ethnicity
+  variable_name: race_ethnicity
+  data_type: categorical
+  categories:
+  - Asian
+  - Black
+  - White
+  - Hispanic
+  is_sensitive: true
+  measurement_technique: Self-report and EHR recruitment data
+  quality_notes:
+  - Removed from the public set; retained in controlled access.
+- id: https://fairhub.io/datasets/2#var-biological-sex
+  name: biological_sex
+  variable_name: biological_sex
+  data_type: categorical
+  categories:
+  - male
+  - female
+  is_sensitive: true
+  measurement_technique: Self-report and EHR recruitment data
+  quality_notes:
+  - Removed from the public set; retained in controlled access.
+- id: https://fairhub.io/datasets/2#var-age
+  name: age
+  variable_name: age
+  data_type: integer
+  minimum_value: 40
+  is_sensitive: true
+  measurement_technique: Date of birth or age from EHR and participant data
+- id: https://fairhub.io/datasets/2#var-zip
+  name: zip_code_5_digit
+  variable_name: zip_code_5_digit
+  data_type: string
+  is_sensitive: true
+  measurement_technique: Participant address/contact information
+  quality_notes:
+  - Controlled-access variable.
+- id: https://fairhub.io/datasets/2#var-hba1c
+  name: HbA1c
+  variable_name: HbA1c
+  data_type: float
+  is_sensitive: false
+  measurement_technique: Whole blood testing
+  quality_notes:
+  - Marker for diabetes; collected from non-fasting blood sample.
+- id: https://fairhub.io/datasets/2#var-cgm
+  name: continuous_glucose_monitoring
+  variable_name: continuous_glucose_monitoring
+  data_type: array
+  unit: mg/dL
+  is_sensitive: false
+  measurement_technique: Dexcom G6 CGM every 5 minutes for 10 days; optional prior Dexcom data up to 90 days for up to 100
+    days total.
+- id: https://fairhub.io/datasets/2#var-ecg
+  name: electrocardiogram
+  variable_name: electrocardiogram
+  data_type: object
+  is_sensitive: false
+  measurement_technique: 12-lead ECG with Philips Pagewriter TC30 Cardiograph; exported in XML.
+- id: https://fairhub.io/datasets/2#var-retinal-images
+  name: retinal_images
+  variable_name: retinal_images
+  data_type: array
+  is_sensitive: false
+  measurement_technique: Fundus photography, FLIO, OCT, and OCTA using multiple devices; DICOM or converted DICOM outputs.
+- id: https://fairhub.io/datasets/2#var-activity
+  name: physical_activity_monitoring
+  variable_name: physical_activity_monitoring
+  data_type: array
+  is_sensitive: false
+  measurement_technique: Garmin Vivosmart 5 over 10 days for steps, heart rate, sleep duration, oxygen saturation, and related
+    activity measures.
+- id: https://fairhub.io/datasets/2#var-environment
+  name: home_environment_measurements
+  variable_name: home_environment_measurements
+  data_type: array
+  is_sensitive: false
+  measurement_technique: Custom home environmental sensor for ambient temperature, relative humidity, nitrogen oxides, VOCs,
+    particulate matter, and light intensity over 10 days.
+- id: https://fairhub.io/datasets/2#var-genomic
+  name: genomic_data
+  variable_name: genomic_data
+  data_type: object
+  is_sensitive: true
+  measurement_technique: Genomic sequencing data and buffy coat-derived DNA for controlled-access or future studies.
+- id: https://fairhub.io/datasets/2#var-medications
+  name: medications
+  variable_name: medications
+  data_type: array
+  is_sensitive: true
+  measurement_technique: Current medication log with RxNorm codes and EHR review; controlled-access variable.
+- id: https://fairhub.io/datasets/2#var-driving
+  name: traffic_and_accident_reports
+  variable_name: traffic_and_accident_reports
+  data_type: array
+  is_sensitive: true
+  measurement_technique: Department of Licensing driving and accident records for the last three years; controlled-access
+    variable.
+is_deidentified:
+  id: https://fairhub.io/datasets/2#deidentification
+  name: Public release deidentification
+  identifiable_elements_present: true
+  method: HIPAA Safe Harbor for public set; controlled access for sensitive variables.
+  identifiers_removed:
+  - PHI
+  - sex
+  - race/ethnicity
+  deidentification_details:
+  - Public data are stripped of PHI as defined by HIPAA Privacy Rule Safe Harbor and also stripped of sex and race/ethnicity
+    to prevent stigmatization of findings.
+  - Controlled-access data retain sensitive elements under data use and approval requirements.
+is_tabular: false
+parent_datasets: []
+related_datasets:
+- id: https://fairhub.io/datasets/2#related-v1
+  name: AI-READI version 1.0.0
+  target_dataset: 10.60775/fairhub.1
+  relationship_type: is_new_version_of
+  description: FAIRhub version 1.0.0, released May 3, 2024.
+- id: https://fairhub.io/datasets/2#related-v2
+  name: AI-READI version 2.0.0
+  target_dataset: 10.60775/fairhub.2
+  relationship_type: is_new_version_of
+  description: FAIRhub version 2.0.0, released November 8, 2024.

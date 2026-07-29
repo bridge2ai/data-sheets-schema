@@ -1,0 +1,33 @@
+rubric	project	variant	prior_pct	prior_evaluator_stamp	opus_pct	fable_pct	delta_fable_minus_opus
+rubric10	AI_READI	full	76.0	hybrid-heuristic-evaluator	82.0	92.0	+10.0
+rubric10	AI_READI	core			82.0	92.0	+10.0
+rubric10	CHORUS	full	70.0	hybrid-heuristic-evaluator	81.0	82.0	+1.0
+rubric10	CHORUS	core			80.0	82.0	+2.0
+rubric10	CM4AI	full	76.0	hybrid-heuristic-evaluator	78.0	92.0	+14.0
+rubric10	CM4AI	core			68.0	92.0	+24.0
+rubric10	VOICE	full	74.0	hybrid-heuristic-evaluator	94.0	98.0	+4.0
+rubric10	VOICE	core			94.0	98.0	+4.0
+rubric20	AI_READI	full	69.0	hybrid-heuristic-evaluator	97.6	98.8	+1.2
+rubric20	AI_READI	core			95.2	97.6	+2.4
+rubric20	CHORUS	full	48.8	hybrid-heuristic-evaluator	90.5	92.9	+2.4
+rubric20	CHORUS	core			89.3	91.7	+2.4
+rubric20	CM4AI	full	63.1	hybrid-heuristic-evaluator	95.2	96.4	+1.2
+rubric20	CM4AI	core			92.9	100.0	+7.1
+rubric20	VOICE	full	69.0	hybrid-heuristic-evaluator	96.4	100.0	+3.6
+rubric20	VOICE	core			97.6	100.0	+2.4
+rubric10_semantic	AI_READI	full	88.0	claude-sonnet-4-5-20250929	80.0	74.0	-6.0
+rubric10_semantic	AI_READI	core	76.0	claude-sonnet-4-5-20250929	70.0	88.0	+18.0
+rubric10_semantic	CHORUS	full	84.0	claude-sonnet-4-5-20250929	74.0	72.0	-2.0
+rubric10_semantic	CHORUS	core	68.0	claude-sonnet-4-5-20250929	83.0	84.0	+1.0
+rubric10_semantic	CM4AI	full	92.0	claude-sonnet-4-5-20250929	93.0	82.0	-11.0
+rubric10_semantic	CM4AI	core	78.0	claude-sonnet-4-5-20250929	86.0	86.0	+0.0
+rubric10_semantic	VOICE	full	92.0	claude-sonnet-4-5-20250929	94.0	88.0	-6.0
+rubric10_semantic	VOICE	core	84.0	claude-sonnet-4-5-20250929	90.0	94.0	+4.0
+rubric20_semantic	AI_READI	full	94.0	claude-sonnet-4-5-20250929	94.0	90.5	-3.5
+rubric20_semantic	AI_READI	core	81.0	claude-sonnet-4-5-20250929	91.7	89.3	-2.4
+rubric20_semantic	CHORUS	full	88.1	claude-sonnet-4-5-20250929	86.9	92.9	+6.0
+rubric20_semantic	CHORUS	core	69.0	claude-sonnet-4-5-20250929	89.3	92.9	+3.6
+rubric20_semantic	CM4AI	full	90.5	claude-sonnet-4-5-20250929	95.2	95.2	+0.0
+rubric20_semantic	CM4AI	core	63.1	claude-sonnet-4-5-20250929	82.1	96.4	+14.3
+rubric20_semantic	VOICE	full	94.0	claude-sonnet-4-5-20250929	91.7	98.8	+7.1
+rubric20_semantic	VOICE	core	81.0	claude-sonnet-4-5-20250929	96.4	98.8	+2.4

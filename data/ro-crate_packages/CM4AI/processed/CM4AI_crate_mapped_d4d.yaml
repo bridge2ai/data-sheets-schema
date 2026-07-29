@@ -1,0 +1,387 @@
+# D4D record for CM4AI, mapped from its RO-Crate
+# Method: static mapping using this repo's own mapping table
+# Mapping table: data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
+# Source: data/ro-crate_packages/CM4AI/crate/ro-crate-metadata.json
+# Upstream ro-crate-linkml.yaml deliberately NOT used
+# No inferred values; see the provenance report alongside
+title: Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
+description: This dataset is the June 2026 Data Release of Cell Maps for Artificial
+  Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the
+  NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated
+  KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived
+  NPCs, neurons, and cardiomyocytes; AP-MS data in MDA-MB-468 breast cancer cells
+  in the presence of chemotherapy (vorinostat and paclitaxel); and IF images in MDA-MB-468
+  breast cancer cells in the presence and absence of chemotherapy (vorinostat and
+  paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata
+  as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented
+  here will be augmented regularly through the end of the project. CM4AI is a collaboration
+  of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and
+  the Hastings Center.
+keywords:
+- AI
+- affinity purification
+- AP-MS
+- artificial intelligence
+- breast cancer
+- Bridge2AI
+- cardiomyocyte
+- CM4AI
+- CRISPR/Cas9
+- induced pluripotent stem cell
+- iPSC
+- KOLF2.1J
+- machine learning
+- mass spectroscopy
+- MDA-MB-468
+- neural progenitor cell
+- NPC
+- neuron
+- paclitaxel
+- perturb-seq
+- perturbation sequencing
+- protein-protein interaction
+- protein localization
+- single-cell RNA sequencing
+- scRNAseq
+- SEC-MS
+- size exclusion chromatography
+- subcellular imaging
+- vorinostat
+- Artificial intelligence
+- Breast cancer
+- CRISPR perturbation
+- Cell maps
+- IPSC
+- Machine learning
+- Mass spectroscopy
+- Perturb-seq
+- Protein-protein interaction
+- cell maps
+page: https://massive.ucsd.edu/ProteoSAFe/dataset.jsp?task=ad8b8084f5b14af5bafac70fdd42a577
+publisher: https://dataverse.lib.virginia.edu/
+version: '1.0'
+license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+download_url: ftp://massive-ftp.ucsd.edu/v10/MSV000098237/
+issued: '2026-06-30T00:00:00Z'
+doi: https://doi.org/10.18130/V3/HIGT4C
+resources:
+- id: https://orcid.org/0000-0003-4060-7360
+- id: https://orcid.org/0000-0003-4535-3486
+- id: https://orcid.org/0000-0003-4647-3877
+- id: https://orcid.org/0000-0002-4180-422X
+- id: https://orcid.org/0000-0001-9998-705X
+- id: https://orcid.org/0000-0002-6711-8260
+- id: https://orcid.org/0009-0009-0483-7506
+- id: https://orcid.org/0000-0003-0223-0312
+- id: https://orcid.org/0000-0002-6311-3526
+- id: https://orcid.org/0000-0002-4650-9094
+- id: https://orcid.org/0000-0002-1571-8029
+- id: https://orcid.org/0000-0003-0917-355X
+- id: https://orcid.org/0000-0001-7252-8638
+- id: https://orcid.org/0000-0003-0384-8499
+- id: https://orcid.org/0000-0003-3960-420X
+- id: https://orcid.org/0000-0003-2404-3040
+- id: https://orcid.org/0000-0003-3881-7588
+- id: https://orcid.org/0000-0002-1103-3882
+- id: https://orcid.org/0000-0002-4025-1299
+- id: https://orcid.org/0000-0002-1471-9513
+- id: https://orcid.org/0009-0005-4217-2745
+- id: https://orcid.org/0000-0001-6339-9141
+- id: https://orcid.org/0000-0003-3361-3797
+- id: https://orcid.org/0000-0001-6730-2773
+- id: https://orcid.org/0000-0002-8965-8153
+- id: https://orcid.org/0000-0001-8179-1796
+- id: https://orcid.org/0000-0002-6112-415X
+- id: https://orcid.org/0000-0003-2567-2009
+- id: https://orcid.org/0000-0003-4664-3143
+- id: https://orcid.org/0000-0003-4902-337X
+- id: https://orcid.org/0000-0001-7034-0850
+- id: https://orcid.org/0000-0002-3383-1287
+- id: https://orcid.org/0000-0002-3508-3577
+- id: https://orcid.org/0000-0002-6644-8284
+- id: https://orcid.org/0000-0002-7080-8801
+- id: https://orcid.org/0000-0003-0435-6197
+- id: https://orcid.org/0000-0002-2048-4028
+- id: https://orcid.org/0000-0002-1708-8454
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D001943
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D057026
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D064113
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D013058
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D005453
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D017239
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D000077337
+- id: http://edamontology.org/topic_0121
+- id: http://edamontology.org/topic_3170
+- id: http://edamontology.org/topic_3320
+- id: http://edamontology.org/topic_3474
+- id: https://www.cellosaurus.org/CVCL_0419
+- id: https://www.cellosaurus.org/CVCL_B5P3
+- id: https://fairscape.net/api/ark:59853/rocrate-endotag-ap-ms-in-mda-mb-468-cells-paclitaxel
+- id: https://fairscape.net/api/ark:59853/rocrate-endotag-ap-ms-in-mda-mb-468-cells-vorinostat
+- id: https://fairscape.net/api/ark:59853/rocrate-paclitaxel-if-data-release
+- id: https://fairscape.net/api/ark:59853/rocrate-untreated-if-data-release
+- id: https://fairscape.net/api/ark:59853/rocrate-vorinostat-if-data-release
+- id: https://fairscape.net/api/ark:59853/rocrate-sec-ms-characterization-of-kolf2-neuronal-and-cardiomyocyte-differentiation-cm4ai-yjftt2oec6c
+- id: https://fairscape.net/api/ark:59853/rocrate-data-from-treated-human-cancer-cells-jan-26
+- id: https://fairscape.net/api/ark:59853/rocrate-sra-data-for-perturbation-cell-atlas-58RmCGMQBj
+- id: https://fairscape.net/api/ark:59853/rocrate-a-perturbation-cell-atlas-of-human-induced-pluripotent-stem-cells
+creators:
+- id: https://orcid.org/0000-0003-4060-7360
+- id: https://orcid.org/0000-0003-4535-3486
+- id: https://orcid.org/0000-0003-4647-3877
+- name: Axelsson, U
+- id: https://orcid.org/0000-0002-4180-422X
+- name: Chinn, B
+- id: https://orcid.org/0000-0001-9998-705X
+- id: https://orcid.org/0000-0002-6711-8260
+- id: https://orcid.org/0009-0009-0483-7506
+- name: Fall, J
+- id: https://orcid.org/0000-0003-0223-0312
+- id: https://orcid.org/0000-0002-6311-3526
+- id: https://orcid.org/0000-0002-4650-9094
+- id: https://orcid.org/0000-0002-1571-8029
+- name: Johannesson, A
+- name: Khaliq, H
+- id: https://orcid.org/0000-0003-0917-355X
+- id: https://orcid.org/0000-0001-7252-8638
+- id: https://orcid.org/0000-0003-0384-8499
+- id: https://orcid.org/0000-0003-3960-420X
+- id: https://orcid.org/0000-0003-2404-3040
+- name: Muralidharan, M
+- id: https://orcid.org/0000-0003-3881-7588
+- id: https://orcid.org/0000-0002-1103-3882
+- id: https://orcid.org/0000-0002-4025-1299
+- name: Pan, E
+- name: Polacco, B
+- id: https://orcid.org/0000-0002-1471-9513
+- id: https://orcid.org/0009-0005-4217-2745
+- id: https://orcid.org/0000-0001-6339-9141
+- id: https://orcid.org/0000-0003-3361-3797
+- id: https://orcid.org/0000-0001-6730-2773
+- name: Zhang, Y
+- id: https://orcid.org/0000-0002-8965-8153
+- id: https://orcid.org/0000-0001-8179-1796
+- id: https://orcid.org/0000-0002-6112-415X
+- id: https://orcid.org/0000-0003-2567-2009
+- id: https://orcid.org/0000-0003-4664-3143
+- id: https://orcid.org/0000-0003-4902-337X
+- id: https://orcid.org/0000-0001-7034-0850
+- id: https://orcid.org/0000-0002-3383-1287
+- id: https://orcid.org/0000-0002-3508-3577
+- id: https://orcid.org/0000-0002-6644-8284
+- id: https://orcid.org/0000-0002-7080-8801
+- id: https://orcid.org/0000-0003-0435-6197
+- id: https://orcid.org/0000-0002-2048-4028
+- id: https://orcid.org/0000-0002-1708-8454
+created_by: '{''@id'': ''https://orcid.org/0000-0003-4060-7360''}; {''@id'': ''https://orcid.org/0000-0003-4535-3486''};
+  {''@id'': ''https://orcid.org/0000-0003-4647-3877''}; Axelsson, U; {''@id'': ''https://orcid.org/0000-0002-4180-422X''};
+  Chinn, B; {''@id'': ''https://orcid.org/0000-0001-9998-705X''}; {''@id'': ''https://orcid.org/0000-0002-6711-8260''};
+  {''@id'': ''https://orcid.org/0009-0009-0483-7506''}; Fall, J; {''@id'': ''https://orcid.org/0000-0003-0223-0312''};
+  {''@id'': ''https://orcid.org/0000-0002-6311-3526''}; {''@id'': ''https://orcid.org/0000-0002-4650-9094''};
+  {''@id'': ''https://orcid.org/0000-0002-1571-8029''}; Johannesson, A; Khaliq, H;
+  {''@id'': ''https://orcid.org/0000-0003-0917-355X''}; {''@id'': ''https://orcid.org/0000-0001-7252-8638''};
+  {''@id'': ''https://orcid.org/0000-0003-0384-8499''}; {''@id'': ''https://orcid.org/0000-0003-3960-420X''};
+  {''@id'': ''https://orcid.org/0000-0003-2404-3040''}; Muralidharan, M; {''@id'':
+  ''https://orcid.org/0000-0003-3881-7588''}; {''@id'': ''https://orcid.org/0000-0002-1103-3882''};
+  {''@id'': ''https://orcid.org/0000-0002-4025-1299''}; Pan, E; Polacco, B; {''@id'':
+  ''https://orcid.org/0000-0002-1471-9513''}; {''@id'': ''https://orcid.org/0009-0005-4217-2745''};
+  {''@id'': ''https://orcid.org/0000-0001-6339-9141''}; {''@id'': ''https://orcid.org/0000-0003-3361-3797''};
+  {''@id'': ''https://orcid.org/0000-0001-6730-2773''}; Zhang, Y; {''@id'': ''https://orcid.org/0000-0002-8965-8153''};
+  {''@id'': ''https://orcid.org/0000-0001-8179-1796''}; {''@id'': ''https://orcid.org/0000-0002-6112-415X''};
+  {''@id'': ''https://orcid.org/0000-0003-2567-2009''}; {''@id'': ''https://orcid.org/0000-0003-4664-3143''};
+  {''@id'': ''https://orcid.org/0000-0003-4902-337X''}; {''@id'': ''https://orcid.org/0000-0001-7034-0850''};
+  {''@id'': ''https://orcid.org/0000-0002-3383-1287''}; {''@id'': ''https://orcid.org/0000-0002-3508-3577''};
+  {''@id'': ''https://orcid.org/0000-0002-6644-8284''}; {''@id'': ''https://orcid.org/0000-0002-7080-8801''};
+  {''@id'': ''https://orcid.org/0000-0003-0435-6197''}; {''@id'': ''https://orcid.org/0000-0002-2048-4028''};
+  {''@id'': ''https://orcid.org/0000-0002-1708-8454''}'
+funders:
+- description: 'National Institutes of Health: 1OT2OD032742-01, R01HG012351, R01NS131560,
+    U54CA274502, #S10 OD026929. Department of Defense: W81XWH-22-1-0401. CIRM training:
+    EDUC4-12804. Dutch Research Council: NWO, 019.231EN.013. National Cancer Institute:
+    P30CA023100'
+purposes:
+- description: 'AI-ready datasets to support research in functional genomics, AI/machine
+    learning model training, cellular process analysis, cell architectural changes,
+    and interactions in presence of specific disease processes, treatment conditions,
+    or genetic perturbations. A major goal is to enable biologically-driven, interpretable
+    ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and
+    Kuenzi et al. 2020 (PMID: 33096023).'
+tasks:
+- description: 'AI-ready datasets to support research in functional genomics, AI/machine
+    learning model training, cellular process analysis, cell architectural changes,
+    and interactions in presence of specific disease processes, treatment conditions,
+    or genetic perturbations. A major goal is to enable biologically-driven, interpretable
+    ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and
+    Kuenzi et al. 2020 (PMID: 33096023).'
+intended_uses:
+- description: 'AI-ready datasets to support research in functional genomics, AI/machine
+    learning model training, cellular process analysis, cell architectural changes,
+    and interactions in presence of specific disease processes, treatment conditions,
+    or genetic perturbations. A major goal is to enable biologically-driven, interpretable
+    ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and
+    Kuenzi et al. 2020 (PMID: 33096023).'
+existing_uses:
+- description: 'AI-ready datasets to support research in functional genomics, AI/machine
+    learning model training, cellular process analysis, cell architectural changes,
+    and interactions in presence of specific disease processes, treatment conditions,
+    or genetic perturbations. A major goal is to enable biologically-driven, interpretable
+    ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and
+    Kuenzi et al. 2020 (PMID: 33096023).'
+other_tasks:
+- description: 'AI-ready datasets to support research in functional genomics, AI/machine
+    learning model training, cellular process analysis, cell architectural changes,
+    and interactions in presence of specific disease processes, treatment conditions,
+    or genetic perturbations. A major goal is to enable biologically-driven, interpretable
+    ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and
+    Kuenzi et al. 2020 (PMID: 33096023).'
+discouraged_uses:
+- description: These laboratory data are not to be used in clinical decision-making
+    or in any context involving patient care without appropriate regulatory oversight
+    and approval.
+prohibited_uses:
+- description: These laboratory data are not to be used in clinical decision-making
+    or in any context involving patient care without appropriate regulatory oversight
+    and approval.
+known_biases:
+- description: Data in this release was derived from commercially available de-identified
+    human cell lines, and does not represent all biological variants which may be
+    seen in the population at large.
+known_limitations:
+- description: This is an interim release. It does not contain predicted cell maps,
+    which will be added in future releases. The current release is most suitable for
+    bioinformatics analysis of the individual datasets. Requires domain expertise
+    for meaningful analysis.
+updates:
+  description: Dataset will be regularly updated and augmented on a quarterly basis
+    through the end of the project (November, 2026). Long term preservation in the
+    https://dataverse.lib.virginia.edu/, supported by committed institutional funds.
+regulatory_restrictions:
+  description: Attribution is required to the copyright holders and the authors. Any
+    publications referencing this data or derived data products should cite the Related
+    Publications below, as well as directly citing this data collection.
+acquisition_methods:
+- description: 'Data collection processes are generally described in Clark T et al.
+    (2024) "Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture
+    from Disease-Relevant Cell Lines" bioRxiv 2024.05.21.589311; doi: https://doi.org/10.1101/2024.05.21.589311.
+    Additional data collection details will be subsequently published once finalized. '
+collection_mechanisms:
+- description: 'Data collection processes are generally described in Clark T et al.
+    (2024) "Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture
+    from Disease-Relevant Cell Lines" bioRxiv 2024.05.21.589311; doi: https://doi.org/10.1101/2024.05.21.589311.
+    Additional data collection details will be subsequently published once finalized. '
+collection_timeframes:
+- name: 9/1/2022
+- name: 6/1/2026
+missing_data_documentation:
+- description: Some datasets are under temporary pre-publication embargo. Protein-protein
+    interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq
+    data interrogate sets of proteins which incompletely overlap. Computed cell maps
+    not included in this release.
+distribution_formats:
+- name: .d
+- name: .d directory group
+- name: .tsv
+- name: .xml
+- name: TSV
+- name: csv
+- name: executable
+- name: fastq.gz
+- name: h5
+- name: h5ad
+- name: image/jpeg
+- name: pdf
+- name: unknown
+ethical_reviews:
+- name: Vardit Ravistky ravitskyv@thehastingscenter.org and Jean-Christophe Belisle-Pipon
+    jean-christophe_belisle-pipon@sfu.ca.
+informed_consent:
+- description: Not applicable — data collected from commercially available de-identified
+    human cell lines (KOLF2.1J iPSC and MDA-MB-468). No primary human subjects research
+    conducted under this release.
+license_and_use_terms:
+  name: https://creativecommons.org/licenses/by-nc-sa/4.0/
+ip_restrictions:
+  description: Attribution is required to the copyright holders and the authors. Any
+    publications referencing this data or derived data products should cite the Related
+    Publications below, as well as directly citing this data collection.
+extension_mechanism:
+  name: https://creativecommons.org/licenses/by-nc-sa/4.0/
+retention_limit:
+  description: Attribution is required to the copyright holders and the authors. Any
+    publications referencing this data or derived data products should cite the Related
+    Publications below, as well as directly citing this data collection.
+version_access:
+  name: '1.0'
+subsets:
+- id: https://orcid.org/0000-0003-4060-7360
+- id: https://orcid.org/0000-0003-4535-3486
+- id: https://orcid.org/0000-0003-4647-3877
+- id: https://orcid.org/0000-0002-4180-422X
+- id: https://orcid.org/0000-0001-9998-705X
+- id: https://orcid.org/0000-0002-6711-8260
+- id: https://orcid.org/0009-0009-0483-7506
+- id: https://orcid.org/0000-0003-0223-0312
+- id: https://orcid.org/0000-0002-6311-3526
+- id: https://orcid.org/0000-0002-4650-9094
+- id: https://orcid.org/0000-0002-1571-8029
+- id: https://orcid.org/0000-0003-0917-355X
+- id: https://orcid.org/0000-0001-7252-8638
+- id: https://orcid.org/0000-0003-0384-8499
+- id: https://orcid.org/0000-0003-3960-420X
+- id: https://orcid.org/0000-0003-2404-3040
+- id: https://orcid.org/0000-0003-3881-7588
+- id: https://orcid.org/0000-0002-1103-3882
+- id: https://orcid.org/0000-0002-4025-1299
+- id: https://orcid.org/0000-0002-1471-9513
+- id: https://orcid.org/0009-0005-4217-2745
+- id: https://orcid.org/0000-0001-6339-9141
+- id: https://orcid.org/0000-0003-3361-3797
+- id: https://orcid.org/0000-0001-6730-2773
+- id: https://orcid.org/0000-0002-8965-8153
+- id: https://orcid.org/0000-0001-8179-1796
+- id: https://orcid.org/0000-0002-6112-415X
+- id: https://orcid.org/0000-0003-2567-2009
+- id: https://orcid.org/0000-0003-4664-3143
+- id: https://orcid.org/0000-0003-4902-337X
+- id: https://orcid.org/0000-0001-7034-0850
+- id: https://orcid.org/0000-0002-3383-1287
+- id: https://orcid.org/0000-0002-3508-3577
+- id: https://orcid.org/0000-0002-6644-8284
+- id: https://orcid.org/0000-0002-7080-8801
+- id: https://orcid.org/0000-0003-0435-6197
+- id: https://orcid.org/0000-0002-2048-4028
+- id: https://orcid.org/0000-0002-1708-8454
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D001943
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D057026
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D064113
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D013058
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D005453
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D017239
+- id: https://meshb.nlm.nih.gov/record/ui?ui=D000077337
+- id: http://edamontology.org/topic_0121
+- id: http://edamontology.org/topic_3170
+- id: http://edamontology.org/topic_3320
+- id: http://edamontology.org/topic_3474
+- id: https://www.cellosaurus.org/CVCL_0419
+- id: https://www.cellosaurus.org/CVCL_B5P3
+- id: https://fairscape.net/api/ark:59853/rocrate-endotag-ap-ms-in-mda-mb-468-cells-paclitaxel
+- id: https://fairscape.net/api/ark:59853/rocrate-endotag-ap-ms-in-mda-mb-468-cells-vorinostat
+- id: https://fairscape.net/api/ark:59853/rocrate-paclitaxel-if-data-release
+- id: https://fairscape.net/api/ark:59853/rocrate-untreated-if-data-release
+- id: https://fairscape.net/api/ark:59853/rocrate-vorinostat-if-data-release
+- id: https://fairscape.net/api/ark:59853/rocrate-sec-ms-characterization-of-kolf2-neuronal-and-cardiomyocyte-differentiation-cm4ai-yjftt2oec6c
+- id: https://fairscape.net/api/ark:59853/rocrate-data-from-treated-human-cancer-cells-jan-26
+- id: https://fairscape.net/api/ark:59853/rocrate-sra-data-for-perturbation-cell-atlas-58RmCGMQBj
+- id: https://fairscape.net/api/ark:59853/rocrate-a-perturbation-cell-atlas-of-human-induced-pluripotent-stem-cells
+name: Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
+citation: Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn
+  B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson
+  A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Metallo C; Muralidharan M; Nourreddine
+  S; Niestroy J; Obernier K; Pan E; Park, S; Polacco B; Pratt D; Qian G; Schaffer,
+  LV; Sigaeva A; Thaker S; Zhang Y; Zhao, X; Bélisle-Pipon JC; Brandt C; Chen JY;
+  Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Payne-Foster P; Ratcliffe S; Ravitsky
+  V; Sali A; Schulz W; Ideker T, 2025, "Cell Maps for Artificial Intelligence - June
+  2026 Data Release (Beta)", https://doi.org/10.18130/V3/HIGT4C , https://dataverse.lib.virginia.edu/,
+  V1
+total_size_bytes: 21051331945400
+id: https://doi.org/10.18130/V3/HIGT4C

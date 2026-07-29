@@ -2,6 +2,11 @@
 id: https://w3id.org/bridge2ai/data-sheets-schema
 name: data-sheets-schema
 title: data-sheets-schema
+# Semantic version of the schema itself, independent of the Python package
+# version in pyproject.toml. Provenance records read this so a generated D4D
+# record states which schema version produced it, rather than pinning identity
+# by content hash alone. Bump on any change to classes, slots or enums.
+version: 1.0.0
 description: |-
   A LinkML schema for Datasheets for Datasets.
 license: MIT

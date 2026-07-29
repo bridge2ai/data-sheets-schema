@@ -3,13 +3,13 @@
 Update data/raw/ downloads using the B2AI GC Input Documents Google Sheet.
 
 Reads the sheet via the Google Sheets API (service account credentials),
-converts it to CSV, and feeds it to DriveAwareExtractor — a subclass of
+converts it to CSV, and feeds it to DriveAwareExtractor, a wrapper around
 OrganizedDatasetExtractor that adds Google Drive / Google Docs download
 support on top of the existing URL handlers.
 
 Supported Drive URL patterns:
   drive.google.com/file/d/{ID}/...   → download binary via Drive API
-  docs.google.com/document/d/{ID}/  → export as PDF via Drive API
+  docs.google.com/document/d/{ID}/  → export as DOCX via Drive API
   docs.google.com/spreadsheets/...  → export as XLSX via Drive API
 
 Falls back to the public direct-download URL if the SA lacks access.
@@ -27,23 +27,37 @@ import os
 import re
 import sys
 import tempfile
-import time
 from pathlib import Path
+import requests
 
 # Add repo src/ to path so we can import the extractor
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / 'src'))
 
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
+from download.organized_dataset_extractor import (  # noqa: E402
+    OrganizedDatasetExtractor,
+    extract_urls,
+    normalize_project_name,
+)
+
+try:
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+    from googleapiclient.http import MediaIoBaseDownload
+    GOOGLE_API_AVAILABLE = True
+except ImportError:
+    service_account = None
+    build = None
+    MediaIoBaseDownload = None
+    GOOGLE_API_AVAILABLE = False
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
 SHEET_ID = '1jBD6sTp6TDemy6v75PGAHSVz5yfIAXZ8zdDPbmOGATM'
-SA_FILE = Path('/Users/marcin/Documents/VIMSS/ontology/KG-Hub/KG-Microbe/'
-               'CultureBotHT/CultureBotHT/credentials/service_account.json')
+DEFAULT_SA_FILE = Path('/Users/marcin/Documents/VIMSS/ontology/KG-Hub/KG-Microbe/'
+                       'CultureBotHT/CultureBotHT/credentials/service_account.json')
+SA_FILE = Path(os.environ.get('B2AI_GOOGLE_SERVICE_ACCOUNT', DEFAULT_SA_FILE))
 OUTPUT_DIR = REPO_ROOT / 'data' / 'raw'
 
 SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
@@ -52,7 +66,11 @@ DRIVE_SCOPES  = ['https://www.googleapis.com/auth/drive.readonly']
 # Map Google Workspace MIME types → export MIME + file extension
 GDOCS_EXPORT = {
     'application/vnd.google-apps.document':
-        ('application/pdf', '.pdf'),
+        (
+            'application/vnd.openxmlformats-officedocument.'
+            'wordprocessingml.document',
+            '.docx',
+        ),
     'application/vnd.google-apps.spreadsheet':
         ('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx'),
     'application/vnd.google-apps.presentation':
@@ -63,17 +81,25 @@ GDOCS_EXPORT = {
 # ── Sheet reading ─────────────────────────────────────────────────────────────
 
 def read_sheet(sheet_id: str) -> list[list[str]]:
-    """Read all rows from the sheet via the Sheets API."""
-    creds = service_account.Credentials.from_service_account_file(
-        str(SA_FILE), scopes=SHEETS_SCOPES
+    """Read all rows, using Google APIs when available and public CSV otherwise."""
+    if GOOGLE_API_AVAILABLE and SA_FILE.exists():
+        creds = service_account.Credentials.from_service_account_file(
+            str(SA_FILE), scopes=SHEETS_SCOPES
+        )
+        svc = build('sheets', 'v4', credentials=creds)
+        result = svc.spreadsheets().values().get(
+            spreadsheetId=sheet_id,
+            range='Sheet1',
+            valueRenderOption='FORMATTED_VALUE',
+        ).execute()
+        return result.get('values', [])
+
+    csv_url = (
+        f'https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv'
     )
-    svc = build('sheets', 'v4', credentials=creds)
-    result = svc.spreadsheets().values().get(
-        spreadsheetId=sheet_id,
-        range='Sheet1',
-        valueRenderOption='FORMATTED_VALUE',
-    ).execute()
-    return result.get('values', [])
+    response = requests.get(csv_url, timeout=30)
+    response.raise_for_status()
+    return list(csv.reader(io.StringIO(response.text)))
 
 
 def rows_to_csv(rows: list[list[str]]) -> str:
@@ -103,7 +129,6 @@ class DriveAwareExtractor:
     _OPEN_RE    = re.compile(r'drive\.google\.com/open\?(?:.*&)?id=([a-zA-Z0-9_-]+)')
 
     def __init__(self, output_dir: str):
-        from download.organized_dataset_extractor import OrganizedDatasetExtractor
         self._base = OrganizedDatasetExtractor(output_dir)
         self._drive_svc = None
 
@@ -113,6 +138,10 @@ class DriveAwareExtractor:
 
     # ── Drive API lazily initialised ──────────────────────────────────────────
     def _drive(self):
+        if not GOOGLE_API_AVAILABLE or not SA_FILE.exists():
+            raise RuntimeError(
+                'Google API credentials are unavailable; use the public handler'
+            )
         if self._drive_svc is None:
             creds = service_account.Credentials.from_service_account_file(
                 str(SA_FILE), scopes=DRIVE_SCOPES
@@ -153,7 +182,7 @@ class DriveAwareExtractor:
             name = meta['name']
             mime = meta.get('mimeType', '')
 
-            base, ext = os.path.splitext(name)
+            _, ext = os.path.splitext(name)
 
             # Choose request type
             if mime in GDOCS_EXPORT:
@@ -161,7 +190,7 @@ class DriveAwareExtractor:
                 request = drive.files().export_media(
                     fileId=fid, mimeType=export_mime
                 )
-                filename = f'{base}_row{row}{export_ext}'
+                filename = f'gdrive_{fid}_row{row}{export_ext}'
             else:
                 if not ext:
                     # Guess from common MIME types
@@ -171,7 +200,7 @@ class DriveAwareExtractor:
                         'text/plain':      '.txt',
                         'text/csv':        '.csv',
                     }.get(mime, '')
-                filename = f'{base}_row{row}{ext}'
+                filename = f'gdrive_{fid}_row{row}{ext}'
                 request = drive.files().get_media(fileId=fid)
 
             file_path = column_dir / filename
@@ -188,127 +217,37 @@ class DriveAwareExtractor:
         except Exception as api_err:
             print(f'      ⚠ Drive API error ({api_err}), trying public URL …')
 
-        # ── Public-URL fallback (works when "anyone with link" can view) ──────
-        try:
-            fallback = f'https://drive.google.com/uc?export=download&id={fid}'
-            resp = self._base.session.get(fallback, timeout=60)
-            resp.raise_for_status()
-            content = resp.content
-
-            # Detect Google's virus-scan warning HTML page
-            if content[:4] != b'%PDF' and b'<html' in content[:200].lower():
-                info['error'] = (
-                    'Public URL returned HTML (virus-scan warning or login page). '
-                    'Share the file with the service account and retry.'
-                )
-                info['downloaded'] = False
-                return info
-
-            filename = f'gdrive_{fid}_row{row}.pdf'
-            file_path = column_dir / filename
-            with open(file_path, 'wb') as fh:
-                fh.write(content)
-
-            info.update({'filename': filename, 'path': str(file_path),
-                         'downloaded': True,
-                         'note': 'downloaded via public URL fallback'})
-            return info
-
-        except Exception as fb_err:
-            info['error'] = f'Drive API failed; public URL also failed: {fb_err}'
-            info['downloaded'] = False
-            return info
+        fallback = self._base._download_google_drive(url, column_dir, row)
+        if fallback.get('downloaded'):
+            fallback['note'] = 'downloaded via public URL fallback'
+        return fallback
 
     # ── override process_url to inject Drive handler ──────────────────────────
     def _process_url(self, url: str, column_dir: Path, row: int) -> dict:
         if 'drive.google.com' in url or 'docs.google.com/document' in url \
                 or 'docs.google.com/spreadsheets' in url \
                 or 'docs.google.com/presentation' in url:
+            if not GOOGLE_API_AVAILABLE or not SA_FILE.exists():
+                return OrganizedDatasetExtractor._process_url(
+                    self._base, url, column_dir, row
+                )
             return self._download_drive(url, column_dir, row)
-        return self._base._process_url(url, column_dir, row)
+        return OrganizedDatasetExtractor._process_url(
+            self._base, url, column_dir, row
+        )
 
-    # ── replicate process_spreadsheet wiring it through our _process_url ──────
-    def process_spreadsheet(self, csv_path: str) -> dict:
-        """
-        Re-implement the outer loop so _process_url points to our override
-        instead of the base class method.
-        """
-        from collections import defaultdict
-
-        results = {
-            'by_column': defaultdict(list),
-            'summary':   defaultdict(int),
-            'errors':    [],
-        }
-
-        # Read the CSV (base extractor can read file path or URL)
-        if csv_path.startswith(('http://', 'https://')):
-            import requests
-            content = requests.get(csv_path, timeout=30).text
-        else:
-            try:
-                with open(csv_path, encoding='utf-8') as f:
-                    content = f.read()
-            except UnicodeDecodeError:
-                with open(csv_path, encoding='latin-1') as f:
-                    content = f.read()
-
-        lines = content.strip().split('\n')
-        reader = csv.DictReader(lines)
-
-        column_urls: dict[str, list] = defaultdict(list)
-        url_pattern = re.compile(r'https?://[^\s,<>"\']*')
-
-        for row_idx, row in enumerate(reader):
-            for column, cell in row.items():
-                if not cell:
-                    continue
-                for url in url_pattern.findall(cell):
-                    url = url.rstrip('.,;:!?)')
-                    column_urls[column].append({
-                        'url': url,
-                        'row': row_idx + 2,
-                        'context': cell[:100],
-                    })
-
-        print(f'\n📊 {sum(len(v) for v in column_urls.values())} URLs across '
-              f'{len(column_urls)} column(s)\n')
-
-        for column, url_list in column_urls.items():
-            if not url_list:
-                continue
-
-            safe_col = self._base._sanitize_filename(column)
-            col_dir  = self._base.output_dir / safe_col
-            col_dir.mkdir(parents=True, exist_ok=True)
-
-            print(f'📂 {column}  ({len(url_list)} URLs → {safe_col}/)')
-
-            for ui in url_list:
-                url = ui['url']
-                row = ui['row']
-                print(f'\n   [row {row}] {url}')
-                try:
-                    file_info = self._process_url(url, col_dir, row)
-                    if file_info:
-                        file_info.update({'column': column, 'row': row,
-                                          'context': ui['context']})
-                        results['by_column'][column].append(file_info)
-                        results['summary'][file_info['type']] += 1
-                        if file_info.get('downloaded'):
-                            note = f'  [{file_info.get("note","")}]' if file_info.get('note') else ''
-                            print(f'      ✅ {file_info.get("filename","file")}{note}')
-                        else:
-                            print(f'      ❌ {file_info.get("error","(no detail)")}')
-                except Exception as exc:
-                    results['errors'].append(
-                        {'url': url, 'column': column, 'row': row, 'error': str(exc)}
-                    )
-                    print(f'      ❌ Exception: {exc}')
-                time.sleep(0.5)
-
-        self._base._save_organized_summary(results)
-        return results
+    def process_spreadsheet(
+        self,
+        csv_path: str,
+        projects: list[str] | None = None,
+    ) -> dict:
+        """Use the base parser/deduplication loop with the Drive API hook."""
+        original_process_url = self._base._process_url
+        self._base._process_url = self._process_url
+        try:
+            return self._base.process_spreadsheet(csv_path, projects=projects)
+        finally:
+            self._base._process_url = original_process_url
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -334,18 +273,21 @@ def main():
     # ── dry-run ───────────────────────────────────────────────────────────────
     if args.dry_run:
         print('\n── DRY RUN: URLs that would be downloaded ──')
-        url_pattern = re.compile(r'https?://[^\s,<>"\']+')
+        seen_urls: dict[str, set[str]] = {}
         for row_idx, row in enumerate(rows[1:], start=2):
             for col_idx, cell in enumerate(row):
                 if col_idx == 0 or not cell:
                     continue
                 col_name = header[col_idx] if col_idx < len(header) else f'col{col_idx}'
-                project  = col_name.replace('-', '_')
+                project = normalize_project_name(col_name)
                 if args.project and project != args.project:
                     continue
                 doc_type = rows[row_idx - 2][0] if rows[row_idx - 2] else ''
-                for url in url_pattern.findall(cell):
-                    url = url.rstrip('.,;:!?)')
+                project_urls = seen_urls.setdefault(project, set())
+                for url in extract_urls(cell):
+                    if url.rstrip('/') in project_urls:
+                        continue
+                    project_urls.add(url.rstrip('/'))
                     tag = '[Drive/Docs]' if ('drive.google.com' in url
                                              or 'docs.google.com' in url) else ''
                     print(f'  [{project}] row {row_idx} ({doc_type}): {url} {tag}')
@@ -373,8 +315,22 @@ def main():
         tmp_path = tmp.name
 
     print(f'\nOutput directory: {OUTPUT_DIR}')
-    extractor = DriveAwareExtractor(str(OUTPUT_DIR))
-    results   = extractor.process_spreadsheet(tmp_path)
+    try:
+        if GOOGLE_API_AVAILABLE and SA_FILE.exists():
+            extractor = DriveAwareExtractor(str(OUTPUT_DIR))
+            results = extractor.process_spreadsheet(
+                tmp_path,
+                projects=[args.project] if args.project else None,
+            )
+        else:
+            print('Google API client/credentials unavailable; using public downloads.')
+            extractor = OrganizedDatasetExtractor(str(OUTPUT_DIR))
+            results = extractor.process_spreadsheet(
+                tmp_path,
+                projects=[args.project] if args.project else None,
+            )
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
 
     total  = sum(len(v) for v in results['by_column'].values())
     errors = len(results['errors'])

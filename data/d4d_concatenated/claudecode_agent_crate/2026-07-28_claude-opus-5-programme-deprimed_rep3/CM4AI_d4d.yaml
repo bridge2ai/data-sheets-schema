@@ -1,0 +1,2675 @@
+# D4D Datasheet for CM4AI Dataset
+# Generation Method: schema-grounded agentic, phase 1
+# Agent runtime: Claude Code
+# Provider: Anthropic
+# Model: claude-opus-5[1m]
+# Reasoning effort: not applicable
+# Mode: four-phase project agent, pinned-referent
+# Source bundle: data/preprocessed/concatenated/CM4AI_preprocessed_with_crate.txt
+# Source manifest: data/preprocessed/source_manifest.yaml
+# Crate manifest: data/ro-crate_packages/crate_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Pinned referent: the CM4AI data-release programme as an ongoing quarterly release series
+# Prior D4D factual reuse: prohibited
+# Temperature: 0.0
+# Generated: 2026-07-28
+
+id: https://cm4ai.org/data-releases/
+name: cm4ai_data_release_programme
+title: Cell Maps for Artificial Intelligence (CM4AI) - Quarterly Data Release Programme
+description: >-
+  Cell Maps for Artificial Intelligence (CM4AI) is the Functional Genomics Data
+  Generation Project of the U.S. National Institutes of Health Common Fund
+  Bridge2AI program. This datasheet describes the CM4AI data-release programme
+  as an ongoing series, not any single release. CM4AI "will deliver
+  machine-readable hierarchical maps of cell architecture as AI-ready data,
+  together with quarterly data releases of map-input data streams", and the
+  project states that it "releases data quarterly, ensuring continuous updates
+  to the cell maps and input data streams". Successive Beta releases are
+  deposited as separate versioned datasets, each with its own DOI, in LibraData
+  - the University of Virginia's instance of Dataverse, an NIH-approved
+  generalist repository - inside the "Cell Maps for Artificial Intelligence"
+  collection under LibraData > School of Medicine.
+
+  The programme interrogates chromatin modifiers, metabolic enzymes and other
+  proteins involved in cancer, neuropsychiatric and cardiac disorders in
+  disease-relevant human cell lines under treated and untreated conditions,
+  using three complementary mapping approaches: mass spectrometry-based
+  proteomics (affinity purification mass spectrometry, AP-MS; and size-exclusion
+  chromatography mass spectrometry, SEC-MS), spatial proteomics / cell imaging
+  (immunofluorescence confocal microscopy), and genetic perturbation via
+  CRISPR/Cas9 (single-cell CRISPRi Perturb-seq). The two cell systems are the
+  triple-negative breast cancer line MDA-MB-468 (untreated / DMSO control,
+  paclitaxel, vorinostat) and the induced pluripotent stem cell line KOLF2.1J
+  (undifferentiated parental, and iPSC-derived neural progenitor cells, neurons
+  and cardiomyocytes). Input data streams are integrated by the Multi-Scale
+  Integrated Cell (MuSIC) pipeline, and outputs are packaged with provenance
+  graphs and rich metadata as AI-ready datasets in RO-Crate format using an
+  extended client-server version of the FAIRSCAPE framework, with ARK persistent
+  identifiers.
+
+  CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UT Austin, UA
+  Birmingham, Simon Fraser University and the Hastings Center. The project is
+  organised into three pillars - Data, People and Ethics - across six modules
+  (Data Acquisition; Tools; Standards; Skills and Workforce Development;
+  Teaming; Ethics). Project-wide totals advertised by the CM4AI portal are 1,374
+  protein interactions, 53,788 immunofluorescent images, 7,023 total proteins
+  investigated, 11,739 genes targeted, and 21.4 TB of data volume. The programme
+  is scheduled to run to the end of the project in November 2026, with the NIH
+  award period running 2022-09-01 to 2026-08-31.
+
+  All releases to date are labelled Beta and are explicitly interim: they do not
+  contain the computed cell maps, which are to be added in future releases.
+page: https://cm4ai.org/data-releases/
+publisher: https://dataverse.lib.virginia.edu/
+language: en
+license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+status: >-
+  Ongoing quarterly Beta release series. Four quarterly releases are represented
+  here as resources; the June 2026 release (doi:10.18130/V3/HIGT4C) is current
+  and the March 2025, June 2025 and October 2025 releases are superseded. Data
+  will be augmented regularly through the end of the project in November 2026.
+  Both the CM4AI Dataverse collection and the CM4AI website carry the notice
+  "This repository is under review for potential modification in compliance with
+  Administration directives."
+is_tabular: false
+citation: >-
+  Clark T, Mohan J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A,
+  Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C,
+  Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Belisle-Pipon J-C,
+  Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster
+  P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T. Cell Maps for
+  Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from
+  Disease-Relevant Cell Lines. bioRxiv, May 2024.
+  doi:10.1101/2024.05.21.589311. Each individual release must additionally be
+  cited directly by its own DOI.
+keywords:
+  - AI
+  - affinity purification
+  - AP-MS
+  - artificial intelligence
+  - breast cancer
+  - Bridge2AI
+  - cardiomyocyte
+  - CM4AI
+  - CRISPR/Cas9
+  - induced pluripotent stem cell
+  - iPSC
+  - KOLF2.1J
+  - machine learning
+  - mass spectroscopy
+  - MDA-MB-468
+  - neural progenitor cell
+  - NPC
+  - neuron
+  - paclitaxel
+  - perturb-seq
+  - perturbation sequencing
+  - protein-protein interaction
+  - protein localization
+  - single-cell RNA sequencing
+  - scRNAseq
+  - SEC-MS
+  - size exclusion chromatography
+  - subcellular imaging
+  - vorinostat
+  - cell maps
+  - functional genomics
+
+resources:
+  - id: https://doi.org/10.18130/V3/B35XWX
+    name: cm4ai_march_2025_data_release
+    title: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+    doi: 10.18130/V3/B35XWX
+    version: "1.4"
+    issued: "2025-03-03T00:00:00+00:00"
+    status: superseded
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    total_file_count: 6
+    description: >-
+      Quarterly release. "This dataset is the March 2025 Data Release of Cell
+      Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional
+      Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release
+      includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data
+      in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and
+      cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the
+      presence and absence of chemotherapy (vorinostat and paclitaxel)."
+      Six public files: two RO-Crate metadata JSON documents for the CRISPR
+      Perturbation Cell Atlas (31.1 KB, MD5 cbdb263b1c099396d75e16f00a79a818)
+      and the CRISPR Perturbation raw sequences (1000.1 KB, MD5
+      1cafefa32a897998e3e2ba0a29a3ef5c); three IF image ZIP archives
+      cm4ai-v0.6-beta-if-images-paclitaxel.zip (2.6 GB, MD5
+      9422486c80bc9e1d35b2fbbc72a5f043), cm4ai-v0.6-beta-if-images-untreated.zip
+      (3.2 GB, MD5 0b4d129f5fbc3bb7f7ea564cd032cef7) and
+      cm4ai-v0.6-beta-if-images-vorinostat.zip (2.8 GB, MD5
+      ac577109a41a9806978461157b777d52); and one SEC-MS RO-Crate metadata JSON
+      (2.9 KB, MD5 cb67e7749b15ce87b9042a9feba9d032). All files published
+      2025-03-03. The IF image sets in this release are described as covering
+      563 proteins of interest, which differs from the 464 proteins reported for
+      the later IF releases. Dataverse citation metadata: publication date
+      2025-03-03, data creation date 2025-02-27, deposit date 2025-02-27,
+      depositor Niestroy, Justin. The page header states Version 1.4 while the
+      dataset citation string states V1. Production locations: University of
+      California San Diego; University of California San Francisco; Stanford
+      University; University of Virginia. 302 downloads recorded at capture.
+  - id: https://doi.org/10.18130/V3/F3TD5R
+    name: cm4ai_june_2025_data_release
+    title: Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+    doi: 10.18130/V3/F3TD5R
+    version: "2.1"
+    issued: "2025-07-01T00:00:00+00:00"
+    status: superseded
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    total_file_count: 21
+    description: >-
+      Quarterly release. "This dataset is a revision of the June 2025 Data
+      Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the
+      Functional Genomics Grand Challenge in the NIH Bridge2AI program. This
+      revision includes adding RGB immunofluorescent images, corrections to
+      ro-crate metadata, and changes to naming conventions. This Beta release
+      includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data
+      in undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs, neurons,
+      cardiomyocytes, and treated and untreated MDA-MB468 breast cancer cells;
+      and IF images in MDA-MB-468 breast cancer cells in the presence and
+      absence of chemotherapy (vorinostat and paclitaxel)." This is the first
+      release in the captured series to publish the structured Data Governance
+      and Ethics, Completeness, Maintenance Plan, Intended Use, Limitations,
+      Prohibited Uses and Potential Sources of Bias statements that are repeated
+      in later releases. 21 public files across four file types (Text 12, Data
+      5, Archive 3, Metadata 1), including release-ro-crate-datasheet.html
+      (89.5 KB, MD5 599c9ece9b88b3ce797b82463b4a1eb4),
+      release-ro-crate-metadata.json (35.0 KB, MD5
+      99f9e00053bff3020fd9832a3a518bbb, "Release RO-Crate with pointers to sub
+      ro-crates"), three IF image ZIP archives under Images/
+      (cm4ai_ifimages_MDA-MB-468_paclitaxel.zip 3.8 GB MD5
+      0d972b80744344ddeede516a0cf6e3d7;
+      cm4ai_ifimages_MDA-MB-468_untreated.zip 4.6 GB MD5
+      a98affcc05429650c6bb3906cd836d55;
+      cm4ai_ifimages_MDA-MB-468_vorinostat.zip 4.2 GB MD5
+      ad4e68ccc14b0f3349dad3321e7b81b2, all published 2025-10-22), per-modality
+      provenance-graph HTML files (Images/paclitaxel, Images/untreated,
+      Images/vorinostat, mass-spec/cancer-cells) and
+      mass-spec-cancer-cells-ro-crate-metadata.json (343.4 KB, MD5
+      3a7063bb391ea5e05a32ba5da5f4b2f8). The IF image sets in this release are
+      described as covering 464 proteins of interest. Dataverse citation
+      metadata: publication date 2025-07-01, data creation date 2025-02-27,
+      deposit date 2025-02-27, depositor Niestroy, Justin. The page header
+      states Version 2.1 while the dataset citation string states V2, and the
+      page reports that the DRAFT version was not found. 256 downloads recorded
+      at capture.
+  - id: https://doi.org/10.18130/V3/K7TGEM
+    name: cm4ai_october_2025_data_release
+    title: Cell Maps for Artificial Intelligence - October 2025 Data Release (Beta)
+    doi: 10.18130/V3/K7TGEM
+    version: "2.1"
+    issued: "2025-10-31T00:00:00+00:00"
+    status: superseded
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/K7TGEM
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    total_file_count: 8
+    description: >-
+      Quarterly release. "This dataset is the October 2025 Data Release of Cell
+      Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional
+      Genomics Grand Challenge in the NIH Bridge2AI program. CM4AI is generating
+      multi-modal data including protein-protein interaction (PPI), spatial
+      localization, and genetic perturbation data in MDA-MB-468 breast cancer
+      cells (+/- paclitaxel or vorinostat) and iPSCs (+/- differentiation)."
+      The release comprises Perturb-seq data for MDA-MB-468 breast cancer cells
+      +/- treatment and undifferentiated (parental) KOLF2.1J iPSCs; SEC-MS data
+      for MDA-MB-468 breast cancer cells +/- treatment, undifferentiated
+      KOLF2.1J iPSCs, and iPSC-derived neuron progenitor cells (NPCs), neurons,
+      and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells +/-
+      treatment. Eight public ZIP archives: cm4ai_mass-spec_KOLF2.zip (23.8 MB,
+      MD5 fb04933a21e4395cce56930a014c6b4e), cm4ai_mass-spec_MDA-MB-468.zip
+      (23.0 MB, MD5 662d62ced9d379f7024e5c6d55859fbb),
+      cm4ai_perturb-seq_KOLF2_cell_atlas.zip (24.6 KB, MD5
+      15dc59312466dbfac85f59b57d27eee6), cm4ai_perturb-seq_KOLF2_raw_sra.zip
+      (79.6 KB, MD5 1cfc4e8e2ead7513a035cc7730046ebb),
+      cm4ai_release_metadata.zip (203.5 KB, MD5
+      c14cc7aaaa0e7231a0d3ec296ff58518), and three IF image archives under
+      Images/ (paclitaxel 3.8 GB MD5 0d972b80744344ddeede516a0cf6e3d7;
+      untreated 4.6 GB MD5 a98affcc05429650c6bb3906cd836d55; vorinostat 4.2 GB
+      MD5 ad4e68ccc14b0f3349dad3321e7b81b2 - byte-identical checksums to the
+      June 2025 release). Perturb-seq external links are marked Embargoed in
+      this release; SEC-MS external data are at MassIVE. Dataverse citation
+      metadata: publication date 2025-10-31, data creation date 2025-02-27,
+      deposit date 2025-02-27. Page header Version 2.1, citation string V2.
+      405 downloads recorded at capture. This is the release still selected by
+      the project's own input source sheet at the time of capture.
+  - id: https://doi.org/10.18130/V3/HIGT4C
+    name: cm4ai_june_2026_data_release
+    title: Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
+    doi: 10.18130/V3/HIGT4C
+    version: "2.0"
+    issued: "2026-06-17T00:00:00+00:00"
+    last_updated_on: "2026-07-15T20:28:19+00:00"
+    status: current
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    download_url: https://dataverse.lib.virginia.edu/api/datasets/:persistentId/?persistentId=doi:10.18130/V3/HIGT4C
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    total_file_count: 10
+    is_tabular: false
+    compression: zip
+    conforms_to: >-
+      RO-Crate 1.2 (https://w3id.org/ro/crate/1.2), extended with the EVI
+      Evidence Graph Ontology (https://w3id.org/EVI#) and Croissant
+      Responsible AI (rai:) properties; packaged by FAIRSCAPE version 1.1.3
+      and identified by the ARK persistent identifier
+      https://fairscape.net/api/ark:59853/rocrate-cell-maps-for-artificial-intelligence-June-2026-data-release.
+    citation: >-
+      Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B;
+      Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M;
+      Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C;
+      Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E;
+      Polacco B; Pratt D; Qian G; Schaffer L; Sigaeva A; Thaker S; Zhang Y;
+      Belisle-Pipon JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg
+      E; Mali P; Payne-Foster P; Ratcliffe S; Ravitsky V; Sali A; Schulz W;
+      Ideker T, 2026, "Cell Maps for Artificial Intelligence - June 2026 Data
+      Release (Beta)", https://doi.org/10.18130/V3/HIGT4C, University of
+      Virginia Dataverse, V2.
+    keywords:
+      - AI
+      - affinity purification
+      - AP-MS
+      - artificial intelligence
+      - breast cancer
+      - Bridge2AI
+      - cardiomyocyte
+      - CM4AI
+      - CRISPR/Cas9
+      - induced pluripotent stem cell
+      - iPSC
+      - KOLF2.1J
+      - machine learning
+      - mass spectroscopy
+      - MDA-MB-468
+      - neural progenitor cell
+      - NPC
+      - neuron
+      - paclitaxel
+      - perturb-seq
+      - perturbation sequencing
+      - protein-protein interaction
+      - protein localization
+      - single-cell RNA sequencing
+      - scRNAseq
+      - SEC-MS
+      - size exclusion chromatography
+      - subcellular imaging
+      - vorinostat
+      - cell maps
+      - CRISPR perturbation
+    description: >-
+      Current quarterly release. "This dataset is the June 2026 Data Release of
+      Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional
+      Genomics Grand Challenge in the NIH Bridge2AI program. CM4AI is generating
+      multi-modal data including protein-protein interaction (PPI), spatial
+      localization, and genetic perturbation data in MDA-MB-468 breast cancer
+      cells (+/- paclitaxel or vorinostat) and iPSCs (+/- differentiation). This
+      Beta release includes: Perturb-seq data for MDA-MB-468 breast cancer cells
+      +/- treatment and undifferentiated (parental) KOLF2.1J iPSCs; SEC-MS data
+      for MDA-MB-468 breast cancer cells +/- treatment, undifferentiated KOLF2.1J
+      iPSCs, and iPSC-derived neuron progenitor cells (NPCs), neurons, and
+      cardiomyocytes; AP-MS data for MDA-MB-468 breast cancer cells + treatment;
+      IF images in MDA-MB-468 breast cancer cells +/- treatment." The addition of
+      AP-MS is what distinguishes this release from October 2025.
+
+      Ten public ZIP archives are distributed on Dataverse; they are itemised in
+      this datasheet's file_collections. The Dataverse payload totals only about
+      16.6 GB because the mass-spectrometry, AP-MS and Perturb-seq archives are
+      RO-Crate metadata packages that reference much larger payloads deposited
+      at MassIVE, the NCBI Sequence Read Archive and Figshare. The release
+      RO-Crate itself reports 53,877 datasets, 1,976 computation/experiment
+      steps, 6 software instances, 20 schemas, 55,859 total entities and
+      21,051,331,945,400 bytes of total content, while its own contentSize field
+      states 19.9 TB; only 8 of 55,859 entities carry checksums.
+
+      Linked sub-crates registered as parts of this release, each with its own
+      ARK identifier: EndoTag AP-MS profiling of chromatin modifier interactome
+      rewiring in MDA-MB-468 cells upon paclitaxel perturbation (MassIVE
+      MSV000101915, 441.2 GB, 560 parts, author Richa Tiwari, published
+      2026-05-22, CC0); the equivalent vorinostat sub-crate (MassIVE
+      MSV000101917, 532.5 GB, 723 parts, published 2026-05-22, CC0); SEC-MS
+      characterization of KOLF2 neuronal and cardiomyocyte differentiation
+      (MassIVE MSV000100676, 1.11 TB, 867 parts, author Antoine Forget,
+      published 2026-05-27, CC0); SEC-MS of MDA-MB468 following treatment of
+      vorinostat or paclitaxel (doi:10.25345/C5348GV4S, MassIVE MSV000098237,
+      910 GB, 45 parts, version 1.5, authors Forget A, Obernier K, Krogan N, CC
+      BY-NC-SA 4.0); Perturbation Cell Atlas of Human Induced Pluripotent Stem
+      Cells - Raw Sequence Data (16.7 TB, version 0.6, access recorded as
+      "Embargoed"); Perturbation Cell Atlas of Human Induced Pluripotent Stem
+      Cells - Perturb Seq (177.35 GB, version 1.0, published by FigShare at
+      https://figshare.com/s/ee85bb1880921326249b); and Paclitaxel, Untreated
+      and Vorinostat IF Images sub-crates from the Lundberg Lab at Stanford.
+
+      Dataverse citation metadata: persistent identifier doi:10.18130/V3/HIGT4C,
+      publication date 2026-06-17, title as above, point of contact Ideker Trey
+      (University of California San Diego), data creation date 2025-02-27,
+      deposit date 2025-02-27, depositor Niestroy, Justin, production location
+      University of California San Diego; University of California San
+      Francisco; Stanford University; University of Virginia, funding National
+      Institutes of Health: 1OT2OD032742-01. 181 downloads recorded at capture.
+    instances:
+      - name: apms_interactomes_mda_mb_468
+        instance_type: >-
+          Affinity purification mass spectrometry (AP-MS) interactome profiles
+          from endogenously tagged MDA-MB-468 triple-negative breast cancer
+          cells under paclitaxel and vorinostat perturbation
+        data_topic: http://edamontology.org/topic_0121
+        data_substrate: https://www.cellosaurus.org/CVCL_0419
+        label: false
+        description: >-
+          New in the June 2026 release. Raw AP-MS data generated from
+          endogenously tagged MDA-MB-468 cells, focused on drug-induced
+          interactome rewiring of chromatin modifiers relevant to the
+          triple-negative breast cancer context. All AP-MS experiments were
+          performed in four biological replicates. Each AP-MS batch includes an
+          untagged parental control, 10 chromatin modifier tagged cell lines,
+          and a positive control tagged line; DMSO-treated samples serve as
+          vehicle control across all AP-MS experiments. Described in the crate
+          as unpublished data. Distributed on Dataverse as two small RO-Crate
+          archives (113.3 KB paclitaxel, 135.8 KB vorinostat) that reference
+          MassIVE deposits MSV000101915 (441.2 GB) and MSV000101917 (532.5 GB).
+      - name: sec_ms_protein_complex_profiles
+        instance_type: >-
+          Size-exclusion chromatography mass spectrometry (SEC-MS) protein
+          co-elution and complex profiles in MDA-MB-468 cells (untreated,
+          paclitaxel, vorinostat) and in KOLF2.1J iPSCs and their NPC, neuron
+          and cardiomyocyte derivatives
+        data_topic: https://meshb.nlm.nih.gov/record/ui?ui=D013058
+        label: false
+        description: >-
+          Two SEC-MS streams. The iPSC stream maps protein-protein interaction
+          networks across differentiation stages - Parental (undifferentiated
+          iPSCs, replicates 1-4), NPC (neural progenitor cells, replicates 1-2),
+          Neuron (terminally differentiated neurons, replicates 1-3) and Cardio
+          (terminally differentiated cardiomyocytes, replicates 1-2) - acquired
+          on a Bruker timsTOF platform with quantitative analysis in Spectronaut
+          and downstream analysis in R using MSstats-compatible formats
+          (MassIVE MSV000100676, 1.11 TB). The cancer-cell stream was generated
+          following treatment of vorinostat or paclitaxel on MDA-MB468 human
+          breast cancer cells in the Nevan Krogan laboratory at the University
+          of California San Francisco (doi:10.25345/C5348GV4S, MassIVE
+          MSV000098237, 910 GB, 45 parts comprising 18 datasets, 9 experiments,
+          9 computations and 9 schemas). Distributed on Dataverse as
+          cm4ai_mass-spec_KOLF2.zip (171.8 KB) and
+          cm4ai_mass-spec_MDA-MB-468.zip (93.9 KB).
+      - name: if_subcellular_images_mda_mb_468
+        instance_type: >-
+          Immunofluorescence (ICC-IF) confocal microscopy images of MDA-MB-468
+          cells, untreated and treated with paclitaxel or vorinostat
+        data_topic: https://meshb.nlm.nih.gov/record/ui?ui=D005453
+        data_substrate: https://www.cellosaurus.org/CVCL_0419
+        label: false
+        description: >-
+          "This data set displays the spatial localization of 464 proteins of
+          interest in cells of the breast cancer cell line MDA-MB-468 ... as
+          imaged by immunofluorescence-based staining (ICC-IF) and confocal
+          microscopy in the Lundberg Lab at Stanford University, as part of the
+          Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) project.
+          Nuclei were stained with DAPI (blue channel); endoplasmic reticulum
+          with a calreticulin antibody (yellow channel); microtubules with
+          tubulin antibody (red channel); and antibody against protein of
+          interest (green channel)." Three conditions are released: untreated
+          (4.6 GB), paclitaxel (3.8 GB) and vorinostat (4.2 GB). The IF
+          sub-crates record large per-condition file inventories, for example
+          17,685 outputs for the paclitaxel sub-crate and 16,845 parts for the
+          untreated sub-crate, with per-channel image entities named in the
+          pattern B2AI_{plate}_{condition}_{well}_{field}_{z}_{channel}.
+          Sub-crate authorship is recorded as Hansen JN, Axelsson U,
+          Johannesson A, Fall J, Ballllosera Navarro F, Lundberg E, with
+          copyright held by The Board of Trustees of the Leland Stanford Junior
+          University.
+      - name: crispri_perturb_seq_kolf2
+        instance_type: >-
+          Single-cell CRISPRi Perturb-seq transcriptional and fitness phenotype
+          data in KOLF2.1J human induced pluripotent stem cells, plus Perturb-seq
+          in MDA-MB-468 cells with and without treatment
+        data_topic: http://www.ebi.ac.uk/efo/EFO_0008860
+        data_substrate: https://www.cellosaurus.org/CVCL_B5P3
+        counts: 11739
+        label: false
+        description: >-
+          "This dataset represents an expressed genome-scale CRISPRi
+          Perturbation Cell Atlas in KOLF2.1J human induced pluripotent stem
+          cells (hiPSCs) mapping transcriptional and fitness phenotypes
+          associated with 11,739 targeted genes ... We validated these findings
+          via phenotypic, protein-interaction, and metabolic tracing assays."
+          The counts field records the 11,739 targeted genes. Two components are
+          registered: the aggregated cell atlas (177.35 GB, published by
+          FigShare at https://figshare.com/s/ee85bb1880921326249b) and the raw
+          sequence data (16.7 TB, access recorded as "Embargoed"). The release
+          page additionally lists Perturb-seq data for MDA-MB-468 breast cancer
+          cells with and without treatment, whose external links are also marked
+          Embargoed. Distributed on Dataverse as
+          cm4ai_perturb-seq_KOLF2_cell_atlas.zip (30.2 KB) and
+          cm4ai_perturb-seq_KOLF2_raw_sra.zip (73.3 KB).
+      - name: release_provenance_metadata
+        instance_type: >-
+          RO-Crate release metadata, provenance graphs, schemas and AI-readiness
+          self-assessment
+        counts: 55859
+        label: false
+        description: >-
+          The cm4ai_release_metadata.zip archive (1.1 MB) carries the release
+          RO-Crate, a human-readable datasheet rendering, an AI-readiness
+          self-assessment and per-modality sub-crate previews and provenance
+          graphs. The crate reports 55,859 total entities, of which 53,877 are
+          datasets, 1,976 are computation or experiment steps, 6 are software
+          instances and 20 are schemas. Declared formats across the crate are
+          .d, .d directory group, .tsv, .xml, TSV, csv, executable, fastq.gz,
+          h5, h5ad, image/jpeg, pdf and unknown.
+
+file_collections:
+  - id: https://doi.org/10.18130/V3/HIGT4C#cm4ai_apms_MDA-MB-468_paclitaxel.zip
+    name: cm4ai_apms_MDA-MB-468_paclitaxel.zip
+    title: AP-MS data for MDA-MB-468 breast cancer cells treated with paclitaxel
+    path: cm4ai_apms_MDA-MB-468_paclitaxel.zip
+    compression: zip
+    collection_type:
+      - processed_data
+      - metadata
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    issued: "2026-06-17T00:00:00+00:00"
+    description: >-
+      ZIP Archive, size reported by Dataverse as 113.3 KB, MD5
+      8642317c321126213240af4837030a53, published Jun 17 2026, public access,
+      22 downloads at capture. Packages the RO-Crate for the EndoTag AP-MS
+      profiling of chromatin modifier interactome rewiring in MDA-MB-468 cells
+      upon paclitaxel perturbation; the underlying 441.2 GB raw payload is
+      deposited at MassIVE under MSV000101915 and released there under CC0
+      1.0. Sub-crate parts: 555 datasets, 2 schemas, 1 sample, 1 instrument and
+      1 experiment. No exact byte count is published for this archive, so
+      total_bytes is left unset.
+  - id: https://doi.org/10.18130/V3/HIGT4C#cm4ai_apms_MDA-MB-468_vorinostat.zip
+    name: cm4ai_apms_MDA-MB-468_vorinostat.zip
+    title: AP-MS data for MDA-MB-468 breast cancer cells treated with vorinostat
+    path: cm4ai_apms_MDA-MB-468_vorinostat.zip
+    compression: zip
+    collection_type:
+      - processed_data
+      - metadata
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    issued: "2026-06-17T00:00:00+00:00"
+    description: >-
+      ZIP Archive, size reported by Dataverse as 135.8 KB, MD5
+      b941f28d6f19c563d1222f7aff0c57b6, published Jun 17 2026, public access,
+      12 downloads at capture. Packages the RO-Crate for the EndoTag-AP-MS
+      profiling of chromatin modifier interactome rewiring in MDA-MB-468 cells
+      upon vorinostat perturbation; the underlying 532.5 GB raw payload is
+      deposited at MassIVE under MSV000101917 and released there under CC0 1.0.
+      Sub-crate parts: 718 datasets, 2 schemas, 1 sample, 1 instrument and 1
+      experiment. No exact byte count is published for this archive, so
+      total_bytes is left unset.
+  - id: https://doi.org/10.18130/V3/HIGT4C#cm4ai_ifimages_MDA-MB-468_paclitaxel.zip
+    name: cm4ai_ifimages_MDA-MB-468_paclitaxel.zip
+    title: Immunofluorescence images of MDA-MB-468 cells treated with paclitaxel
+    path: cm4ai_ifimages_MDA-MB-468_paclitaxel.zip
+    compression: zip
+    collection_type:
+      - raw_data
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    issued: "2026-07-15T00:00:00+00:00"
+    description: >-
+      ZIP Archive, size reported by Dataverse as 3.8 GB, MD5
+      6c1a86520eec2696ec19444eb8a8b428, published Jul 15 2026, public access,
+      13 downloads at capture. Four-channel confocal ICC-IF images (DAPI blue
+      nucleus; calreticulin yellow endoplasmic reticulum; tubulin red
+      microtubules; green protein of interest) acquired in the Lundberg Lab at
+      Stanford University; copyright The Board of Trustees of the Leland
+      Stanford Junior University. The corresponding release RO-Crate sub-crate
+      reports 17,685 outputs. Note that this file's MD5 differs from the
+      identically named 3.8 GB file in the June 2025 and October 2025 releases
+      (MD5 0d972b80744344ddeede516a0cf6e3d7), and the crate's own IF sub-crate
+      entity still carries the March 2025 size and checksum. No exact byte
+      count is published, so total_bytes is left unset.
+  - id: https://doi.org/10.18130/V3/HIGT4C#cm4ai_ifimages_MDA-MB-468_untreated.zip
+    name: cm4ai_ifimages_MDA-MB-468_untreated.zip
+    title: Immunofluorescence images of untreated MDA-MB-468 cells
+    path: cm4ai_ifimages_MDA-MB-468_untreated.zip
+    compression: zip
+    collection_type:
+      - raw_data
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    issued: "2026-07-15T00:00:00+00:00"
+    description: >-
+      ZIP Archive, size reported by Dataverse as 4.6 GB, MD5
+      6d066e6b9d762284c6aa5d0b44565568, published Jul 15 2026, public access,
+      13 downloads at capture. Untreated (DMSO control) condition of the
+      four-channel confocal ICC-IF image set from the Lundberg Lab at Stanford
+      University. The corresponding release RO-Crate sub-crate reports 16,845
+      parts, including 468 experiment entities and three stain entities
+      (stain-dapi, stain-calreticulin-antibody and a tubulin stain), a cell-line
+      entity for MDA-MB-468 and a treatment-control entity. Its MD5 differs from
+      the identically named file in the June 2025 and October 2025 releases
+      (MD5 a98affcc05429650c6bb3906cd836d55). No exact byte count is published,
+      so total_bytes is left unset.
+  - id: https://doi.org/10.18130/V3/HIGT4C#cm4ai_ifimages_MDA-MB-468_vorinostat.zip
+    name: cm4ai_ifimages_MDA-MB-468_vorinostat.zip
+    title: Immunofluorescence images of MDA-MB-468 cells treated with vorinostat
+    path: cm4ai_ifimages_MDA-MB-468_vorinostat.zip
+    compression: zip
+    collection_type:
+      - raw_data
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    issued: "2026-07-15T00:00:00+00:00"
+    description: >-
+      ZIP Archive, size reported by Dataverse as 4.2 GB, MD5
+      df79632753989ef23b0a3df6604d4af1, published Jul 15 2026, public access,
+      14 downloads at capture. Vorinostat condition of the four-channel confocal
+      ICC-IF image set from the Lundberg Lab at Stanford University. The
+      corresponding sub-crate records the contact address emmalu@stanford.edu
+      and funder National Institutes of Health: 1OT2OD032742-01. Its MD5 differs
+      from the identically named file in the June 2025 and October 2025 releases
+      (MD5 ad4e68ccc14b0f3349dad3321e7b81b2). No exact byte count is published,
+      so total_bytes is left unset.
+  - id: https://doi.org/10.18130/V3/HIGT4C#cm4ai_mass-spec_KOLF2.zip
+    name: cm4ai_mass-spec_KOLF2.zip
+    title: SEC-MS data for KOLF2.1J iPSCs and their differentiated derivatives
+    path: cm4ai_mass-spec_KOLF2.zip
+    compression: zip
+    collection_type:
+      - processed_data
+      - metadata
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    issued: "2026-06-17T00:00:00+00:00"
+    description: >-
+      ZIP Archive, size reported by Dataverse as 171.8 KB, MD5
+      f250bf0b04f516f7462d30432441fc0e, published Jun 17 2026, public access,
+      11 downloads at capture. Packages the RO-Crate for "SEC-MS
+      characterization of KOLF2 neuronal and cardiomyocyte differentiation"
+      (author Antoine Forget), whose 1.11 TB payload is deposited at MassIVE
+      under MSV000100676 and released there under CC0 1.0; 867 parts comprising
+      862 datasets, 2 schemas, 1 sample, 1 instrument and 1 experiment. Sample
+      groups: Parental replicates 1-4, NPC replicates 1-2, Neuron replicates
+      1-3, Cardio replicates 1-2. No exact byte count is published, so
+      total_bytes is left unset.
+  - id: https://doi.org/10.18130/V3/HIGT4C#cm4ai_mass-spec_MDA-MB-468.zip
+    name: cm4ai_mass-spec_MDA-MB-468.zip
+    title: SEC-MS data for MDA-MB-468 cells with and without treatment
+    path: cm4ai_mass-spec_MDA-MB-468.zip
+    compression: zip
+    collection_type:
+      - processed_data
+      - metadata
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    issued: "2026-06-17T00:00:00+00:00"
+    description: >-
+      ZIP Archive, size reported by Dataverse as 93.9 KB, MD5
+      9aed30b6e8a91b151155316aae657ea5, published Jun 17 2026, public access,
+      12 downloads at capture. Packages the RO-Crate for "SEC-MS of MDA-MB468
+      following treatment of vorinostat or paclitaxel", version 1.5, authors
+      Forget A, Obernier K, Krogan N, contact nevan.krogan@ucsf.edu, identifier
+      doi:10.25345/C5348GV4S, licensed CC BY-NC-SA 4.0, 910 GB, with content at
+      ftp://massive-ftp.ucsd.edu/v10/MSV000098237/ and a MassIVE task page at
+      https://massive.ucsd.edu/ProteoSAFe/dataset.jsp?task=ad8b8084f5b14af5bafac70fdd42a577.
+      The sub-crate records MD5 cb67e7749b15ce87b9042a9feba9d032 for its own
+      RO-Crate metadata document, matching the SEC-MS RO-Crate metadata file
+      published in the March 2025 release. No exact byte count is published for
+      this Dataverse archive, so total_bytes is left unset.
+  - id: https://doi.org/10.18130/V3/HIGT4C#cm4ai_perturb-seq_KOLF2_cell_atlas.zip
+    name: cm4ai_perturb-seq_KOLF2_cell_atlas.zip
+    title: CRISPRi Perturbation Cell Atlas for KOLF2.1J iPSCs
+    path: cm4ai_perturb-seq_KOLF2_cell_atlas.zip
+    compression: zip
+    collection_type:
+      - processed_data
+      - metadata
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    issued: "2026-06-17T00:00:00+00:00"
+    description: >-
+      ZIP Archive, size reported by Dataverse as 30.2 KB, MD5
+      291a362842a176a4fcccaf2cdc1dedde, published Jun 17 2026, public access,
+      15 downloads at capture. Packages the RO-Crate for "Perturbation Cell
+      Atlas of Human Induced Pluripotent Stem Cells - Perturb Seq", version 1.0,
+      177.35 GB, published by FigShare at
+      https://figshare.com/s/ee85bb1880921326249b, contact pmali@ucsd.edu,
+      licensed CC BY-NC-SA 4.0. Crate parts: an aggregated data entity, an
+      aggregate schema and a data-processing computation. The sub-crate carries
+      MD5 1cafefa32a897998e3e2ba0a29a3ef5c, which matches the CRISPR
+      Perturbation raw-sequences RO-Crate metadata file of the March 2025
+      release. No exact byte count is published for this Dataverse archive, so
+      total_bytes is left unset.
+  - id: https://doi.org/10.18130/V3/HIGT4C#cm4ai_perturb-seq_KOLF2_raw_sra.zip
+    name: cm4ai_perturb-seq_KOLF2_raw_sra.zip
+    title: Raw sequence data for the KOLF2.1J CRISPRi Perturbation Cell Atlas
+    path: cm4ai_perturb-seq_KOLF2_raw_sra.zip
+    compression: zip
+    collection_type:
+      - metadata
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    issued: "2026-06-17T00:00:00+00:00"
+    description: >-
+      ZIP Archive, size reported by Dataverse as 73.3 KB, MD5
+      8bb3f365f01fb8bbbd2ac6a535059305, published Jun 17 2026, public access,
+      8 downloads at capture. Packages the RO-Crate for "Perturbation Cell Atlas
+      of Human Induced Pluripotent Stem Cells - Raw Sequence Data", version 0.6,
+      16.7 TB, contact pmali@ucsd.edu, licensed CC BY-NC-SA 4.0, whose access
+      URL is recorded as "Embargoed"; the crate registers several hundred SRA
+      sample entities as inputs. Classified here as metadata because the
+      archive itself carries only the RO-Crate description of an embargoed raw
+      sequence deposit. The sub-crate carries MD5
+      cbdb263b1c099396d75e16f00a79a818, which matches the CRISPR Perturbation
+      Cell Atlas RO-Crate metadata file of the March 2025 release. No exact
+      byte count is published for this Dataverse archive, so total_bytes is
+      left unset.
+  - id: https://doi.org/10.18130/V3/HIGT4C#cm4ai_release_metadata.zip
+    name: cm4ai_release_metadata.zip
+    title: June 2026 release RO-Crate, datasheet rendering and AI-readiness score
+    path: cm4ai_release_metadata.zip
+    compression: zip
+    collection_type:
+      - metadata
+      - documentation
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    publisher: https://dataverse.lib.virginia.edu/
+    page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    issued: "2026-06-17T00:00:00+00:00"
+    conforms_to: >-
+      RO-Crate 1.2 with EVI Evidence Graph Ontology and Croissant Responsible AI
+      (rai:) extensions, produced by FAIRSCAPE 1.1.3.
+    description: >-
+      ZIP Archive, size reported by Dataverse as 1.1 MB, MD5
+      318deb7c5edab0d2fa55e26fcb67b440, published Jun 17 2026, public access,
+      22 downloads at capture. Contains the release RO-Crate metadata document,
+      a D4D-shaped LinkML rendering, a human-readable datasheet rendering, an
+      AI-readiness self-assessment, and per-modality sub-crate previews and
+      provenance-graph renderings for AP-MS, Images, mass-spec and Perturb-Seq.
+      The AI-readiness self-assessment reports content for all four FAIRness
+      dimensions, all four provenance dimensions, all five characterization
+      dimensions, all three pre-model explainability dimensions, all four ethics
+      dimensions, all four sustainability dimensions and all four computability
+      dimensions, while noting that only 8 of 55,859 entities carry checksums.
+      No exact byte count is published, so total_bytes is left unset.
+
+external_resources:
+  - name: massive_proteomics_repository
+    description: >-
+      MassIVE (UCSD) hosts the mass-spectrometry payloads that the release
+      RO-Crates reference. AP-MS paclitaxel MSV000101915 (441.2 GB) and
+      vorinostat MSV000101917 (532.5 GB); SEC-MS in KOLF2.1J iPSCs and
+      derivatives MSV000100676 (1.11 TB); SEC-MS in treated MDA-MB-468 cells
+      MSV000098237 (910 GB, doi:10.25345/C5348GV4S). Earlier release pages
+      describe these as "Mass Spectrometry Data (Human iPSCs)" and "Mass
+      Spectrometry Data (Human Cancer Cells)".
+    external_resources:
+      - https://massive.ucsd.edu/ProteoSAFe/QueryMSV?id=MSV000101915
+      - https://massive.ucsd.edu/ProteoSAFe/QueryMSV?id=MSV000101917
+      - https://massive.ucsd.edu/ProteoSAFe/QueryMSV?id=MSV000100676
+      - https://massive.ucsd.edu/ProteoSAFe/dataset.jsp?task=ad8b8084f5b14af5bafac70fdd42a577
+      - ftp://massive-ftp.ucsd.edu/v10/MSV000098237/
+    archival: true
+    restrictions:
+      - >-
+        The AP-MS and iPSC SEC-MS sub-crates declare CC0 1.0 at MassIVE, whereas
+        the Dataverse release as a whole is licensed CC BY-NC-SA 4.0.
+  - name: figshare_perturbation_cell_atlas
+    description: >-
+      Figshare hosts the aggregated CRISPRi Perturbation Cell Atlas of Human
+      Induced Pluripotent Stem Cells (177.35 GB), linked from the June 2026
+      release as "CRISPRi Perturbation Atlas of iPSCs".
+    external_resources:
+      - https://figshare.com/s/ee85bb1880921326249b
+    archival: false
+  - name: ncbi_sra_bioproject_raw_sequences
+    description: >-
+      Raw Perturb-seq sequence data are deposited in the NCBI Sequence Read
+      Archive and referenced from the June 2025 release as "Sequence Read
+      Archive (SRA) Data: NCBI BioProject". In the October 2025 and June 2026
+      releases the Perturb-seq external links for both KOLF2.1J iPSCs and
+      MDA-MB-468 cells are marked "Embargoed", and the corresponding sub-crate
+      records its access URL as "Embargoed".
+    archival: true
+    restrictions:
+      - Under temporary pre-publication embargo at the time of capture.
+  - name: cm4ai_project_portal
+    description: >-
+      The CM4AI web portal, built on the U-BRITE platform, is the project's
+      dissemination point for data releases, tools, product documentation,
+      publications and training material. Project-related inquiries are directed
+      to Swathi Thaker, PhD (UAB, Program Manager, snthaker@uab.edu) and website
+      support to Zhandos Sembay (UAB, zsembay8@uab.edu).
+    external_resources:
+      - https://cm4ai.org/
+      - https://cm4ai.org/data-releases/
+    archival: false
+  - name: fairscape_ai_readiness_framework
+    description: >-
+      FAIRSCAPE provides the AI-readiness packaging used by the Standards
+      module: a client-side Python3 package (FAIRSCAPE-CLI) that builds RO-Crate
+      packages, and a server that registers them, mints ARK persistent
+      identifiers and computes end-to-end EVI provenance entailments. Copyright
+      is held by the Rector and Board of Visitors of the University of Virginia
+      and the software is available under the MIT open-source license. The
+      release crates were produced by FAIRSCAPE version 1.1.3.
+    external_resources:
+      - https://fairscape.github.io
+    archival: false
+    used_software:
+      - id: https://fairscape.github.io
+        name: FAIRSCAPE
+        version: 1.1.3
+        license: MIT
+        url: https://fairscape.github.io
+        description: >-
+          Client-server framework for FAIR and reproducible biomedical
+          analytics; packages CM4AI outputs as RO-Crates with EVI provenance
+          graphs and ARK persistent identifiers.
+  - name: cell_mapping_toolkit_and_portal
+    description: >-
+      The Cell Mapping Toolkit implements the end-to-end MuSIC pipeline as a
+      series of Python packages with full user documentation, and the Multiscale
+      Integrated Cell visualization portal provides interactive exploration of
+      published cell maps. These are project tools rather than release payloads;
+      no computed cell map is included in any release captured here.
+    external_resources:
+      - https://github.com/idekerlab/cellmaps_pipeline
+      - https://musicmaps.ai/u2os-cellmap
+    archival: false
+    used_software:
+      - id: https://github.com/idekerlab/cellmaps_pipeline
+        name: Cell Mapping Toolkit (cellmaps_pipeline)
+        url: https://github.com/idekerlab/cellmaps_pipeline
+        description: >-
+          Open-source Python package series implementing the Multi-Scale
+          Integrated Cell (MuSIC) pipeline for cell map construction. Alpha-level
+          tools are released on GitHub under a BSD-3 open-source license and
+          production-ready tools are archived in Zenodo.
+
+purposes:
+  - name: primary_purpose
+    response: >-
+      "CM4AI's objective is to deliver machine-readable hierarchical maps of cell
+      architecture as AI-Ready data produced from multimodal interrogation of
+      100 chromatin modifiers and 100 metabolic enzymes involved in cancer,
+      neuropsychiatric, and cardiac disorders in disease-relevant cell lines
+      under perturbed and unperturbed conditions, utilizing state-of-the-art
+      mass spectrometry based proteomics, spatial proteomics / cell imaging, and
+      genetic perturbations using CRISPR." The quarterly release programme
+      exists to publish the map-input data streams as ethical, FAIR, AI-ready
+      datasets on a predictable schedule while the maps themselves are still
+      being computed.
+  - name: bridge2ai_grand_challenge_purpose
+    response: >-
+      "As part of the NIH Common Fund's Bridge2AI program, the CM4AI data
+      generation project seeks to map the spatiotemporal architecture of human
+      cells and use these maps toward the grand challenge of interpretable
+      genotype-phenotype learning. In genomics and precision medicine, machine
+      learning models are often 'black boxes,' predicting phenotypes from
+      genotypes without understanding the mechanisms by which such translation
+      occurs."
+  - name: ai_readiness_demonstration_purpose
+    response: >-
+      A second purpose of the release programme is to demonstrate ethical
+      AI-readiness in practice. "At a strategic level, CM4AI - as do other
+      Bridge2AI DGPs - aims to ethically leverage the most state-of-the art
+      computational and experimental tools in biomedical science to enable a new
+      generation of transformative artificial intelligence research to benefit
+      humanity. Its datasets and software are available to the research
+      community under minimally restrictive terms consistent with ethical
+      guidelines, researcher attribution, and research integrity."
+
+tasks:
+  - name: interpretable_genotype_phenotype_learning
+    response: >-
+      Supporting "visible" machine learning systems informed by multi-scale cell
+      and tissue architecture: "this Bridge2AI data generation project will
+      generate a resource of matched data and tools to enable the creation of
+      'visible' ML systems, which are not black boxes but are built directly on
+      knowledge maps of cell and tissue architecture."
+  - name: multimodal_cell_map_construction
+    response: >-
+      Constructing hierarchical cell maps - directed acyclic graphs in which
+      each node is an assembly of proteins in proximity at a given scale - by
+      integrating protein-protein interaction and protein localisation data
+      through self-supervised embedding followed by multi-resolution community
+      detection.
+  - name: perturbation_response_mapping
+    response: >-
+      Measuring how cell architecture, protein complexes and transcriptional
+      state are reorganised by drug treatment (paclitaxel, vorinostat) in
+      triple-negative breast cancer cells and by lineage commitment in iPSC
+      differentiation to neural progenitor cells, neurons and cardiomyocytes.
+
+addressing_gaps:
+  - name: black_box_genomic_prediction_gap
+    response: >-
+      "Machine learning (ML) models show great promise in analyzing the human
+      genome to make predictions, but the inner workings of these models are
+      typically difficult-to-interpret 'black boxes.'" CM4AI addresses this by
+      producing the structural knowledge maps on which interpretable models can
+      be built.
+  - name: unmapped_cell_architecture_gap
+    response: >-
+      Much of subcellular architecture remains uncharted and individual mapping
+      modalities are incomplete on their own; integrating orthogonal modalities
+      is needed to resolve assemblies across physical scales.
+  - name: ai_ready_data_standards_gap
+    response: >-
+      Existing biomedical datasets frequently lack the provenance,
+      characterisation, explainability and ethical documentation required for
+      reliable AI use. CM4AI defines AI-ready biomedical data as "fully
+      characterized FAIR data of known provenance, which can be ethically and
+      reliably processed by AI applications; whose models and software are
+      available and well-described for validation and re-use; and whose
+      predictions may be fully explained and interpreted to the user as needed",
+      and packages every release accordingly.
+
+creators:
+  - name: cm4ai_principal_investigator
+    principal_investigator: https://orcid.org/0000-0002-1708-8454
+    affiliations:
+      - id: d4d:organization/university-of-california-san-diego
+        name: University of California San Diego
+    credit_roles:
+      - conceptualization
+      - supervision
+      - project_administration
+      - funding_acquisition
+    description: >-
+      Trey Ideker (University of California San Diego, ORCID
+      0000-0002-1708-8454) is the principal investigator of the CM4AI Data
+      Generation Project and the point of contact on every captured Dataverse
+      release; contact email tideker@health.ucsd.edu. NIH RePORTER lists him as
+      principal investigator on core project OT2OD032742 at the University of
+      California, San Diego.
+  - name: cm4ai_standards_module_lead
+    principal_investigator: https://orcid.org/0000-0003-4060-7360
+    affiliations:
+      - id: https://ror.org/0153tk833
+        name: University of Virginia
+    credit_roles:
+      - methodology
+      - data_curation
+      - writing_original_draft
+    description: >-
+      Timothy Clark (University of Virginia, ORCID 0000-0003-4060-7360) is first
+      author of the CM4AI project article and first-listed author on every
+      captured release citation. The Standards module he represents is
+      responsible for AI-readiness packaging of data, software, metadata and
+      provenance graphs via the FAIRSCAPE framework.
+  - name: spatial_proteomics_imaging_lead
+    principal_investigator: https://orcid.org/0000-0001-7034-0850
+    affiliations:
+      - id: d4d:organization/stanford-university
+        name: Stanford University
+      - id: d4d:organization/kth-royal-institute-of-technology
+        name: KTH Royal Institute of Technology
+    credit_roles:
+      - investigation
+      - resources
+      - supervision
+    description: >-
+      Emma Lundberg (Stanford University and KTH Royal Institute of Technology,
+      ORCID 0000-0001-7034-0850, contact emmalu@stanford.edu) leads the
+      immunofluorescence spatial proteomics imaging. All CM4AI IF image sets are
+      attributed to "the Lundberg Lab at Stanford University", and the IF
+      sub-crates name Hansen JN, Axelsson U, Johannesson A, Fall J, Ballllosera
+      Navarro F and Lundberg E as authors, with copyright held by The Board of
+      Trustees of the Leland Stanford Junior University.
+  - name: mass_spectrometry_ppi_lead
+    principal_investigator: https://orcid.org/0000-0003-4902-337X
+    affiliations:
+      - id: d4d:organization/university-of-california-san-francisco
+        name: University of California San Francisco
+    credit_roles:
+      - investigation
+      - resources
+      - supervision
+    description: >-
+      Nevan Krogan (University of California San Francisco, ORCID
+      0000-0003-4902-337X, contact nevan.krogan@ucsf.edu) leads the
+      mass-spectrometry protein-protein interaction work. The SEC-MS datasets in
+      the releases are attributed to "the Nevan Krogan laboratory at the
+      University of California San Francisco"; the SEC-MS sub-crates name Forget
+      A, Obernier K and Krogan N as authors, and Antoine Forget as author of the
+      iPSC differentiation SEC-MS crate.
+  - name: genetic_perturbation_lead
+    principal_investigator: https://orcid.org/0000-0002-3383-1287
+    affiliations:
+      - id: d4d:organization/university-of-california-san-diego
+        name: University of California San Diego
+    credit_roles:
+      - investigation
+      - resources
+      - supervision
+    description: >-
+      Prashant Mali (University of California San Diego, ORCID
+      0000-0002-3383-1287, contact pmali@ucsd.edu) is the contact for the
+      Perturb-seq components. The Perturbation Cell Atlas sub-crates list
+      authors Doctor Y; Dailamy A; Forget A; Lee YH; Chinn B; Khaliq H; Polacco
+      B; Muralidharan M; Pan E; Zhang Y; Sigaeva A; Hansen JN; Gao J; Parker JA;
+      Obernier K; Clark T; Chen JY; Metallo C; Lundberg E; Ideker T; Krogan N;
+      Mali P.
+  - name: structural_modeling_lead
+    principal_investigator: https://orcid.org/0000-0003-0435-6197
+    affiliations:
+      - id: d4d:organization/university-of-california-san-francisco
+        name: University of California San Francisco
+    credit_roles:
+      - methodology
+      - investigation
+    description: >-
+      Andrej Sali (ORCID 0000-0003-0435-6197) leads integrative structure
+      modelling of cell-map communities using the open-source Integrative
+      Modeling Platform (IMP) version 2.18 and the Python Modeling Interface.
+      The captured release inventories contain no structural models; this work
+      is described as exploratory in the project article. Affiliation is
+      recorded as University of California San Francisco in the project article
+      and as University of California San Diego in the Dataverse author lists.
+  - name: data_governance_committee_contact
+    principal_investigator: https://orcid.org/0000-0003-4535-3486
+    affiliations:
+      - id: d4d:organization/university-of-california-san-diego
+        name: University of California San Diego
+    credit_roles:
+      - project_administration
+      - data_curation
+    description: >-
+      Jillian Parker (University of California, San Diego, ORCID
+      0000-0003-4535-3486) is named as the Data Governance Committee contact on
+      every structured release page, with contact address
+      jillianparker@health.ucsd.edu. The release RO-Crate spells the same role
+      holder "Jilian Parker" in its dataGovernanceCommittee field.
+  - name: ethics_module_reviewers
+    principal_investigator: https://orcid.org/0000-0002-7080-8801
+    affiliations:
+      - id: d4d:organization/the-hastings-center
+        name: The Hastings Center
+      - id: d4d:organization/university-of-montreal
+        name: University of Montreal
+      - id: d4d:organization/simon-fraser-university
+        name: Simon Fraser University
+    credit_roles:
+      - investigation
+      - supervision
+    description: >-
+      Vardit Ravitsky (ORCID 0000-0002-7080-8801, ravitskyv@thehastingscenter.org)
+      and Jean-Christophe Belisle-Pipon (Simon Fraser University, ORCID
+      0000-0002-8965-8153, jean-christophe_belisle-pipon@sfu.ca) are named as the
+      ethical review contacts on every structured release page and in the release
+      RO-Crate. The Ethics team employs "a methodology inspired by Value-Sensitive
+      Design (VSD)" and developed the CM4AI Life Cycle governance framework and an
+      axiological Value Repository.
+  - name: release_depositor
+    principal_investigator: https://orcid.org/0000-0002-1103-3882
+    affiliations:
+      - id: https://ror.org/0153tk833
+        name: University of Virginia
+    credit_roles:
+      - data_curation
+    description: >-
+      Justin Niestroy (University of Virginia, ORCID 0000-0002-1103-3882) is
+      recorded as the depositor for the March 2025, June 2025, October 2025 and
+      June 2026 releases, with deposit date 2025-02-27 on all four records.
+  - name: cm4ai_program_manager
+    principal_investigator: https://orcid.org/0000-0001-6730-2773
+    affiliations:
+      - id: d4d:organization/university-of-alabama-at-birmingham
+        name: University of Alabama at Birmingham
+    credit_roles:
+      - project_administration
+    description: >-
+      Swathi Thaker, PhD (University of Alabama at Birmingham, ORCID
+      0000-0001-6730-2773) is listed as CM4AI Program Manager and the contact
+      for project-related inquiries at snthaker@uab.edu.
+  - name: release_author_list
+    affiliations:
+      - id: d4d:organization/university-of-california-san-diego
+        name: University of California San Diego
+      - id: d4d:organization/university-of-california-san-francisco
+        name: University of California San Francisco
+      - id: d4d:organization/stanford-university
+        name: Stanford University
+      - id: https://ror.org/0153tk833
+        name: University of Virginia
+      - id: d4d:organization/yale-university
+        name: Yale University
+      - id: d4d:organization/university-of-texas-at-austin
+        name: University of Texas at Austin
+      - id: d4d:organization/university-of-alabama-at-birmingham
+        name: University of Alabama at Birmingham
+      - id: d4d:organization/university-of-alabama
+        name: University of Alabama
+      - id: d4d:organization/simon-fraser-university
+        name: Simon Fraser University
+      - id: d4d:organization/the-hastings-center
+        name: The Hastings Center
+      - id: d4d:organization/kth-royal-institute-of-technology
+        name: KTH Royal Institute of Technology
+      - id: d4d:organization/university-of-montreal
+        name: University of Montreal
+    description: >-
+      The credited author list is identical across the four captured releases:
+      Clark T (University of Virginia, 0000-0003-4060-7360); Parker J (UCSD,
+      0000-0003-4535-3486); Al Manir S (University of Virginia,
+      0000-0003-4647-3877); Axelsson U (KTH Royal Institute of Technology);
+      Ballllosero Navarro F (Stanford, 0000-0002-4180-422X); Chinn B (UCSD);
+      Churas CP (UCSD, 0000-0001-9998-705X); Dailamy A (UCSD,
+      0000-0002-6711-8260); Doctor Y (UCSD, 0009-0009-0483-7506); Fall J (KTH);
+      Forget A (UCSF, 0000-0003-0223-0312); Gao J (UCSD, 0000-0002-6311-3526);
+      Hansen JN (Stanford, 0000-0002-4650-9094); Hu M (UCSD,
+      0000-0002-1571-8029); Johannesson A (KTH); Khaliq H (UCSD); Lee YH (UCSD,
+      0000-0003-0917-355X); Lenkiewicz J (UCSD, 0000-0001-7252-8638); Levinson
+      MA (University of Virginia, 0000-0003-0384-8499); Marquez C (UCSD,
+      0000-0003-3960-420X); Metallo C (UCSD, 0000-0003-2404-3040); Muralidharan
+      M (UCSF); Nourreddine S (UCSD, 0000-0003-3881-7588); Niestroy J
+      (University of Virginia, 0000-0002-1103-3882); Obernier K (UCSF,
+      0000-0002-4025-1299); Pan E (UCSD); Polacco B (UCSF); Pratt D (UCSD,
+      0000-0002-1471-9513); Qian G (UCSD, 0009-0005-4217-2745); Schaffer L
+      (UCSD, 0000-0001-6339-9141); Sigaeva A (KTH, 0000-0003-3361-3797); Thaker
+      S (UAB, 0000-0001-6730-2773); Zhang Y (UCSD); Belisle-Pipon JC (Simon
+      Fraser University, 0000-0002-8965-8153); Brandt C (Yale,
+      0000-0001-8179-1796); Chen JY (UAB, 0000-0002-6112-415X); Ding Y
+      (University of Texas at Austin, 0000-0003-2567-2009); Fodeh S (Yale,
+      0000-0003-4664-3143); Krogan N (UCSF, 0000-0003-4902-337X); Lundberg E
+      (Stanford, 0000-0001-7034-0850); Mali P (UCSD, 0000-0002-3383-1287);
+      Payne-Foster P (University of Alabama, 0000-0002-3508-3577); Ratcliffe S
+      (University of Virginia, 0000-0002-6644-8284); Ravitsky V (University of
+      Montreal, 0000-0002-7080-8801); Sali A (0000-0003-0435-6197); Schulz W
+      (Yale, 0000-0002-2048-4028); Ideker T (UCSD, 0000-0002-1708-8454). The
+      AI-readiness self-assessment counts 47 authors. The June 2026 release
+      RO-Crate citation differs from the Dataverse author list by omitting
+      Marquez C and adding Park, S and Zhao, X. The June 2026 Dataverse record
+      gives ROR https://ror.org/0153tk833 in place of the institution name for
+      the three University of Virginia authors.
+
+funders:
+  - name: nih_bridge2ai_common_fund
+    grantor: d4d:organization/national-institutes-of-health
+    description: >-
+      The National Institutes of Health Common Fund funds CM4AI through the
+      Bridge to Artificial Intelligence (Bridge2AI) program. Every captured
+      Dataverse release records "Funding Information: National Institutes of
+      Health: 1OT2OD032742-01", and both the CM4AI home page and data-releases
+      page state "NIH funding award number: 1OT2OD032742-01". NIH RePORTER lists
+      application ID 11211616, project number 3OT2OD032742-01S2, core project
+      number OT2OD032742, title "Bridge2AI: Cell Maps for AI (CM4AI) Data
+      Generation Project", organization University of California, San Diego,
+      fiscal year 2025, award amount 5,289,382, project start 2022-09-01 and
+      project end 2026-08-31.
+    grants:
+      - id: d4d:grant/1OT2OD032742-01
+        name: Bridge2AI Functional Genomics Data Generation Project (CM4AI)
+        grant_number: 1OT2OD032742-01
+      - id: d4d:grant/3OT2OD032742-01S2
+        name: >-
+          Bridge2AI: Cell Maps for AI (CM4AI) Data Generation Project,
+          supplement application 11211616
+        grant_number: 3OT2OD032742-01S2
+      - id: d4d:grant/5U54HG012513-02
+        name: Bridge2AI Bridge Center
+        grant_number: 5U54HG012513-02
+  - name: additional_nih_awards_recorded_in_release_crate
+    grantor: d4d:organization/national-institutes-of-health
+    description: >-
+      The June 2026 release RO-Crate and its Perturb-seq sub-crates record a
+      longer funder string than the Dataverse citation metadata does, adding
+      several NIH awards alongside the Bridge2AI award.
+    grants:
+      - id: d4d:grant/R01HG012351
+        name: NIH award R01HG012351
+        grant_number: R01HG012351
+      - id: d4d:grant/R01NS131560
+        name: NIH award R01NS131560
+        grant_number: R01NS131560
+      - id: d4d:grant/U54CA274502
+        name: NIH award U54CA274502
+        grant_number: U54CA274502
+      - id: d4d:grant/S10-OD026929
+        name: NIH shared instrumentation award S10 OD026929
+        grant_number: S10 OD026929
+      - id: d4d:grant/P30CA023100
+        name: National Cancer Institute award P30CA023100
+        grant_number: P30CA023100
+  - name: non_nih_funders_recorded_in_release_crate
+    description: >-
+      Non-NIH funding recorded in the June 2026 release RO-Crate funder string,
+      together with the University of Virginia funding acknowledged in the CM4AI
+      project article.
+    grants:
+      - id: d4d:grant/W81XWH-22-1-0401
+        name: Department of Defense award W81XWH-22-1-0401
+        grant_number: W81XWH-22-1-0401
+      - id: d4d:grant/EDUC4-12804
+        name: CIRM training award EDUC4-12804
+        grant_number: EDUC4-12804
+      - id: d4d:grant/NWO-019.231EN.013
+        name: Dutch Research Council (NWO) award 019.231EN.013
+        grant_number: NWO, 019.231EN.013
+      - id: d4d:grant/frederick-thomas-fund
+        name: >-
+          Frederick Thomas Fund of the University of Virginia, acknowledged in
+          the CM4AI project article
+        grant_number: not stated
+
+instances:
+  - name: protein_interactions_programme_total
+    instance_type: Protein-protein interactions measured across the programme
+    counts: 1374
+    data_topic: http://purl.obolibrary.org/obo/NCIT_C18469
+    label: false
+    description: >-
+      Programme-level figure advertised in the CM4AI Data Insights panel on both
+      cm4ai.org and cm4ai.org/data-releases as "Protein Interactions 1,374". The
+      pages do not state which releases or modalities this count covers.
+  - name: immunofluorescent_images_programme_total
+    instance_type: Immunofluorescent confocal microscopy images
+    counts: 53788
+    data_topic: https://meshb.nlm.nih.gov/record/ui?ui=D005453
+    data_substrate: https://www.cellosaurus.org/CVCL_0419
+    label: false
+    description: >-
+      Programme-level figure advertised in the CM4AI Data Insights panel as
+      "Immunofluorescent Images 53,788". The June 2026 release RO-Crate
+      separately reports 53,877 dataset entities across all linked sub-crates,
+      which is a different quantity and should not be conflated with the image
+      count.
+  - name: proteins_investigated_programme_total
+    instance_type: Distinct proteins investigated across all modalities
+    counts: 7023
+    label: false
+    description: >-
+      Programme-level figure advertised in the CM4AI Data Insights panel as
+      "Total Proteins Investigated 7,023". The same pages describe the flagship
+      SEC-MS datasets as "capturing ~7,000 proteins" in both the iPSC and TNBC
+      arms.
+  - name: genes_targeted_programme_total
+    instance_type: Genes targeted by CRISPRi perturbation
+    counts: 11739
+    data_topic: https://meshb.nlm.nih.gov/record/ui?ui=D064113
+    data_substrate: https://www.cellosaurus.org/CVCL_B5P3
+    label: false
+    description: >-
+      Programme-level figure advertised in the CM4AI Data Insights panel as
+      "genes targeted 11,739". It matches the "11,739 targeted genes" of the
+      expressed genome-scale CRISPRi Perturbation Cell Atlas in KOLF2.1J iPSCs,
+      described on the data-releases page as "Perturb-seq of >11,000 genes
+      (whole-genome)". The TNBC arm is described separately as "Perturb-seq of
+      200 genes".
+    missing_information:
+      - name: perturb_seq_embargo
+        missing:
+          - >-
+            Perturb-seq data for KOLF2.1J iPSCs (undifferentiated) and for
+            MDA-MB-468 cells with and without treatment are listed with external
+            access marked "Embargoed" in the October 2025 and June 2026
+            releases.
+        why_missing:
+          - Temporary pre-publication embargo.
+  - name: mda_mb_468_cell_system
+    instance_type: >-
+      Triple-negative breast cancer cell line samples under untreated, paclitaxel
+      and vorinostat conditions
+    data_substrate: https://www.cellosaurus.org/CVCL_0419
+    label: false
+    description: >-
+      "MDA-MB-468 (RRID:CVCL_0419) is a triple negative breast cancer cell line
+      established from a metastatic site pleural effusion of a 51-year-old black
+      female with a metastatic mammary adenocarcinoma, available from ATCC. This
+      cell line has been extensively used to study triple-negative breast cancer
+      and is well characterized with data such as transcriptomic, mutational
+      profile and whole-genome sequencing available." Conditions released are
+      untreated (DMSO control), paclitaxel and vorinostat. Flagship TNBC content
+      advertised by the project is SEC-MS capturing ~7,000 proteins, IF images
+      for 523 proteins, Perturb-seq of 200 genes, and AP-MS interactomes.
+  - name: kolf2_1j_cell_system
+    instance_type: >-
+      Induced pluripotent stem cell line samples: undifferentiated parental
+      iPSCs and iPSC-derived neural progenitor cells, neurons and cardiomyocytes
+    data_substrate: https://www.cellosaurus.org/CVCL_B5P3
+    label: false
+    description: >-
+      "The KOLF2.1J (RRID:CVCL_B5P3) iPSCs cell line was derived from a healthy
+      male Northern European donor, available from the Human Induced Pluripotent
+      Stem Cells Initiative (HipSci) resource. It is available for access by
+      non-for-profit organizations via a simple MTA." Differentiation states
+      released are parental (undifferentiated), neural progenitor cell, neuron
+      and cardiomyocyte. Flagship iPSC content advertised by the project is
+      Perturb-seq of >11,000 genes (whole-genome) and SEC-MS capturing ~7,000
+      proteins, with IF images listed as "coming soon".
+
+anomalies:
+  - name: release_date_conflict_june_2026
+    anomaly_details:
+      - >-
+        The cm4ai.org data-releases page presents the June 2026 Data Release
+        (Beta), doi.org/10.18130/V3/HIGT4C, with "Released on: June 17, 2025".
+        The official Dataverse record for the same DOI gives publication date
+        2026-06-17, and its files are stamped Jun 17 2026 and Jul 15 2026. The
+        Dataverse metadata is authoritative; the website's year is incorrect.
+  - name: crate_versus_dataverse_version_and_date_conflict
+    anomaly_details:
+      - >-
+        For the same June 2026 release, the Dataverse record states Version 2.0,
+        publication date 2026-06-17 and citation year 2026 with V2, while the
+        release RO-Crate root entity states version "1.0", datePublished
+        "2026-06-30" and a citation string beginning "... , 2025, ... V1". The
+        crate's own citation for its sub-crates cites the March 2025 release
+        title against the October 2025 DOI 10.18130/V3/K7TGEM, and the IF
+        sub-crates cite doi:10.18130/V3/B35XWX. These are internal
+        inconsistencies in the crate's citation fields.
+  - name: stale_if_subcrate_metadata
+    anomaly_details:
+      - >-
+        The June 2026 release RO-Crate carries IF image sub-crates whose
+        contentSize (2.6 GB paclitaxel, 3.2 GB untreated, 2.8 GB vorinostat),
+        MD5 (for example 0b4d129f5fbc3bb7f7ea564cd032cef7 for untreated),
+        datePublished ("02/28/2025") and version ("0.1.0") all correspond to the
+        March 2025 release rather than to the June 2026 Dataverse files
+        (3.8 GB / 4.6 GB / 4.2 GB with different checksums). The same sub-crates
+        state 464 proteins, whereas the March 2025 files they check-sum are
+        described as covering 563 proteins.
+  - name: protein_coverage_count_conflict
+    anomaly_details:
+      - >-
+        Three different figures are given for the number of proteins covered by
+        the MDA-MB-468 IF image sets: 563 (March 2025 Dataverse file
+        descriptions), 464 (June 2025, October 2025 and June 2026 file and
+        sub-crate descriptions) and 523 (cm4ai.org flagship dataset summary,
+        which states no release scope). The 563 and 464 figures are separable by
+        release; the 523 figure cannot be attributed to a release from the
+        corpus.
+  - name: contentsize_versus_byte_count_conflict
+    anomaly_details:
+      - >-
+        The June 2026 release RO-Crate states contentSize "19.9 TB" and
+        evi:totalContentSizeBytes 21051331945400 for the same object, and the
+        AI-readiness self-assessment repeats "Total size: 19.9 TB". The
+        project's Data Insights panel advertises 21.4 TB of data volume at
+        programme scope. These three figures are not reconciled in the corpus.
+  - name: checksum_coverage_anomaly
+    anomaly_details:
+      - >-
+        The AI-readiness self-assessment reports "0% of files have checksums
+        (8/55859)" for the June 2026 release, while simultaneously marking the
+        "verifiable" criterion as satisfied.
+  - name: stale_release_page_content
+    anomaly_details:
+      - >-
+        The cm4ai.org data-releases page lists "AP-MS interactomes (coming
+        soon!)" for the TNBC flagship datasets and "IF images (coming soon!)"
+        for the iPSC flagship datasets, but the June 2026 release it links to
+        already publishes AP-MS data for MDA-MB-468 cells with treatment. The
+        page's Archive list also omits the current release from its own archive
+        enumeration while naming May 2024, March 2025, June 2025 and October
+        2025.
+
+known_biases:
+  - name: cell_line_representativeness_bias
+    bias_type: representation_bias
+    bias_description: >-
+      "Data in this release was derived from commercially available
+      de-identified human cell lines, and does not represent all biological
+      variants which may be seen in the population at large." The programme
+      rests on two cell lines only: MDA-MB-468, derived from a single
+      51-year-old Black female donor with metastatic mammary adenocarcinoma, and
+      KOLF2.1J, derived from a single healthy male Northern European donor.
+    affected_subsets:
+      - All releases and all modalities.
+    mitigation_strategy: >-
+      The limitation is stated explicitly on every structured release page and
+      in the release RO-Crate as rai:dataBiases; no mitigation beyond disclosure
+      is described in the corpus.
+  - name: target_selection_bias
+    bias_type: selection_bias
+    bias_description: >-
+      Protein and gene targets are not sampled at random. The programme
+      deliberately selects "100 chromatin modifiers and 100 metabolic enzymes
+      involved in cancer, neuropsychiatric, and cardiac disorders", extended
+      with "another 500 proteins pending significant hits from the genetic
+      perturbations and PPI results". Spatial proteomics coverage is further
+      constrained to proteins for which Human Protein Atlas antibodies exist.
+    affected_subsets:
+      - AP-MS, IF imaging and Perturb-seq components.
+  - name: cross_modality_coverage_bias
+    bias_type: measurement_bias
+    bias_description: >-
+      "Protein-protein interaction (SEC-MS), protein localization (IF imaging),
+      and CRISPRi perturbSeq data interrogate sets of proteins which incompletely
+      overlap." Any analysis restricted to the intersection of modalities is
+      therefore drawn from a narrower and non-random protein set than any single
+      modality provides.
+
+known_limitations:
+  - name: interim_release_limitation
+    limitation_type: scope_limitation
+    limitation_description: >-
+      "This is an interim release. It does not contain predicted cell maps,
+      which will be added in future releases. The current release is most
+      suitable for bioinformatics analysis of the individual datasets. Requires
+      domain expertise for meaningful analysis."
+    scope_impact: >-
+      The headline product of the programme - the integrated hierarchical cell
+      map - is absent from every release captured here. Users obtain the
+      map-input data streams, not the maps.
+    recommended_mitigation: >-
+      Analyse the individual modality datasets on their own terms, and await
+      later releases for computed cell maps.
+  - name: completeness_limitation
+    limitation_type: coverage_limitation
+    limitation_description: >-
+      "These data are not yet in completed final form, and some datasets are
+      under temporary pre-publication embargo. Protein-protein interaction
+      (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq data
+      interrogate sets of proteins which incompletely overlap. Computed cell maps
+      not included in this release."
+    scope_impact: >-
+      Embargoed Perturb-seq deposits cannot be retrieved from their external
+      repositories at the time of capture, and the modalities cannot be joined
+      across the full protein set.
+  - name: domain_expertise_limitation
+    limitation_type: methodological_limitation
+    limitation_description: >-
+      The release explicitly "requires domain expertise for meaningful
+      analysis". The Dataverse archives for the mass-spectrometry, AP-MS and
+      Perturb-seq modalities are RO-Crate metadata packages rather than analysis-
+      ready matrices; the substantive payloads must be retrieved from MassIVE,
+      the SRA or Figshare.
+    recommended_mitigation: >-
+      Follow the RO-Crate provenance graph to the external repository holding
+      each payload, and consult the CM4AI training material and Cell Mapping
+      Toolkit documentation.
+  - name: single_cell_type_map_limitation
+    limitation_type: representativeness_limitation
+    limitation_description: >-
+      Cell maps are constructed per cell type and condition. Assemblies resolved
+      in one cellular context are not guaranteed to transfer to another; the
+      programme's own design of treated versus untreated and differentiated
+      versus naive states presumes that architecture changes with context.
+
+confidential_elements:
+  - name: confidentiality_assessment
+    confidential_elements_present: false
+    confidentiality_details:
+      - >-
+        The release RO-Crate records confidentialityLevel "Unrestricted" at both
+        release and sub-crate level, and the AI-readiness self-assessment records
+        "secure: Confidentiality level: Unrestricted". All files on the captured
+        Dataverse releases are marked File Access: Public.
+
+content_warnings:
+  - name: content_warning_assessment
+    content_warnings_present: false
+    warnings:
+      - >-
+        No content warnings are declared in any captured source. The data are
+        laboratory measurements on immortalised and induced pluripotent human
+        cell lines.
+
+subpopulations:
+  - name: human_subpopulation_assessment
+    subpopulation_elements_present: false
+    identification:
+      - >-
+        No human subpopulations are identified. The crate states
+        d4d:atRiskPopulations "None - no human subjects involved; commercially
+        sourced de-identified cell lines only."
+    distribution:
+      - >-
+        The only donor attributes recorded anywhere in the corpus are the
+        provenance descriptions of the two source cell lines: MDA-MB-468 from a
+        51-year-old Black female with metastatic mammary adenocarcinoma, and
+        KOLF2.1J from a healthy male Northern European donor. Structured
+        biological subpopulations within the data are experimental groups - cell
+        line, treatment condition and differentiation state - not human
+        subpopulations.
+
+sensitive_elements:
+  - name: sensitive_element_assessment
+    sensitive_elements_present: false
+    sensitivity_details:
+      - >-
+        "CM4AI data are distinctive within Bridge2AI in that they are
+        non-clinical (from tissue cultures) and are considered to be
+        de-identified as they cannot be matched, with current knowledge, to a
+        human subject." Every structured release page records Human Subjects:
+        No, De-identified Samples: Yes and FDA Regulated: No.
+
+relationships:
+  - name: cell_map_hierarchy_structure
+    relationship_details:
+      - >-
+        "Cell maps are hierarchical directed acyclic graphs (DAG), where each
+        node represents an assembly of proteins in proximity at a given scale,
+        spanning from large assemblies representing cell compartments (e.g.
+        nucleus, mitochondria) to small assemblies of proteins in close
+        proximity (e.g. protein complexes or subunits)." This is the intended
+        output structure of the programme; no computed map is present in the
+        captured releases.
+  - name: release_to_subcrate_relationships
+    relationship_details:
+      - >-
+        Each release RO-Crate is a container whose parts are per-modality
+        sub-crates, each with its own ARK identifier, author list, licence and
+        external repository deposit. Sub-crates declare isPartOf against several
+        releases at once - for example the AP-MS sub-crates declare membership
+        of both a January 2026 and a June 2026 release - so a single sub-crate
+        can be shared across releases rather than duplicated.
+  - name: modality_intersection_relationship
+    relationship_details:
+      - >-
+        The three primary modalities are linked by shared protein and gene
+        identities rather than by shared instances, and the release states
+        explicitly that these protein sets overlap incompletely.
+
+acquisition_methods:
+  - name: laboratory_measurement_acquisition
+    was_directly_observed: true
+    was_reported_by_subjects: false
+    was_inferred_derived: true
+    was_validated_verified: true
+    acquisition_details:
+      - >-
+        All instances are directly measured in the project's own laboratories
+        from cultured cell lines; nothing is self-reported, because there are no
+        human participants.
+      - >-
+        Derived instances exist alongside the measurements: protein embeddings,
+        co-embeddings and community hierarchies are computed by the MuSIC
+        pipeline, and mass-spectrometry protein quantifications are derived from
+        raw spectra by search software.
+      - >-
+        Validation is built into the design. The Perturbation Cell Atlas
+        findings were validated "via phenotypic, protein-interaction, and
+        metabolic tracing assays", and the AP-MS design carries an untagged
+        parental control, a positive control tagged line and DMSO vehicle
+        controls in four biological replicates.
+
+collection_mechanisms:
+  - name: affinity_purification_mass_spectrometry
+    mechanism_details:
+      - >-
+        AP-MS on endogenously tagged cell lines. "We have endogenously tagged 17
+        genes in MDA-MB-468 and acquired AP-MS data under three conditions
+        (untreated, paclitaxel and vorinostat treated). We are currently in the
+        process of tagging 34 additional genes in MDA-MB-468 cells."
+      - >-
+        The released AP-MS submissions comprise raw data from endogenously
+        tagged MDA-MB-468 cells under paclitaxel and vorinostat perturbation,
+        performed in four biological replicates, with each batch containing an
+        untagged parental control, 10 chromatin modifier tagged cell lines and a
+        positive control tagged line, with DMSO-treated vehicle controls.
+  - name: size_exclusion_chromatography_mass_spectrometry
+    mechanism_details:
+      - >-
+        SEC-MS for proteome-wide complex and interaction mapping. "In addition,
+        we have performed SEC-MS on MDA-MB-468 cells under three conditions
+        (untreated, paclitaxel and vorinostat treated), which enabled us to
+        identify 72/100 chromatin modifiers, with 52 of them being integral
+        components of protein complexes ... We detected PPI profiles of over a
+        thousand complexes in MDA-MB468 cells, with thousands of proteins
+        exhibiting differential elution profiles between control and paclitaxel
+        or vorinostat treated cells. SEC-MS has also been performed in KOLF2
+        iPSCs and derivatives, uncovering more than 700 protein complexes in
+        both parental iPSCs and differentiated neurons."
+      - >-
+        The iPSC differentiation SEC-MS data were acquired on a Bruker timsTOF
+        platform for protein correlation profiling, across Parental, NPC, Neuron
+        and Cardio sample groups.
+  - name: immunofluorescence_confocal_imaging
+    mechanism_details:
+      - >-
+        Immunofluorescence-based staining (ICC-IF) and confocal microscopy in
+        the Lundberg Lab at Stanford University, using the Human Protein Atlas
+        resource of antibodies. "We established automated fixation and
+        permeabilization protocols for the pipetting robot for MDA-MB-468 and
+        KOLF2 cell lines, and completed spatial proteomics mapping of 100
+        chromatin regulators in the MDA-MB-468 cells (+/- paclitaxel or
+        vorinostat), with another 500 proteins pending significant hits from the
+        genetic perturbations and PPI results."
+      - >-
+        Each image carries four channels: nuclei stained with DAPI (blue),
+        endoplasmic reticulum with a calreticulin antibody (yellow),
+        microtubules with a tubulin antibody (red), and an antibody against the
+        protein of interest (green).
+  - name: crispri_single_cell_perturbation_screening
+    mechanism_details:
+      - >-
+        "We performed single-cell CRISPR screens perturbing 100 chromatin
+        regulators in the MDA-MB-468 cells under 3 conditions (no treatment,
+        paclitaxel or vorinostat) and KOLF2 iPSC in the undifferentiated state.
+        We have designed a CRISPR lentiviral library targeting 100 chromatin
+        factors with 6 guide RNAs per gene. We generated and characterized
+        MDA-MB-468 and KOLF2 CRISPR lines expressing inducible dCas9. Single-cell
+        CRISPR screens of 100 chromatin regulators (+/- drug) in MDA-MB-468 cells
+        and in undifferentiated KOLF2.1J iPSCs were done using the 10x Genomics
+        3'HT kit."
+      - >-
+        The released Perturbation Cell Atlas is an expressed genome-scale CRISPRi
+        screen in KOLF2.1J iPSCs mapping transcriptional and fitness phenotypes
+        for 11,739 targeted genes.
+
+sampling_strategies:
+  - name: targeted_protein_and_gene_selection
+    is_sample: true
+    is_random: false
+    is_representative: false
+    source_data:
+      - >-
+        Human chromatin modifiers, metabolic enzymes and other proteins
+        implicated in cancer, neuropsychiatric and cardiac disorders.
+    why_not_representative:
+      - >-
+        Targets were chosen for disease relevance and experimental tractability,
+        not to be representative of the proteome or of any population. The
+        Perturbation Cell Atlas is the exception in scale, being an expressed
+        genome-scale CRISPRi screen of 11,739 targeted genes.
+    strategies:
+      - >-
+        Deliberate selection of an initial panel of 100 chromatin modifiers and
+        100 metabolic enzymes, extended by hit-driven expansion of about 500
+        further proteins in spatial proteomics.
+      - >-
+        Full factorial coverage of the treatment conditions within each cell
+        system: untreated / paclitaxel / vorinostat for MDA-MB-468, and
+        parental / NPC / neuron / cardiomyocyte for KOLF2.1J.
+  - name: replicate_design
+    is_sample: true
+    is_random: false
+    strategies:
+      - >-
+        AP-MS experiments were performed in four biological replicates per
+        condition, with an untagged parental control, ten tagged chromatin
+        modifier lines and a positive control line in each batch.
+      - >-
+        The iPSC differentiation SEC-MS design uses Parental replicates 1-4, NPC
+        replicates 1-2, Neuron replicates 1-3 and Cardio replicates 1-2.
+
+data_collectors:
+  - name: data_acquisition_module_laboratories
+    role: >-
+      Generation of the primary experimental data streams in the CM4AI Data
+      Acquisition module
+    collector_details:
+      - >-
+        Mass spectrometry (AP-MS and SEC-MS): the Nevan Krogan laboratory,
+        University of California San Francisco.
+      - >-
+        Spatial proteomics imaging: the Lundberg Lab, Stanford University, with
+        KTH Royal Institute of Technology co-authors.
+      - >-
+        Genetic perturbation and the Perturbation Cell Atlas: the Prashant Mali
+        group, University of California San Diego.
+  - name: tools_and_standards_modules
+    role: Data integration, packaging and metadata production
+    collector_details:
+      - >-
+        The Tools module, University of California San Diego, produces and
+        maintains the MuSIC dataset integration and map production system.
+      - >-
+        The Standards module, University of Virginia, performs AI-readiness
+        packaging of data, software, metadata and provenance graphs through the
+        FAIRSCAPE framework, and deposits the releases in LibraData.
+  - name: production_locations
+    role: Institutions recorded by Dataverse as production locations
+    collector_details:
+      - >-
+        "University of California San Diego; University of California San
+        Francisco; Stanford University; University of Virginia" is recorded as
+        the Production Location on the June 2025, October 2025 and June 2026
+        releases; the March 2025 record lists University of California San
+        Francisco twice.
+
+collection_timeframes:
+  - name: programme_collection_timeframe
+    start_date: "2022-09-01"
+    end_date: "2026-06-01"
+    timeframe_details:
+      - >-
+        The June 2026 release RO-Crate records rai:dataCollectionTimeframe as
+        "9/1/2022" to "6/1/2026", matching the NIH project start date of
+        2022-09-01.
+      - >-
+        Sub-crates carry narrower end dates reflecting their own deposits:
+        "1/31/2026" for the AP-MS and Perturb-seq crates and "10/13/25" for the
+        paclitaxel IF crate.
+      - >-
+        NIH RePORTER gives the project period as 2022-09-01 to 2026-08-31, while
+        the maintenance plan states that data will be augmented "through the end
+        of the project in November 2026". These two end dates are not reconciled
+        in the corpus.
+  - name: release_publication_timeframe
+    start_date: "2025-03-03"
+    end_date: "2026-07-15"
+    timeframe_details:
+      - >-
+        Publication dates of the four quarterly releases represented as resources
+        here: 2025-03-03, 2025-07-01, 2025-10-31 and 2026-06-17, with the latest
+        file additions to the current release stamped 2026-07-15. An earlier May
+        2024 release predates this window.
+
+direct_collection:
+  - name: direct_generation_by_project_laboratories
+    is_direct: true
+    collection_details:
+      - >-
+        All primary data are generated directly by CM4AI laboratories from
+        purchased or licensed cell lines. There is no third-party data
+        acquisition and no collection from individuals.
+      - >-
+        Source materials are obtained from external providers: MDA-MB-468 from
+        ATCC and KOLF2.1J from the Human Induced Pluripotent Stem Cells
+        Initiative (HipSci) resource, the latter "available for access by
+        non-for-profit organizations via a simple MTA".
+
+missing_data_documentation:
+  - name: release_missing_data_statement
+    missing_data_patterns:
+      - Some datasets are under temporary pre-publication embargo.
+      - >-
+        Protein-protein interaction (SEC-MS), protein localization (IF imaging),
+        and CRISPRi perturbSeq data interrogate sets of proteins which
+        incompletely overlap.
+      - Computed cell maps not included in this release.
+    missing_data_causes:
+      - Pre-publication embargo pending associated manuscripts.
+      - >-
+        Independent modality-specific target selection and antibody or reagent
+        availability.
+      - Map computation deferred to later releases.
+    handling_strategy: >-
+      Missing and embargoed content is disclosed rather than imputed. The release
+      RO-Crate carries the same statement in rai:dataCollectionMissingData and in
+      a completeness field, and the Dataverse page repeats it under
+      "Completeness". No imputation is performed anywhere in the corpus.
+
+raw_data_sources:
+  - name: mda_mb_468_cell_line_source
+    source_description: >-
+      MDA-MB-468 (RRID:CVCL_0419) triple negative breast cancer cell line,
+      established from a metastatic site pleural effusion of a 51-year-old black
+      female with a metastatic mammary adenocarcinoma.
+    source_type:
+      - commercially available human cell line
+    access_details: Available from ATCC.
+    raw_data_format:
+      - live cell culture
+  - name: kolf2_1j_cell_line_source
+    source_description: >-
+      KOLF2.1J (RRID:CVCL_B5P3) induced pluripotent stem cell line, derived from
+      a healthy male Northern European donor.
+    source_type:
+      - human induced pluripotent stem cell line
+    access_details: >-
+      Available from the Human Induced Pluripotent Stem Cells Initiative (HipSci)
+      resource; accessible to not-for-profit organizations via a simple MTA.
+    raw_data_format:
+      - live cell culture
+  - name: mass_spectrometry_raw_deposits
+    source_description: >-
+      Raw and processed mass-spectrometry files underlying the AP-MS and SEC-MS
+      components, deposited at MassIVE.
+    source_type:
+      - external repository deposit
+    access_details: >-
+      MSV000101915 (AP-MS paclitaxel, 441.2 GB), MSV000101917 (AP-MS vorinostat,
+      532.5 GB), MSV000100676 (SEC-MS KOLF2 differentiation, 1.11 TB) and
+      MSV000098237 (SEC-MS treated MDA-MB-468, 910 GB, doi:10.25345/C5348GV4S,
+      content at ftp://massive-ftp.ucsd.edu/v10/MSV000098237/). The AP-MS and
+      KOLF2 SEC-MS deposits are licensed CC0 1.0 at MassIVE.
+    raw_data_format:
+      - .d
+      - .d directory group
+      - .tsv
+      - .xml
+  - name: perturb_seq_raw_sequence_deposits
+    source_description: >-
+      Raw single-cell sequencing data underlying the CRISPRi Perturbation Cell
+      Atlas, 16.7 TB.
+    source_type:
+      - external repository deposit
+    access_details: >-
+      Referenced by the June 2025 release as NCBI BioProject / Sequence Read
+      Archive; the corresponding access URL is recorded as "Embargoed" in the
+      June 2026 release crate, and both Perturb-seq external links are marked
+      Embargoed on the October 2025 and June 2026 release pages. The aggregated
+      atlas (177.35 GB) is available from Figshare at
+      https://figshare.com/s/ee85bb1880921326249b.
+    raw_data_format:
+      - fastq.gz
+      - h5
+      - h5ad
+
+ethical_reviews:
+  - name: ethical_review_hastings_center
+    contact_person: https://orcid.org/0000-0002-7080-8801
+    reviewing_organization: d4d:organization/the-hastings-center
+    review_details:
+      - >-
+        Every structured release page records "Ethical Review: Vardit Ravitsky
+        (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon
+        (jean-christophe_belisle-pipon@sfu.ca)". The release RO-Crate repeats
+        this in its ethicalReview field, spelling the first name "Vardit
+        Ravistky".
+      - >-
+        "The Ethics team worked closely with Data Acquisition, Tools, and
+        Standards Modules to develop a plan for ethical preparation, licensing,
+        dissemination, and Data Access supervision of CM4AI datasets. This plan
+        balances the openness of the data produced, with protection of the
+        intellectual property, and supervision and monitoring of potential
+        efforts at commercialization."
+  - name: ethical_review_simon_fraser
+    contact_person: https://orcid.org/0000-0002-8965-8153
+    reviewing_organization: d4d:organization/simon-fraser-university
+    review_details:
+      - >-
+        Jean-Christophe Belisle-Pipon (Simon Fraser University) is the second
+        named ethical review contact on all structured release pages and in the
+        release RO-Crate.
+      - >-
+        "The Ethics team is instrumental in formulating the CM4AI Life Cycle, a
+        framework designed to elucidate governance milestones throughout the data
+        generation and AI system development processes."
+
+data_protection_impacts:
+  - name: data_protection_assessment
+    impact_details:
+      - >-
+        No personal data are processed. The data are laboratory measurements on
+        commercially available, de-identified human cell lines and are
+        "considered to be de-identified as they cannot be matched, with current
+        knowledge, to a human subject".
+      - >-
+        Confidentiality level is declared Unrestricted and all released files
+        are public, so no access-control or re-identification safeguards are
+        applied to the distributed content.
+      - >-
+        A Data Access Committee supervises ethical matters related to dataset
+        distribution and potential dual licensing for commercial use, and a Data
+        Governance Committee contact is named on every release.
+
+human_subject_research:
+  name: human_subject_research_status
+  involves_human_subjects: false
+  irb_approval:
+    - >-
+      "Exempt - research with commercially available de-identified human cell
+      lines does not constitute human subjects research." No IRB protocol number
+      appears anywhere in the corpus.
+  ethics_review_board:
+    - Vardit Ravitsky (ravitskyv@thehastingscenter.org)
+    - Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+  special_populations:
+    - >-
+      None. The release RO-Crate records d4d:atRiskPopulations "None - no human
+      subjects involved; commercially sourced de-identified cell lines only."
+  regulatory_compliance:
+    - "Human Subjects: No (stated on every structured release page)."
+    - "De-identified Samples: Yes."
+    - "FDA Regulated: No."
+    - >-
+      humanSubjectResearch in the release RO-Crate: "None - data collected from
+      commercially available cell lines".
+  description: >-
+    Both source cell lines are described as ethically sourced. "CM4AI has elected
+    to use the cancer cell line MDA-MB-468 (+/- treatment with paclitaxel and
+    vorinostat) and the iPSC line KOLF2.1J (+/- neuronal and cardiomyocytic
+    differentiation), both of which have been ethically sourced."
+
+informed_consent:
+  - name: informed_consent_status
+    consent_type:
+      - Not applicable
+    consent_documentation:
+      - >-
+        "Not applicable - data collected from commercially available
+        de-identified human cell lines (KOLF2.1J iPSC and MDA-MB-468). No
+        primary human subjects research conducted under this release."
+    consent_scope:
+      - >-
+        Consent for the original derivation of the two cell lines rests with
+        their upstream providers (ATCC for MDA-MB-468, HipSci for KOLF2.1J); no
+        consent instrument is reproduced in the corpus.
+
+at_risk_populations:
+  name: at_risk_population_status
+  at_risk_groups_included: false
+  special_protections:
+    - >-
+      "None - no human subjects involved; commercially sourced de-identified cell
+      lines only."
+  description: >-
+    No at-risk or vulnerable population is enrolled or represented, because the
+    programme enrolls no human participants at all.
+
+participant_privacy:
+  - name: participant_privacy_status
+    anonymization_method:
+      - >-
+        Not applicable at the level of the released data: both source cell lines
+        are supplied to the project already de-identified by their commercial or
+        consortium providers.
+    reidentification_risk:
+      - >-
+        Assessed as effectively absent by the project: the data "are considered
+        to be de-identified as they cannot be matched, with current knowledge, to
+        a human subject". The corpus records no formal re-identification risk
+        analysis.
+    data_linkage:
+      - >-
+        No linkage to individual-level human records is performed or possible
+        from the released content.
+
+preprocessing_strategies:
+  - name: music_integration_pipeline
+    preprocessing_details:
+      - >-
+        The MuSIC (Multi-Scale Integrated Cell) pipeline is the programme's
+        integration route from raw modality data to cell maps. Its published
+        segments are: download PPI and image data from the Krogan and Lundberg
+        laboratory deposition archives; generate embeddings, using node2vec on
+        the PPI networks and a Human Protein Atlas deep learning model on the IF
+        images, each reducing dimensionality; co-embed the two representations
+        using contrastive deep learning so that "the original embeddings can be
+        reconstructed with minimal information loss and proteins with similar PPI
+        and image embeddings have similar co-embeddings"; perform protein
+        community detection on all-by-all similarities in co-embedding space to
+        produce the hierarchy; and evaluate the hierarchy by alignment to Gene
+        Ontology and Reactome and by LLM-based naming.
+      - >-
+        The pipeline outputs are not part of the captured releases: "Computed
+        cell maps not included in this release."
+    used_software:
+      - id: https://github.com/idekerlab/cellmaps_pipeline
+        name: Cell Mapping Toolkit (cellmaps_pipeline)
+        url: https://github.com/idekerlab/cellmaps_pipeline
+        description: >-
+          Implements the end-to-end MuSIC pipeline as a series of Python PyPI
+          packages with full user documentation.
+  - name: mass_spectrometry_processing
+    preprocessing_details:
+      - >-
+        For the KOLF2 differentiation SEC-MS data, "Raw data was processed using
+        Spectronaut; downstream analysis was conducted in R using
+        MSstats-compatible formats."
+      - >-
+        The SEC-MS crate for treated MDA-MB-468 cells registers 9 computations
+        alongside 18 datasets, 9 experiments and 9 schemas, indicating a
+        per-condition processing step recorded in the provenance graph.
+  - name: fairscape_ai_readiness_packaging
+    preprocessing_details:
+      - >-
+        "The client-side package, FAIRSCAPE-CLI, is called when any computation
+        or coherent set of computations in the pipeline is completed, and it is
+        passed metadata which defines schemas in JSON-Schema for the datasets in
+        the computational unit, as well as the inputs, computations, software,
+        models, and outputs. FAIRSCAPE-CLI creates an RO-Crate package with the
+        datasets, metadata, and software - or resolvable references to these
+        components - and unique stubs for identifier creation on each of these
+        components."
+      - >-
+        "The RO-Crates are then sent to the FAIRSCAPE server where they are
+        registered and assigned persistent, resolvable, globally unique
+        persistent identifiers (PIDs) ... The PID system currently in use is the
+        ARK scheme - with DOIs a future feature as supplementary PIDs for
+        final-state publishable work. Lastly, the server computes end-to-end
+        entailments on each RO-Crate's provenance as expressed in the EVI
+        Evidence Graph Ontology and links them together where possible."
+      - >-
+        The June 2026 release crate reports 1,976 computation or experiment steps
+        and 6 software instances recorded in its provenance graph.
+    used_software:
+      - id: https://fairscape.github.io
+        name: FAIRSCAPE
+        version: 1.1.3
+        license: MIT
+        url: https://fairscape.github.io
+        description: >-
+          AI-readiness packaging framework producing RO-Crates with EVI
+          provenance graphs and ARK identifiers.
+
+cleaning_strategies:
+  - name: experimental_quality_control
+    cleaning_details:
+      - >-
+        AP-MS batches are internally controlled: each includes an untagged
+        parental control, ten chromatin modifier tagged cell lines and a positive
+        control tagged line, with DMSO-treated samples as vehicle controls across
+        all AP-MS experiments, in four biological replicates.
+      - >-
+        For the single-cell CRISPR screens the project article states that "The
+        resulting data are currently being QCed"; the corpus records no final QC
+        criteria or exclusion counts for the released Perturb-seq data.
+  - name: metadata_curation_and_correction
+    cleaning_details:
+      - >-
+        Release metadata are themselves cleaned between releases: the June 2025
+        release is explicitly "a revision ... includes adding RGB immunofluorescent
+        images, corrections to ro-crate metadata, and changes to naming
+        conventions."
+
+labeling_strategies:
+  - name: llm_assisted_assembly_annotation
+    data_annotation_protocol:
+      - >-
+        In the hierarchy evaluation step of the MuSIC pipeline, "cell maps are
+        aligned to known protein function and pathway resources, including the
+        Gene Ontology (GO) and Reactome, to determine protein assemblies in the
+        cell map with high overlap with known cell biology", and "assemblies in
+        the cell maps are annotated using a large language model (LLM) approach
+        that we developed to name sets of proteins and assign a name confidence
+        score."
+    labeling_details:
+      - >-
+        Labels of this kind attach to computed cell maps, which are not included
+        in any release captured here. No per-instance labels are distributed with
+        the release payloads.
+    annotator_demographics:
+      - Not recorded in the corpus.
+  - name: structured_ontology_annotation_of_releases
+    data_annotation_protocol:
+      - >-
+        Release-level keywords are mapped to public ontology terms in the
+        Dataverse metadata, for example AI and artificial intelligence to NCI
+        Thesaurus NCIT_C16309, affinity purification to BAO_0002603, AP-MS to
+        Software Ontology SWO_1100012, breast cancer to LOINC LA14283-8,
+        cardiomyocyte to CL_0000746, CRISPR/Cas9 to BAO_0010249, induced
+        pluripotent stem cell and iPSC to EFO_0004905, machine learning to
+        OBI_0002587, mass spectroscopy to MeSH D013058, neural progenitor cell
+        and NPC to CL_0011020, neuron to CL_0000540, paclitaxel to CHEBI_45863,
+        perturb-seq and perturbation sequencing to EFO_0008860, protein-protein
+        interaction to NCIT_C18469, protein localization to GO_0008104,
+        single-cell RNA sequencing and scRNAseq to EFO_0008913, and vorinostat
+        to CHEBI_45716.
+      - >-
+        The release RO-Crate additionally declares subject terms as MeSH records
+        (Breast Neoplasms D001943, Induced Pluripotent Stem Cells D057026,
+        CRISPR-Cas Systems D064113, Mass Spectrometry D013058, Fluorescent
+        Antibody Technique D005453, Paclitaxel D017239, Vorinostat D000077337),
+        EDAM topics (Proteomics topic_0121, RNA-Seq topic_3170, Functional
+        genomics topic_3320, Machine learning topic_3474) and Cellosaurus cell
+        lines (MDA-MB-468 CVCL_0419, KOLF2.1J CVCL_B5P3).
+    labeling_details:
+      - >-
+        This is dataset-level semantic annotation for discovery, not instance-
+        level labelling of the measurements.
+
+raw_sources:
+  - name: massive_raw_mass_spectrometry
+    access_url: https://massive.ucsd.edu/ProteoSAFe/QueryMSV?id=MSV000101915
+    raw_data_details:
+      - >-
+        Raw AP-MS data for the paclitaxel condition, 441.2 GB, MassIVE
+        MSV000101915, released at MassIVE under CC0 1.0.
+      - >-
+        The corresponding vorinostat deposit is MassIVE MSV000101917, 532.5 GB,
+        also CC0 1.0.
+  - name: massive_raw_sec_ms
+    access_url: https://massive.ucsd.edu/ProteoSAFe/QueryMSV?id=MSV000100676
+    raw_data_details:
+      - >-
+        SEC-MS characterization of KOLF2 neuronal and cardiomyocyte
+        differentiation, 1.11 TB, MassIVE MSV000100676, CC0 1.0, publisher
+        MassIVE.
+      - >-
+        SEC-MS of MDA-MB468 following treatment of vorinostat or paclitaxel, 910
+        GB, doi:10.25345/C5348GV4S, MassIVE MSV000098237, CC BY-NC-SA 4.0, with
+        content at ftp://massive-ftp.ucsd.edu/v10/MSV000098237/.
+  - name: embargoed_raw_sequence_data
+    raw_data_details:
+      - >-
+        Raw sequence data for the Perturbation Cell Atlas, 16.7 TB, version 0.6,
+        with access URL recorded as "Embargoed" in the June 2026 release crate.
+        The aggregated atlas is available from Figshare at
+        https://figshare.com/s/ee85bb1880921326249b.
+
+machine_annotation_tools:
+  - name: pipeline_and_analysis_tools
+    tools:
+      - node2vec
+      - Human Protein Atlas deep learning image model
+      - Contrastive deep-learning co-embedding model
+      - Multi-resolution community detection
+      - Large language model assembly naming
+      - Spectronaut
+      - R / MSstats
+      - 10x Genomics 3' HT kit
+      - Integrative Modeling Platform (IMP) version 2.18
+    tool_descriptions:
+      - >-
+        node2vec reduces the dimensionality of downloaded PPI networks to
+        produce a PPI embedding capturing each protein's interaction
+        neighbourhood.
+      - >-
+        A Human Protein Atlas deep learning model reduces IF images to an image
+        embedding capturing protein localisation.
+      - >-
+        Contrastive deep learning fuses the PPI and image embeddings into a
+        per-protein co-embedding, followed by community detection over all-by-all
+        similarities to produce the assembly hierarchy.
+      - >-
+        An LLM approach developed by the project names sets of proteins and
+        assigns a name confidence score during hierarchy evaluation.
+      - >-
+        Spectronaut performs quantitative analysis of the KOLF2 differentiation
+        SEC-MS raw data, with downstream analysis in R using MSstats-compatible
+        formats.
+      - >-
+        Single-cell CRISPR screens were performed using the 10x Genomics 3' HT
+        kit.
+      - >-
+        Integrative structure modelling of MuSIC communities uses the Python
+        Modeling Interface over the open-source Integrative Modeling Platform
+        (IMP) version 2.18, available at https://integrativemodeling.org.
+    tool_accuracy:
+      - >-
+        No accuracy figures for these tools as applied to the released CM4AI data
+        are given in the corpus.
+
+existing_uses:
+  - name: published_analyses_using_cm4ai_data
+    examples:
+      - >-
+        "Nourreddine S, Doctor Y, Dailamy A, et al. (2024) A Perturbation Cell
+        Atlas of Human Induced Pluripotent Stem Cells. bioRxiv 2024.11.03.621734;
+        doi: https://doi.org/10.1101/2024.11.03.621734" - the publication
+        associated with the Perturb-seq components of the releases.
+      - >-
+        "Clark T, Parker J, Al Manir S, et al. (2024) Cell Maps for Artificial
+        Intelligence: AI-Ready Maps of Human Cell Architecture from
+        Disease-Relevant Cell Lines. bioRxiv 2024.05.21.589311" - the project
+        article, cited as the Related Publication on every release.
+    description: >-
+      The June 2026 release RO-Crate lists four associated publications: the two
+      above, plus Qin Y, Huttlin EL, Winsnes CF et al., "A multi-scale map of
+      cell structure fusing protein images and interactions", Nature 600, 536-542
+      (2021), doi:10.1038/s41586-021-04115-9; and Schaffer LV, Hu M, Qian G et
+      al., "Multimodal cell maps as a foundation for structural and functional
+      genomics", Nature (2025), https://www.nature.com/articles/s41586-025-08878-3.
+      The last two are methodological antecedents whose underlying measurements
+      were made in HEK293 and U2OS osteosarcoma cells respectively and are
+      deposited outside the CM4AI Dataverse releases; they demonstrate what the
+      CM4AI mapping approach produces rather than describing the released CM4AI
+      data.
+  - name: demonstrated_downstream_modelling_uses
+    examples:
+      - >-
+        Visible machine learning and visible neural networks: cell maps "have
+        been used in AI tools for 'visible machine learning' or 'visible neural
+        networks' (VNNs) to interrogate how protein assemblies in the cell affect
+        cell-level phenotype predictions", with the release crate citing Ma et
+        al. 2018 (PMID 29505029) and Kuenzi et al. 2020 (PMID 33096023) as the
+        pattern to enable.
+      - >-
+        Interpretation of cancer mutations using a multiscale map of protein
+        systems, Zheng F, Kelly MR, Ramms DJ et al., Science 374, eabf3067
+        (2021).
+  - name: training_and_community_use
+    examples:
+      - >-
+        "Initial Datasets, Tools and Standards associated with all three parallel
+        mapping platforms have been released and are publicly available at our
+        CM4AI web portal. These data were also made available at our CodeFest in
+        March 2024, accompanied by detailed tutorials explaining how the data
+        were derived and integrated, and providing production ready software for
+        producing the datasets."
+      - >-
+        The inaugural virtual CodeFest trained 38 registrants, of whom 40%
+        identified as female and 30% came from underrepresented communities.
+
+use_repository:
+  - name: cm4ai_dataverse_collection
+    repository_url: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+    repository_details:
+      - >-
+        The "Cell Maps for Artificial Intelligence" collection in LibraData, the
+        University of Virginia's instance of Dataverse and an NIH-approved
+        generalist repository, reached via University of Virginia Dataverse >
+        LibraData: UVa's Scholarly Research > School of Medicine. Dataverse
+        software version at capture: v. 6.6 build 1829-192cdc4.
+  - name: cm4ai_web_portal
+    repository_url: https://cm4ai.org/data-releases/
+    repository_details:
+      - >-
+        The CM4AI web portal, using the U-BRITE platform, "to support open and
+        trustworthy data management and sharing, ensuring the broad dissemination
+        of the datasets, cell maps, and tools developed".
+  - name: software_repositories
+    repository_url: https://github.com/idekerlab/cellmaps_pipeline
+    repository_details:
+      - >-
+        "Software comprising the Tools data integration pipeline is available
+        under BSD-3 open source license in GitHub (for alpha level tools) or in
+        the Zenodo long-term archive (for production-ready tools). Links to these
+        tools are packaged in RO-Crates as part of CM4AI provenance
+        representations."
+      - >-
+        FAIRSCAPE is documented with a tutorial and installation instructions at
+        https://fairscape.github.io and is available under the MIT License; the
+        Integrative Modeling Platform is at http://integrativemodeling.org.
+      - >-
+        "All CM4AI integration and packaging software is freely available and
+        licensed under nonrestrictive open-source licenses."
+
+other_tasks:
+  - name: downstream_task_opportunities
+    task_details:
+      - >-
+        Interpretation of genetic variants and mutations: "Cell maps provide a
+        foundation for downstream applications in human genomics, including
+        interpretation of genetic variants and mutations."
+      - >-
+        Analysis of cell architectural change under disease processes, treatment
+        conditions or genetic perturbation, named as an intended use on every
+        structured release page.
+      - >-
+        Benchmarking and development of multimodal integration methods, since
+        the releases publish matched modalities on the same cell systems.
+
+future_use_impacts:
+  - name: interim_state_impact
+    impact_details:
+      - >-
+        Because every captured release is Beta and interim, analyses built on one
+        release may not transfer cleanly to the next: file names, checksums and
+        RO-Crate structure have already changed between releases, and the June
+        2025 revision explicitly changed naming conventions and corrected
+        RO-Crate metadata.
+      - >-
+        Computed cell maps "will be added in future releases", so conclusions
+        drawn now from the individual modality datasets may be revised once the
+        integrated maps are published.
+  - name: embargo_and_availability_impact
+    impact_details:
+      - >-
+        Perturb-seq external deposits are currently embargoed; users planning
+        reproducible pipelines should expect their availability, and therefore
+        the reproducibility of downstream work, to change when the embargo lifts.
+  - name: institutional_review_impact
+    impact_details:
+      - >-
+        Both the CM4AI Dataverse collection and the CM4AI website display the
+        notice "This repository is under review for potential modification in
+        compliance with Administration directives", which signals possible future
+        change to the availability or content of the release programme.
+
+discouraged_uses:
+  - name: clinical_use_discouraged
+    discouragement_details:
+      - >-
+        "These laboratory data are not to be used in clinical decision-making or
+        in any context involving patient care without appropriate regulatory
+        oversight and approval."
+  - name: population_generalisation_discouraged
+    discouragement_details:
+      - >-
+        Treating the data as representative of human biological variation is
+        discouraged: the data "does not represent all biological variants which
+        may be seen in the population at large".
+  - name: naive_cross_modality_use_discouraged
+    discouragement_details:
+      - >-
+        Joining the modalities without accounting for their incompletely
+        overlapping protein sets, and expecting analysis-ready integrated cell
+        maps from a release that explicitly excludes them.
+  - name: commercial_use_without_licence_discouraged
+    discouragement_details:
+      - >-
+        "Commercial use requires a separate license negotiation with the
+        copyright holder (UCSD, Stanford, and/or UCSF depending upon the specific
+        data package in question). A Data Access Committee will supervise ethical
+        matters related to dataset distribution and potential dual licensing for
+        commercial use."
+
+intended_uses:
+  - name: declared_intended_uses
+    use_category:
+      - AI-ready data for functional genomics research
+      - AI and machine learning model training
+      - Cellular process analysis
+      - Perturbation and disease-context analysis
+    examples:
+      - AI-ready datasets to support research in functional genomics
+      - AI model training
+      - Cellular process analysis
+      - >-
+        Cell architectural changes and interactions in presence of specific
+        disease processes, treatment conditions, or genetic perturbations
+    usage_notes: >-
+      The release RO-Crate elaborates the same list in rai:dataUseCases and adds:
+      "A major goal is to enable biologically-driven, interpretable ML
+      applications, for example as proposed in Ma et al. 2018 (PMID: 29505029)
+      and Kuenzi et al. 2020 (PMID: 33096023)."
+
+prohibited_uses:
+  - name: clinical_decision_making_prohibited
+    prohibition_reason:
+      - >-
+        "These laboratory data are not to be used in clinical decision-making or
+        in any context involving patient care without appropriate regulatory
+        oversight and approval." This statement appears as the Prohibited Uses
+        entry on every structured release page and as both usageInfo and
+        prohibitedUses in the release RO-Crate.
+  - name: unlicensed_commercial_use_prohibited
+    prohibition_reason:
+      - >-
+        The CC BY-NC-SA 4.0 licence excludes commercial use; commercial use
+        requires separate licence negotiation with UCSD, Stanford and/or UCSF
+        depending on the data package.
+
+distribution_formats:
+  - name: dataverse_distribution
+    access_urls:
+      - https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
+      - https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/K7TGEM
+      - https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R
+      - https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX
+    description: >-
+      Primary distribution is by DOI-identified Dataverse deposit. The June 2026
+      release ships 10 public ZIP archives; the October 2025 release 8 ZIP
+      archives; the June 2025 release 21 files across Text, Data, Archive and
+      Metadata types; and the March 2025 release 6 files (3 archives and 3 JSON
+      documents). Dataverse states "The dataset is too large to download. Please
+      select the files you need from the files table", warns that "The files
+      selected are too large to download as a ZIP" above a 953.7 MB limit, and
+      offers the Data Access API for programmatic access at
+      https://dataverse.lib.virginia.edu/api/access/datafile/. Metadata export is
+      offered as OAI_ORE, DataCite, OpenAIRE, Schema.org JSON-LD, DDI Codebook
+      v2, Dublin Core, Croissant (October 2025 onward), DDI HTML Codebook and
+      JSON.
+  - name: ro_crate_packaging_format
+    description: >-
+      Every release from June 2025 onward is packaged as an RO-Crate conforming
+      to https://w3id.org/ro/crate/1.2, extended with the EVI Evidence Graph
+      Ontology and Croissant Responsible AI (rai:) properties, produced by
+      FAIRSCAPE 1.1.3 and identified by ARK persistent identifiers in the
+      ark:59853 namespace. Renderings shipped alongside the crate include an
+      HTML datasheet, per-modality RO-Crate previews and provenance-graph HTML,
+      and an AI-readiness score JSON.
+  - name: payload_file_formats
+    description: >-
+      Formats declared across the June 2026 release crate are .d, .d directory
+      group, .tsv, .xml, TSV, csv, executable, fastq.gz, h5, h5ad, image/jpeg,
+      pdf and unknown. On Dataverse these are wrapped as ZIP archives; the
+      earlier releases also expose bare JSON RO-Crate metadata documents and
+      HTML provenance-graph files, of which Dataverse notes "The .html
+      provenance graph files require download to view properly. They will not
+      display in the Dataverse preview."
+
+distribution_dates:
+  - name: quarterly_release_dates
+    release_dates:
+      - "May 2024: first data release, cited in the project article as doi:10.18130/V3/DXWOS5"
+      - "2025-03-03: March 2025 Data Release (Beta), doi:10.18130/V3/B35XWX"
+      - "2025-07-01: June 2025 Data Release (Beta), doi:10.18130/V3/F3TD5R"
+      - "2025-10-31: October 2025 Data Release (Beta), doi:10.18130/V3/K7TGEM"
+      - "2026-06-17: June 2026 Data Release (Beta), doi:10.18130/V3/HIGT4C"
+      - >-
+        2026-07-15: three immunofluorescence image archives added to the June
+        2026 release, corresponding to the Dataverse version 2 release time
+        2026-07-15T20:28:19Z
+    description: >-
+      Releases are quarterly by policy: "CM4AI releases data quarterly, ensuring
+      continuous updates to the cell maps and input data streams." Individual
+      files within a release may be published later than the release itself, as
+      with the June 2025 release whose IF archives are stamped 2025-10-22 and the
+      October 2025 release whose Perturb-seq and metadata archives are stamped
+      2025-12-22.
+
+third_party_sharing:
+  - name: external_repository_sharing
+    is_shared: true
+    description: >-
+      Release payloads are deliberately mirrored to or hosted in
+      domain-appropriate third-party repositories: MassIVE for mass-spectrometry
+      data, the NCBI Sequence Read Archive and BioProject for raw sequence data,
+      and Figshare for the aggregated Perturbation Cell Atlas. The releases
+      themselves are held in LibraData at the University of Virginia. The project
+      article also notes collaboration "with the NIH Common Fund Data Ecosystem
+      (CFDE) for data curation".
+
+license_and_use_terms:
+  name: cm4ai_license_terms
+  contact_person: https://orcid.org/0000-0002-1708-8454
+  data_use_permission:
+    - general_research_use
+    - no_commercial_use
+  license_terms:
+    - >-
+      "Dataset licensed for reuse under Creative Commons
+      Attribution-NonCommercial-ShareAlike 4.0 International license
+      (https://creativecommons.org/licenses/by-nc-sa/4.0/)." Recorded on every
+      captured release as "License/Data Use Agreement: CC BY-NC-SA 4.0".
+    - >-
+      "Attribution is required to the copyright holders and the authors. Any
+      publications referencing this data or derived data products should cite the
+      Related Publications below, as well as directly citing this data
+      collection."
+    - >-
+      "Copyright (c) 2026 The Regents of the University of California except
+      where otherwise noted. Spatial proteomics raw image data is copyright (c)
+      2026 The Board of Trustees of the Leland Stanford Junior University." The
+      March 2025 release carries the same notice with year 2025, and the
+      Perturbation Cell Atlas raw-sequence sub-crate with year 2024.
+    - >-
+      "Commercial use requires a separate license negotiation with the copyright
+      holder (UCSD, Stanford, and/or UCSF depending upon the specific data
+      package in question). A Data Access Committee will supervise ethical
+      matters related to dataset distribution and potential dual licensing for
+      commercial use."
+    - >-
+      Dataverse community norms apply in addition: "Our Community Norms as well
+      as good scientific practices expect that proper credit is given via
+      citation. Please use the data citation shown on the dataset page."
+    - >-
+      Licence heterogeneity exists below the release level. The AP-MS sub-crates
+      (MassIVE MSV000101915 and MSV000101917) and the KOLF2 SEC-MS sub-crate
+      (MSV000100676) declare https://creativecommons.org/publicdomain/zero/1.0/
+      (CC0 1.0), while the treated-MDA-MB-468 SEC-MS sub-crate, the IF image
+      sub-crates and both Perturbation Cell Atlas sub-crates declare CC BY-NC-SA
+      4.0. Users relying on a specific component should check that component's
+      own declared licence.
+    - >-
+      Software is licensed separately and more permissively: the Tools data
+      integration pipeline under BSD-3 and FAIRSCAPE under MIT.
+  description: >-
+    The CC BY-NC-SA 4.0 deed captured in the corpus grants permission to share
+    and adapt the material under the conditions of attribution, non-commercial
+    use and ShareAlike, with no additional restrictions, and states that the
+    licensor cannot revoke these freedoms as long as the terms are followed.
+
+ip_restrictions:
+  name: cm4ai_ip_restrictions
+  restrictions:
+    - >-
+      Copyright in the datasets is held by The Regents of the University of
+      California except where otherwise noted; copyright in the spatial
+      proteomics raw image data is held by The Board of Trustees of the Leland
+      Stanford Junior University.
+    - >-
+      Copyright in the FAIRSCAPE software is held by the Rector and Board of
+      Visitors of the University of Virginia; the Dataverse instance is
+      "Copyright (c) 2025, by the Rector and Visitors of the University of
+      Virginia".
+    - >-
+      Commercial use requires separate licence negotiation with UCSD, Stanford
+      and/or UCSF depending on the data package, supervised by a Data Access
+      Committee that also considers potential dual licensing.
+    - >-
+      The Ethics plan explicitly "balances the openness of the data produced,
+      with protection of the intellectual property, and supervision and
+      monitoring of potential efforts at commercialization."
+
+regulatory_restrictions:
+  name: cm4ai_regulatory_status
+  hipaa_compliant: not_applicable
+  confidentiality_level: unrestricted
+  governance_committee_contact: https://orcid.org/0000-0003-4535-3486
+  regulatory_restrictions:
+    - "FDA Regulated: No, stated on every structured release page."
+    - >-
+      No human subjects research is conducted, so no IRB approval, informed
+      consent or human-subject regulatory regime applies; the crate records the
+      exemption as "research with commercially available de-identified human cell
+      lines does not constitute human subjects research."
+  other_compliance:
+    - >-
+      Bridge2AI Code of Conduct: "The Ethics Pillar also supported the work
+      initiated by the Bridge2AI Ethics Working Group for supporting the
+      Bridge2AI Data Sharing and Dissemination Working Group in developing a Code
+      of Conduct. The Code of Conduct outlines basic requirements for
+      participants in the Bridge2AI Open House to access B2AI data (including
+      CM4AI datasets), to attest and commit to it prior to accessing the data."
+    - >-
+      Institutional review notice: "This repository is under review for potential
+      modification in compliance with Administration directives", displayed on
+      both the Dataverse collection and the CM4AI website.
+  description: >-
+    HIPAA is recorded as not applicable because no protected health information
+    is present; the data derive from commercially available de-identified cell
+    lines. Confidentiality level is Unrestricted at both release and sub-crate
+    level. The Data Governance Committee contact is Jillian Parker
+    (jillianparker@health.ucsd.edu).
+
+maintainers:
+  - name: cm4ai_project_maintainers
+    role: academic_institution
+    maintainer_details:
+      - >-
+        The CM4AI project maintains the release programme through the end of the
+        project; project-related inquiries go to Swathi Thaker, PhD (UAB, Program
+        Manager, snthaker@uab.edu) and website support to Zhandos Sembay (UAB,
+        zsembay8@uab.edu).
+      - >-
+        The point of contact recorded on every Dataverse release is Ideker Trey
+        (University of California San Diego); the release RO-Crate gives
+        contactEmail tideker@health.ucsd.edu.
+  - name: repository_maintainers
+    role: academic_institution
+    maintainer_details:
+      - >-
+        LibraData, the University of Virginia's Dataverse instance, provides
+        "Long term preservation in the https://dataverse.lib.virginia.edu/,
+        supported by committed institutional funds", with support reachable
+        through University of Virginia Dataverse Support.
+      - >-
+        Depositor of record for all four captured releases is Niestroy, Justin
+        (University of Virginia).
+
+errata:
+  - name: june_2025_revision
+    erratum_url: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R
+    erratum_details:
+      - >-
+        "This dataset is a revision of the June 2025 Data Release ... This
+        revision includes adding RGB immunofluorescent images, corrections to
+        ro-crate metadata, and changes to naming conventions." The revision is
+        published as version 2.1 of doi:10.18130/V3/F3TD5R.
+  - name: metadata_defects_observed_in_current_release
+    erratum_details:
+      - >-
+        No formal erratum is published for the June 2026 release, but its
+        RO-Crate contains uncorrected metadata defects: a version and
+        datePublished that disagree with the Dataverse record, citation strings
+        naming the wrong release and year, and IF sub-crate size, checksum,
+        version and date fields inherited from the March 2025 release. The
+        cm4ai.org release page also displays the wrong release year.
+
+updates:
+  name: cm4ai_update_plan
+  frequency: quarterly
+  update_details:
+    - >-
+      "Dataset will be regularly updated and augmented through the end of the
+      project in November 2026", with "Updates on a quarterly basis". The
+      RO-Crate states the same as rai:dataReleaseMaintenancePlan: "Dataset will
+      be regularly updated and augmented on a quarterly basis through the end of
+      the project (November, 2026)."
+    - >-
+      "Data presented here will be augmented regularly through the end of the
+      project."
+    - >-
+      Each quarterly update is published as a new DOI-identified Dataverse
+      dataset rather than as a new version of a single dataset, so the release
+      series is a set of sibling records rather than a version chain.
+  description: >-
+    The update cadence is the defining property of this programme: a new Beta
+    release approximately every quarter, each adding modalities or conditions.
+    March 2025 introduced Perturb-seq in undifferentiated iPSCs, SEC-MS in iPSCs
+    and derivatives, and IF images; June 2025 added SEC-MS in treated and
+    untreated MDA-MB-468 cells and RGB IF images; October 2025 added Perturb-seq
+    in MDA-MB-468 cells; and June 2026 added AP-MS in treated MDA-MB-468 cells.
+
+retention_limit:
+  name: cm4ai_retention
+  retention_period: >-
+    Indefinite. "Long term preservation in the
+    https://dataverse.lib.virginia.edu/, supported by committed institutional
+    funds."
+  retention_details:
+    - >-
+      LibraData is "the University of Virginia's archival data repository" and
+      "an NIH-approved generalist repository".
+    - >-
+      Dataverse retains superseded content: "Files will not be removed from
+      previously published versions of the dataset."
+    - >-
+      A countervailing signal exists: the collection notice "This collection is
+      under review for potential modification in compliance with Administration
+      directives" appears on every captured Dataverse release page.
+
+version_access:
+  name: cm4ai_release_versions
+  latest_version_doi: https://doi.org/10.18130/V3/HIGT4C
+  versions_available:
+    - >-
+      May 2024 Data Release - listed in the Archive section of the CM4AI
+      data-releases page; cited in the project article's Data and Software
+      Availability Statement as "Clark T, Mohan J, Schaffer L, Obernier K, et al.
+      Cell Maps for Artificial Intelligence - Data Release,
+      https://doi.org/10.18130/V3/DXWOS5, University of Virginia Dataverse, V1".
+      No processed record for this release is present in the current source
+      bundle, so it is not represented as a resource in this datasheet.
+    - "March 2025 Data Release (Beta) - doi:10.18130/V3/B35XWX, Dataverse version 1.4"
+    - "June 2025 Data Release (Beta) - doi:10.18130/V3/F3TD5R, Dataverse version 2.1"
+    - "October 2025 Data Release (Beta) - doi:10.18130/V3/K7TGEM, Dataverse version 2.1"
+    - >-
+      June 2026 Data Release (Beta) - doi:10.18130/V3/HIGT4C, Dataverse version
+      2.0, current
+  version_details:
+    - >-
+      Each quarterly release carries its own DOI and its own internal Dataverse
+      version number; the two numbering systems are independent. Within a
+      release, Dataverse offers Minor and Major version increments and preserves
+      files from previously published versions.
+    - >-
+      Superseded releases remain publicly retrievable at their DOIs; the CM4AI
+      data-releases page presents them under an "Archive" heading while promoting
+      the current release under "Our latest data release".
+    - >-
+      The June 2026 release records Dataverse version 2 as released
+      2026-07-15T20:28:19Z, after the 2026-06-17 publication date, which
+      corresponds to the later addition of the three IF image archives.
+    - >-
+      The release RO-Crate declares its own version "1.0", which does not
+      correspond to the Dataverse dataset version 2.0.
+
+extension_mechanism:
+  name: cm4ai_extension
+  contribution_url: https://github.com/idekerlab/cellmaps_pipeline
+  extension_details:
+    - >-
+      The programme is designed for extension by others through its toolkit
+      rather than by direct contribution to the releases: "To facilitate
+      continued map improvement, incorporation of new datasets, and construction
+      of new cell maps across subtypes and disease states, we also developed the
+      Cell Mapping Toolkit, which implements the end-to-end pipeline described
+      here as a series of Python packages complete with full user documentation.
+      This toolkit provides a flexible and generalizable framework for cell map
+      construction, enabling researchers to integrate and construct cell maps via
+      multiple input modalities."
+    - >-
+      The corpus documents no mechanism for external parties to contribute data
+      into a CM4AI quarterly release. Contact for the collection owner is
+      available through the Dataverse "Contact Owner" function and through the
+      named project contacts.
+
+is_deidentified:
+  name: cm4ai_deidentification
+  identifiable_elements_present: false
+  method: >-
+    Not applicable in the usual sense: no identifiable human data enter the
+    programme. Source materials are commercially available, already de-identified
+    human cell lines, and the data "are considered to be de-identified as they
+    cannot be matched, with current knowledge, to a human subject".
+  identifiers_removed:
+    - >-
+      None removed by the project; no direct or indirect human identifiers are
+      collected at any point.
+  deidentification_details:
+    - >-
+      "De-identified Samples: Yes" is recorded on every structured release page,
+      alongside "Human Subjects: No".
+    - >-
+      "CM4AI data are distinctive within Bridge2AI in that they are non-clinical
+      (from tissue cultures) and are considered to be de-identified as they
+      cannot be matched, with current knowledge, to a human subject."
+
+related_datasets:
+  - target_dataset: https://doi.org/10.18130/V3/DXWOS5
+    relationship_type: is_new_version_of
+    description: >-
+      The May 2024 CM4AI Data Release, the earliest release cited in the project
+      article's Data and Software Availability Statement. It is superseded by the
+      later quarterly releases but has no processed record in the current source
+      bundle, so it is documented here rather than as a resource.
+  - target_dataset: https://doi.org/10.1101/2024.05.21.589311
+    relationship_type: is_referenced_by
+    description: >-
+      Clark T et al., "Cell Maps for Artificial Intelligence: AI-Ready Maps of
+      Human Cell Architecture from Disease-Relevant Cell Lines", bioRxiv 2024.
+      The Related Publication recorded on every captured release, and the
+      reference the licence terms require users to cite.
+  - target_dataset: https://doi.org/10.1101/2024.11.03.621734
+    relationship_type: is_referenced_by
+    description: >-
+      Nourreddine S et al., "A Perturbation Cell Atlas of Human Induced
+      Pluripotent Stem Cells", bioRxiv 2024, PMCID PMC11580897. The publication
+      associated with the Perturb-seq components of the releases.
+  - target_dataset: https://doi.org/10.1038/s41586-025-08878-3
+    relationship_type: references
+    description: >-
+      Schaffer LV, Hu M, Qian G et al., "Multimodal cell maps as a foundation for
+      structural and functional genomics", Nature 642, 222-231 (2025), published
+      09 April 2025 with a Publisher Correction on 02 October 2025
+      (doi:10.1038/s41586-025-09648-x). Listed as an associated publication of
+      the June 2026 release. Its measurements were made in U2OS osteosarcoma
+      cells, not in the CM4AI cell systems, and its data are deposited separately
+      at NDEx (cell map uuid f693137a-d2d7-11ef-8e41-005056ae3c32; AP-MS network
+      uuid 95bc75d5-d1d1-11ee-8a40-005056ae23aa), MassIVE MSV000097168,
+      ProteomeXchange PXD052362, the EBI Complex Portal (query CLO:0009454), the
+      Human Protein Atlas v23 release and ModelArchive (ma-idk-u2osmap,
+      ma-m5og4). It therefore demonstrates the mapping approach rather than
+      describing the released CM4AI data.
+  - target_dataset: https://doi.org/10.1038/s41586-021-04115-9
+    relationship_type: references
+    description: >-
+      Qin Y, Huttlin EL, Winsnes CF et al., "A multi-scale map of cell structure
+      fusing protein images and interactions", Nature 600, 536-542 (2021). Listed
+      as an associated publication of the June 2026 release; the methodological
+      antecedent of the MuSIC approach, based on 661 proteins in HEK293 cells.
+  - target_dataset: https://massive.ucsd.edu/ProteoSAFe/QueryMSV?id=MSV000101915
+    relationship_type: has_part
+    description: >-
+      MassIVE deposit MSV000101915, the 441.2 GB AP-MS paclitaxel payload
+      referenced by the June 2026 release RO-Crate.
+  - target_dataset: https://massive.ucsd.edu/ProteoSAFe/QueryMSV?id=MSV000101917
+    relationship_type: has_part
+    description: >-
+      MassIVE deposit MSV000101917, the 532.5 GB AP-MS vorinostat payload
+      referenced by the June 2026 release RO-Crate.
+  - target_dataset: https://massive.ucsd.edu/ProteoSAFe/QueryMSV?id=MSV000100676
+    relationship_type: has_part
+    description: >-
+      MassIVE deposit MSV000100676, the 1.11 TB SEC-MS payload for KOLF2 neuronal
+      and cardiomyocyte differentiation.
+  - target_dataset: https://doi.org/10.25345/C5348GV4S
+    relationship_type: has_part
+    description: >-
+      MassIVE deposit MSV000098237, the 910 GB SEC-MS payload for MDA-MB468 cells
+      following vorinostat or paclitaxel treatment.

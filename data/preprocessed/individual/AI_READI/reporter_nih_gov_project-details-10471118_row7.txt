@@ -1,1 +1,28 @@
-RePORT ⟩ RePORTERWe're sorry but RePORTER doesn't work properly without JavaScript enabled. Please enable it to continue.
+SOURCE METADATA
+Project: AI_READI
+Source ID: nih_reporter_project
+Source type: NIH project page
+Source URL: https://reporter.nih.gov/project-details/10471118
+Raw file: data/raw/AI_READI/reporter_nih_gov_project-details-10471118_row7.txt
+--------------------------------------------------------------------------------
+NIH RePORTER Project
+Source: https://reporter.nih.gov/project-details/10471118
+Application ID: 10471118
+Project number: 1OT2OD032644-01
+Core project number: OT2OD032644
+Title: Bridge2AI: Salutogenesis Data Generation Project
+Principal investigator: LEE, AARON
+Organization: UNIVERSITY OF WASHINGTON
+Fiscal year: 2022
+Award amount: 5026499
+Project start: 2022-09-01T00:00:00
+Project end: 2025-08-31T00:00:00
+
+Abstract Text
+The Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights (AI-READI) project is one of the data generation projects in the NIH Common Fund’s Bridge2AI program. The project seeks to create a flagship ethically-sourced dataset to enable future generations of artificial intelligence/machine learning (AI/ML) research to provide critical insights into type 2 diabetes mellitus (T2DM), including salutogenic pathways to return to health. The ability to understand and affect the course of complex, multi-organ diseases such as T2DM has been limited by a lack of well-designed, high quality, and large multimodal datasets. The team of investigators will aim to collect a cross-sectional dataset of 4,000+ people and longitudinal data from 10% of the study cohort across the US. The study cohort will be balanced for diabetes disease stage. Data collection will be specifically designed to permit downstream pseudotime manifold analysis, an approach used to predict disease trajectories by collecting and learning from complex, multimodal data from participants with differing disease severity (normal to insulin-dependent T2DM). The long-term objective for this project is to develop a foundational dataset in diabetes, agnostic to existing classification criteria, which can be used to reconstruct a temporal atlas of T2DM development and reversal towards health (i.e., salutogenesis). Six cross-disciplinary project modules involving teams located across eight institutions will work together to develop this flagship dataset. All data will be optimized for downstream AI/ML research and made publicly available. . The AI-READI project will also engage in a tribal consultation to address barriers and facilitators of participation with the goal of collecting similar data within a Native American cohort in an ethical and respectful manner. Specific aims include 1) Collect and share the dataset for AI/ML research according to the Findable, Accessible, Interoperable, Reusable (FAIR) data principles, 2) Create a model for developing large scalable datasets, and 3) Increase access to and quality of AI/ML research by recruiting and training personnel.
+
+Public Health Relevance Statement
+Recent advances in artificial intelligence (AI) research are poised to provide breakthrough discoveries, but have been limited by the lack of large, well-characterized comprehensive datasets that capture molecular, physiological, pathological, and clinical at various stages of illness. To address these challenges, the AI-READI team of investigators will generate an ethically-sourced and unique dataset with many types of data collected from patients with different severities of type 2 diabetes mellitus (T2DM), which will enable key discoveries about the trajectory of this disease and how improvements to health (i.e., salutogenesis) can be promoted over time. The project will train future scientists in AI-based research and establish best practices for the generation of future datasets that are ethically sourced and accessible for responsible and scientifically valid use by the greater research community.
+
+Preferred terms:
+Address;Affect;Artificial Intelligence;Asian;Atlases;Awareness;Behavioral;Black race;Bridge to Artificial Intelligence;Classification;Clinical;Cohort Studies;Collaborations;Communities;Complex;Consultations;Data;Data Collection;Data Set;Development;Diabetes Mellitus;Disease;Ethics;FAIR principles;Foundations;Funding;Future;Future Generations;Generations;Goals;Health;Health Promotion;Hispanic;Human Resources;Institution;Insulin;Latinx;Learning;Machine Learning;Modeling;Molecular;Native Americans;Non-Insulin-Dependent Diabetes Mellitus;Participant;Pathologic;Pathway interactions;Patients;Persons;Physiological;Population Heterogeneity;Process;Research;Research Design;Research Personnel;Scientist;Severity of illness;Source;Text;Time;Training;United States National Institutes of Health;Work;base;cohort;data reuse;design;ethical legal social implication;insight;multimodal data;programs;recruit;social

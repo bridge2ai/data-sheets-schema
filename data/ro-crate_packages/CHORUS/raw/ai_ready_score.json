@@ -1,0 +1,129 @@
+{
+  "name": "AI-Ready Score for CHoRUS RO-Crate Package",
+  "fairness": {
+    "findable": {
+      "has_content": true,
+      "details": "Dataset has DOI: https://doi.org/10.18130/V3/XNBOPG"
+    },
+    "accessible": {
+      "has_content": true,
+      "details": "The RO-Crate's JSON-LD metadata is machine-readable and publicly accessible by design."
+    },
+    "interoperable": {
+      "has_content": true,
+      "details": "The dataset uses the schema.org vocabulary within the RO-Crate framework and conforms to the Croissant RAI specification for interoperability."
+    },
+    "reusable": {
+      "has_content": true,
+      "details": "License: Data Use Agreement available at 'https://chorus4ai.org/dataset/'"
+    }
+  },
+  "provenance": {
+    "transparent": {
+      "has_content": true,
+      "details": "1468 dataset(s) documented"
+    },
+    "traceable": {
+      "has_content": true,
+      "details": "2 computation/experiment steps documented"
+    },
+    "interpretable": {
+      "has_content": true,
+      "details": "1 software instances documented"
+    },
+    "key_actors_identified": {
+      "has_content": true,
+      "details": "Author specified, Publisher: B2AI CHoRUS, PI: Eric Rosenthal, EROSENTHAL@mgh.harvard.edu"
+    }
+  },
+  "characterization": {
+    "semantics": {
+      "has_content": true,
+      "details": "Data is semantically described using the schema.org vocabulary within a machine-readable RO-Crate."
+    },
+    "statistics": {
+      "has_content": false,
+      "details": "No statistical characterization available. To add statistics, set 'contentSize' and/or 'hasSummaryStatistics' in Dataset/ROCrate entities"
+    },
+    "standards": {
+      "has_content": true,
+      "details": "44 schema(s) documented"
+    },
+    "potential_sources_of_bias": {
+      "has_content": true,
+      "details": "\u2022\tReferral bias from tertiary/quaternary academic centers\n\u2022\tSocioeconomic and demographic distribution reflective of participating institutions\n\u2022\tDocumentation bias in clinical notes\n\u2022\tMissingness not..."
+    },
+    "data_quality": {
+      "has_content": true,
+      "details": "Variable sampling rates across real-world data from hospital waveform systems and middleware"
+    }
+  },
+  "pre_model_explainability": {
+    "data_documentation_template": {
+      "has_content": true,
+      "details": "Documentation is provided via the RO-Crate's structured JSON-LD metadata, this HTML Datasheet, and Croissant RAI properties."
+    },
+    "fit_for_purpose": {
+      "has_content": true,
+      "details": "Limitations: \u2022\tObservational data; and not randomized; collected as real-world clinical data, not through prospective research interactions with patient.\n\u2022\tDocumentation quality dependent on routine clinical workflows and data elements being collected in clinical practice.\n\u2022\tVariable sampling rates across real-world data from hospital waveform systems and middleware\n\u2022\tInstitutional heterogeneity in coding and clinical data collection practices\n\u2022\tLimited generalizability beyond participating hospitals\n\u2022\tNot appropriate for re-identification, contact tracing, or patient-level intervention\n\u2022\tHold-out splits are available for testing; training and validation in development splits require internal mechanisms to avoid overfitting\n"
+    },
+    "verifiable": {
+      "has_content": true,
+      "details": "99% of files have checksums (1469/1477)"
+    }
+  },
+  "ethics": {
+    "ethically_acquired": {
+      "has_content": true,
+      "details": "Data collection: Data are derived from routine clinical care at participating hospitals under IRB oversight. Collection includes:\n\u2022\tElectronic health record extraction and transformation to OMOP common data model\n\u2022\tImaging metadata de-identification using RSNA Clinical Trial Processor and pixel-level de-identification using IbisWorks EICON. \n\u2022\tHigh-resolution physiologic waveform capture extraction and transformation to the WFDB standard, \n\u2022\tStandardized harmonization to common data model\nEthical safeguards include:\n\u2022\tIRB approval or waiver as appropriate\n\u2022\tCompliance with CHoRUS governance\n\u2022\tLayered privacy protection including de-identification, data use agreement, controlled access data repository with adherence to NIST 800-53 principles, audit-level protection, registration, role-based access controls, protection against data exfiltration.\nData are not collected solely for research but repurposed from clinical workflows under ethical oversight.\n, Human subject info: Yes"
+    },
+    "ethically_managed": {
+      "has_content": true,
+      "details": "Ethical review: Eric S. Rosenthal, Michael J. Young, Ishan Williams,\u00a0Ashley\u00a0Cordes, and Barbara J. Evans in collaboration with the Mass General Brigham IRB with\u00a0local context review by IRBs, HIPAA Privacy Officers, and institutional counsels at contributing medical centers., Governance: Eric Rosenthal, EROSENTHAL@mgh.harvard.edu"
+    },
+    "ethically_disseminated": {
+      "has_content": true,
+      "details": "License: Data Use Agreement available at 'https://chorus4ai.org/dataset/', Sensitive info: ['CHoRUS operates within a secure enclave environment aligned with NIST 800-53 controls.', 'De-identification consistent with HIPAA Safe Harbor', 'Removal or tokenization of direct identifiers', 'Date shifting or limited date fields when required', 'Role-based access control (RBAC)', 'Multi-factor authentication', 'Full audit logging of data access and queries', 'Prohibition of re-identification attempts', 'Data export restrictions and output review procedures to reduce risk of re-identification', 'Re-identification risk is periodically assessed and mitigation strategies updated as needed.']"
+    },
+    "secure": {
+      "has_content": true,
+      "details": "Confidentiality level: HL7:2V (very restricted)"
+    }
+  },
+  "sustainability": {
+    "persistent": {
+      "has_content": true,
+      "details": "Dataset has DOI: https://doi.org/10.18130/V3/XNBOPG"
+    },
+    "domain_appropriate": {
+      "has_content": true,
+      "details": "Maintenance plan: \n\u2022\tVersioned dataset releases e.g., CHoRUS vX.Y)\n\u2022\tRelease notes documenting schema changes, harmonization updates, and known issues\n\u2022\tGovernance committee oversight for structural modifications\n\u2022\tData upload\n\u2022\tDeprecation policy includes:\no\tAdvance notice of schema changes\no\tBackward compatibility window where feasible\no\tArchive of prior versions within enclave where possible or incremental change records\nPrimary maintainers: CHoRUS Data Pillar in collaboration with institutional data stewards.\n"
+    },
+    "well_governed": {
+      "has_content": true,
+      "details": "Governance committee: Eric Rosenthal, EROSENTHAL@mgh.harvard.edu"
+    },
+    "associated": {
+      "has_content": true,
+      "details": "All data, software, and computations are explicitly linked within the RO-Crate's provenance graph."
+    }
+  },
+  "computability": {
+    "standardized": {
+      "has_content": true,
+      "details": "Formats: .ipynb, text/tab-separated-values, wfdb"
+    },
+    "computationally_accessible": {
+      "has_content": true,
+      "details": "Publisher: B2AI CHoRUS"
+    },
+    "portable": {
+      "has_content": true,
+      "details": "The dataset is packaged as a self-contained RO-Crate, a standard designed for portability across systems."
+    },
+    "contextualized": {
+      "has_content": true,
+      "details": "Context is provided by the RO-Crate's graph structure and detailed in properties such as rai:dataLimitations."
+    }
+  }
+}

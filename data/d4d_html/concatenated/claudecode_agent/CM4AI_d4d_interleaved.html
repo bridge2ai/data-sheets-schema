@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>Interleaved D4D Evaluation — CM4AI (claudecode_agent)</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+       margin: 0; padding: 0; background: #f5f5f7; color: #222; line-height: 1.45; }
+.wrap { max-width: 1500px; margin: 0 auto; padding: 24px; }
+h1 { font-size: 1.6em; margin: 0 0 4px 0; }
+h2 { font-size: 1.2em; margin: 24px 0 10px 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 6px; }
+h3 { font-size: 1.0em; margin: 14px 0 6px 0; color: #34495e; }
+.meta { color: #555; margin-bottom: 14px; font-size: 0.92em; }
+.scorecard { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+             gap: 12px; margin: 14px 0 24px 0; }
+.score { background: white; border-radius: 8px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.score .num { font-size: 1.9em; font-weight: 700; color: #2c3e50; }
+.score .lbl { color: #777; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; }
+.score .pct { color: #16a085; font-weight: 600; margin-left: 6px; }
+
+.sw { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.sw .col { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.sw .col ul { padding-left: 18px; margin: 4px 0 0 0; }
+.sw .col li { margin: 4px 0; }
+.sw .strengths h3 { color: #27ae60; }
+.sw .weaknesses h3 { color: #c0392b; }
+
+.field { background: white; border-radius: 8px; padding: 0; margin: 14px 0;
+         box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: grid;
+         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; overflow: hidden; }
+.field .yaml { background: #fbfcfe; padding: 14px 16px; border-right: 1px solid #ecedef; min-width: 0; }
+.field .yaml pre { margin: 0; font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+                   font-size: 0.84em; white-space: pre-wrap; word-break: break-word;
+                   color: #2c3e50; }
+.field .yaml .field-name { font-size: 0.85em; color: #999; text-transform: uppercase;
+                           letter-spacing: 0.04em; margin-bottom: 6px; font-weight: 600; }
+.field .anns { padding: 14px 16px; background: white; min-width: 0; }
+.field .anns.empty { color: #aaa; font-style: italic; font-size: 0.85em; }
+
+.ann { background: #f7f8fa; border-left: 4px solid #3498db; padding: 10px 12px;
+       margin-bottom: 8px; border-radius: 0 6px 6px 0; font-size: 0.85em; }
+.ann-r10 { border-left-color: #9b59b6; }
+.ann-r20 { border-left-color: #16a085; }
+.ann-issue { border-left-color: #e67e22; }
+.ann-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.badge { color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.78em; font-weight: 600; white-space: nowrap; }
+.ann-label { font-weight: 600; color: #555; }
+.ann-sub { color: #666; }
+.ann-body { color: #444; }
+.ann-row { display: grid; grid-template-columns: 90px 1fr; gap: 8px; margin-top: 4px; }
+.ann-k { font-size: 0.85em; color: #888; text-transform: uppercase; letter-spacing: 0.04em; }
+.ann-v { word-break: break-word; }
+
+.unmatched { background: white; border-radius: 8px; padding: 14px 16px; margin: 16px 0;
+             box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.recs { background: white; border-radius: 8px; padding: 14px 16px; margin: 16px 0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.recs ol { margin: 8px 0 0 0; padding-left: 22px; }
+.recs li { margin: 6px 0; }
+.legend { font-size: 0.8em; color: #777; margin-top: 6px; }
+.legend .key { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
+</style></head><body><div class="wrap">
+
+<h1>Interleaved Semantic Evaluation</h1>
+<div class="meta">
+  Project: <b>CM4AI</b> &middot; Method: <b>claudecode_agent</b><br>
+  YAML: <code>data/d4d_concatenated/claudecode_agent/CM4AI_d4d.yaml</code><br>
+  R10 JSON: <code>data/evaluation_llm/rubric10_semantic/concatenated/CM4AI_claudecode_agent_evaluation.json</code><br>
+  R20 JSON: <code>data/evaluation_llm/rubric20_semantic/concatenated/CM4AI_claudecode_agent_evaluation.json</code><br>
+  Model: <code>claude-sonnet-4-5-20250929</code>
+</div>
+
+<div class="scorecard">
+<div class="score"><div class="lbl">Rubric10 (semantic)</div><div class="num">46/50 <span class="pct">(92.0%)</span></div></div>
+<div class="score"><div class="lbl">Rubric20 (semantic)</div><div class="num">76.0/84 <span class="pct">(90.5%)</span></div></div>
+<div class="score"><div class="lbl">Consistency checks (R10/R20)</div><div class="num">42 <span class="pct">pass</span> · 0 fail · 1 warn</div></div>
+<div class="score"><div class="lbl">Mapped feedback / fields</div><div class="num">55 <span class="pct">across 25 fields</span></div></div>
+</div>
+<div class="legend"><span class="key" style="background:#9b59b6;"></span>R10 sub-element <span class="key" style="background:#16a085;"></span>R20 question <span class="key" style="background:#e67e22;"></span>Semantic issue</div>
+<div class="sw">
+<div class="col strengths"><h3>Strengths</h3><ul><li>Exceptional structural completeness with all mandatory fields populated with high-quality, detailed content (1340-char description, 28 keywords)</li><li>Comprehensive funding documentation with full grant numbers, budget details, timeline, and 24 creators with ORCID and affiliations</li><li>Outstanding technical documentation including specific software versions (IMP 2.18), named algorithms (node2vec, contrastive learning), and detailed collection protocols</li><li>Excellent FAIR compliance with multiple persistent identifiers (4 DOIs, 2 RRIDs, ARKs), comprehensive provenance via FAIRSCAPE/EVI, and extensive ontology mappings (GO, Reactome, Schema.org)</li><li>Robust version history with unique DOIs per release, detailed change logs, and clear update roadmap through November 2026</li><li>Strong governance with clear licensing (CC BY-NC-SA 4.0), Data Access Committee oversight, and explicit commercial use negotiation process</li><li>Extensive interoperability with RO-Crate packaging, JSON-Schema validation, and mappings to 10+ ontologies and standards</li><li>Comprehensive external resource documentation linking 13 platforms and demonstrating excellent cross-platform integration</li><li>Well-documented ethics approach appropriate for de-identified cell line research with clear rationale for non-human-subjects determination</li><li>Multiple peer-reviewed publications (Nature 2025) validating scientific credibility and providing formal citations</li></ul></div>
+<div class="col weaknesses"><h3>Weaknesses</h3><ul><li>MassIVE Repository URLs provided as placeholder text rather than specific accession numbers (though this may reflect data not yet deposited)</li><li>Ethics documentation scored 4/5 because comprehensive human subjects protections (IRB, informed consent, compensation) are not applicable to de-identified cell lines, though the documentation correctly addresses this limitation</li><li>Human subject representation scored 4/5 because traditional demographic diversity is not applicable to two-cell-line study, though cell line demographics are well-documented</li><li>Some external resource URLs are generic platform links rather than direct dataset accessions (e.g., &#x27;MassIVE Repository&#x27; without MSV accession numbers)</li></ul></div>
+</div>
+<h2>Field-by-field</h2>
+
+<div class="field" id="field-id">
+  <div class="yaml">
+    <div class="field-name">id</div>
+    <pre>id: https://doi.org/10.18130/V3/DXWOS5</pre>
+  </div>
+  <div class="anns"><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R20 · correctness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">DOI prefix 10.18130 matches Harvard Dataverse pattern correctly</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">id, distribution_formats</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">No action needed - DOI format is valid</span></div>
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Persistent Identifier (DOI, RRID, or URI)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://doi.org/10.18130/V3/DXWOS5</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Valid DOI with correct format (10.18130 prefix matches Harvard Dataverse/UVA LibraData). Multiple additional DOIs provided for version releases.</span></div>
+    <div class="ann-row"><span class="ann-k">semantic</span><span class="ann-v">format_valid: True; prefix_plausible: True; registrar: Harvard Dataverse (UVA LibraData)</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q1 (Structural Completeness)</span>
+    <span class="ann-sub">Field Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">≥90% fields populated</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://doi.org/10.18130/V3/DXWOS5, title: Cell Maps for Artificial Intelligence (CM4AI), description: 1340 chars, keywords: 28 keywords, license_and_use_terms: detailed CC BY-NC-SA 4.0 with citation requirements</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">All mandatory fields present with comprehensive, high-quality content. Description exceptionally detailed with technical specifics.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">DOI format valid with Harvard Dataverse prefix 10.18130</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">All fields semantically appropriate and internally consistent</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-name">
+  <div class="yaml">
+    <div class="field-name">name</div>
+    <pre>name: CM4AI</pre>
+  </div>
+  <div class="anns empty"><span>no field-level feedback matched</span></div>
+</div>
+
+
+<div class="field" id="field-title">
+  <div class="yaml">
+    <div class="field-name">title</div>
+    <pre>title: Cell Maps for Artificial Intelligence (CM4AI)</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Dataset Title and Description Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">title: Cell Maps for Artificial Intelligence (CM4AI); description: 1,820 characters covering mission, data types, cell lines, multimodal integration, MuSIC pipeline, RO-Crate packaging, and Nature publication</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive description with specific technical details: 100 chromatin modifiers, 100 metabolic enzymes, multiple data streams (IF, AP-MS, SEC-MS, CRISPR), cell lines (MDA-MB-468, KOLF2.1J), and peer-reviewed validation (Nature 2025)</span></div>
+    <div class="ann-row"><span class="ann-k">semantic</span><span class="ann-v">length: 1820; specificity: high; actionable: True</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q1 (Structural Completeness)</span>
+    <span class="ann-sub">Field Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">≥90% fields populated</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://doi.org/10.18130/V3/DXWOS5, title: Cell Maps for Artificial Intelligence (CM4AI), description: 1340 chars, keywords: 28 keywords, license_and_use_terms: detailed CC BY-NC-SA 4.0 with citation requirements</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">All mandatory fields present with comprehensive, high-quality content. Description exceptionally detailed with technical specifics.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">DOI format valid with Harvard Dataverse prefix 10.18130</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">All fields semantically appropriate and internally consistent</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-description">
+  <div class="yaml">
+    <div class="field-name">description</div>
+    <pre>description: &#x27;CM4AI is the Functional Genomics Data Generation Project in the U.S. National Institutes
+  of Health&#x27;&#x27;s (NIH) Bridge to Artificial Intelligence (Bridge2AI) program. Its overarching mission is
+  to produce ethical, AI-ready datasets of cell architecture, inferred from multimodal data collected
+  for human cell lines, to enable transformative biomedical AI research. The project delivers machine-readable
+  hierarchical maps of cell architecture as AI-Ready data produced from multimodal interrogation of 100
+  chromatin modifiers and 100 metabolic enzymes involved in cancer, neuropsychiatric, and cardiac disorders
+  in disease-relevant cell lines under perturbed and unperturbed conditions. Data streams include immunofluorescence
+  (IF) subcellular microscopy for spatial proteomics, affinity purification mass spectroscopy (AP-MS)
+  and size exclusion mass spectroscopy (SEC-MS) for protein-protein interaction (PPI) data, and single-cell
+  CRISPR-Cas perturbation screens by cell type. Input data streams are integrated via the Multi-Scale
+  Integrated Cell (MuSIC) software pipeline employing deep learning models and community detection algorithms,
+  and output cell maps are packaged with provenance graphs and rich metadata as AI-Ready datasets in RO-Crate
+  format using the FAIRSCAPE framework. A Nature publication (Schaffer, Hu et al., April 2025) demonstrates
+  multimodal cell maps as a foundation for structural and functional genomics, integrating IF imaging,
+  AP-MS, and SEC-MS with integrative structure modeling to produce multimodal cell maps of MDA-MB-468
+  breast cancer cells and KOLF2.1J iPSCs.
+
+  &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Dataset Title and Description Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">title: Cell Maps for Artificial Intelligence (CM4AI); description: 1,820 characters covering mission, data types, cell lines, multimodal integration, MuSIC pipeline, RO-Crate packaging, and Nature publication</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive description with specific technical details: 100 chromatin modifiers, 100 metabolic enzymes, multiple data streams (IF, AP-MS, SEC-MS, CRISPR), cell lines (MDA-MB-468, KOLF2.1J), and peer-reviewed validation (Nature 2025)</span></div>
+    <div class="ann-row"><span class="ann-k">semantic</span><span class="ann-v">length: 1820; specificity: high; actionable: True</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q1 (Structural Completeness)</span>
+    <span class="ann-sub">Field Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">≥90% fields populated</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://doi.org/10.18130/V3/DXWOS5, title: Cell Maps for Artificial Intelligence (CM4AI), description: 1340 chars, keywords: 28 keywords, license_and_use_terms: detailed CC BY-NC-SA 4.0 with citation requirements</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">All mandatory fields present with comprehensive, high-quality content. Description exceptionally detailed with technical specifics.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">DOI format valid with Harvard Dataverse prefix 10.18130</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">All fields semantically appropriate and internally consistent</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q2 (Structural Completeness)</span>
+    <span class="ann-sub">Entry Length Adequacy</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">&gt;200 chars</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">description: 1340 chars, purposes (4 entries): avg 385 chars, tasks (5 entries): avg 295 chars, addressing_gaps (4 entries): avg 285 chars</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional narrative detail across all fields. Description provides comprehensive technical overview. All motivation fields exceed 200 characters with substantive content.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All narratives technically accurate with specific references (Nature publication, DOI citations)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Narratives consistently describe multimodal cell mapping for AI research</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q9 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Access Requirements and Governance Documentation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">License + restrictions + confidentiality classification</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">license: CC BY-NC-SA 4.0. license_and_use_terms: detailed description with attribution requirements, non-commercial restriction with separate commercial license negotiation process, share-alike requirement, citation requirements (Nature publication + bioRxiv preprint + data DOI), Data Access Committee oversight (Jillian Parker), copyright holders (UCSD, Stanford, UCSF). No explicit ip_restrictions or regulatory_restrictions fields, but commercial use restrictions clearly defined in license terms. confidentiality_level: implicit (public with usage restrictions)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent governance documentation. License clearly defined with explicit terms. Commercial restrictions and negotiation process documented. Data Access Committee provides governance oversight. Attribution and citation requirements explicit.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">CC BY-NC-SA 4.0 is valid Creative Commons license. Citation requirements include valid DOIs</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Non-commercial restriction consistent with academic research data. Data Access Committee aligns with ethical oversight structure</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-page">
+  <div class="yaml">
+    <div class="field-name">page</div>
+    <pre>page: https://www.cm4ai.org</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Landing Page and Resources (page, hierarchical resources)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">page: https://www.cm4ai.org; distribution_formats with access_urls including DOI landing pages, NDEx, U-BRITE platform, MassIVE, NCBI SRA</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Official project website plus multiple access points: UVA Dataverse (DOIs with landing pages), NDEx for visualization, MassIVE for MS data, NCBI SRA for sequence data. Hierarchical resource structure via RO-Crate packages.</span></div>
+    <div class="ann-row"><span class="ann-k">semantic</span><span class="ann-v">landing_page_valid: True; multiple_access_points: True; hierarchical_structure: True</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q16 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Findability (Persistent Links)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">page: https://www.cm4ai.org. external_resources: 13 categories with persistent URLs including https://doi.org/10.18130/V3/DXWOS5 (Dataverse), https://doi.org/10.1038/s41586-025-08878-3 (Nature), https://doi.org/10.1101/2024.05.21.589311 (bioRxiv), https://fairscape.github.io, http://integrativemodeling.org, https://www.ndexbio.org, https://commonfund.nih.gov/bridge2ai, https://reporter.nih.gov/project-details/11211616. ARK identifiers for RO-Crates</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Pass - Multiple persistent URLs including DOIs, project website, and external platform links. ARK scheme provides additional persistent identifiers.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All URLs are well-formed. DOI prefixes valid (10.18130 Dataverse, 10.1038 Nature, 10.1101 bioRxiv)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">URLs align with stated distribution platforms and publication venues</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q6 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Dataset Identification Metadata</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">doi (multiple): https://doi.org/10.18130/V3/DXWOS5 (main), https://doi.org/10.18130/V3/B35XWX (Beta V1.4), https://doi.org/10.18130/V3/F3TD5R (Beta V2.1), https://doi.org/10.18130/V3/K7TGEM (October 2025). RRID: RRID:CVCL_0419 (MDA-MB-468), RRID:CVCL_B5P3 (KOLF2.1J). page: https://www.cm4ai.org. ARK identifiers mentioned for RO-Crates</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Pass - Multiple persistent identifiers including 4 DOIs, 2 RRIDs, project URL, and ARK scheme for RO-Crates.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">DOI prefix 10.18130 correctly matches Harvard Dataverse. RRID format valid (RRID:CVCL_* for cell lines)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Multiple DOIs logically correspond to different beta releases</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-language">
+  <div class="yaml">
+    <div class="field-name">language</div>
+    <pre>language: en</pre>
+  </div>
+  <div class="anns empty"><span>no field-level feedback matched</span></div>
+</div>
+
+
+<div class="field" id="field-keywords">
+  <div class="yaml">
+    <div class="field-name">keywords</div>
+    <pre>keywords:
+- Cell Maps
+- Artificial Intelligence
+- AI-Ready Data
+- Bridge2AI
+- Functional Genomics
+- Protein-Protein Interactions
+- Spatial Proteomics
+- CRISPR Perturbation
+- Hierarchical Cell Maps
+- MDA-MB-468
+- KOLF2.1J
+- iPSC
+- Breast Cancer
+- Chromatin Modifiers
+- Metabolic Enzymes
+- Immunofluorescence
+- Mass Spectrometry
+- AP-MS
+- SEC-MS
+- Perturb-Seq
+- FAIR Principles
+- RO-Crate
+- FAIRSCAPE
+- Visible Neural Networks
+- Deep Learning
+- Integrative Structure Modeling</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Keywords or Tags for Searchability</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">keywords: 26 terms including Cell Maps, AI-Ready Data, Bridge2AI, Functional Genomics, Protein-Protein Interactions, Spatial Proteomics, CRISPR Perturbation, specific cell lines (MDA-MB-468, KOLF2.1J), techniques (AP-MS, SEC-MS, Immunofluorescence), standards (FAIR, RO-Crate, FAIRSCAPE), methods (Deep Learning, Integrative Structure Modeling)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent coverage: domain (functional genomics), methods (AP-MS, SEC-MS, IF, CRISPR), cell types (breast cancer, iPSC), standards (FAIR, RO-Crate), diseases (Breast Cancer), and techniques (Deep Learning, Visible Neural Networks)</span></div>
+    <div class="ann-row"><span class="ann-k">semantic</span><span class="ann-v">count: 26; coverage: comprehensive; domain_relevant: True</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q1 (Structural Completeness)</span>
+    <span class="ann-sub">Field Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">≥90% fields populated</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://doi.org/10.18130/V3/DXWOS5, title: Cell Maps for Artificial Intelligence (CM4AI), description: 1340 chars, keywords: 28 keywords, license_and_use_terms: detailed CC BY-NC-SA 4.0 with citation requirements</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">All mandatory fields present with comprehensive, high-quality content. Description exceptionally detailed with technical specifics.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">DOI format valid with Harvard Dataverse prefix 10.18130</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">All fields semantically appropriate and internally consistent</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q3 (Structural Completeness)</span>
+    <span class="ann-sub">Keyword Diversity</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">≥8 keywords</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">keywords: 28 unique keywords including Cell Maps, Artificial Intelligence, AI-Ready Data, Bridge2AI, Functional Genomics, Protein-Protein Interactions, Spatial Proteomics, CRISPR Perturbation, MDA-MB-468, KOLF2.1J, iPSC, Breast Cancer, Chromatin Modifiers, Immunofluorescence, Mass Spectrometry, AP-MS, SEC-MS, Perturb-Seq, FAIR Principles, RO-Crate, FAIRSCAPE, Deep Learning, Integrative Structure Modeling</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent keyword diversity with 28 unique, semantically meaningful keywords covering technical methods, cell types, disease contexts, and AI frameworks.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All keywords are standard scientific terms with correct usage (AP-MS, SEC-MS, RO-Crate, FAIRSCAPE)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Keywords align with description and data types documented</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-purposes">
+  <div class="yaml">
+    <div class="field-name">purposes</div>
+    <pre>purposes:
+- id: cm4ai:purpose:1
+  description: &#x27;Deliver machine-readable hierarchical maps of cell architecture as AI-Ready data from
+    multimodal interrogation of disease-relevant cell lines to enable transformative biomedical AI research.
+    CM4AI produces integrated cell maps from spatial proteomics, protein-protein interactions, and genetic
+    perturbations using state-of-the-art mass spectrometry, cell imaging, and CRISPR technologies.
+
+    &#x27;
+- id: cm4ai:purpose:2
+  description: &#x27;Address the grand challenge of interpretable genotype-phenotype learning in genomics and
+    precision medicine. Machine learning models are often &quot;black boxes&quot; predicting phenotypes from genotypes
+    without understanding the mechanisms. CM4AI enables &quot;visible&quot; machine learning systems informed by
+    multi-scale cell and tissue architecture, allowing AI tools to interrogate how protein assemblies
+    in the cell affect cell-level phenotype predictions.
+
+    &#x27;
+- id: cm4ai:purpose:3
+  description: &#x27;Establish standards, best practices, and guidelines for ethical AI-readiness in biomedical
+    data. This includes implementing FAIR principles, computing machine-readable provenance graphs, characterizing
+    and validating all datasets with JSON-Schema mini-data-dictionaries, and mapping data elements to
+    public ontology vocabularies where appropriate.
+
+    &#x27;
+- id: cm4ai:purpose:4
+  description: &#x27;Provide multimodal cell maps as a foundation for structural and functional genomics, enabling
+    integrative structure modeling of protein assemblies identified via the MuSIC pipeline. Demonstrated
+    in peer-reviewed publication in Nature (Schaffer, Hu et al., April 2025, doi:10.1038/s41586-025-08878-3)
+    integrating IF imaging, AP-MS, SEC-MS, and structure modeling.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q2 (Structural Completeness)</span>
+    <span class="ann-sub">Entry Length Adequacy</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">&gt;200 chars</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">description: 1340 chars, purposes (4 entries): avg 385 chars, tasks (5 entries): avg 295 chars, addressing_gaps (4 entries): avg 285 chars</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional narrative detail across all fields. Description provides comprehensive technical overview. All motivation fields exceed 200 characters with substantive content.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All narratives technically accurate with specific references (Nature publication, DOI citations)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Narratives consistently describe multimodal cell mapping for AI research</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-tasks">
+  <div class="yaml">
+    <div class="field-name">tasks</div>
+    <pre>tasks:
+- id: cm4ai:task:1
+  description: &#x27;Integrate multimodal data streams (spatial proteomics via IF imaging, protein-protein
+    interactions via AP-MS and SEC-MS, and genetic perturbations via CRISPR screens) using the Multi-Scale
+    Integrated Cell (MuSIC) software pipeline employing deep learning models and community detection algorithms
+    to produce hierarchical cell maps.
+
+    &#x27;
+- id: cm4ai:task:2
+  description: &#x27;Enable development of visible neural networks (VNNs) and visible machine learning tools
+    that use hierarchical cell maps as interpretable structures for AI model architectures, allowing interrogation
+    of how protein assemblies affect cell-level phenotypes and interpretation of genetic variants and
+    mutations.
+
+    &#x27;
+- id: cm4ai:task:3
+  description: &#x27;Characterize cell architecture and protein interactions in disease-relevant cell lines
+    including treated and untreated MDA-MB-468 breast cancer cells (with paclitaxel and vorinostat) and
+    differentiated and naive KOLF2.1J induced pluripotent stem cells (iPSCs) differentiated into neurons
+    and cardiomyocytes.
+
+    &#x27;
+- id: cm4ai:task:4
+  description: &#x27;Develop ethical AI frameworks and governance structures for biomedical data, including
+    Value-Sensitive Design methodologies, axiological repositories, CM4AI Life Cycle framework, and guidelines
+    for responsible design of datasets and AI technologies.
+
+    &#x27;
+- id: cm4ai:task:5
+  description: &#x27;Perform integrative structure modeling of MuSIC protein communities to determine structural
+    models using data from PDB, AlphaFoldDB, crosslinking mass spectrometry, and prediction of disordered
+    sequence segments, enabling structural and functional genomics applications.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q2 (Structural Completeness)</span>
+    <span class="ann-sub">Entry Length Adequacy</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">&gt;200 chars</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">description: 1340 chars, purposes (4 entries): avg 385 chars, tasks (5 entries): avg 295 chars, addressing_gaps (4 entries): avg 285 chars</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional narrative detail across all fields. Description provides comprehensive technical overview. All motivation fields exceed 200 characters with substantive content.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All narratives technically accurate with specific references (Nature publication, DOI citations)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Narratives consistently describe multimodal cell mapping for AI research</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-addressing_gaps">
+  <div class="yaml">
+    <div class="field-name">addressing_gaps</div>
+    <pre>addressing_gaps:
+- id: cm4ai:gap:1
+  description: &#x27;Address the limitation that machine learning models in genomics and precision medicine
+    are typically difficult-to-interpret &quot;black boxes&quot; by providing hierarchical cell maps that enable
+    visible machine learning systems built directly on knowledge maps of cell and tissue architecture.
+
+    &#x27;
+- id: cm4ai:gap:2
+  description: &#x27;Provide fully provenanced, ethically validated, and FAIR-compliant AI-ready datasets with
+    machine-readable provenance graphs, complete schemas, validation procedures, and data sheets that
+    can be reliably processed by AI applications with full explainability.
+
+    &#x27;
+- id: cm4ai:gap:3
+  description: &#x27;Create integrated datasets combining protein localization (spatial proteomics), protein-protein
+    interactions (AP-MS and SEC-MS), and transcriptional states (CRISPR perturbation screens) at multiple
+    scales, enabling complex multi-modal AI analyses not feasible with single data types.
+
+    &#x27;
+- id: cm4ai:gap:4
+  description: &#x27;Bridge the gap between protein interaction networks and structural biology by enabling
+    integrative structure modeling of protein communities identified from multimodal cell maps, combining
+    PDB, AlphaFoldDB, crosslinking MS, and sequence disorder predictions.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q2 (Structural Completeness)</span>
+    <span class="ann-sub">Entry Length Adequacy</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">&gt;200 chars</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">description: 1340 chars, purposes (4 entries): avg 385 chars, tasks (5 entries): avg 295 chars, addressing_gaps (4 entries): avg 285 chars</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional narrative detail across all fields. Description provides comprehensive technical overview. All motivation fields exceed 200 characters with substantive content.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All narratives technically accurate with specific references (Nature publication, DOI citations)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Narratives consistently describe multimodal cell mapping for AI research</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-creators">
+  <div class="yaml">
+    <div class="field-name">creators</div>
+    <pre>creators:
+- id: cm4ai:creator:1
+  description: &#x27;Trey Ideker, Contact PI/Project Leader, University of California San Diego, Department
+    of Internal Medicine/Medicine, ORCID: 0000-0002-1708-8454&#x27;
+- id: cm4ai:creator:2
+  description: &#x27;Jean-Christophe Bélisle-Pipon, Co-Investigator, Simon Fraser University, Ethics Module
+    Leader, ORCID: 0000-0002-8965-8153&#x27;
+- id: cm4ai:creator:3
+  description: &#x27;Timothy Clark, Co-Investigator, University of Virginia, Standards Module, ORCID: 0000-0003-4060-7360&#x27;
+- id: cm4ai:creator:4
+  description: &#x27;Jake Yue Chen, Co-Investigator, University of Alabama at Birmingham, Teaming Module, ORCID:
+    0000-0002-6112-415X&#x27;
+- id: cm4ai:creator:5
+  description: &#x27;Nevan J Krogan, Co-Investigator, University of California San Francisco, Data Acquisition
+    Module (Protein-Protein Interactions), ORCID: 0000-0003-4902-337X&#x27;
+- id: cm4ai:creator:6
+  description: &#x27;Emma Lundberg, Co-Investigator, Stanford University, Data Acquisition Module (Spatial
+    Proteomics), ORCID: 0000-0001-7034-0850&#x27;
+- id: cm4ai:creator:7
+  description: &#x27;Prashant Mali, Co-Investigator, University of California San Diego, Data Acquisition Module
+    (Genetic Perturbations), ORCID: 0000-0002-3383-1287&#x27;
+- id: cm4ai:creator:8
+  description: &#x27;Sarah J Ratcliffe, Co-Investigator, University of Virginia, ORCID: 0000-0002-6644-8284&#x27;
+- id: cm4ai:creator:9
+  description: &#x27;Vardit Ravitsky, Co-Investigator, University of Montreal, Ethics Module, ORCID: 0000-0002-7080-8801&#x27;
+- id: cm4ai:creator:10
+  description: &#x27;Andrej Sali, Co-Investigator, University of California San Diego, Integrative Structure
+    Modeling, ORCID: 0000-0003-0435-6197&#x27;
+- id: cm4ai:creator:11
+  description: &#x27;Wade Loren Schulz, Co-Investigator, Yale University, Skills and Workforce Development
+    Module, ORCID: 0000-0002-2048-4028&#x27;
+- id: cm4ai:creator:12
+  description: &#x27;Ying Ding, Co-Investigator, University of Texas at Austin, ORCID: 0000-0003-2567-2009&#x27;
+- id: cm4ai:creator:13
+  description: &#x27;Samah Fodeh, Co-Investigator, Yale University, ORCID: 0000-0003-4664-3143&#x27;
+- id: cm4ai:creator:14
+  description: &#x27;Cynthia Brandt, Co-Investigator, Yale University, ORCID: 0000-0001-8179-1796&#x27;
+- id: cm4ai:creator:15
+  description: &#x27;Pamela Payne-Foster, Co-Investigator, University of Alabama, ORCID: 0000-0002-3508-3577&#x27;
+- id: cm4ai:creator:16
+  description: &#x27;Jillian Parker, Program Manager, University of California San Diego, Data Governance Committee
+    Lead, ORCID: 0000-0003-4535-3486&#x27;
+- id: cm4ai:creator:17
+  description: &#x27;Leah V. Schaffer, Researcher, University of California San Diego, ORCID: 0000-0001-6339-9141&#x27;
+- id: cm4ai:creator:18
+  description: &#x27;Mengzhou Hu, Researcher, University of California San Diego, ORCID: 0000-0002-1571-8029&#x27;
+- id: cm4ai:creator:19
+  description: &#x27;Christopher P Churas, Researcher, University of California San Diego, ORCID: 0000-0001-9998-705X&#x27;
+- id: cm4ai:creator:20
+  description: &#x27;Sadnan Al Manir, Researcher, University of Virginia, Standards Module, ORCID: 0000-0003-4647-3877&#x27;
+- id: cm4ai:creator:21
+  description: &#x27;Maxwell Adam Levinson, Researcher, University of Virginia, Standards Module, ORCID: 0000-0003-0384-8499&#x27;
+- id: cm4ai:creator:22
+  description: &#x27;Dexter Pratt, Researcher, University of California San Diego, ORCID: 0000-0002-1471-9513&#x27;
+- id: cm4ai:creator:23
+  description: &#x27;Sami Nourreddine, Researcher, University of California San Diego, ORCID: 0000-0003-3881-7588&#x27;
+- id: cm4ai:creator:24
+  description: &#x27;Amir Dailamy, Researcher, University of California San Diego, ORCID: 0000-0002-6711-8260&#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q7 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Funding and Acknowledgements Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Funders with grants + creators with affiliations</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">funders: 1 detailed entry with NIH Common Fund Bridge2AI, grant numbers 1OT2OD032742-01 and 5U54HG012513-02, budget details ($5,289,382 FY 2025), opportunity number OTA-21-008, project dates, additional Frederick Thomas Fund. creators: 24 entries with ORCID, institutional affiliations, and roles (Contact PI Trey Ideker UCSD ORCID:0000-0002-1708-8454, Co-Investigators from SFU, UVA, UAB, UCSF, Stanford, Yale, etc.)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent funding and creator documentation. All 24 creators have ORCID, institution, and role. Funding includes grant numbers, budget, and timeline.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Grant number 1OT2OD032742-01 follows NIH OT2 (Other Transaction) format correctly. All ORCIDs follow standard format (0000-000X-XXXX-XXXX)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Institutions align with Bridge2AI consortium structure. Budget and timeline match NIH Common Fund program</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-funders">
+  <div class="yaml">
+    <div class="field-name">funders</div>
+    <pre>funders:
+- id: cm4ai:funder:1
+  description: &#x27;National Institutes of Health Common Fund Bridge2AI Program. Funded through NIH grant
+    1OT2OD032742-01 (Bridge2AI Functional Genomics) and 5U54HG012513-02 (Bridge2AI Bridge Center), administered
+    by NIH Office of the Director. Opportunity Number: OTA-21-008. Project dates: September 1, 2022 to
+    August 31, 2026. FY 2025 funding: $5,289,382 (Direct: $4,632,095, Indirect: $657,287). Additional
+    funding from the Frederick Thomas Fund of the University of Virginia.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R20 · consistency</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">Grant number 1OT2OD032742-01 follows NIH format correctly (Type + Number + Institute + Suffix)</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">funders</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">No action needed - grant format is valid</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q7 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Funding and Acknowledgements Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Funders with grants + creators with affiliations</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">funders: 1 detailed entry with NIH Common Fund Bridge2AI, grant numbers 1OT2OD032742-01 and 5U54HG012513-02, budget details ($5,289,382 FY 2025), opportunity number OTA-21-008, project dates, additional Frederick Thomas Fund. creators: 24 entries with ORCID, institutional affiliations, and roles (Contact PI Trey Ideker UCSD ORCID:0000-0002-1708-8454, Co-Investigators from SFU, UVA, UAB, UCSF, Stanford, Yale, etc.)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent funding and creator documentation. All 24 creators have ORCID, institution, and role. Funding includes grant numbers, budget, and timeline.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Grant number 1OT2OD032742-01 follows NIH OT2 (Other Transaction) format correctly. All ORCIDs follow standard format (0000-000X-XXXX-XXXX)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Institutions align with Bridge2AI consortium structure. Budget and timeline match NIH Common Fund program</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-instances">
+  <div class="yaml">
+    <div class="field-name">instances</div>
+    <pre>instances:
+- id: cm4ai:instance:1
+  description: &#x27;MDA-MB-468: Triple negative breast cancer cell line (RRID:CVCL_0419) established from
+    a metastatic site pleural effusion of a 51-year-old black female with a metastatic mammary adenocarcinoma,
+    available from ATCC. This cell line has been extensively used to study triple-negative breast cancer
+    and is well characterized with transcriptomic, mutational profile, and whole-genome sequencing data
+    available. Cells are analyzed under three conditions: untreated, paclitaxel-treated, and vorinostat-treated.
+
+    &#x27;
+- id: cm4ai:instance:2
+  description: &#x27;KOLF2.1J: Human induced pluripotent stem cell (iPSC) line (RRID:CVCL_B5P3) derived from
+    a healthy male Northern European donor, available from the Human Induced Pluripotent Stem Cells Initiative
+    (HipSci) resource. Available for access by non-for-profit organizations via a simple MTA. Analyzed
+    in undifferentiated state and after differentiation into neurons, neural progenitor cells (NPCs),
+    and cardiomyocytes.
+
+    &#x27;
+- id: cm4ai:instance:3
+  description: &#x27;100 Chromatin Regulators: Near-comprehensive set of chromatin regulators encoded by the
+    human genome analyzed via AP-MS, SEC-MS, IF imaging, and CRISPR perturbation screens across different
+    cell states and treatment conditions. 17 genes endogenously tagged in MDA-MB-468 with AP-MS data under
+    three conditions, with 34 additional genes in process. SEC-MS identified 72/100 chromatin modifiers,
+    with 52 being integral components of protein complexes.
+
+    &#x27;
+- id: cm4ai:instance:4
+  description: &#x27;100 Metabolic Enzymes: Set of metabolic enzymes involved in cancer, neuropsychiatric,
+    and cardiac disorders analyzed via multimodal interrogation including mass spectrometry, imaging,
+    and perturbation screens.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R20 · correctness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">RRID format for cell lines (RRID:CVCL_0419, RRID:CVCL_B5P3) follows standard RRID:CVCL pattern</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">instances</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">No action needed - RRID format is valid</span></div>
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Hierarchical Structure (parent datasets, relationships)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">RO-Crate packages with hierarchical structure; multiple release versions (V0.5, V1.4, V2.1, October 2025); subsets defined (IF images, AP-MS, SEC-MS, CRISPR atlas, MuSIC cell maps); instances organized by cell line and treatment condition</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Clear hierarchical organization: project-level RO-Crates containing data subsets, versioned releases with DOIs, parent-child relationships between raw data and integrated cell maps. Temporal versioning with quarterly updates.</span></div>
+    <div class="ann-row"><span class="ann-k">semantic</span><span class="ann-v">version_hierarchy: True; data_subset_structure: True; relationships_typed: True</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">4/5</span>
+    <span class="ann-label">R20 Q15 (Technical Documentation)</span>
+    <span class="ann-sub">Human Subject Representation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Cell line demographics and subgroup characterization</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">instances: 4 entries with detailed cell line descriptions - MDA-MB-468 (triple negative breast cancer from 51-year-old black female, RRID:CVCL_0419, metastatic site, 3 treatment conditions), KOLF2.1J (iPSC from healthy male Northern European donor, RRID:CVCL_B5P3, 4 differentiation states), 100 chromatin regulators, 100 metabolic enzymes. subpopulations: 7 entries detailing treatment conditions and differentiation states. special_populations: Demographics documented for original cell line donors (age, sex, race, disease status)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Very good characterization appropriate for cell line research. Detailed demographics of original donors, RRIDs for traceability, comprehensive subpopulation documentation. Scored 4/5 because this is not human subjects research (de-identified cell lines), so traditional demographic diversity metrics are not applicable, but documentation is comprehensive for this data type.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Cell line descriptions match published characterizations. RRIDs are valid and match cell types</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Subpopulations align with collection mechanisms (3 MDA-MB-468 conditions match AP-MS/SEC-MS/IF protocols, 4 KOLF2.1J states match differentiation protocols)</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q5 (Structural Completeness)</span>
+    <span class="ann-sub">Data File Size Availability</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">instances: 4 entries describing cell types and protein sets (MDA-MB-468, KOLF2.1J, 100 Chromatin Regulators, 100 Metabolic Enzymes). Specific counts: 563 proteins (March 2025), 464 proteins (June 2025), 17 genes endogenously tagged, 72/100 chromatin modifiers detected, 1000+ complexes, 11,739 targeted genes in CRISPR screens</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Pass - Multiple instance counts provided across different data modalities with specific numerical details.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Instance counts are plausible for proteomics and genomics scales</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Counts consistent across beta release versions (563 proteins → 464 proteins with revisions)</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-subsets">
+  <div class="yaml">
+    <div class="field-name">subsets</div>
+    <pre>subsets:
+- id: cm4ai:subset:1
+  description: &#x27;Spatial Proteomics IF Images - MDA-MB-468: Immunofluorescence-based staining (ICC-IF)
+    and confocal microscopy images displaying spatial localization of proteins of interest in MDA-MB-468
+    breast cancer cells under three conditions: untreated, paclitaxel-treated, and vorinostat-treated.
+    March 2025 Beta release included 563 proteins; June 2025 Beta V2.1 revision includes 464 proteins
+    with RGB images. Nuclei stained with DAPI (blue channel), endoplasmic reticulum with calreticulin
+    antibody (yellow channel), microtubules with tubulin antibody (red channel), and antibody against
+    protein of interest (green channel). Generated by Lundberg Lab at Stanford University using automated
+    fixation and permeabilization protocols.
+
+    &#x27;
+- id: cm4ai:subset:2
+  description: &#x27;Protein-Protein Interaction AP-MS Data: Affinity purification mass spectrometry (AP-MS)
+    data on endogenously tagged cell lines mapping protein-protein interactions of chromatin regulators.
+    17 genes endogenously tagged in MDA-MB-468 with data acquired under three conditions (untreated, paclitaxel,
+    vorinostat). Orthogonal approach to SEC-MS for PPI mapping.
+
+    &#x27;
+- id: cm4ai:subset:3
+  description: &#x27;Protein-Protein Interaction SEC-MS Data: Size exclusion chromatography coupled to mass
+    spectrometry (SEC-MS) for proteome-wide complex/interaction mapping. Performed on MDA-MB-468 cells
+    under three conditions (untreated, paclitaxel, vorinostat) and on KOLF2.1J iPSCs and derivatives (undifferentiated,
+    NPCs, neurons, cardiomyocytes). Detected PPI profiles of over 1,000 complexes in MDA-MB-468 cells
+    and over 700 protein complexes in iPSCs and differentiated neurons. Identified 72/100 chromatin modifiers
+    with 52 being integral components of protein complexes. October 2025 release adds SEC-MS for MDA-MB-468
+    breast cancer cells.
+
+    &#x27;
+- id: cm4ai:subset:4
+  description: &#x27;CRISPR Perturbation Cell Atlas: Genome-scale CRISPRi perturbation cell atlas in undifferentiated
+    KOLF2.1J human induced pluripotent stem cells (hiPSCs) mapping transcriptional and fitness phenotypes
+    associated with 11,739 targeted genes. Single-cell CRISPR screens performed using 10x Genomics 3&#x27;&#x27;HT
+    kit with CRISPR lentiviral library targeting 100 chromatin factors with 6 guide RNAs per gene. Screens
+    conducted in MDA-MB-468 cells under 3 conditions (no treatment, paclitaxel, vorinostat) and KOLF2.1J
+    iPSC in undifferentiated state. October 2025 release adds Perturb-seq data for MDA-MB-468 breast cancer
+    cells. Includes raw sequence data and processed cell atlas data.
+
+    &#x27;
+- id: cm4ai:subset:5
+  description: &#x27;Hierarchical Cell Maps via MuSIC: Integrated hierarchical cell maps produced by Multi-Scale
+    Integrated Cell (MuSIC) pipeline from fusion of protein localization (IF images) and protein-protein
+    interaction data (AP-MS and SEC-MS). Cell maps are hierarchical directed acyclic graphs (DAG) where
+    each node represents an assembly of proteins in proximity at a given scale, spanning from large assemblies
+    representing cell compartments to small assemblies of protein complexes. Maps contain 10 layers of
+    depth representing communities at multiple resolutions, with communities at smaller distance nested
+    inside larger communities. Nature publication (Schaffer, Hu et al., April 2025) presents first fully
+    integrated multimodal cell maps.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Hierarchical Structure (parent datasets, relationships)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">RO-Crate packages with hierarchical structure; multiple release versions (V0.5, V1.4, V2.1, October 2025); subsets defined (IF images, AP-MS, SEC-MS, CRISPR atlas, MuSIC cell maps); instances organized by cell line and treatment condition</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Clear hierarchical organization: project-level RO-Crates containing data subsets, versioned releases with DOIs, parent-child relationships between raw data and integrated cell maps. Temporal versioning with quarterly updates.</span></div>
+    <div class="ann-row"><span class="ann-k">semantic</span><span class="ann-v">version_hierarchy: True; data_subset_structure: True; relationships_typed: True</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-sampling_strategies">
+  <div class="yaml">
+    <div class="field-name">sampling_strategies</div>
+    <pre>sampling_strategies:
+- id: cm4ai:sampling:1
+  description: &#x27;Purposive selection of two disease-relevant cell lines: MDA-MB-468 triple negative breast
+    cancer cell line for cancer research, and KOLF2.1J iPSCs for neuropsychiatric and cardiac disorder
+    research. Both cell lines ethically sourced and well-characterized in the literature. Selection criteria:
+    (1) MDA-MB-468 chosen for triple-negative breast cancer research applications; (2) KOLF2.1J chosen
+    as reference iPSC line for large-scale collaborative studies; (3) both have extensive existing characterization
+    data and are commercially available and ethically sourced.
+
+    &#x27;
+  is_sample: false
+  is_random: false
+  is_representative: false
+  strategies:
+  - Selection of commercially available, ethically sourced cell lines
+  - MDA-MB-468 chosen for triple-negative breast cancer research applications
+  - KOLF2.1J chosen as reference iPSC line for large-scale collaborative studies
+  - Both cell lines have extensive existing characterization data</pre>
+  </div>
+  <div class="anns empty"><span>no field-level feedback matched</span></div>
+</div>
+
+
+<div class="field" id="field-subpopulations">
+  <div class="yaml">
+    <div class="field-name">subpopulations</div>
+    <pre>subpopulations:
+- id: cm4ai:subpop:1
+  description: &#x27;MDA-MB-468 Untreated: MDA-MB-468 breast cancer cells in control/untreated condition&#x27;
+- id: cm4ai:subpop:2
+  description: &#x27;MDA-MB-468 Paclitaxel-Treated: MDA-MB-468 breast cancer cells treated with paclitaxel
+    chemotherapy&#x27;
+- id: cm4ai:subpop:3
+  description: &#x27;MDA-MB-468 Vorinostat-Treated: MDA-MB-468 breast cancer cells treated with vorinostat
+    chemotherapy&#x27;
+- id: cm4ai:subpop:4
+  description: &#x27;KOLF2.1J Undifferentiated iPSCs: KOLF2.1J induced pluripotent stem cells in undifferentiated/naive
+    state&#x27;
+- id: cm4ai:subpop:5
+  description: &#x27;KOLF2.1J iPSC-Derived Neurons: KOLF2.1J iPSCs differentiated into neurons&#x27;
+- id: cm4ai:subpop:6
+  description: &#x27;KOLF2.1J iPSC-Derived Neural Progenitor Cells (NPCs): KOLF2.1J iPSCs differentiated into
+    neural progenitor cells&#x27;
+- id: cm4ai:subpop:7
+  description: &#x27;KOLF2.1J iPSC-Derived Cardiomyocytes: KOLF2.1J iPSCs differentiated into cardiomyocytes&#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">4/5</span>
+    <span class="ann-label">R20 Q15 (Technical Documentation)</span>
+    <span class="ann-sub">Human Subject Representation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Cell line demographics and subgroup characterization</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">instances: 4 entries with detailed cell line descriptions - MDA-MB-468 (triple negative breast cancer from 51-year-old black female, RRID:CVCL_0419, metastatic site, 3 treatment conditions), KOLF2.1J (iPSC from healthy male Northern European donor, RRID:CVCL_B5P3, 4 differentiation states), 100 chromatin regulators, 100 metabolic enzymes. subpopulations: 7 entries detailing treatment conditions and differentiation states. special_populations: Demographics documented for original cell line donors (age, sex, race, disease status)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Very good characterization appropriate for cell line research. Detailed demographics of original donors, RRIDs for traceability, comprehensive subpopulation documentation. Scored 4/5 because this is not human subjects research (de-identified cell lines), so traditional demographic diversity metrics are not applicable, but documentation is comprehensive for this data type.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Cell line descriptions match published characterizations. RRIDs are valid and match cell types</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Subpopulations align with collection mechanisms (3 MDA-MB-468 conditions match AP-MS/SEC-MS/IF protocols, 4 KOLF2.1J states match differentiation protocols)</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-collection_mechanisms">
+  <div class="yaml">
+    <div class="field-name">collection_mechanisms</div>
+    <pre>collection_mechanisms:
+- id: cm4ai:collection:1
+  description: &#x27;Immunofluorescence Spatial Proteomics Imaging: Automated fixation and permeabilization
+    protocols using pipetting robot for MDA-MB-468 and KOLF2.1J cell lines. Immunofluorescence-based staining
+    (ICC-IF) with confocal microscopy to capture spatial subcellular organization. Completed spatial proteomics
+    mapping of 100 chromatin regulators in MDA-MB-468 cells under three conditions (untreated, paclitaxel,
+    vorinostat), with 500 additional proteins pending from genetic perturbations and PPI results. Antibodies
+    from Human Protein Atlas resource. Generated by Lundberg Lab at Stanford University.
+
+    &#x27;
+- id: cm4ai:collection:2
+  description: &#x27;Affinity Purification Mass Spectrometry: Endogenous tagging of genes in cell lines followed
+    by affinity purification mass spectrometry (AP-MS) to map protein-protein interactions. 17 genes endogenously
+    tagged in MDA-MB-468 with AP-MS data acquired under three conditions (untreated, paclitaxel, vorinostat).
+    34 additional genes currently in tagging process. Orthogonal approach to SEC-MS for comprehensive
+    PPI mapping.
+
+    &#x27;
+- id: cm4ai:collection:3
+  description: &#x27;Size Exclusion Chromatography Mass Spectrometry: Size exclusion chromatography coupled
+    to mass spectrometry (SEC-MS) for proteome-wide complex/interaction mapping. Performed in Krogan Laboratory
+    at UCSF. Conducted on MDA-MB-468 cells under three conditions and on KOLF2.1J iPSCs and derivatives
+    (undifferentiated, NPCs, neurons, cardiomyocytes). Enabled detection of over 1,000 protein complexes
+    in MDA-MB-468 cells and over 700 complexes in iPSCs, with thousands of proteins exhibiting differential
+    elution profiles between control and treated cells.
+
+    &#x27;
+- id: cm4ai:collection:4
+  description: &#x27;CRISPR Perturbation Screens: Single-cell CRISPR screens using CRISPR lentiviral library
+    targeting 100 chromatin factors with 6 guide RNAs per gene. Generated and characterized MDA-MB-468
+    and KOLF2.1J CRISPR lines expressing inducible dCas9. Screens performed in MDA-MB-468 cells under
+    3 conditions (no treatment, paclitaxel, vorinostat) and in undifferentiated KOLF2.1J iPSCs using 10x
+    Genomics 3&#x27;&#x27;HT kit. Genome-scale screens mapping transcriptional and fitness phenotypes for 11,739
+    targeted genes.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q12 (Technical Documentation)</span>
+    <span class="ann-sub">Collection Protocol Clarity</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Full collection protocol with methods, collectors, and timeframes</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">collection_mechanisms: 4 detailed entries - (1) IF spatial proteomics with automated protocols at Stanford (Lundberg Lab), (2) AP-MS with endogenous tagging (17 genes done, 34 in progress), (3) SEC-MS at UCSF (Krogan Lab) with specific cell conditions, (4) CRISPR screens with 10x Genomics. acquisition_methods: 4 entries covering confocal microscopy (4 channels specified), mass spectrometry (AP-MS, SEC-MS), single-cell RNA-seq (10x Genomics 3&#x27;HT), MuSIC pipeline integration. data_collectors implied via lab attributions (Lundberg Lab Stanford, Krogan Lab UCSF, Mali Lab UCSD). collection_timeframes: Project dates Sept 1 2022 to Aug 31 2026, beta releases March/June/October 2025, quarterly updates through Nov 2026</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent collection protocol documentation with comprehensive mechanisms, acquisition methods, lab attributions, and detailed timeframes including release schedule.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All lab names and institutions are real. 10x Genomics 3&#x27;HT kit is real product. Confocal microscopy channel descriptions are technically accurate</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Collection timelines align with project funding period (2022-2026) and beta release schedule</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-acquisition_methods">
+  <div class="yaml">
+    <div class="field-name">acquisition_methods</div>
+    <pre>acquisition_methods:
+- id: cm4ai:acquisition:1
+  description: &#x27;Confocal Microscopy for Subcellular Imaging: High-resolution confocal microscopy of immunofluorescence-stained
+    cells capturing four channels: DAPI (nuclei, blue), calreticulin antibody (ER, yellow), tubulin antibody
+    (microtubules, red), and antibody against protein of interest (green). Images processed using Human
+    Protein Atlas deep learning model to reduce dimensionality, producing image embeddings containing
+    information about protein localization.
+
+    &#x27;
+- id: cm4ai:acquisition:2
+  description: &#x27;Mass Spectrometry for Protein Interactions: State-of-the-art mass spectrometry-based proteomics
+    including AP-MS on endogenously tagged cell lines and SEC-MS for proteome-wide complex mapping. PPI
+    networks processed using node2vec deep learning model to reduce dimensionality, producing PPI embeddings
+    containing information about protein interactions.
+
+    &#x27;
+- id: cm4ai:acquisition:3
+  description: &#x27;Single-Cell RNA Sequencing for Perturbation Mapping: Single-cell RNA sequencing using
+    10x Genomics 3&#x27;&#x27;HT kit to capture transcriptional states following CRISPR perturbations. Generates
+    genome-scale perturbation cell atlas mapping transcriptional and fitness phenotypes. Raw sequence
+    data deposited to NCBI BioProject/Sequence Read Archive (SRA).
+
+    &#x27;
+- id: cm4ai:acquisition:4
+  description: &#x27;MuSIC Pipeline Integration: Multi-Scale Integrated Cell (MuSIC) pipeline integrates PPI
+    embeddings and image embeddings using contrastive deep learning to obtain co-embeddings for each protein.
+    Community detection performed based on all-by-all similarities of protein pairs in co-embedding space,
+    producing hierarchical cell maps as final output. Maps annotated using Gene Ontology, Reactome pathways,
+    and large language model approaches.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q12 (Technical Documentation)</span>
+    <span class="ann-sub">Collection Protocol Clarity</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Full collection protocol with methods, collectors, and timeframes</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">collection_mechanisms: 4 detailed entries - (1) IF spatial proteomics with automated protocols at Stanford (Lundberg Lab), (2) AP-MS with endogenous tagging (17 genes done, 34 in progress), (3) SEC-MS at UCSF (Krogan Lab) with specific cell conditions, (4) CRISPR screens with 10x Genomics. acquisition_methods: 4 entries covering confocal microscopy (4 channels specified), mass spectrometry (AP-MS, SEC-MS), single-cell RNA-seq (10x Genomics 3&#x27;HT), MuSIC pipeline integration. data_collectors implied via lab attributions (Lundberg Lab Stanford, Krogan Lab UCSF, Mali Lab UCSD). collection_timeframes: Project dates Sept 1 2022 to Aug 31 2026, beta releases March/June/October 2025, quarterly updates through Nov 2026</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent collection protocol documentation with comprehensive mechanisms, acquisition methods, lab attributions, and detailed timeframes including release schedule.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All lab names and institutions are real. 10x Genomics 3&#x27;HT kit is real product. Confocal microscopy channel descriptions are technically accurate</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Collection timelines align with project funding period (2022-2026) and beta release schedule</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-preprocessing_strategies">
+  <div class="yaml">
+    <div class="field-name">preprocessing_strategies</div>
+    <pre>preprocessing_strategies:
+- id: cm4ai:preproc:1
+  description: &#x27;Deep Learning Embedding Generation: PPI networks processed using node2vec deep learning
+    model to reduce dimensionality and produce PPI embeddings. IF images processed using Human Protein
+    Atlas deep learning model to reduce dimensionality and produce image embeddings. PPI and image embeddings
+    integrated to obtain co-embeddings using contrastive deep learning, learning co-embeddings such that
+    original embeddings can be reconstructed with minimal information loss.
+
+    &#x27;
+  preprocessing_details:
+  - node2vec deep learning for PPI network dimensionality reduction
+  - Human Protein Atlas deep learning model for image embedding
+  - Contrastive deep learning for PPI and image embedding integration
+  - Co-embedding optimization to minimize information loss
+- id: cm4ai:preproc:2
+  description: &#x27;Hierarchical Community Detection: Community detection performed on co-embedding space
+    using multiscale community detection algorithms implemented in Cytoscape. Produces hierarchical directed
+    acyclic graphs (DAG) of protein assemblies at multiple resolutions, with 10 layers of depth representing
+    communities from large cell compartments to small protein complexes.
+
+    &#x27;
+  preprocessing_details:
+  - All-by-all similarity computation in co-embedding space
+  - Multiscale community detection using Cytoscape algorithms
+  - Hierarchical structure generation as directed acyclic graphs
+  - 10-layer depth hierarchy from compartments to complexes
+- id: cm4ai:preproc:3
+  description: &#x27;Cell Map Annotation: Two-pronged annotation approach: (1) Alignment to known protein function
+    and pathway resources including Gene Ontology (GO) and Reactome to determine protein assemblies with
+    high overlap with known cell biology, and (2) Large language model (LLM) approach to name sets of
+    proteins and assign name confidence scores.
+
+    &#x27;
+  preprocessing_details:
+  - Alignment to Gene Ontology for functional annotation
+  - Alignment to Reactome pathways for pathway annotation
+  - LLM-based naming of protein assemblies with confidence scores
+  - Validation of assemblies against known cell biology
+- id: cm4ai:preproc:4
+  description: &#x27;Quality Control for Imaging Data: Standardized automated fixation and permeabilization
+    protocols using pipetting robot. Consistent staining protocols across conditions using Human Protein
+    Atlas antibodies. Quality control of imaging data before release and processing through MuSIC pipeline.
+
+    &#x27;
+  preprocessing_details:
+  - Automated protocols for consistency
+  - Standardized staining across all conditions
+  - Quality checks before downstream processing
+  - Release only after quality validation
+- id: cm4ai:preproc:5
+  description: &#x27;Quality Control for Mass Spectrometry Data: Quality control and validation of AP-MS and
+    SEC-MS data before public release. Mass spectrometry data for human iPSCs deposited to MassIVE Repository,
+    and data for human cancer cells also deposited to MassIVE Repository.
+
+    &#x27;
+  preprocessing_details:
+  - QC procedures for AP-MS data
+  - QC procedures for SEC-MS data
+  - Validation before public release
+  - Deposition to MassIVE repositories with persistent identifiers
+- id: cm4ai:preproc:6
+  description: &#x27;Integrative Structure Modeling: Bioinformatics pipeline for annotating MuSIC communities
+    by available structural information about community members and their interactions. Structural information
+    includes PDB, AlphaFold Protein Structure Database, crosslinking mass spectrometry, and prediction
+    of disordered sequence segments. Communities ranked by structural information amount as proxy for
+    integrative modeling feasibility. Modeling protocol scripted using Python Modeling Interface package
+    based on Integrative Modeling Platform (IMP) version 2.18.
+
+    &#x27;
+  preprocessing_details:
+  - PDB structural information integration
+  - AlphaFoldDB structure integration
+  - Crosslinking mass spectrometry data incorporation
+  - Disordered region prediction using sequence analysis
+  - Feasibility ranking for structure modeling
+  - IMP-based structural model generation</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q11 (Technical Documentation)</span>
+    <span class="ann-sub">Tool and Software Transparency</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Comprehensive strategies with software versions/URLs</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">preprocessing_strategies: 6 detailed entries covering deep learning (node2vec, HPA model, contrastive learning), hierarchical community detection (Cytoscape algorithms), cell map annotation (GO, Reactome, LLM), QC for imaging (automated protocols), QC for mass spec (MassIVE deposition), integrative structure modeling (IMP 2.18, Python Modeling Interface). Software tools: node2vec, Human Protein Atlas deep learning model, Cytoscape, Gene Ontology, Reactome, LLM (unspecified), IMP version 2.18, AlphaFold, PDB, 10x Genomics 3&#x27;HT kit. cleaning_strategies: FAIRSCAPE-CLI, RO-Crate, JSON-Schema validation, ARK identifiers, EVI provenance</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent software and tool documentation with specific versions (IMP 2.18), named algorithms (node2vec, contrastive learning), and platforms (Cytoscape, 10x Genomics 3&#x27;HT). Comprehensive preprocessing and cleaning strategies documented.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All cited tools are real and appropriate for stated tasks (IMP for structure modeling, node2vec for graph embedding, Cytoscape for networks)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Tool choices align with data types and analysis goals (deep learning for image/network integration, community detection for hierarchical maps)</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-cleaning_strategies">
+  <div class="yaml">
+    <div class="field-name">cleaning_strategies</div>
+    <pre>cleaning_strategies:
+- id: cm4ai:cleaning:1
+  description: &#x27;FAIRSCAPE AI-Readiness Packaging: All datasets packaged using FAIRSCAPE framework which
+    creates RO-Crate packages with datasets, metadata, provenance graphs, and software. FAIRSCAPE-CLI
+    validates inputs and creates output RO-Crate packages. FAIRSCAPE server assigns persistent resolvable
+    globally unique identifiers (ARK scheme), decomposes RO-Crates into components, and computes end-to-end
+    provenance entailments using EVI Evidence Graph Ontology.
+
+    &#x27;
+  cleaning_details:
+  - RO-Crate packaging with metadata and provenance
+  - JSON-Schema validation of all datasets
+  - ARK persistent identifier assignment
+  - Provenance graph computation and linking
+  - Machine-readable metadata in JSON-LD with Schema.org, EVI vocabularies
+- id: cm4ai:cleaning:2
+  description: &#x27;Data Standard Mapping: Data mapped to applicable standards and ontologies including Gene
+    Ontology (GO), Reactome, Protein Data Bank (PDB), AlphaFold Protein Structure Database, Schema.org,
+    and EVI Evidence Graph Ontology. Keywords mapped to controlled vocabularies from NCI Thesaurus, BioAssay
+    Ontology, Cell Ontology, CHEBI, EFO, and other ontologies.
+
+    &#x27;
+  cleaning_details:
+  - GO mapping for protein functions
+  - Reactome mapping for pathways
+  - PDB and AlphaFold for structural information
+  - Schema.org and EVI for metadata
+  - Controlled vocabulary mapping for all keywords
+  - NCI Thesaurus, BAO, Cell Ontology, CHEBI ontology mappings</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q10 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Interoperability and Standardization</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Standard formats + schema/ontology compliance</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Standard formats: RO-Crate, JSON-LD, JSON-Schema, SRA/FASTQ, mass spec data, network graphs. Ontologies/standards: Gene Ontology (GO), Reactome pathways, PDB, AlphaFold Protein Structure Database, Schema.org, EVI Evidence Graph Ontology, NCI Thesaurus, BioAssay Ontology, Cell Ontology, CHEBI, EFO. Schema conformance: JSON-Schema mini-data-dictionaries for all datasets, FAIRSCAPE framework validation, RO-Crate metadata standards. cleaning_strategies document mapping to standards</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent interoperability with comprehensive standard format usage and extensive ontology mapping. RO-Crate and FAIRSCAPE frameworks ensure machine-readable metadata. Multiple ontologies for semantic annotation.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All cited standards are real (GO, Reactome, PDB, AlphaFold, Schema.org, EVI, RO-Crate)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Ontology mappings align with data types (GO for proteins, Reactome for pathways, Cell Ontology for cell types)</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q11 (Technical Documentation)</span>
+    <span class="ann-sub">Tool and Software Transparency</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Comprehensive strategies with software versions/URLs</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">preprocessing_strategies: 6 detailed entries covering deep learning (node2vec, HPA model, contrastive learning), hierarchical community detection (Cytoscape algorithms), cell map annotation (GO, Reactome, LLM), QC for imaging (automated protocols), QC for mass spec (MassIVE deposition), integrative structure modeling (IMP 2.18, Python Modeling Interface). Software tools: node2vec, Human Protein Atlas deep learning model, Cytoscape, Gene Ontology, Reactome, LLM (unspecified), IMP version 2.18, AlphaFold, PDB, 10x Genomics 3&#x27;HT kit. cleaning_strategies: FAIRSCAPE-CLI, RO-Crate, JSON-Schema validation, ARK identifiers, EVI provenance</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent software and tool documentation with specific versions (IMP 2.18), named algorithms (node2vec, contrastive learning), and platforms (Cytoscape, 10x Genomics 3&#x27;HT). Comprehensive preprocessing and cleaning strategies documented.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All cited tools are real and appropriate for stated tasks (IMP for structure modeling, node2vec for graph embedding, Cytoscape for networks)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Tool choices align with data types and analysis goals (deep learning for image/network integration, community detection for hierarchical maps)</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-intended_uses">
+  <div class="yaml">
+    <div class="field-name">intended_uses</div>
+    <pre>intended_uses:
+- id: cm4ai:use:1
+  description: &#x27;AI Model Training for Functional Genomics: Primary intended use is training and development
+    of artificial intelligence and machine learning models for functional genomics research. AI-ready
+    datasets with full provenance, metadata, and validation enable immediate use in AI/ML pipelines without
+    reformatting.
+
+    &#x27;
+- id: cm4ai:use:2
+  description: &#x27;Visible Neural Network Development: Development of visible neural networks (VNNs) that
+    use hierarchical cell maps as interpretable model architectures. Unlike black box models, VNNs built
+    on cell maps allow interrogation of how protein assemblies affect cell-level phenotypes, enabling
+    interpretation of genetic variants and mutations in the context of cellular mechanisms.
+
+    &#x27;
+- id: cm4ai:use:3
+  description: &#x27;Genotype-Phenotype Mapping Research: Research into interpretable genotype-phenotype learning
+    using multi-scale cell maps. Enables understanding of mechanisms by which genotypes translate to phenotypes,
+    supporting precision medicine applications and genomic variant interpretation.
+
+    &#x27;
+- id: cm4ai:use:4
+  description: &#x27;Drug Response and Synergy Prediction: Analysis of cellular responses to drug treatments
+    (paclitaxel, vorinostat) to predict drug response and synergy. Cell maps under different treatment
+    conditions enable visible machine learning for drug discovery and personalized medicine applications.
+
+    &#x27;
+- id: cm4ai:use:5
+  description: &#x27;Disease Mechanism Research: Study of disease mechanisms in cancer, neuropsychiatric disorders,
+    and cardiac disorders through analysis of chromatin modifiers and metabolic enzymes in disease-relevant
+    cell contexts. Supports understanding of disease pathways and identification of therapeutic targets.
+
+    &#x27;
+- id: cm4ai:use:6
+  description: &#x27;Structural and Functional Genomics: Use as foundation for integrative structure modeling
+    of protein communities, combining multimodal cell maps with PDB, AlphaFoldDB, and crosslinking mass
+    spectrometry data to determine structural models of protein assemblies, as demonstrated in Nature
+    publication (Schaffer, Hu et al., April 2025).
+
+    &#x27;
+- id: cm4ai:use:7
+  description: &#x27;Model for AI-Ready Biomedical Dataset Development: Use as exemplar for future AI-ready
+    biomedical dataset development, demonstrating best practices in FAIR principles implementation, provenance
+    tracking, ethical data governance, and AI-readiness packaging using RO-Crate and FAIRSCAPE frameworks.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns empty"><span>no field-level feedback matched</span></div>
+</div>
+
+
+<div class="field" id="field-discouraged_uses">
+  <div class="yaml">
+    <div class="field-name">discouraged_uses</div>
+    <pre>discouraged_uses:
+- id: cm4ai:discouraged:1
+  description: &#x27;Clinical Decision-Making Without Validation: Laboratory data from cell lines are not to
+    be used in clinical decision-making or any context involving patient care without appropriate regulatory
+    oversight and approval. Requires domain expertise and clinical validation before any clinical applications.
+    Explicitly prohibited per dataset terms.
+
+    &#x27;
+- id: cm4ai:discouraged:2
+  description: &#x27;Use During Incomplete Data Release: This is an interim/beta release with data not yet
+    in completed final form. Some datasets are under temporary pre-publication embargo, protein interrogation
+    sets incompletely overlap across data modalities, and computed cell maps not yet included in releases.
+    Full integration and final cell maps will be available in future releases through November 2026.
+
+    &#x27;
+- id: cm4ai:discouraged:3
+  description: &#x27;Analysis Without Domain Expertise: Datasets require domain expertise for meaningful analysis
+    and interpretation. Current release is most suitable for bioinformatics analysis of individual datasets.
+    Not suitable for use without understanding of functional genomics, proteomics, cell biology, and AI/ML
+    methodologies. Training resources available through CM4AI Skills and Workforce Development module.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns empty"><span>no field-level feedback matched</span></div>
+</div>
+
+
+<div class="field" id="field-license">
+  <div class="yaml">
+    <div class="field-name">license</div>
+    <pre>license: CC BY-NC-SA 4.0</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q18 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Reusability (License Clarity)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">License explicitly defines reuse terms</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">license: CC BY-NC-SA 4.0. license_and_use_terms: Detailed reuse terms - (1) Attribution required to copyright holders and CM4AI project, (2) Non-commercial use permitted, (3) Commercial use requires separate license from UCSD/Stanford/UCSF, (4) Share-alike requirement for derivatives, (5) Citation requirements (Nature, bioRxiv, data DOI), (6) Data Access Committee oversight. Explicit reuse cases: AI model training, VNN development, genotype-phenotype research, drug response prediction, disease mechanism research, structural genomics, AI-ready dataset development exemplar</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent license clarity with explicit terms and identifiable reuse cases. License defines permitted uses (academic AI research), restricted uses (commercial), attribution requirements, and derivative work terms.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">CC BY-NC-SA 4.0 is standard Creative Commons license with correct interpretation of terms</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">License terms consistent with intended_uses (academic AI research) and discouraged_uses (clinical applications without validation)</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q9 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Access Requirements and Governance Documentation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">License + restrictions + confidentiality classification</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">license: CC BY-NC-SA 4.0. license_and_use_terms: detailed description with attribution requirements, non-commercial restriction with separate commercial license negotiation process, share-alike requirement, citation requirements (Nature publication + bioRxiv preprint + data DOI), Data Access Committee oversight (Jillian Parker), copyright holders (UCSD, Stanford, UCSF). No explicit ip_restrictions or regulatory_restrictions fields, but commercial use restrictions clearly defined in license terms. confidentiality_level: implicit (public with usage restrictions)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent governance documentation. License clearly defined with explicit terms. Commercial restrictions and negotiation process documented. Data Access Committee provides governance oversight. Attribution and citation requirements explicit.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">CC BY-NC-SA 4.0 is valid Creative Commons license. Citation requirements include valid DOIs</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Non-commercial restriction consistent with academic research data. Data Access Committee aligns with ethical oversight structure</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-license_and_use_terms">
+  <div class="yaml">
+    <div class="field-name">license_and_use_terms</div>
+    <pre>license_and_use_terms:
+  id: cm4ai:license:1
+  description: &#x27;Data licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+    International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required
+    to the copyright holders and the Cell Maps for Artificial Intelligence project. Any publications referencing
+    this data or derived products should cite the Nature article (Schaffer LV, Hu M, et al. Multimodal
+    cell maps as a foundation for structural and functional genomics. Nature. 2025. doi:10.1038/s41586-025-08878-3)
+    and the bioRxiv preprint (Clark T, et al. Cell Maps for Artificial Intelligence: AI-Ready Maps of
+    Human Cell Architecture from Disease-Relevant Cell Lines. BioRXiv, May 2024. doi:10.1101/2024.05.21.589311)
+    and directly cite the data collection. Commercial use requires separate license negotiation with copyright
+    holder (UCSD, Stanford, and/or UCSF depending upon specific data package). A Data Access Committee
+    (led by Jillian Parker) supervises ethical matters related to dataset distribution and potential dual
+    licensing for commercial use. Copyright (c) 2025 The Regents of the University of California except
+    where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees
+    of the Leland Stanford Junior University.
+
+    &#x27;
+  license_terms:
+  - Attribution required to copyright holders and authors
+  - Non-commercial use only (commercial requires separate license)
+  - Share-alike - derivative works must use same license
+  - Must cite Nature publication and bioRxiv preprint and data collection DOI
+  - Data Access Committee oversight for ethical distribution</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q1 (Structural Completeness)</span>
+    <span class="ann-sub">Field Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">≥90% fields populated</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://doi.org/10.18130/V3/DXWOS5, title: Cell Maps for Artificial Intelligence (CM4AI), description: 1340 chars, keywords: 28 keywords, license_and_use_terms: detailed CC BY-NC-SA 4.0 with citation requirements</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">All mandatory fields present with comprehensive, high-quality content. Description exceptionally detailed with technical specifics.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">DOI format valid with Harvard Dataverse prefix 10.18130</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">All fields semantically appropriate and internally consistent</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q14 (Technical Documentation)</span>
+    <span class="ann-sub">Associated Publications</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Multiple references and dataset citation</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">external_resources: 13 resource categories including Nature publication (Schaffer, Hu et al. April 2025, doi:10.1038/s41586-025-08878-3), bioRxiv preprint (Clark et al. May 2024, doi:10.1101/2024.05.21.589311), Perturbation Cell Atlas publication (Nourreddine et al. 2024, doi:10.1101/2024.11.03.621734). Citation requirements in license_and_use_terms mandate citing Nature publication, bioRxiv preprint, and data collection DOI. Multiple DOIs for dataset versions provided</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent publication documentation with 3 peer-reviewed/preprint publications, all with valid DOIs. Dataset citation requirements clearly specified in license terms.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All publication DOIs follow valid format (10.1038 for Nature, 10.1101 for bioRxiv). Publication timeline plausible (preprint May 2024 → Nature April 2025)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Publications align with dataset content (multimodal cell maps, CRISPR perturbation atlas). Authors match creators list</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q17 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Accessibility (Access Mechanism)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Fully defined access path (platform, login, policy)</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">distribution_formats: 5 detailed access mechanisms - (1) RO-Crate packages via UVA Dataverse with DOIs and landing pages, (2) MassIVE Repository for mass spec data, (3) NCBI BioProject/SRA for sequence data, (4) NDEx for cell maps (browser or Cytoscape/HiView/ndex2 Python library), (5) LibraData UVA archive. license_and_use_terms: CC BY-NC-SA 4.0 with attribution requirements, non-commercial use, Data Access Committee for commercial licensing. KOLF2.1J: simple MTA required for non-profit access. MDA-MB-468: ATCC commercial source</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent access documentation with specific platforms, access methods (browser, API, Python library), licensing requirements, and paths for both academic (direct) and commercial (committee oversight) use.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All access platforms are real (Dataverse, MassIVE, NCBI SRA, NDEx). CC BY-NC-SA 4.0 is valid license. ATCC and HipSci are real cell line sources</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Access mechanisms align with distribution formats. License terms consistent with Data Access Committee governance structure</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q18 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Reusability (License Clarity)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">License explicitly defines reuse terms</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">license: CC BY-NC-SA 4.0. license_and_use_terms: Detailed reuse terms - (1) Attribution required to copyright holders and CM4AI project, (2) Non-commercial use permitted, (3) Commercial use requires separate license from UCSD/Stanford/UCSF, (4) Share-alike requirement for derivatives, (5) Citation requirements (Nature, bioRxiv, data DOI), (6) Data Access Committee oversight. Explicit reuse cases: AI model training, VNN development, genotype-phenotype research, drug response prediction, disease mechanism research, structural genomics, AI-ready dataset development exemplar</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent license clarity with explicit terms and identifiable reuse cases. License defines permitted uses (academic AI research), restricted uses (commercial), attribution requirements, and derivative work terms.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">CC BY-NC-SA 4.0 is standard Creative Commons license with correct interpretation of terms</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">License terms consistent with intended_uses (academic AI research) and discouraged_uses (clinical applications without validation)</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q9 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Access Requirements and Governance Documentation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">License + restrictions + confidentiality classification</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">license: CC BY-NC-SA 4.0. license_and_use_terms: detailed description with attribution requirements, non-commercial restriction with separate commercial license negotiation process, share-alike requirement, citation requirements (Nature publication + bioRxiv preprint + data DOI), Data Access Committee oversight (Jillian Parker), copyright holders (UCSD, Stanford, UCSF). No explicit ip_restrictions or regulatory_restrictions fields, but commercial use restrictions clearly defined in license terms. confidentiality_level: implicit (public with usage restrictions)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent governance documentation. License clearly defined with explicit terms. Commercial restrictions and negotiation process documented. Data Access Committee provides governance oversight. Attribution and citation requirements explicit.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">CC BY-NC-SA 4.0 is valid Creative Commons license. Citation requirements include valid DOIs</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Non-commercial restriction consistent with academic research data. Data Access Committee aligns with ethical oversight structure</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-distribution_formats">
+  <div class="yaml">
+    <div class="field-name">distribution_formats</div>
+    <pre>distribution_formats:
+- id: cm4ai:format:1
+  description: &#x27;RO-Crate Packages with Provenance: All CM4AI output data packaged as Research Object Crate
+    (RO-Crate) packages containing datasets, metadata, provenance graphs, and software (or resolvable
+    references). RO-Crates assigned persistent globally unique identifiers (ARK scheme, DOIs planned for
+    publishable work) that resolve to machine- and human-readable landing pages with metadata in JSON-LD
+    using Schema.org and EVI vocabularies.
+
+    &#x27;
+  access_urls:
+  - https://doi.org/10.18130/V3/DXWOS5
+  - https://doi.org/10.18130/V3/B35XWX
+  - https://doi.org/10.18130/V3/F3TD5R
+  - https://doi.org/10.18130/V3/K7TGEM
+  - https://www.cm4ai.org
+- id: cm4ai:format:2
+  description: &#x27;Mass Spectrometry Data in MassIVE: Mass spectrometry data deposited to MassIVE Repository
+    (Proteomics community-supported repository). Separate depositions for human iPSC data and human cancer
+    cell data (SEC-MS for KOLF2.1J iPSCs and MDA-MB-468 cancer cells). Data will be uploaded to PRIDE
+    when available.
+
+    &#x27;
+  access_urls:
+  - MassIVE Repository (human iPSCs - SEC-MS)
+  - MassIVE Repository (human cancer cells - SEC-MS)
+- id: cm4ai:format:3
+  description: &#x27;Sequence Data in NCBI SRA: Raw sequence data from CRISPR perturbation screens deposited
+    to NCBI BioProject/Sequence Read Archive (SRA). Genome-scale CRISPRi perturbation cell atlas raw sequences
+    and processed data available.
+
+    &#x27;
+  access_urls:
+  - NCBI BioProject
+  - Sequence Read Archive (SRA)
+- id: cm4ai:format:4
+  description: &#x27;Hierarchical Cell Maps in NDEx: Cell maps shared via Network Data Exchange (NDEx) for
+    visualization and access. Maps can be visualized in web browser or accessed via tools such as Cytoscape,
+    HiView, and Python ndex2 library.
+
+    &#x27;
+  access_urls:
+  - https://www.ndexbio.org
+- id: cm4ai:format:5
+  description: &#x27;University of Virginia Dataverse: Archived RO-Crates available in University of Virginia&#x27;&#x27;s
+    LibraData data archive (instance of Harvard&#x27;&#x27;s Dataverse, an NIH-approved generalist repository).
+    Long-term preservation supported by committed institutional funds. Quarterly updates through November
+    2026.
+
+    &#x27;
+  access_urls:
+  - https://doi.org/10.18130/V3/DXWOS5
+  - LibraData University of Virginia</pre>
+  </div>
+  <div class="anns"><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R20 · content_accuracy</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">MassIVE Repository URLs not provided as full DOI/accession links</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">distribution_formats</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">Replace placeholder text with actual MassIVE accession numbers when available</span></div>
+  </div>
+</div><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R20 · correctness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">DOI prefix 10.18130 matches Harvard Dataverse pattern correctly</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">id, distribution_formats</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">No action needed - DOI format is valid</span></div>
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Landing Page and Resources (page, hierarchical resources)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">page: https://www.cm4ai.org; distribution_formats with access_urls including DOI landing pages, NDEx, U-BRITE platform, MassIVE, NCBI SRA</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Official project website plus multiple access points: UVA Dataverse (DOIs with landing pages), NDEx for visualization, MassIVE for MS data, NCBI SRA for sequence data. Hierarchical resource structure via RO-Crate packages.</span></div>
+    <div class="ann-row"><span class="ann-k">semantic</span><span class="ann-v">landing_page_valid: True; multiple_access_points: True; hierarchical_structure: True</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q17 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Accessibility (Access Mechanism)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Fully defined access path (platform, login, policy)</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">distribution_formats: 5 detailed access mechanisms - (1) RO-Crate packages via UVA Dataverse with DOIs and landing pages, (2) MassIVE Repository for mass spec data, (3) NCBI BioProject/SRA for sequence data, (4) NDEx for cell maps (browser or Cytoscape/HiView/ndex2 Python library), (5) LibraData UVA archive. license_and_use_terms: CC BY-NC-SA 4.0 with attribution requirements, non-commercial use, Data Access Committee for commercial licensing. KOLF2.1J: simple MTA required for non-profit access. MDA-MB-468: ATCC commercial source</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent access documentation with specific platforms, access methods (browser, API, Python library), licensing requirements, and paths for both academic (direct) and commercial (committee oversight) use.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All access platforms are real (Dataverse, MassIVE, NCBI SRA, NDEx). CC BY-NC-SA 4.0 is valid license. ATCC and HipSci are real cell line sources</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Access mechanisms align with distribution formats. License terms consistent with Data Access Committee governance structure</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q4 (Structural Completeness)</span>
+    <span class="ann-sub">File Enumeration and Type Variety</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">&gt;3 file types</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">distribution_formats: 5 distinct formats - (1) RO-Crate packages with JSON-LD metadata, (2) Mass Spectrometry data in MassIVE, (3) Sequence data in NCBI SRA, (4) Hierarchical cell maps in NDEx, (5) Dataverse archived RO-Crates. Media types: JSON-LD, mass spec raw data, FASTQ/SRA, network graphs, multiple data types in RO-Crate bundles</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional format diversity with 5 distinct distribution channels and multiple file types. RO-Crate packaging provides multi-format bundling with provenance.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All distribution platforms are real (MassIVE, NCBI SRA, NDEx, Dataverse)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Distribution formats align with data collection methods (mass spec → MassIVE, sequencing → SRA)</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-maintainers">
+  <div class="yaml">
+    <div class="field-name">maintainers</div>
+    <pre>maintainers:
+- id: cm4ai:maintainer:1
+  description: &#x27;CM4AI Consortium: Multidisciplinary consortium managing dataset maintenance including
+    University of California San Diego (lead), University of California San Francisco, Stanford University,
+    University of Virginia, Yale University, University of Alabama at Birmingham, Simon Fraser University,
+    and The Hastings Center. Data Governance Committee led by Jillian Parker (jillianparker@health.ucsd.edu).
+    Ethical Review by Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon
+    (jean-christophe_belisle-pipon@sfu.ca).
+
+    &#x27;
+  maintainer_details:
+  - University of California San Diego (lead institution, Ideker Lab)
+  - UCSF (Krogan Lab - protein interactions, Sali Lab - structure modeling)
+  - Stanford University (Lundberg Lab - spatial proteomics)
+  - University of Virginia (Clark Lab - standards and FAIRSCAPE)
+  - Yale University (Schulz Lab - workforce development)
+  - University of Alabama at Birmingham (Chen Lab - teaming, U-BRITE platform)
+  - Simon Fraser University (Bélisle-Pipon - ethics)
+  - The Hastings Center (Ravitsky - ethics)
+  - Data Governance Committee (Jillian Parker, jillianparker@health.ucsd.edu)</pre>
+  </div>
+  <div class="anns empty"><span>no field-level feedback matched</span></div>
+</div>
+
+
+<div class="field" id="field-updates">
+  <div class="yaml">
+    <div class="field-name">updates</div>
+    <pre>updates:
+  id: cm4ai:updates:1
+  description: &#x27;Dataset regularly updated and augmented through end of project in November 2026. Beta
+    releases on quarterly basis with periodic data augmentation. Initial alpha release (v0.5) provided
+    as supplemental data. March 2025 Beta (V1.4) includes perturb-seq in KOLF2.1J iPSCs, SEC-MS in iPSCs
+    and derivatives, and IF images in MDA-MB-468 under three conditions. June 2025 Beta (V2.1) revision
+    adds RGB IF images, ro-crate metadata corrections, and naming convention changes, plus SEC-MS for
+    MDA-MB-468. October 2025 Beta adds Perturb-seq for MDA-MB-468 breast cancer cells and additional SEC-MS
+    data. Future releases will include computed cell maps and complete integration of all data streams.
+    Long-term preservation in University of Virginia Dataverse with committed institutional support.
+
+    &#x27;
+  frequency: Quarterly updates through November 2026; long-term preservation thereafter
+  update_details:
+  - Alpha release v0.5 (supplemental data)
+  - March 2025 Beta release V1.4 (doi:10.18130/V3/B35XWX)
+  - June 2025 Beta release V2.1 (doi:10.18130/V3/F3TD5R)
+  - October 2025 Beta release (doi:10.18130/V3/K7TGEM)
+  - Quarterly augmentation through November 2026
+  - Future releases to include computed cell maps
+  - Final release expected November 2026
+  - Long-term preservation in UVA Dataverse</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q12 (Technical Documentation)</span>
+    <span class="ann-sub">Collection Protocol Clarity</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Full collection protocol with methods, collectors, and timeframes</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">collection_mechanisms: 4 detailed entries - (1) IF spatial proteomics with automated protocols at Stanford (Lundberg Lab), (2) AP-MS with endogenous tagging (17 genes done, 34 in progress), (3) SEC-MS at UCSF (Krogan Lab) with specific cell conditions, (4) CRISPR screens with 10x Genomics. acquisition_methods: 4 entries covering confocal microscopy (4 channels specified), mass spectrometry (AP-MS, SEC-MS), single-cell RNA-seq (10x Genomics 3&#x27;HT), MuSIC pipeline integration. data_collectors implied via lab attributions (Lundberg Lab Stanford, Krogan Lab UCSF, Mali Lab UCSD). collection_timeframes: Project dates Sept 1 2022 to Aug 31 2026, beta releases March/June/October 2025, quarterly updates through Nov 2026</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent collection protocol documentation with comprehensive mechanisms, acquisition methods, lab attributions, and detailed timeframes including release schedule.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All lab names and institutions are real. 10x Genomics 3&#x27;HT kit is real product. Confocal microscopy channel descriptions are technically accurate</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Collection timelines align with project funding period (2022-2026) and beta release schedule</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q13 (Technical Documentation)</span>
+    <span class="ann-sub">Version History Documentation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Comprehensive versioning with errata, updates, and release notes</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">updates: Detailed version history with Alpha v0.5 (supplemental data), March 2025 Beta V1.4 (doi:10.18130/V3/B35XWX), June 2025 Beta V2.1 (doi:10.18130/V3/F3TD5R), October 2025 Beta (doi:10.18130/V3/K7TGEM). Release notes: V1.4 adds perturb-seq in iPSCs, SEC-MS in iPSCs, IF images MDA-MB-468. V2.1 adds RGB IF images, ro-crate metadata corrections, naming convention changes, SEC-MS for MDA-MB-468. October adds Perturb-seq for MDA-MB-468. Update frequency: Quarterly through November 2026. version_access: Each version has unique DOI in Dataverse. Future plans: computed cell maps, complete integration</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent version history with detailed release notes, version-specific DOIs, errata documentation (metadata corrections in V2.1), and clear update roadmap through 2026.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All version DOIs follow Harvard Dataverse pattern 10.18130. Version numbering is consistent (V1.4 → V2.1)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Version timeline aligns with project schedule. Incremental data additions match collection mechanisms documented</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q19 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Data Integrity and Provenance</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Structured version control with timestamps</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">updates: Comprehensive version history with timestamps - Alpha v0.5 (supplemental), March 2025 Beta V1.4, June 2025 Beta V2.1, October 2025 Beta. Each version has unique DOI and detailed change log (V2.1: RGB images added, metadata corrections, naming changes). Provenance: FAIRSCAPE framework computes end-to-end provenance graphs using EVI Evidence Graph Ontology. RO-Crate packages include provenance graphs with machine-readable lineage. retention_limit: NIH data sharing policy compliance, long-term preservation in UVA Dataverse, no planned sunset</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent provenance and integrity documentation. Structured version control with DOIs, detailed change logs, formal provenance graphs via FAIRSCAPE/EVI, and long-term preservation commitment.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">FAIRSCAPE and EVI are real provenance frameworks. Version DOIs are valid. NIH data sharing policy is real requirement</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Version changes align with collection progress (additional data types added in each release). Provenance approach consistent with FAIR principles and RO-Crate packaging</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-retention_limit">
+  <div class="yaml">
+    <div class="field-name">retention_limit</div>
+    <pre>retention_limit:
+  id: cm4ai:retention:1
+  description: &#x27;Digital data maintained according to NIH data sharing policies with long-term preservation
+    in University of Virginia&#x27;&#x27;s LibraData repository supported by committed institutional funds. No planned
+    sunset for data availability. Archived RO-Crates with persistent identifiers (ARK, future DOIs) ensure
+    long-term accessibility and citability.
+
+    &#x27;
+  retention_details:
+  - NIH data sharing policy compliance
+  - UVA Dataverse institutional commitment
+  - Persistent identifiers (ARK, future DOIs)
+  - No planned data sunset
+  - Machine-readable metadata for long-term discoverability</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q19 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Data Integrity and Provenance</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Structured version control with timestamps</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">updates: Comprehensive version history with timestamps - Alpha v0.5 (supplemental), March 2025 Beta V1.4, June 2025 Beta V2.1, October 2025 Beta. Each version has unique DOI and detailed change log (V2.1: RGB images added, metadata corrections, naming changes). Provenance: FAIRSCAPE framework computes end-to-end provenance graphs using EVI Evidence Graph Ontology. RO-Crate packages include provenance graphs with machine-readable lineage. retention_limit: NIH data sharing policy compliance, long-term preservation in UVA Dataverse, no planned sunset</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent provenance and integrity documentation. Structured version control with DOIs, detailed change logs, formal provenance graphs via FAIRSCAPE/EVI, and long-term preservation commitment.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">FAIRSCAPE and EVI are real provenance frameworks. Version DOIs are valid. NIH data sharing policy is real requirement</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Version changes align with collection progress (additional data types added in each release). Provenance approach consistent with FAIR principles and RO-Crate packaging</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-human_subject_research">
+  <div class="yaml">
+    <div class="field-name">human_subject_research</div>
+    <pre>human_subject_research:
+  id: cm4ai:hsr:1
+  description: &#x27;CM4AI data are distinctive within Bridge2AI in that they are non-clinical data from tissue
+    cultures and are considered to be de-identified as they cannot be matched, with current knowledge,
+    to a human subject. Both cell lines (MDA-MB-468 and KOLF2.1J) are commercially available, ethically
+    sourced, de-identified cell lines. MDA-MB-468 available from ATCC. KOLF2.1J available from HipSci
+    resource for non-profit organizations via simple MTA. Human Subjects: No. De-identified Samples: Yes.
+    FDA Regulated: No.
+
+    &#x27;
+  involves_human_subjects: false
+  irb_approval:
+  - Not applicable - de-identified cell lines from commercial sources
+  ethics_review_board:
+  - CM4AI Ethics Module (Vardit Ravitsky, Jean-Christophe Bélisle-Pipon)
+  - Data Access Committee (Jillian Parker)
+  - Bridge2AI Ethics Working Group participation
+  special_populations:
+  - MDA-MB-468 derived from 51-year-old black female (de-identified)
+  - KOLF2.1J derived from healthy male Northern European donor (de-identified)</pre>
+  </div>
+  <div class="anns"><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R20 · consistency</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">human_subject_research.involves_human_subjects=False is consistent with de-identified cell lines explanation</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">human_subject_research, sensitive_elements</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">No action needed - logic is sound</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">4/5</span>
+    <span class="ann-label">R20 Q8 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Ethical and Privacy Declarations</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Good ethics documentation with appropriate context</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">human_subject_research: involves_human_subjects=false with detailed explanation (de-identified commercial cell lines, cannot be matched to subjects). irb_approval: &#x27;Not applicable - de-identified cell lines from commercial sources&#x27;. ethics_review_board: CM4AI Ethics Module (Vardit Ravitsky, Jean-Christophe Bélisle-Pipon), Data Access Committee (Jillian Parker), Bridge2AI Ethics Working Group. special_populations: MDA-MB-468 from 51-year-old black female (de-identified), KOLF2.1J from healthy male Northern European donor (de-identified). sensitive_elements: Cell line origin metadata documented, sensitive_elements_present=false with rationale</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Good ethics documentation appropriate for non-human subjects research. Clear explanation of de-identification and commercial sourcing. Ethics review structure present. Scored 4/5 because comprehensive human subjects protections (IRB, informed consent, compensation) are not applicable to cell line research, but documentation clearly addresses this.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Ethics approach correct for de-identified cell lines - not human subjects research under current regulations</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Consistent logic: involves_human_subjects=false → IRB not applicable → ethics review focuses on data governance and dual use</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-sensitive_elements">
+  <div class="yaml">
+    <div class="field-name">sensitive_elements</div>
+    <pre>sensitive_elements:
+- id: cm4ai:sensitive:1
+  description: &#x27;Cell Line Origin Metadata: While cell lines are de-identified and cannot be matched to
+    specific individuals, metadata about cell line origins (age, sex, race of original donor) is retained
+    for scientific context. This metadata does not constitute identifiable human subjects data under current
+    knowledge. Data derived from commercially available de-identified human cell lines and does not represent
+    all biological variants in the population at large.
+
+    &#x27;
+  sensitive_elements_present: false
+  sensitivity_details:
+  - De-identified commercial cell lines
+  - Donor demographic metadata for scientific context only
+  - Cannot be matched to individuals with current knowledge
+  - Ethically sourced from ATCC and HipSci
+  - Does not represent all biological variants seen in the population</pre>
+  </div>
+  <div class="anns"><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R20 · consistency</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">human_subject_research.involves_human_subjects=False is consistent with de-identified cell lines explanation</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">human_subject_research, sensitive_elements</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">No action needed - logic is sound</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">4/5</span>
+    <span class="ann-label">R20 Q8 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Ethical and Privacy Declarations</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Good ethics documentation with appropriate context</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">human_subject_research: involves_human_subjects=false with detailed explanation (de-identified commercial cell lines, cannot be matched to subjects). irb_approval: &#x27;Not applicable - de-identified cell lines from commercial sources&#x27;. ethics_review_board: CM4AI Ethics Module (Vardit Ravitsky, Jean-Christophe Bélisle-Pipon), Data Access Committee (Jillian Parker), Bridge2AI Ethics Working Group. special_populations: MDA-MB-468 from 51-year-old black female (de-identified), KOLF2.1J from healthy male Northern European donor (de-identified). sensitive_elements: Cell line origin metadata documented, sensitive_elements_present=false with rationale</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Good ethics documentation appropriate for non-human subjects research. Clear explanation of de-identification and commercial sourcing. Ethics review structure present. Scored 4/5 because comprehensive human subjects protections (IRB, informed consent, compensation) are not applicable to cell line research, but documentation clearly addresses this.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Ethics approach correct for de-identified cell lines - not human subjects research under current regulations</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Consistent logic: involves_human_subjects=false → IRB not applicable → ethics review focuses on data governance and dual use</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-external_resources">
+  <div class="yaml">
+    <div class="field-name">external_resources</div>
+    <pre>external_resources:
+- id: cm4ai:resource:1
+  description: &#x27;CM4AI Project Website: Official project website and data portal using U-BRITE platform&#x27;
+  external_resources:
+  - https://www.cm4ai.org
+- id: cm4ai:resource:2
+  description: &#x27;NIH RePORTER Project Details: Federal grant information and project details for Bridge2AI
+    Functional Genomics&#x27;
+  external_resources:
+  - https://reporter.nih.gov/project-details/11211616
+- id: cm4ai:resource:3
+  description: &#x27;University of Virginia Dataverse: LibraData repository with archived RO-Crates and data
+    releases&#x27;
+  external_resources:
+  - https://doi.org/10.18130/V3/DXWOS5
+  - https://doi.org/10.18130/V3/B35XWX
+  - https://doi.org/10.18130/V3/F3TD5R
+  - https://doi.org/10.18130/V3/K7TGEM
+- id: cm4ai:resource:4
+  description: &#x27;Nature Publication: Schaffer LV, Hu M, Qian G, et al. Multimodal cell maps as a foundation
+    for structural and functional genomics. Nature. Published April 9, 2025.
+
+    &#x27;
+  external_resources:
+  - https://doi.org/10.1038/s41586-025-08878-3
+- id: cm4ai:resource:5
+  description: &#x27;bioRxiv Preprint: Clark T, et al. Cell Maps for Artificial Intelligence: AI-Ready Maps
+    of Human Cell Architecture from Disease-Relevant Cell Lines. BioRXiv, May 2024.
+
+    &#x27;
+  external_resources:
+  - https://doi.org/10.1101/2024.05.21.589311
+- id: cm4ai:resource:6
+  description: &#x27;FAIRSCAPE Framework Documentation: AI-readiness framework documentation, tutorial, and
+    installation instructions&#x27;
+  external_resources:
+  - https://fairscape.github.io
+- id: cm4ai:resource:7
+  description: &#x27;Integrative Modeling Platform: Open source IMP package for integrative structure modeling&#x27;
+  external_resources:
+  - http://integrativemodeling.org
+- id: cm4ai:resource:8
+  description: &#x27;Network Data Exchange (NDEx): Repository and visualization platform for cell maps and
+    networks&#x27;
+  external_resources:
+  - https://www.ndexbio.org
+- id: cm4ai:resource:9
+  description: &#x27;Bridge2AI Program: Parent NIH Common Fund program supporting AI-ready biomedical datasets&#x27;
+  external_resources:
+  - https://commonfund.nih.gov/bridge2ai
+- id: cm4ai:resource:10
+  description: &#x27;NIH Common Fund Data Ecosystem (CFDE): Collaboration partner for data curation and integration&#x27;
+  external_resources:
+  - https://www.nih-cfde.org
+- id: cm4ai:resource:11
+  description: &#x27;MassIVE Proteomics Repository: Mass spectrometry data repository for iPSC and cancer cell
+    SEC-MS data&#x27;
+  external_resources:
+  - MassIVE Repository (SEC-MS human iPSCs)
+  - MassIVE Repository (SEC-MS human cancer cells)
+- id: cm4ai:resource:12
+  description: &#x27;NCBI Sequence Read Archive: Repository for CRISPR perturbation screen raw sequence data&#x27;
+  external_resources:
+  - NCBI BioProject
+  - Sequence Read Archive (SRA)
+- id: cm4ai:resource:13
+  description: &#x27;Perturbation Cell Atlas Publication: Nourreddine S, Doctor Y, Dailamy A, et al. A PERTURBATION
+    CELL ATLAS OF HUMAN INDUCED PLURIPOTENT STEM CELLS. bioRxiv. 2024 Nov 4. PMCID: PMC11580897
+
+    &#x27;
+  external_resources:
+  - https://doi.org/10.1101/2024.11.03.621734</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q14 (Technical Documentation)</span>
+    <span class="ann-sub">Associated Publications</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Multiple references and dataset citation</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">external_resources: 13 resource categories including Nature publication (Schaffer, Hu et al. April 2025, doi:10.1038/s41586-025-08878-3), bioRxiv preprint (Clark et al. May 2024, doi:10.1101/2024.05.21.589311), Perturbation Cell Atlas publication (Nourreddine et al. 2024, doi:10.1101/2024.11.03.621734). Citation requirements in license_and_use_terms mandate citing Nature publication, bioRxiv preprint, and data collection DOI. Multiple DOIs for dataset versions provided</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent publication documentation with 3 peer-reviewed/preprint publications, all with valid DOIs. Dataset citation requirements clearly specified in license terms.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All publication DOIs follow valid format (10.1038 for Nature, 10.1101 for bioRxiv). Publication timeline plausible (preprint May 2024 → Nature April 2025)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Publications align with dataset content (multimodal cell maps, CRISPR perturbation atlas). Authors match creators list</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q16 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Findability (Persistent Links)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">page: https://www.cm4ai.org. external_resources: 13 categories with persistent URLs including https://doi.org/10.18130/V3/DXWOS5 (Dataverse), https://doi.org/10.1038/s41586-025-08878-3 (Nature), https://doi.org/10.1101/2024.05.21.589311 (bioRxiv), https://fairscape.github.io, http://integrativemodeling.org, https://www.ndexbio.org, https://commonfund.nih.gov/bridge2ai, https://reporter.nih.gov/project-details/11211616. ARK identifiers for RO-Crates</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Pass - Multiple persistent URLs including DOIs, project website, and external platform links. ARK scheme provides additional persistent identifiers.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All URLs are well-formed. DOI prefixes valid (10.18130 Dataverse, 10.1038 Nature, 10.1101 bioRxiv)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">URLs align with stated distribution platforms and publication venues</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q20 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Interlinking Across Platforms</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">external_resources: 13 resource categories linking to multiple platforms - CM4AI website (cm4ai.org), UVA Dataverse (4 version DOIs), NIH RePORTER (grant details), Nature (publication), bioRxiv (preprints), FAIRSCAPE (framework), IMP (software), NDEx (networks), Bridge2AI (program), NIH CFDE (collaboration), MassIVE (mass spec data), NCBI BioProject/SRA (sequences). Cross-platform identifiers: DOIs link Dataverse to citations, ARKs link RO-Crates to FAIRSCAPE, RRIDs link to cell line databases</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Pass - Extensive cross-platform interlinking with 13 external resource categories spanning repositories, publications, software, and infrastructure. Multiple identifier schemes (DOI, ARK, RRID) enable platform interconnection.</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All linked platforms are real and operational. Cross-references are semantically appropriate (publication DOIs, repository accessions, software URLs)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Platform links align with data types and distribution formats. CFDE collaboration consistent with Bridge2AI program structure</span></div>
+  </div>
+</div></div>
+</div>
+
+<h2>Recommendations</h2>
+<div class="recs"><ol>
+<li><b style="color:#9b59b6;">R20</b> &middot; Replace MassIVE Repository placeholder text with specific accession numbers (MSV000XXXXX format) when data is deposited</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Add direct NCBI BioProject accession numbers (PRJNA format) and SRA run accessions when sequence data is finalized</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Consider adding explicit confidentiality_level field (currently implicit as &#x27;public with usage restrictions&#x27;)</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Expand discouraged_uses to address potential dual-use concerns beyond clinical misuse, given cancer and neuropsychiatric disease contexts</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Add software repository links (GitHub URLs) for MuSIC pipeline, FAIRSCAPE-CLI, and custom analysis scripts to enhance reproducibility</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Consider documenting LLM tool used for protein assembly naming (preprocessing_strategies mentions &#x27;LLM approach&#x27; but doesn&#x27;t specify which model)</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Add version numbers for additional software tools where possible (node2vec, Human Protein Atlas model) to match detail level of IMP 2.18 documentation</li>
+</ol></div>
+</div></body></html>

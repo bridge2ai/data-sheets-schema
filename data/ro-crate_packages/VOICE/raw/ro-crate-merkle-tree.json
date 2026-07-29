@@ -1,0 +1,99 @@
+{
+  "algorithm": "SHA-256",
+  "rootHash": "f1663e1069a9894b21202ebf05f4839b9fb82b79ba5b337df54dd18f36d3be47",
+  "leafCount": 11,
+  "leaves": [
+    {
+      "index": 0,
+      "contentUrl": "file:///features/ppgs.parquet",
+      "sha256": "3940ff2dab5e87facb8c8f147e88505cfd06d09c1aa5c5bf7c49d4844685eef2"
+    },
+    {
+      "index": 1,
+      "contentUrl": "file:///features/sparc_ema.parquet",
+      "sha256": "bd8cfb972816b709c928ae46d2d29b3a81dd69840fc28965fd1cbb861549bbfb"
+    },
+    {
+      "index": 2,
+      "contentUrl": "file:///features/sparc_loudness.parquet",
+      "sha256": "d4ab7280cb6537053324d81fe76636477d849aabf50e2d69f9fcc65d4e6d294f"
+    },
+    {
+      "index": 3,
+      "contentUrl": "file:///features/sparc_periodicity.parquet",
+      "sha256": "e3dccc5d8dc8f8743414812077cafedc54f412f5d6648573ca26baa210c1fe14"
+    },
+    {
+      "index": 4,
+      "contentUrl": "file:///features/sparc_pitch.parquet",
+      "sha256": "b96f2a764d615cd46078b9a3bc4cd940dec539324a68467f6a3030bd0e8fcb96"
+    },
+    {
+      "index": 5,
+      "contentUrl": "file:///features/torchaudio_mel_spectrogram.parquet",
+      "sha256": "178ece43a766cb2a85a0e87e78793d6a7bb2f0a6bd67135ec69f4f83d6467e22"
+    },
+    {
+      "index": 6,
+      "contentUrl": "file:///features/torchaudio_mfcc.parquet",
+      "sha256": "018c3849e8868e34ca2a8caff834b25c1f773d07ae9e299f619e5fd25994f171"
+    },
+    {
+      "index": 7,
+      "contentUrl": "file:///features/torchaudio_pitch.parquet",
+      "sha256": "f18cf97c1021ac507ee1011c940b6a3170b64cc9a95d215aaf1c730d868b8b2e"
+    },
+    {
+      "index": 8,
+      "contentUrl": "file:///features/torchaudio_spectrogram.parquet",
+      "sha256": "27b482279fdc4e696acaa71db4ccdab0846846d6c22f30a4b1ce34551b549b24"
+    },
+    {
+      "index": 9,
+      "contentUrl": "file:///phenotype/confounders/confounders.tsv",
+      "sha256": "dbc1ec63418802bc9306ee38d4e9bf71b67ff685594f4ffd59e70a39bb1fd75f"
+    },
+    {
+      "index": 10,
+      "contentUrl": "file:///phenotype/demographics/demographics.tsv",
+      "sha256": "883e358cd6e1b63694e1a9483860e922f2b7b78c87516da59e538c600c0fe73d"
+    }
+  ],
+  "levels": [
+    [
+      "3940ff2dab5e87facb8c8f147e88505cfd06d09c1aa5c5bf7c49d4844685eef2",
+      "bd8cfb972816b709c928ae46d2d29b3a81dd69840fc28965fd1cbb861549bbfb",
+      "d4ab7280cb6537053324d81fe76636477d849aabf50e2d69f9fcc65d4e6d294f",
+      "e3dccc5d8dc8f8743414812077cafedc54f412f5d6648573ca26baa210c1fe14",
+      "b96f2a764d615cd46078b9a3bc4cd940dec539324a68467f6a3030bd0e8fcb96",
+      "178ece43a766cb2a85a0e87e78793d6a7bb2f0a6bd67135ec69f4f83d6467e22",
+      "018c3849e8868e34ca2a8caff834b25c1f773d07ae9e299f619e5fd25994f171",
+      "f18cf97c1021ac507ee1011c940b6a3170b64cc9a95d215aaf1c730d868b8b2e",
+      "27b482279fdc4e696acaa71db4ccdab0846846d6c22f30a4b1ce34551b549b24",
+      "dbc1ec63418802bc9306ee38d4e9bf71b67ff685594f4ffd59e70a39bb1fd75f",
+      "883e358cd6e1b63694e1a9483860e922f2b7b78c87516da59e538c600c0fe73d",
+      "883e358cd6e1b63694e1a9483860e922f2b7b78c87516da59e538c600c0fe73d"
+    ],
+    [
+      "fc98b4a1728d32dcbc2eaaebbc7d371170b89141694bf2ace4caa1be254fe384",
+      "76a5830c695ec06dd5d676bf03330cc9af1a2e0105f952bf4f800924054ae1f6",
+      "f3a3bd04f0393de05f289097a0d0e57f895bbe8a90c1b3e2ddc103476c7a424e",
+      "161da0ea3949fd17644403b3afc24450375f4dafe62bb0cbe1616cb32932bf6d",
+      "64c333b846fc3397207b3404476f9878ec6e0469d178f14f94ed70f83049708e",
+      "57975945f82b25bf8c70ac9918b5ca5d013b6d41c20b11941b179f40c2a94aa0"
+    ],
+    [
+      "57f481e3425a9bacbafc655d3cbd5f7f3dc170acf6ba0c33e254f54b3254a3e7",
+      "d4c54ab8b9f1681b9fe0cb6984171e7b9c193bb20976b68738bdd4e12bc409ed",
+      "ee5c74743eefe2787ae47828fa0ab6365aa7c1a21528266ce02089a50bf29fdf",
+      "ee5c74743eefe2787ae47828fa0ab6365aa7c1a21528266ce02089a50bf29fdf"
+    ],
+    [
+      "c6d0126c3449aa9d4840cb8902aa32e81d587e0a9f93491ede599313c3c41edc",
+      "edcf23698c75acd3915dce8132f7c2f6ec792f92fece6ac4025c59b3beccf5ca"
+    ],
+    [
+      "f1663e1069a9894b21202ebf05f4839b9fb82b79ba5b337df54dd18f36d3be47"
+    ]
+  ]
+}
