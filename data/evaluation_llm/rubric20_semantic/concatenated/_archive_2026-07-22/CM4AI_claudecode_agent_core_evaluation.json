@@ -1,0 +1,447 @@
+{
+  "rubric": "rubric20-semantic",
+  "version": "1.0",
+  "d4d_file": "data/d4d_concatenated/claudecode_agent_core/CM4AI_d4d_core.yaml",
+  "project": "CM4AI",
+  "method": "claudecode_agent_core",
+  "evaluation_timestamp": "2026-05-14T01:32:11Z",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "consistency",
+        "severity": "low",
+        "description": "D4D-core schema subset evaluated - many full-schema fields absent by design",
+        "fields_involved": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies", "software_and_tools", "ethical_reviews", "informed_consent", "participant_compensation", "vulnerable_populations"],
+        "recommendation": "This is expected for core schema variant - no action needed"
+      },
+      {
+        "type": "correctness",
+        "severity": "low",
+        "description": "DOI format valid and registrar prefix 10.18130 matches Harvard Dataverse",
+        "fields_involved": ["doi"],
+        "recommendation": "DOI correctly formatted and appropriate for university repository"
+      },
+      {
+        "type": "semantic_understanding",
+        "severity": "low",
+        "description": "Grant number 1OT2OD032742-01 follows NIH format correctly (Type OT2, Institute OD)",
+        "fields_involved": ["funders"],
+        "recommendation": "Grant number validation passed"
+      },
+      {
+        "type": "consistency",
+        "severity": "low",
+        "description": "human_subject_research indicates non-clinical cell line data (de-identified), is_deidentified provides detailed explanation",
+        "fields_involved": ["human_subject_research", "is_deidentified"],
+        "recommendation": "Consistent logic - no human subjects research but de-identified cell lines documented"
+      }
+    ],
+    "semantic_insights": [
+      "Description is highly detailed (1,274 characters) with specific cell lines, data modalities, and Nature publication reference",
+      "Keywords demonstrate excellent diversity (67 terms) covering domains, methods, and standards",
+      "DOI prefix 10.18130 correctly identifies University of Virginia Dataverse repository",
+      "Grant number follows NIH format: OT2 (Other Transaction type) OD (Office of the Director) 032742",
+      "Purpose statements provide comprehensive motivation with specific AI-readiness goals and publication validation",
+      "Creators list includes full affiliations and ORCIDs (24 individuals with roles and institutions)",
+      "Distribution formats extensively documented with multiple repositories (Dataverse, MassIVE, NCBI SRA, NDEx)",
+      "Version tracking shows clear progression (0.5 alpha → V1.4 → V2.1 → future releases)",
+      "License CC BY-NC-SA 4.0 appropriate for non-commercial academic research data",
+      "Cell line metadata (MDA-MB-468, KOLF2.1J) includes RRID identifiers correctly formatted (RRID:CVCL_0419, RRID:CVCL_B5P3)",
+      "Conforms_to field explicitly declares core schema compliance",
+      "External resources provide comprehensive ecosystem linkage (9 distinct platforms/publications)",
+      "Human subjects research field correctly indicates non-clinical cell line data with detailed de-identification explanation"
+    ],
+    "consistency_checks": {
+      "passed": 22,
+      "failed": 0,
+      "warnings": 8
+    },
+    "correctness_validations": {
+      "doi_format": "valid",
+      "grant_number_format": "valid",
+      "rrid_format": "valid",
+      "url_validity": "all_valid"
+    }
+  },
+  "overall_score": {
+    "total_points": 53.0,
+    "max_points": 84,
+    "percentage": 63.1
+  },
+  "categories": [
+    {
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "description": "Proportion of mandatory schema fields populated",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥90% fields populated",
+          "evidence": "id: https://doi.org/10.18130/V3/DXWOS5, title: Cell Maps for Artificial Intelligence (CM4AI), description: 1274 chars, keywords: 67 terms, license: CC BY-NC-SA 4.0",
+          "quality_note": "All core schema mandatory fields populated with comprehensive content. Description exceeds 200 characters with specific technical details. Keywords cover broad domain.",
+          "semantic_checks": {
+            "correctness": "All fields semantically appropriate - DOI matches repository type, title descriptive, keywords domain-relevant",
+            "consistency": "Fields align coherently - license matches non-commercial academic data, DOI points to institutional repository"
+          }
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "description": "Whether narrative fields (description, purposes) have meaningful content length",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": ">200 chars",
+          "evidence": "description: 1274 chars (exceeds threshold), purposes: 4 detailed purpose statements averaging 400+ chars each",
+          "quality_note": "Exceptional narrative depth. Description provides comprehensive overview of project mission, data types, cell lines, methods, and validation publication. Purpose statements detail AI-readiness goals, interpretable ML, ethical standards, and structural genomics applications.",
+          "semantic_checks": {
+            "correctness": "Content matches claimed dataset type - functional genomics with multimodal cell imaging and proteomics",
+            "consistency": "Narrative aligns across description and purposes - consistent focus on AI-ready hierarchical cell maps"
+          }
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "description": "Number of unique keywords provided to describe dataset topic coverage",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥8 keywords",
+          "evidence": "keywords: 67 unique terms including Cell Maps, AI-Ready Data, Functional Genomics, Spatial Proteomics, AP-MS, SEC-MS, CRISPR Perturbation, MDA-MB-468, KOLF2.1J, FAIR Principles, RO-Crate, FAIRSCAPE, Deep Learning, Integrative Structure Modeling",
+          "quality_note": "Outstanding keyword diversity covering domains (functional genomics), methods (AP-MS, SEC-MS, IF imaging), cell lines (MDA-MB-468, KOLF2.1J), standards (FAIR, RO-Crate), and computational approaches (deep learning, VNN). Far exceeds 8-keyword threshold.",
+          "semantic_checks": {
+            "correctness": "All keywords technically accurate - AP-MS and SEC-MS are standard proteomics abbreviations, RRID identifiers valid",
+            "consistency": "Keywords align with description content - all mentioned methods and cell lines appear in description"
+          }
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "description": "Number of distribution formats and file type diversity",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "2-3 file types",
+          "evidence": "distribution_formats: 5 formats documented (RO-Crate ZIP, MassIVE proteomics, NCBI SRA sequences, NDEx networks, Dataverse archive). distributions: 4 specific releases with format: ZIP, media_type: application/zip",
+          "quality_note": "Multiple distribution channels documented across specialized repositories, but primary format is ZIP (RO-Crate packages). Limited media type variety in distributions section (all ZIP), though distribution_formats describes diverse data types (proteomics, genomics, networks).",
+          "semantic_checks": {
+            "correctness": "RO-Crate format appropriate for FAIR-compliant packaging, ZIP media type standard for archives",
+            "consistency": "Distribution formats align with collection mechanisms (mass spec → MassIVE, sequences → SRA, networks → NDEx)"
+          }
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "description": "Presence of file size or instance count metadata",
+          "score_type": "pass/fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "instances: 4 detailed instance descriptions (MDA-MB-468 cell line, KOLF2.1J iPSC line, 100 Chromatin Regulators, 100 Metabolic Enzymes). Specific counts: 17 genes endogenously tagged with AP-MS, 72/100 chromatin modifiers in SEC-MS, 11,739 genes in genome-scale screens",
+          "quality_note": "Instance metadata provides counts for biological entities (100 chromatin regulators, 100 metabolic enzymes, 17 tagged genes, 72 detected proteins, 11,739 genes screened). While not file byte sizes, these represent instance counts appropriate for genomics dataset.",
+          "semantic_checks": {
+            "correctness": "Instance counts plausible for genomics scale - 100 chromatin regulators reasonable for near-comprehensive coverage",
+            "consistency": "Instance counts align with collection mechanisms - 17 tagged genes with AP-MS data matches limited endogenous tagging throughput"
+          }
+        }
+      ],
+      "category_score": 20,
+      "category_max": 24
+    },
+    {
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "description": "Presence of unique identifiers such as DOI, RRID, or persistent URLs",
+          "score_type": "pass/fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "doi: 10.18130/V3/DXWOS5, page: https://www.cm4ai.org, download_url: https://doi.org/10.18130/V3/DXWOS5, additional DOIs in distributions (10.18130/V3/B35XWX, 10.18130/V3/F3TD5R, 10.18130/V3/K7TGEM), RRID identifiers in instances (RRID:CVCL_0419 for MDA-MB-468, RRID:CVCL_B5P3 for KOLF2.1J)",
+          "quality_note": "Exceptional identifier coverage with primary DOI, project website, multiple release-specific DOIs, and cell line RRID identifiers. All identifiers follow correct formats and are resolvable.",
+          "semantic_checks": {
+            "correctness": "DOI prefix 10.18130 correctly identifies University of Virginia Dataverse repository. RRID format valid (RRID:CVCL_XXXX for cell lines). URLs use HTTPS protocol.",
+            "consistency": "DOI in doi field matches download_url DOI. Multiple DOIs correspond to documented version releases (V1.4, V2.1, etc.)"
+          }
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "description": "Presence of funding sources, grants, creator affiliations, and institutional sponsors",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Funders with grants + creators with affiliations",
+          "evidence": "funders: NIH Common Fund Bridge2AI with grants 1OT2OD032742-01 and 5U54HG012513-02, FY2025 funding $5,289,382 detailed, Frederick Thomas Fund. creators: 24 individuals with names, roles, institutions, and ORCID identifiers (e.g., Trey Ideker Contact PI UCSD ORCID:0000-0002-1708-8454)",
+          "quality_note": "Comprehensive funding documentation with grant numbers, funding amounts, administering agencies, opportunity numbers, and project dates. Creator metadata includes full affiliations, roles, and ORCID identifiers for all 24 team members across 8 institutions.",
+          "semantic_checks": {
+            "correctness": "Grant number 1OT2OD032742-01 follows NIH format: Type (OT2=Other Transaction), Institute (OD=Office of the Director), Number (032742), Suffix (-01). ORCID identifiers follow format 0000-000X-XXXX-XXXX.",
+            "consistency": "Funding aligns with purposes - Bridge2AI program supports AI-ready datasets. Creator affiliations match institutional collaborations (UCSD, Stanford, UCSF, UVA, Yale)."
+          }
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "description": "Comprehensive ethics coverage including IRB approval, deidentification, privacy protections, informed consent, participant compensation, and vulnerable population safeguards",
+          "score_type": "numeric",
+          "score": 2,
+          "max_score": 5,
+          "score_label": "Partial ethics (deidentification only)",
+          "evidence": "human_subject_research: non-clinical data from tissue cultures, de-identified cell lines. is_deidentified: detailed explanation of de-identified commercially available cell lines (MDA-MB-468 from ATCC, KOLF2.1J from HipSci). sensitive_elements: cell line origin metadata documented. Core schema does not include ethical_reviews, informed_consent, participant_compensation, vulnerable_populations fields.",
+          "quality_note": "D4D-core schema subset lacks comprehensive ethics fields. Human subjects research and de-identification documented, but IRB approval, informed consent, compensation, and vulnerable populations not applicable/present due to core schema limitations and non-human-subjects nature (cell lines).",
+          "semantic_checks": {
+            "correctness": "Correctly identifies data as non-human-subjects research (commercially available de-identified cell lines). De-identification explanation semantically appropriate for cell line data.",
+            "consistency": "Consistent logic: human_subject_research indicates no human subjects + is_deidentified explains cell lines cannot be matched to individuals. Sensitive_elements acknowledges donor metadata retention for scientific context."
+          }
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements and Governance Documentation",
+          "description": "Whether access policy, license, IP restrictions, regulatory restrictions, and confidentiality level are clearly defined",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License + restrictions + confidentiality classification",
+          "evidence": "license_and_use_terms: CC BY-NC-SA 4.0 with attribution requirements, publication citation requirements, commercial licensing details, copyright holders (UCSD, Stanford, UCSF), Data Access Committee oversight. ip_restrictions: commercial use requires separate license negotiation, copyright details. regulatory_restrictions: non-clinical research data, not FDA regulated, NIH data sharing compliance, no HIPAA obligations, Data Access Committee oversight.",
+          "quality_note": "Comprehensive governance documentation covering license terms, intellectual property restrictions, regulatory context, and data access oversight. License clearly specified with reuse conditions. IP and regulatory restrictions documented with institutional oversight mechanisms.",
+          "semantic_checks": {
+            "correctness": "CC BY-NC-SA 4.0 is valid Creative Commons license. NIH data sharing policy compliance appropriate for NIH-funded research. FDA/HIPAA non-applicability correct for non-clinical cell line data.",
+            "consistency": "License restrictions align with IP restrictions (non-commercial clause consistent). Regulatory restrictions align with human_subject_research status (no HIPAA for non-human-subjects data)."
+          }
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "description": "Presence of standard formats, ontologies, or schema conformance",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Standard formats + schema/ontology compliance",
+          "evidence": "conforms_to: https://w3id.org/bridge2ai/data-sheets-schema/core-schema, conforms_to_schema: src/data_sheets_schema/schema/data_sheets_schema_core.yaml, conforms_to_class: CoreDataset. distribution_formats mention RO-Crate (Research Object standard), Schema.org, EVI Evidence Graph Ontology. cleaning_strategies mention Gene Ontology, Reactome, PDB, AlphaFold, Schema.org, EVI ontology mappings.",
+          "quality_note": "Exceptional standardization with explicit schema conformance declarations, RO-Crate packaging (international FAIR standard), and extensive ontology mappings (GO, Reactome, Schema.org, EVI, NCI Thesaurus, Cell Ontology, CHEBI, EFO). Conforms_to fields provide machine-readable schema compliance.",
+          "semantic_checks": {
+            "correctness": "RO-Crate is recognized Research Object Crate standard. Schema.org is W3C community standard. Gene Ontology and Reactome are authoritative bioinformatics resources. conforms_to URL follows W3ID persistent identifier pattern.",
+            "consistency": "Schema conformance aligns with file header comments (# Schema: D4D Core). Ontology usage aligns with data types (GO for protein function, Reactome for pathways, PDB/AlphaFold for structures)."
+          }
+        }
+      ],
+      "category_score": 18,
+      "category_max": 22
+    },
+    {
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "description": "Mentions of preprocessing, cleaning, and labeling strategies with software tools used in data preparation",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "At least one strategy documented",
+          "evidence": "preprocessing_strategies: 6 strategies (deep learning embeddings via node2vec and HPA models, hierarchical community detection in Cytoscape, annotation via GO/Reactome/LLM, QC for imaging/MS, integrative structure modeling via IMP). cleaning_strategies: FAIRSCAPE framework, ontology mapping. Software mentioned: MuSIC pipeline, Cytoscape, FAIRSCAPE-CLI, Python Modeling Interface, IMP version 2.18. Core schema lacks labeling_strategies and software_and_tools fields.",
+          "quality_note": "Comprehensive preprocessing and cleaning strategies documented with specific software tools (Cytoscape, FAIRSCAPE, IMP v2.18). However, software version details incomplete (node2vec version not specified, HPA model version not specified). Labeling strategies not documented due to core schema limitations.",
+          "semantic_checks": {
+            "correctness": "Named tools are real and appropriate: node2vec (graph embedding), Cytoscape (network analysis), IMP (integrative modeling platform), FAIRSCAPE (RO-Crate framework). IMP version 2.18 is plausible version number.",
+            "consistency": "Software usage aligns with data types: node2vec for PPI networks, Cytoscape for community detection, IMP for structural modeling. Preprocessing strategies align with acquisition methods (embeddings for MS and imaging data)."
+          }
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "description": "Description completeness of data collection mechanisms, acquisition methods, data collectors, and collection timeframes",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Full protocol minus minor gaps",
+          "evidence": "collection_mechanisms: 4 detailed mechanisms (IF spatial proteomics by Lundberg Lab Stanford, AP-MS with 17 genes tagged in MDA-MB-468, SEC-MS by Krogan Lab UCSF, CRISPR screens with 10x Genomics). acquisition_methods: 4 methods (confocal microscopy 4-channel, mass spectrometry AP-MS/SEC-MS, single-cell RNA-seq 10x 3'HT, MuSIC pipeline integration). Data collectors identified by lab (Lundberg/Stanford, Krogan/UCSF). Core schema lacks data_collectors and collection_timeframes fields.",
+          "quality_note": "Collection mechanisms and acquisition methods comprehensively documented with technical details (4-channel confocal, endogenous tagging, SEC-MS complexes, 10x Genomics kit). Data collectors inferred from mechanism descriptions (Lundberg Lab, Krogan Lab). Collection timeframes absent but project dates provided in funders (Sept 2022 - Aug 2026).",
+          "semantic_checks": {
+            "correctness": "Technical details accurate: 10x Genomics 3'HT is real single-cell sequencing kit, confocal microscopy 4-channel setup is standard (DAPI, ER, tubulin, target protein), AP-MS and SEC-MS are established proteomics methods.",
+            "consistency": "Collection mechanisms align with instances (100 chromatin regulators) and acquisition methods (MS for PPIs, imaging for localization, RNA-seq for perturbations). Data collectors (Lundberg/Stanford for imaging, Krogan/UCSF for MS) align with creator affiliations."
+          }
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "description": "Presence of version information, version access methods, errata, update plans, and release notes with dates",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Version number + access + update plan",
+          "evidence": "version: 2.1, updates: quarterly releases through Nov 2026, version history (v0.5 alpha, V1.4 March 2025, V2.1 June 2025, Oct 2025 beta). distributions provide version-specific DOIs and release notes. Core schema lacks version_access, errata, and release_notes fields.",
+          "quality_note": "Version number present (2.1) with detailed update schedule and version progression documented in updates and distributions fields. Version-specific DOIs provide access to historical versions. Lacks dedicated errata field and structured release notes, though distributions describe changes (RGB IF images added, metadata corrections, SEC-MS additions).",
+          "semantic_checks": {
+            "correctness": "Version numbering follows semantic pattern (0.5 alpha < 1.4 beta < 2.1 beta). Release dates chronologically consistent (March 2025 < June 2025 < Oct 2025).",
+            "consistency": "Version field (2.1) matches latest described release (June 2025 Beta V2.1 in distributions). Update schedule (quarterly through Nov 2026) aligns with project end date (Aug 31, 2026 from funders)."
+          }
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "description": "Presence of formal citations or external resources with DOI-linked references",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Multiple references and dataset citation",
+          "evidence": "external_resources: 13 resources including Nature publication (doi:10.1038/s41586-025-08878-3), bioRxiv preprint (doi:10.1101/2024.05.21.589311), perturbation atlas publication (doi:10.1101/2024.11.03.621734), project website, NIH RePORTER, repositories (Dataverse, MassIVE, SRA, NDEx), frameworks (FAIRSCAPE, IMP), parent program (Bridge2AI, CFDE). license_and_use_terms includes citation requirements for Nature article and bioRxiv preprint.",
+          "quality_note": "Excellent publication documentation with 3 peer-reviewed/preprint publications with DOIs, citation requirements in license terms, and comprehensive external resource links to data repositories, software frameworks, and program websites. Publications directly validate dataset (Nature structural genomics paper, perturbation atlas).",
+          "semantic_checks": {
+            "correctness": "DOI formats valid (10.1038 = Nature, 10.1101 = bioRxiv). Publication dates plausible (April 2025 Nature, May 2024 bioRxiv preprint, Nov 2024 perturbation atlas). URLs use HTTPS and follow expected patterns for platforms (reporter.nih.gov, ndexbio.org, fairscape.github.io).",
+            "consistency": "Publications align with dataset content: Nature paper on multimodal cell maps matches dataset description, bioRxiv preprint describes CM4AI project, perturbation atlas matches CRISPR screen data. External resources align with distribution formats (MassIVE for MS data, SRA for sequences, NDEx for networks)."
+          }
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "description": "Inclusion of human subjects, demographic diversity, or subgroup details",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Detailed demographics without full inclusion/exclusion criteria",
+          "evidence": "instances: 4 entries with cell line metadata (MDA-MB-468: 51-year-old black female metastatic breast cancer, RRID:CVCL_0419 from ATCC; KOLF2.1J: healthy male Northern European donor, RRID:CVCL_B5P3 from HipSci). subpopulations: 7 subgroups (MDA-MB-468 untreated/paclitaxel/vorinostat, KOLF2.1J undifferentiated/neurons/NPCs/cardiomyocytes). sampling_strategies: purposive selection with criteria documented. Core schema lacks demographic diversity fields.",
+          "quality_note": "Cell line origin demographics documented (age, sex, race for MDA-MB-468; sex, ethnicity for KOLF2.1J) with RRID identifiers and commercial sources. Subpopulations clearly defined by treatment conditions and differentiation states. Sampling strategy explains selection rationale. However, not human subjects research (de-identified cell lines), so traditional demographic diversity not applicable.",
+          "semantic_checks": {
+            "correctness": "RRID identifiers correctly formatted for cell lines (RRID:CVCL_XXXX). Cell line metadata plausible (MDA-MB-468 established from 51yo patient, KOLF2.1J from healthy donor). ATCC and HipSci are real cell line repositories.",
+            "consistency": "Instances metadata aligns with human_subject_research field (non-human subjects, de-identified cell lines). Subpopulations align with collection_mechanisms (3 conditions for MDA-MB-468 match untreated/paclitaxel/vorinostat in SEC-MS). Sampling strategy (purposive, not random/representative) matches is_sample/is_random/is_representative flags."
+          }
+        }
+      ],
+      "category_score": 20,
+      "category_max": 25
+    },
+    {
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "description": "Dataset includes persistent URLs for access and documentation",
+          "score_type": "pass/fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "page: https://www.cm4ai.org, download_url: https://doi.org/10.18130/V3/DXWOS5, doi: 10.18130/V3/DXWOS5, external_resources: 13 persistent URLs including repository links, framework documentation, publication DOIs, NIH RePORTER",
+          "quality_note": "Excellent persistent link coverage with DOI, project website, download URL, and extensive external resources. DOI provides machine- and human-readable landing page. Multiple access points documented.",
+          "semantic_checks": {
+            "correctness": "DOI URL uses doi.org resolver (standard practice). Project website URL valid (cm4ai.org domain). External resource URLs use appropriate domains (reporter.nih.gov, ndexbio.org, etc.).",
+            "consistency": "DOI in doi field matches download_url DOI. Page URL (cm4ai.org) matches external_resources project website entry."
+          }
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "description": "Describes how users can obtain the dataset (download, DUA, login)",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Fully defined access path",
+          "evidence": "distribution_formats: 5 channels (RO-Crate at Dataverse DOI with ARK/DOI identifiers and JSON-LD landing pages, MassIVE for MS data, NCBI SRA for sequences, NDEx for networks, LibraData long-term preservation). distributions: 4 specific releases with DOIs, format (ZIP), media_type (application/zip), path (DOI URLs). license_and_use_terms: CC BY-NC-SA 4.0 with attribution requirements, commercial licensing process via Data Access Committee.",
+          "quality_note": "Access mechanisms comprehensively documented with multiple distribution channels for different data types, specific DOI access points for each release, file formats and media types specified, and licensing terms clearly explained. Users can access via DOI resolution, repository-specific portals, or project website.",
+          "semantic_checks": {
+            "correctness": "Distribution channels are real platforms (Dataverse, MassIVE, NCBI SRA, NDEx). ZIP format and application/zip media type standard for archives. CC BY-NC-SA 4.0 is valid license identifier.",
+            "consistency": "Access mechanisms align with distribution_formats (RO-Crate ZIP archives match distributions format/media_type). License terms align with ip_restrictions (non-commercial clause, Data Access Committee for commercial use)."
+          }
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "description": "License is clearly defined and permits identifiable reuse cases",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License explicitly defines reuse terms",
+          "evidence": "license_and_use_terms: CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/) with detailed reuse conditions (attribution required to copyright holders and CM4AI project, publication citation required for Nature article and bioRxiv preprint, commercial use requires separate license, ShareAlike provision applies). license: CC BY-NC-SA 4.0.",
+          "quality_note": "License exceptionally clear with standard CC license identifier, URL to full license text, and detailed explanation of reuse terms including attribution requirements, citation expectations, commercial use restrictions, and ShareAlike obligations. Reuse cases well-defined (academic research permitted, commercial requires negotiation).",
+          "semantic_checks": {
+            "correctness": "CC BY-NC-SA 4.0 is valid Creative Commons license with standard URL. License provisions accurately described (BY=attribution, NC=non-commercial, SA=share-alike).",
+            "consistency": "License field (CC BY-NC-SA 4.0) matches license_and_use_terms description. License restrictions align with ip_restrictions (commercial licensing via Data Access Committee). Attribution requirements align with funders and creators documentation."
+          }
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "description": "Presence of change logs or provenance tracking",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Change notes with partial timestamps",
+          "evidence": "updates: detailed update plan with quarterly releases through Nov 2026, version history with dates (March 2025 V1.4, June 2025 V2.1, Oct 2025 beta), release content descriptions. distributions: version-specific changes documented (RGB IF images added in V2.1, metadata corrections, SEC-MS additions). Core schema lacks version_access field for structured provenance tracking.",
+          "quality_note": "Change documentation present with version history, release dates, and content changes described in updates and distributions fields. FAIRSCAPE framework mentioned in cleaning_strategies provides end-to-end provenance entailments using EVI Evidence Graph Ontology. However, lacks structured version_access field for granular provenance tracking.",
+          "semantic_checks": {
+            "correctness": "Release dates chronologically consistent (March 2025 < June 2025 < Oct 2025). Version numbering progression plausible (V1.4 → V2.1). Update plan timeline (through Nov 2026) aligns with project end date (Aug 2026).",
+            "consistency": "Version field (2.1) matches latest release described in updates (June 2025 V2.1). Provenance framework (FAIRSCAPE with EVI ontology) aligns with distribution_formats (RO-Crate packages with provenance graphs)."
+          }
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "description": "Metadata connects dataset records across multiple platforms",
+          "score_type": "pass/fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "external_resources: 13 cross-platform links (UVA Dataverse via DOI, CM4AI website, NIH RePORTER, Nature publication DOI, bioRxiv DOI, perturbation atlas DOI, FAIRSCAPE docs, IMP website, NDEx repository, Bridge2AI program, NIH CFDE, MassIVE mentioned, SRA mentioned). distribution_formats explicitly link to MassIVE, NCBI SRA, NDEx, Dataverse.",
+          "quality_note": "Exceptional cross-platform interlinking with 13 external resources spanning publication platforms (Nature, bioRxiv), repositories (Dataverse, MassIVE, SRA, NDEx), software frameworks (FAIRSCAPE, IMP), program sites (Bridge2AI, NIH CFDE, NIH RePORTER), and project website. Distribution formats explicitly connect data types to appropriate repositories.",
+          "semantic_checks": {
+            "correctness": "External resource URLs valid for platforms (doi.org for publications, reporter.nih.gov for grants, ndexbio.org for networks, fairscape.github.io for framework). Platforms appropriate for data types (MassIVE for proteomics, SRA for sequences, NDEx for networks).",
+            "consistency": "External resources align with distribution_formats (MassIVE, SRA, NDEx appear in both). Publication DOIs in external_resources match citation requirements in license_and_use_terms. Project website (cm4ai.org) matches page field."
+          }
+        }
+      ],
+      "category_score": 16,
+      "category_max": 13
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Outstanding structural completeness with all core schema mandatory fields populated with comprehensive, high-quality content exceeding minimum thresholds",
+      "Exceptional keyword diversity (67 terms) covering domains, methods, cell lines, standards, and computational approaches - far exceeds typical datasets",
+      "Comprehensive funding documentation with grant numbers following NIH format, detailed budgets, and complete creator metadata with ORCID identifiers",
+      "Excellent governance documentation with clear license terms (CC BY-NC-SA 4.0), IP restrictions, regulatory context, and Data Access Committee oversight",
+      "Strong FAIR compliance with persistent identifiers (DOI, RRID), explicit schema conformance declarations, extensive ontology mappings, and RO-Crate packaging",
+      "Comprehensive access mechanisms documented across 5 distribution channels (Dataverse, MassIVE, SRA, NDEx, project website) with version-specific DOIs",
+      "Exceptional publication linkage with 3 peer-reviewed/preprint publications with DOIs and citation requirements embedded in license terms",
+      "Outstanding cross-platform interlinking (13 external resources) connecting repositories, publications, software frameworks, and program sites",
+      "Detailed version history with clear progression (v0.5 → V1.4 → V2.1), quarterly update schedule, and version-specific release notes",
+      "Comprehensive collection protocol documentation with technical details (4-channel confocal, 10x Genomics 3'HT, SEC-MS complexes) and data collector identification"
+    ],
+    "weaknesses": [
+      "D4D-core schema subset lacks comprehensive ethics fields (ethical_reviews, informed_consent, participant_compensation, vulnerable_populations) - expected limitation for exchange-layer schema",
+      "Software version details incomplete - node2vec version not specified, HPA deep learning model version not specified, though IMP version provided (2.18)",
+      "Limited file type variety in distributions section (all ZIP media type) despite diverse data types described in distribution_formats",
+      "Structured provenance tracking field (version_access) absent from core schema, though FAIRSCAPE framework provides provenance capabilities",
+      "Collection timeframes not explicitly documented, though project dates available in funders field (Sept 2022 - Aug 2026)",
+      "Errata field absent from core schema, though distribution descriptions document changes and corrections",
+      "Labeling strategies field not present in core schema",
+      "Human subjects demographic diversity not applicable (de-identified cell lines, not human subjects research)"
+    ],
+    "recommendations": [
+      "For full-schema D4D variant: Add ethical_reviews field documenting Data Access Committee review and ethical oversight by Ravitsky/Belisle-Pipon",
+      "Specify software versions in preprocessing_strategies: node2vec version, HPA deep learning model version, FAIRSCAPE-CLI version, Cytoscape version",
+      "Expand distributions to include additional media types beyond ZIP (e.g., application/x-hdf for processed embeddings, text/tab-separated-values for metadata tables)",
+      "Add explicit collection_timeframes field with data acquisition dates for each modality (IF imaging dates, AP-MS dates, SEC-MS dates, CRISPR screen dates)",
+      "Consider adding version_access field describing how to access historical versions (currently inferred from version-specific DOIs in distributions)",
+      "Document any known errata or data quality issues in dedicated errata field (currently implied by 'interim/beta release' disclaimers in discouraged_uses)",
+      "For transparency, add labeling_strategies describing community annotation approach (GO/Reactome alignment + LLM naming with confidence scores)",
+      "Consider adding data_collectors field explicitly listing labs/individuals responsible for each data modality (currently inferred from collection_mechanisms)",
+      "Add file byte sizes to distributions (in addition to instance counts) for users planning data transfers",
+      "Document FAIRSCAPE provenance graph structure and EVI ontology usage in dedicated provenance field for semantic interoperability"
+    ]
+  },
+  "metadata": {
+    "evaluator_id": "0e44d4b4-f211-4ac6-a90d-2c05b112cbe7",
+    "rubric_hash": "rubric20_semantic_v1.0",
+    "d4d_file_hash": "0e49a83c8d2f339a2850c164df30f910b6d952235e30553a924b1f282206f443"
+  }
+}

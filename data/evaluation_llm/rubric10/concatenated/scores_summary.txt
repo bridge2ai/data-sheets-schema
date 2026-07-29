@@ -1,0 +1,34 @@
+# rubric10 scores — publication exemplar run 2026-07-22 (claude-fable-5)
+
+[claudecode]
+  AI_READI   34/50  (68.0%)
+  CHORUS     18/50  (36.0%)
+  CM4AI      33/50  (66.0%)
+  VOICE      37/50  (74.0%)
+
+[claudecode_agent]
+  AI_READI   46/50  (92.0%)
+  CHORUS     41/50  (82.0%)
+  CM4AI      46/50  (92.0%)
+  VOICE      49/50  (98.0%)
+
+[claudecode_agent_core]
+  AI_READI   46/50  (92.0%)
+  CHORUS     41/50  (82.0%)
+  CM4AI      46/50  (92.0%)
+  VOICE      49/50  (98.0%)
+
+[claudecode_assistant]
+  AI_READI   39/50  (78.0%)
+  CHORUS     35/50  (70.0%)
+  CM4AI      33/50  (66.0%)
+  VOICE      37/50  (74.0%)
+
+[gpt5]
+  AI_READI   3/50  (6.0%)
+  CHORUS     5/50  (10.0%)
+  CM4AI      28/50  (56.0%)
+  VOICE      1/50  (2.0%)
+
+Note: claudecode_agent and claudecode_agent_core rows evaluated 2026-07-22
+with claude-fable-5; other methods retain earlier evaluations (see each JSON's model field).

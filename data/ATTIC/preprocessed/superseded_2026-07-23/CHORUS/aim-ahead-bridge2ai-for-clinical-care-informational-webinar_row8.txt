@@ -1,0 +1,855 @@
+AIM-AHEAD 
+Bridge2AI for Clinical Care
+Training Program
+Cohort I
+
+Informational Webinar
+
+November 6, 2024, 3:00pm CT/4:00pm ET
+
+AIM-AHEAD Consortium
+
+Introduction
+
+The Artificial Intelligence/Machine Learning Consortium to Advance 
+Health Equity and Research Diversity (AIM-AHEAD) program was 
+established by the National Institutes of Health (NIH).
+
+Purpose
+
+The purpose of AIM-AHEAD is to enhance diversity in the field 
+of artificial intelligence and machine learning (AI/ML), with 
+emphasis on reducing health disparities and promoting 
+health equity. 
+
+This will be achieved by engaging in a fair, equitable, and 
+transparent process of building a consortium of AI/ML partners 
+to promote health equity and an inclusive and diverse 
+workforce.  
+
+The AIM-AHEAD Coordinating Center
+
+Introduction
+The A-CC consists of four cores, focused on various initiatives to achieve AIM-AHEAD’s mission. 
+
+Leadership Core
+
+Data Science Training Core
+
+Lead, recruit, and 
+coordinate the AIM-AHEAD 
+Consortium
+
+Assess, develop, and 
+implement data science 
+training curriculum
+
+Data and Research Core
+
+Address research priorities 
+and needs to form an 
+inclusive basis for AI/ML
+
+Infrastructure Core
+
+Assess data, computing, and 
+software infrastructure to facilitate 
+AI/ML and health disparities 
+research
+
+Bridge2AI Consortium
+
+Data
+
+Ethics
+
+People
+
+Diverse
+FAIR
+AI-ready
+
+Accurate
+Reliable
+Ethically Sourced
+
+Diverse teams
+Diverse research cohorts
+Training
+
+Generate new data & best 
+practices to:
+
+● Propel modern AI/ML 
+
+models to pioneer new 
+science, 
+
+● Advance a new culture of 
+ethical considerations 
+for data, and 
+
+● Create a modernized 
+
+workforce that is skilled 
+in this new method of 
+scientific data creation.
+
+NIH Leadership Team
+
+Samson Gebreab, Ph.D. MSc. 
+Program Lead, AIM-AHEAD
+Office of Data Science 
+Strategy,
+NIH
+
+Dr. Emir Khatipov
+Program Director, 
+AIM-AHEAD
+Office of Data Science 
+Strategy,
+NIH
+
+Shurjo K. Sen, Ph.D.
+Program Director, 
+Bridge2AI
+Office of Genomic Data 
+Science,
+NIH
+
+Eva Lancaster, Ph.D.  
+Program Director, 
+AIM-AHEAD
+Office of Data Science 
+Strategy,
+NIH
+
+Haluk Resat Ph.D.
+Program Lead, 
+Bridge2AI
+Office of Strategic 
+Coordination
+NIH
+
+Christian Evans, PMP 
+Program Specialist, 
+AIM-AHEAD
+Office of Data Science 
+Strategy,
+NIH
+
+AIM-AHEAD  Leadership Team
+
+Jamboor 
+Vishwanatha, PhD
+UNT Health Science 
+Center
+AIM-AHEAD PI
+
+Toufeeq A. Syed, PhD
+University of Texas Health 
+Science Center, 
+Houston, TX
+AIM-AHEAD MPI
+
+Nawar Shara, PhD
+MedStar Health 
+Research Institute
+AIM-AHEAD DSTC MPI
+
+Bridge2AI CHoRUS Leadership Team
+
+Program Leads
+
+Eric 
+Rosenthal
+MGH
+
+Azra Bihorac
+UF
+
+Xiaoqian 
+Jiang
+UT Health
+
+Yulia 
+Strekalova
+UF
+
+Parisa 
+Rashidi
+UF
+
+Andrew 
+Williams
+Tufts
+
+Program Purpose 
+
+Expand Data Access: Increase access to Bridge2AI AI/ML for Clinical 
+Care datasets, especially for underrepresented trainees.
+
+Engagement and Training: Provide engagement, training, and 
+mentorship opportunities for trainees on AI/ML and big data analysis.
+
+Purpose
+
+Focus on Health Disparities: Empower trainees to conduct data-driven 
+research addressing health disparities.
+
+Multi-Modal Data Use: Equip trainees to work with diverse, multi-modal 
+datasets from a broad cohort to conduct impactful AI/ML research.
+
+Program Partnership
+
+Strategic Partnership: AIM-AHEAD and Bridge2AI collaborate to provide 
+specialized AI/ML training for clinical care, leveraging shared resources and 
+expertise.
+
+Combined Expertise: AIM-AHEAD's strength in diverse trainee recruitment and 
+Bridge2AI’s AI data and curriculum drive a comprehensive training experience.
+
+Partnership
+
+Focus on Underrepresented Communities: Jointly committed to expanding AI/ML 
+proficiency in communities historically underrepresented in biomedical research.
+
+Goal: Develop a skilled, diverse workforce prepared to advance health equity 
+through AI/ML applications in clinical care.
+
+Bridge2AI for Clinical Care Dataset
+
+Multicenter
+
+Multimodal &
+High-Resolution
+
+CHoRUS Dataset
+
+• Retrospective data collection
+• Controlled access 
+• As of November 2024, covers 14 
+
+different hospitals with 23.4K unique 
+admissions
+• OMOP and telemetry in enclave except:
+
+• Clinical notes – stored locally except 
+
+•
+
+tokens
+Imaging – de-id in process at this 
+point
+
+• EEG – extraction in process at this 
+
+point
+
+• Datasets are being used for training 
+
+activities and publications
+
+Data type
+
+Data 
+standard
+
+Demographics OMOP
+
+OMOP
+
+Controlled
+
+Controlled
+
+Access control
+
+Metadata
+
+Yes
+
+Yes
+
+Yes
+
+Yes
+
+OMOP
+
+Controlled
+
+OMOP
+
+Controlled
+
+Medication administration 
+(dosing time-stamped upon 
+each infusion change or 
+dose administration)
+
+Procedures (documentation 
+by providers)
+
+Nursing flowsheets 
+(high-frequency 
+documentation)
+
+Diagnoses (documentation 
+by providers)
+
+Clinical notes (extracted 
+and tokenized using OHNLP 
+toolkit)
+
+Imaging (from PACS)
+
+DICOM
+
+Waveform telemetry 
+(bedside monitors, 
+gateway/middleware)
+
+WFDB
+
+Controlled
+
+Controlled
+
+Planned
+
+Yes
+
+Published metadata 
+schema
+
+Yes (OMOP schema)
+
+Yes (OMOP schema)
+
+Yes (OMOP schema)
+
+Yes (OMOP schema with 
+extensions)
+
+Yes (OHNLP open source 
+schema)
+
+Yes (DICOM schema)
+
+Yes (PhysioNet schema 
+extended)
+
+OMOP
+
+Controlled
+
+Yes
+
+Yes (OMOP schema)
+
+OHNLP
+
+Controlled
+
+Planned
+
+http://doi:10.1007/s12028-024-02007  
+
+Waveform EEG (hospital 
+database)
+
+EDF+ and 
+Persyst
+
+Controlled
+
+Planned
+
+Yes (open source EDF+ and 
+Persyst schema)
+
+CHoRUS Dataset
+
+CHoRUS Dataset
+
+CHoRUS Dataset
+
+CHoRUS Dataset
+
+Foundational Hands-On Training
+
+Gain experience with AI/ML in the Bridge2AI CHoRUS ecosystem
+Learn fundamental skills, tools, and design patterns for applying AI to clinical problems.
+
+Asynchronous
+Jupyter Notebooks
+
+Synchronous
+Office Hours
+
+Hybrid Workshop:
+AI in Clinical Care
+
+Python and Version Control
+
+Structured EHR Datasets
+
+Virtual meetings
+with AI experts
+
+Guided coding exercises
+
+ML for Clinical Applications
+
+Notebook review
+
+Hands-on brainstorming
+
+Clinical Deep Learning
+
+Ethics of Clinical AI
+
+Open Q&A
+
+Community team building
+
+Training Overview
+
+Trainees will receive hands-on training on the Bridge2AI AI/ML for Clinical Care 
+Network and leverage the data and tools to create practical use cases, putting 
+their new skills to work in real-life situations and innovative data-driven 
+research. Training will include:
+
+Workshops on using Jupyter 
+Notebooks
+
+Didactics on generative AI 
+and specific use cases
+
+Ongoing mentorship and 
+support using Collaborative 
+Cloud platforms
+
+Workshops on using the OHDSI 
+tool stack
+
+Instruction on creating 
+practical use cases
+
+Workshops on the 
+OHDSI/OMOP common data 
+model
+
+Virtual live courses
+
+Hands-on training on the 
+Bridge2AI AI/ML for Clinical 
+Care Collaborative Cloud
+
+Program Trainee Objectives
+
+Objective 1
+
+Exhibit advanced expertise in AI/ML principles as they are applied to clinical care.
+
+Objective 2
+
+Develop and present use cases suitable to apply in Bridge2AI Data Topics.
+
+Objective 3
+
+Participate directly in joint research and development projects on the Bridge2AI AI/ML for 
+Clinical Care Collaborative Cloud platform, utilizing the expertise and insights gained from the 
+program and interfacing with the BRIDGE Center ethics expertise in AI/ML biases and privacy 
+preservation.
+
+Objective 4
+
+Prepare a compelling poster presentation for the AIM-AHEAD Annual Meeting and the 
+Bridge2AI Annual Meeting in 2025, submit an abstract for a health informatics conference, 
+or develop a manuscript for a peer-reviewed journal.
+
+ After completing the program, trainees will understand how to develop real-world use cases and how to address 
+ethical concerns such as bias and privacy. They will be equipped to engage in collaborative research on the 
+Bridge2AI platform, and will join a committed community of professionals dedicated to extending AI/ML benefits to 
+underrepresented communities in biomedical research.
+
+Outcome
+
+Curriculum Overview
+
+Examples
+
+Hosts: MGB, UF, UTH, Tufts
+
+Host
+
+Lecturer(s)
+
+Delivery
+
+Approach
+
+Topic and Description
+
+Delivery: Live Online, Recorded, 
+Asynchronous
+
+MGB
+
+Morteza 
+Zabihi
+
+Live Online
+
+Didactic
+
+Machine Learning Basics - Intro to ML 
+methods for AI
+
+Format: Didactic, Workshop, 
+Office Hours, Self-Directed
+
+UF
+
+Zhenhong Hu Self-Directed
+
+Python 
+Notebook
+
+Intro to Python & Version Control
+
+UTH
+
+Debora 
+Simmons
+
+Recorded
+
+Lecture
+
+Ethics of AI in Clinical Practice - 
+Safety, risk, and legal considerations
+
+Tufts
+
+Andrew 
+Williams
+
+Live Online
+
+Didactic
+
+Working with EHR Data for Research
+
+MGH
+
+Aliyah Geer
+
+Workshop
+
+Collaborative
+
+Data Schemas in Clinical Cloud
+
+Curriculum Overview
+
+AI-LEARN Curriculum for Bridge2AI diverse learning communities 
+
+Courses to leverage & Sync DSTC_MHRI Workshops
+
+Curriculum Offering
+
+Target Audience / 
+Purpose
+
+Key Topics
+
+Format: Online, self-paced 
+with video lectures, case 
+studies, and exercises. 
+
+AI/ML Essentials for 
+Healthcare
+
+No coding; 
+healthcare workers
+
+Intro to AI/ML, ethics, patient engagement, 
+health equity
+
+Certification: Available upon 
+completion. 
+
+Open Data Science 
+for All
+
+Beginners to 
+intermediate 
+learners
+
+Advanced 
+Decision-Making 
+Models
+
+Focus on model 
+selection for 
+healthcare
+
+Data science basics, supervised/unsupervised 
+learning, AI trust, healthcare applications
+
+Statistical modeling, decision trees, healthcare 
+use cases
+
+Cutting Edge AI 
+Training Modules
+
+Keeping up with AI 
+advancements
+
+Integration with DSTC_MHRI workshops, latest 
+AI/ML trends
+
+Requirements for Accessing Data
+
+Registration
+
+Participants will fill out a registration form with name, email, and institution
+
+Email must be an institution email not a personal
+
+Once access is granted you will receive an email with how to gain access
+
+Licensing Agreement
+
+All participants must sign a licensing agreement
+
+Trainee Expectations
+
+In order to successfully complete the program, selected trainees must:
+
+Time Commitment: Be able to commit to 8 hours per week (on average) of coursework and 
+synchronous class sessions 
+
+Attendance: Attend one virtual, synchronous class session per week (day of the week and 
+time TBD)
+
+Assignments: Complete all assigned milestones and goals
+
+Presentation of Work: Attend both the AIM-AHEAD Annual Meeting (July 2025) 
+and the Bridge2AI Annual Meeting (May 2025) and present a works-in-progress 
+poster. 
+
+*These are both in-person events and a $2,000 travel allowance will be given to each trainee for travel expenses.
+
+Program Benefits
+
+Stipend
+
+An $8,000 stipend upon successful 
+completion of trainee milestones
+
+A $2,000 allowance to attend the AIM-AHEAD 
+Annual Meeting and the Bridge2AI Annual 
+Meeting in 2025 
+
+Support
+
+Support and guidance 
+from an experienced 
+AIM-AHEAD mentor
+
+Support from the 
+AIM-AHEAD Data 
+Science Training Core
+
+Direct 1:1 guidance, virtual office 
+hours, helpdesk support and 
+concierge services supporting R 
+and Python coding and the 
+OHDSI tool stack
+
+Training
+
+Training on:
+
+●
+
+●
+
+●
+
+●
+
+●
+
+Introductory machine learning and feature engineering
+
+The Bridge2AI AI/ML for Clinical Care Collaborative Cloud
+
+Ethics and Policy issues in AI/ML
+
+AI/ML for Clinical Care canonical Jupyter Notebooks
+
+The OHDSI/OMOP common data model
+
+AIM-AHEAD Mentorship Process
+
+Each trainee will be matched with a mentor who will provide ongoing support 
+throughout the training program. Mentors are matched with mentees using the 
+Connect Platform.  Mentorship matches are made using: 
+
+AI Algorithm
+
+Administrative 
+Matching
+
+Mentor Pool 
+Search 
+
+Applicant Eligibility
+
+Citizenship
+
+Must be a U.S. Citizen, Permanent Resident, or Non-Citizen U.S. 
+National
+
+Education
+
+Post-baccalaureate and graduate students, early-career 
+investigators, or employees with a bachelor’s degree in a related field 
+
+EducationSkills & 
+
+Experience
+
+To ensure success in the training program, applicants must already possess 
+certain skills, knowledge and experience. These include:
+
+Practical experience in coding/programming with R or Python
+
+Basic understanding of statistics
+
+Institutional Eligibility
+
+Non-Academic Organizations 
+
+Nonprofits with or without 501(c)(3) status, Tribally derived institutions, or For-Profit 
+Businesses
+
+Must be a domestic organization located in the United States and its territories
+
+Higher Education Institutions
+
+Public, Private, HSIs, HBCUs, TCUs, AANAPISI, or NAH Serving Institutions
+
+Must be a domestic institution located in the United States and its territories
+
+Application Requirements
+
+Submission Deadline: November 18, 2024 by 11:59 PM EST
+
+Profile Information: Name, organization, department, position, research area, and contact.
+
+Letters of Support: A supervisor's letter confirming training time and contact info is required, along 
+with one faculty recommendation attesting to the applicant's skills and readiness for advanced data 
+analytics. 
+
+Transcripts: Official or photocopy of undergraduate and graduate (if applicable).
+
+NIH Biosketch or CV: Max 5 pages.
+
+Statement of Rationale: Max 900 words—goals, research question, coding plan, relevant experience, 
+and long-term objectives.
+
+*This is just an overview. Please see the CFA for the full list of application requirements.
+
+Application Process
+
+Applications must be submitted between October 18, 2024 and November 18, 2024 at 11:59 PM EST 
+
+Note: Please use Chrome, Firefox, or Edge browsers. 
+
+1
+
+2
+
+3
+
+4
+
+Familiarize 
+yourself with the 
+program 
+requirements 
+outlined in the call 
+for applications 
+
+Gather all of the 
+required 
+application 
+materials 
+
+Create an 
+account on 
+AIM-AHEAD 
+Connect  and 
+register as a 
+“mentee/learner”
+
+Submit 
+application for 
+review using the 
+InfoReady 
+platform
+
+Up to 25 trainees will be selected 
+
+Program Timeline
+
+Funding Cycle      2024-2025
+
+Program Length
+
+8 months
+
+CFA Release Date 
+
+October 18, 2024
+
+Application Deadline 
+
+November 18, 2024 by 11:59 PM EST
+
+Notice of Award
+
+January 6, 2025
+
+Program Start Date
+
+January 15, 2025
+
+Bridge2AI Annual Meeting 2025
+
+May 2025
+
+AIM-AHEAD Annual Meeting 2025
+
+July 2025
+
+Questions?
+
+Please see the PDF 
+linked in the chat for 
+more helpful links 
+and resources. 
+
+Scan the QR code 
+above to access the 
+AIM-AHEAD 
+Bridge2AI for Clinical 
+Care CFA.
+
+

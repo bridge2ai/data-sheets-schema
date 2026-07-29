@@ -1,0 +1,299 @@
+{
+  "rubric": "rubric20",
+  "version": "1.0",
+  "d4d_file": "CHORUS_d4d_core.yaml",
+  "project": "CHORUS",
+  "method": "claudecode_agent_core",
+  "evaluation_timestamp": "2026-07-22T00:00:00Z",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "llm_as_judge"
+  },
+  "overall_score": {
+    "total_points": 75.0,
+    "max_points": 84,
+    "percentage": 89.3
+  },
+  "categories": [
+    {
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "description": "Proportion of mandatory schema fields populated",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥90% fields populated",
+          "evidence": "id: https://chorus4ai.org/ | title: Patient-Focused Collaborative Hospital Repository... | description: 420+ chars (lines 10-26) | keywords: 28 keywords (lines 32-59) | license: Controlled Access - Data Use Agreement Required (OT2OD032701)",
+          "quality_note": "All mandatory fields present with comprehensive, meaningful content. Core schema variant includes all required fields."
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "description": "Whether narrative fields have meaningful content length",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": ">200 chars",
+          "evidence": "description: 420+ characters (lines 10-26) | purposes: multiple entries with 200+ char descriptions each (lines 98-129)",
+          "quality_note": "Narrative fields are comprehensive and well-detailed, providing substantial context."
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "description": "Number of unique keywords provided",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥8 keywords",
+          "evidence": "28 unique keywords including: CHoRUS, Bridge2AI, critical care, acute illness, AI-ready dataset, OMOP Common Data Model, EHR, waveform telemetry, medical imaging, DICOM, EEG, clinical notes, OHNLP, health equity, social determinants of health, federated access, multi-modal data, ethical AI, trustworthy AI, workforce development, privacy preservation, bias mitigation, ICU, intensive care, and more",
+          "quality_note": "Excellent keyword diversity covering technical standards, data types, ethical considerations, and domain applications."
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "description": "Number of files and file type diversity in distributions",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": ">3 file types",
+          "evidence": "5 distribution entries with formats: OMOP (structured EHR), WFDB (waveform telemetry), DICOM (medical imaging), TXT/plain text (clinical notes, line 88), EDF+ and Persyst (EEG waveforms)",
+          "quality_note": "Exceptional multi-modal file type diversity representing all major critical care data modalities."
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "description": "Presence of file size or dimensional metadata",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "1.6 billion rows of EHR OMOP data (line 67) | 23 TB of waveform data (line 71) | 7,642 admissions with radiology, 1,000 images currently available (line 77) | 50,000 patient admissions (line 24)",
+          "quality_note": "Multiple dimensional metrics provided across all data modalities."
+        }
+      ],
+      "category_score": 21,
+      "category_max": 21
+    },
+    {
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "description": "Presence of unique identifiers (DOI, RRID, persistent URLs)",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "page: https://chorus4ai.org/ (line 27) | id: https://chorus4ai.org/ (line 7) | NIH grant ID: OT2OD032701 referenced throughout",
+          "quality_note": "Persistent URL present. No formal DOI or RRID, but NIH grant identifier serves as persistent reference."
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "description": "Presence of funding sources, grants, or institutional sponsors",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Funding agency + award number + comprehensive details",
+          "evidence": "funders section (lines 248-257): NIH Common Fund Bridge2AI Program | grant OT2OD032701, 1OT2OD032701-01 | Fiscal Year 2022, Total funding $5,880,300 (direct costs) | Project dates: September 1, 2022 to November 30, 2026 | Study Section: DCMM | Assistance Listing: 93.310 | Opportunity: OTA-21-008",
+          "quality_note": "Exceptionally comprehensive funding documentation with all administrative details."
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "description": "Presence of deidentification methods, IRB approvals, ethical sourcing",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "IRB approval + deidentification + ethical sourcing details",
+          "evidence": "ethical_reviews (lines 759-766): IRB approvals at all 14 acquisition centers, community ethics focus groups | is_deidentified (lines 838-847): OMOP transformation, OHNLP tokenization, DICOM header de-id, privacy_scan_tool | informed_consent (lines 783-792): Waiver of consent with IRB approval | at_risk_populations (lines 794-803): Vulnerable ICU populations identified | human_subject_research (lines 768-782): Comprehensive ethical framework addressing privacy, bias, SDOH",
+          "quality_note": "Outstanding ethical documentation covering IRB review, multiple de-identification strategies, vulnerable populations, and community engagement."
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "description": "Whether access policy and license are clearly defined",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License + Data Use Agreement + platform access description",
+          "evidence": "license_and_use_terms (lines 806-816): Controlled Access requiring institutional email registration and signed licensing agreement | Access process: registration form (name, institutional email, institution) → approval → email with enclave access | Contact: dbold@emory.edu, jared.houghtaling@tuftsmedicine.org | Platform: CHoRUS secure enclave (Azure-based) | NIH award OT2OD032701",
+          "quality_note": "Comprehensive access documentation with clear step-by-step process and contact information."
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "description": "Presence of standard formats, ontologies, or schema conformance",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Standard formats + schema/ontology compliance",
+          "evidence": "distribution_formats (lines 664-692): OMOP Common Data Model with published schema metadata | WFDB format following extended PhysioNet schema | DICOM format with comprehensive metadata | OHNLP open source schema | EDF+ (European Data Format) and Persyst open source schemas | Validated semantic mappings in chorus-mapping repository (line 512) | OHDSI tool stack compatibility (line 509)",
+          "quality_note": "Exceptional use of international standards across all data modalities with published schema metadata and validated mappings."
+        }
+      ],
+      "category_score": 21,
+      "category_max": 21
+    },
+    {
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "description": "Mentions of preprocessing libraries or tools used",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Comprehensive list with some version/URL gaps",
+          "evidence": "OHDSI tool stack (lines 509, 871) | OHNLP toolkit (line 518) | privacy_scan_tool (line 532) | DeGauss UF-Geocoding tool (line 539) | chorus_waveform repository (line 526) | chorus-mapping repository (line 549) | CHoRUSReports characterization tool (line 513) | Visualization and annotation environment (lines 559-565) | GitHub organization chorus-ai with 28 repositories (line 717, 856)",
+          "quality_note": "Multiple tools documented with purposes and some GitHub repository references, but lacking specific version numbers."
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "description": "Description completeness of participant recruitment and data acquisition",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Full recruitment and procedural details included",
+          "evidence": "acquisition_methods (lines 360-390): 5 detailed methods (EHR via OMOP, clinical notes via OHNLP, imaging via DICOM, waveforms via WFDB, EEG extraction) | collection_mechanisms (lines 392-419): 4 mechanisms with technical details | collection_timeframes (lines 421-428): Sept 2022 - Nov 2026 with milestones | data_collectors (lines 430-438): 14 acquisition centers, GitHub tracking, Chorus_SOP protocols | sampling_strategies (lines 440-448): Federated sampling, ethics focus groups | raw_data_sources (lines 450-483): 4 raw sources with institutional context",
+          "quality_note": "Exceptionally comprehensive collection documentation with multi-level detail on methods, mechanisms, timing, and responsible parties."
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "description": "Presence of multiple version records and associated dates",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Two versions with limited change detail",
+          "evidence": "version_access (lines 740-746): Controlled access versioned releases, version history maintained as expansion progresses | distribution_dates (lines 695-700): Initial release September 2022, current release August 2025 with 50K admissions | updates (lines 719-728): Ongoing expansion from 45K unique admissions to target 100K+ patients, continuous updates tracked via GitHub",
+          "quality_note": "Two major versions identified with dates and high-level change summaries (45K → 100K expansion), but lacking granular change logs."
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "description": "Presence of formal citations or DOI-linked references",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "One DOI cited",
+          "evidence": "external_resources (lines 872-874): Published Research in Neurocritical Care journal documenting CHoRUS dataset methodology and design at https://doi.org/10.1007/s12028-024-02007",
+          "quality_note": "One peer-reviewed publication with DOI. Additional publications likely in development given project stage."
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "description": "Inclusion of human subjects, demographic diversity, or subgroup details",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "General population description with subgroups but lacking detailed demographics",
+          "evidence": "instances (lines 260-270): Critically ill patients in ICU/PICU/NICU across 14 acquisition centers, 50,000 admissions released, target 100,000+ patients, retrospective data collection | subpopulations (lines 272-284): By hospital (14 different hospitals, 20 academic centers, geographic/institutional diversity) and by ICU type (ICU, PICU, NICU) | Social Determinants of Health data mentioned (lines 310-314) but no age/sex/race demographic breakdown",
+          "quality_note": "Good population characterization with institutional diversity and ICU subtypes, but missing detailed demographic distributions (age, sex, race/ethnicity)."
+        }
+      ],
+      "category_score": 18,
+      "category_max": 25
+    },
+    {
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "description": "Dataset includes persistent URLs for access and documentation",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "page: https://chorus4ai.org/ (line 27) | external_resources: 8 resources with persistent URLs including CHoRUS website, GitHub organization (https://github.com/chorus-ai), Chorus_SOP docs, NIH RePORTER (https://reporter.nih.gov/project-details/10472824), Bridge2AI program (https://bridge2ai.org/chorus), AIM-AHEAD training (https://aim-ahead.net/), OHDSI community (https://www.ohdsi.org/), published research DOI (lines 850-874)",
+          "quality_note": "Multiple persistent URLs across platforms ensuring long-term findability."
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "description": "Describes how users can obtain the dataset",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Fully defined access path (platform, login, policy)",
+          "evidence": "license_and_use_terms (lines 806-816): Controlled access requires (1) institutional email registration, (2) signed licensing agreement, (3) approval review, (4) email with CHoRUS secure enclave access instructions | Platform: Azure-based secure enclave | Contacts: dbold@emory.edu, jared.houghtaling@tuftsmedicine.org | Training program administrators assist with licensing | Data use agreement prohibits re-identification and redistribution (lines 619-629)",
+          "quality_note": "Fully documented access workflow with platform details, registration requirements, and contact information."
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "description": "License is clearly defined and permits identifiable reuse cases",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License explicitly defines reuse terms",
+          "evidence": "license_and_use_terms: Controlled Access License with Data Use Agreement (lines 806-816) | intended_uses (lines 568-591): 4 permitted uses (AI/ML model development, external validation, health equity research, educational training) | discouraged_uses (lines 593-615): 3 discouraged uses (clinical use without validation, re-identification, use without awareness of limitations) | prohibited_uses (lines 617-629): 2 explicit prohibitions (re-identification, redistribution outside agreement) | ip_restrictions (lines 818-825): MIT/Apache-2.0 for software, clinical data ownership with institutions",
+          "quality_note": "Exceptionally clear license framework with explicit permitted, discouraged, and prohibited uses."
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "description": "Presence of change logs or provenance tracking",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Change notes but limited structured version control",
+          "evidence": "updates (lines 719-728): Continuous expansion tracked, 45K → 100K+ admissions progression, status updates via GitHub project management | version_access (lines 740-746): Version history maintained, controlled access tracks current/future versions | distribution_dates: Initial Sept 2022, current Aug 2025 (lines 695-700) | No structured changelog with granular timestamps or diff records",
+          "quality_note": "High-level provenance tracking via GitHub and expansion milestones, but lacking detailed structured version control logs."
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "description": "Metadata connects dataset records across multiple platforms",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "external_resources (lines 850-874): Cross-platform links to (1) CHoRUS website https://chorus4ai.org/, (2) GitHub organization https://github.com/chorus-ai with 28 repositories, (3) NIH RePORTER https://reporter.nih.gov/project-details/10472824, (4) Bridge2AI program https://bridge2ai.org/chorus, (5) AIM-AHEAD training https://aim-ahead.net/, (6) OHDSI community https://www.ohdsi.org/, (7) Neurocritical Care publication https://doi.org/10.1007/s12028-024-02007, (8) Chorus_SOP GitHub documentation",
+          "quality_note": "Extensive cross-platform interlinking across institutional, funding, standards, and publication platforms."
+        }
+      ],
+      "category_score": 15,
+      "category_max": 17
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Exceptional structural completeness with all mandatory fields populated comprehensively (21/21 points)",
+      "Outstanding metadata quality including detailed funding documentation with full NIH grant details, fiscal information, and project timeline",
+      "Exemplary ethical documentation covering IRB approvals at 14 centers, multiple de-identification strategies (OMOP, OHNLP, DICOM, privacy_scan_tool), vulnerable populations, and community ethics engagement",
+      "Strong FAIR compliance with persistent identifiers, comprehensive access documentation, clear license framework with explicit permitted/prohibited uses, and extensive cross-platform interlinking",
+      "Excellent interoperability with systematic use of international standards (OMOP CDM, DICOM, WFDB, OHNLP, EDF+) and published schema metadata across all data modalities",
+      "Comprehensive collection documentation detailing 5 acquisition methods, 4 collection mechanisms, 14 data acquisition centers, and federated sampling strategies",
+      "Multi-modal file type diversity representing all major critical care data modalities (EHR, waveforms, imaging, notes, EEG) with dimensional metadata (1.6B rows, 23 TB, 50K admissions)"
+    ],
+    "weaknesses": [
+      "Limited version history documentation with only two major versions identified and lacking granular change logs (3/5 points)",
+      "Minimal associated publications with only one DOI cited (3/5 points) - additional publications likely in development given project maturity",
+      "Missing detailed demographic breakdowns (age, sex, race/ethnicity distributions) despite good institutional and ICU subtype diversity (3/5 points)",
+      "Software tools lack specific version numbers despite comprehensive tool listing (4/5 points)",
+      "No formal DOI or RRID for the dataset itself, relying on website URL and NIH grant identifier"
+    ],
+    "recommendations": [
+      "Add structured version changelog documenting specific data modality releases (e.g., 'v1.0: Initial 45K admissions, EHR + waveforms only' → 'v2.0: Expanded to 50K admissions, added 1K DICOM images')",
+      "Include software_and_tools section with version numbers (e.g., 'OHNLP toolkit v1.2.3', 'privacy_scan_tool v2.0.1', 'DeGauss v3.0') and GitHub repository links",
+      "Add demographic summary statistics to composition section (e.g., 'Age: median 65 years (IQR 52-75), Sex: 48% female, Race/Ethnicity: breakdown TBD as data expands')",
+      "Register formal dataset DOI through DataCite or similar DOI-issuing authority for improved citability and persistent identification",
+      "Expand associated publications section as additional peer-reviewed papers documenting CHoRUS dataset, methods, and applications are published",
+      "Add granular release notes to version_access documenting specific changes, data modality additions, quality improvements, and known issues for each version"
+    ]
+  },
+  "metadata": {
+    "evaluator_id": "r20-core-CHORUS",
+    "rubric_hash": "sha256-rubric20-1.0",
+    "d4d_file_hash": "sha256-CHORUS_d4d_core"
+  }
+}

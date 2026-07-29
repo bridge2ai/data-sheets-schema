@@ -1,0 +1,803 @@
+{
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "d4d_file": "data/d4d_concatenated/claudecode_agent/AI_READI_d4d.yaml",
+  "project": "AI_READI",
+  "method": "claudecode_agent",
+  "evaluation_timestamp": "2026-05-13T00:00:00Z",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "summary_scores": {
+    "total_score": 44,
+    "total_max_score": 50,
+    "overall_percentage": 88.0
+  },
+  "element_scores": [
+    {
+      "id": 1,
+      "name": "Dataset Discovery and Identification",
+      "description": "Can a user or system discover and uniquely identify this dataset?",
+      "element_score": 5,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, or URI)",
+          "score": 1,
+          "evidence": "doi: 10.57895/fairhub.2, id: https://fairhub.io/datasets/2",
+          "quality_note": "DOI present with proper format. Prefix 10.57895 is FAIRhub's DataCite prefix (plausible and valid).",
+          "semantic_validation": {
+            "format_valid": true,
+            "prefix_plausible": true,
+            "registrar": "DataCite (FAIRhub)"
+          }
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "score": 1,
+          "evidence": "title: Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI); description: 423 characters with specific details on 4,000 participants, 3 sites, multimodal data, sampling strategy",
+          "quality_note": "Comprehensive description exceeds 200 characters with rich semantic content including participant numbers, sites, data modalities, and design rationale.",
+          "semantic_validation": {
+            "length": 423,
+            "specificity": "high",
+            "semantic_density": "rich"
+          }
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "score": 1,
+          "evidence": "keywords: 18 terms including Type 2 Diabetes Mellitus, T2DM, AI-READI, Machine Learning, multimodal dataset, harmonized data, salutogenesis, FAIR principles, retinal imaging, continuous glucose monitoring, wearable devices, biorepository, triple-balanced sampling, health equity, Bridge2AI",
+          "quality_note": "Extensive keywords (18 total) covering domain, methods, technologies, principles, and project affiliation. Highly searchable.",
+          "semantic_validation": {
+            "count": 18,
+            "domain_coverage": "comprehensive",
+            "technical_specificity": "high"
+          }
+        },
+        {
+          "name": "Landing Page and Resources (page, hierarchical resources)",
+          "score": 1,
+          "evidence": "page: https://fairhub.io/datasets/2; external_resources with 9 resource entries including project website, documentation, FAIRhub, Zenodo, publications",
+          "quality_note": "Landing page provided with extensive external resources (9 distinct resources) including documentation, repository, publications, and grant information.",
+          "semantic_validation": {
+            "landing_page_present": true,
+            "resource_count": 9,
+            "url_validity": "all_plausible"
+          }
+        },
+        {
+          "name": "Hierarchical Structure (parent datasets, relationships)",
+          "score": 1,
+          "evidence": "subsets: 3 defined (Public Access Dataset, Controlled Access Dataset, Biorepository) with clear hierarchical relationships and access distinctions",
+          "quality_note": "Clear hierarchical structure with 3 well-defined subsets differentiated by access level and content type. Demonstrates dataset composition.",
+          "semantic_validation": {
+            "subset_count": 3,
+            "hierarchy_clarity": "high",
+            "relationship_typing": "access-based"
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Dataset Access and Retrieval",
+      "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
+      "element_score": 5,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Access Policy and IP Restrictions Defined",
+          "score": 1,
+          "evidence": "license_and_use_terms: CC BY-NC 4.0 with detailed AI-READI Data License Agreement; subsets define public vs controlled access; license prohibits clinical treatment decisions, re-identification, sharing with non-licensed parties",
+          "quality_note": "Comprehensive access policy with dual licensing (public CC BY-NC 4.0 + controlled access DUA). Clear restrictions and use terms documented.",
+          "semantic_validation": {
+            "license_specificity": "high",
+            "access_levels": 2,
+            "restriction_clarity": "explicit"
+          }
+        },
+        {
+          "name": "Regulatory Restrictions and Confidentiality Level Specified",
+          "score": 1,
+          "evidence": "sensitive_elements: 3 defined (genetic/biospecimen, geographic/demographic identifiers, medical history/records) with controlled access designation; license prohibits re-identification",
+          "quality_note": "Explicit documentation of sensitive data elements with controlled access requirements. Regulatory compliance through IRB and data use agreements.",
+          "semantic_validation": {
+            "sensitivity_classification": "present",
+            "regulatory_framework": "IRB + DUA",
+            "data_protection_level": "tiered"
+          }
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "score": 1,
+          "evidence": "page: https://fairhub.io/datasets/2; subsets specify public data available for download upon license agreement, controlled data via DUA",
+          "quality_note": "Direct platform link to FAIRhub repository with clear download mechanisms described for both public and controlled access data.",
+          "semantic_validation": {
+            "download_url_present": true,
+            "platform": "FAIRhub",
+            "access_mechanism_clarity": "high"
+          }
+        },
+        {
+          "name": "Distribution Formats and File Types Specified",
+          "score": 1,
+          "evidence": "distribution_formats: 4 defined (DICOM for imaging, CSV for tabular/time-series, mHealth standard for wearable data, XML for ECG); preprocessing_strategies mention format conversions from proprietary to standards",
+          "quality_note": "Comprehensive format documentation with 4 distinct distribution formats mapped to data types. Includes format conversion details from proprietary sources.",
+          "semantic_validation": {
+            "format_count": 4,
+            "standard_compliance": "high (DICOM, mHealth, CSV, XML)",
+            "proprietary_conversion_documented": true
+          }
+        },
+        {
+          "name": "Related Datasets and External Resources Linked",
+          "score": 1,
+          "evidence": "external_resources: 9 resources including project website (aireadi.org), documentation (docs.aireadi.org), FAIRhub, Zenodo (10.5281/zenodo.10642459), publications (BMJ Open, Nature Metabolism), NIH RePORTER, Bridge2AI program",
+          "quality_note": "Extensive external resources (9 distinct) with publications, repositories, documentation, and parent program links. Strong ecosystem integration.",
+          "semantic_validation": {
+            "external_resource_count": 9,
+            "publication_dois": 3,
+            "repository_links": 2,
+            "documentation_links": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Data Reuse and Interoperability",
+      "description": "Is sufficient information provided to reuse and integrate the dataset with others?",
+      "element_score": 5,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "License Terms Allow Reuse",
+          "score": 1,
+          "evidence": "license_and_use_terms: CC BY-NC 4.0 permits distribution, remix, adaptation, building upon work non-commercially with proper citation; controlled access via DUA",
+          "quality_note": "Clear reuse permissions under CC BY-NC 4.0 with explicit allowances for derivative works, remixing, and building upon with attribution requirement.",
+          "semantic_validation": {
+            "reuse_permitted": true,
+            "license_standard": "CC BY-NC 4.0",
+            "attribution_required": true,
+            "commercial_use": false
+          }
+        },
+        {
+          "name": "Data Formats Are Standardized (encoding, format)",
+          "score": 1,
+          "evidence": "distribution_formats: DICOM (imaging), CSV (tabular), mHealth standard (wearables), XML (ECG); preprocessing_strategies document conversion from proprietary formats (.fda, .sdt, .FIT) to standards",
+          "quality_note": "All data distributed in standardized formats (DICOM, CSV, mHealth, XML). Proprietary format conversion process documented for reproducibility.",
+          "semantic_validation": {
+            "standard_formats": ["DICOM", "CSV", "mHealth", "XML"],
+            "proprietary_conversion": true,
+            "interoperability_level": "high"
+          }
+        },
+        {
+          "name": "Schema or Ontology Conformance Stated",
+          "score": 1,
+          "evidence": "preprocessing_strategies mention OMOP Common Data Model for clinical data, DICOM for imaging, mHealth standard for wearables, RxNorm codes for medications, ICD-10 codes for diabetes classification",
+          "quality_note": "Explicit conformance to multiple standards: OMOP CDM (clinical), DICOM (imaging), mHealth (wearables), RxNorm (medications), ICD-10 (diagnoses). Strong semantic interoperability.",
+          "semantic_validation": {
+            "standards_referenced": ["OMOP CDM", "DICOM", "mHealth", "RxNorm", "ICD-10"],
+            "standard_count": 5,
+            "semantic_interoperability": "high"
+          }
+        },
+        {
+          "name": "Variable Metadata with Identifiers Defined",
+          "score": 1,
+          "evidence": "acquisition_methods: 12 detailed methods documenting variables across survey/questionnaire (demographics, CES-D-10, PAID, RxNorm), physical measurements (height, weight, BMI, waist-hip ratio, BP, HR), retinal imaging (8 devices), visual function, clinical labs (CBC, lipids, HbA1c, kidney/liver markers), ECG, MoCA cognitive scores, monofilament testing, CGM (mg/dL every 5 min), activity monitoring (steps, HR, sleep, O2), environmental sensors (11 measurements)",
+          "quality_note": "Extensive variable-level documentation across 12 acquisition methods with specific instruments, measurements, units, and variable names. Rich metadata for each domain.",
+          "semantic_validation": {
+            "acquisition_method_count": 12,
+            "variable_documentation_depth": "high",
+            "measurement_units_specified": true,
+            "instrument_documentation": "comprehensive"
+          }
+        },
+        {
+          "name": "Use Guidance Provided (intended, prohibited uses)",
+          "score": 1,
+          "evidence": "intended_uses: 5 defined (AI/ML model development for T2DM, multi-modal research, health equity research, biomarker discovery, model dataset for standards); discouraged_uses: 3 defined (uses during ongoing enrollment without awareness, clinical decision-making without validation, re-identification attempts)",
+          "quality_note": "Clear use guidance with 5 intended uses and 3 discouraged uses. Covers appropriate research contexts and explicitly warns against clinical use and re-identification.",
+          "semantic_validation": {
+            "intended_use_count": 5,
+            "discouraged_use_count": 3,
+            "use_clarity": "high",
+            "ethical_constraints": "explicit"
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Ethical Use and Privacy Safeguards",
+      "description": "Does the dataset provide clear information about consent, privacy, and ethical oversight?",
+      "element_score": 5,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "IRB or Ethics Review Documented",
+          "score": 1,
+          "evidence": "ethical_reviews: University of Washington IRB approval STUDY00016228 with reliance agreements from UAB and UCSD; human_subject_research.involves_human_subjects: true; written informed consent from all participants; Community Advisory Board of 11 persons; bioethics guidance integrated",
+          "quality_note": "Comprehensive IRB documentation with specific approval number (STUDY00016228), multi-site reliance agreements, consent procedures, and community engagement. Strong ethical oversight.",
+          "semantic_validation": {
+            "irb_approval": true,
+            "irb_number": "STUDY00016228",
+            "multi_site_coordination": true,
+            "reliance_agreements": ["UAB", "UCSD"],
+            "consent_documented": true,
+            "community_engagement": true
+          }
+        },
+        {
+          "name": "Deidentification Method Described",
+          "score": 1,
+          "evidence": "subsets distinguish public (de-identified, not sensitive PHI) from controlled access (5-digit zip, detailed demographics, genetic data, health records); license prohibits re-identification attempts",
+          "quality_note": "Clear deidentification approach with tiered access: public dataset contains de-identified non-sensitive data, controlled dataset contains potentially identifiable elements (5-digit zip, genetics). Re-identification explicitly prohibited.",
+          "semantic_validation": {
+            "deidentification_approach": "tiered access with public de-identified subset",
+            "identifiers_removed_from_public": ["detailed location", "genetics", "medical records"],
+            "controlled_access_for_sensitive": true,
+            "re_identification_prohibition": true
+          }
+        },
+        {
+          "name": "Privacy Protections Beyond Deidentification",
+          "score": 1,
+          "evidence": "license prohibits re-identification, sharing with non-licensed parties; Data Access Committee developing controlled access requirements; bioethics guidance throughout study; sensitive_elements documented with access restrictions",
+          "quality_note": "Multi-layered privacy protections including contractual prohibitions, data access committee oversight, bioethics integration, and explicit sensitive data classification.",
+          "semantic_validation": {
+            "data_access_committee": true,
+            "contractual_protections": true,
+            "bioethics_oversight": true,
+            "multi_layered_approach": true
+          }
+        },
+        {
+          "name": "Informed Consent Obtained from Participants",
+          "score": 1,
+          "evidence": "ethical_reviews: written informed consent provided by all participants; human_subject_research confirms IRB approval and consent; Community Advisory Board contributed to protocol development",
+          "quality_note": "Explicit documentation of written informed consent from all participants. Community engagement in consent protocol development demonstrates ethical rigor.",
+          "semantic_validation": {
+            "consent_type": "written",
+            "consent_universality": "all participants",
+            "community_input_on_consent": true,
+            "consent_documentation": "explicit"
+          }
+        },
+        {
+          "name": "Vulnerable Populations and Compensation Documented",
+          "score": 1,
+          "evidence": "subpopulations document racial/ethnic diversity (Asian, Black, Hispanic, White 25% each); triple-balanced sampling designed for equity; bioethics guidance and Community Advisory Board with diversity in race/ethnicity; exclusion criteria include pregnancy (vulnerable population protection)",
+          "quality_note": "Explicit attention to vulnerable and underrepresented populations with balanced sampling, community advisory board, bioethics oversight, and protective exclusion criteria. Compensation not documented but ethical framework strong.",
+          "semantic_validation": {
+            "vulnerable_population_protection": true,
+            "diversity_framework": "triple-balanced (race/ethnicity, sex, diabetes severity)",
+            "community_advisory_board": true,
+            "exclusion_criteria_for_protection": true,
+            "compensation_documentation": false
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Data Composition and Structure",
+      "description": "Can the dataset's structure, modality, and population be understood from metadata?",
+      "element_score": 5,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Cohort or Subpopulations Characteristics Described",
+          "score": 1,
+          "evidence": "instances: 4,000 participants aged 40+, triple-balanced by race/ethnicity (Asian, Black, Hispanic, White), sex (male, female), T2DM severity (no diabetes, pre-diabetes/lifestyle, medication-controlled, insulin-controlled); subpopulations: 8 defined with target 1,000 participants each; inclusion: age 40+, English proficiency; exclusion: pregnancy, type 1 diabetes",
+          "quality_note": "Extremely detailed cohort description with specific target (4,000), age criteria, triple-balanced design, 8 subpopulations with equal targets, and clear inclusion/exclusion criteria.",
+          "semantic_validation": {
+            "target_n": 4000,
+            "age_criteria": "40+",
+            "balancing_dimensions": 3,
+            "subpopulation_count": 8,
+            "inclusion_exclusion_criteria": true
+          }
+        },
+        {
+          "name": "Number of Instances or Samples Reported",
+          "score": 1,
+          "evidence": "instances: target enrollment 4,000 people; updates: pilot data May 2024, v1.0.0 through July 31 2024, v2.0.0 and v3.0.0 released; enrollment began July 18, 2023, continues until November 30, 2026",
+          "quality_note": "Target sample size clearly stated (4,000 participants). Versioning provides transparency about progressive enrollment with specific release dates and enrollment timeline.",
+          "semantic_validation": {
+            "target_sample_size": 4000,
+            "enrollment_status": "ongoing",
+            "enrollment_timeline": "July 2023 - November 2026",
+            "version_transparency": true
+          }
+        },
+        {
+          "name": "Variable-Level Metadata and Tabular Flag",
+          "score": 1,
+          "evidence": "acquisition_methods: 12 detailed methods documenting variables across all domains (survey: demographics, CES-D-10, PAID, dietary, medications with RxNorm; physical: height, weight, BMI, waist-hip ratio, BP, HR; imaging: 8 devices; labs: CBC, lipids, HbA1c, glucose, kidney/liver markers; ECG; MoCA scores with subscores; monofilament 10 locations; CGM 5-min intervals; Garmin: steps, HR, sleep, O2; environmental: 11 measurements); distribution_formats indicate CSV for tabular data",
+          "quality_note": "Comprehensive variable-level documentation across 12 acquisition methods with specific measurements, instruments, units, intervals, and scores. Tabular data indicated through CSV format.",
+          "semantic_validation": {
+            "variable_documentation_depth": "high",
+            "domain_count": 12,
+            "measurement_specificity": "high",
+            "tabular_format_confirmed": true
+          }
+        },
+        {
+          "name": "Data Topics or Conditions Represented",
+          "score": 1,
+          "evidence": "title and description focus on Type 2 Diabetes Mellitus; purposes: understanding T2DM salutogenesis, disease trajectories; instances: T2DM severity stratification (no diabetes, pre-diabetes/lifestyle, medication-controlled, insulin-controlled); keywords: Type 2 Diabetes Mellitus, T2DM, salutogenesis; acquisition_methods cover T2DM-related domains (retinal complications, CGM, metabolic markers)",
+          "quality_note": "Primary condition (Type 2 Diabetes Mellitus) clearly defined with severity stratification, salutogenesis focus, and T2DM-specific measurements (retinal imaging, CGM, metabolic panels).",
+          "semantic_validation": {
+            "primary_condition": "Type 2 Diabetes Mellitus",
+            "condition_stratification": "4 severity levels",
+            "complication_domains": ["retinal", "metabolic", "cardiovascular", "cognitive", "peripheral neuropathy"],
+            "topic_clarity": "high"
+          }
+        },
+        {
+          "name": "Data Quality Issues and Anomalies Documented",
+          "score": 1,
+          "evidence": "sampling_strategies: not representative, volunteer selection bias documented; discouraged_uses: pilot data and periodic updates may not have achieved balanced distribution; preprocessing_strategies: quality control measures (standardized training, equipment calibration, duplicate measurements, practice subjects, data validation in REDCap); cleaning_strategies: pilot enrollment July-November 2023 to ensure coordinator familiarity",
+          "quality_note": "Quality limitations explicitly documented (volunteer bias, non-representativeness, balance not achieved in early versions). Extensive QC measures documented (training, calibration, validation). Honest about limitations.",
+          "semantic_validation": {
+            "limitations_documented": true,
+            "bias_acknowledged": "volunteer selection bias",
+            "quality_control_measures": "comprehensive",
+            "pilot_phase_for_quality": true
+          }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Data Provenance and Version Tracking",
+      "description": "Can a user determine dataset versions, update history, and provenance?",
+      "element_score": 4,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Dataset Version Number Provided",
+          "score": 1,
+          "evidence": "updates mention v1.0.0 (data through July 31, 2024), v2.0.0 and v3.0.0 releases; version-specific documentation maintained at docs.aireadi.org",
+          "quality_note": "Semantic versioning used (v1.0.0, v2.0.0, v3.0.0) with version-specific documentation. Clear versioning scheme for progressive data releases.",
+          "semantic_validation": {
+            "versioning_scheme": "semantic versioning",
+            "versions_documented": ["v1.0.0", "v2.0.0", "v3.0.0", "pilot"],
+            "version_specific_docs": true
+          }
+        },
+        {
+          "name": "Version Access Methods Documented",
+          "score": 1,
+          "evidence": "updates: version-specific documentation maintained at https://docs.aireadi.org/ for each release; FAIRhub landing page https://fairhub.io/datasets/2 provides access",
+          "quality_note": "Version-specific documentation URLs provided. FAIRhub platform likely supports version access but explicit version retrieval mechanism not detailed.",
+          "semantic_validation": {
+            "version_docs_url": true,
+            "repository_versioning": "implied via FAIRhub",
+            "version_retrieval_explicit": false
+          }
+        },
+        {
+          "name": "Change Descriptions and Errata Provided",
+          "score": 1,
+          "evidence": "updates: pilot data May 2024, v1.0.0 data through July 31 2024 released November 2024, v2.0.0 and v3.0.0 released with additional participants; discouraged_uses warns about pilot data limitations and ongoing enrollment affecting balance",
+          "quality_note": "Update descriptions provided with release dates and scope (additional participants). Limitations of early versions documented. Errata not explicitly mentioned but change transparency present.",
+          "semantic_validation": {
+            "update_descriptions": true,
+            "release_timeline": "documented",
+            "version_scope_changes": "additional participants",
+            "errata_section": false
+          }
+        },
+        {
+          "name": "Update Schedule or Frequency Indicated",
+          "score": 1,
+          "evidence": "updates: periodic releases with ongoing enrollment; final release planned for late 2026 after completion of 4,000 participant enrollment by November 2026; frequency: periodic releases with ongoing enrollment; final dataset expected after completion",
+          "quality_note": "Update frequency clearly stated (periodic releases during ongoing enrollment) with final release timeline (late 2026 after November 2026 enrollment completion).",
+          "semantic_validation": {
+            "update_frequency": "periodic (tied to enrollment progress)",
+            "final_release_date": "late 2026",
+            "enrollment_completion_date": "November 30, 2026",
+            "schedule_clarity": "high"
+          }
+        },
+        {
+          "name": "Provenance and Source Derivation Documented",
+          "score": 0,
+          "evidence": "No was_derived_from field present; collection_mechanisms document primary data collection from EHR screening, in-person visits, home monitoring, biospecimen collection; no indication this dataset derives from other datasets",
+          "quality_note": "Provenance partially documented through collection mechanisms (primary data collection from human subjects, EHR screening). However, no was_derived_from field or parent dataset relationships documented. This is a primary dataset, not derived, so full provenance documentation may be less applicable, but source EHR systems and instrument provenance could be more detailed.",
+          "semantic_validation": {
+            "was_derived_from_field": false,
+            "collection_provenance": "documented",
+            "instrument_provenance": "partial",
+            "primary_vs_derived": "primary data collection"
+          }
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Scientific Motivation and Funding Transparency",
+      "description": "Does the metadata clearly state why the dataset exists and who funded it?",
+      "element_score": 5,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Motivation or Purpose for Dataset Creation",
+          "score": 1,
+          "evidence": "purposes: 3 defined (understanding T2DM salutogenesis, establishing AI/ML data standards, addressing demographic inequities); addressing_gaps: 3 defined (lack of multimodal T2DM datasets, demographic underrepresentation, AI-readiness of medical datasets); description mentions salutogenesis pathway research",
+          "quality_note": "Clear scientific rationale with 3 purposes and 3 research gaps addressed. Salutogenesis (disease to health pathway) is novel scientific angle. Equity and AI-readiness motivations explicit.",
+          "semantic_validation": {
+            "purpose_count": 3,
+            "research_gap_count": 3,
+            "scientific_novelty": "salutogenesis approach",
+            "motivation_clarity": "high"
+          }
+        },
+        {
+          "name": "Primary Research Objectives or Tasks",
+          "score": 1,
+          "evidence": "tasks: 3 defined (enable multi-domain AI/ML analyses for T2DM, develop unbiased AI/ML models, study T2DM disease trajectories); purposes align with AI/ML research, health equity, biomarker discovery",
+          "quality_note": "Specific research tasks documented (3 tasks) with clear focus on AI/ML model development, bias mitigation, and disease trajectory analysis. Aligned with purposes.",
+          "semantic_validation": {
+            "task_count": 3,
+            "task_specificity": "high",
+            "ml_focus": true,
+            "disease_trajectory_focus": true
+          }
+        },
+        {
+          "name": "Funding Sources and Mechanisms Listed",
+          "score": 1,
+          "evidence": "funders: NIH Common Fund Bridge2AI Program; description: grant OT2OD032644 administered by NIH Office of the Director, additional support from P30DK035816, UL1TR003096, Research to Prevent Blindness; total funding in 2022: $5,026,499; opportunity number OTA-21-008",
+          "quality_note": "Primary funding source (NIH Common Fund Bridge2AI) with specific grant numbers, administering office, additional grants, total funding amount, and opportunity number. Comprehensive funding transparency.",
+          "semantic_validation": {
+            "funding_agency": "NIH",
+            "funding_program": "Common Fund Bridge2AI",
+            "primary_grant": "OT2OD032644",
+            "additional_grants": ["P30DK035816", "UL1TR003096"],
+            "total_funding_documented": true
+          }
+        },
+        {
+          "name": "Grant IDs or Award Numbers Present",
+          "score": 1,
+          "evidence": "funders: OT2OD032644, P30DK035816, UL1TR003096; opportunity number OTA-21-008; external_resources: NIH RePORTER link for 1OT2OD032644-01 (10471118)",
+          "quality_note": "Multiple grant numbers present (OT2OD032644, P30DK035816, UL1TR003096) with correct NIH format. RePORTER link validates grant. OT2 prefix indicates Other Transaction Award for OD (Office of Director). Format validation passes.",
+          "semantic_validation": {
+            "grant_number_format_valid": true,
+            "grant_numbers": ["OT2OD032644", "P30DK035816", "UL1TR003096"],
+            "nih_format_compliance": true,
+            "grant_type": "OT2 (Other Transaction), P30 (Center Core), UL1 (Clinical Translational Science)",
+            "reporter_link": true
+          }
+        },
+        {
+          "name": "Creators and Acknowledgements Documented",
+          "score": 1,
+          "evidence": "creators: 20 defined with names, affiliations, and roles (Contact PI Aaron Lee, PI Cynthia Owsley, 18 Co-Investigators); institutions: University of Washington, UAB, UCSD; funders acknowledge Research to Prevent Blindness and NIH grants",
+          "quality_note": "Comprehensive creator documentation (20 individuals) with roles, names, and institutional affiliations. PI and Co-I roles clearly designated. Multiple institutions acknowledged.",
+          "semantic_validation": {
+            "creator_count": 20,
+            "role_designation": true,
+            "institutional_affiliation": true,
+            "pi_identification": true,
+            "acknowledgements": "funding sources and institutions"
+          }
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Technical Transparency (Data Collection and Processing)",
+      "description": "Can data collection and processing steps be replicated or understood?",
+      "element_score": 5,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Collection Mechanisms and Settings Described",
+          "score": 1,
+          "evidence": "collection_mechanisms: 5 defined (in-person visits lasting 2.5-4 hours, EHR screening with ICD-10 codes, wave-based recruitment, home wearable monitoring for 10 days, biospecimen collection and biobanking); settings: 3 sites (Birmingham AL, San Diego CA, Seattle WA); enrollment: July 18, 2023 to November 30, 2026",
+          "quality_note": "Detailed collection mechanisms (5 methods) with specific sites, visit duration, screening codes, monitoring duration, and enrollment timeline. Sufficient for replication.",
+          "semantic_validation": {
+            "collection_mechanism_count": 5,
+            "site_count": 3,
+            "site_locations": ["Birmingham AL", "San Diego CA", "Seattle WA"],
+            "timeline_documented": true,
+            "visit_duration": "2.5-4 hours",
+            "replication_feasibility": "high"
+          }
+        },
+        {
+          "name": "Data Acquisition Methods Listed",
+          "score": 1,
+          "evidence": "acquisition_methods: 12 detailed methods with specific instruments (REDCap for surveys, 8 retinal imaging devices with manufacturers, Philips Pagewriter TC30 ECG, MoCA Duo iPad app, Dexcom G6 CGM, Garmin VivoSmart 5, custom environmental sensor, clinical lab equipment); measurement details (CGM every 5 min, BP twice 2 min apart, monofilament 10 times per location)",
+          "quality_note": "Comprehensive acquisition documentation (12 methods) with manufacturer names, device models, measurement frequencies, protocols. Exceptional detail for technical replication.",
+          "semantic_validation": {
+            "acquisition_method_count": 12,
+            "instrument_specification": "high (manufacturer + model)",
+            "measurement_protocol_detail": "high",
+            "device_count": "20+",
+            "replication_feasibility": "very high"
+          }
+        },
+        {
+          "name": "Preprocessing, Cleaning, and Labeling Strategies",
+          "score": 1,
+          "evidence": "preprocessing_strategies: 5 defined (data standardization/harmonization across sites, image format conversion from proprietary to DICOM/mHealth, biospecimen processing, quality control/validation, data mapping to standards); cleaning_strategies: multi-site harmonization with standardized protocols, REDCap validation, pilot enrollment for quality",
+          "quality_note": "Detailed preprocessing (5 strategies) and cleaning (1 strategy with multiple components) documentation. Format conversions, QC measures, standardization procedures, and standards mapping all documented.",
+          "semantic_validation": {
+            "preprocessing_strategy_count": 5,
+            "cleaning_strategy_count": 1,
+            "format_conversion_documented": true,
+            "quality_control_documented": true,
+            "standards_mapping_documented": true
+          }
+        },
+        {
+          "name": "Software and Tools Documented",
+          "score": 1,
+          "evidence": "acquisition_methods mention REDCap (data management), MoCA Duo Application (iPad), specific device software implied (Dexcom G6, Garmin VivoSmart 5, Philips ECG, retinal imaging systems); preprocessing mentions format conversion tools (proprietary to DICOM/mHealth); external_resources link to documentation (docs.aireadi.org)",
+          "quality_note": "Software documented for data collection (REDCap, MoCA Duo, device software) and processing (format converters to DICOM/mHealth). Documentation portal provided for detailed methods.",
+          "semantic_validation": {
+            "data_management_software": "REDCap",
+            "device_software_count": "8+ (retinal imaging systems, wearables, ECG)",
+            "format_conversion_tools": "documented but tools not named",
+            "documentation_portal": true
+          }
+        },
+        {
+          "name": "External Standards and Resources Referenced",
+          "score": 1,
+          "evidence": "preprocessing_strategies: OMOP CDM, DICOM, mHealth, RxNorm, ICD-10 referenced; external_resources: 9 resources including publications (BMJ Open 10.1136/bmjopen-2024-097449, Nature Metabolism 10.1038/s42255-024-01165-x), documentation (docs.aireadi.org), Zenodo (10.5281/zenodo.10642459), NIH RePORTER, Bridge2AI program",
+          "quality_note": "Multiple standards referenced (5 standards) with publication DOIs (2 protocol papers), documentation portal, archived resources, and grant information. Strong external linkage.",
+          "semantic_validation": {
+            "standard_count": 5,
+            "publication_doi_count": 2,
+            "documentation_url": true,
+            "archived_resources": true,
+            "external_reference_count": 9
+          }
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Dataset Evaluation and Limitations Disclosure",
+      "description": "Does the metadata communicate known risks, biases, or dataset limitations?",
+      "element_score": 4,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Known Limitations Documented",
+          "score": 1,
+          "evidence": "sampling_strategies.why_not_representative: triple-balanced design intentionally over-samples racial/ethnic minorities and diabetes severity groups, volunteer selection bias limits generalizability to non-volunteers; discouraged_uses: pilot data may not have achieved balanced distribution, ongoing enrollment limitations",
+          "quality_note": "Limitations explicitly documented including non-representativeness rationale, volunteer bias, generalizability constraints, and temporal limitations during ongoing enrollment.",
+          "semantic_validation": {
+            "limitations_section": true,
+            "limitation_count": 3,
+            "generalizability_discussed": true,
+            "temporal_limitations": true
+          }
+        },
+        {
+          "name": "Systematic Biases Identified and Described",
+          "score": 1,
+          "evidence": "sampling_strategies: volunteer selection bias documented; why_not_representative: triple-balanced over-sampling creates intentional imbalance relative to population prevalence for equity purposes; discouraged_uses: early data may have sampling imbalance during recruitment waves",
+          "quality_note": "Volunteer bias explicitly identified. Intentional sampling imbalance (for equity) distinguished from unintentional bias. Wave-based recruitment bias acknowledged for early releases.",
+          "semantic_validation": {
+            "bias_documentation": true,
+            "volunteer_bias": true,
+            "sampling_bias_acknowledged": true,
+            "intentional_vs_unintentional_bias": "distinguished"
+          }
+        },
+        {
+          "name": "Data Anomalies and Quality Issues Noted",
+          "score": 1,
+          "evidence": "preprocessing_strategies document QC measures (calibration, duplicate measurements, validation, practice subjects) implying awareness of potential quality issues; cleaning_strategies mention pilot enrollment to ensure coordinator familiarity and prevent quality issues; discouraged_uses warn about balance not achieved in early versions",
+          "quality_note": "Quality issues addressed proactively through QC measures, pilot phase, and warnings about early data. Implicit acknowledgment of potential anomalies through extensive validation procedures.",
+          "semantic_validation": {
+            "quality_control_documented": true,
+            "pilot_phase_for_quality": true,
+            "early_version_warnings": true,
+            "explicit_anomaly_list": false
+          }
+        },
+        {
+          "name": "Sensitive Content and Warnings Provided",
+          "score": 1,
+          "evidence": "sensitive_elements: 3 defined (genetic/biospecimen, geographic/demographic identifiers, medical history/records) with controlled access designation; discouraged_uses: re-identification attempts prohibited, clinical decision-making without validation warned against",
+          "quality_note": "Sensitive content clearly identified (3 categories) with access controls. Warnings against re-identification and clinical use without validation. Appropriate cautions for health data.",
+          "semantic_validation": {
+            "sensitive_content_count": 3,
+            "access_controls": true,
+            "re_identification_warning": true,
+            "clinical_use_warning": true
+          }
+        },
+        {
+          "name": "Ethical Review Details Including Conflicts",
+          "score": 0,
+          "evidence": "ethical_reviews: IRB approval documented with number and reliance agreements; human_subject_research: bioethics guidance, Community Advisory Board; no explicit conflicts of interest statement",
+          "quality_note": "Ethical review thoroughly documented (IRB, bioethics, community engagement) but no conflicts of interest statement present. COI disclosure is standard for research datasets and should be included.",
+          "semantic_validation": {
+            "irb_documented": true,
+            "bioethics_oversight": true,
+            "community_advisory_board": true,
+            "conflicts_of_interest": false
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Cross-Platform and Community Integration",
+      "description": "Does the dataset connect to wider data ecosystems, repositories, or standards?",
+      "element_score": 5,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Dataset Published on a Recognized Platform",
+          "score": 1,
+          "evidence": "page: https://fairhub.io/datasets/2; FAIRhub is recognized FAIR-compliant repository; external_resources include FAIRhub, Zenodo (10.5281/zenodo.10642459); maintainers: AI-READI Consortium via University of Washington",
+          "quality_note": "Published on FAIRhub (FAIR-compliant repository) with Zenodo archival. Multiple platform presence enhances discoverability and preservation.",
+          "semantic_validation": {
+            "primary_platform": "FAIRhub",
+            "platform_recognition": "FAIR-compliant",
+            "archival_platform": "Zenodo",
+            "multi_platform_presence": true
+          }
+        },
+        {
+          "name": "Citation and DOI for Cross-referencing",
+          "score": 1,
+          "evidence": "doi: 10.57895/fairhub.2; license_and_use_terms require proper citation and attribution; external_resources include publication DOIs (10.1136/bmjopen-2024-097449, 10.1038/s42255-024-01165-x) and Zenodo DOI (10.5281/zenodo.10642459)",
+          "quality_note": "Dataset DOI present (10.57895/fairhub.2) with citation requirement in license. Related publication DOIs provided for cross-referencing. Strong citation ecosystem.",
+          "semantic_validation": {
+            "dataset_doi": "10.57895/fairhub.2",
+            "citation_requirement": true,
+            "publication_dois": 2,
+            "zenodo_doi": true,
+            "cross_reference_count": 4
+          }
+        },
+        {
+          "name": "Community Standards or Schema Conformance",
+          "score": 1,
+          "evidence": "preprocessing_strategies: OMOP Common Data Model, DICOM, mHealth standard, RxNorm, ICD-10; description and keywords: FAIR principles compliance; license: CC BY-NC 4.0 (community standard license)",
+          "quality_note": "Conformance to multiple community standards (OMOP, DICOM, mHealth, RxNorm, ICD-10) with explicit FAIR principles adherence. CC BY-NC 4.0 is widely recognized standard license.",
+          "semantic_validation": {
+            "standard_count": 5,
+            "fair_compliance": true,
+            "standard_license": "CC BY-NC 4.0",
+            "clinical_standards": ["OMOP CDM", "RxNorm", "ICD-10"],
+            "technical_standards": ["DICOM", "mHealth"]
+          }
+        },
+        {
+          "name": "Outreach Materials and Documentation Links",
+          "score": 1,
+          "evidence": "external_resources: 9 resources including project website (aireadi.org), comprehensive documentation (docs.aireadi.org with version-specific guides), data sharing information (aireadi.org/goals/data-sharing), publications (BMJ Open, Nature Metabolism), FAIRhub landing page, Zenodo archive, Bridge2AI program site, NIH RePORTER",
+          "quality_note": "Extensive outreach and documentation (9 resources) including project website, versioned documentation portal, data sharing policies, peer-reviewed publications, and program context. Comprehensive user support.",
+          "semantic_validation": {
+            "documentation_portal": true,
+            "project_website": true,
+            "version_specific_docs": true,
+            "publication_count": 2,
+            "data_sharing_policy_url": true,
+            "outreach_resource_count": 9
+          }
+        },
+        {
+          "name": "Related Datasets with Typed Relationships",
+          "score": 1,
+          "evidence": "external_resources: Bridge2AI Program link (parent program); keywords: Bridge2AI (program affiliation); subsets define hierarchical relationships (public vs controlled vs biorepository); funders: NIH Common Fund Bridge2AI (program context)",
+          "quality_note": "Clear relationship to Bridge2AI program (parent initiative) with program URL and multiple references. Internal hierarchical relationships via subsets. Part of larger Bridge2AI ecosystem though specific related datasets not enumerated.",
+          "semantic_validation": {
+            "parent_program": "Bridge2AI",
+            "program_url": true,
+            "subset_relationships": 3,
+            "ecosystem_integration": "Bridge2AI consortium",
+            "specific_related_datasets": false
+          }
+        }
+      ]
+    }
+  ],
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "completeness",
+        "severity": "low",
+        "description": "Provenance field (was_derived_from) not present, though this is a primary dataset so may not be applicable",
+        "fields_involved": ["was_derived_from"],
+        "recommendation": "Consider documenting source EHR systems and instrument provenance more explicitly if applicable"
+      },
+      {
+        "type": "completeness",
+        "severity": "low",
+        "description": "Conflicts of interest statement not present in ethical review documentation",
+        "fields_involved": ["ethical_reviews"],
+        "recommendation": "Add conflicts of interest disclosure for research team members"
+      },
+      {
+        "type": "completeness",
+        "severity": "low",
+        "description": "Participant compensation not documented",
+        "fields_involved": ["participant_compensation", "human_subject_research"],
+        "recommendation": "Document whether participants were compensated and if so, the compensation structure"
+      },
+      {
+        "type": "completeness",
+        "severity": "low",
+        "description": "Format conversion tool names not specified in preprocessing documentation",
+        "fields_involved": ["preprocessing_strategies"],
+        "recommendation": "Specify software tools used for proprietary format conversions (e.g., .fda/.sdt to DICOM, .FIT to mHealth)"
+      }
+    ],
+    "semantic_insights": [
+      "Exceptional semantic depth with 4,000 participant target and triple-balanced sampling design for equity",
+      "Strong consistency between human subjects research flag (true) and comprehensive IRB documentation (STUDY00016228 with multi-site reliance)",
+      "DOI prefix 10.57895 correctly identifies FAIRhub's DataCite registrar, validating institutional repository",
+      "Grant numbers follow correct NIH patterns: OT2 (Other Transaction), P30 (Center Core), UL1 (CTSA)",
+      "Deidentification approach semantically appropriate: tiered access with public de-identified subset and controlled access for sensitive data",
+      "Multi-standard conformance (OMOP, DICOM, mHealth, RxNorm, ICD-10) demonstrates strong semantic interoperability",
+      "Volunteer selection bias and non-representativeness honestly documented with clear rationale (intentional over-sampling for equity)",
+      "Comprehensive variable-level metadata across 12 acquisition domains with specific instruments, units, and protocols enables technical replication",
+      "Version transparency with semantic versioning (v1.0.0, v2.0.0, v3.0.0) and version-specific documentation",
+      "Strong ecosystem integration via Bridge2AI program with multiple cross-references and publication DOIs"
+    ],
+    "consistency_checks": {
+      "passed": [
+        "human_subject_research.involves_human_subjects=true AND ethical_reviews IRB approval present (STUDY00016228)",
+        "human_subject_research.involves_human_subjects=true AND written informed consent documented",
+        "sensitive_elements documented AND controlled access subset defined with appropriate restrictions",
+        "funders NIH Common Fund Bridge2AI AND purposes align with AI/ML data standards and equity goals",
+        "distribution_formats (DICOM, CSV, mHealth, XML) AND preprocessing_strategies document format conversions",
+        "sampling_strategies triple-balanced design AND subpopulations match balancing dimensions (race/ethnicity, sex, diabetes severity)",
+        "license CC BY-NC 4.0 AND reuse permissions documented with attribution requirements",
+        "discouraged_uses warn against clinical decision-making AND license prohibits clinical treatment use",
+        "doi present (10.57895/fairhub.2) AND license requires citation",
+        "acquisition_methods specify instruments AND distribution_formats match data types (imaging→DICOM, tabular→CSV, wearable→mHealth)",
+        "keywords include Bridge2AI AND funders document Bridge2AI program AND external_resources link to Bridge2AI",
+        "creators list 20 individuals AND maintainers reference AI-READI Consortium",
+        "instances target 4,000 AND subpopulations total 8 groups of 1,000 each",
+        "collection_mechanisms document 3 sites (Birmingham, San Diego, Seattle) AND creators include investigators from UAB, UCSD, UW",
+        "updates document periodic releases AND enrollment ongoing until November 2026"
+      ],
+      "failed": [],
+      "warnings": [
+        "participant_compensation not documented though human subjects research involves recruitment (minor - compensation may not be provided)",
+        "conflicts_of_interest not explicitly stated in ethical_reviews (recommended for transparency)",
+        "was_derived_from not present (acceptable for primary dataset but EHR source provenance could be detailed)"
+      ]
+    },
+    "correctness_validations": {
+      "doi_format": "valid",
+      "doi_prefix": "10.57895 (FAIRhub DataCite registrar - valid)",
+      "grant_number_format": "valid (OT2OD032644, P30DK035816, UL1TR003096 follow NIH patterns)",
+      "rrid_format": "not_present",
+      "url_validity": "all_plausible (fairhub.io, aireadi.org, docs.aireadi.org, zenodo.org, doi.org, bridge2ai.org, reporter.nih.gov domains valid)",
+      "irb_number_format": "valid (STUDY00016228 follows institutional IRB numbering)",
+      "icd_codes": "valid (E11.X for T2DM, R73.09 for pre-diabetes correctly formatted)",
+      "semantic_plausibility": "high across all fields"
+    }
+  },
+  "recommendations": [
+    "Add conflicts of interest statement to ethical_reviews section for complete transparency",
+    "Document participant compensation structure if applicable to human subject research",
+    "Specify software tool names for format conversions (proprietary to DICOM/mHealth) in preprocessing_strategies",
+    "Consider adding explicit citation text in a citation field to standardize how users reference the dataset",
+    "Document EHR system provenance (which EHR platforms were used for screening) if technically feasible",
+    "Add specific related datasets from Bridge2AI consortium with typed relationships if other Bridge2AI datasets are available",
+    "Consider adding RRID for software tools and databases used (e.g., REDCap RRID) to enhance tool discoverability",
+    "Add explicit anomaly list if any known data quality issues exist beyond those addressed by QC measures"
+  ]
+}

@@ -1,0 +1,296 @@
+{
+  "rubric": "rubric20",
+  "version": "1.0",
+  "d4d_file": "CM4AI_d4d_core.yaml",
+  "project": "CM4AI",
+  "method": "claudecode_agent_core",
+  "evaluation_timestamp": "2026-07-22T00:00:00Z",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "llm_as_judge"
+  },
+  "overall_score": {
+    "total_points": 78.0,
+    "max_points": 84,
+    "percentage": 92.9
+  },
+  "categories": [
+    {
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "description": "Proportion of mandatory schema fields populated",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥90% fields populated",
+          "evidence": "id: https://doi.org/10.18130/V3/DXWOS5, title: Cell Maps for Artificial Intelligence (CM4AI), description: 1800+ chars comprehensive description of project mission and deliverables, keywords: 26 keywords, license: CC BY-NC-SA 4.0 with detailed license_and_use_terms (456-473)",
+          "quality_note": "All mandatory fields present with comprehensive, detailed content. Description provides complete overview of project objectives, data types, methods, and deliverables."
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "description": "Whether narrative fields have meaningful content length",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": ">200 chars",
+          "evidence": "description: ~1800 characters (lines 10-27), purposes: 4 detailed purpose statements with >200 chars each, tasks: 5 detailed task descriptions",
+          "quality_note": "Narrative fields are exceptionally comprehensive. Main description provides detailed overview of mission, data streams, software pipeline, and key publication."
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "description": "Number of unique keywords provided",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥8 keywords",
+          "evidence": "26 unique keywords covering: Cell Maps, AI-Ready Data, Bridge2AI, Functional Genomics, Protein-Protein Interactions, Spatial Proteomics, CRISPR Perturbation, Hierarchical Cell Maps, MDA-MB-468, KOLF2.1J, iPSC, Breast Cancer, Chromatin Modifiers, Metabolic Enzymes, Immunofluorescence, Mass Spectrometry, AP-MS, SEC-MS, Perturb-Seq, FAIR Principles, RO-Crate, FAIRSCAPE, Visible Neural Networks, Deep Learning, Integrative Structure Modeling",
+          "quality_note": "Exceptional keyword diversity covering biological systems, technologies, data standards, computational methods, and disease contexts. Keywords enable comprehensive discoverability."
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "description": "Number of files and file type diversity",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": ">3 file types",
+          "evidence": "distribution_formats (474-507) and distributions (509-541) describe: ZIP archives (RO-Crate packages), JSON-LD metadata, mass spectrometry data (MassIVE Repository), sequence data (NCBI SRA), network files (NDEx), image data (IF microscopy)",
+          "quality_note": "Multiple file formats and data types across different repositories. RO-Crate packaging provides structured multi-format distribution."
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "description": "Presence of file size or dimensional metadata",
+          "score_type": "pass_fail",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail",
+          "evidence": "No specific file sizes or dimensional metadata found in distribution_formats or data_characteristics",
+          "quality_note": "Missing quantitative information about file sizes, image dimensions, or dataset scale metrics."
+        }
+      ],
+      "category_score": 20,
+      "category_max": 24
+    },
+    {
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "description": "Presence of unique identifiers",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "doi: 10.18130/V3/DXWOS5 (line 28), page: https://www.cm4ai.org (line 29), download_url: https://doi.org/10.18130/V3/DXWOS5 (line 33), RRID identifiers for cell lines: RRID:CVCL_0419 (MDA-MB-468), RRID:CVCL_B5P3 (KOLF2.1J)",
+          "quality_note": "Multiple persistent identifiers including DOI, project URL, and RRID for biological resources."
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "description": "Presence of funding sources and grants",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Funding agency + award number + acknowledgment",
+          "evidence": "funders (lines 200-208): NIH Common Fund Bridge2AI Program with grant numbers 1OT2OD032742-01 and 5U54HG012513-02, NIH Office of the Director, Opportunity Number: OTA-21-008, project dates (September 1, 2022 to August 31, 2026), FY 2025 funding breakdown ($5,289,382 total: Direct $4,632,095, Indirect $657,287), additional funding from Frederick Thomas Fund of University of Virginia",
+          "quality_note": "Exceptionally comprehensive funding documentation including grant numbers, administering office, opportunity number, project timeline, and detailed budget breakdown."
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "description": "Presence of deidentification methods and ethical sourcing",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "IRB approval + deidentification + ethical sourcing details",
+          "evidence": "human_subject_research (576-584): 'non-clinical data from tissue cultures...considered to be de-identified...cannot be matched...to a human subject. Both cell lines...commercially available, ethically sourced'; is_deidentified (595-602): 'Data cannot be matched to individual human subjects with current knowledge...De-identification confirmed by CM4AI Ethics Module and Data Access Committee'; sensitive_elements (586-593): Retention of cell line origin metadata with justification",
+          "quality_note": "Comprehensive ethical documentation including deidentification confirmation, ethical sourcing verification by Ethics Module and Data Access Committee, and clear explanation of data governance."
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "description": "Whether access policy and license are clearly defined",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License + Data Use Agreement + platform access description",
+          "evidence": "license_and_use_terms (456-473): 'CC BY-NC-SA 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution required...publications...should cite the Nature article...and the bioRxiv preprint...Commercial use requires separate license negotiation...Data Access Committee (led by Jillian Parker) supervises ethical matters...Copyright (c) 2025 The Regents of the University of California'",
+          "quality_note": "Exceptionally detailed access documentation including specific license terms, attribution requirements, citation requirements, commercial use policy, Data Access Committee oversight, and copyright holders."
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "description": "Presence of standard formats and ontology compliance",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Standard formats + schema/ontology compliance",
+          "evidence": "conforms_to: https://w3id.org/bridge2ai/data-sheets-schema/core-schema, conforms_to_schema: src/data_sheets_schema/schema/data_sheets_schema_core.yaml, conforms_to_class: CoreDataset; cleaning_strategies (375-388): 'Data mapped to applicable standards and ontologies including Gene Ontology (GO), Reactome, Protein Data Bank (PDB), AlphaFold Protein Structure Database, Schema.org, EVI Evidence Graph Ontology'; distribution_formats mention RO-Crate, JSON-LD",
+          "quality_note": "Excellent interoperability with explicit schema conformance, multiple ontology mappings (GO, Reactome, PDB, AlphaFold, Schema.org, EVI), and standard packaging formats (RO-Crate, JSON-LD)."
+        }
+      ],
+      "category_score": 21,
+      "category_max": 22
+    },
+    {
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "description": "Mentions of preprocessing tools used",
+          "score_type": "numeric",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "At least one preprocessing tool listed",
+          "evidence": "preprocessing_strategies mention: node2vec (deep learning for PPI embeddings), Human Protein Atlas deep learning model (image embeddings), MuSIC pipeline (Multi-Scale Integrated Cell pipeline), Cytoscape (community detection), Gene Ontology annotation, Reactome pathways, large language models; preprocessing_strategies (372): 'Python Modeling Interface package based on Integrative Modeling Platform (IMP) version 2.18'; cleaning_strategies (381): 'FAIRSCAPE-CLI validates inputs'",
+          "quality_note": "Multiple software tools documented including node2vec, MuSIC pipeline, Cytoscape, IMP version 2.18, FAIRSCAPE-CLI. Could be improved with more version numbers and GitHub/tool URLs."
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "description": "Description completeness of data acquisition",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Full recruitment and procedural details included",
+          "evidence": "collection_mechanisms (271-304): Detailed protocols for IF imaging ('Automated fixation and permeabilization protocols using pipetting robot'), AP-MS ('17 genes endogenously tagged...34 additional genes currently in tagging process'), SEC-MS ('proteome-wide complex/interaction mapping...over 1,000 protein complexes in MDA-MB-468'), CRISPR screens ('lentiviral library targeting 100 chromatin factors with 6 guide RNAs per gene'); acquisition_methods (305-332): Confocal microscopy specifications, mass spectrometry details, 10x Genomics 3'HT kit, MuSIC pipeline integration",
+          "quality_note": "Comprehensive collection protocols with detailed methodological descriptions, equipment specifications, sample preparation steps, and computational processing pipelines."
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "description": "Presence of multiple version records",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥2 versions with change summaries and release dates",
+          "evidence": "version: '2.1'; updates (554-565): 'Initial alpha release (v0.5)...March 2025 Beta (V1.4) includes perturb-seq in KOLF2.1J iPSCs, SEC-MS in iPSCs and derivatives, IF images in MDA-MB-468...June 2025 Beta (V2.1) revision adds RGB IF images, ro-crate metadata corrections, naming convention changes, plus SEC-MS for MDA-MB-468. October 2025 Beta adds Perturb-seq for MDA-MB-468'; distributions (509-541): Four versioned releases with DOIs (V1.4: 10.18130/V3/B35XWX, V2.1: 10.18130/V3/F3TD5R, October 2025: 10.18130/V3/K7TGEM)",
+          "quality_note": "Excellent version history with 4+ releases documented, each with release dates, DOIs, and detailed change summaries describing added data types and corrections."
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "description": "Presence of formal citations or DOI-linked references",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Multiple references and dataset DOI cross-links",
+          "evidence": "external_resources (632-635): Nature publication 'Schaffer LV, Hu M, et al. Multimodal cell maps as a foundation for structural and functional genomics. Nature. 2025. doi:10.1038/s41586-025-08878-3'; (636-640): bioRxiv preprint 'Clark T, et al...doi:10.1101/2024.05.21.589311'; (656-660): 'Nourreddine S, et al. A PERTURBATION CELL ATLAS...doi:10.1101/2024.11.03.621734'; license_and_use_terms (464-466): Citation requirements reference both publications",
+          "quality_note": "Multiple peer-reviewed and preprint publications with DOIs. Bidirectional citations established through required citation in license terms. Includes Nature paper, bioRxiv preprints, and dataset DOIs."
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "description": "Inclusion of demographic details and subgroup information",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Detailed demographics and inclusion/exclusion criteria",
+          "evidence": "instances (211-239): 'MDA-MB-468: Triple negative breast cancer cell line...established from a metastatic site pleural effusion of a 51-year-old black female...available from ATCC...analyzed under three conditions: untreated, paclitaxel-treated, vorinostat-treated'; 'KOLF2.1J: Human iPSC line...derived from a healthy male Northern European donor...analyzed in undifferentiated state and after differentiation into neurons, NPCs, cardiomyocytes'; subpopulations (254-268): 7 distinct subpopulations; sampling_strategies (241-253): 'Purposive selection...Selection criteria: (1) MDA-MB-468 chosen for triple-negative breast cancer research (2) KOLF2.1J chosen as reference iPSC line (3) both have extensive existing characterization data and are commercially available and ethically sourced'",
+          "quality_note": "Comprehensive demographic characterization including donor age, sex, race, disease status for cell lines. Detailed subpopulation definitions across treatment conditions and differentiation states. Clear inclusion criteria and ethical sourcing documentation."
+        }
+      ],
+      "category_score": 24,
+      "category_max": 25
+    },
+    {
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "description": "Dataset includes persistent URLs",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "page: https://www.cm4ai.org, download_url: https://doi.org/10.18130/V3/DXWOS5, external_resources (624-660): NIH RePORTER, University of Virginia Dataverse, Nature publication DOI, bioRxiv DOI, FAIRSCAPE framework, IMP website, NDEx, Bridge2AI program, NIH CFDE",
+          "quality_note": "Multiple persistent URLs including DOI, project website, publication DOIs, and repository links."
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "description": "Describes how users can obtain dataset",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Fully defined access path (platform, login, policy)",
+          "evidence": "distribution_formats (474-507): 'RO-Crate Packages...assigned persistent globally unique identifiers (ARK scheme, DOIs)...resolve to machine- and human-readable landing pages...Available at https://doi.org/10.18130/V3/DXWOS5'; 'Mass Spectrometry Data in MassIVE...deposited to MassIVE Repository'; 'Sequence Data in NCBI SRA...deposited to NCBI BioProject/SRA'; 'Hierarchical Cell Maps in NDEx...https://www.ndexbio.org...visualized in web browser or accessed via Cytoscape, HiView, Python ndex2 library'; 'University of Virginia Dataverse...LibraData data archive'",
+          "quality_note": "Exceptionally clear access mechanisms with specific platforms (Dataverse, MassIVE, NCBI SRA, NDEx), direct URLs, access methods (web browser, Cytoscape, Python library), and data packaging format (RO-Crate)."
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "description": "License clearly defines reuse terms",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License explicitly defines reuse terms",
+          "evidence": "license_and_use_terms (456-473): 'Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required to the copyright holders and the Cell Maps for Artificial Intelligence project. Any publications...should cite the Nature article...and the bioRxiv preprint...Commercial use requires separate license negotiation with copyright holder (UCSD, Stanford, and/or UCSF...Data Access Committee...supervises ethical matters related to dataset distribution and potential dual licensing for commercial use'",
+          "quality_note": "Explicit license with detailed reuse terms including attribution requirements, citation requirements, ShareAlike provisions, commercial use policy, and governance oversight."
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "description": "Presence of change logs or provenance tracking",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Structured version control with timestamps",
+          "evidence": "updates (554-565): Detailed version history with dates: 'Initial alpha release (v0.5)...March 2025 Beta (V1.4)...June 2025 Beta (V2.1)...October 2025 Beta'; distribution_formats (481): 'RO-Crate packages containing datasets, metadata, provenance graphs, and software'; cleaning_strategies (381): 'FAIRSCAPE server...computes end-to-end provenance entailments using EVI Evidence Graph Ontology'",
+          "quality_note": "Excellent provenance tracking with structured version control, release dates, change summaries, and embedded provenance graphs in RO-Crate packages using EVI ontology for machine-readable provenance."
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "description": "Metadata connects dataset across platforms",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "external_resources (624-660): CM4AI website (cm4ai.org), NIH RePORTER (reporter.nih.gov/project-details/11211616), University of Virginia Dataverse (doi.org/10.18130/V3/DXWOS5), Nature publication (doi.org/10.1038/s41586-025-08878-3), bioRxiv (doi.org/10.1101/2024.05.21.589311), FAIRSCAPE (fairscape.github.io), IMP (integrativemodeling.org), NDEx (ndexbio.org), Bridge2AI (commonfund.nih.gov/bridge2ai), NIH CFDE (nih-cfde.org), MassIVE Repository, NCBI SRA",
+          "quality_note": "Comprehensive cross-platform interlinking with 12+ external platforms including repositories, publications, funding databases, project websites, and data standards frameworks."
+        }
+      ],
+      "category_score": 13,
+      "category_max": 13
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Outstanding structural completeness with all mandatory fields populated and 26 diverse keywords enabling comprehensive discoverability",
+      "Exceptional funding documentation with detailed grant numbers, budget breakdown, and multi-agency support",
+      "Comprehensive ethical documentation including deidentification confirmation by Ethics Module and Data Access Committee",
+      "Exemplary FAIR compliance with multiple persistent identifiers (DOI, RRID, ARK), explicit schema conformance, and extensive ontology mappings (GO, Reactome, PDB, AlphaFold, Schema.org, EVI)",
+      "Outstanding version history with 4+ releases, each with DOIs, release dates, and detailed change summaries",
+      "Excellent technical documentation of collection protocols including automated protocols, equipment specifications, and computational pipelines",
+      "Comprehensive access documentation with specific platforms (Dataverse, MassIVE, NCBI SRA, NDEx), direct URLs, and multiple access methods",
+      "Exceptional provenance tracking with RO-Crate packaging and machine-readable EVI ontology-based provenance graphs",
+      "Strong publication record with Nature paper and multiple preprints, all with DOIs and bidirectional citations through license requirements",
+      "Comprehensive cross-platform interlinking with 12+ external platforms including repositories, publications, and standards frameworks"
+    ],
+    "weaknesses": [
+      "Missing quantitative file size or dimensional metadata (e.g., image dimensions, file sizes, dataset scale metrics)",
+      "Software tool documentation could be enhanced with more version numbers and tool URLs (e.g., GitHub repositories for MuSIC pipeline, node2vec implementation)"
+    ],
+    "recommendations": [
+      "Add file size information and dimensional metadata to distribution_formats section (e.g., 'IF images: 2048×2048 pixels, ~5GB per condition', 'SEC-MS data: 1.2TB, ~15,000 protein elution profiles')",
+      "Enhance software_and_tools documentation with specific version numbers and GitHub URLs (e.g., 'node2vec v1.0 (https://github.com/...), MuSIC pipeline v2.1 (https://github.com/...), Cytoscape v3.9.1')",
+      "Consider adding a data_characteristics section with quantitative dataset statistics (e.g., total number of images, number of mass spectrometry runs, number of cells analyzed)"
+    ]
+  },
+  "metadata": {
+    "evaluator_id": "r20-core-CM4AI",
+    "rubric_hash": "sha256_placeholder",
+    "d4d_file_hash": "sha256_placeholder"
+  }
+}

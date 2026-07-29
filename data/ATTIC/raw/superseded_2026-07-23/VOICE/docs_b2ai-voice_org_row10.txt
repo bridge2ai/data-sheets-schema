@@ -1,0 +1,738 @@
+Bridge2AI - Voice
+Skip to content
+Home
+About
+Our Consortium
+Advisory Board and Collaborators
+Join Us
+Data & Tools
+B2AI-Voice Dataset
+B2Ai Voice Dataset – Pediatric Dashboard
+B2Ai Voice Dataset – Adult Dashboard
+B2AI-Voice Tools
+Training Resources
+Webinars
+Training and Mentorship
+Voice AI Symposium
+Voice AI Symposium
+Impact
+Publications
+Press
+Social Media
+Home
+About
+Our Consortium
+Advisory Board and Collaborators
+Join Us
+Data & Tools
+B2AI-Voice Dataset
+B2Ai Voice Dataset – Pediatric Dashboard
+B2Ai Voice Dataset – Adult Dashboard
+B2AI-Voice Tools
+Training Resources
+Webinars
+Training and Mentorship
+Voice AI Symposium
+Voice AI Symposium
+Impact
+Publications
+Press
+Social Media
+Bridge2AI-Voice Dataset
+The Bridge2AI-Voice(B2Ai-Voice) dataset is a large, ethically sourced, and demographically diverse voice dataset linked to health information, released by the NIH’s Bridge2AI initiative. The dataset includes many derived voice recordings (such as spectrograms and other acoustic features) rather than raw audio in the public release, along with detailed participant metadata: clinical diagnoses (including voice, neurological, mood, respiratory disorders), validated questionnaires, and demographics. It is collected from multiple sites across North America, with version 3.0 containing ~61,937 voice-derived recordings from 833 adult participants. The pediatric dataset v1.0 is now available containing data from 300 participants. Access to the original raw audio is restricted to controlled access due to privacy concerns. Access can be requested by emailing [email protected]
+B2AI-Voice v3 adult dataset and v1 pediatric dataset now available (with voice upon request)
+Access the Flagship B2Ai-Voice Dataset
+Register for Adult Dataset Access via PhysioNet
+Register for Pediatric Dataset Access via PhysioNet
+How to get data access
+Featurized dataset
+Featurized Adult and Pediatric Datasets are Available under Registered Access
+The adult and pediatric datasets are available through separate PhysioNet links under registered access. Credentialed users must be approved and sign DUA. Visit PhysioNet to begin process.
+Adult Dataset
+Pediatric Dataset
+Datasets with Audio Data
+Available under controlled access
+Users interested in access the audio data from any Bridge2AI-Voice dataset can request access by emailing [email protected]Raw audio data is disseminated through controlled access only to protect participants’ privacy.
+Documentation
+Training opportunities for using the dataset: https://www.b2aivoicescholars.org/.
+Overview
+Collection Methods
+Data Governance
+Study Metadata
+Healthsheet
+Data Pre-Processing
+AI-Readiness
+Bridge2AI-Voice is a Precision Public Health grand challenge project funded by the NIH Common Fund Bridge2AI Program. Bridge2AI-Voice seeks to create a flagship, standardized, and ethically sourced dataset of 10,000 voices linked to health information to fuel research and discovery in voice biomarkers.Our group aims to promote integration of voice as a biomarker of health in clinical care. To do so, we will generate a large multi-institutional, ethically sourced, and diverse voice dataset linked to multimodal health biomarkers to fuel voice AI research. Data collection is performed via a novel app (The Bridge2AI-Voice App) available as a smartphone application linked to electronic health records (EHR). The app collects breathing sounds and voice, speech, and linguistic tasks, along with a considerable amount of health information through surveys and validated questionnaires. Other multimodal data collected includes imaging, genomics, and respiratory function tests, among others. The consortium is also addressing the growing ethical, legal, and social challenges surrounding voice AI, including risks of voice re-identification, vulnerabilities like voice AI hacking, concerns around voice data sharing and privacy, and the influence of gender and racial diversity on the development and application of these technologies.Our best ethical practices, developed through ethical inquiry, have guided the development of the voice collection protocol as well as data dissemination practices.As voice is increasingly recognized as a biomarker of health by the tech world and voice AI is gaining attention from multinationals such as Google, Amazon, Mozilla, and Apple, many important issues related to patient privacy protection, ethical and fair representation of populations, and clinical accuracy are arising. As a multidisciplinary group of academic experts, we aim to influence and guide the world of voice AI by ensuring patient protection through ethical and fairness principles and by creating safe, innovative infrastructures to disseminate ethically sourced data for future generations of voice AI researchers.Based on the existing literature and ongoing research in different fields of voice research, our group has identified 5 disease cohort categories for which voice changes have been associated with specific diseases with well-recognized unmet needs and for which our data acquisition efforts are focused:Voice DisordersNeurological and Neurodegenerative DisordersMood and Psychiatric DisordersRespiratory disordersPediatric Voice and Speech DisordersPlease Note: The public data releases do not contain an equal distribution of these categories of diseases. Further releases will contain additional data.Data AccessAdult DatasetA derived dataset containing spectrograms and combined phenotypic data is available on PhysioNet under a permissioned access mechanism. Registration on PhysioNet and signing of a data use agreement will enable access. Raw audio is available under a controlled access mechanism. The latest version of the dataset is available at the following URL:
+Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information
+Pediatric DatasetThe Bridge2AI Voice consortium has also prepared a pediatric dataset. To access the Bridge2AI Voice pediatric dataset please click here
+Bridge2AI-Voice Pediatric Dataset
+Older VersionsAn earlier version of the feature-only dataset is available on HealthDataNexus, which provides cloud compute alongside the dataset rather than allowing data downloads.
+Request Data Access to v1.0 via Health Data Nexus
+Data is collected across five disease categories. The initial data release contains data collected from four of the five categories.Participants are recruited across different academic institutions from “high volume expert clinics” based on diagnosis and inclusion/exclusion criteria outlined below (Table 1).Pediatric Participants: Pediatric participants are recruited strictly from the Hospital for Sick Children (SickKids) and are grouped by age.High Volume Expert Clinics: Outpatient clinics within hospital systems or academic institutions that have developed an expertise in a specific disease area and see more than 50 patients per month from the same disease category. Ex: Asthma/COPD pulmonary specialty clinic.Data is collected in the clinic with the assistance of a trained research assistant. Future data collection will also occur remotely; however, remote data collection did not occur for the initial dataset release. Voice samples are collected prospectively using a custom software application (the Bridge2AI-Voice App) with the Bridge2AI-Voice protocols.For Pediatrics, all data is collected using reproschema-ui with the Bridge2AI-Voice pediatric protocol.Clinical validation: Clinical validation is performed by a qualified physician or practitioner based on established gold standards for diagnosis (Table 1).Acoustic Tasks: Voice, breathing, cough, and speech data are recorded with the app for adults and with reproschema-ui for pediatrics. A total of 22 acoustic tasks are recorded through the app (Table 2).Demographic surveys and confounders: Detailed demographic data and surveys about confounding factors such as smoking and drinking history are collected through the smartphone application.Validated Questionnaires: The Bridge2AI-Voice protocols contain validated tools and questionnaires for each disease category within the app for data collection (Table 3).Other Multimodal Data: The rest of the multimodal data, including imaging, genomic data (for the neuro cohort), laryngoscopy imaging, and other EHR data, is extracted from different sites independently and will be uploaded through the REDCap database. Please note that no external data is released in this v3.0.0 release.Please see the following publication for a description of protocol development:Bensoussan, Yael, et al. “Developing Multi-Disorder Voice Protocols: A team science approach involving clinical expertise, bioethics, standards, and DEI.” Proc. Interspeech 2024. 2024. https://www.isca-archive.org/interspeech_2024/bensoussan24_interspeech.html.The supporting REDCap data dictionary, metadata, and instrument PDFs are available at https://github.com/eipm/bridge2ai-redcap.When using the REDCap data dictionary and metadata, please cite:Bensoussan, Y., Ghosh, S. S., Rameau, A., Boyer, M., Bahr, R., Watts, S., Rudzicz, F., Bolser, D., Lerner-Ellis, J., Awan, S., Powell, M. E., Belisle-Pipon, J.-C., Ravitsky, V., Johnson, A., Zisimopoulos, P., Tang, J., Sigaras, A., Elemento, O., Dorr, D., … Bridge2AI-Voice. (2024). eipm/bridge2ai-redcap. Zenodo. https://zenodo.org/doi/10.5281/zenodo.12760724.Protocols can be found in the Bridge2AI-Voice documentation of the dataset for each cohort in the following:Voice DisordersRespiratoryMood/PsychiatricNeurologicalControlsPediatricsPeds 10+Peds 6-10Peds 4-6Peds 2-4
+Table 1 – Disease cohort inclusion/exclusion criteria and validation methods
+Disease Cohort
+Diagnosis
+Inclusion Criteria
+Exclusion Criteria
+Gold Standard Validation Methods
+Voice Disorders Cohort
+Laryngeal Cancer
+Active laryngeal cancer T1-T4 Biopsy proven (if no biopsy at time of collection and suspicion is very high, provider will have to go back to confirm in the clinical validation section after the biopsy is obtained)
+Previously treated laryngeal cancer with no evidence of disease on scope
+Laryngoscopy Images Stroboscopy Videos
+Voice Disorders Cohort
+Laryngitis
+Acute laryngitis Chronic laryngitis Bacterial laryngitis Fungal laryngitis Autoimmune laryngitis *need to have evidence of information of the vocal cords on laryngoscopy as well as dysphonia
+Subjective laryngitis without evidence on scope
+Laryngoscopy Images Stroboscopy Videos
+Voice Disorders Cohort
+Pre-cancerous lesions
+Keratosis Leukoplakia (note if with or without dysplasia)
+Low grade –
+Laryngoscopy Images Stroboscopy Videos
+Voice Disorders Cohort
+Benign Lesions of the vocal cord (nodule, polyp, cyst)
+Vocal fold nodules Vocal fold polyp Vocal fold cyst Reinke’s Edema Vocal fold ulcers Recurrent respiratory Papilloma Fibrous mass Rheumatoid nodules Recurrent Laryngeal Papilloma (RLP)
+Patient has received surgery for any condition and does not have evidence of pathology when scoped Immediate post op prior less than 30 days from laryngeal surgery
+Laryngoscopy Images Stroboscopy Videos
+Voice Disorders Cohort
+Muscle Tension Dysphonia (MTD)
+Laryngology & SLP diagnosis
+Laryngoscopy Images Stroboscopy Videos
+Voice Disorders Cohort
+Spasmodic Dysphonia/Laryngeal Tremor
+Adductor laryngeal dystonia (ADLD) previously called spasmodic dysphonia Abductor laryngeal dystonia (ABLD) Vocal tremor Mixed laryngeal dystonia Singer’s laryngeal dystonia (SLD) Adductor laryngeal spasms during inspiration (ARLD)
+Laryngoscopy Images Stroboscopy Videos
+Voice Disorders Cohort
+Unilateral Vocal Fold Paralysis
+Laryngology & SLP diagnosis
+Vocal fold paresis Bilateral VF paralysis Immediately or less than 2 weeks post injection Immediately post-op thyroplasty (less than a month)
+Laryngoscopy Images Stroboscopy Videos CT scan Spirometry
+Voice Disorders Cohort
+Glottic insufficiency/presbyphonia
+Patients with glottic gap on STROBOSCOPY due to vocal fold atrophy related to aging, rapid weight loss, severe illness, or other causes
+Patients with glottic gap 2nd to unilateral paresis or paralysis
+Respiratory Disorders Cohort
+Airway Stenosis: Bilateral Vocal fold paralysis, Supraglottic stenosis, Glottic stenosis, Posterior glottic stenosis, subglottic stenosis, tracheal stenosis, multi-level upper airway stenosis
+Nasopharyngeal stenosis
+Spirometry and flow volume loops CT scan of neck/chest
+Respiratory Disorders Cohort
+Chronic Cough
+bothersome cough > 8 weeks, negative for exclusion criteria
+Cough less than 8 weeks, current smoking, lung/laryngeal cancer, COPD, asthma, GERD, bronchiectasis, TB infection, pneumonia, pulmonary granuloma, idiopathic pulmonary fibrosis, ACE inhibitor use, eosinophilic bronchitis, tracheomalacia, upper airway cough syndrome, laryngitis, chest Xray/CT indicative of airway foreign body
+Spirometry and flow volume loops
+Neurological and Neurodegenerative Disorders
+Mild Cognitive Impairment (MCI)
+clinical diagnosis of MCI/ cognitive decline/short term memory loss/cognitively impaired Being over the age of 44 and under 85 Able to read, speak the English language
+Not having a clinical diagnosis Being less than the age of 44 and above 85 Unable to speak and read the English language Having had a surgical intervention significantly altering the symptoms of the disease studied
+CT Brain MRI Brain Whole Genome Sequencing
+Neurological and Neurodegenerative Disorders
+Alzheimer’s disease (AD)
+clinical diagnosis of AD Being over the age of 44 and under 85 Able to read, speak the English language
+Not having a clinical diagnosis Being less than the age of 44 and above 85 Unable to speak and read the English language Having had a surgical intervention significantly altering the symptoms of the disease studied
+CT Brain MRI Brain Serum Bloodmarker Ptau proteins Whole Genome Sequencing
+Neurological and Neurodegenerative Disorders
+Other types of Dementia
+clinical diagnosis of frontotemporal dementia/ Lewy body dementia/ vascular dementia/ mixed dementia/ alcohol induced dementia (to make a note in diagnosis form) Being over the age of 44 and under 85 Able to read, speak the English language
+Not having a clinical diagnosis Being less than the age of 44 and above 85 Unable to speak and read the English language Having had a surgical intervention significantly altering the symptoms of the disease studied
+CT Brain MRI Brain Whole Genome Sequencing
+Neurological and Neurodegenerative Disorders
+Amyotrophic Lateral Sclerosis (ALS)
+clinical diagnosis of sporadic ALS/ Familial ALS/ Spinal or limb-onset ALS/ Bulbar-onset ALS Being over the age of 44 and under 85 Able to read, speak the English language
+Not having a clinical diagnosis Being less than the age of 44 and above 85 Unable to speak and read the English language Having had a surgical intervention significantly altering the symptoms of the disease studied
+CT Brain MRI Brain Whole Genome Sequencing
+Neurological and Neurodegenerative Disorders
+Parkinson’s Disease (PD)
+clinical diagnosis of idiopathic PD/multiple system atrophy/progressive Supranuclear palsy/ Corticobasal degeneration/dementia with Lewy bodies/other or atypical parkinsonism Parkinson’s patients enrolled in Deep Brain Stimulation studies (to make a note of this in diagnosis form)
+Not having a clinical diagnosis Being less than the age of 44 and above 85 Unable to speak and read the English language Having had a surgical intervention significantly altering the symptoms of the disease studied
+CT Brain MRI Brain Whole Genome Sequencing
+Mood and Psychiatric Disorders
+Alcohol or Substance Use Disorder
+Co-morbid with depression, bipolar disorder and anxiety disorder.
+Not applicable
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Anxiety Disorder
+Existing clinical diagnosis of anxiety and/or currently experiencing an anxious episode.
+Not having a clinical diagnosis
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Attention-Deficit/Hyperactivity Disorder (ADHD)
+Co-morbid with depression, bipolar disorder and anxiety disorder.
+Q-Mood-ADHD Adult questionnaire is part of part B mood cohort
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Autism Spectrum Disorder (ASD)
+Co-morbid with depression, bipolar disorder and anxiety disorder.
+Not applicable
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Bipolar Disorder
+Existing clinical diagnosis of bipolar I or II and/or currently experiencing a manic/depressive episode.
+Not having a clinical diagnosis
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Borderline Personality Disorder
+Co-morbid with depression, bipolar disorder and anxiety disorder.
+Not applicable
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Depression or Major Depressive Disorder
+Existing clinical diagnosis of depression and/or currently experiencing a depressive episode.
+Not having a clinical diagnosis
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Eating Disorder (ED)
+Co-morbid with depression, bipolar disorder and anxiety disorder.
+Not applicable
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Insomnia/Sleep Disorder
+Co-morbid with depression, bipolar disorder and anxiety disorder.
+Not applicable
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Obsessive-Compulsive Disorder (OCD)
+Co-morbid with depression, bipolar disorder and anxiety disorder.
+Not applicable
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Panic Disorder
+Co-morbid with depression, bipolar disorder and anxiety disorder.
+Not applicable
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Post-Traumatic Stress Disorder (PTSD)
+Co-morbid with depression, bipolar disorder and anxiety disorder.
+Q-Mood-PTSD Adult questionnaire is part of part B of mood cohort
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Schizophrenia
+Co-morbid with depression, bipolar disorder and anxiety disorder.
+Not applicable
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Social Anxiety Disorder
+Co-morbid with depression, bipolar disorder and anxiety disorder.
+Q-Mood-GAD7 questionnaire is part of part B of mood cohort
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Mood and Psychiatric Disorders
+Other Psychiatric Disorder
+Not applicable
+Not applicable
+Electronic health summary; clinical diagnosis from psychiatrist; medication history
+Table 2 – Acoustic Tasks in Protocol
+Name
+Task
+Description
+Part
+Non Voice/Non Speech
+Respiration Part A [Example]
+Breathing sounds
+A
+Non Voice/Non Speech
+Cough part A [Example]
+Voluntary Cough
+A
+Non Voice/Non Speech
+Breath Sounds [Example]
+Breathing sounds
+Resp
+Non Voice/Non Speech
+Voluntary Cough [Example]
+Voluntary Cough
+Resp
+Voice/Non Speech
+Prolonged Vowel [Example]
+vowel /e/
+A
+Voice/Non Speech
+Maximum Phonation Time [Example]
+vowel /e/
+A
+Voice/Non Speech
+Glides [Example]
+Lowest to Highest /e/
+A
+Voice/Non Speech
+Loudness [Example]
+/Hey/
+A
+Voice/Non Speech
+Diadochokinesis [Example]
+/pa/ta/ka/ /buttercup/
+A
+Speech
+Rainbow Passage [Example]
+validated passage
+A
+Speech
+Caterpillar Passage [Example]
+validated passage
+Voice
+Speech
+Cape-V Sentences [Example]
+validated sentences
+Voice
+Speech
+Free Speech Part A [Example]
+open questions
+A
+Speech
+Picture Description [Example]
+describing a picture
+A
+Speech
+Free Speech Voice [Example]
+open questions
+Voice
+Speech
+Story Recall [Example]
+speech after reading a story
+A
+Speech
+Animal Fluency [Example]
+name animals
+Mood
+Speech
+Open Response Questions [Example]
+open questions
+Mood
+Speech
+Word-Color Stroop [Example]
+color descriptions
+Neuro
+Speech
+Productive Vocabulary [Example]
+describing images
+Neuro
+Speech
+Random Item generation [Example]
+describing images
+Neuro
+Speech
+Cinderella Story [Example]
+story
+Neuro
+Speech
+ABC’s
+Recalling alphabet
+Peds
+Speech
+Ready For School
+Recalling a typical day preparing for School
+Peds
+Speech
+Favorite Show
+Recalling favorite shows
+Peds
+Speech
+Favorite Food
+Describing their favorite food
+Peds
+Speech
+Outside of School
+After school activities description
+Peds
+Speech
+Months
+Listing the months
+Peds
+Speech
+Counting
+Counting
+Peds
+Speech
+Naming Animals
+Listing animals
+Peds
+Speech
+Naming Food
+Listing foods
+Peds
+Speech
+Identifying Pictures
+Picture identification
+Peds
+Speech
+Picture Description (Pediatrics)
+describing a picture
+Peds
+Voice/Non Speech
+Long Sounds
+Sustained /ee/ and /ah/ sounds
+Peds
+Voice/Non Speech
+Noisy Sounds
+/jj/ /ah/ /ee/ /oo/ /sh/ /ss/ /muh/ /nuh/ /zz/ /hh/
+Peds
+Speech
+Caterpillar Passage (Pediatrics)
+validated passage
+Peds
+Speech
+Repeat Words
+Word repetition
+Peds
+Speech
+Role naming
+recalling days, months, and counting from 60 – 70
+Peds
+Speech
+Repeat Sentences
+Sentence Recall
+Peds
+Voice/Non Speech
+Silly Sounds
+/PUH/ /TUH/ /KUH/ /PUH TUH KUH/
+Peds
+Table 3 – Validated Questionnaires integrated into App
+Validated Questionnaire
+Voice Disorders
+Respiratory
+Mood/Psychiatric
+Neurological
+Controls
+Pediatrics
+Example
+Voice Handicap Index-10 (VHI-10)
+X
+X
+X
+X
+X
+PDF
+Patient Health Questionnaire (PHQ-9)
+X
+X
+X
+X
+X
+PDF
+General Anxiety Disorder (GAD-7)
+X
+X
+X
+X
+X
+PDF
+Positive and Negative Affect Schedule (PANAS)
+X
+X
+PDF
+Custom Affect scale
+X
+X
+PDF
+Post-Traumatic Stress Disorder Test (PTSD) Adult
+X
+X
+PDF
+Attention Deficit and Hyperactivity Disorder Questionnaire (ADHD-Adult)
+X
+X
+PDF
+The Diagnostic and Statistical Manual of Mental Disorders (DSM-5 Adult)
+X
+X
+PDF
+Dyspnea Index (DI)
+X
+X
+PDF
+Leicester Cough Questionnaire (LCQ)
+X
+X
+PDF
+Winograd Questionnaire
+X
+X
+PDF
+Montreal Cognitive Assessment (MOCA)*
+X
+X
+PDF
+Children’s Voice Handicap Index-10 (C-VHI-10)
+X
+PDF
+Pediatric Voice Outcomes Survey (PVOS)
+X
+PDF
+Pediatric Voice-Related Quality-of-Life (PVRQOL)
+X
+PDF
+Patient Health Questionnaire modified for Adolescents (PHQ-A)
+X
+PDF
+Accessing the DatasetThe feature-only and raw audio datasets are available under distinct agreements appropriate for the sensitivity of their respective content.Registered Access (features-only data):Register on PhysioNet and confirm your identity (Registered Access License).Sign the Bridge2AI-Voice Registered Access Agreement, which outlines the terms and conditions for data use.Controlled Access (raw audio data):Complete the Data Access Request Form (DARF)Complete the Data Use Agreement (DUA)Submit your application to the Data Access Compliance Office for reviewUpon approval, ensure a Data Use and Transfer Agreement (DTUA) is signed by an authorized official at your institution.Memorandum: Ethical Justification for Controlled Access to Raw Voice Data SamplesClick the button below to download a copy of the memorandum explaining the reasoning behind the governance structure.
+Download - Memorandum PDF
+OversightHas the clinical study been reviewed and approved by at least one human subjects’ protection review board?Submitted and approved by the USF Single IRB and subsite IRBs through the Single IRB process.Is this clinical study for a drug product?NoIs this clinical study for a medical device?NoWas a data monitoring committee appointed for this study?NoDe-Identification LevelsLevel of de-identification for this dataset: Identifiable information (under HIPAA and the Common Rule), as well as data considered sensitive, have been removed from this dataset.Does this dataset remove direct identifiers?YesDoes this dataset apply the HIPAA de-identification rules?YesDoes this dataset rebase and/or replace dates by integers?YesDoes this dataset remove or generalize geographic information?YesDoes this dataset remove narrative text fields?YesDoes this dataset achieve K-anonymization (k>=2)?NoDe-identification DetailsAll direct identifiers were removed, as these would reveal the identity of the research participant. These include name, civic address, and social security numbers. Indirect identifiers were removed where these created a significant risk of participant re-identification, for example through their combination with other public data available on social media, in government registries, or elsewhere. These include select geographic or demographic identifiers, as well as some information about household composition or cultural identity. Non-identifying elements of data that revealed highly sensitive information, such as information about household income, mental health status, traumatic life experiences, and the like, were also removed. All raw voice data was removed, as this data has the potential to cause individual re-identification or to be used for illicit or unauthorized purposes.ConsentConsent TypeDoes this dataset allow only the non-commercial use of the data?NoDoes this dataset allow only the use of the data in a specific geographic location?NoDoes this dataset allow only the use of the data for a specific type of research?NoDoes this dataset allow only the use of the data for genetic research?NoDoes this dataset allow only the use of the data for research that does not involve the development of methods or algorithms?NoConsent DetailsResearch data that does not contain your direct identifiers will be shared with external researchers for future research through a secure database. Data that poses a low risk of causing individual re-identification will be shared in registered access with the general public. Data that would pose a heightened risk of re-identification if shared in full open access will be shared through a controlled access mechanism with authorized researchers.
+Official Title: Bridge2AI-VoiceDesign: Study Type – ObservationalEnrollment Count (Anticipated by 2027): 10,000Design Observation ModelCohortDesign Time PerspectiveCross-sectionalBiospecimens: Respiratory, Voice and speech samplesBiospecimens Description:The Bridge2AI-Voice dataset contains samples from conventional acoustic tasks including respiratory sounds, cough sounds, and free speech prompts, capturing voice, speech and language data relating to health. Participants who consent are asked to perform speaking tasks and complete self-reported demographic and medical history questionnaires, as well as disease-specific validated questionnaires. Participants who consent also permit investigators to access medical information through EHR platforms in order to perform gold standard validation of diagnoses and symptoms.EligibilitySexAllGender BasedNoMinimum Age18 years (this will change when pediatric cohort is introduced, and metadata will be updated to reflect new eligibility criteria)Maximum Age120 yearsHealthy VolunteersYesInclusion CriteriaSee Collection Methods – Table 1Exclusion CriteriaDoes not read or speak English (Please note, the Spanish protocols and Data collection will be included in future releases)See Collection Methods – Table 1Study PopulationThe current v.2.0.0 dataset contains only adult populations. As the study progresses, a pediatric cohort will be introduced. Inclusion/exclusion criteria and additional information regarding the dataset and study metadata will be updated at that time. In addition, the current dataset contains fluent English speakers but will expand to include data collection in Spanish.Sampling MethodNon-Probability SampleIdentification InformationOrganization Study IDOT2OD032720Organization Study TypeU.S. National Institutes of Health (NIH) Grant/Contract Award NumberSecondary ID:IDLinkOT2OD032720https://reporter.nih.gov/search/4XtcXzBGEkWQlwG5v8odBA/project-details/10858564CollaboratorsUniversity of South FloridaWeill Cornell MedicineOregon Health & Science UniversityMassachusetts Institute of TechnologyUniversity of TorontoMount Sinai HospitalHospital for Sick ChildrenSimon Fraser UniversityThe Hastings CenterWashington University in St. LouisUniversity of FloridaVanderbilt University Medical CenterURL How to CiteIf you use this dataset for any purpose, please cite the resources specified in the Bridge2AI-Voice documentation for version 2.0.0 of the dataset at (URL)Bridge2AI-Voice Consortium (2024). Flagship Voice Dataset from the Bridge2AI-Voice Project (2.0.0) [Dataset].Contact For any questions, suggestions, or feedback related to this dataset, please email [email protected]AcknowledgementBridge2AI-Voice is supported by NIH grant OT2OD032720 through the NIH Bridge2AI Common Fund program.
+General InformationThe Bridge2AI Voice dataset aims to enable the development, benchmarking, or validation of clinically applicable machine-learning models for diagnosing a wide range of health conditions using voice data, including vocal pathologies, neurological, psychiatric, respiratory, and pediatric voice disorders. This dataset contains voice recordings and key metadata, and it is structured to be Findable, Accessible, Interoperable, and Reusable (FAIR).Has the dataset been audited before? If yes, by whom and what are the results?The dataset has been audited internally for missingness and consistency by the data release team. A missingness table is included with the dataset. Certain aspects of the data (e.g., transcription) were generated using off-the-shelf models that have not been audited for correctness.Dataset VersioningDoes the dataset get released as static versions or is it dynamically updated?StaticDoes the current version/subversion of the dataset come with predefined task(s), labels, and recommended data splits (e.g., for training, development/validation, testing)? If yes, please provide a high-level description of the introduced tasks, data splits, and labeling, and explain the rationale behind them. Please provide the related links and references. If not, is there any resource (website, portal, etc.) to keep track of all defined tasks and/or associated label definitions? (please note that more detailed questions w.r.t labeling is provided in further sections)Yes, the current version of the dataset comes with predefined tasks and labeling. The tasks are primarily designed for training machine-learning models for disease detection and classification using voice data. Labels include diagnostic categories such as vocal pathologies, neurological disorders, psychiatric conditions, and respiratory disorders. However, there are no predefined recommended data splits for training, validation, or testing. Researchers are encouraged to create their own data splits based on their specific requirements. More details regarding task definitions and labeling can be found in the dataset.MotivationFor what purpose was the dataset created? Was there a specific task in mind? Was there a specific gap that needed to be filled? Please provide a description.The Bridge2AI Voice dataset was created to address a gap in the availability of large-scale, diverse, and well-documented voice data for use in clinical machine-learning applications. Previous studies on machine learning-based voice diagnosis produced promising results, but their sample sizes were too small, or they lacked the key metadata needed for training robust, clinically useful models. The dataset aims to bridge this gap by providing an ethically sourced, large, and diverse dataset to develop, benchmark, or validate clinically applicable AI/ML models. The goal is to facilitate the use of voice as a non-invasive, cost-effective biomarker for the screening, diagnosis, and monitoring of a wide range of health conditions.What are the applications that the dataset is meant to address? (e.g., administrative applications, software applications, research)The Bridge2AI Voice dataset is primarily intended for research applications, specifically in the development of AI and machine-learning models for healthcare. It aims to support clinical research in disease screening, diagnosis, and monitoring through voice biomarkers. The dataset can be used for AI model pretraining, fine-tuning, benchmarking, or validation.Are there any types of usage or applications that are discouraged from using this dataset? If so, why?Yes, there are restrictions on the use of this dataset, as detailed in the Registered Data Access Agreement. These restrictions reflect the B2AI-Voice Consortium’s commitment to advancing ethical and trustworthy research practices that respect and protect the rights and interests of research participants. Accordingly, the dataset is intended solely for commercial and non-commercial research purposes by Authorized Researchers. Specifically, the dataset is not to be used a) to attempt to re-identify research participants, nor any actions that could reasonably lead to re-identification; and b) for any purpose that could foreseeably cause harm or stigmatization to research participants, their families, communities, or specific populations. Lastly, intellectual property protections, database rights, or related rights may not be used in a manner that restricts or limits access to any part of the dataset or to any conclusions derived from it. This restriction ensures that future use of the dataset remains unrestricted, in alignment with the Open Science principles upheld by the B2AI-Voice Consortium. Specifically, the dataset should not be used for non-research applications, such as hiring decisions, insurance premium adjustments, or any form of surveillance that could lead to discrimination or harm. These limitations are intended to prevent unethical or biased outcomes that could negatively impact individuals based on their health conditions or voice characteristics.Who created this dataset (e.g., which team, research group), and on behalf of which entity (e.g., company, institution, organization)?Voice as a Biomarker of Health is being co-led by Dr. Yaël Bensoussan, MD, MSc, from USF Health Morsani College of Medicine and Olivier Elemento, PhD, from Weill Cornell Medicine, who are co-principal investigators for the project, which is funded by the NIH Common Fund within the Bridge2AI Program. The project also includes lead investigators from 10 other universities in North America; Alexandros Sigaras, MSc and Anaïs Rameau, MD, MPhil (Weill Cornell Medicine), Maria Powell, CCC-SLP, PhD (Vanderbilt University Medical Center), Ruth Bahr, CCC-SLP, PhD (USF Health Morsani College of Medicine), Jennifer Sui, MD (Hospital for Sick Children), Philip Payne, PhD (Washington University in St. Louis), David Dorr, MD (Oregon Health & Science University), Jean-Christophe Bélisle-Pipon, PhD (Simon Fraser University), Vardit Ravitsky, PhD (The Hastings Center), Satrajit Ghosh, PhD (Massachusetts Institute of Technology), Frank Rudzizc, PhD (University of Toronto), Jordan Lerner-Ellis, PhD (Sinai Health) and Don Bolser, PhD (University of Florida). There are over 50 other investigators, clinicians, scholars, and trainees who have contributed to the development of this dataset. Please see full list of collaborators here: The Bridge2AI-Voice Consortium (2024)Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number. If the funding institution differs from the research organization creating and managing the dataset, please state how.The NIH Common Fund3TF-OT2ActfOD032720Projectf01S1What is the distribution of backgrounds and experience/expertise of the dataset curators/generators?The curators and generators of the Bridge2AI Voice dataset come from a diverse range of backgrounds and areas of expertise, reflecting the interdisciplinary nature of the project. The team includes:Clinicians and Healthcare Professionals: Practicing doctors and healthcare workers involved in the direct collection of clinical data and providing practical insights into the medical relevance of the dataset.Biomedical Researchers: Experts in clinical medicine, neurology, and psychiatry, contributing deep knowledge of the medical conditions being studied.Machine Learning and AI Specialists: Researchers and engineers with expertise in machine learning, artificial intelligence, and data science, focusing on developing models and algorithms for analyzing voice data.Data Scientists and Statisticians: Professionals skilled in data curation, preprocessing, and statistical analysis, ensuring the dataset is robust and suitable for machine learning applications.Social Scientists and Ethicists: Experts in ethics, sociology, and human subjects research, ensuring the dataset is ethically sourced and meets standards for privacy and consent.Engineers and Technologists: Individuals with experience in software development, systems engineering, and data infrastructure, contributing to the technical aspects of data collection, storage, and dissemination.Data CompositionWhat do the instances that comprise the dataset represent (e.g., documents, images, people, countries)? Are there multiple types of instances? Please provide a description.Each instance represents a person.How many instances are there in total (of each type, if appropriate) (breakdown based on schema, provide data stats)?There are currently around 833 instances.How many patients/subjects does this dataset represent? Answer this for both the preliminary dataset and the current version of the dataset.833Does the dataset contain all possible instances, or is it a sample (not necessarily random) of instances from a larger set? If the dataset is a sample, then what is the larger set? Is the sample representative of the larger set (e.g., geographic coverage)? If so, please describe how this representativeness was validated/verified. If it is not representative of the larger set, please describe why not (e.g., to cover a more diverse range of instances, because instances were withheld or unavailable). Answer this question for the preliminary version and the current version of the dataset in question.It is a sample of a larger, ongoing collection. The data is not representative because it was collected at a limited number of geographic locations. We hope to make it more representative by shifting to remote collection and designing our recruiting approach in a way that controls for more variables.What data modality does each patient data consist of? If the data is hierarchical, provide the modality details for all levels (e.g., text, image, physiological signal). Break down all levels and specify the modalities and devices.Audio recordings, questionnaire responses.What data does each instance consist of? “Raw” data (e.g., unprocessed text or images) or features? In either case, please provide a description.Raw audio and questionnaire response data, as well as extracted audio features.Is any information missing from individual instances? If so, please provide a description, explaining why this information is missing (e.g., because it was unavailable).Yes, some questions are optional. There may be data collection irregularities that caused some information to be missing from individual instances. Each individual answered a common set of questions and then responded to additional questions relevant to their primary diagnostic category.Are relationships between individual instances made explicit? (e.g., They are all part of the same clinical trial, or a patient has multiple hospital visits, and each visit is one instance)? If so, please describe how these relationships are made explicit.No, they are unrelated.Are there any errors, sources of noise, or redundancies in the dataset? If so, please provide a description. (e.g., losing data due to battery failure, or in survey data subjects skip the question, radiological sources of noise).Yes, different sites have different collection configurations. The collection protocol changed over the course of the study.Is the dataset self-contained, or does it link to or otherwise rely on external resources (e.g., websites, other datasets)? If it links to or relies on external resources:a. Are there guarantees that they will exist, and remain constant, over time?NAb. Are there official archival versions of the complete dataset (i.e., including the external resources as they existed at the time the dataset was created)?NAc. Are there any restrictions (e.g., licenses, fees) associated with any of the external resources that might apply to a future user? Please provide descriptions of all external resources and any restrictions associated with them, as well as links or other access points, as appropriate.It is self-contained.Does the dataset contain data that might be considered confidential (e.g., data that is protected by legal privilege or by doctor-patient confidentiality, data that includes the content of individuals’ non-public communications that is confidential)? If so, please provide a description.NoDoes the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise pose any safety risk (such as psychological safety and anxiety)? If so, please describe why.This dataset includes the transcription of free speech tasks. While the inclusion of information of that type is unlikely, it cannot be completely avoided, as research participants are responsible for their choice of language.If the dataset has been de-identified, were any measures taken to avoid the re-identification of individuals? Examples of such measures: removing patients with rare pathologies or shifting time stamps.This dataset has been de-identified through removal of all audio data and certain sensitive fields identified by a team of ethicists.Does the dataset contain data that might be considered sensitive in any way (e.g., data that reveals racial or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)? If so, please provide a description.Yes:racial or ethnic origins: The dataset includes race information.sexual orientations: The dataset includes sexual orientation information.financial or health data: The dataset includes socioeconomic and health information.Devices and Contextual Attributes in Data CollectionFor data that requires a device or equipment for collection or the context of the experiment, answer the following additional questions or provide relevant information based on the device or context that is used (for example)Data is collected on iPads (9th or 10th generation), iPad Air (5th generation) using an Avid AE-36 microphone and an Apple dongle to connect it to the iPad.Challenges in Testing and Confounding FactorsWhich factors in the data might limit the generalization of potentially derived models? Is this information available as auxiliary labels for challenge tests? For instance:a. Number and diversity of devices included in the dataset.Distinct iPad devices were used at each site.b. Data recording specificities, e.g., the view for a chest x-ray image.The data were recorded with a head-mounted headset with a microphone that could be at slightly different distances. The clinical diagnosis, depending on the disorder, was performed by one clinician or based on an EHR record or prescription.c. Number and diversity of recording sites included in the dataset.There are five recording sites included in the dataset.d. Distribution shifts over time.Changes in diagnostic criteria or practices could be a source of distribution shift.What confounding factors might be present in the data?Noise artifacts, variations in diagnostic practices, inaccurate questionnaire responses, underreporting.What confounding factors might be present in the data?Noise artifacts, variations in diagnostic practices, inaccurate questionnaire responses, underreporting.a. Interactions between demographic or historically marginalized groups and data recordings, e.g., were women patients recorded in one site, and men in another?Groups that have less trust in the medical system, AI, or are less proximal to the collection sites would have been less likely to be recruited.b. Interactions between the labels and data recordings, e.g. were healthy patients recorded on one device and diseased patients on another?Participants were screened for different disorders based on site, so they also had their data collected with different devices.Collection and use of demographic informationDoes the dataset identify any demographic sub-populations (e.g., by age, gender, sex, ethnicity)?Age, Gender, Sex, Ethnicity, Socioeconomic statusPre-processing / de-identificationWas there any pre-processing for the de-identification of the patients? Provide the answer for the preliminary and the current version of the dataset.Yes, the data were extracted from the raw audio to limit re-identification and only the extracted features are being released with the dataset.Was there any pre-processing for cleaning the data? Provide the answer for the preliminary and the current version of the dataset.NoWas the “raw” data (post de-identification) saved in addition to the preprocessed/cleaned data (e.g., to support unanticipated future uses)? If so, please provide a link or other access point to the “raw” data.Yes, it is saved and is not accessible publicly.Were instances excluded from the dataset at the time of preprocessing? If so, why? For example, instances related to patients under 18 might be discarded.NoLabeling and subjectivity of labelingIs there an explicit label or target associated with each data instance? Please respond for both the preliminary dataset and the current version.a. If yes:What are the labels provided?Who performed the labeling? For example, was the labeling done by a clinician, ML researcher, university or hospital?Diagnostic labels are the result of a clinical assessment of the participant. At each site, a local clinician provided the diagnosis based on a clinical interview and appropriate work-up. For the psychiatric disorders cohort, this assessment was determined by using the participants EHR record or using an active prescription, which was done outside of data collection by an appropriately licensed clinician.b. What labeling strategy was used?Gold standard label available in the data (diagnosed by a clinician).c. Human-labeled data:How many labelers were considered?Single labeler per dataWhat is the demographic of the labelers? (countries of residence, of origin, number of years of experience, age, gender, race, ethnicity, etc.)Typically, the clinician at site of data collection, or external to (for prior diagnostic assessment)What guidelines did they follow?Per Bridge2AI Protocols and ICD-10 codes.How many labelers provide a label per instance?1What is the human-level performance in the applications that the dataset is supposed to address?It varies widely.Is the software used to preprocess/clean/label the instances available? If so, please provide a link or other access point.Yes. https://github.com/sensein/b2aiprep, https://github.com/sensein/senselabIs there any guideline that the future researchers are recommended to follow when creating new labels/defining new tasks?The process for any new labels should be described alongside any release of a model or publication. This process should include exact variables used for this determination.Collection ProcessWere any REB/IRB approval (e.g., by an institutional review board or research ethics board) received? If so, please provide a description of these review processes, including the outcomes, as well as a link or other access point to any supporting documentation.YesHow was the data associated with each instance acquired? Was the data directly observable (e.g., medical images, labs, or vitals), reported by subjects (e.g., survey responses, pain levels, itching/burning sensations), or indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)? If data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified? If so, please describe how.The data was directly observable and reported by subjects. Clinical diagnoses were verified by clinicians reviewing audio and/or imaging data, looking at electronic health records, or medication prescriptions.What mechanisms or procedures were used to collect the data (e.g., hardware apparatus or sensor, manual human curation, software program, software API)? How were these mechanisms or procedures validated? Provide the answer for all modalities and collected data. Has this information been changed through the process? If so, explain why.The data were collected using an iPad app.Who was involved in the data collection process (e.g., patients, clinicians, doctors, ML researchers, hospital staff, vendors, etc.) and how were they compensated (e.g., how much were contributors paid)?Research teams, which may include medical, graduate, or undergraduate students, coordinated with clinicians/doctors to identify appropriate participants. These clinicians and doctors were listed under IRB as co-investigators, and were added to the consortium so that their names are included on consortium-level publications that emerge from the research. Hospital staff were not involved in scheduling but assisted in the logistics of coordinating data collection.Participants were compensated for their time through electronic gift cards. Participants currently receive $40 for a data collection session that takes less than 90 minutes, and $80 for a session that takes over 90 minutes, for no more than a total of 3 sessions and maximum compensation of $120.Over what timeframe was the data collected?The data was collected over a period of 12 months.Does the dataset relate to people?YesDid you collect the data from the individuals in question directly, or obtain it via third parties or other sources (e.g., hospitals, app company)?DirectlyWere the individuals in question notified about the data collection?Yes, participants went through an IRB-approved consent process.Did the individuals in question consent to the collection and use of their data?Yes, all participants have been duly informed and agreed to the collection and the use of their data via prospective informed consent.If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent in the future or for certain uses?Consenting participants are informed that they may withdraw from the study at any point. If a participant chooses to withdraw during or before the voice data collection, their data will not be included in the database. Participants are informed that research data (including voice recordings) cannot be removed from the database once the voice data collection process is completed.In which countries was the data collected?USA and CanadaHas an analysis of the potential impact of the dataset and its use on data subjects been conducted?NoInclusion Criteria-Accessibility in data collectionIs there any language-based communication with patients (e.g.: English, French)? If yes, describe the choices of language(s) for communication. (for example, if there is an app used for communication, what are the language options?)English language was used for communication with study participants.The only language option for v2.0.0 is English. Spanish versions of the protocol are under development.What are the accessibility measurements and what aspects were considered when the study was designed and implemented?The protocol asks about disabilities. Collection accessibility was facilitated through the normal means of the collection sites, including reading questions to participants when needed.UsesHas the dataset been used for any tasks already? If so, please provide a description.A restricted version of the dataset containing raw audio has been used in the Bridge2AI Summer School and hackathon.Does using the dataset require the citation of the paper or any other forms of acknowledgement? If yes, is it easily accessible through google scholar or other repositoriesBensoussan, Yael, et al. “Developing Multi-Disorder Voice Protocols: A team science approach involving clinical expertise, bioethics, standards, and DEI.” Proc. Interspeech 2024. 2024. https://www.isca-archive.org/interspeech_2024/bensoussan24_interspeech.htmlIs there a repository that links to any or all papers or systems that use the dataset? If so, please provide a link or other access point. (besides Google scholar)NoIs there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a future user might need to know to avoid uses that could result in unfair treatment of individuals or groups (e.g., stereotyping, quality of service issues) or other undesirable harms (e.g., financial harms, legal risks) If so, please provide a description. Is there anything a future user could do to mitigate these undesirable harms?Yes, this dataset has skews based on disorder category, site, and other demographic factors. Users should consider the multivariate distribution when assessing utility for different questions.Are there tasks for which the dataset should not be used? If so, please provide a description.Yes, there are certain applications that are discouraged from using this dataset. Specifically, the dataset should not be used for non-clinical applications such as hiring decisions, insurance premium adjustments, or any form of surveillance that could lead to discrimination or harm. These discouraged uses are intended to prevent unethical or biased outcomes that could negatively impact individuals based on their health conditions or voice characteristics. The dataset is intended strictly for research that prioritize patient safety, privacy, and ethical use.Dataset DistributionWill the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which the dataset was created?The dataset will be distributed broadly to individuals outside of the entity who created the dataset.How will the dataset be distributed (e.g., tarball on website, API, GitHub)? Does the dataset have a digital object identifier (DOI)?The dataset will be distributed through a data publishing platform accessible at https://healthdatanexus.ai/This platform provides publicly accessible metadata regarding the dataset with a DOI for persistent resolution. The dataset itself requires registered access.When was/will the dataset be distributed?The data was published and made available at the end of November, 2024.Assuming the dataset is available, will it be/is the dataset distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? If so, please describe this license and/or ToU, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms or ToU, as well as any fees associated with these restrictions.Users of the dataset must agree to terms laid out in the registered access agreement. The terms relating to intellectual property are repeated here for informational purposes only:INTELLECTUAL PROPERTY RIGHTS. You understand and acknowledge that the Data may be protected by copyright and other rights, including other intellectual property rights. Duplication, as reasonably required to carry out Your Research Project with the Data, is nonetheless permitted. Sale of all or part of the Data on any media is not permitted. You recognize that nothing in this Agreement shall operate to transfer to You any intellectual property rights in or relating to the Data. You agree not to make intellectual property claims on the Data. You agree not to use intellectual property protection in ways that would prevent or block access to, or use of, any element of these Data, or conclusions drawn directly from the Data. You can elect to perform further research that would add intellectual and resource capital to the Data and decide to obtain intellectual property rights on these downstream discoveries. You agree to implement licensing policies that will not obstruct further research. You agree to respect the Fort Lauderdale Agreement.There are no fees associated with these restrictions.Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms, as well as any fees associated with these restrictions.No IP-based restrictions have been imposed by third parties.Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any supporting documentation.No export controls apply to the dataset.MaintenanceWho is supporting/hosting/maintaining the dataset?The dataset is supported by the NIH via the Bridge2AI project.The dataset is hosted by the Health Data Nexus, a data publishing platform maintained by the Temerty Center for Artificial Intelligence Research and Education in Medicine (T-CAIREM) based at the University of Toronto. The Health Data Nexus maintains the technical infrastructure hosting dataset and provides continued access to interested researchers.How can the owner/curator/manager of the dataset be contacted (e.g. email address)?The platform team may be contacted through: [email protected]The curator of the data may be contacted through: [email protected]Is there an erratum? If so, please provide a link or other access point.There is no erratum. A changelog for each dataset version is published online with the dataset metadata.Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, please describe how often, by whom, and how updates will be communicated to users (e.g., mailing list, GitHub)?Yes, further versions of the dataset will be released on a semi-annual (twice a year) basis. These updates will be distributed as new versions of the dataset on the Health Data Nexus platform. Users will be notified through news items on the platform as well as through standard communication channels.If the dataset relates to people, are there applicable limits on the retention of the data associated with the instances (e.g., were individuals in question told that their data would be retained for a fixed period of time and then deleted)? If so, please describe these limits and explain how they will be enforced.Once data is contributed, the data will be retained as long as it is useful for research purposes, possibly indefinitely.Will older versions of the dataset continue to be supported/hosted/maintained? If so, please describe how and for how long. If not, please describe how its obsolescence will be communicated to users.By default, older versions of the dataset will continue to be supported, hosted, and made available to researchers. Each version of the dataset has a unique DOI. The dataset publishers reserve the right to remove access to older versions.If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so?For dataset extensions and augmentations, it is possible for others to publish a derivative dataset on the Health Data Nexus which references the original source. These derivative datasets may be made available under the same conditions as the source data.For augmentations to the code used to produce the data, the open-source repositories have discussion forums and issue pages which allow for public discussion of data preprocessing. The repository also has a mechanism (“pull requests”) for contributing improvements to the data preprocessing code.
+The raw audio files and the questionnaire data retrieved from ReproSchema-UI or exported from REDCap were converted to be compliant with the Brain Imaging Data Structure v1.9.0.
+Pediatric data: Pediatric data collected through ReproSchema-UI is extracted and transformed into REDCap format, and subsequently converted to the Brain Imaging Data Structure (BIDS).
+The folder structure for the dataset is as follows:
+b2ai-voice-audio
+├── CHANGES.md
+├── README.md
+├── dataset_description.json
+├── phenotype
+├── confounders
+│
+├── confounders.json
+│
+└── confounders.tsv
+├── demographics
+│
+├── demographics.json
+│
+└── demographics.tsv
+├── diagnosis
+│
+├── adhd_adult.json
+│
+├── adhd_adult.tsv
+│
+├── airway_stenosis.json
+│
+├── airway_stenosis.tsv
+│
+├── amyotrophic_lateral_sclerosis.json
+│
+├── amyotrophic_lateral_sclerosis.tsv
+│
+├── anxiety.json
+│
+├── anxiety.tsv
+│
+├── benign_lesions.json
+│
+├── benign_lesions.tsv
+│
+├── bipolar_disorder.json
+│
+├── bipolar_disorder.tsv
+│
+├── cognitive_impairment.json
+│
+├── cognitive_impairment.tsv
+│
+├── control.json
+│
+├── control.tsv
+│
+├── copd_and_asthma.json
+│
+├── copd_and_asthma.tsv
+│
+├── depression.json
+│
+├── depression.tsv
+│
+├── glottic_insufficiency.json
+│
+├── glottic_insufficiency.tsv
+│
+├── laryngeal_cancer.json
+│
+├── laryngeal_cancer.tsv
+│
+├── laryngeal_dystonia.json
+│
+├── laryngeal_dystonia.tsv
+│
+├── laryngitis.json
+│
+├── laryngitis.tsv
+│
+├── muscle_tension_dysphonia.json
+│
+├── muscle_tension_dysphonia.tsv
+│
+├── parkinsons_disease.json
+│
+├── parkinsons_disease.tsv
+│
+├── precancerous_lesions.json
+│
+├── precancerous_lesions.tsv
+│
+├── psychiatric_history.json
+│
+├── psychiatric_history.tsv
+│
+├── ptsd_adult.json
+│
+├── ptsd_adult.tsv
+│
+├── unexplained_chronic_cough.json
+│
+├── unexplained_chronic_cough.tsv
+│
+├── unilateral_vocal_fold_paralysis.json
+│
+└── unilateral_vocal_fold_paralysis.tsv
+├── enrollment
+│
+├── eligibility.json
+│
+├── eligibility.tsv
+│
+├── enrollment_form.json
+│
+├── enrollment_form.tsv
+│
+├── participant.json
+│
+└── participant.tsv
+├── questionnaire
+│
+├── custom_affect_scale.json
+│
+├── custom_affect_scale.tsv
+│
+├── dsm5_adult.json
+│
+├── dsm5_adult.tsv
+│
+├── dyspnea_index.json
+│
+├── dyspnea_index.tsv
+│
+├── gad7_anxiety.json
+│
+├── gad7_anxiety.tsv
+│
+├── leicester_cough_questionnaire.json
+│
+├── leicester_cough_questionnaire.tsv
+│
+├── panas.json
+│
+├── panas.tsv
+│
+├── phq9.json
+│
+├── phq9.tsv
+│
+├── productive_vocabulary.json
+│
+├── productive_vocabulary.tsv
+│
+├── vhi10.json
+│
+├── vhi10.tsv
+│
+├── voice_perception.json
+│
+└── voice_perception.tsv
+└── task
+├── acoustic_task.json
+├── acoustic_task.tsv
+├── harvard_sentences.json
+├── harvard_sentences.tsv
+├── random_item_generation.json
+├── random_item_generation.tsv
+├── recording.json
+├── recording.tsv
+├── session.json
+├── session.tsv
+├── stroop.json
+├── stroop.tsv
+├── voice_perception.json
+├── voice_perception.tsv
+├── voice_problem_severity.json
+├── voice_problem_severity.tsv
+├── winograd.json
+└── winograd.tsv
+└── sub-<participant_id>
+└── ses-<participant_id>
+└── audio
+├── sub<participant_id>_ses<participant_id>_task-<task_name>.wav
+└── sub<participant_id>_ses<participant_id>_task-<task_name>.json
+Speech tasks included
+ABC’s
+Animal fluency
+Cape V sentences
+Caterpillar Passage
+Caterpillar Passage (Pediatrics)
+Cinderella Story
+Counting
+Diadochokinesis
+Favorite Foods
+Favorite Show/Movies
+Identifying Pictures
+Months
+Naming Animals
+Naming Foods
+Outside of School
+Picture description
+Picture Description (Pediatrics)
+Productive Vocabulary
+Prolonged vowel
+Rainbow Passage
+Random Item Generation
+Ready For School
+Repeat Words
+Repeat Sentences
+Role Naming
+Story recall
+Word-color Stroop
+AI-Ready derived datasets
+The feature-only dataset provides AI-ready derivations from the raw audio. Features extracted include:
+OpenSmile eGeMaps features per audio file
+Parselmouth/Praat speech features for any speech tasks
+Speech intelligibility metrics for speech tasks Time-varying features:
+Torchaudio-based pitch contour, spectrograms, mel spectrogram, and MFCCs
+Speech Articulatory Coding (sparc)-based features including electromagnetic articulography (EMA) estimates, plus loudness, periodicity, and pitch measures
+Phonetic posteriorgrams (PPGs)
+The waveform-derived features are stored using two formats:
+A fixed feature format that includes static features extracted from the entire waveform
+A temporal format that varies for each audio file depending on the length of recording.
+The questionnaire features are collected and distributed in the phenotype folder format shown above. These can be used for cohort selection.
+Methods of De-identification for v3.0.0 All direct identifiers were removed, as these would reveal the identity of the research participant. These include name, civic address, and social security numbers. Indirect identifiers were removed where these created a significant risk of causing participant re-identification, for example through their combination with other public data available on social media, in government registries, or elsewhere. These include select geographic or demographic identifiers, as well as some information about household composition or cultural identity. Non-identifying elements of data that revealed highly sensitive information, such as information about household income, mental health status, traumatic life experiences, and the like, were also removed.
+Raw audio transcripts were reviewed, and any audio recordings that contained potentially identifying information and external voices were removed from the release.
+All sensitive fields were removed from the dataset at this stage. These correspond to data elements encoded as sensitive (column name: “Identifier?”) listed in the REDCap data dictionary (CSV).
+In addition, all spectrograms, MFCCs, Mel spectrograms, transcriptions, EMAs, and PPGs from open-response prompts are removed from the feature-only dataset.
+Audit protocol
+Generate missingness tables
+Check distributions and outliers
+For categorical responses, check against schema
+For audio tasks, run quality control metrics
+For waveforms:
+Check amount of silence
+Duration
+For speech, check produced speech relative to intended passage
+All processing is performed using these toolkits:
+b2aiprep: organizing and preprocessing the dataset
+SenseLab: processing audio files for research tasks
+For detailed descriptions of each criterion, please see: AI-readiness for Biomedical Data: Bridge2AI Recommendations
+Table 4 – Precision Public Health (Voice) – Current RatingCriterionCriterion met? (Y=1; N=0)Total Score for Criterion (%)FAIRness (0)Findable (0.a)1100Accessible (0.b)1Interoperable (0.c)1Reusable (0.d)1Provenance (1)Transparent (1.a)1100Traceable (1.b)1Interpretable (1.c)1Key actors identified (1.d)1Characterization (2)Semantics (2.a)180Statistics (2.b)1Standards (2.c)1Potential Sources of Bias (2.d)1Data Quality (2.e)0Pre-model explainability (3)Data documentation templates (3.a)1100Fit for purpose (3.c)1Verifiable (3.d)1Ethics (4)Ethically acquired (4.a)1100Ethically managed (4.b)1Ethically disseminated (4.c)1Secure (4.d)1Sustainability (5)Persistent (5.a)150Domain-appropriate (5.b)0Well-governed (5.c)1Associated (5.d)0Computability (6)Standardized (6.a)175Computational Accessibility (6.b)1Portable (6.c)1Contextualized (6.d)0
+Supporting Materials
+B2Ai-Voice | REDCap
+Description: Bridge2AI REDCap Data Dictionary and Metadata.License: MIT
+Navigate to Source Code
+B2Ai-Voice | Prep Library
+Description: The code used to preprocess the raw audio waveforms into the parquet file and to merge the source data into the phenotype files.License: Apache-2.0
+Navigate to Source Code
+B2Ai-Voice | Docs
+Description: Source code for the Docs and Dashboard for the Bridge2AI Voice Project at https://docs.b2ai-voice.org/.License: MIT
+Navigate to Source Code
+B2Ai-Voice | FHIR
+Description: FHIR profiles for voice as a biomarker.
+Navigate to Source Code
+View our dashboard and learn more about the data
+Go to the Bridge2AI Voice Adult Dashboard
+Go to the Bridge2AI Voice Pediatric Dashboard
+Join our mission to shape the future of voice in health. Collaborate, contribute, and explore today.
+About
+Blogs
+Contact Us
+Site Map
+Terms and Conditions
+Copyright © 2025 B2AI Voice. All Rights Reserved.
+Bridge2AI-Voice is part of the Bridge2AI Program, funded by the NIH Common Fund. Award #3Tf-OTOD03272001S2This repository is under review for potential modification in compliance with Administration directives.
+Youtube
+X-twitter
+Facebook
+Linkedin

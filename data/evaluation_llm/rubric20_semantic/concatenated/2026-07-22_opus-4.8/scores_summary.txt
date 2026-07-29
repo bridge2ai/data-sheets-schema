@@ -1,0 +1,14 @@
+# rubric20_semantic scores — publication run 2026-07-22
+
+[claudecode_agent]
+  AI_READI   79.0/84  (94.0%)
+  CHORUS     73.0/84  (86.9%)
+  CM4AI      80.0/84  (95.2%)
+  VOICE      77.0/84.0  (91.7%)
+
+[claudecode_agent_core]
+  AI_READI   77.0/84  (91.7%)
+  CHORUS     75.0/84  (89.3%)
+  CM4AI      69/84  (82.1%)
+  VOICE      81.0/84  (96.4%)
+

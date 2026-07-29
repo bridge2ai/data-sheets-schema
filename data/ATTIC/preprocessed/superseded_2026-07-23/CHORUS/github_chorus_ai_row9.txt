@@ -1,0 +1,565 @@
+10/30/25, 11:25 PM
+
+CHoRUS for Equitable AI
+
+chorus-ai
+
+Overview
+
+Repositories
+
+28
+
+Discussions
+
+Projects 3
+
+Packages
+
+Peopl
+
+CHoRUS for Equitable AI
+
+Follow
+
+37 followers
+
+United States of America
+
+https://chorus4ai.org/
+
+README.md
+
+CHoRUS for Equitable AI
+
+license MITMIT
+license
+
+Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for
+Equitable AI
+
+Table of Contents
+
+About
+
+Get Started
+
+Data Site Managers
+
+Clinical Collaborators
+
+Project Managers
+
+Software Developers
+
+Community Users
+
+License
+
+Contact
+
+https://github.com/chorus-ai#table-of-contents
+
+1/7
+
+10/30/25, 11:25 PM
+
+About
+
+CHoRUS for Equitable AI
+
+The goal of the CHoRUS Network is to develop the most diverse, high-resolution, ethically
+
+sourced, AI-ready data set to answer the grand challenge of improving recovery from acute
+
+illness.
+
+This collaboration spans 20 academic centers, of which 14 will contribute as Data
+
+Acquisition centers.
+
+Patient-focused efforts will determine the ethical and legal approaches to manage privacy
+
+and bias, while accounting for Social Determinants of Health.
+
+Unified standards will harmonize multi-modal EHR, waveform, imaging, and text data.
+
+A visualization and annotation environment will label data with targets important for
+
+prediction.
+
+A comprehensive set of approaches will develop the skills and workforce for a next
+
+generation of diverse academic and community AI scientists.
+
+Federated access will enable sampling methods to ensure a balanced and diverse cohort.
+
+Collaborating with Bridge2AI and 3 other data generation projects, the CHoRUS Network will
+
+help us cross the Bridge2AI network together.
+
+Get Started
+
+The CHoRUS GitHub organization houses active repositories that provide:
+
+1. Software and tooling to interact with and extract insight from clinical data in diverse
+
+formats
+
+2. Validated semantic mappings for connecting clinical data in various source formats to
+
+international standards
+
+3. Standard operating protocols (SOPs) to instruct data contributing sites about best
+
+practices for curating and delivering interoperable datasets
+
+4. Project management overviews to help track data delivery statuses and complex task
+
+dependencies within CHoRUS
+
+We've defined different groups of anticipated users of this GitHub in the sections below, and
+
+direct those users to appropriate locations within the chorus-ai repository space.
+
+(back to top)
+
+Data Site Managers
+
+The starting reference for data managers at data contributing sites is the Chorus_SOP page.
+
+Here, you will find an interactive workflow diagram describing the step-by-step process for
+
+extracting and contributing clinical data to CHoRUS, with dynamic links to various SOP
+
+documents that have undergone an internal validation and review process within the
+
+Chorus_SOP repository.
+
+https://github.com/chorus-ai#table-of-contents
+
+2/7
+
+10/30/25, 11:25 PM
+
+CHoRUS for Equitable AI
+
+The workflow diagram also includes links to a wealth of recordings and documentation
+
+compiled by the various sub-teams (Standards, Data Acquisition, and Tooling) within the
+
+CHoRUS DGP.
+
+If you run into any issues in the creation or submission of your data extract, please feel free
+to post them in the relevant context-specific discussion location:
+
+Standards Discussions
+
+Data Acquisition Discussions
+
+Clinical Collaborators
+
+(back to top)
+
+Clinical expertise is invaluable to semantic mapping and validation within CHoRUS. We have
+
+established a chorus-mapping repository with documentation and pooled tabular mappings
+
+along with an associated clinical validation SOP for contributing to mapping efforts.
+
+If you're interested in getting involved in downstream analytics on the mapped and
+assembled dataset, please feel free to reach out using the contact details below
+
+(back to top)
+
+Project Managers
+
+We've established two different modes of project management within the chorus-ai
+organization:
+
+1. Task tracking among CHoRUS members and across teams
+
+2. Status tracking of data contributing sites to identify and resolve any blocking issues
+
+Task Tracking
+
+We are aggregating issues across various repositories into an overall task management
+
+project. In this GitHub project, we assign users to tasks, create and track anticipated
+
+delivery dates, and highlight dependencies between tasks and users. Several per-repo
+projects are also active, but we are in the process of phasing those projects out and
+
+migrating their contents to this central project space.
+
+Status Tracking
+
+We have asked data contributing sites to provide regular status updates with regard to their
+
+progress in creating and curating a CHoRUS-specific clinical data extract. Sites can submit
+
+updates either using the GitHub interface directly, or by submitting a Google Form (please
+
+reach out to get a link to the form if you'd like to submit an update for your site). We've
+
+created a GoogleScript that is triggered on each Google Form submission and makes calls
+to the GitHub API to update status and issue information appropriately. These site statuses
+
+end up in either the Standards Project or the Data Acquisition Project.
+
+https://github.com/chorus-ai#table-of-contents
+
+3/7
+
+10/30/25, 11:25 PM
+
+CHoRUS for Equitable AI
+
+(back to top)
+
+Software Developers
+
+We have software contributors within CHoRUS who have a broad range of expertise, and
+
+who have produced powerful open-source tooling for transforming and interacting with
+
+clinical data. We have created a web guide for both contributors and users of the CHoRUS
+
+software packages that compiles documentation in the chorus-developer repository.
+
+You can check the versions, maintainers, and other metadata about CHoRUS packages
+
+using our package status page.
+
+(back to top)
+
+Community Users
+
+Welcome! Feel free to browse any of the resources listed above, or check out our public-
+
+facing webpage for more information about the project, its progress, and high-level aims.
+
+Thanks for stopping by!
+
+License
+
+(back to top)
+
+This project is licensed under the MIT License. See the LICENSE file for more details.
+
+(back to top)
+
+Contact
+
+For any inquiries or feedback, please feel free to reach out to us:
+
+Request access: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org
+
+Website: www.bridge2ai.org/chorus
+
+(back to top)
+
+Popular repositories
+
+chorus-container-apps
+
+Public
+
+Set of dockerized container applications and associated configurations to be deployed to support CHoRUS
+services on Azure
+
+JavaScript
+
+ 5
+
+ 1
+
+https://github.com/chorus-ai#table-of-contents
+
+4/7
+
+Public
+
+Public
+
+Public
+
+Public
+
+Public
+
+10/30/25, 11:25 PM
+
+CHoRUS for Equitable AI
+
+privacy_scan_tool
+
+A Privacy Scan tools for medical records
+
+Python
+
+ 4
+
+chorus_waveform
+
+CHoRUS waveform documentation and various waveform conversion scripts
+
+Jupyter Notebook
+
+ 3
+
+ 3
+
+Chorus_SOP
+
+ChoRUS centralized SOP documentation site
+
+MDX
+
+ 3
+
+ 4
+
+CADA
+
+ 2
+
+data_acq_SOP
+
+An online documentation SOP for Data Acquisition Module
+
+JavaScript
+
+ 2
+
+ 2
+
+ Repositories
+
+Find a repository…
+
+Type
+
+Language
+
+Sort
+
+Chorus_SOP Public
+
+ChoRUS centralized SOP documentation site
+
+MDX
+
+ 3
+
+Apache-2.0 
+
+ 4
+
+ 4
+
+ 2
+
+Updated 12 hours ago
+
+https://github.com/chorus-ai#table-of-contents
+
+5/7
+
+10/30/25, 11:25 PM
+
+CHoRUS for Equitable AI
+
+chorus-container-apps
+
+Public
+
+Set of dockerized container applications and associated configurations to be deployed to
+
+support CHoRUS services on Azure
+
+JavaScript
+
+ 5
+
+ 1
+
+ 5
+
+ 1
+
+Updated last week
+
+CTP-deid Public
+
+0 
+
+0 
+
+ 0
+
+ 0
+
+Updated 28 days ago
+
+UF-Geocoding Public
+
+Forked from bihorac-LAB/Exposome
+
+Open source code to geocode OMOP Location entities via DeGauss
+
+Python
+
+0 
+
+MIT 
+
+ 3
+
+ 0
+
+ 0
+
+Updated on Sep 25
+
+chorus_waveform_resources
+
+Public
+
+Resources which support the preparation and release of waveforms
+
+0 
+
+0 
+
+ 0
+
+ 0
+
+Updated on Sep 18
+
+CHoRUSReports
+
+Public
+
+This repo is dedicated to producing characterization reports to return to sites following their
+
+data submissions
+
+R
+
+0 
+
+0 
+
+ 1
+
+ 0
+
+Updated on Aug 8
+
+cloud_public Public
+
+0 
+
+0 
+
+ 2
+
+ 0
+
+Updated on Jun 16
+
+https://github.com/chorus-ai#table-of-contents
+
+6/7
+
+10/30/25, 11:25 PM
+
+CHoRUS for Equitable AI
+
+chorus-extract-upload Public
+
+Repository with tools to create and upload a CHoRUS Data Extract
+
+Python
+
+0 
+
+MIT 
+
+0 
+
+ 1
+
+ 0
+
+Updated on May 15
+
+chorus-apps-internal
+
+Public
+
+CHoRUS internally built web applications.
+
+0 
+
+0 
+
+ 29
+
+ 0
+
+Updated on May 14
+
+chorus_waveform Public
+
+CHoRUS waveform documentation and various waveform conversion scripts
+
+Jupyter Notebook
+
+ 3
+
+MIT 
+
+ 3
+
+ 8
+
+ 1
+
+Updated on Feb 21
+
+View all repositories
+
+Top discussions this past month
+
+Requesting addition of Python packages
+
+1
+
+1
+
+View all discussions
+
+People
+
+Top languages
+
+JavaScript
+
+Python
+
+Jupyter Notebook
+
+CSS
+
+MDX
+
+Report abuse
+
+https://github.com/chorus-ai#table-of-contents
+
+7/7
+
+

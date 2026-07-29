@@ -1,0 +1,439 @@
+{
+  "rubric": "rubric10",
+  "version": "1.0",
+  "d4d_file": "CM4AI_d4d_core.yaml",
+  "project": "CM4AI",
+  "method": "claudecode_agent_core",
+  "evaluation_timestamp": "2026-07-22T00:00:00Z",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "llm_as_judge"
+  },
+  "overall_score": {
+    "total_points": 34.0,
+    "max_points": 50,
+    "percentage": 68.0
+  },
+  "elements": [
+    {
+      "id": 1,
+      "name": "Dataset Discovery and Identification",
+      "description": "Can a user or system discover and uniquely identify this dataset?",
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, etc.)",
+          "score": 1,
+          "evidence": "doi: 10.18130/V3/DXWOS5, id: https://doi.org/10.18130/V3/DXWOS5",
+          "quality_note": "Properly formatted DOI present in both doi and id fields"
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "score": 1,
+          "evidence": "title: Cell Maps for Artificial Intelligence (CM4AI), description: 200+ word comprehensive description",
+          "quality_note": "Clear title and very comprehensive description explaining mission, data types, methods, and outputs"
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "score": 1,
+          "evidence": "keywords: [Cell Maps, Artificial Intelligence, AI-Ready Data, Bridge2AI, Functional Genomics, ...] (26 keywords total)",
+          "quality_note": "Excellent keyword coverage including domain (cell biology), methods (AP-MS, SEC-MS, CRISPR), technologies, and applications"
+        },
+        {
+          "name": "Dataset Landing Page or Platform URL",
+          "score": 1,
+          "evidence": "page: https://www.cm4ai.org",
+          "quality_note": "Active project website and data portal"
+        },
+        {
+          "name": "Associated Project or Program",
+          "score": 1,
+          "evidence": "keywords: [Bridge2AI], description mentions 'Bridge to Artificial Intelligence (Bridge2AI) program'",
+          "quality_note": "Clear association with NIH Bridge2AI program"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 2,
+      "name": "Dataset Access and Retrieval",
+      "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
+      "sub_elements": [
+        {
+          "name": "Access Mechanism Defined",
+          "score": 0,
+          "evidence": "No access_and_licensing.access_policy field in core schema",
+          "quality_note": "Missing from core schema - access policy information not available in standardized field"
+        },
+        {
+          "name": "Data Use Agreement Required?",
+          "score": 0,
+          "evidence": "No access_and_licensing.data_use_agreement field in core schema",
+          "quality_note": "Missing from core schema - DUA information not available in standardized field"
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "score": 1,
+          "evidence": "download_url: https://doi.org/10.18130/V3/DXWOS5",
+          "quality_note": "Direct DOI link provided for download access"
+        },
+        {
+          "name": "File Formats Specified",
+          "score": 0,
+          "evidence": "is_tabular: false, distributions mention ZIP/RO-Crate but no data_characteristics.data_formats field",
+          "quality_note": "Format information exists in distributions but not in standardized data_formats field (not in core schema)"
+        },
+        {
+          "name": "External Links to Similar or Related Datasets",
+          "score": 1,
+          "evidence": "external_resources: [CM4AI Project Website, NIH RePORTER, Dataverse, Nature Publication, bioRxiv, FAIRSCAPE, IMP, NDEx, Bridge2AI, CFDE, MassIVE, NCBI SRA, Perturbation Atlas]",
+          "quality_note": "Comprehensive external resources section with 13 related resources"
+        }
+      ],
+      "element_score": 2,
+      "element_max": 5
+    },
+    {
+      "id": 3,
+      "name": "Data Reuse and Interoperability",
+      "description": "Is sufficient information provided to reuse and integrate the dataset with others?",
+      "sub_elements": [
+        {
+          "name": "License Terms Allow Reuse",
+          "score": 1,
+          "evidence": "license: CC BY-NC-SA 4.0, license_and_use_terms describes attribution requirements and commercial use restrictions",
+          "quality_note": "Clear Creative Commons license with detailed terms, attribution requirements, and commercial licensing guidance"
+        },
+        {
+          "name": "Data Formats Are Standardized",
+          "score": 0,
+          "evidence": "Distributions mention RO-Crate and ZIP, but no data_characteristics.data_formats field",
+          "quality_note": "Core schema lacks standardized data_formats field - format information exists only in distributions"
+        },
+        {
+          "name": "Schema or Ontology Conformance Stated",
+          "score": 1,
+          "evidence": "conforms_to: https://w3id.org/bridge2ai/data-sheets-schema/core-schema, conforms_to_class: CoreDataset",
+          "quality_note": "Explicit schema conformance to D4D Core schema with class specification"
+        },
+        {
+          "name": "Identifiers Defined for Linking",
+          "score": 0,
+          "evidence": "No data_characteristics.identifiers_in_files field (not in core schema)",
+          "quality_note": "Missing from core schema - linking identifiers not documented in standardized field"
+        },
+        {
+          "name": "Documentation of Processing Tools for Reproducibility",
+          "score": 0,
+          "evidence": "MuSIC, FAIRSCAPE, Cytoscape, IMP mentioned in text but no software_and_tools or open_source_code fields",
+          "quality_note": "Processing tools mentioned in prose but not in standardized software_and_tools field (not in core schema)"
+        }
+      ],
+      "element_score": 2,
+      "element_max": 5
+    },
+    {
+      "id": 4,
+      "name": "Ethical Use and Privacy Safeguards",
+      "description": "Does the dataset provide clear information about consent, privacy, and ethical oversight?",
+      "sub_elements": [
+        {
+          "name": "IRB or Ethics Review Documented",
+          "score": 0,
+          "evidence": "No ethics.irb_approval field (not in core schema)",
+          "quality_note": "Missing from core schema - ethical review information not in standardized field"
+        },
+        {
+          "name": "Deidentification Method Described",
+          "score": 0,
+          "evidence": "is_deidentified section mentions 'de-identified human cell lines' but no deidentification_and_privacy.approach field",
+          "quality_note": "Deidentification status documented but method/approach not in standardized field (not in core schema)"
+        },
+        {
+          "name": "Identifiers Removed or Masked",
+          "score": 0,
+          "evidence": "No deidentification_and_privacy.examples_of_identifiers_removed field",
+          "quality_note": "Missing from core schema - specific identifiers removed not documented"
+        },
+        {
+          "name": "Informed Consent Obtained from Participants",
+          "score": 0,
+          "evidence": "No collection_process.consent field (not in core schema)",
+          "quality_note": "Missing from core schema - consent procedures not in standardized field"
+        },
+        {
+          "name": "Ethical Sourcing Statement Included",
+          "score": 0,
+          "evidence": "sensitive_elements and human_subject_research mention ethical sourcing but no ethics.ethical_position field",
+          "quality_note": "Ethical sourcing discussed in prose but not in standardized ethics.ethical_position field (not in core schema)"
+        }
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 5,
+      "name": "Data Composition and Structure",
+      "description": "Can the dataset's structure, modality, and population be understood from metadata?",
+      "sub_elements": [
+        {
+          "name": "Cohort or Population Characteristics Described",
+          "score": 1,
+          "evidence": "instances: [MDA-MB-468 breast cancer cell line with detailed donor demographics and characterization, KOLF2.1J iPSC line with donor details]",
+          "quality_note": "Comprehensive description of two cell lines with RRID identifiers, origin details, and availability information"
+        },
+        {
+          "name": "Number of Participants or Samples Reported",
+          "score": 1,
+          "evidence": "instances describe 100 chromatin regulators and 100 metabolic enzymes; subpopulations enumerate 7 distinct conditions",
+          "quality_note": "Sample/target counts clearly specified (100 chromatin regulators, 100 metabolic enzymes) with detailed condition breakdown"
+        },
+        {
+          "name": "Modalities or Data Types Listed",
+          "score": 0,
+          "evidence": "collection_mechanisms and acquisition_methods describe IF imaging, AP-MS, SEC-MS, CRISPR screens but no data_characteristics.modalities field",
+          "quality_note": "Modalities comprehensively described in collection methods but not in standardized modalities field (not in core schema)"
+        },
+        {
+          "name": "Conditions or Phenotypes Represented",
+          "score": 1,
+          "evidence": "subpopulations: [MDA-MB-468 Untreated, MDA-MB-468 Paclitaxel-Treated, MDA-MB-468 Vorinostat-Treated, KOLF2.1J Undifferentiated iPSCs, iPSC-Derived Neurons, iPSC-Derived NPCs, iPSC-Derived Cardiomyocytes]",
+          "quality_note": "Seven distinct subpopulations covering treatment conditions and differentiation states clearly documented"
+        },
+        {
+          "name": "File Dimensions or Sampling Rates Provided",
+          "score": 0,
+          "evidence": "No data_characteristics.sampling_and_dimensions field",
+          "quality_note": "Missing from core schema - file dimensions and sampling rates not documented in standardized field"
+        }
+      ],
+      "element_score": 3,
+      "element_max": 5
+    },
+    {
+      "id": 6,
+      "name": "Data Provenance and Version Tracking",
+      "description": "Can a user determine dataset versions, update history, and provenance?",
+      "sub_elements": [
+        {
+          "name": "Dataset Version Number Provided",
+          "score": 1,
+          "evidence": "version: '2.1'",
+          "quality_note": "Clear semantic version number"
+        },
+        {
+          "name": "Version History Documented",
+          "score": 1,
+          "evidence": "distributions section lists V0.5 (alpha), V1.4 (March 2025 Beta), V2.1 (June 2025 Beta), October 2025 Beta with DOIs",
+          "quality_note": "Comprehensive version history with DOI for each release and detailed release timeline"
+        },
+        {
+          "name": "Change Descriptions for Each Version",
+          "score": 1,
+          "evidence": "distributions: 'March 2025 Beta (V1.4): includes perturb-seq in KOLF2.1J iPSCs, SEC-MS in iPSCs and derivatives...', 'June 2025 Beta (V2.1): revision adds RGB IF images, ro-crate metadata corrections, naming convention changes...'",
+          "quality_note": "Specific changes documented for each beta release with actionable detail"
+        },
+        {
+          "name": "Update Schedule or Frequency Indicated",
+          "score": 1,
+          "evidence": "updates: 'Dataset regularly updated and augmented through end of project in November 2026. Beta releases on quarterly basis'",
+          "quality_note": "Clear quarterly update schedule through November 2026 with long-term preservation plan"
+        },
+        {
+          "name": "Versioned Documentation or External References",
+          "score": 1,
+          "evidence": "distributions: [doi:10.18130/V3/DXWOS5, doi:10.18130/V3/B35XWX, doi:10.18130/V3/F3TD5R, doi:10.18130/V3/K7TGEM]",
+          "quality_note": "Each version has its own persistent DOI identifier with version-specific landing pages"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 7,
+      "name": "Scientific Motivation and Funding Transparency",
+      "description": "Does the metadata clearly state why the dataset exists and who funded it?",
+      "sub_elements": [
+        {
+          "name": "Motivation or Rationale for Dataset Creation",
+          "score": 1,
+          "evidence": "purposes: [4 detailed purposes including AI-ready cell maps, visible ML, FAIR standards, structural genomics foundation], addressing_gaps: [4 gaps including black box ML limitation, FAIR-compliant datasets, multimodal integration, protein structure bridge]",
+          "quality_note": "Comprehensive scientific rationale with 4 purposes and 4 research gaps clearly articulated"
+        },
+        {
+          "name": "Primary Research Objective or Task",
+          "score": 1,
+          "evidence": "tasks: [5 detailed tasks including multimodal integration, VNN development, disease mechanism research, ethical AI frameworks, integrative structure modeling], intended_uses: [7 use cases]",
+          "quality_note": "Five specific research tasks and seven intended uses provide comprehensive objective documentation"
+        },
+        {
+          "name": "Funding Source or Grant Agency Listed",
+          "score": 1,
+          "evidence": "funders: 'National Institutes of Health Common Fund Bridge2AI Program'",
+          "quality_note": "Clear funding source with NIH Common Fund Bridge2AI Program and Frederick Thomas Fund acknowledgment"
+        },
+        {
+          "name": "Award Number or Grant ID Present",
+          "score": 1,
+          "evidence": "funders: '1OT2OD032742-01 (Bridge2AI Functional Genomics) and 5U54HG012513-02 (Bridge2AI Bridge Center), FY 2025 funding: $5,289,382'",
+          "quality_note": "Two grant numbers provided with opportunity number, project dates, and detailed FY 2025 budget breakdown"
+        },
+        {
+          "name": "Acknowledgement of Platform or Participant Support",
+          "score": 1,
+          "evidence": "creators: [24 creators with ORCID, institutional affiliations, and roles including Contact PI, Co-Investigators, Program Manager, and Researchers], funders acknowledge Frederick Thomas Fund",
+          "quality_note": "Extensive 24-person creator list with ORCIDs, roles, and institutional affiliations plus platform acknowledgments"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 8,
+      "name": "Technical Transparency (Data Collection and Processing)",
+      "description": "Can data collection and processing steps be replicated or understood?",
+      "sub_elements": [
+        {
+          "name": "Collection Setting or Sites Described",
+          "score": 1,
+          "evidence": "collection_mechanisms: 'Generated by Lundberg Lab at Stanford University', 'Performed in Krogan Laboratory at UCSF'",
+          "quality_note": "Specific laboratory and institutional affiliations clearly documented for each data type"
+        },
+        {
+          "name": "Data Capture Method or Device Listed",
+          "score": 1,
+          "evidence": "collection_mechanisms and acquisition_methods: 'Automated fixation and permeabilization protocols using pipetting robot', 'confocal microscopy', 'affinity purification mass spectrometry (AP-MS)', 'Size exclusion chromatography coupled to mass spectrometry (SEC-MS)', '10x Genomics 3'HT kit'",
+          "quality_note": "Comprehensive instrumentation and method documentation including automation, microscopy, mass spectrometry platforms, and single-cell kits"
+        },
+        {
+          "name": "Preprocessing or Cleaning Steps Documented",
+          "score": 1,
+          "evidence": "preprocessing_strategies: [Deep Learning Embedding Generation with node2vec and HPA models, Hierarchical Community Detection with Cytoscape, Cell Map Annotation with GO/Reactome/LLM, Quality Control for Imaging and MS Data, Integrative Structure Modeling with IMP], cleaning_strategies: [FAIRSCAPE AI-Readiness Packaging, Data Standard Mapping]",
+          "quality_note": "Six preprocessing strategies and two cleaning strategies comprehensively document the entire MuSIC pipeline from embeddings to hierarchical maps"
+        },
+        {
+          "name": "Open-Source Processing Code Provided",
+          "score": 0,
+          "evidence": "Software mentioned (FAIRSCAPE-CLI, MuSIC, Cytoscape, IMP, node2vec) but no software_and_tools.preprocessing_code field with repository links",
+          "quality_note": "Processing software named but no GitHub repositories or code links in standardized field (not in core schema)"
+        },
+        {
+          "name": "External Standards or References Cited",
+          "score": 1,
+          "evidence": "external_resources: [Nature Publication doi:10.1038/s41586-025-08878-3, bioRxiv Preprint doi:10.1101/2024.05.21.589311, FAIRSCAPE Framework, IMP documentation, Perturbation Atlas Publication PMCID:PMC11580897]",
+          "quality_note": "Comprehensive references including peer-reviewed Nature publication, bioRxiv preprint, and multiple method/framework citations"
+        }
+      ],
+      "element_score": 4,
+      "element_max": 5
+    },
+    {
+      "id": 9,
+      "name": "Dataset Evaluation and Limitations Disclosure",
+      "description": "Does the metadata communicate known risks, biases, or dataset limitations?",
+      "sub_elements": [
+        {
+          "name": "Limitations Section Present",
+          "score": 1,
+          "evidence": "discouraged_uses: [Use During Incomplete Data Release: 'interim/beta release with data not yet in completed final form', Analysis Without Domain Expertise]",
+          "quality_note": "Limitations clearly documented in discouraged_uses section including incomplete data release status and expertise requirements"
+        },
+        {
+          "name": "Sampling Bias or Representativeness Noted",
+          "score": 1,
+          "evidence": "sampling_strategies: 'is_representative: false', sensitive_elements: 'does not represent all biological variants in the population at large'",
+          "quality_note": "Explicit acknowledgment that dataset is not representative and does not cover all biological variants"
+        },
+        {
+          "name": "Quality Control or Validation Steps Mentioned",
+          "score": 1,
+          "evidence": "preprocessing_strategies: 'Quality Control for Imaging Data: Standardized automated fixation and permeabilization protocols...', 'Quality Control for Mass Spectrometry Data: Quality control and validation of AP-MS and SEC-MS data before public release'",
+          "quality_note": "Explicit QC procedures documented for both imaging and mass spectrometry data with validation before release"
+        },
+        {
+          "name": "Known Risks or Use Constraints Listed",
+          "score": 1,
+          "evidence": "discouraged_uses: [Clinical Decision-Making Without Validation: 'Explicitly prohibited per dataset terms', Use During Incomplete Data Release, Analysis Without Domain Expertise: 'requires domain expertise for meaningful analysis']",
+          "quality_note": "Three comprehensive use constraints including explicit prohibition of clinical use, interim data limitations, and expertise requirements"
+        },
+        {
+          "name": "Conflicts of Interest Declared",
+          "score": 0,
+          "evidence": "No ethics.conflicts_of_interest field (not in core schema)",
+          "quality_note": "Missing from core schema - conflicts of interest not documented in standardized field"
+        }
+      ],
+      "element_score": 4,
+      "element_max": 5
+    },
+    {
+      "id": 10,
+      "name": "Cross-Platform and Community Integration",
+      "description": "Does the dataset connect to wider data ecosystems, repositories, or standards?",
+      "sub_elements": [
+        {
+          "name": "Dataset Published on a Recognized Platform",
+          "score": 1,
+          "evidence": "publisher: University of California San Diego, distributions mention Dataverse (LibraData), MassIVE Repository, NCBI SRA, NDEx",
+          "quality_note": "Published on multiple recognized platforms including Dataverse (NIH-approved), MassIVE (proteomics), NCBI SRA (genomics), and NDEx (networks)"
+        },
+        {
+          "name": "Cross-referenced DOIs or Related Dataset Links",
+          "score": 1,
+          "evidence": "distributions: [4 version DOIs: 10.18130/V3/DXWOS5, 10.18130/V3/B35XWX, 10.18130/V3/F3TD5R, 10.18130/V3/K7TGEM], external_resources: [Nature doi:10.1038/s41586-025-08878-3, bioRxiv doi:10.1101/2024.05.21.589311, Perturbation Atlas doi:10.1101/2024.11.03.621734]",
+          "quality_note": "Four distribution DOIs plus three publication DOIs providing comprehensive cross-referencing"
+        },
+        {
+          "name": "Community Standards or Schema Reference",
+          "score": 1,
+          "evidence": "conforms_to: https://w3id.org/bridge2ai/data-sheets-schema/core-schema, cleaning_strategies mention Gene Ontology, Reactome, PDB, AlphaFold, Schema.org, EVI Evidence Graph Ontology",
+          "quality_note": "D4D Core schema conformance plus multiple community standards (GO, Reactome, PDB, AlphaFold, Schema.org, EVI ontology)"
+        },
+        {
+          "name": "Associated Outreach Materials",
+          "score": 1,
+          "evidence": "external_resources: [CM4AI Project Website (www.cm4ai.org with U-BRITE platform), FAIRSCAPE Framework Documentation (tutorial, installation), IMP Documentation]",
+          "quality_note": "Project portal with documentation, FAIRSCAPE tutorials, and integrative modeling platform documentation available"
+        },
+        {
+          "name": "Similar Dataset Links or Thematic Grouping",
+          "score": 1,
+          "evidence": "external_resources: [Bridge2AI Program: https://commonfund.nih.gov/bridge2ai, NIH Common Fund Data Ecosystem (CFDE): https://www.nih-cfde.org]",
+          "quality_note": "Clear thematic grouping within Bridge2AI program and CFDE ecosystem with explicit program links"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Comprehensive provenance and version tracking with DOIs for each release and detailed quarterly update schedule through November 2026",
+      "Excellent funding transparency with NIH grant numbers (1OT2OD032742-01, 5U54HG012513-02), FY 2025 budget breakdown, and 24-person creator list with ORCIDs",
+      "Strong technical documentation of collection mechanisms (Lundberg Lab at Stanford, Krogan Lab at UCSF) and processing pipelines (MuSIC, FAIRSCAPE, node2vec, community detection)",
+      "Clear limitations disclosure including non-representative sampling (is_representative: false), interim data release status, and explicit prohibition of clinical use",
+      "Exceptional cross-platform integration with Dataverse, MassIVE, NCBI SRA, NDEx plus Nature publication and bioRxiv preprint DOIs"
+    ],
+    "weaknesses": [
+      "Core schema lacks ethical compliance fields: no IRB approval, consent procedures, deidentification approach, or conflicts of interest documentation (Element 4: 0/5)",
+      "Missing standardized access and distribution fields: no access policy, DUA requirements, or data formats in data_characteristics (Element 2 weaknesses)",
+      "No standardized fields for data modalities, identifiers, sampling rates, or processing code repositories (Elements 3 and 5 gaps)",
+      "Processing tools mentioned in prose (MuSIC, FAIRSCAPE, Cytoscape, IMP) but no GitHub repository links in software_and_tools field",
+      "Core schema structural limitations prevent documentation of technical details available in full D4D schema"
+    ],
+    "recommendations": [
+      "Note: Core schema is intentionally minimal exchange layer - full schema evaluation would score higher on Elements 2-5 and 8",
+      "For users requiring comprehensive metadata: reference full D4D datasheet at data/d4d_concatenated/claudecode_agent/CM4AI_d4d.yaml",
+      "Add software_and_tools.preprocessing_code field to core schema for reproducibility documentation (GitHub repos for MuSIC, FAIRSCAPE-CLI)",
+      "Consider adding minimal ethics fields to core schema: is_deidentified status and human_subject_research flag at minimum",
+      "Enhance distributions with explicit media_type and format fields for each distribution package"
+    ]
+  },
+  "metadata": {
+    "evaluator_id": "d4d-rubric10-agent",
+    "rubric_hash": "sha256-placeholder-rubric10",
+    "d4d_file_hash": "sha256-placeholder-cm4ai-core",
+    "schema_context": "CoreDataset class from data_sheets_schema_core.yaml - semantic exchange layer subset with reduced field coverage compared to full D4D schema"
+  }
+}

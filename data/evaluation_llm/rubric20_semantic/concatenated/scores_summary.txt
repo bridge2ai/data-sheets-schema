@@ -1,0 +1,16 @@
+# rubric20_semantic scores — publication exemplar run 2026-07-22 (claude-fable-5)
+
+[claudecode_agent]
+  AI_READI   76/84  (90.5%)
+  CHORUS     78/84  (92.9%)
+  CM4AI      80/84  (95.2%)
+  VOICE      83/84  (98.8%)
+
+[claudecode_agent_core]
+  AI_READI   75/84  (89.3%)
+  CHORUS     78/84  (92.9%)
+  CM4AI      81/84  (96.4%)
+  VOICE      83/84  (98.8%)
+
+Note: claudecode_agent and claudecode_agent_core rows evaluated 2026-07-22
+with claude-fable-5; other methods retain earlier evaluations (see each JSON's model field).

@@ -1,0 +1,245 @@
+{
+  "run_date": "2026-07-22",
+  "run_label": "publication_final_2026-07-22_fable-5",
+  "evaluation_model": "claude-fable-5",
+  "temperature": 0.0,
+  "git_head": "0e19e85fe6a0b18038ba64bbff309d684bae2a9f",
+  "git_status_at_run": [
+    "M .claude/agents/d4d-rubric10-semantic.md",
+    " M .claude/agents/d4d-rubric10.md",
+    " M .claude/agents/d4d-rubric20-semantic.md",
+    " M .claude/agents/d4d-rubric20.md",
+    " M aurelian",
+    "R  data/d4d_concatenated/claudecode_agent/AI_READI_d4d.yaml -> data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/AI_READI_d4d.yaml",
+    "R  data/d4d_concatenated/claudecode_agent/CHORUS_d4d.yaml -> data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/CHORUS_d4d.yaml",
+    "R  data/d4d_concatenated/claudecode_agent/CM4AI_d4d.yaml -> data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/CM4AI_d4d.yaml",
+    "R  data/d4d_concatenated/claudecode_agent/VOICE_d4d.yaml -> data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/VOICE_d4d.yaml",
+    "R  data/d4d_concatenated/claudecode_agent_core/AI_READI_d4d_core.yaml -> data/d4d_concatenated/claudecode_agent_core/2026-04-10_sonnet-4.6/AI_READI_d4d_core.yaml",
+    "R  data/d4d_concatenated/claudecode_agent_core/CHORUS_d4d_core.yaml -> data/d4d_concatenated/claudecode_agent_core/2026-04-10_sonnet-4.6/CHORUS_d4d_core.yaml",
+    "R  data/d4d_concatenated/claudecode_agent_core/CM4AI_d4d_core.yaml -> data/d4d_concatenated/claudecode_agent_core/2026-04-10_sonnet-4.6/CM4AI_d4d_core.yaml",
+    "R  data/d4d_concatenated/claudecode_agent_core/VOICE_d4d_core.yaml -> data/d4d_concatenated/claudecode_agent_core/2026-04-10_sonnet-4.6/VOICE_d4d_core.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/GENERATION_SUMMARY.md -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/GENERATION_SUMMARY.md",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/RePORT_RePORTER_AI-READI_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/RePORT_RePORTER_AI-READI_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/RePORT_RePORTER_AI_READI_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/RePORT_RePORTER_AI_READI_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/docs_aireadi_org_docs-2_row10_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/docs_aireadi_org_docs-2_row10_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/docs_aireadi_org_docs-2_row8_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/docs_aireadi_org_docs-2_row8_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/docs_google_com_document-d_row11_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/docs_google_com_document-d_row11_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/docs_google_com_document-d_row13_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/docs_google_com_document-d_row13_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/doi_row2_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/doi_row2_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/doi_row9_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/doi_row9_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/e097449_full_row2_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/e097449_full_row2_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/fairhub_row10_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/fairhub_row10_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/fairhub_row12_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/fairhub_row12_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/fairhub_row13_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/fairhub_row13_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/fairhub_row16_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/fairhub_row16_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/AI_READI/zenodo_org_records-10642459_row11_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/AI_READI/zenodo_org_records-10642459_row11_d4d.yaml",
+    "R  \"data/d4d_individual/claudecode_agent/CHORUS/CHoRUS for Equitable AI - github.txt_d4d.yaml\" -> \"data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CHORUS/CHoRUS for Equitable AI - github.txt_d4d.yaml\"",
+    "R  \"data/d4d_individual/claudecode_agent/CHORUS/CHoRUS for Equitable AI - github_d4d.yaml\" -> \"data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CHORUS/CHoRUS for Equitable AI - github_d4d.yaml\"",
+    "R  \"data/d4d_individual/claudecode_agent/CHORUS/CHoRUS for Equitable AI.txt_d4d.yaml\" -> \"data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CHORUS/CHoRUS for Equitable AI.txt_d4d.yaml\"",
+    "R  \"data/d4d_individual/claudecode_agent/CHORUS/CHoRUS for Equitable AI_d4d.yaml\" -> \"data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CHORUS/CHoRUS for Equitable AI_d4d.yaml\"",
+    "R  data/d4d_individual/claudecode_agent/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.txt_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.txt_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.txt_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.txt_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9.txt_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9.txt_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CHORUS/github_chorus_ai_row9.txt_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CHORUS/github_chorus_ai_row9.txt_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CHORUS/github_chorus_ai_row9_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CHORUS/github_chorus_ai_row9_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CM4AI/2024.05.21.589311v1.full.txt_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CM4AI/2024.05.21.589311v1.full.txt_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CM4AI/2024.05.21.589311v1.full_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CM4AI/2024.05.21.589311v1.full_d4d.yaml",
+    "R  \"data/d4d_individual/claudecode_agent/CM4AI/RePORT \\342\\237\\251 RePORTER - CM4AI.txt_d4d.yaml\" -> \"data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CM4AI/RePORT \\342\\237\\251 RePORTER - CM4AI.txt_d4d.yaml\"",
+    "R  data/d4d_individual/claudecode_agent/CM4AI/RePORT_RePORTER_CM4AI_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CM4AI/RePORT_RePORTER_CM4AI_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CM4AI/creativecommons_org_licenses-by-nc-sa_row15.txt_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CM4AI/creativecommons_org_licenses-by-nc-sa_row15.txt_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CM4AI/creativecommons_org_licenses_by_nc_sa_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CM4AI/creativecommons_org_licenses_by_nc_sa_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CM4AI/dataverse_10.18130_V3_B35XWX_row16.txt_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CM4AI/dataverse_10.18130_V3_B35XWX_row16.txt_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CM4AI/dataverse_10.18130_V3_F3TD5R_row19.txt_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CM4AI/dataverse_10.18130_V3_F3TD5R_row19.txt_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CM4AI/dataverse_B35XWX_march2025_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CM4AI/dataverse_B35XWX_march2025_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CM4AI/dataverse_F3TD5R_june2025_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CM4AI/dataverse_F3TD5R_june2025_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CM4AI/doi_row3.json_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CM4AI/doi_row3.json_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/CM4AI/doi_row3_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/CM4AI/doi_row3_d4d.yaml",
+    "R  \"data/d4d_individual/claudecode_agent/VOICE/B2AI-Voice DTUA 2025 2025-09-04_d4d.yaml\" -> \"data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/VOICE/B2AI-Voice DTUA 2025 2025-09-04_d4d.yaml\"",
+    "R  data/d4d_individual/claudecode_agent/VOICE/B2AI-Voice_DTUA_2025_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/VOICE/B2AI-Voice_DTUA_2025_d4d.yaml",
+    "R  \"data/d4d_individual/claudecode_agent/VOICE/RePORT \\342\\237\\251 RePORTER - VOICE_d4d.yaml\" -> \"data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/VOICE/RePORT \\342\\237\\251 RePORTER - VOICE_d4d.yaml\"",
+    "R  data/d4d_individual/claudecode_agent/VOICE/docs_google_com_document-d_row13_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/VOICE/docs_google_com_document-d_row13_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/VOICE/github_eipm_bridge2ai-docs_README_row22_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/VOICE/github_eipm_bridge2ai-docs_README_row22_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/VOICE/github_eipm_bridge2ai-docs_row22_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/VOICE/github_eipm_bridge2ai-docs_row22_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/VOICE/healthnexus_row13_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/VOICE/healthnexus_row13_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/VOICE/physionet_b2ai-voice_1.1_row14_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/VOICE/physionet_b2ai-voice_1.1_row14_d4d.yaml",
+    "R  data/d4d_individual/claudecode_agent/VOICE/physionet_b2ai-voice_1.1_row17_d4d.yaml -> data/d4d_individual/claudecode_agent/2025-12-06_sonnet-4.5/VOICE/physionet_b2ai-voice_1.1_row17_d4d.yaml",
+    " M data/evaluation_llm/rubric10/concatenated/AI_READI_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric10/concatenated/CHORUS_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric10/concatenated/CM4AI_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric10/concatenated/VOICE_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric10_semantic/concatenated/AI_READI_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric10_semantic/concatenated/CHORUS_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric10_semantic/concatenated/CM4AI_claudecode_agent_evaluation.json",
+    " D data/evaluation_llm/rubric10_semantic/concatenated/REGENERATION_SUMMARY_REPORT.md",
+    " M data/evaluation_llm/rubric10_semantic/concatenated/VOICE_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric10_semantic/concatenated/scores_summary.txt",
+    " M data/evaluation_llm/rubric10_semantic/concatenated/summary_report.md",
+    " M data/evaluation_llm/rubric20/concatenated/AI_READI_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric20/concatenated/CHORUS_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric20/concatenated/CM4AI_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric20/concatenated/VOICE_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric20_semantic/concatenated/AI_READI_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric20_semantic/concatenated/CHORUS_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric20_semantic/concatenated/CM4AI_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric20_semantic/concatenated/VOICE_claudecode_agent_evaluation.json",
+    " M data/evaluation_llm/rubric20_semantic/concatenated/summary_report.md",
+    "?? data/d4d_concatenated/claudecode_agent/CM4AI_d4d_rubric10_eval.json",
+    "?? data/d4d_html/concatenated/claudecode_agent/AI_READI_d4d_interleaved.html",
+    "?? data/d4d_html/concatenated/claudecode_agent/CHORUS_d4d_interleaved.html",
+    "?? data/d4d_html/concatenated/claudecode_agent/CM4AI_d4d_interleaved.html",
+    "?? data/d4d_html/concatenated/claudecode_agent/VOICE_d4d_interleaved.html",
+    "?? data/d4d_html/concatenated/claudecode_agent_core/AI_READI_d4d_core_interleaved.html",
+    "?? data/d4d_html/concatenated/claudecode_agent_core/CHORUS_d4d_core_interleaved.html",
+    "?? data/d4d_html/concatenated/claudecode_agent_core/CM4AI_d4d_core_interleaved.html",
+    "?? data/d4d_html/concatenated/claudecode_agent_core/VOICE_d4d_core_interleaved.html",
+    "?? data/evaluation_llm/publication_summary_2026-07-22_fable-5.md",
+    "?? data/evaluation_llm/publication_summary_2026-07-22_fable-5.tsv",
+    "?? data/evaluation_llm/publication_summary_2026-07-22_sonnet-4.5.md",
+    "?? data/evaluation_llm/publication_summary_2026-07-22_sonnet-4.5.tsv",
+    "?? data/evaluation_llm/rubric10/concatenated/2026-07-22_sonnet-4.5/",
+    "?? data/evaluation_llm/rubric10/concatenated/AI_READI_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric10/concatenated/CHORUS_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric10/concatenated/CM4AI_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric10/concatenated/VOICE_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric10/concatenated/_archive_2026-07-22/",
+    "?? data/evaluation_llm/rubric10/concatenated/scores_summary.txt",
+    "?? data/evaluation_llm/rubric10/concatenated/summary_report.md",
+    "?? data/evaluation_llm/rubric10_semantic/concatenated/2026-07-22_sonnet-4.5/",
+    "?? data/evaluation_llm/rubric10_semantic/concatenated/AI_READI_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric10_semantic/concatenated/CHORUS_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric10_semantic/concatenated/CM4AI_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric10_semantic/concatenated/VOICE_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric10_semantic/concatenated/_archive_2026-07-22/",
+    "?? data/evaluation_llm/rubric20/concatenated/2026-07-22_sonnet-4.5/",
+    "?? data/evaluation_llm/rubric20/concatenated/AI_READI_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric20/concatenated/CHORUS_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric20/concatenated/CM4AI_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric20/concatenated/VOICE_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric20/concatenated/_archive_2026-07-22/",
+    "?? data/evaluation_llm/rubric20/concatenated/scores_summary.txt",
+    "?? data/evaluation_llm/rubric20/concatenated/summary_report.md",
+    "?? data/evaluation_llm/rubric20_semantic/concatenated/2026-07-22_sonnet-4.5/",
+    "?? data/evaluation_llm/rubric20_semantic/concatenated/AI_READI_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric20_semantic/concatenated/CHORUS_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric20_semantic/concatenated/CM4AI_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric20_semantic/concatenated/VOICE_claudecode_agent_core_evaluation.json",
+    "?? data/evaluation_llm/rubric20_semantic/concatenated/_archive_2026-07-22/",
+    "?? data/evaluation_llm/rubric20_semantic/concatenated/scores_summary.txt",
+    "?? data/evaluation_llm/run_manifest_2026-07-22_sonnet-4.5.json",
+    "?? data/poster_assets/",
+    "?? scripts/publication_summary_2026-07-22.py",
+    "?? scripts/render_interleaved_evaluation.py"
+  ],
+  "d4d_inputs": {
+    "AI_READI": {
+      "full": {
+        "path": "data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/AI_READI_d4d.yaml",
+        "sha256": "ff673f87beb6cecaa74e7fe91c07f0899435a25f36142153c606b6c5ad2fb28f",
+        "bytes": 34210
+      },
+      "core": {
+        "path": "data/d4d_concatenated/claudecode_agent_core/2026-04-10_sonnet-4.6/AI_READI_d4d_core.yaml",
+        "sha256": "181125d9d40b5e5797a760d68942fb5cedf8109133068324622728a09546e445",
+        "bytes": 37679
+      }
+    },
+    "CHORUS": {
+      "full": {
+        "path": "data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/CHORUS_d4d.yaml",
+        "sha256": "59855256fbbaa7388b1771de39be058fcc2d5314fd6d425a650316b5344ecfdb",
+        "bytes": 44562
+      },
+      "core": {
+        "path": "data/d4d_concatenated/claudecode_agent_core/2026-04-10_sonnet-4.6/CHORUS_d4d_core.yaml",
+        "sha256": "bde32a7f539ab0de6dd8eff711a9fdfc0840fe2ae7bdffa8a99594b0d6fb4088",
+        "bytes": 46302
+      }
+    },
+    "CM4AI": {
+      "full": {
+        "path": "data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/CM4AI_d4d.yaml",
+        "sha256": "d3542ecc9a305d2d2c96f38c383003307f7cdb4efdfc44326c6f0645c578861e",
+        "bytes": 46299
+      },
+      "core": {
+        "path": "data/d4d_concatenated/claudecode_agent_core/2026-04-10_sonnet-4.6/CM4AI_d4d_core.yaml",
+        "sha256": "0e49a83c8d2f339a2850c164df30f910b6d952235e30553a924b1f282206f443",
+        "bytes": 40045
+      }
+    },
+    "VOICE": {
+      "full": {
+        "path": "data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/VOICE_d4d.yaml",
+        "sha256": "9cf19cf2e6191e4a04f921372b8bef312f71a52b62d827ec2e3530f09bd1e666",
+        "bytes": 51093
+      },
+      "core": {
+        "path": "data/d4d_concatenated/claudecode_agent_core/2026-04-10_sonnet-4.6/VOICE_d4d_core.yaml",
+        "sha256": "7848bbc7a5b785f218c37973172181792edc4228345c7a6410917dbbf70a618b",
+        "bytes": 50813
+      }
+    }
+  },
+  "rubric_agents": {
+    "d4d-rubric10": {
+      "path": ".claude/agents/d4d-rubric10.md",
+      "sha256": "8fa1c5e8ec114adc115f40fdb4e996a6b8d522cfaac4f89e73bba7c956d9840e",
+      "bytes": 21086
+    },
+    "d4d-rubric20": {
+      "path": ".claude/agents/d4d-rubric20.md",
+      "sha256": "9fe092cca3647d2b3cf5e2f7e0e30ebe017de7d8b58db0b0308d0a4e702333a5",
+      "bytes": 21855
+    },
+    "d4d-rubric10-semantic": {
+      "path": ".claude/agents/d4d-rubric10-semantic.md",
+      "sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
+      "bytes": 43183
+    },
+    "d4d-rubric20-semantic": {
+      "path": ".claude/agents/d4d-rubric20-semantic.md",
+      "sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
+      "bytes": 39308
+    }
+  },
+  "eval_matrix": {
+    "projects": [
+      "AI_READI",
+      "CHORUS",
+      "CM4AI",
+      "VOICE"
+    ],
+    "d4d_variants": [
+      "full (claudecode_agent)",
+      "core (claudecode_agent_core)"
+    ],
+    "rubrics": [
+      "rubric10",
+      "rubric20",
+      "rubric10_semantic",
+      "rubric20_semantic"
+    ],
+    "total_evaluations": 32
+  },
+  "supersedes": {
+    "run": "publication_final_2026-07-22 (Claude Opus 4.8)",
+    "archived_to": [
+      "data/evaluation_llm/{rubric}/concatenated/2026-07-22_opus-4.8/",
+      "data/evaluation_llm/run_manifest_2026-07-22_opus-4.8.json",
+      "data/evaluation_llm/publication_summary_2026-07-22_opus-4.8.md",
+      "data/evaluation_llm/publication_summary_2026-07-22_opus-4.8.tsv"
+    ]
+  },
+  "d4d_generation": {
+    "full_and_core": {
+      "date": "2026-04-10",
+      "model": "Claude Sonnet 4.6",
+      "model_basis": "PR #146 (88142c4f) commit trailer"
+    },
+    "note": "D4D inputs unchanged from sonnet-4.5 eval run; hashes verified identical."
+  },
+  "notes": "Exemplar publication run: all 32 claudecode_agent + claudecode_agent_core evaluations rerun with claude-fable-5 on 2026-07-22. Agent definitions updated to pin claude-fable-5 (frontmatter + output template) prior to run."
+}

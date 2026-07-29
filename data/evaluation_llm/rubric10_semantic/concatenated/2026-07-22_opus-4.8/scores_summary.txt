@@ -1,0 +1,50 @@
+# rubric10_semantic scores — publication run 2026-07-22
+
+[READI_claudecode]
+  AI_READI   —
+  CHORUS     —
+  CM4AI      —
+  VOICE      —
+
+[READI_claudecode_assistant]
+  AI_READI   —
+  CHORUS     —
+  CM4AI      —
+  VOICE      —
+
+[READI_gpt5]
+  AI_READI   —
+  CHORUS     —
+  CM4AI      —
+  VOICE      —
+
+[claudecode]
+  AI_READI   —
+  CHORUS     None/None  (—)
+  CM4AI      None/None  (—)
+  VOICE      None/None  (—)
+
+[claudecode_agent]
+  AI_READI   40.0/50  (80.0%)
+  CHORUS     37.0/50  (74.0%)
+  CM4AI      46.5/50  (93.0%)
+  VOICE      47/50  (94.0%)
+
+[claudecode_agent_core]
+  AI_READI   35.0/50  (70.0%)
+  CHORUS     41.5/50  (83.0%)
+  CM4AI      43.0/50  (86.0%)
+  VOICE      45.0/50  (90.0%)
+
+[claudecode_assistant]
+  AI_READI   —
+  CHORUS     None/None  (—)
+  CM4AI      None/None  (—)
+  VOICE      None/None  (—)
+
+[gpt5]
+  AI_READI   —
+  CHORUS     None/None  (—)
+  CM4AI      None/None  (—)
+  VOICE      None/None  (—)
+

@@ -1,456 +1,296 @@
 {
   "rubric": "rubric20",
   "version": "1.0",
-  "d4d_file": "data/d4d_concatenated/claudecode_agent/CHORUS_d4d.yaml",
+  "d4d_file": "data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/CHORUS_d4d.yaml",
   "project": "CHORUS",
   "method": "claudecode_agent",
-  "type": "concatenated",
-  "evaluation_timestamp": "2025-12-08T19:16:57.624610",
+  "evaluation_timestamp": "2026-07-22T00:00:00Z",
   "model": {
-    "name": "hybrid-heuristic-evaluator",
-    "temperature": "N/A",
-    "evaluation_type": "rule_based_with_quality_heuristics"
+    "name": "claude-fable-5",
+    "temperature": 0.0,
+    "evaluation_type": "llm_as_judge"
   },
   "overall_score": {
-    "total_points": 41,
+    "total_points": 78,
     "max_points": 84,
-    "percentage": 48.8
+    "percentage": 92.9
   },
-  "categories": {
-    "Structural Completeness": {
+  "categories": [
+    {
       "name": "Structural Completeness",
       "questions": [
         {
           "id": 1,
           "name": "Field Completeness",
-          "description": "Proportion of mandatory schema fields populated including hierarchical structure and governance",
-          "score": 0,
-          "max_score": 5,
+          "description": "Proportion of mandatory schema fields populated",
           "score_type": "numeric",
-          "evidence": "id: https://chorus4ai.org/",
-          "quality_note": "8/14 fields filled (\u226440%)"
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥90% fields populated",
+          "evidence": "id: https://chorus4ai.org/; title: 'Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI'; description: ~1000 char multi-modal narrative; keywords: 26 entries; license_and_use_terms: full block with license_terms (lines 617-632). Also top-level license field (line 29).",
+          "quality_note": "All five mandatory fields present with substantial, meaningful content (100%)."
         },
         {
           "id": 2,
           "name": "Entry Length Adequacy",
-          "description": "Narrative fields have meaningful content length",
+          "description": "Whether narrative fields have meaningful content length",
+          "score_type": "numeric",
           "score": 5,
           "max_score": 5,
-          "score_type": "numeric",
-          "evidence": "description: The CHoRUS Network dataset is a diverse, high-resolution, ethically sourced, AI-...",
-          "quality_note": "Avg 742 chars (>200)"
+          "score_label": ">200 chars",
+          "evidence": "description spans lines 10-26 (~1000 chars). Motivation content carried by purposes (4 detailed entries, lines 60-91) each with multi-sentence descriptions.",
+          "quality_note": "Narrative fields far exceed the 200-char threshold with rich, specific context."
         },
         {
           "id": 3,
           "name": "Keyword Diversity",
           "description": "Number of unique keywords provided",
+          "score_type": "numeric",
           "score": 5,
           "max_score": 5,
-          "score_type": "numeric",
-          "evidence": "keywords: 20 items",
-          "quality_note": "20 keywords (\u22658)"
+          "score_label": "≥8 keywords",
+          "evidence": "26 unique keywords (lines 30-57): CHoRUS, Bridge2AI, critical care, OMOP Common Data Model, EHR, waveform telemetry, DICOM, EEG, OHNLP, health equity, federated access, multi-modal data, bias mitigation, ICU, etc.",
+          "quality_note": "Well above threshold; keywords span topic, modality, standards, and equity dimensions."
         },
         {
           "id": 4,
           "name": "File Enumeration and Type Variety",
-          "description": "Number of distribution formats and file type diversity",
-          "score": 0,
-          "max_score": 5,
+          "description": "Number of files and file type diversity",
           "score_type": "numeric",
-          "evidence": "distribution_formats: 1 items",
-          "quality_note": "1 file type only: DICOM"
+          "score": 5,
+          "max_score": 5,
+          "score_label": ">3 file types",
+          "evidence": "distribution_formats lists 5 distinct formats (lines 634-672): OMOP CDM (structured EHR), WFDB (waveform telemetry), DICOM (imaging), OHNLP tokenized (clinical notes), EDF+/Persyst (EEG).",
+          "quality_note": "Five distinct standard formats indicating genuinely multi-modal data."
         },
         {
           "id": 5,
           "name": "Data File Size Availability",
-          "description": "Presence of file size or dimensional metadata (bytes, instance counts)",
-          "score": 0,
-          "max_score": 1,
+          "description": "Presence of file size or dimensional metadata",
           "score_type": "pass_fail",
-          "evidence": "instances: 1 items",
-          "quality_note": "Fail: No file size/dimension metadata"
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "Numerous quantitative metrics: '1.6 billion rows of EHR OMOP data', '23 TB of waveform data', '1,000 images', '7,642 admissions with radiology data', 'over 45,000 unique admissions', '50,000 patient admissions' (lines 23-26, 244-267).",
+          "quality_note": "Rich dimensional/size metadata present across modalities."
         }
       ],
-      "category_score": 10,
+      "category_score": 21,
       "category_max": 21
     },
-    "Metadata Quality & Content": {
+    {
       "name": "Metadata Quality & Content",
       "questions": [
         {
           "id": 6,
           "name": "Dataset Identification Metadata",
-          "description": "Presence of unique identifiers (DOI, RRID, URLs)",
+          "description": "Presence of unique identifiers such as DOI, RRID, or persistent URLs",
+          "score_type": "pass_fail",
           "score": 1,
           "max_score": 1,
-          "score_type": "pass_fail",
-          "evidence": "page: https://chorus4ai.org/",
-          "quality_note": "Pass: Persistent identifier found"
+          "score_label": "Pass",
+          "evidence": "Publication DOI https://doi.org/10.1007/s12028-024-02007 (line 818); NIH RePORTER project-details/10472824 (line 797); persistent project page https://chorus4ai.org/ (line 27).",
+          "quality_note": "At least one persistent identifier (DOI) plus persistent project URLs present."
         },
         {
           "id": 7,
           "name": "Funding and Acknowledgements Completeness",
-          "description": "Funding sources, grants, sponsors, and creator affiliations",
-          "score": 0,
-          "max_score": 5,
+          "description": "Presence of funding sources, grants, or institutional sponsors",
           "score_type": "numeric",
-          "evidence": "Missing: funders, creators, funding_and_acknowledgements",
-          "quality_note": "Field absent or empty"
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Funding agency + award number + acknowledgment",
+          "evidence": "funders (lines 210-219): 'NIH Common Fund Bridge2AI Program', grant OT2OD032701, project number 1OT2OD032701-01, Opportunity Number OTA-21-008, 2022 funding $5,880,300, Assistance Listing 93.310, project dates. License block adds acknowledgment: 'Funded under NIH award OT2OD032701; content is solely responsibility of authors' (line 632).",
+          "quality_note": "Agency, award number, amount, and acknowledgment all present with specificity."
         },
         {
           "id": 8,
           "name": "Ethical and Privacy Declarations",
-          "description": "Comprehensive ethics: IRB, deidentification, privacy, consent, compensation, vulnerable populations",
-          "score": 3,
-          "max_score": 5,
+          "description": "Presence of deidentification methods, IRB approvals, or ethical sourcing notes",
           "score_type": "numeric",
-          "evidence": "human_subject_research: present (3 keys)",
-          "quality_note": "Partial ethics documentation"
+          "score": 5,
+          "max_score": 5,
+          "score_label": "IRB + deidentification + ethical sourcing details",
+          "evidence": "human_subject_research (lines 750-774): IRBs at 14 centers, community ethics focus groups, regulatory_compliance (HIPAA, 45 CFR 46 Common Rule). De-identification methods: OMOP transformation, OHNLP tokenization, DICOM header de-id, privacy_scan_tool, re-identification-limitation transformations (lines 462-496).",
+          "quality_note": "Comprehensive ethics documentation: IRB review, multiple de-identification methods, and ethical sourcing via focus groups."
         },
         {
           "id": 9,
-          "name": "Access Requirements and Governance Documentation",
-          "description": "Access policy, license, IP restrictions, regulatory restrictions, confidentiality level",
-          "score": 3,
-          "max_score": 5,
+          "name": "Access Requirements Documentation",
+          "description": "Whether access policy and license are clearly defined",
           "score_type": "numeric",
-          "evidence": "license_and_use_terms: present (2 keys)",
-          "quality_note": "License type only"
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License + Data Use Agreement + platform access description",
+          "evidence": "license_and_use_terms (lines 617-632): controlled access, institutional (.edu) email registration, signed licensing agreement, review/approval process, CHoRUS secure enclave (Azure), DUA prohibiting re-identification, access request contacts.",
+          "quality_note": "Access path fully specified: license type, DUA, registration, and platform (enclave) mechanism."
         },
         {
           "id": 10,
           "name": "Interoperability and Standardization",
-          "description": "Standard formats, encoding, ontologies, schema conformance",
-          "score": 0,
-          "max_score": 5,
+          "description": "Presence of standard formats, ontologies, or schema conformance",
           "score_type": "numeric",
-          "evidence": "distribution_formats: 1 items",
-          "quality_note": "Non-standard or unspecified format"
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Standard formats + schema/ontology compliance",
+          "evidence": "OMOP Common Data Model, DICOM, WFDB (extended PhysioNet schema), OHNLP schema, EDF+/Persyst. Schema compliance validation across all modalities (cleaning_strategies lines 513-525); OHDSI/OMOP vocabulary standardization (lines 435-448).",
+          "quality_note": "Multiple international standard formats with explicit schema conformance and validation."
         }
       ],
-      "category_score": 7,
+      "category_score": 21,
       "category_max": 21
     },
-    "Technical Documentation": {
+    {
       "name": "Technical Documentation",
       "questions": [
         {
           "id": 11,
           "name": "Tool and Software Transparency",
-          "description": "Preprocessing, cleaning, labeling strategies with software tools",
-          "score": 0,
-          "max_score": 5,
+          "description": "Mentions of preprocessing libraries or tools used in data preparation",
           "score_type": "numeric",
-          "evidence": "preprocessing_strategies: 1 items",
-          "quality_note": "No software tools documented"
+          "score": 5,
+          "max_score": 5,
+          "score_label": "Comprehensive list with versions or URLs",
+          "evidence": "Named tools with repos/URLs: OHNLP toolkit, OHDSI tool stack, DeGauss/UF-Geocoding, privacy_scan_tool, chorus_waveform, chorus-extract-upload, CHoRUSReports, all under https://github.com/chorus-ai (lines 690-710), with licenses (MIT, Apache-2.0).",
+          "quality_note": "Comprehensive tool inventory with repository URLs and licenses; only software version numbers are missing."
         },
         {
           "id": 12,
           "name": "Collection Protocol Clarity",
-          "description": "Collection mechanisms, acquisition methods, data collectors, timeframes",
+          "description": "Description completeness of participant recruitment and data acquisition",
+          "score_type": "numeric",
           "score": 5,
           "max_score": 5,
-          "score_type": "numeric",
-          "evidence": "acquisition_methods: 1 items",
-          "quality_note": "Full recruitment and procedural details"
+          "score_label": "Full recruitment and procedural details included",
+          "evidence": "collection_mechanisms (4, lines 373-400) and acquisition_methods (5, lines 402-432) detail retrospective EHR extraction, waveform capture via gateway/middleware, PACS imaging, EEG extraction; source population (ICU/PICU/NICU, 14 acquisition centers) and federated sampling described (lines 282-302).",
+          "quality_note": "Procedural acquisition detail is thorough per modality; recruitment is retrospective and well characterized at the cohort/site level."
         },
         {
           "id": 13,
           "name": "Version History Documentation",
-          "description": "Version info, version access, errata, update plans, release notes",
-          "score": 0,
-          "max_score": 5,
+          "description": "Presence of multiple version records and associated dates",
           "score_type": "numeric",
-          "evidence": "version_access: present (2 keys)",
-          "quality_note": "No version info"
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Milestone status without discrete versioned change summaries",
+          "evidence": "updates (lines 712-733): continuous updates through Nov 30 2026 with August 2025 status milestone (45K+ admissions, 50K released, 1.6B rows) and no-cost extension noted. No enumerated discrete release versions with per-version change logs.",
+          "quality_note": "Temporal status milestones and expansion narrative present, but not ≥2 discrete version records with change summaries."
         },
         {
           "id": 14,
           "name": "Associated Publications",
-          "description": "Citations or DOI-linked references",
-          "score": 0,
-          "max_score": 5,
+          "description": "Presence of formal citations or DOI-linked references",
           "score_type": "numeric",
-          "evidence": "external_resources: 2 items",
-          "quality_note": "No publications cited"
+          "score": 3,
+          "max_score": 5,
+          "score_label": "One DOI/paper cited",
+          "evidence": "external_resources cites one peer-reviewed publication DOI https://doi.org/10.1007/s12028-024-02007 (Neurocritical Care, lines 815-818); NIH RePORTER grant record also linked (non-publication).",
+          "quality_note": "A single publication DOI is present; no multiple formal citations or bidirectional dataset DOI cross-links."
         },
         {
           "id": 15,
           "name": "Human Subject Representation",
-          "description": "Demographics, subpopulations, vulnerable population protections",
-          "score": 5,
-          "max_score": 5,
+          "description": "Inclusion of human subjects, demographic diversity, or subgroup details",
           "score_type": "numeric",
-          "evidence": "subpopulations: 1 items",
-          "quality_note": "Detailed demographics and criteria"
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Subgroup description with limited explicit demographics",
+          "evidence": "instances (critically ill ICU/PICU/NICU patients, lines 222-235); subpopulations by hospital and by ICU type (lines 304-316); Social Determinants of Health and equity dimensions (race, ethnicity, geography) referenced in uses (lines 563-571).",
+          "quality_note": "Population and subgroup structure well described; explicit demographic breakdowns and formal inclusion/exclusion criteria are limited (retrospective cohort)."
         }
       ],
-      "category_score": 10,
+      "category_score": 20,
       "category_max": 25
     },
-    "FAIRness & Accessibility": {
+    {
       "name": "FAIRness & Accessibility",
       "questions": [
         {
           "id": 16,
           "name": "Findability (Persistent Links)",
-          "description": "Persistent identifiers (DOI, ID) and URLs for access",
+          "description": "Dataset includes persistent URLs for access and documentation",
+          "score_type": "pass_fail",
           "score": 1,
           "max_score": 1,
-          "score_type": "pass_fail",
-          "evidence": "page: https://chorus4ai.org/",
-          "quality_note": "Pass: External URLs present"
+          "score_label": "Pass",
+          "evidence": "page https://chorus4ai.org/ (line 27) plus 8 external_resources entries (lines 777-818) including project site, GitHub org, NIH RePORTER, Bridge2AI, AIM-AHEAD, OHDSI, and a publication DOI.",
+          "quality_note": "Multiple persistent, findable URLs present."
         },
         {
           "id": 17,
           "name": "Accessibility (Access Mechanism)",
-          "description": "Download URL, distribution formats, access policy",
+          "description": "Describes how users can obtain the dataset",
+          "score_type": "numeric",
           "score": 5,
           "max_score": 5,
-          "score_type": "numeric",
-          "evidence": "distribution_formats: 1 items",
-          "quality_note": "Fully defined access path"
+          "score_label": "Fully defined access path (platform, login, policy)",
+          "evidence": "license_and_use_terms describes registration with institutional email, signed licensing agreement, review/approval, email with access instructions to CHoRUS secure enclave (Azure), and access contacts (lines 620-632); distribution_formats give per-format access_urls.",
+          "quality_note": "Complete, actionable access mechanism: platform, registration/login, approval policy, and contacts."
         },
         {
           "id": 18,
-          "name": "Reusability (License and Use Guidance)",
-          "description": "License with explicit use guidance (intended/prohibited/discouraged)",
-          "score": 3,
-          "max_score": 5,
+          "name": "Reusability (License Clarity)",
+          "description": "License is clearly defined and permits identifiable reuse cases",
           "score_type": "numeric",
-          "evidence": "license_and_use_terms: present (2 keys)",
-          "quality_note": "License present, unclear reuse"
+          "score": 5,
+          "max_score": 5,
+          "score_label": "License explicitly defines reuse terms",
+          "evidence": "license_terms (lines 626-632) specify permitted research uses, prohibition of re-identification, controlled-access conditions; intended_uses and discouraged_uses (lines 543-614) delineate acceptable vs. prohibited reuse.",
+          "quality_note": "Reuse conditions are explicit, including permitted purposes and clear prohibitions."
         },
         {
           "id": 19,
           "name": "Data Integrity and Provenance",
-          "description": "Version access, errata, updates, source derivation, parent datasets",
-          "score": 5,
-          "max_score": 5,
+          "description": "Presence of change logs or provenance tracking",
           "score_type": "numeric",
-          "evidence": "version_access: present (2 keys)",
-          "quality_note": "Structured version control with timestamps"
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Change notes plus tracking with milestone timestamps",
+          "evidence": "updates documents continuous collection with GitHub project tracking, Google Form site-status submissions, semantic-mapping validation, and August 2025 / November 2026 timestamps (lines 712-733); cleaning_strategies note cross-site QA via CHoRUSReports and validated mappings.",
+          "quality_note": "Strong provenance and change tracking with timestamps, though not a formal per-version change-controlled log."
         },
         {
           "id": 20,
-          "name": "Interlinking Across Platforms and Datasets",
-          "description": "External resources and dataset relationships (typed relationships, hierarchical linkages)",
-          "score": 0,
-          "max_score": 1,
+          "name": "Interlinking Across Platforms",
+          "description": "Metadata connects dataset records across multiple platforms",
           "score_type": "pass_fail",
-          "evidence": "external_resources: 2 items",
-          "quality_note": "Fail: No cross-platform linkages"
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "Cross-platform links to GitHub (github.com/chorus-ai), NIH RePORTER, Bridge2AI, AIM-AHEAD, OHDSI, and a DOI publication (lines 777-818).",
+          "quality_note": "Verified interlinking across multiple external platforms."
         }
       ],
-      "category_score": 14,
+      "category_score": 16,
       "category_max": 17
     }
-  },
-  "questions": [
-    {
-      "id": 1,
-      "name": "Field Completeness",
-      "description": "Proportion of mandatory schema fields populated including hierarchical structure and governance",
-      "score": 0,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "id: https://chorus4ai.org/",
-      "quality_note": "8/14 fields filled (\u226440%)"
-    },
-    {
-      "id": 2,
-      "name": "Entry Length Adequacy",
-      "description": "Narrative fields have meaningful content length",
-      "score": 5,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "description: The CHoRUS Network dataset is a diverse, high-resolution, ethically sourced, AI-...",
-      "quality_note": "Avg 742 chars (>200)"
-    },
-    {
-      "id": 3,
-      "name": "Keyword Diversity",
-      "description": "Number of unique keywords provided",
-      "score": 5,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "keywords: 20 items",
-      "quality_note": "20 keywords (\u22658)"
-    },
-    {
-      "id": 4,
-      "name": "File Enumeration and Type Variety",
-      "description": "Number of distribution formats and file type diversity",
-      "score": 0,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "distribution_formats: 1 items",
-      "quality_note": "1 file type only: DICOM"
-    },
-    {
-      "id": 5,
-      "name": "Data File Size Availability",
-      "description": "Presence of file size or dimensional metadata (bytes, instance counts)",
-      "score": 0,
-      "max_score": 1,
-      "score_type": "pass_fail",
-      "evidence": "instances: 1 items",
-      "quality_note": "Fail: No file size/dimension metadata"
-    },
-    {
-      "id": 6,
-      "name": "Dataset Identification Metadata",
-      "description": "Presence of unique identifiers (DOI, RRID, URLs)",
-      "score": 1,
-      "max_score": 1,
-      "score_type": "pass_fail",
-      "evidence": "page: https://chorus4ai.org/",
-      "quality_note": "Pass: Persistent identifier found"
-    },
-    {
-      "id": 7,
-      "name": "Funding and Acknowledgements Completeness",
-      "description": "Funding sources, grants, sponsors, and creator affiliations",
-      "score": 0,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "Missing: funders, creators, funding_and_acknowledgements",
-      "quality_note": "Field absent or empty"
-    },
-    {
-      "id": 8,
-      "name": "Ethical and Privacy Declarations",
-      "description": "Comprehensive ethics: IRB, deidentification, privacy, consent, compensation, vulnerable populations",
-      "score": 3,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "human_subject_research: present (3 keys)",
-      "quality_note": "Partial ethics documentation"
-    },
-    {
-      "id": 9,
-      "name": "Access Requirements and Governance Documentation",
-      "description": "Access policy, license, IP restrictions, regulatory restrictions, confidentiality level",
-      "score": 3,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "license_and_use_terms: present (2 keys)",
-      "quality_note": "License type only"
-    },
-    {
-      "id": 10,
-      "name": "Interoperability and Standardization",
-      "description": "Standard formats, encoding, ontologies, schema conformance",
-      "score": 0,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "distribution_formats: 1 items",
-      "quality_note": "Non-standard or unspecified format"
-    },
-    {
-      "id": 11,
-      "name": "Tool and Software Transparency",
-      "description": "Preprocessing, cleaning, labeling strategies with software tools",
-      "score": 0,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "preprocessing_strategies: 1 items",
-      "quality_note": "No software tools documented"
-    },
-    {
-      "id": 12,
-      "name": "Collection Protocol Clarity",
-      "description": "Collection mechanisms, acquisition methods, data collectors, timeframes",
-      "score": 5,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "acquisition_methods: 1 items",
-      "quality_note": "Full recruitment and procedural details"
-    },
-    {
-      "id": 13,
-      "name": "Version History Documentation",
-      "description": "Version info, version access, errata, update plans, release notes",
-      "score": 0,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "version_access: present (2 keys)",
-      "quality_note": "No version info"
-    },
-    {
-      "id": 14,
-      "name": "Associated Publications",
-      "description": "Citations or DOI-linked references",
-      "score": 0,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "external_resources: 2 items",
-      "quality_note": "No publications cited"
-    },
-    {
-      "id": 15,
-      "name": "Human Subject Representation",
-      "description": "Demographics, subpopulations, vulnerable population protections",
-      "score": 5,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "subpopulations: 1 items",
-      "quality_note": "Detailed demographics and criteria"
-    },
-    {
-      "id": 16,
-      "name": "Findability (Persistent Links)",
-      "description": "Persistent identifiers (DOI, ID) and URLs for access",
-      "score": 1,
-      "max_score": 1,
-      "score_type": "pass_fail",
-      "evidence": "page: https://chorus4ai.org/",
-      "quality_note": "Pass: External URLs present"
-    },
-    {
-      "id": 17,
-      "name": "Accessibility (Access Mechanism)",
-      "description": "Download URL, distribution formats, access policy",
-      "score": 5,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "distribution_formats: 1 items",
-      "quality_note": "Fully defined access path"
-    },
-    {
-      "id": 18,
-      "name": "Reusability (License and Use Guidance)",
-      "description": "License with explicit use guidance (intended/prohibited/discouraged)",
-      "score": 3,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "license_and_use_terms: present (2 keys)",
-      "quality_note": "License present, unclear reuse"
-    },
-    {
-      "id": 19,
-      "name": "Data Integrity and Provenance",
-      "description": "Version access, errata, updates, source derivation, parent datasets",
-      "score": 5,
-      "max_score": 5,
-      "score_type": "numeric",
-      "evidence": "version_access: present (2 keys)",
-      "quality_note": "Structured version control with timestamps"
-    },
-    {
-      "id": 20,
-      "name": "Interlinking Across Platforms and Datasets",
-      "description": "External resources and dataset relationships (typed relationships, hierarchical linkages)",
-      "score": 0,
-      "max_score": 1,
-      "score_type": "pass_fail",
-      "evidence": "external_resources: 2 items",
-      "quality_note": "Fail: No cross-platform linkages"
-    }
   ],
+  "assessment": {
+    "strengths": [
+      "Complete structural core: all mandatory fields populated with rich, specific content and 26 diverse keywords",
+      "Exceptional funding documentation with NIH agency, award number, opportunity number, amount, and acknowledgment",
+      "Comprehensive ethics/privacy coverage: IRB review across 14 centers, community ethics focus groups, and multiple de-identification methods (OMOP, OHNLP tokenization, DICOM de-id, privacy scan tool)",
+      "Strong interoperability with five international standard formats (OMOP, DICOM, WFDB, OHNLP, EDF+/Persyst) and explicit schema-compliance validation",
+      "Fully defined controlled-access mechanism (registration, DUA, secure enclave) and clear reuse terms, with quantitative scale metrics (1.6B rows, 23 TB waveform)"
+    ],
+    "weaknesses": [
+      "No enumerated discrete dataset versions with per-version change summaries (only continuous-status milestones)",
+      "Only a single associated publication DOI; no multiple formal citations or bidirectional dataset DOI cross-links",
+      "Human-subject representation lacks explicit demographic breakdowns and formal inclusion/exclusion criteria",
+      "Software tools are documented with repository URLs but without version numbers",
+      "Provenance is milestone-timestamped rather than a formal per-version change-controlled log"
+    ],
+    "recommendations": [
+      "Add an explicit versions list (e.g., v1 August 2025 status, subsequent releases) with dated change summaries",
+      "Expand citations/references with additional peer-reviewed publications and a mintable dataset DOI cross-linked to the record",
+      "Add demographic distributions (age, sex, race/ethnicity, geography) and documented inclusion/exclusion criteria for the released cohort",
+      "Record software/tool version numbers (OHNLP, OHDSI stack, DeGauss, privacy_scan_tool) alongside their repository URLs",
+      "Introduce structured provenance with per-release timestamps and checksums for distributed data extracts"
+    ]
+  },
   "metadata": {
-    "evaluator_id": "batch-hybrid-evaluator",
-    "rubric_hash": "sha256-rubric20",
-    "d4d_file_hash": "43a324f53795312c82618206592ce88862664ba59b85bf2d81b2318895431783"
+    "evaluator_id": "d4d-rubric20",
+    "rubric_hash": "5a63dff015cbd0555b8413b79f6f474f59518fc1dc8dea13850f0004d291709a",
+    "d4d_file_hash": "59855256fbbaa7388b1771de39be058fcc2d5314fd6d425a650316b5344ecfdb"
   }
 }

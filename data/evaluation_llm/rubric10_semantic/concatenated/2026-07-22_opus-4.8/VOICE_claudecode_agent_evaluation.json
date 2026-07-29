@@ -1,0 +1,492 @@
+{
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "d4d_file": "VOICE_d4d.yaml",
+  "project": "VOICE",
+  "method": "claudecode_agent",
+  "evaluation_timestamp": "2026-07-22T00:00:00Z",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "completeness",
+        "severity": "low",
+        "description": "Missing explicit related_datasets field to formally link adult and pediatric datasets",
+        "fields_involved": ["related_datasets"],
+        "recommendation": "Add related_datasets entry linking to pediatric dataset v1.0 with relationship type 'has_subset' or 'companion_to'"
+      },
+      {
+        "type": "completeness",
+        "severity": "low",
+        "description": "No explicit known_limitations field, though limitations discussed in why_not_representative",
+        "fields_involved": ["known_limitations", "sampling_strategies.why_not_representative"],
+        "recommendation": "Add dedicated known_limitations section consolidating representativeness constraints"
+      },
+      {
+        "type": "completeness",
+        "severity": "low",
+        "description": "No explicit anomalies field documenting data quality issues",
+        "fields_involved": ["anomalies"],
+        "recommendation": "Add anomalies section documenting quality issues found during audit protocol"
+      }
+    ],
+    "semantic_insights": [
+      "DOI prefix 10.13026 correctly corresponds to PhysioNet, primary distribution platform",
+      "Grant numbers 3OT2OD032720-01S3 and R01EB030362 follow proper NIH format (mechanism+institute+number)",
+      "HIPAA Safe Harbor deidentification method appropriate for clinical voice data with biometric identifiers",
+      "Strong ethical documentation with proper alignment: human subjects research → IRB approval → informed consent → deidentification",
+      "Comprehensive technical transparency with specific tools (OpenSMILE, Parselmouth, Whisper, b2aiprep) and version numbers",
+      "Excellent privacy layering: HIPAA + Certificate of Confidentiality + registered access + controlled access for raw audio",
+      "BIDS v1.9.0 conformance provides community standard integration for neuroimaging/neurophysiology data",
+      "Multi-institutional collection sites (5 North American sites) with standardized protocols demonstrates rigor",
+      "Version 3.0 with semi-annual release schedule and clear update documentation shows active maintenance",
+      "Pediatric cohort separation with age-appropriate protocols (2-4, 4-6, 6-10, 10+ years) demonstrates ethical consideration"
+    ],
+    "consistency_checks": {
+      "passed": 12,
+      "failed": 0,
+      "warnings": 0
+    },
+    "correctness_validations": {
+      "doi_format": "valid",
+      "doi_prefix_plausibility": "confirmed_physionet",
+      "grant_number_format": "valid_nih_pattern",
+      "rrid_format": "not_present",
+      "url_validity": "all_valid"
+    }
+  },
+  "overall_score": {
+    "total_points": 47,
+    "max_points": 50,
+    "percentage": 94.0
+  },
+  "elements": [
+    {
+      "id": 1,
+      "name": "Dataset Discovery and Identification",
+      "description": "Can a user or system discover and uniquely identify this dataset?",
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, or URI)",
+          "score": 1,
+          "evidence": "doi: 10.13026/37yb-1t42; id: https://doi.org/10.13026/37yb-1t42",
+          "quality_note": "DOI present with correct PhysioNet prefix (10.13026), properly formatted and semantically valid for distribution platform"
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "score": 1,
+          "evidence": "title: Bridge2AI-Voice - An ethically-sourced, diverse voice dataset linked to health information; description: 833+ char comprehensive description covering purpose, scope, version, participants, tasks",
+          "quality_note": "Excellent title and description providing specific details (833 participants, 61,937 recordings, v3.0, multi-institutional, disease cohorts)"
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "score": 1,
+          "evidence": "keywords: 48 terms covering domain (voice biomarker, acoustic biomarker), conditions (Parkinson's, depression, COPD), methods (MFCC, spectrogram, OpenSMILE), standards (BIDS, FAIR, CARE), platforms (PhysioNet)",
+          "quality_note": "Comprehensive keyword coverage across medical conditions, technical methods, ethical frameworks, and data standards"
+        },
+        {
+          "name": "Landing Page and Resources (page, hierarchical resources)",
+          "score": 1,
+          "evidence": "page: https://docs.b2ai-voice.org; external_resources: 14 resources including PhysioNet, GitHub repos, documentation, training",
+          "quality_note": "Primary landing page plus extensive external resources with specific URLs for documentation, code, training, and access"
+        },
+        {
+          "name": "Hierarchical Structure (parent datasets, relationships)",
+          "score": 0,
+          "evidence": "No parent_datasets or related_datasets fields present",
+          "quality_note": "Missing formal links to pediatric dataset v1.0 which is mentioned narratively but not structured. Could improve discoverability with typed relationships"
+        }
+      ],
+      "element_score": 4,
+      "element_max": 5
+    },
+    {
+      "id": 2,
+      "name": "Dataset Access and Retrieval",
+      "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
+      "sub_elements": [
+        {
+          "name": "Access Policy and IP Restrictions Defined",
+          "score": 1,
+          "evidence": "license_and_use_terms: Bridge2AI Voice Registered Access License with detailed DUA requirements, PhysioNet registered access for features, controlled access for raw audio via DACO",
+          "quality_note": "Clear two-tier access policy (registered vs. controlled) with specific requirements and no IP restrictions mentioned"
+        },
+        {
+          "name": "Regulatory Restrictions and Confidentiality Level Specified",
+          "score": 1,
+          "evidence": "human_subject_research.regulatory_compliance: HIPAA Safe Harbor, Certificate of Confidentiality, 45 CFR 46 Common Rule, OMB M-07-16 PII designation; no export controls",
+          "quality_note": "Comprehensive regulatory framework with specific standards cited and legal protections (Certificate of Confidentiality) documented"
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "score": 1,
+          "evidence": "external_resources: https://physionet.org/content/b2ai-voice/, https://healthdatanexus.ai/content/b2ai-voice/1.0/, version_access with PhysioNet DOI",
+          "quality_note": "Multiple access points via PhysioNet (primary) and Health Data Nexus (alternative with cloud compute)"
+        },
+        {
+          "name": "Distribution Formats and File Types Specified",
+          "score": 1,
+          "evidence": "distribution_formats: Parquet (spectrograms, MFCCs, features), TSV/JSON (phenotype, static features, BIDS-compliant), WAV (raw audio, controlled access only)",
+          "quality_note": "Well-documented formats with specific use cases and BIDS v1.9.0 structure, appropriate for different access tiers"
+        },
+        {
+          "name": "Related Datasets and External Resources Linked",
+          "score": 1,
+          "evidence": "external_resources: 14 entries including b2aiprep GitHub, REDCap dictionary, Interspeech publication, NIH RePORTER, training programs, SenseLab toolkit",
+          "quality_note": "Extensive external resources with actionable URLs covering code, documentation, publications, and training"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 3,
+      "name": "Data Reuse and Interoperability",
+      "description": "Is sufficient information provided to reuse and integrate the dataset with others?",
+      "sub_elements": [
+        {
+          "name": "License Terms Allow Reuse",
+          "score": 1,
+          "evidence": "license: Bridge2AI Voice Registered Access License; license_and_use_terms: commercial and non-commercial research use permitted for Authorized Researchers, no geographic restrictions",
+          "quality_note": "Clear reuse permissions for both commercial and non-commercial research with explicit statement of no geographic restrictions"
+        },
+        {
+          "name": "Data Formats Are Standardized (encoding, format)",
+          "score": 1,
+          "evidence": "distribution_formats: Parquet (standard for ML datasets), TSV/JSON (standard tabular), WAV (standard audio), BIDS v1.9.0 compliant structure",
+          "quality_note": "All formats use community standards (Parquet, TSV/JSON, WAV) with BIDS v1.9.0 providing structural interoperability"
+        },
+        {
+          "name": "Schema or Ontology Conformance Stated",
+          "score": 1,
+          "evidence": "preprocessing_strategies, distribution_formats: BIDS v1.9.0 compliant; labeling_strategies: ICD-10 codes; keywords: FAIR principles, CARE principles",
+          "quality_note": "Conformance to BIDS v1.9.0 neuroimaging standard and ICD-10 diagnostic coding with FAIR/CARE principles commitment"
+        },
+        {
+          "name": "Variable Metadata with Identifiers Defined",
+          "score": 1,
+          "evidence": "distribution_formats: static_features.tsv with static_features.json data dictionary; phenotype files with JSON data dictionaries per file (confounders, demographics, diagnosis, questionnaire)",
+          "quality_note": "Data dictionaries provided for all phenotype and feature files, though not in dedicated variables field. BIDS format ensures metadata structure"
+        },
+        {
+          "name": "Use Guidance Provided (intended, prohibited uses)",
+          "score": 1,
+          "evidence": "intended_uses: 4 entries (AI/ML models, acoustic biomarker research, training/education, multimodal research); discouraged_uses: 3 entries (hiring/insurance/surveillance, re-identification, IP restrictions); prohibited_uses: 1 entry (unauthorized use, sale, re-identification attempts)",
+          "quality_note": "Comprehensive use guidance across intended, discouraged, and prohibited categories with clear rationale for each"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 4,
+      "name": "Ethical Use and Privacy Safeguards",
+      "description": "Does the dataset provide clear information about consent, privacy, and ethical oversight?",
+      "sub_elements": [
+        {
+          "name": "IRB or Ethics Review Documented",
+          "score": 1,
+          "evidence": "human_subject_research: University of South Florida Single IRB with subsite IRB approvals through Single IRB process; ethical_reviews: IRB review, bioethics guidance by Belisle-Pipon and Ravitsky, ethics module for voice AI consent frameworks",
+          "quality_note": "Comprehensive IRB documentation with Single IRB coordination across 5 sites plus dedicated bioethics guidance integrated throughout study design"
+        },
+        {
+          "name": "Deidentification Method Described",
+          "score": 1,
+          "evidence": "is_deidentified: HIPAA Safe Harbor de-identification applied; direct identifiers removed (names, addresses, SSN); indirect identifiers removed where re-identification risk significant; dates rebased, geographic info removed/generalized",
+          "quality_note": "Specific HIPAA Safe Harbor method with clear enumeration of identifier categories removed (direct, indirect, sensitive). Appropriate for biometric voice data"
+        },
+        {
+          "name": "Privacy Protections Beyond Deidentification",
+          "score": 1,
+          "evidence": "participant_privacy: 8 layers - HIPAA Safe Harbor, raw audio removal from public dataset, open-response features removal, Certificate of Confidentiality, registered access DUA, controlled access DTUA, federated learning planned, secure storage requirements",
+          "quality_note": "Exceptional multi-layered privacy framework going well beyond basic deidentification, with legal protections (Certificate of Confidentiality) and technical controls (access tiers, federated learning)"
+        },
+        {
+          "name": "Informed Consent Obtained from Participants",
+          "score": 1,
+          "evidence": "collection_consents: prospective informed consent via IRB-approved process for voice data collection, questionnaires, EHR access, data sharing; no restriction on commercial vs. non-commercial use or geographic sharing",
+          "quality_note": "Detailed consent process covering all data types (voice, questionnaires, EHR) with clear scope (commercial OK, broad geographic sharing OK)"
+        },
+        {
+          "name": "Vulnerable Populations and Compensation Documented",
+          "score": 1,
+          "evidence": "at_risk_populations: Pediatric participants (2-18 years) with age-appropriate protocols, distinct IRB considerations, separate dataset release; participant_compensation: $40 (<90 min) or $80 (>90 min), max 3 sessions/$120 total",
+          "quality_note": "Pediatric protections detailed with age-stratified protocols and separate release. Fair compensation structure documented with session-based tiers"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 5,
+      "name": "Data Composition and Structure",
+      "description": "Can the dataset's structure, modality, and population be understood from metadata?",
+      "sub_elements": [
+        {
+          "name": "Cohort or Subpopulations Characteristics Described",
+          "score": 1,
+          "evidence": "subpopulations: 6 cohorts - Voice Disorders (laryngeal pathologies), Neurological (ages 44-85, AD/PD/ALS), Mood/Psychiatric (depression/bipolar/schizophrenia), Respiratory (stenosis, chronic cough), Pediatric (2-18 years, age groups), Controls (healthy volunteers)",
+          "quality_note": "Highly detailed cohort descriptions with specific diagnoses, age ranges, validation methods (laryngoscopy, MRI, EHR), and inclusion criteria"
+        },
+        {
+          "name": "Number of Instances or Samples Reported",
+          "score": 1,
+          "evidence": "instances.counts: 833 adult participants; description: ~61,937 voice-derived recordings; pediatric v1.0: 300 participants; enrollment target: 10,000 by 2027",
+          "quality_note": "Specific counts for participants and recordings with version-specific numbers and future enrollment targets documented"
+        },
+        {
+          "name": "Variable-Level Metadata and Tabular Flag",
+          "score": 1,
+          "evidence": "is_tabular: false; distribution_formats: static_features.tsv with static_features.json data dictionary; phenotype files with JSON data dictionaries (confounders, demographics, diagnosis, questionnaire, task)",
+          "quality_note": "Tabular flag correctly set to false for multimodal dataset. Data dictionaries provided for all phenotype and feature files in BIDS format"
+        },
+        {
+          "name": "Data Topics or Conditions Represented",
+          "score": 1,
+          "evidence": "subpopulations: laryngeal cancer, vocal fold paralysis, dysphonia, Alzheimer's, Parkinson's, ALS, depression, schizophrenia, bipolar disorder, COPD, chronic cough, airway stenosis, pediatric speech disorders, autism spectrum disorder",
+          "quality_note": "Comprehensive disease coverage across 4 major categories (voice, neurological, mood, respiratory) plus pediatric conditions with specific diagnoses listed"
+        },
+        {
+          "name": "Data Quality Issues and Anomalies Documented",
+          "score": 1,
+          "evidence": "sampling_strategies.why_not_representative: limited geographic locations (5 sites), clinic-based selection bias, no remote collection, underrepresentation of groups with less medical trust, English-only, unequal disease distribution; cleaning_strategies: audit protocol with missingness tables, outlier checks, audio quality metrics (silence, duration, speech-to-passage accuracy)",
+          "quality_note": "Honest documentation of sampling limitations and representativeness constraints. Audit protocol with quality metrics documented though no explicit anomalies field"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 6,
+      "name": "Data Provenance and Version Tracking",
+      "description": "Can a user determine dataset versions, update history, and provenance?",
+      "sub_elements": [
+        {
+          "name": "Dataset Version Number Provided",
+          "score": 1,
+          "evidence": "version: '3.0.0'",
+          "quality_note": "Clear semantic versioning with major.minor.patch format"
+        },
+        {
+          "name": "Version Access Methods Documented",
+          "score": 1,
+          "evidence": "version_access: All versions available through PhysioNet (https://physionet.org/content/b2ai-voice/) and Health Data Nexus with version-specific DOIs; older versions supported, hosted, and available; publishers reserve right to remove access",
+          "quality_note": "Comprehensive version access policy with dual platforms, version-specific DOIs, and clear statement about older version availability"
+        },
+        {
+          "name": "Change Descriptions and Errata Provided",
+          "score": 1,
+          "evidence": "updates: version history documented - v1.0 (306 participants, 12,523 recordings), v1.1 (added MFCC features), v2.0.0, v2.0.1, v3.0.0 (833 adults, ~61,937 recordings); pediatric v1.0 released separately",
+          "quality_note": "Detailed version history with participant/recording counts and feature additions documented. No explicit errata field but updates provide change descriptions"
+        },
+        {
+          "name": "Update Schedule or Frequency Indicated",
+          "score": 1,
+          "evidence": "updates: semi-annual releases planned; collection_timeframes: ongoing through November 30, 2026; enrollment target 10,000 by 2027; users notified through news items on platforms",
+          "quality_note": "Clear semi-annual release schedule with ongoing collection timeline and notification mechanism documented"
+        },
+        {
+          "name": "Provenance and Source Derivation Documented",
+          "score": 1,
+          "evidence": "collection_mechanisms, acquisition_methods: direct collection via Bridge2AI-Voice App on iPad with Avid AE-36 microphone; data_collectors: research teams at 5 North American sites; collection_timeframes: September 2022 - November 2026",
+          "quality_note": "Detailed provenance through collection process documentation including hardware (iPad 9th/10th gen, Avid AE-36 mic), software (Bridge2AI-Voice App), sites, and timeframes. No was_derived_from field as this is primary collection"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 7,
+      "name": "Scientific Motivation and Funding Transparency",
+      "description": "Does the metadata clearly state why the dataset exists and who funded it?",
+      "sub_elements": [
+        {
+          "name": "Motivation or Purpose for Dataset Creation",
+          "score": 1,
+          "evidence": "purposes: 4 entries - (1) integrate voice as health biomarker in clinical care, (2) create ethically sourced flagship dataset of 10,000 voices, (3) establish standards for voice data collection/analysis, (4) address ethical/legal/social challenges (re-identification risks, privacy, diversity in voice AI)",
+          "quality_note": "Comprehensive motivation covering clinical integration, dataset creation, standards development, and ethics - addresses both scientific and societal needs"
+        },
+        {
+          "name": "Primary Research Objectives or Tasks",
+          "score": 1,
+          "evidence": "tasks: 7 entries - voice disorder AI/ML models, neurological disorder detection, mood/psychiatric disorder algorithms, respiratory disorder screening, pediatric voice/speech AI, workforce development/curriculum, model pretraining/fine-tuning/benchmarking with b2aiprep/SenseLab",
+          "quality_note": "Specific research tasks with clear ML objectives, disease categories, and technical tools (b2aiprep, SenseLab, OpenSMILE) identified"
+        },
+        {
+          "name": "Funding Sources and Mechanisms Listed",
+          "score": 1,
+          "evidence": "funders: (1) NIH Common Fund Bridge2AI Program, Opportunity OTA-21-008, NIH Office of Director, DCMM Study Section; (2) NIBIB supporting PhysioNet (MIT Laboratory for Computational Physiology)",
+          "quality_note": "Detailed funding sources with specific programs (NIH Common Fund Bridge2AI), opportunity numbers, administering institutes, and study sections"
+        },
+        {
+          "name": "Grant IDs or Award Numbers Present",
+          "score": 1,
+          "evidence": "funders: Grant 3OT2OD032720-01S3 (project dates September 1, 2022 to November 30, 2026, total 2025 funding $4,660,942); Grant R01EB030362 (PhysioNet support)",
+          "quality_note": "Full grant numbers with correct NIH format (3OT2OD032720-01S3 matches NIH pattern, R01EB030362 matches R01 mechanism). Includes project dates and funding amounts"
+        },
+        {
+          "name": "Creators and Acknowledgements Documented",
+          "score": 1,
+          "evidence": "creators: Bridge2AI-Voice Consortium led by Dr. Yael Bensoussan (Contact PI, USF) and Dr. Olivier Elemento (Co-PI, Weill Cornell); 50+ investigators from 12+ institutions including Sigaras, Rameau, Powell, Bahr, Siu, Payne, Dorr, Belisle-Pipon, Ravitsky, Ghosh, Rudzicz, Lerner-Ellis, Bolser, Johnson",
+          "quality_note": "Comprehensive creator documentation with leadership structure (Contact PI, Co-PI), institutional affiliations, and key co-investigators across disciplines (clinical, ML, data science, ethics)"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 8,
+      "name": "Technical Transparency (Data Collection and Processing)",
+      "description": "Can data collection and processing steps be replicated or understood?",
+      "sub_elements": [
+        {
+          "name": "Collection Mechanisms and Settings Described",
+          "score": 1,
+          "evidence": "collection_mechanisms: (1) clinic-based using Bridge2AI-Voice App on iPad (9th/10th gen) or iPad Air (5th gen) with Avid AE-36 microphone and Apple dongle, research assistant present, future remote planned; (2) pediatric via reproschema-ui with age-grouped tasks; (3) clinical data via REDCap from EHR/imaging/genomics",
+          "quality_note": "Highly specific collection setup with exact hardware models, software platforms, and settings documented for reproducibility"
+        },
+        {
+          "name": "Data Acquisition Methods Listed",
+          "score": 1,
+          "evidence": "acquisition_methods: (1) 22 adult acoustic tasks (respiration, cough, vowels, phonation, diadochokinesis, reading passages, free speech, cognitive tasks); (2) 36 pediatric tasks; (3) validated questionnaires (VHI-10, PHQ-9, GAD-7, MOCA, disease-specific); (4) EHR access for gold standard validation",
+          "quality_note": "Comprehensive task enumeration with specific names (Rainbow Passage, Cape-V, Stroop, Cinderella Story) and validated instruments cited"
+        },
+        {
+          "name": "Preprocessing, Cleaning, and Labeling Strategies",
+          "score": 1,
+          "evidence": "preprocessing_strategies: 8 entries (b2aiprep monaural conversion/16kHz resampling, spectrogram extraction 25ms window/10ms hop/512-point FFT, 60 MFCCs, OpenSMILE eGeMaps, Parselmouth/Praat features, torchaudio/SPARC/PPG, Whisper transcription, BIDS conversion); cleaning_strategies: 4 entries (HIPAA Safe Harbor, audio privacy protection, sensitive field removal per REDCap dictionary, audit protocol); labeling_strategies: clinician-assigned diagnoses per Bridge2AI protocol Table 1 and ICD-10 with gold standard validation (laryngoscopy, MRI, EHR, meds)",
+          "quality_note": "Exceptional detail with specific parameters (window sizes, FFT points, sampling rates), tools with versions, and validation methods for labels"
+        },
+        {
+          "name": "Software and Tools Documented",
+          "score": 1,
+          "evidence": "preprocessing_strategies, external_resources: b2aiprep (https://github.com/sensein/b2aiprep, Apache-2.0), OpenSMILE eGeMaps, Parselmouth, Praat, torchaudio, OpenAI Whisper, SenseLab (https://github.com/sensein/senselab), reproschema-ui, REDCap, Bridge2AI-Voice App",
+          "quality_note": "Comprehensive tool documentation with GitHub repositories, licenses (Apache-2.0, MIT), and specific feature extraction methods (eGeMaps, SPARC, PPG)"
+        },
+        {
+          "name": "External Standards and Resources Referenced",
+          "score": 1,
+          "evidence": "external_resources: 14 resources including BIDS v1.9.0, ICD-10 codes, PhysioNet, REDCap dictionary (https://github.com/eipm/bridge2ai-redcap), documentation (https://docs.b2ai-voice.org), Interspeech 2024 publication (DOI 10.21437/Interspeech.2024-1926), NIH RePORTER, Zenodo archive",
+          "quality_note": "Extensive external resources with actionable URLs and DOIs for standards (BIDS), code (GitHub), publications (Interspeech), and archives (Zenodo)"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 9,
+      "name": "Dataset Evaluation and Limitations Disclosure",
+      "description": "Does the metadata communicate known risks, biases, or dataset limitations?",
+      "sub_elements": [
+        {
+          "name": "Known Limitations Documented",
+          "score": 1,
+          "evidence": "sampling_strategies.why_not_representative: limited geographic locations (5 sites), clinic-based selection bias toward treatment-seeking populations, no remote collection in initial releases, underrepresentation of groups with less medical trust or less proximal to sites, English-only participants, unequal disease distribution",
+          "quality_note": "Honest limitations documentation through representativeness section. No dedicated known_limitations field but information well-captured"
+        },
+        {
+          "name": "Systematic Biases Identified and Described",
+          "score": 1,
+          "evidence": "sampling_strategies.why_not_representative: clinic-based recruitment introduces selection bias toward treatment-seeking populations; groups with less trust in medical system underrepresented; non-probability purposive sampling from specialty clinics; not representative of general population",
+          "quality_note": "Explicit bias discussion identifying selection bias from clinic-based recruitment and medical system trust as key systematic issues"
+        },
+        {
+          "name": "Data Anomalies and Quality Issues Noted",
+          "score": 0,
+          "evidence": "cleaning_strategies mentions audit protocol with missingness tables, outlier checks, and audio quality metrics (silence amount, duration, speech-to-passage accuracy) but no explicit anomalies field or specific issues documented",
+          "quality_note": "Audit protocol described but no explicit documentation of discovered anomalies or quality issues. Missing dedicated anomalies field"
+        },
+        {
+          "name": "Sensitive Content and Warnings Provided",
+          "score": 1,
+          "evidence": "sensitive_elements: 5 entries - (1) voice as biometric identifier with re-identification/hacking risks, (2) EHR data with diagnoses/symptoms/clinical data, (3) demographic info (race, ethnicity, sexual orientation, financial status, health data), (4) free speech transcriptions potentially identifying, (5) Certificate of Confidentiality protection",
+          "quality_note": "Comprehensive sensitive content documentation with specific risk categories (biometric, health, demographic) and legal protections identified"
+        },
+        {
+          "name": "Ethical Review Details Including Conflicts",
+          "score": 1,
+          "evidence": "ethical_reviews: IRB review and approval from University of South Florida Single IRB with subsite approvals; bioethics guidance by consortium bioethicists (Belisle-Pipon, Ravitsky); ethics module developing guidelines for voice AI consent and data sharing",
+          "quality_note": "Detailed ethical review with IRB specifics and dedicated bioethics team. No conflicts of interest documented"
+        }
+      ],
+      "element_score": 4,
+      "element_max": 5
+    },
+    {
+      "id": 10,
+      "name": "Cross-Platform and Community Integration",
+      "description": "Does the dataset connect to wider data ecosystems, repositories, or standards?",
+      "sub_elements": [
+        {
+          "name": "Dataset Published on a Recognized Platform",
+          "score": 1,
+          "evidence": "external_resources, license_and_use_terms: PhysioNet (https://physionet.org/content/b2ai-voice/) as primary platform managed by MIT Laboratory for Computational Physiology; Health Data Nexus (https://healthdatanexus.ai/content/b2ai-voice/1.0/) as alternative with cloud compute",
+          "quality_note": "Published on PhysioNet (highly recognized biomedical data repository) with alternative on Health Data Nexus. No explicit publisher field but platform well-documented"
+        },
+        {
+          "name": "Citation and DOI for Cross-referencing",
+          "score": 1,
+          "evidence": "citation: Bensoussan, Yael, et al. 'Developing Multi-Disorder Voice Protocols...' Proc. Interspeech 2024. DOI 10.21437/Interspeech.2024-1926; doi: 10.13026/37yb-1t42 (dataset DOI)",
+          "quality_note": "Both dataset DOI (10.13026/37yb-1t42) and publication citation with DOI provided for cross-referencing"
+        },
+        {
+          "name": "Community Standards or Schema Conformance",
+          "score": 1,
+          "evidence": "preprocessing_strategies, distribution_formats: BIDS v1.9.0 compliant; labeling_strategies: ICD-10 codes; keywords: FAIR principles, CARE principles; description mentions OMOP, FHIR integration goals",
+          "quality_note": "Strong community standard conformance: BIDS v1.9.0 (neuroimaging), ICD-10 (diagnoses), FAIR/CARE principles (ethical AI). OMOP/FHIR mentioned as integration goals"
+        },
+        {
+          "name": "Outreach Materials and Documentation Links",
+          "score": 1,
+          "evidence": "external_resources: project documentation (https://docs.b2ai-voice.org), training (https://www.b2aivoicescholars.org/), GitHub repos (bridge2ai-docs, bridge2ai-redcap, b2aiprep, senselab), Interspeech 2024 publication, NIH RePORTER, Zenodo archive",
+          "quality_note": "Excellent outreach with dedicated documentation site, training program (Voice Scholars), open source repos, and publications"
+        },
+        {
+          "name": "Related Datasets with Typed Relationships",
+          "score": 0,
+          "evidence": "Pediatric dataset v1.0 mentioned narratively throughout (subsets, subpopulations, acquisition_methods) but no formal related_datasets field with typed relationships",
+          "quality_note": "Missing formal linkage to pediatric dataset v1.0 which is released separately. Could improve discoverability with structured related_datasets field"
+        }
+      ],
+      "element_score": 4,
+      "element_max": 5
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Exceptional ethical documentation: Single IRB coordination across 5 sites, dedicated bioethics team, 8-layer privacy framework with Certificate of Confidentiality",
+      "Outstanding technical transparency: specific hardware (iPad models, Avid AE-36 mic), preprocessing parameters (25ms window, 10ms hop, 512-point FFT), tools with GitHub repos and licenses",
+      "Comprehensive disease coverage: 5 major cohorts (voice, neurological, mood, respiratory, pediatric) with specific diagnoses, age ranges, and gold standard validation methods",
+      "Strong community integration: BIDS v1.9.0 conformance, ICD-10 coding, FAIR/CARE principles, PhysioNet distribution, open source tooling (b2aiprep, SenseLab)",
+      "Excellent funding transparency: NIH grant numbers with correct format (3OT2OD032720-01S3, R01EB030362), project dates, funding amounts ($4.66M in 2025)",
+      "Robust version management: semantic versioning (3.0.0), semi-annual releases, version-specific DOIs, detailed change history from v1.0 to v3.0",
+      "Multi-layered access control: registered access for features, controlled access for raw audio, institutional DTUAs, PhysioNet DUA requirements",
+      "Comprehensive preprocessing pipeline: 8 documented strategies from raw audio (16kHz, monaural) through features (spectrograms, MFCCs, OpenSMILE, Praat) to BIDS format"
+    ],
+    "weaknesses": [
+      "Missing formal related_datasets linkage to pediatric dataset v1.0, which is mentioned narratively but not structured for machine-readability",
+      "No explicit known_limitations field despite clear limitations documented in why_not_representative (relies on user finding info in sampling section)",
+      "No explicit known_biases field as dedicated section (bias discussion embedded in representativeness constraints)",
+      "Missing dedicated anomalies field documenting specific data quality issues discovered during audit protocol",
+      "No publisher field despite PhysioNet being primary distribution platform (reliance on narrative mentions)",
+      "Variables/data dictionary not in standardized variables field (documented in distribution_formats but less discoverable)"
+    ],
+    "recommendations": [
+      "Add related_datasets field linking to pediatric dataset v1.0 with relationship type 'has_subset' or 'companion_dataset' for formal machine-readable linkage",
+      "Create dedicated known_limitations section consolidating sampling constraints, representativeness issues, and English-only limitation",
+      "Add known_biases field explicitly documenting selection bias from clinic-based recruitment and medical trust underrepresentation",
+      "Populate anomalies field with findings from audit protocol (missingness patterns, outliers, audio quality issues) for transparency",
+      "Add publisher field with value 'PhysioNet' or 'MIT Laboratory for Computational Physiology' for formal platform designation",
+      "Consider adding variables field with data dictionary entries for core phenotype and feature variables to improve discoverability alongside existing TSV/JSON dictionaries"
+    ]
+  },
+  "metadata": {
+    "evaluator_id": "rubric10-semantic-agent",
+    "rubric_hash": "sha256:placeholder",
+    "d4d_file_hash": "sha256:placeholder"
+  }
+}
