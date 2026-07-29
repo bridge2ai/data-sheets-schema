@@ -40,6 +40,20 @@ CORE_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_core_all.ya
 SOURCE_MANIFEST = Path("data/preprocessed/source_manifest.yaml")
 SOURCE_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema.yaml")
 
+# The GitHub D4D assistant already centralises model settings here, and hashes
+# its prompts. Both generation paths read this file rather than each declaring
+# its own model and temperature, so the two cannot drift into being different
+# procedures that claim to be the same one.
+DETERMINISTIC_CONFIG = Path(".github/workflows/d4d_assistant_deterministic.config")
+
+# The assistant hashes with SHA-256; the 33 run records written before this
+# module existed use md5 for input bundles. Rather than silently mixing them,
+# each hash field names its algorithm: prompts (new) use sha256, input bundles
+# keep md5 so existing records stay comparable. Unifying on sha256 means
+# rewriting those records and is deliberately left as a separate decision.
+PROMPT_HASH = "sha256"
+INPUT_HASH = "md5"
+
 # Header fields carrying model/runtime identity.
 HEADER_FIELDS = ("Generation Method", "Agent runtime", "Provider", "Model",
                  "Reasoning effort", "Mode", "Temperature", "Generated",
@@ -55,6 +69,52 @@ def _md5(path: Path) -> str | None:
         for chunk in iter(lambda: fh.read(1 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def _sha256(path: Path) -> str | None:
+    if not path or not path.exists():
+        return None
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def load_generation_config(path: Path = DETERMINISTIC_CONFIG) -> dict[str, Any]:
+    """Model settings shared with the GitHub assistant.
+
+    Returning the file's own values rather than defaults matters: if the two
+    paths disagree about the model or temperature they are different
+    procedures, and the fingerprint should say so rather than paper over it.
+    """
+    if not path.exists():
+        return {}
+    try:
+        return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except Exception:
+        return {}
+
+
+def prompt_facts(prompt_paths: list[Path] | None) -> dict[str, Any]:
+    """Hash every prompt file a run consumed.
+
+    The prompt is a generation input as much as the bundle is, and until now it
+    was the one input this record did not name. A condition whose prompt cannot
+    be identified cannot be replicated — which is exactly why the 2026-07-27
+    tuned prompts, written inline and never saved, are unreproducible.
+    """
+    if not prompt_paths:
+        return {"paths": None,
+                "note": ("no prompt files declared; the prompt was supplied "
+                         "inline and is not recoverable from this record")}
+    out = []
+    for p in prompt_paths:
+        p = Path(p)
+        out.append({"path": str(p), "sha256": _sha256(p),
+                    "bytes": p.stat().st_size if p.exists() else None,
+                    "exists": p.exists()})
+    return {"hash_algorithm": PROMPT_HASH, "files": out}
 
 
 def _run(cmd: list[str]) -> str | None:
@@ -201,6 +261,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  input_bundle: Path | None = None,
                  input_verified: bool = False,
                  concat_dir: Path = CONCAT_DIR,
+                 prompt_paths: list[Path] | None = None,
+                 schema_digest_md5: str | None = None,
                  extra_notes: list[str] | None = None) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
 
@@ -215,6 +277,11 @@ def build_record(project: str, method: str, label: str, *, mode: str,
 
     header = parse_header(full)
     unrecoverable: list[dict[str, str]] = []
+    # Distinct from unrecoverable: these fields ARE populated, but the value is
+    # asserted rather than observed. Collapsing the two would either hide a
+    # claim that was never measured, or imply a field is missing when it is
+    # present. Both mislead in different directions.
+    unverified: list[dict[str, Any]] = []
     notes = list(extra_notes or [])
 
     # ---- inputs -------------------------------------------------------
@@ -266,6 +333,38 @@ def build_record(project: str, method: str, label: str, *, mode: str,
             "reason": "the record header predates model identity being written into headers",
         })
 
+    # Temperature in a Claude Code header is asserted by the agent because the
+    # prompt template says to write it, not observed from a setting the runtime
+    # exposes. Recording it as though it were measured would be the same class
+    # of false claim this module exists to prevent.
+    runtime = (model.get("agent_runtime") or "").strip().lower()
+    if model.get("temperature") and runtime == "claude code":
+        model["temperature_basis"] = "asserted by the generating agent, not observed"
+        unverified.append({
+            "field": "model.temperature",
+            "value": model.get("temperature"),
+            "reason": ("the Claude Code runtime does not expose a temperature "
+                       "setting to the agent or to this recorder; the header "
+                       "value restates the prompt template rather than a "
+                       "measured parameter. A direct API run can observe it."),
+        })
+
+    cfg = load_generation_config()
+    declared = (cfg.get("model") or {}) if isinstance(cfg, dict) else {}
+    if declared:
+        model["shared_config"] = {
+            "path": str(DETERMINISTIC_CONFIG),
+            "name": declared.get("name"),
+            "temperature": declared.get("temperature"),
+            "max_tokens": declared.get("max_tokens"),
+        }
+        if declared.get("name") and model.get("model") and \
+                str(declared["name"]) not in str(model["model"]):
+            notes.append(
+                f"Model mismatch: this run used {model['model']!r} while "
+                f"{DETERMINISTIC_CONFIG} pins {declared['name']!r}. The two "
+                "generation paths are not running the same model.")
+
     # ---- system --------------------------------------------------------
     if mode == "live":
         system = system_facts()
@@ -286,7 +385,9 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                 "arm": _arm_for(base),
                 "replicate": _replicate_for(label)},
         "model": model or None,
-        "schema": schema_facts(),
+        "prompts": prompt_facts(prompt_paths),
+        "schema": schema_facts() | (
+            {"digest_md5": schema_digest_md5} if schema_digest_md5 else {}),
         "software": software_facts() if mode == "live" else {
             "note": "reconstructed; versions are today's, not the run's"},
         "repo": repo_facts(),
@@ -295,6 +396,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         "outputs": {"full": _artifact(full), "core": _artifact(core),
                     "report": _artifact(report)},
         "unrecoverable": unrecoverable or None,
+        "unverified": unverified or None,
         "notes": notes or None,
     }
     return ProvenanceRecord(data)

@@ -136,3 +136,38 @@ class TestProvenance(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestSharedConfigConvergence(unittest.TestCase):
+    """The API path and the GitHub assistant must not drift into two procedures.
+
+    Both read model settings from the assistant's deterministic config. If they
+    disagree, the record says so rather than presenting the run as conforming.
+    """
+
+    def test_shared_config_is_readable(self):
+        from data_sheets_schema.provenance import load_generation_config
+        cfg = load_generation_config()
+        self.assertIn("model", cfg, "assistant deterministic config not loadable")
+        self.assertIsNotNone(cfg["model"].get("name"))
+
+    def test_missing_config_degrades_quietly(self):
+        from pathlib import Path
+        from data_sheets_schema.provenance import load_generation_config
+        self.assertEqual(load_generation_config(Path("/nonexistent/x.config")), {})
+
+    def test_prompt_files_are_hashed(self):
+        from pathlib import Path
+        from data_sheets_schema.provenance import prompt_facts
+        p = Path("src/download/prompts/d4d_generic_arm_prompt.md")
+        facts = prompt_facts([p])
+        self.assertEqual(facts["hash_algorithm"], "sha256")
+        self.assertTrue(facts["files"][0]["exists"])
+        self.assertEqual(len(facts["files"][0]["sha256"]), 64)
+
+    def test_absent_prompt_declaration_is_stated_not_implied(self):
+        """A run with no declared prompt must say so — silence reads as 'none'."""
+        from data_sheets_schema.provenance import prompt_facts
+        facts = prompt_facts(None)
+        self.assertIsNone(facts["paths"])
+        self.assertIn("not recoverable", facts["note"])
