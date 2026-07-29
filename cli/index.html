@@ -843,6 +843,14 @@ poetry run d4d --help
 <td><code>--output-dir PATH</code></td>
 <td>Output directory for downloads. Default: <code>data/raw</code></td>
 </tr>
+<tr>
+<td><code>--sheet-url URL_OR_PATH</code></td>
+<td>Public CSV export URL or local CSV file. Defaults to the Bridge2AI GC input sheet</td>
+</tr>
+<tr>
+<td><code>--manifest PATH</code></td>
+<td>Stage downloads and promote only canonical artifacts, retaining valid prior fallbacks. Default: <code>data/preprocessed/source_manifest.yaml</code></td>
+</tr>
 </tbody>
 </table>
 <h3 id="d4d-download-preprocess"><code>d4d download preprocess</code></h3>
@@ -869,6 +877,10 @@ poetry run d4d --help
 <tr>
 <td><code>--output-dir PATH</code></td>
 <td>Preprocessed output directory. Default: <code>data/preprocessed/individual</code></td>
+</tr>
+<tr>
+<td><code>--manifest PATH</code></td>
+<td>Canonical source selection manifest. Default: <code>data/preprocessed/source_manifest.yaml</code></td>
 </tr>
 </tbody>
 </table>
@@ -897,8 +909,17 @@ poetry run d4d --help
 <td><code>--output-file PATH</code></td>
 <td>Output path. Default: <code>data/preprocessed/concatenated/{PROJECT}_preprocessed.txt</code></td>
 </tr>
+<tr>
+<td><code>--manifest PATH</code></td>
+<td>Canonical source selection manifest. Default: <code>data/preprocessed/source_manifest.yaml</code></td>
+</tr>
 </tbody>
 </table>
+<p>The manifest fixes the active source inventory, normalizes every processed
+artifact to <code>.txt</code>, and supplies a deterministic concatenation order. To run the
+repository-level workflow for all four projects:</p>
+<pre><code class="language-bash">make download-and-preprocess
+</code></pre>
 <h2 id="d4d-evaluate"><code>d4d evaluate</code></h2>
 <h3 id="d4d-evaluate-presence"><code>d4d evaluate presence</code></h3>
 <p>Run the presence-based evaluator across one project or all projects.</p>

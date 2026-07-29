@@ -1,0 +1,2427 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>Interleaved D4D Evaluation — CHORUS (claudecode_agent)</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+       margin: 0; padding: 0; background: #f5f5f7; color: #222; line-height: 1.45; }
+.wrap { max-width: 1500px; margin: 0 auto; padding: 24px; }
+h1 { font-size: 1.6em; margin: 0 0 4px 0; }
+h2 { font-size: 1.2em; margin: 24px 0 10px 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 6px; }
+h3 { font-size: 1.0em; margin: 14px 0 6px 0; color: #34495e; }
+.meta { color: #555; margin-bottom: 14px; font-size: 0.92em; }
+.scorecard { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+             gap: 12px; margin: 14px 0 24px 0; }
+.score { background: white; border-radius: 8px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.score .num { font-size: 1.9em; font-weight: 700; color: #2c3e50; }
+.score .lbl { color: #777; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; }
+.score .pct { color: #16a085; font-weight: 600; margin-left: 6px; }
+
+.sw { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.sw .col { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.sw .col ul { padding-left: 18px; margin: 4px 0 0 0; }
+.sw .col li { margin: 4px 0; }
+.sw .strengths h3 { color: #27ae60; }
+.sw .weaknesses h3 { color: #c0392b; }
+
+.field { background: white; border-radius: 8px; padding: 0; margin: 14px 0;
+         box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: grid;
+         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; overflow: hidden; }
+.field .yaml { background: #fbfcfe; padding: 14px 16px; border-right: 1px solid #ecedef; min-width: 0; }
+.field .yaml pre { margin: 0; font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+                   font-size: 0.84em; white-space: pre-wrap; word-break: break-word;
+                   color: #2c3e50; }
+.field .yaml .field-name { font-size: 0.85em; color: #999; text-transform: uppercase;
+                           letter-spacing: 0.04em; margin-bottom: 6px; font-weight: 600; }
+.field .anns { padding: 14px 16px; background: white; min-width: 0; }
+.field .anns.empty { color: #aaa; font-style: italic; font-size: 0.85em; }
+
+.ann { background: #f7f8fa; border-left: 4px solid #3498db; padding: 10px 12px;
+       margin-bottom: 8px; border-radius: 0 6px 6px 0; font-size: 0.85em; }
+.ann-r10 { border-left-color: #9b59b6; }
+.ann-r20 { border-left-color: #16a085; }
+.ann-issue { border-left-color: #e67e22; }
+.ann-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.badge { color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.78em; font-weight: 600; white-space: nowrap; }
+.ann-label { font-weight: 600; color: #555; }
+.ann-sub { color: #666; }
+.ann-body { color: #444; }
+.ann-row { display: grid; grid-template-columns: 90px 1fr; gap: 8px; margin-top: 4px; }
+.ann-k { font-size: 0.85em; color: #888; text-transform: uppercase; letter-spacing: 0.04em; }
+.ann-v { word-break: break-word; }
+
+.unmatched { background: white; border-radius: 8px; padding: 14px 16px; margin: 16px 0;
+             box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.recs { background: white; border-radius: 8px; padding: 14px 16px; margin: 16px 0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.recs ol { margin: 8px 0 0 0; padding-left: 22px; }
+.recs li { margin: 6px 0; }
+.legend { font-size: 0.8em; color: #777; margin-top: 6px; }
+.legend .key { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
+</style></head><body><div class="wrap">
+
+<h1>Interleaved Semantic Evaluation</h1>
+<div class="meta">
+  Project: <b>CHORUS</b> &middot; Method: <b>claudecode_agent</b><br>
+  YAML: <code>data/d4d_concatenated/claudecode_agent/CHORUS_d4d.yaml</code><br>
+  R10 JSON: <code>data/evaluation_llm/rubric10_semantic/concatenated/CHORUS_claudecode_agent_evaluation.json</code><br>
+  R20 JSON: <code>data/evaluation_llm/rubric20_semantic/concatenated/CHORUS_claudecode_agent_evaluation.json</code><br>
+  Model: <code>claude-sonnet-4-5-20250929</code>
+</div>
+
+<div class="scorecard">
+<div class="score"><div class="lbl">Rubric10 (semantic)</div><div class="num">42.0/50 <span class="pct">(84.0%)</span></div></div>
+<div class="score"><div class="lbl">Rubric20 (semantic)</div><div class="num">74.0/84 <span class="pct">(88.1%)</span></div></div>
+<div class="score"><div class="lbl">Consistency checks (R10/R20)</div><div class="num">28 <span class="pct">pass</span> · 6 fail · 7 warn</div></div>
+<div class="score"><div class="lbl">Mapped feedback / fields</div><div class="num">65 <span class="pct">across 29 fields</span></div></div>
+</div>
+<div class="legend"><span class="key" style="background:#9b59b6;"></span>R10 sub-element <span class="key" style="background:#16a085;"></span>R20 question <span class="key" style="background:#e67e22;"></span>Semantic issue</div>
+<div class="sw">
+<div class="col strengths"><h3>Strengths</h3><ul><li>Exceptional structural completeness with all mandatory fields populated and comprehensive narrative depth (1,247 char description, 28 keywords, 4 detailed purposes)</li><li>Outstanding funding documentation with complete NIH grant details (1OT2OD032701-01, $5.88M, fiscal timeline) and 19 creators with institutional affiliations across 14 data acquisition centers</li><li>Comprehensive multi-modal data standardization with 5 internationally recognized formats (OMOP, WFDB, DICOM, OHNLP, EDF+/Persyst) and published schema metadata for all modalities</li><li>Excellent technical documentation with specific software tools named, GitHub organization documented (28 repositories including chorus-ai/Chorus_SOP, chorus-mapping), and detailed preprocessing/cleaning/labeling strategies</li><li>Strong FAIR compliance with multiple persistent identifiers (project URL, publication DOI 10.1007/s12028-024-02007, NIH RePORTER), clear controlled access mechanism (Azure secure enclave, DUA), and exceptional interlinking across 8 platforms</li><li>Robust ethical framework with 14 IRBs, HIPAA/45 CFR 46 compliance, community ethics focus groups, de-identification across all modalities, and Social Determinants of Health considerations</li><li>Well-documented access governance with explicit controlled access model, institutional email requirement, signed licensing agreement, access contacts provided, and clear permitted/prohibited uses</li><li>Comprehensive collection protocol with 4 collection mechanisms, 5 acquisition methods, multi-site coordination details, and complete timeline (9/2022-11/2026 with 8/2025 snapshot)</li></ul></div>
+<div class="col weaknesses"><h3>Weaknesses</h3><ul><li>Missing specific IRB protocol numbers from any of the 14 institutional review boards despite comprehensive ethics documentation</li><li>No explicit deidentification method summary field (HIPAA Safe Harbor vs Expert Determination) though methods described across preprocessing strategies</li><li>Lacks formal version numbering system and structured release notes despite good snapshot-based progress tracking (August 2025 status)</li><li>Missing specific demographic breakdowns (age ranges, race/ethnicity distributions) and explicit inclusion/exclusion criteria for patient enrollment</li><li>Minor grant number format inconsistency: license field shows OT2OD032701 while funders shows 1OT2OD032701-01</li><li>No explicit informed consent approach documented (likely retrospective waiver but not stated)</li><li>Missing participant compensation details and explicit vulnerable population safeguards (though PICU/NICU implies pediatric protections)</li></ul></div>
+</div>
+<h2>Field-by-field</h2>
+
+<div class="field" id="field-id">
+  <div class="yaml">
+    <div class="field-name">id</div>
+    <pre>id: https://chorus4ai.org/</pre>
+  </div>
+  <div class="anns"><div class="ann ann-issue" style="border-left-color:#e67e22;">
+  <div class="ann-head">
+    <span class="badge" style="background:#e67e22;">⚠ medium</span>
+    <span class="ann-label">R10 · correctness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">Dataset identifier is URL rather than standard persistent identifier</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">id</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">Register dataset with DataCite for DOI</span></div>
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#c0392b;">✗ 0/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Persistent Identifier (DOI, RRID, or URI)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://chorus4ai.org/</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">URL identifier present but not a proper persistent identifier (DOI, RRID, or UUID). This is a landing page URL, not a DOI or other standard persistent identifier format.</span></div>
+    <div class="ann-row"><span class="ann-k">semantic</span><span class="ann-v">doi_format_check: not_present; rrid_format_check: not_present; plausibility: URL identifier lacks persistence guarantees of DOI/RRID systems</span></div>
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 4.Ethical Use and Privacy Safeguards</span>
+    <span class="ann-sub">Deidentification Method Described</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">5 methods: re-id limitation, privacy_scan_tool, OHNLP tokenization, DICOM de-id, DeGauss geocoding</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Multiple deidentification methods across all modalities</span></div>
+    
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q1 (Structural Completeness)</span>
+    <span class="ann-sub">Field Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">≥90% fields populated</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://chorus4ai.org/, title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI, description: 420+ chars with comprehensive detail, keywords: 28 keywords, license: Controlled Access - Data Use Agreement Required (OT2OD032701)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">All mandatory fields present with exceptional content quality and detail</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All fields semantically appropriate for multi-center critical care dataset</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Field content aligns across all mandatory elements</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q16 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Findability (Persistent Links)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">page: https://chorus4ai.org/, id: https://chorus4ai.org/, external_resources: 8 persistent URLs including NIH RePORTER (https://reporter.nih.gov/project-details/10472824), GitHub (https://github.com/chorus-ai), Bridge2AI (https://bridge2ai.org/chorus), publication DOI (https://doi.org/10.1007/s12028-024-02007)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent findability with multiple persistent URLs across project website, federal grant database, GitHub organization, and peer-reviewed publication</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All URL formats valid. NIH RePORTER, GitHub, and DOI URLs follow standard patterns</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">All URLs point to consistent CHoRUS project resources across different platforms</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q6 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Dataset Identification Metadata</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://chorus4ai.org/, page: https://chorus4ai.org/, external_resources: includes DOI 10.1007/s12028-024-02007 (peer-reviewed publication), NIH RePORTER project link https://reporter.nih.gov/project-details/10472824</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Multiple persistent identifiers provided including project URL, publication DOI, and federal grant tracking</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">DOI format valid (10.1007/s12028-024-02007), NIH RePORTER URL structure correct</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">All URLs point to consistent CHoRUS project resources</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-name">
+  <div class="yaml">
+    <div class="field-name">name</div>
+    <pre>name: CHoRUS</pre>
+  </div>
+  <div class="anns empty"><span>no field-level feedback matched</span></div>
+</div>
+
+
+<div class="field" id="field-title">
+  <div class="yaml">
+    <div class="field-name">title</div>
+    <pre>title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Dataset Title and Description Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent title and highly comprehensive description with specific details</span></div>
+    
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q1 (Structural Completeness)</span>
+    <span class="ann-sub">Field Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">≥90% fields populated</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://chorus4ai.org/, title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI, description: 420+ chars with comprehensive detail, keywords: 28 keywords, license: Controlled Access - Data Use Agreement Required (OT2OD032701)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">All mandatory fields present with exceptional content quality and detail</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All fields semantically appropriate for multi-center critical care dataset</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Field content aligns across all mandatory elements</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-description">
+  <div class="yaml">
+    <div class="field-name">description</div>
+    <pre>description: &#x27;CHoRUS for Equitable AI is a Bridge2AI data generation project developing the most diverse,
+  high-resolution, ethically sourced, AI-ready critical care dataset to answer the grand challenge of
+  improving recovery from acute illness. The project spans 20 academic centers (14 data acquisition centers)
+  and is building a publicly available dataset targeting over 100,000 critically ill patients with multi-modal
+  data including structured EHR, waveform telemetry, medical imaging, EEG, and clinical notes. All structured
+  data is standardized to the OMOP Common Data Model with additional formats (DICOM, WFDB, OHNLP tokenization)
+  and comprehensive metadata schemas. Patient-focused efforts determine ethical and legal approaches to
+  manage privacy and bias while accounting for Social Determinants of Health. A visualization and annotation
+  environment labels data with targets important for prediction. The project emphasizes skills and workforce
+  development for a next generation of diverse academic and community AI scientists through training programs
+  and partnerships with AIM-AHEAD. As of August 2025, the dataset covers 14 different hospitals with over
+  45,000 unique admissions and includes 50,000 patient admissions from ICU, PICU, and NICU, 1.6 billion
+  rows of EHR OMOP data, 7,642 admissions with radiology data, and 23 TB of waveform data.
+
+  &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q1 (Structural Completeness)</span>
+    <span class="ann-sub">Field Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">≥90% fields populated</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://chorus4ai.org/, title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI, description: 420+ chars with comprehensive detail, keywords: 28 keywords, license: Controlled Access - Data Use Agreement Required (OT2OD032701)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">All mandatory fields present with exceptional content quality and detail</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All fields semantically appropriate for multi-center critical care dataset</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Field content aligns across all mandatory elements</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q2 (Structural Completeness)</span>
+    <span class="ann-sub">Entry Length Adequacy</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">&gt;200 chars</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">description: 1,247 chars, purposes: 4 purposes averaging 300+ chars each with comprehensive detail on grand challenge, AI-ready dataset creation, standards establishment, diversity/equity</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional narrative depth across all narrative fields with specific metrics and objectives</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Narrative content accurately describes critical care AI dataset with specific enrollment targets and data volumes</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Purposes align with Bridge2AI program goals and dataset composition described</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-page">
+  <div class="yaml">
+    <div class="field-name">page</div>
+    <pre>page: https://chorus4ai.org/</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Landing Page and Resources</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">page: https://chorus4ai.org/; 8 external resources</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Active landing page plus extensive external resources</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#c0392b;">✗ 0/1</span>
+    <span class="ann-label">R10 2.Dataset Access and Retrieval</span>
+    <span class="ann-sub">Download URL or Platform Link Available</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Landing page URL provided but no direct download URL; access via secure enclave</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Appropriate for controlled access but no public download URL</span></div>
+    
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q16 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Findability (Persistent Links)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">page: https://chorus4ai.org/, id: https://chorus4ai.org/, external_resources: 8 persistent URLs including NIH RePORTER (https://reporter.nih.gov/project-details/10472824), GitHub (https://github.com/chorus-ai), Bridge2AI (https://bridge2ai.org/chorus), publication DOI (https://doi.org/10.1007/s12028-024-02007)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent findability with multiple persistent URLs across project website, federal grant database, GitHub organization, and peer-reviewed publication</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All URL formats valid. NIH RePORTER, GitHub, and DOI URLs follow standard patterns</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">All URLs point to consistent CHoRUS project resources across different platforms</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q6 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Dataset Identification Metadata</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://chorus4ai.org/, page: https://chorus4ai.org/, external_resources: includes DOI 10.1007/s12028-024-02007 (peer-reviewed publication), NIH RePORTER project link https://reporter.nih.gov/project-details/10472824</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Multiple persistent identifiers provided including project URL, publication DOI, and federal grant tracking</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">DOI format valid (10.1007/s12028-024-02007), NIH RePORTER URL structure correct</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">All URLs point to consistent CHoRUS project resources</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-language">
+  <div class="yaml">
+    <div class="field-name">language</div>
+    <pre>language: en</pre>
+  </div>
+  <div class="anns empty"><span>no field-level feedback matched</span></div>
+</div>
+
+
+<div class="field" id="field-license">
+  <div class="yaml">
+    <div class="field-name">license</div>
+    <pre>license: Controlled Access - Data Use Agreement Required (OT2OD032701)</pre>
+  </div>
+  <div class="anns"><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R20 · consistency</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">License field references grant number (OT2OD032701) but funders section shows 1OT2OD032701-01 with project number prefix</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">license, funders</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">Use consistent grant number format across all fields (recommend 1OT2OD032701-01)</span></div>
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 2.Dataset Access and Retrieval</span>
+    <span class="ann-sub">Access Policy and IP Restrictions Defined</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">license: Controlled Access - Data Use Agreement Required</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Clear controlled access policy with specific requirements</span></div>
+    
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q1 (Structural Completeness)</span>
+    <span class="ann-sub">Field Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">≥90% fields populated</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://chorus4ai.org/, title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI, description: 420+ chars with comprehensive detail, keywords: 28 keywords, license: Controlled Access - Data Use Agreement Required (OT2OD032701)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">All mandatory fields present with exceptional content quality and detail</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All fields semantically appropriate for multi-center critical care dataset</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Field content aligns across all mandatory elements</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-keywords">
+  <div class="yaml">
+    <div class="field-name">keywords</div>
+    <pre>keywords:
+- CHoRUS
+- Bridge2AI
+- critical care
+- acute illness
+- AI-ready dataset
+- OMOP Common Data Model
+- electronic health records
+- EHR
+- waveform telemetry
+- medical imaging
+- DICOM
+- EEG
+- clinical notes
+- OHNLP
+- health equity
+- social determinants of health
+- federated access
+- multi-modal data
+- high-resolution data
+- ethical AI
+- trustworthy AI
+- workforce development
+- data standardization
+- privacy preservation
+- bias mitigation
+- ICU
+- intensive care</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Keywords or Tags for Searchability</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">keywords: 28 keywords</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive keyword set covering all relevant dimensions</span></div>
+    
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q1 (Structural Completeness)</span>
+    <span class="ann-sub">Field Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">≥90% fields populated</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://chorus4ai.org/, title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI, description: 420+ chars with comprehensive detail, keywords: 28 keywords, license: Controlled Access - Data Use Agreement Required (OT2OD032701)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">All mandatory fields present with exceptional content quality and detail</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All fields semantically appropriate for multi-center critical care dataset</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Field content aligns across all mandatory elements</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q3 (Structural Completeness)</span>
+    <span class="ann-sub">Keyword Diversity</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">≥8 keywords</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">keywords: 28 unique keywords covering project (CHoRUS, Bridge2AI), domain (critical care, acute illness, ICU), data types (EHR, waveforms, imaging, EEG, DICOM, OHNLP), standards (OMOP), themes (health equity, ethical AI, privacy preservation, bias mitigation)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive keyword coverage across all relevant dimensions with excellent domain specificity</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Keywords accurately reflect multi-modal critical care dataset with standardization focus</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Keywords align with purposes, data formats, and ethical considerations described</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-purposes">
+  <div class="yaml">
+    <div class="field-name">purposes</div>
+    <pre>purposes:
+- id: chorus:purpose:1
+  name: Improve recovery from acute illness
+  description: &#x27;Answer the grand challenge of improving recovery from acute illness by developing high-resolution
+    multi-center datasets as a critical first step towards actionable and trustworthy AI in critical care.
+    Address the urgent need for infrastructure to support artificial intelligence and machine learning
+    (AI/ML) in critical care settings.
+
+    &#x27;
+- id: chorus:purpose:2
+  name: Create AI-ready critical care dataset
+  description: &#x27;Develop a publicly available, AI-ready critical care dataset from more than 100,000 critically
+    ill patients while ensuring methods promote privacy, accountability, and clinical benefit. Generate
+    the most diverse, high-resolution, ethically sourced dataset for AI/ML applications in acute and critical
+    care, expanding AI and Machine Learning to improve recovery from acute illness.
+
+    &#x27;
+- id: chorus:purpose:3
+  name: Establish data standards and tools
+  description: &#x27;Unify standards to harmonize multi-modal EHR, waveform, imaging, and text data. Develop
+    software and tooling to interact with and extract insight from clinical data in diverse formats. Create
+    validated semantic mappings for connecting clinical data in various source formats to international
+    standards (OMOP Common Data Model, DICOM, WFDB, OHNLP).
+
+    &#x27;
+- id: chorus:purpose:4
+  name: Promote diversity and health equity
+  description: &#x27;Ensure comprehensive sets of patient conditions and clinical treatment strategies with
+    appropriate contextual factors such as geographic distance to nearest hospital and Social Determinants
+    of Health. Develop the skills and workforce for a next generation of diverse academic and community
+    AI scientists through comprehensive training and education programs in partnership with AIM-AHEAD.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 7.Scientific Motivation and Funding Transparency</span>
+    <span class="ann-sub">Motivation or Purpose for Dataset Creation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">4 purposes + 4 research gaps addressed</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional motivation documentation</span></div>
+    
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q18 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Reusability (License Clarity)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">License explicitly defines reuse terms</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">license_and_use_terms: CHoRUS Controlled Access License with Data Use Agreement explicitly defines permitted research uses, prohibits re-identification, requires institutional email and signed agreement. intended_uses: 4 use cases explicitly permitted (AI/ML model development for critical care, external validation, health equity research, educational/training purposes). discouraged_uses: 3 uses explicitly prohibited (clinical decision-making without validation/approval, re-identification attempts, use without awareness of data limitations)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional license clarity with specific permitted uses, explicit prohibitions, and clear reuse requirements (DUA signature, research-only)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Controlled access license appropriate for de-identified clinical data. Research-only restriction standard for NIH-funded datasets pending validation</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">License terms align with intended_uses (research, education) and discouraged_uses (clinical deployment without approval). Re-identification prohibition consistent with de-identification preprocessing</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q2 (Structural Completeness)</span>
+    <span class="ann-sub">Entry Length Adequacy</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">&gt;200 chars</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">description: 1,247 chars, purposes: 4 purposes averaging 300+ chars each with comprehensive detail on grand challenge, AI-ready dataset creation, standards establishment, diversity/equity</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional narrative depth across all narrative fields with specific metrics and objectives</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Narrative content accurately describes critical care AI dataset with specific enrollment targets and data volumes</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Purposes align with Bridge2AI program goals and dataset composition described</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-tasks">
+  <div class="yaml">
+    <div class="field-name">tasks</div>
+    <pre>tasks:
+- id: chorus:task:1
+  name: Characterize acute and critical care illness
+  description: &#x27;Generate data for ML/AI applications aimed at characterizing acute and critical care illness
+    patterns, progression, and outcomes across diverse patient populations and hospital settings.
+
+    &#x27;
+- id: chorus:task:2
+  name: Predict complications in critically ill patients
+  description: &#x27;Enable prediction of complications among patients with acute or critical illness using
+    multi-modal data including structured EHR, waveforms, imaging, and clinical notes.
+
+    &#x27;
+- id: chorus:task:3
+  name: Measure treatment response
+  description: &#x27;Support measurement and analysis of treatment response among critically ill patients through
+    high-frequency documentation, medication administration records, and clinical outcomes data.
+
+    &#x27;
+- id: chorus:task:4
+  name: External validation for AI model marketplace adoption
+  description: &#x27;Provision a holdout test set accessible for model external validation to aid marketplace
+    adoption of AI-developed models for implementation in acute and critical care settings.
+
+    &#x27;
+- id: chorus:task:5
+  name: Label data for prediction targets
+  description: &#x27;Utilize visualization and annotation environment to label data with targets important
+    for prediction tasks in critical care AI applications.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 7.Scientific Motivation and Funding Transparency</span>
+    <span class="ann-sub">Primary Research Objectives or Tasks</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">5 detailed tasks with clear descriptions</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive research objectives</span></div>
+    
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-addressing_gaps">
+  <div class="yaml">
+    <div class="field-name">addressing_gaps</div>
+    <pre>addressing_gaps:
+- id: chorus:gap:1
+  name: Lack of diverse multi-center critical care datasets
+  description: &#x27;Address the absence of large-scale, diverse, high-resolution multi-center datasets for
+    critical care AI/ML by creating a dataset spanning 20 academic centers with 100,000+ critically ill
+    patients and ensuring balanced, diverse cohorts through federated access and sampling methods across
+    14 data acquisition centers.
+
+    &#x27;
+- id: chorus:gap:2
+  name: Insufficient data standardization in critical care
+  description: &#x27;Overcome the lack of unified standards in critical care data by harmonizing multi-modal
+    EHR, waveform, imaging, and text data to OMOP Common Data Model and other international standards
+    (DICOM, WFDB, OHNLP).
+
+    &#x27;
+- id: chorus:gap:3
+  name: Privacy and bias concerns in clinical AI
+  description: &#x27;Address ethical and legal challenges in AI through patient-focused efforts that determine
+    approaches to manage privacy and bias while accounting for Social Determinants of Health and performing
+    community-facing ethics focus groups to determine what data is appropriate for public sharing.
+
+    &#x27;
+- id: chorus:gap:4
+  name: Limited diversity in AI/ML workforce
+  description: &#x27;Bridge the gap in diverse AI/ML workforce through comprehensive educational approaches,
+    training programs (including AIM-AHEAD partnership), and cultivation of expertise in lay and scientific
+    communities to improve AI literacy and utilization.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q15 (Technical Documentation)</span>
+    <span class="ann-sub">Human Subject Representation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Detailed demographics and inclusion/exclusion criteria</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">instances: 50,000 patient admissions (ICU, PICU, NICU) from 14 hospitals, 45,000+ unique admissions, target 100K+ critically ill patients, retrospective data collection. subpopulations: 2 documented (by hospital - 14 different hospitals across 20 academic centers for geographic/institutional diversity; by care setting - ICU, PICU, NICU). addressing_gaps: emphasizes &#x27;most diverse&#x27; dataset with Social Determinants of Health, federated sampling for balanced diverse cohorts. sampling_strategies: multi-center federated sampling, is_representative: true, representative_verification includes geographic/institutional diversity and SDOH contextual factors</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent human subject representation with specific population sizes, geographic diversity across 14 hospitals, care setting diversity (ICU/PICU/NICU), and explicit diversity goals with SDOH considerations. Missing: specific demographic breakdowns (age ranges, race/ethnicity distributions, explicit inclusion/exclusion criteria)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Population sizes plausible for multi-center 4-year critical care study. ICU/PICU/NICU settings appropriate for acute/critical illness focus</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">14 hospitals consistent across multiple fields. Diversity emphasis aligns with health equity purposes and SDOH sensitive_elements. Retrospective collection aligns with IRB approvals</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-creators">
+  <div class="yaml">
+    <div class="field-name">creators</div>
+    <pre>creators:
+- id: chorus:creator:1
+  name: Eric S. Rosenthal
+  description: Contact PI/Project Leader, Massachusetts General Hospital (MGH), Director of MGH Neurosciences
+    ICU
+- id: chorus:creator:2
+  name: Azra Bihorac
+  description: Principal Investigator, University of Florida (UF)
+- id: chorus:creator:3
+  name: Ashley Cordes
+  description: Principal Investigator, CHoRUS Consortium
+- id: chorus:creator:4
+  name: Gilles Clermont
+  description: Principal Investigator, CHoRUS Consortium
+- id: chorus:creator:5
+  name: Gari David Clifford
+  description: Principal Investigator, CHoRUS Consortium
+- id: chorus:creator:6
+  name: Barbara J. Evans
+  description: Principal Investigator, CHoRUS Consortium
+- id: chorus:creator:7
+  name: Xiao Hu
+  description: Principal Investigator, CHoRUS Consortium
+- id: chorus:creator:8
+  name: Rishikesan Kamaleswaran
+  description: Principal Investigator, CHoRUS Consortium
+- id: chorus:creator:9
+  name: Yulia A. Levites Strekalova
+  description: Principal Investigator, University of Florida (UF)
+- id: chorus:creator:10
+  name: Parisa Rashidi
+  description: Principal Investigator, University of Florida (UF)
+- id: chorus:creator:11
+  name: Cynthia Rudin
+  description: Principal Investigator, CHoRUS Consortium
+- id: chorus:creator:12
+  name: Ishan Canty Williams
+  description: Principal Investigator, CHoRUS Consortium
+- id: chorus:creator:13
+  name: Andrew Ewing Williams
+  description: Principal Investigator, Tufts Medicine
+- id: chorus:creator:14
+  name: Xiaoqian Jiang
+  description: Program Lead, UT Health Science Center (UTHealth Houston)
+- id: chorus:creator:15
+  name: Morteza Zabihi
+  description: Lecturer (Machine Learning Basics), Massachusetts General Hospital
+- id: chorus:creator:16
+  name: Zhenhong Hu
+  description: Instructor (Python and Version Control), University of Florida
+- id: chorus:creator:17
+  name: Debora Simmons
+  description: Lecturer (Ethics of AI in Clinical Practice), UT Health Science Center
+- id: chorus:creator:18
+  name: Aliyah Geer
+  description: Workshop Lead (Data Schemas in Clinical Cloud), Massachusetts General Hospital
+- id: chorus:creator:19
+  name: Ciera McCrary
+  description: Program Manager, Massachusetts General Hospital (MGH)</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 7.Scientific Motivation and Funding Transparency</span>
+    <span class="ann-sub">Creators and Acknowledgements Documented</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">19 creators with roles and institutional affiliations</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive creator documentation across multiple roles</span></div>
+    
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q7 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Funding and Acknowledgements Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Funders with grants + creators with affiliations</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">funders: NIH Common Fund Bridge2AI Program with grant 1OT2OD032701-01, total funding $5,880,300 (2022), project dates September 1, 2022 to November 30, 2026. creators: 19 creators with institutional affiliations (MGH, UF, UT Health, Tufts Medicine, Emory) and roles (Contact PI, Principal Investigator, Program Lead, Lecturer, Workshop Lead, Program Manager)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional funding documentation with grant number, fiscal details, project timeline, and comprehensive creator affiliations across all participating institutions</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Grant number 1OT2OD032701-01 follows NIH OT2 (Other Transaction) format correctly for Bridge2AI program</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Creator institutions align with 14 data acquisition centers and 20 academic centers described. Minor inconsistency: license field shows OT2OD032701 without project prefix 1-01</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-funders">
+  <div class="yaml">
+    <div class="field-name">funders</div>
+    <pre>funders:
+- id: chorus:funder:1
+  name: NIH Common Fund Bridge2AI Program
+  description: &#x27;Funded through National Institutes of Health grant OT2OD032701 (project number 1OT2OD032701-01),
+    administered by NIH Office of the Director. Opportunity Number: OTA-21-008. Study Section: Data Coordination,
+    Mapping, and Modeling (DCMM). Fiscal Year 2022. Total funding in 2022: $5,880,300 (all direct costs).
+    Project dates: September 1, 2022 to November 30, 2026 (with approved no-cost extension). Award notice
+    date: September 1, 2022. Assistance Listing Number: 93.310.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R20 · consistency</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">License field references grant number (OT2OD032701) but funders section shows 1OT2OD032701-01 with project number prefix</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">license, funders</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">Use consistent grant number format across all fields (recommend 1OT2OD032701-01)</span></div>
+  </div>
+</div><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R20 · correctness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">Grant number OT2OD032701 follows NIH format correctly but uses OT2 (Other Transaction) mechanism which is non-standard for typical research grants</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">funders</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">Verify OT2 mechanism is intentional for Bridge2AI program (appears correct for this special NIH Common Fund initiative)</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q7 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Funding and Acknowledgements Completeness</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Funders with grants + creators with affiliations</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">funders: NIH Common Fund Bridge2AI Program with grant 1OT2OD032701-01, total funding $5,880,300 (2022), project dates September 1, 2022 to November 30, 2026. creators: 19 creators with institutional affiliations (MGH, UF, UT Health, Tufts Medicine, Emory) and roles (Contact PI, Principal Investigator, Program Lead, Lecturer, Workshop Lead, Program Manager)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional funding documentation with grant number, fiscal details, project timeline, and comprehensive creator affiliations across all participating institutions</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Grant number 1OT2OD032701-01 follows NIH OT2 (Other Transaction) format correctly for Bridge2AI program</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Creator institutions align with 14 data acquisition centers and 20 academic centers described. Minor inconsistency: license field shows OT2OD032701 without project prefix 1-01</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-instances">
+  <div class="yaml">
+    <div class="field-name">instances</div>
+    <pre>instances:
+- id: chorus:instance:1
+  name: Critically ill patients in ICU settings
+  description: &#x27;Individual critically ill patients requiring acute or critical care admitted to intensive
+    care units (ICU), pediatric intensive care units (PICU), or neonatal intensive care units (NICU) across
+    14 data acquisition centers. As of August 2025, the dataset covers 14 different hospitals with over
+    45,000 unique admissions, with 50,000 patient admissions from ICU, PICU, and NICU currently released.
+    Target enrollment exceeds 100,000 critically ill patients. Retrospective data collection from patients
+    with acute or critical illness.
+
+    &#x27;
+  instance_type: &#x27;Human subjects - critically ill patients admitted to participating hospitals (retrospective
+    data collection, ongoing collection through November 2026).
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q15 (Technical Documentation)</span>
+    <span class="ann-sub">Human Subject Representation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Detailed demographics and inclusion/exclusion criteria</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">instances: 50,000 patient admissions (ICU, PICU, NICU) from 14 hospitals, 45,000+ unique admissions, target 100K+ critically ill patients, retrospective data collection. subpopulations: 2 documented (by hospital - 14 different hospitals across 20 academic centers for geographic/institutional diversity; by care setting - ICU, PICU, NICU). addressing_gaps: emphasizes &#x27;most diverse&#x27; dataset with Social Determinants of Health, federated sampling for balanced diverse cohorts. sampling_strategies: multi-center federated sampling, is_representative: true, representative_verification includes geographic/institutional diversity and SDOH contextual factors</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent human subject representation with specific population sizes, geographic diversity across 14 hospitals, care setting diversity (ICU/PICU/NICU), and explicit diversity goals with SDOH considerations. Missing: specific demographic breakdowns (age ranges, race/ethnicity distributions, explicit inclusion/exclusion criteria)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Population sizes plausible for multi-center 4-year critical care study. ICU/PICU/NICU settings appropriate for acute/critical illness focus</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">14 hospitals consistent across multiple fields. Diversity emphasis aligns with health equity purposes and SDOH sensitive_elements. Retrospective collection aligns with IRB approvals</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q5 (Structural Completeness)</span>
+    <span class="ann-sub">Data File Size Availability</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">instances: 50,000 patient admissions released (45,000+ unique admissions), target 100,000+ critically ill patients. Specific data volumes: 1.6 billion rows of EHR OMOP data, 23 TB of waveform data, 7,642 admissions with radiology data, 1,000 images available</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive instance counts and data volumes provided with specific metrics by modality</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Instance counts plausible for multi-center critical care dataset over 3+ years</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Data volumes align with described collection mechanisms and timeframes</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-subsets">
+  <div class="yaml">
+    <div class="field-name">subsets</div>
+    <pre>subsets:
+- id: chorus:subset:1
+  name: Controlled Access Structured EHR Dataset (OMOP)
+  description: &#x27;Primary dataset with controlled access requiring data use agreement and licensing. Includes
+    OMOP-standardized structured EHR data comprising demographics, medication administration (dosing time-stamped
+    upon each infusion change or dose administration), procedures, nursing flowsheets (high-frequency
+    documentation), and diagnoses. Available in secure enclave. As of August 2025, contains 1.6 billion
+    rows of EHR OMOP data. Registration required with institutional email; all participants must sign
+    licensing agreement.
+
+    &#x27;
+- id: chorus:subset:2
+  name: Waveform Telemetry Dataset (WFDB)
+  description: &#x27;Waveform telemetry data from bedside monitors (gateway/middleware) standardized to WFDB
+    (WaveForm DataBase) format following extended PhysioNet schema. Available in secure enclave with controlled
+    access. As of August 2025, contains 23 TB of waveform data. Published metadata schema: PhysioNet schema
+    (extended).
+
+    &#x27;
+- id: chorus:subset:3
+  name: Medical Imaging Dataset (DICOM)
+  description: &#x27;Imaging data from hospital PACS (Picture Archiving and Communication System) in DICOM
+    format with comprehensive metadata following DICOM schema. As of August 2025, 1,000 images are available
+    with de-identification in process for the larger cohort. 7,642 admissions have radiology data. Controlled
+    access planned.
+
+    &#x27;
+- id: chorus:subset:4
+  name: Clinical Notes Dataset (OHNLP Tokenized)
+  description: &#x27;Clinical notes extracted and tokenized using OHNLP (Open Health Natural Language Processing)
+    toolkit following open source OHNLP schema. Stored locally at contributing sites (except tokens).
+    Controlled access planned. De-identification achieved through tokenization approach.
+
+    &#x27;
+- id: chorus:subset:5
+  name: EEG Waveform Dataset (EDF+ and Persyst)
+  description: &#x27;Electroencephalography (EEG) waveform data from hospital databases in EDF+ (European Data
+    Format) and Persyst formats. Open source EDF+ and Persyst schema metadata available. Extraction in
+    process, planned for controlled access.
+
+    &#x27;
+- id: chorus:subset:6
+  name: Training and Publication Subset
+  description: &#x27;Subsets of the dataset currently being used for training activities (AIM-AHEAD Bridge2AI
+    for Clinical Care Training Program) and publications as the dataset undergoes expansion and quality
+    assurance processes.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 1.Dataset Discovery and Identification</span>
+    <span class="ann-sub">Hierarchical Structure</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">6 distinct subsets (OMOP EHR, WFDB waveforms, DICOM imaging, OHNLP notes, EEG, training subset)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Well-structured hierarchical organization with 6 modality-based subsets</span></div>
+    
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-sampling_strategies">
+  <div class="yaml">
+    <div class="field-name">sampling_strategies</div>
+    <pre>sampling_strategies:
+- id: chorus:sampling:1
+  name: Multi-center federated sampling
+  description: &#x27;Federated access enables sampling methods to ensure a balanced and diverse cohort across
+    20 academic centers (14 data acquisition centers). Legal framework established for collecting data
+    at scale with sampling to ensure comprehensive sets of patient conditions and clinical treatment strategies.
+    Community-facing ethics focus groups conducted to determine what data is appropriate for public sharing.
+
+    &#x27;
+  is_sample: true
+  is_random: false
+  is_representative: true
+  source_data:
+  - Critically ill patients in ICU, PICU, and NICU settings at 14 data acquisition centers across 20 academic
+    centers in the United States
+  representative_verification:
+  - Federated multi-center data collection across 14 hospitals ensures geographic and institutional diversity;
+    sampling for balanced and diverse patient populations; inclusion of Social Determinants of Health
+    contextual factors</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q15 (Technical Documentation)</span>
+    <span class="ann-sub">Human Subject Representation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Detailed demographics and inclusion/exclusion criteria</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">instances: 50,000 patient admissions (ICU, PICU, NICU) from 14 hospitals, 45,000+ unique admissions, target 100K+ critically ill patients, retrospective data collection. subpopulations: 2 documented (by hospital - 14 different hospitals across 20 academic centers for geographic/institutional diversity; by care setting - ICU, PICU, NICU). addressing_gaps: emphasizes &#x27;most diverse&#x27; dataset with Social Determinants of Health, federated sampling for balanced diverse cohorts. sampling_strategies: multi-center federated sampling, is_representative: true, representative_verification includes geographic/institutional diversity and SDOH contextual factors</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent human subject representation with specific population sizes, geographic diversity across 14 hospitals, care setting diversity (ICU/PICU/NICU), and explicit diversity goals with SDOH considerations. Missing: specific demographic breakdowns (age ranges, race/ethnicity distributions, explicit inclusion/exclusion criteria)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Population sizes plausible for multi-center 4-year critical care study. ICU/PICU/NICU settings appropriate for acute/critical illness focus</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">14 hospitals consistent across multiple fields. Diversity emphasis aligns with health equity purposes and SDOH sensitive_elements. Retrospective collection aligns with IRB approvals</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-subpopulations">
+  <div class="yaml">
+    <div class="field-name">subpopulations</div>
+    <pre>subpopulations:
+- id: chorus:subpop:1
+  name: Critically ill patients by hospital
+  description: &#x27;Patients distributed across 14 different hospitals within the CHoRUS network spanning
+    20 academic centers in the United States, ensuring geographic and institutional diversity in critical
+    care settings.
+
+    &#x27;
+- id: chorus:subpop:2
+  name: ICU, PICU, and NICU patients
+  description: &#x27;Patients admitted to intensive care units (ICU), pediatric intensive care units (PICU),
+    and neonatal intensive care units (NICU) across contributing hospitals, with 50,000 patient admissions
+    in the current released dataset.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q15 (Technical Documentation)</span>
+    <span class="ann-sub">Human Subject Representation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Detailed demographics and inclusion/exclusion criteria</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">instances: 50,000 patient admissions (ICU, PICU, NICU) from 14 hospitals, 45,000+ unique admissions, target 100K+ critically ill patients, retrospective data collection. subpopulations: 2 documented (by hospital - 14 different hospitals across 20 academic centers for geographic/institutional diversity; by care setting - ICU, PICU, NICU). addressing_gaps: emphasizes &#x27;most diverse&#x27; dataset with Social Determinants of Health, federated sampling for balanced diverse cohorts. sampling_strategies: multi-center federated sampling, is_representative: true, representative_verification includes geographic/institutional diversity and SDOH contextual factors</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent human subject representation with specific population sizes, geographic diversity across 14 hospitals, care setting diversity (ICU/PICU/NICU), and explicit diversity goals with SDOH considerations. Missing: specific demographic breakdowns (age ranges, race/ethnicity distributions, explicit inclusion/exclusion criteria)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Population sizes plausible for multi-center 4-year critical care study. ICU/PICU/NICU settings appropriate for acute/critical illness focus</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">14 hospitals consistent across multiple fields. Diversity emphasis aligns with health equity purposes and SDOH sensitive_elements. Retrospective collection aligns with IRB approvals</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-sensitive_elements">
+  <div class="yaml">
+    <div class="field-name">sensitive_elements</div>
+    <pre>sensitive_elements:
+- id: chorus:sensitive:1
+  name: Protected health information - clinical EHR data
+  description: &#x27;Complete electronic health records including demographics, diagnoses, procedures, medications,
+    nursing documentation, and clinical notes for critically ill patients. Contains protected health information
+    subject to HIPAA and institutional privacy requirements. De-identified before release through OMOP
+    transformation and privacy scanning tools.
+
+    &#x27;
+  sensitive_elements_present: true
+  sensitivity_details:
+  - Demographics and patient identifiers (de-identified before controlled access release)
+  - Diagnoses and medical conditions (OMOP standardized)
+  - Medication administration records with dosing timestamps (OMOP standardized)
+  - Procedures and clinical interventions documented by providers (OMOP standardized)
+  - Clinical notes (tokenized using OHNLP toolkit for privacy protection)
+  - Nursing flowsheet documentation at high frequency (OMOP with extensions)
+- id: chorus:sensitive:2
+  name: Physiological monitoring and EEG waveform data
+  description: &#x27;Continuous waveform telemetry from bedside monitors and EEG recordings capturing detailed
+    physiological states of critically ill patients. May reveal sensitive health conditions and treatment
+    responses. Stored in WFDB format (telemetry) and EDF+/Persyst formats (EEG) with controlled access.
+
+    &#x27;
+  sensitive_elements_present: true
+  sensitivity_details:
+  - Continuous cardiac waveforms from bedside monitors (WFDB format, 23 TB)
+  - Respiratory monitoring and hemodynamic measurement data
+  - Electroencephalography (EEG) recordings from hospital databases
+  - High-frequency physiological parameters
+- id: chorus:sensitive:3
+  name: Medical imaging data
+  description: &#x27;Diagnostic imaging studies in DICOM format from hospital PACS systems. De-identification
+    in process to remove embedded patient information while preserving clinical utility. As of August
+    2025, 1,000 images available with de-id in process for larger cohort (7,642 admissions with radiology
+    data total).
+
+    &#x27;
+  sensitive_elements_present: true
+  sensitivity_details:
+  - Radiology images (CT scans, X-rays, MRI and other modalities) in DICOM format
+  - DICOM metadata (de-identification in process)
+  - Embedded patient information being removed through de-identification pipeline
+- id: chorus:sensitive:4
+  name: Social Determinants of Health data
+  description: &#x27;Contextual factors including geographic information (distance to hospital) and social
+    determinants of health data. Collected to support health equity research while maintaining patient
+    privacy through privacy-preserving transformations.
+
+    &#x27;
+  sensitive_elements_present: true
+  sensitivity_details:
+  - Geographic location information (distance to nearest hospital)
+  - Social determinants of health variables
+  - Contextual equity factors with privacy-preserving transformations applied</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">4/5</span>
+    <span class="ann-label">R20 Q8 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Ethical and Privacy Declarations</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Comprehensive ethics with minor gaps</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">human_subject_research.involves_human_subjects: true, ethics_review_board: Institutional review boards at 14 data acquisition centers, community-facing ethics focus groups, legal and ethical advisory teams. regulatory_compliance: HIPAA, 45 CFR 46 (Common Rule), institutional data privacy regulations, NIH ethical AI requirements. preprocessing_strategies includes de-identification: OMOP transformation, OHNLP tokenization, DICOM header de-identification, privacy scan tool. sensitive_elements: 4 categories documented (PHI-clinical EHR, waveforms/EEG, imaging, SDOH)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive ethical documentation covering IRB review, regulatory compliance, de-identification methods, and privacy protections. Missing: specific IRB protocol numbers, explicit informed consent approach (retrospective waiver likely), participant compensation details, vulnerable population safeguards (though PICU/NICU implies pediatric protections)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">HIPAA and 45 CFR 46 compliance appropriate for US-based multi-center health data. De-identification methods semantically appropriate for each data type</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Ethics review at 14 sites aligns with 14 data acquisition centers. Community ethics focus groups support public sharing claims. Minor gap: no IRB protocol numbers provided despite multi-site coordination</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-collection_mechanisms">
+  <div class="yaml">
+    <div class="field-name">collection_mechanisms</div>
+    <pre>collection_mechanisms:
+- id: chorus:collection:1
+  name: Retrospective EHR extraction
+  description: &#x27;Retrospective data collection from electronic health record systems at 14 data acquisition
+    centers. Data extracted includes demographics, medication administration (dosing time-stamped upon
+    each infusion change or dose administration), procedures, nursing flowsheets (high-frequency documentation),
+    diagnoses, and clinical notes. Standardized to OMOP Common Data Model.
+
+    &#x27;
+- id: chorus:collection:2
+  name: Waveform telemetry capture
+  description: &#x27;Continuous waveform telemetry data captured from bedside monitors through gateway and
+    middleware systems at each contributing hospital. Stored in WFDB (WaveForm DataBase) format following
+    extended PhysioNet schema. Contains 23 TB of waveform data as of August 2025.
+
+    &#x27;
+- id: chorus:collection:3
+  name: Medical imaging acquisition from PACS
+  description: &#x27;Medical imaging data acquired from hospital Picture Archiving and Communication Systems
+    (PACS) and stored in DICOM format with comprehensive metadata following DICOM schema. 7,642 admissions
+    have radiology data; 1,000 images currently available.
+
+    &#x27;
+- id: chorus:collection:4
+  name: EEG recording extraction
+  description: &#x27;Electroencephalography recordings extracted from hospital EEG databases in EDF+ (European
+    Data Format) and Persyst formats with metadata following open source schemas. Extraction in process
+    as of August 2025.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q12 (Technical Documentation)</span>
+    <span class="ann-sub">Collection Protocol Clarity</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Full collection protocol with methods, collectors, and timeframes</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">collection_mechanisms: 4 detailed mechanisms (retrospective EHR extraction, waveform telemetry capture via gateway/middleware, medical imaging from PACS, EEG extraction from databases). acquisition_methods: 5 methods with technical details (OMOP transformation, OHNLP tokenization, DICOM from PACS, WFDB from bedside monitors, EEG from hospital databases). Collection timeframes: September 1, 2022 to November 30, 2026 (approved no-cost extension), snapshot August 2025. Data collectors: 14 data acquisition centers across 20 academic centers, coordinated by CHoRUS Consortium (MGH lead, UF, UT Health, Tufts Medicine)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive collection protocol documentation with detailed mechanisms, methods, multi-site coordination, and clear timeline with current status snapshot</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Collection mechanisms appropriate for multi-center retrospective critical care study. 4-year timeline plausible for 100K+ patient dataset</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Collection mechanisms align with distribution formats. 14 data acquisition centers consistent across multiple fields. Timeframes logically ordered (start 9/2022, snapshot 8/2025, end 11/2026)</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-acquisition_methods">
+  <div class="yaml">
+    <div class="field-name">acquisition_methods</div>
+    <pre>acquisition_methods:
+- id: chorus:acquisition:1
+  name: Structured EHR data via OMOP transformation
+  description: &#x27;Demographics, medication administration (dosing time-stamped upon each infusion change
+    or dose administration), procedures, nursing flowsheets (high-frequency documentation), and diagnoses
+    acquired from electronic health records and standardized to OMOP Common Data Model. Controlled access
+    with published OMOP schema metadata. Contains 1.6 billion rows of OMOP data as of August 2025.
+
+    &#x27;
+- id: chorus:acquisition:2
+  name: Clinical notes via OHNLP tokenization
+  description: &#x27;Clinical notes extracted from EHR systems and tokenized using OHNLP (Open Health Natural
+    Language Processing) toolkit. Stored locally at sites except for tokens. Controlled access planned
+    with OHNLP open source schema metadata.
+
+    &#x27;
+- id: chorus:acquisition:3
+  name: Medical imaging via DICOM from PACS
+  description: &#x27;Imaging data acquired from hospital PACS systems in DICOM format. De-identification in
+    process. Planned controlled access with published DICOM schema metadata.
+
+    &#x27;
+- id: chorus:acquisition:4
+  name: Waveform telemetry via WFDB from bedside monitors
+  description: &#x27;Bedside monitor waveform data acquired through gateway and middleware systems. Stored
+    in WFDB format with controlled access and published PhysioNet schema (extended) metadata. 23 TB available
+    as of August 2025.
+
+    &#x27;
+- id: chorus:acquisition:5
+  name: EEG waveforms from hospital databases
+  description: &#x27;EEG recordings from hospital databases in EDF+ and Persyst formats. Extraction in process.
+    Planned controlled access with open source EDF+ and Persyst schema metadata.
+
+    &#x27;</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q12 (Technical Documentation)</span>
+    <span class="ann-sub">Collection Protocol Clarity</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Full collection protocol with methods, collectors, and timeframes</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">collection_mechanisms: 4 detailed mechanisms (retrospective EHR extraction, waveform telemetry capture via gateway/middleware, medical imaging from PACS, EEG extraction from databases). acquisition_methods: 5 methods with technical details (OMOP transformation, OHNLP tokenization, DICOM from PACS, WFDB from bedside monitors, EEG from hospital databases). Collection timeframes: September 1, 2022 to November 30, 2026 (approved no-cost extension), snapshot August 2025. Data collectors: 14 data acquisition centers across 20 academic centers, coordinated by CHoRUS Consortium (MGH lead, UF, UT Health, Tufts Medicine)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive collection protocol documentation with detailed mechanisms, methods, multi-site coordination, and clear timeline with current status snapshot</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Collection mechanisms appropriate for multi-center retrospective critical care study. 4-year timeline plausible for 100K+ patient dataset</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Collection mechanisms align with distribution formats. 14 data acquisition centers consistent across multiple fields. Timeframes logically ordered (start 9/2022, snapshot 8/2025, end 11/2026)</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-preprocessing_strategies">
+  <div class="yaml">
+    <div class="field-name">preprocessing_strategies</div>
+    <pre>preprocessing_strategies:
+- id: chorus:preproc:1
+  name: OMOP Common Data Model transformation
+  description: &#x27;All structured electronic health record data standardized to the OMOP (Observational Medical
+    Outcomes Partnership) Common Data Model. Ensures interoperability and enables use of OHDSI (Observational
+    Health Data Sciences and Informatics) tool stack for analysis. Data from all 14 acquisition centers
+    unified through this transformation.
+
+    &#x27;
+  preprocessing_details:
+  - Transformation of source EHR data from diverse institutional formats to OMOP CDM
+  - Standardization of terminology and clinical codes to OMOP vocabulary standards
+  - Mapping to OMOP vocabulary standards using validated semantic mappings
+  - Quality assurance of transformed data against OMOP schema specifications
+  - Integration with OHDSI tools for downstream analysis and characterization
+  - Generation of characterization reports returned to contributing sites via CHoRUSReports
+- id: chorus:preproc:2
+  name: Clinical note tokenization via OHNLP
+  description: &#x27;Clinical notes processed using OHNLP (Open Health Natural Language Processing) toolkit
+    for extraction and tokenization. Protects patient privacy while enabling natural language processing
+    and analysis of clinical text data.
+
+    &#x27;
+  preprocessing_details:
+  - Text extraction from clinical notes in source EHR systems
+  - OHNLP tokenization pipeline applied to free-text clinical documentation
+  - De-identification of sensitive information through tokenization approach
+  - Standardization to OHNLP open source schema
+  - Local storage of full notes at sites; only tokens available in enclave
+- id: chorus:preproc:3
+  name: Waveform standardization to WFDB format
+  description: &#x27;Waveform telemetry data from diverse bedside monitoring systems standardized to WFDB (WaveForm
+    DataBase) format following extended PhysioNet schema. Scripts available in chorus_waveform repository.
+
+    &#x27;
+  preprocessing_details:
+  - Conversion from proprietary bedside monitor formats using gateway/middleware systems
+  - Standardization to WFDB format per extended PhysioNet schema
+  - Metadata extraction and schema compliance verification
+  - Quality checks for waveform integrity and completeness
+  - Synchronization with clinical events from OMOP EHR data
+- id: chorus:preproc:4
+  name: Medical imaging de-identification
+  description: &#x27;DICOM imaging data undergoing de-identification process to remove patient identifiable
+    information from image metadata while preserving clinical utility and image quality.
+
+    &#x27;
+  preprocessing_details:
+  - DICOM header de-identification to remove embedded patient information
+  - Preservation of clinically relevant imaging metadata
+  - DICOM schema compliance verification after de-identification
+  - Quality assurance of de-identified images for clinical utility
+  - Privacy scan tool (privacy_scan_tool) used for medical records privacy scanning
+- id: chorus:preproc:5
+  name: Re-identification limitation transformations
+  description: &#x27;Data transformed using approaches that limit re-identification while maintaining analytical
+    utility. Multiple preprocessing strategies employed to protect patient privacy across all data modalities
+    per HIPAA and institutional requirements.
+
+    &#x27;
+  preprocessing_details:
+  - Application of de-identification algorithms across all data modalities
+  - Privacy-preserving transformations for EHR and imaging data
+  - Geocoding via DeGauss (UF-Geocoding tool) for OMOP Location entities
+  - Risk assessment and compliance with ethical and legal requirements
+  - Community ethics focus group input on appropriate data for public sharing</pre>
+  </div>
+  <div class="anns"><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R20 · semantic_understanding</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">De-identification described across multiple preprocessing strategies but no unified deidentification method field</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">preprocessing_strategies, is_deidentified</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">Add explicit deidentification method summary (HIPAA Safe Harbor, Expert Determination, or hybrid)</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q10 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Interoperability and Standardization</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Standard formats + schema/ontology compliance</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">distribution_formats: OMOP Common Data Model (published OMOP schema metadata), WFDB (published PhysioNet schema extended), DICOM (published DICOM schema metadata), OHNLP tokenized (open source OHNLP schema), EDF+ and Persyst (open source schemas). preprocessing_strategies: semantic mapping validation via chorus-mapping repository, OHDSI tool stack integration, schema compliance validation across all modalities</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional interoperability with comprehensive standardization across all five data modalities using internationally recognized standards and published schemas</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Format choices semantically appropriate: OMOP (observational health data standard), WFDB (PhysioNet waveform standard), DICOM (medical imaging standard), OHNLP (clinical NLP standard), EDF+ (EEG standard)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Schema conformance validated through preprocessing_strategies and cleaning_strategies. chorus-mapping repository for semantic validation mentioned consistently</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q11 (Technical Documentation)</span>
+    <span class="ann-sub">Tool and Software Transparency</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Comprehensive strategies with software versions/URLs</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">preprocessing_strategies: 5 detailed strategies (OMOP transformation, OHNLP tokenization, WFDB standardization, DICOM de-identification, re-identification limitation). cleaning_strategies: 2 strategies (multi-center harmonization with chorus-mapping repository, schema compliance validation). labeling_strategies: visualization and annotation environment. software_and_tools: OHDSI tool stack, OHNLP toolkit, privacy_scan_tool, DeGauss (UF-Geocoding), CHoRUSReports (R), chorus_waveform scripts, chorus-extract-upload tools. GitHub organization (chorus-ai) with 28 repositories including Chorus_SOP, chorus-mapping, chorus-container-apps</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional software transparency with specific tools named, GitHub organization documented (28 repositories), open source licenses specified (MIT, Apache-2.0), and comprehensive preprocessing/cleaning/labeling strategies</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Tools semantically appropriate: OHDSI/OMOP for structured EHR, OHNLP for clinical notes, PhysioNet/WFDB for waveforms, DeGauss for geocoding</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Software tools align with preprocessing strategies and distribution formats. GitHub repositories (chorus-ai) support documented SOPs and semantic mappings</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">4/5</span>
+    <span class="ann-label">R20 Q8 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Ethical and Privacy Declarations</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Comprehensive ethics with minor gaps</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">human_subject_research.involves_human_subjects: true, ethics_review_board: Institutional review boards at 14 data acquisition centers, community-facing ethics focus groups, legal and ethical advisory teams. regulatory_compliance: HIPAA, 45 CFR 46 (Common Rule), institutional data privacy regulations, NIH ethical AI requirements. preprocessing_strategies includes de-identification: OMOP transformation, OHNLP tokenization, DICOM header de-identification, privacy scan tool. sensitive_elements: 4 categories documented (PHI-clinical EHR, waveforms/EEG, imaging, SDOH)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive ethical documentation covering IRB review, regulatory compliance, de-identification methods, and privacy protections. Missing: specific IRB protocol numbers, explicit informed consent approach (retrospective waiver likely), participant compensation details, vulnerable population safeguards (though PICU/NICU implies pediatric protections)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">HIPAA and 45 CFR 46 compliance appropriate for US-based multi-center health data. De-identification methods semantically appropriate for each data type</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Ethics review at 14 sites aligns with 14 data acquisition centers. Community ethics focus groups support public sharing claims. Minor gap: no IRB protocol numbers provided despite multi-site coordination</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-cleaning_strategies">
+  <div class="yaml">
+    <div class="field-name">cleaning_strategies</div>
+    <pre>cleaning_strategies:
+- id: chorus:cleaning:1
+  name: Multi-center data harmonization with validated semantic mappings
+  description: &#x27;Data from 14 acquisition centers harmonized through validated semantic mappings and standard
+    operating protocols (SOPs). Ensures consistency and interoperability across diverse institutional
+    EHR systems and clinical practices. Mappings maintained in chorus-mapping repository with clinical
+    validation SOP.
+
+    &#x27;
+  cleaning_details:
+  - Semantic mapping validation by clinical experts using chorus-mapping repository
+  - Standard operating protocol (SOP) implementation per Chorus_SOP documentation
+  - Cross-site data quality checks through CHoRUSReports characterization reports
+  - Resolution of institutional variations in coding and clinical terminology
+  - Clinical validation SOP for contributing to mapping efforts
+  - Site status tracking via GitHub interface and Google Form submissions
+- id: chorus:cleaning:2
+  name: Schema compliance validation across all modalities
+  description: &#x27;All data modalities validated against published metadata schemas (OMOP, DICOM, WFDB, OHNLP,
+    EDF+, Persyst) to ensure compliance and data quality across the multi-modal dataset.
+
+    &#x27;
+  cleaning_details:
+  - Schema compliance verification against OMOP CDM specifications
+  - DICOM schema metadata validation for imaging data
+  - WFDB/PhysioNet schema validation for waveform data
+  - OHNLP open source schema validation for tokenized clinical notes
+  - EDF+ and Persyst schema validation for EEG data
+  - Documentation of schema extensions for OMOP high-frequency nursing flowsheets</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q11 (Technical Documentation)</span>
+    <span class="ann-sub">Tool and Software Transparency</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Comprehensive strategies with software versions/URLs</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">preprocessing_strategies: 5 detailed strategies (OMOP transformation, OHNLP tokenization, WFDB standardization, DICOM de-identification, re-identification limitation). cleaning_strategies: 2 strategies (multi-center harmonization with chorus-mapping repository, schema compliance validation). labeling_strategies: visualization and annotation environment. software_and_tools: OHDSI tool stack, OHNLP toolkit, privacy_scan_tool, DeGauss (UF-Geocoding), CHoRUSReports (R), chorus_waveform scripts, chorus-extract-upload tools. GitHub organization (chorus-ai) with 28 repositories including Chorus_SOP, chorus-mapping, chorus-container-apps</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional software transparency with specific tools named, GitHub organization documented (28 repositories), open source licenses specified (MIT, Apache-2.0), and comprehensive preprocessing/cleaning/labeling strategies</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Tools semantically appropriate: OHDSI/OMOP for structured EHR, OHNLP for clinical notes, PhysioNet/WFDB for waveforms, DeGauss for geocoding</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Software tools align with preprocessing strategies and distribution formats. GitHub repositories (chorus-ai) support documented SOPs and semantic mappings</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-labeling_strategies">
+  <div class="yaml">
+    <div class="field-name">labeling_strategies</div>
+    <pre>labeling_strategies:
+- id: chorus:labeling:1
+  name: Visualization and annotation environment for prediction targets
+  description: &#x27;Custom visualization and annotation environment developed to label data with targets important
+    for prediction tasks in critical care AI applications. Supports labeling for characterizing acute
+    illness, predicting complications, and measuring treatment response.
+
+    &#x27;
+  data_annotation_protocol:
+  - Interactive visualization tools for clinical data exploration
+  - Annotation interface for clinical expert labeling of prediction targets
+  - Labeling of targets for characterization, prediction, and treatment response tasks
+  - Quality control of annotations through review processes
+  - Documentation of labeling protocols per Chorus_SOP standard operating procedures</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q11 (Technical Documentation)</span>
+    <span class="ann-sub">Tool and Software Transparency</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Comprehensive strategies with software versions/URLs</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">preprocessing_strategies: 5 detailed strategies (OMOP transformation, OHNLP tokenization, WFDB standardization, DICOM de-identification, re-identification limitation). cleaning_strategies: 2 strategies (multi-center harmonization with chorus-mapping repository, schema compliance validation). labeling_strategies: visualization and annotation environment. software_and_tools: OHDSI tool stack, OHNLP toolkit, privacy_scan_tool, DeGauss (UF-Geocoding), CHoRUSReports (R), chorus_waveform scripts, chorus-extract-upload tools. GitHub organization (chorus-ai) with 28 repositories including Chorus_SOP, chorus-mapping, chorus-container-apps</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional software transparency with specific tools named, GitHub organization documented (28 repositories), open source licenses specified (MIT, Apache-2.0), and comprehensive preprocessing/cleaning/labeling strategies</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Tools semantically appropriate: OHDSI/OMOP for structured EHR, OHNLP for clinical notes, PhysioNet/WFDB for waveforms, DeGauss for geocoding</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Software tools align with preprocessing strategies and distribution formats. GitHub repositories (chorus-ai) support documented SOPs and semantic mappings</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-intended_uses">
+  <div class="yaml">
+    <div class="field-name">intended_uses</div>
+    <pre>intended_uses:
+- id: chorus:use:1
+  name: AI/ML model development for critical care
+  description: &#x27;Primary intended use is development and training of artificial intelligence and machine
+    learning models to characterize acute and critical care illness, predict complications, and measure
+    treatment response in critically ill patients across diverse hospital settings.
+
+    &#x27;
+  examples:
+  - Characterizing acute and critical care illness patterns using multi-modal data
+  - Predicting complications (e.g., sepsis, respiratory failure) in critically ill patients
+  - Measuring treatment response in ICU patients using medication and waveform data
+  - Developing clinical deep learning models for critical care AI applications
+- id: chorus:use:2
+  name: External validation of AI models
+  description: &#x27;Provision of holdout test set accessible for model external validation to aid marketplace
+    adoption of AI-developed models for implementation in acute and critical care settings.
+
+    &#x27;
+  examples:
+  - External validation of sepsis prediction models developed at other institutions
+  - Benchmarking AI algorithms for critical care across diverse patient populations
+- id: chorus:use:3
+  name: Health equity and disparities research
+  description: &#x27;Studies examining health equity, social determinants of health, and disparities in critical
+    care outcomes across diverse patient populations and hospital settings. Dataset includes contextual
+    factors such as geographic distance to nearest hospital.
+
+    &#x27;
+  examples:
+  - Analysis of disparities in critical care outcomes by race, ethnicity, and geography
+  - Research on social determinants of health in ICU patient populations
+- id: chorus:use:4
+  name: Educational and training purposes for AI scientists
+  description: &#x27;Training and education of next generation of diverse academic and community AI scientists
+    through hands-on experience with real-world critical care datasets. Integrated with AIM-AHEAD Bridge2AI
+    for Clinical Care Training Program (Cohorts 1 and 2).
+
+    &#x27;
+  examples:
+  - &#x27;AIM-AHEAD training program for underrepresented trainees (Cohort 1: 2024-2025, Cohort 2: 2025-2026)&#x27;
+  - Foundational hands-on training using Jupyter Notebooks with Bridge2AI CHoRUS ecosystem
+  - Workshops on OHDSI/OMOP common data model and clinical AI
+  - Development of practical use cases for AI/ML in clinical care</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q18 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Reusability (License Clarity)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">License explicitly defines reuse terms</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">license_and_use_terms: CHoRUS Controlled Access License with Data Use Agreement explicitly defines permitted research uses, prohibits re-identification, requires institutional email and signed agreement. intended_uses: 4 use cases explicitly permitted (AI/ML model development for critical care, external validation, health equity research, educational/training purposes). discouraged_uses: 3 uses explicitly prohibited (clinical decision-making without validation/approval, re-identification attempts, use without awareness of data limitations)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional license clarity with specific permitted uses, explicit prohibitions, and clear reuse requirements (DUA signature, research-only)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Controlled access license appropriate for de-identified clinical data. Research-only restriction standard for NIH-funded datasets pending validation</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">License terms align with intended_uses (research, education) and discouraged_uses (clinical deployment without approval). Re-identification prohibition consistent with de-identification preprocessing</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-discouraged_uses">
+  <div class="yaml">
+    <div class="field-name">discouraged_uses</div>
+    <pre>discouraged_uses:
+- id: chorus:discouraged:1
+  name: Clinical decision-making without proper validation and regulatory approval
+  description: &#x27;Dataset is for research purposes only. AI/ML models developed should undergo appropriate
+    clinical validation, regulatory approval, and institutional review before use in patient care or clinical
+    decision-making.
+
+    &#x27;
+  discouragement_details:
+  - Models trained on CHoRUS data must undergo independent clinical validation
+  - Regulatory approval processes (e.g., FDA clearance) required for clinical use
+  - Institutional review board approval needed for clinical deployment
+- id: chorus:discouraged:2
+  name: Re-identification attempts
+  description: &#x27;Attempts to re-identify patients from de-identified data violate ethical principles, data
+    use agreements, and legal frameworks established for privacy protection under HIPAA and institutional
+    requirements.
+
+    &#x27;
+  discouragement_details:
+  - Re-identification attempts violate the signed data use agreement
+  - Prohibited under HIPAA and applicable institutional data privacy regulations
+  - Data use agreement explicitly prohibits re-identification efforts
+- id: chorus:discouraged:3
+  name: Use without awareness of ongoing data collection limitations
+  description: &#x27;As data collection continues through November 2026 and quality assurance processes are
+    ongoing, early dataset versions should be used with awareness of completeness limitations and ongoing
+    expansion (from 45K to target 100K+ admissions).
+
+    &#x27;
+  discouragement_details:
+  - Dataset is actively growing; cohort coverage varies by data modality
+  - EEG extraction and full imaging de-identification still in process as of 2025
+  - Clinical notes stored locally at sites; only tokens available in enclave</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q18 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Reusability (License Clarity)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">License explicitly defines reuse terms</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">license_and_use_terms: CHoRUS Controlled Access License with Data Use Agreement explicitly defines permitted research uses, prohibits re-identification, requires institutional email and signed agreement. intended_uses: 4 use cases explicitly permitted (AI/ML model development for critical care, external validation, health equity research, educational/training purposes). discouraged_uses: 3 uses explicitly prohibited (clinical decision-making without validation/approval, re-identification attempts, use without awareness of data limitations)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional license clarity with specific permitted uses, explicit prohibitions, and clear reuse requirements (DUA signature, research-only)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Controlled access license appropriate for de-identified clinical data. Research-only restriction standard for NIH-funded datasets pending validation</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">License terms align with intended_uses (research, education) and discouraged_uses (clinical deployment without approval). Re-identification prohibition consistent with de-identification preprocessing</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q9 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Access Requirements and Governance Documentation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">License + restrictions + confidentiality classification</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">license_and_use_terms: CHoRUS Controlled Access License with Data Use Agreement, institutional (.edu) email required, signed licensing agreement mandatory, controlled access through secure enclave (Azure-based), prohibits re-identification, access contacts provided (dbold@emory.edu, jared.houghtaling@tuftsmedicine.org). regulatory_compliance: HIPAA, 45 CFR 46, institutional regulations. discouraged_uses explicitly prohibit re-identification and unauthorized clinical use</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional access governance documentation with clear controlled access model, licensing requirements, secure infrastructure, and explicit prohibitions on misuse</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Controlled access model appropriate for HIPAA-regulated clinical data. Azure secure enclave consistent with NIH data sharing requirements</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Access requirements align with sensitive_elements (PHI), regulatory_compliance (HIPAA), and de-identification approach (controlled access despite de-id)</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-license_and_use_terms">
+  <div class="yaml">
+    <div class="field-name">license_and_use_terms</div>
+    <pre>license_and_use_terms:
+  id: chorus:license:1
+  name: CHoRUS Controlled Access License with Data Use Agreement
+  description: &#x27;Dataset distributed under controlled access requiring institutional email registration
+    and signed licensing agreement. Access granted after review and approval process. Participants must
+    complete registration form with name, institutional email (not personal), and institution. Once approved,
+    users receive email with access instructions to CHoRUS secure enclave. For training program access,
+    program administrators assist with licensing.
+
+    &#x27;
+  license_terms:
+  - Institutional (.edu) email required for registration
+  - All participants must sign a licensing agreement before gaining access to the dataset
+  - Controlled access through secure enclave (Azure-based infrastructure)
+  - Data use agreement specifies permitted research uses and prohibits re-identification
+  - Access request contacts - dbold@emory.edu or jared.houghtaling@tuftsmedicine.org
+  - Funded under NIH award OT2OD032701; content is solely responsibility of authors</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q17 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Accessibility (Access Mechanism)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Fully defined access path (platform, login, policy)</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">distribution_formats: all 5 formats specify access via secure enclave (Azure-based infrastructure) with controlled access. license_and_use_terms: complete registration process (institutional email, licensing agreement signature), approval workflow, access instructions via email after approval, specific contact emails (dbold@emory.edu, jared.houghtaling@tuftsmedicine.org), training program administrator assistance available</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional access mechanism documentation with step-by-step process, platform specification (Azure secure enclave), contact information, and alternative access paths (training programs)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Controlled access via secure enclave appropriate for HIPAA-regulated clinical data. Institutional email requirement standard for DUA-based access</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Access mechanism aligns with license requirements (DUA), regulatory compliance (HIPAA), and sensitive_elements (PHI). Azure infrastructure consistent with NIH data sharing requirements</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q18 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Reusability (License Clarity)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">License explicitly defines reuse terms</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">license_and_use_terms: CHoRUS Controlled Access License with Data Use Agreement explicitly defines permitted research uses, prohibits re-identification, requires institutional email and signed agreement. intended_uses: 4 use cases explicitly permitted (AI/ML model development for critical care, external validation, health equity research, educational/training purposes). discouraged_uses: 3 uses explicitly prohibited (clinical decision-making without validation/approval, re-identification attempts, use without awareness of data limitations)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional license clarity with specific permitted uses, explicit prohibitions, and clear reuse requirements (DUA signature, research-only)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Controlled access license appropriate for de-identified clinical data. Research-only restriction standard for NIH-funded datasets pending validation</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">License terms align with intended_uses (research, education) and discouraged_uses (clinical deployment without approval). Re-identification prohibition consistent with de-identification preprocessing</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q9 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Access Requirements and Governance Documentation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">License + restrictions + confidentiality classification</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">license_and_use_terms: CHoRUS Controlled Access License with Data Use Agreement, institutional (.edu) email required, signed licensing agreement mandatory, controlled access through secure enclave (Azure-based), prohibits re-identification, access contacts provided (dbold@emory.edu, jared.houghtaling@tuftsmedicine.org). regulatory_compliance: HIPAA, 45 CFR 46, institutional regulations. discouraged_uses explicitly prohibit re-identification and unauthorized clinical use</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional access governance documentation with clear controlled access model, licensing requirements, secure infrastructure, and explicit prohibitions on misuse</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Controlled access model appropriate for HIPAA-regulated clinical data. Azure secure enclave consistent with NIH data sharing requirements</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Access requirements align with sensitive_elements (PHI), regulatory_compliance (HIPAA), and de-identification approach (controlled access despite de-id)</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-distribution_formats">
+  <div class="yaml">
+    <div class="field-name">distribution_formats</div>
+    <pre>distribution_formats:
+- id: chorus:format:1
+  name: OMOP Common Data Model (structured EHR data)
+  description: &#x27;Structured electronic health record data distributed in OMOP Common Data Model format
+    enabling use of OHDSI tool stack for analysis. Contains 1.6 billion rows. Available in secure enclave
+    with controlled access. Published OMOP schema metadata available.
+
+    &#x27;
+  access_urls:
+  - https://chorus4ai.org/
+- id: chorus:format:2
+  name: WFDB waveform format (bedside monitor telemetry)
+  description: &#x27;Waveform telemetry data (23 TB) distributed in WFDB (WaveForm DataBase) format following
+    extended PhysioNet schema. Available in secure enclave with controlled access. Published PhysioNet
+    schema (extended) metadata available.
+
+    &#x27;
+  access_urls:
+  - https://chorus4ai.org/
+- id: chorus:format:3
+  name: DICOM format (medical imaging)
+  description: &#x27;Medical imaging data (7,642 admissions with radiology; 1,000 images currently available)
+    distributed in DICOM format with comprehensive metadata following DICOM schema. De-identification
+    in process for larger cohort. Planned controlled access.
+
+    &#x27;
+  access_urls:
+  - https://chorus4ai.org/
+- id: chorus:format:4
+  name: OHNLP tokenized format (clinical notes)
+  description: &#x27;Clinical notes distributed as OHNLP-tokenized text following open source OHNLP schema.
+    Stored locally at contributing sites (except tokens). Controlled access planned.
+
+    &#x27;
+  access_urls:
+  - https://chorus4ai.org/
+- id: chorus:format:5
+  name: EDF+ and Persyst formats (EEG waveforms)
+  description: &#x27;EEG waveform data distributed in EDF+ (European Data Format) and Persyst formats following
+    open source schemas. Extraction in process, planned for controlled access.
+
+    &#x27;
+  access_urls:
+  - https://chorus4ai.org/</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q10 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Interoperability and Standardization</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Standard formats + schema/ontology compliance</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">distribution_formats: OMOP Common Data Model (published OMOP schema metadata), WFDB (published PhysioNet schema extended), DICOM (published DICOM schema metadata), OHNLP tokenized (open source OHNLP schema), EDF+ and Persyst (open source schemas). preprocessing_strategies: semantic mapping validation via chorus-mapping repository, OHDSI tool stack integration, schema compliance validation across all modalities</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional interoperability with comprehensive standardization across all five data modalities using internationally recognized standards and published schemas</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Format choices semantically appropriate: OMOP (observational health data standard), WFDB (PhysioNet waveform standard), DICOM (medical imaging standard), OHNLP (clinical NLP standard), EDF+ (EEG standard)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Schema conformance validated through preprocessing_strategies and cleaning_strategies. chorus-mapping repository for semantic validation mentioned consistently</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q17 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Accessibility (Access Mechanism)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Fully defined access path (platform, login, policy)</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">distribution_formats: all 5 formats specify access via secure enclave (Azure-based infrastructure) with controlled access. license_and_use_terms: complete registration process (institutional email, licensing agreement signature), approval workflow, access instructions via email after approval, specific contact emails (dbold@emory.edu, jared.houghtaling@tuftsmedicine.org), training program administrator assistance available</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional access mechanism documentation with step-by-step process, platform specification (Azure secure enclave), contact information, and alternative access paths (training programs)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Controlled access via secure enclave appropriate for HIPAA-regulated clinical data. Institutional email requirement standard for DUA-based access</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Access mechanism aligns with license requirements (DUA), regulatory compliance (HIPAA), and sensitive_elements (PHI). Azure infrastructure consistent with NIH data sharing requirements</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q4 (Structural Completeness)</span>
+    <span class="ann-sub">File Enumeration and Type Variety</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">&gt;3 file types</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">distribution_formats: 5 distinct formats - OMOP Common Data Model (structured EHR), WFDB (waveforms), DICOM (imaging), OHNLP tokenized (clinical notes), EDF+/Persyst (EEG)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional multi-modal data variety with comprehensive format standardization across all modalities</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Format choices semantically appropriate for each data type (OMOP for EHR, WFDB for waveforms, DICOM for imaging)</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Distribution formats match preprocessing strategies and acquisition methods described</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-maintainers">
+  <div class="yaml">
+    <div class="field-name">maintainers</div>
+    <pre>maintainers:
+- id: chorus:maintainer:1
+  name: CHoRUS Consortium
+  description: &#x27;Multi-institutional consortium managing dataset maintenance including 14 data acquisition
+    centers, coordinating teams at Massachusetts General Hospital (lead), University of Florida, UT Health
+    Science Center, and Tufts Medicine, plus infrastructure development team. Standards, Data Acquisition,
+    and Tooling sub-teams manage ongoing data delivery and quality. Contact: cmccrary@mgh.harvard.edu
+    (Ciera McCrary, Program Manager, MGH).
+
+    &#x27;
+  maintainer_details:
+  - Massachusetts General Hospital (lead institution, Contact PI Eric S. Rosenthal)
+  - University of Florida (data acquisition and coordination, Azra Bihorac, Parisa Rashidi, Yulia Strekalova)
+  - UT Health Science Center / UTHealth Houston (Xiaoqian Jiang)
+  - Tufts Medicine (Andrew Ewing Williams, Manlik Kwong, Jared Houghtaling)
+  - 14 data acquisition centers across United States contributing clinical data extracts
+  - Standards team (semantic mappings and validation via chorus-mapping repository)
+  - Data Acquisition team (extraction and contribution per Chorus_SOP)
+  - Tooling team (software development across chorus-ai GitHub organization)
+  - Project management via GitHub organization (chorus-ai) with 28 active repositories
+- id: chorus:maintainer:2
+  name: CHoRUS GitHub Organization (chorus-ai)
+  description: &#x27;Active GitHub organization housing repositories for software, semantic mappings, standard
+    operating protocols, and project management. 28 repositories with comprehensive documentation and
+    community support. Licensed under MIT License (GitHub organization).
+
+    &#x27;
+  maintainer_details:
+  - GitHub organization at https://github.com/chorus-ai
+  - Chorus_SOP repository - centralized SOP documentation site (Apache-2.0 license)
+  - chorus-container-apps - Azure deployment infrastructure (JavaScript)
+  - chorus-mapping - semantic mappings repository
+  - chorus_waveform - waveform documentation and conversion scripts (MIT license)
+  - privacy_scan_tool - privacy scan tool for medical records (Python)
+  - CHoRUSReports - characterization reports returned to contributing sites (R)
+  - chorus-extract-upload - tools to create and upload CHoRUS data extract (MIT license)
+  - UF-Geocoding - open source code to geocode OMOP Location entities via DeGauss
+  - Community discussions and issue tracking for Standards and Data Acquisition teams</pre>
+  </div>
+  <div class="anns empty"><span>no field-level feedback matched</span></div>
+</div>
+
+
+<div class="field" id="field-updates">
+  <div class="yaml">
+    <div class="field-name">updates</div>
+    <pre>updates:
+  id: chorus:updates:1
+  name: Ongoing data collection and continuous expansion
+  description: &#x27;Dataset updated continuously as data collection progresses at 14 acquisition centers.
+    As of August 2025, covers 14 hospitals with over 45,000 unique admissions; current released dataset
+    includes 50,000 patient admissions (ICU, PICU, NICU) and 1.6 billion rows of EHR OMOP data. Target
+    exceeds 100,000 critically ill patients. Project timeline extends through November 30, 2026 (approved
+    no-cost extension). Regular status updates tracked through GitHub project management system via GitHub
+    interface or Google Form submissions. Sites statuses tracked in Standards Project and Data Acquisition
+    Project.
+
+    &#x27;
+  frequency: Continuous updates through November 30, 2026
+  update_details:
+  - Ongoing retrospective data collection at 14 sites through project end date
+  - Current status (August 2025) - 45K+ unique admissions; 50K released (ICU, PICU, NICU)
+  - Target - 100,000+ critically ill patients across 9 data modalities
+  - Regular site status updates via GitHub interface or Google Form submissions
+  - GitHub project tracking for deliverables and task dependencies
+  - Documentation updates maintained in Chorus_SOP repository
+  - Software and tooling continuous development across chorus-ai GitHub organization
+  - Semantic mapping validation and expansion via chorus-mapping repository
+  - EEG extraction and full imaging de-identification in progress</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 6.Data Provenance and Version Tracking</span>
+    <span class="ann-sub">Update Schedule or Frequency Indicated</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Continuous updates through November 30, 2026 with regular status tracking</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Clear update schedule through specific end date</span></div>
+    
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">4/5</span>
+    <span class="ann-label">R20 Q13 (Technical Documentation)</span>
+    <span class="ann-sub">Version History Documentation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Comprehensive versioning with minor gaps</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">updates: Ongoing data collection and continuous expansion, frequency &#x27;Continuous updates through November 30, 2026&#x27;, current status August 2025 (45K+ unique admissions, 50K released), target 100K+ patients. update_details: site status tracking via GitHub interface or Google Form submissions, Standards Project and Data Acquisition Project tracking, documentation updates in Chorus_SOP repository, ongoing EEG extraction and imaging de-identification. retention_limit: long-term retention per NIH data sharing policies. No explicit version numbering or formal release notes</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Good version tracking through continuous update model with specific snapshots (August 2025) and progress metrics. Missing: formal version numbers, structured release notes, specific errata documentation</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Continuous update model appropriate for ongoing multi-center data collection. NIH data sharing policy retention aligns with federal requirements</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Update frequency aligns with project timeline (through 11/2026). Site tracking via GitHub consistent with maintainer GitHub organization (chorus-ai)</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">4/5</span>
+    <span class="ann-label">R20 Q19 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Data Integrity and Provenance</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Structured version control with timestamps</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">updates: continuous update model with frequency &#x27;Continuous updates through November 30, 2026&#x27;, specific snapshot timestamp (August 2025) with metrics (45K+ unique admissions, 50K released, 1.6B rows, 23TB waveforms). update_details: site status tracking via GitHub interface/Google Form, Standards Project and Data Acquisition Project tracking, documentation updates in Chorus_SOP repository. retention_limit: NIH data sharing policies govern retention. Missing: formal version numbers, structured changelog</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Good provenance tracking with timestamped snapshots, GitHub-based tracking systems, and clear update frequency. Missing: formal version changelog or release notes documenting specific changes between snapshots</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Continuous update model appropriate for ongoing multi-center data collection. August 2025 snapshot timestamp plausible within 9/2022-11/2026 timeline</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">GitHub tracking aligns with maintainer GitHub organization (chorus-ai). NIH data sharing policy retention consistent with federal funding requirements</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-retention_limit">
+  <div class="yaml">
+    <div class="field-name">retention_limit</div>
+    <pre>retention_limit:
+  id: chorus:retention:1
+  name: Long-term dataset retention per NIH data sharing policies
+  description: &#x27;Digital data maintained according to NIH data sharing policies and institutional requirements
+    at participating centers. Controlled access model ensures long-term availability for research while
+    protecting patient privacy. Funded under NIH award OT2OD032701 with project end date of November 30,
+    2026.
+
+    &#x27;
+  retention_details:
+  - NIH data sharing policies govern long-term retention requirements
+  - Institutional requirements at 14 participating data acquisition centers apply
+  - Controlled access model via secure enclave for ongoing privacy protection
+  - Long-term maintenance through CHoRUS Consortium and associated institutions</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">4/5</span>
+    <span class="ann-label">R20 Q13 (Technical Documentation)</span>
+    <span class="ann-sub">Version History Documentation</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Comprehensive versioning with minor gaps</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">updates: Ongoing data collection and continuous expansion, frequency &#x27;Continuous updates through November 30, 2026&#x27;, current status August 2025 (45K+ unique admissions, 50K released), target 100K+ patients. update_details: site status tracking via GitHub interface or Google Form submissions, Standards Project and Data Acquisition Project tracking, documentation updates in Chorus_SOP repository, ongoing EEG extraction and imaging de-identification. retention_limit: long-term retention per NIH data sharing policies. No explicit version numbering or formal release notes</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Good version tracking through continuous update model with specific snapshots (August 2025) and progress metrics. Missing: formal version numbers, structured release notes, specific errata documentation</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Continuous update model appropriate for ongoing multi-center data collection. NIH data sharing policy retention aligns with federal requirements</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Update frequency aligns with project timeline (through 11/2026). Site tracking via GitHub consistent with maintainer GitHub organization (chorus-ai)</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">4/5</span>
+    <span class="ann-label">R20 Q19 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Data Integrity and Provenance</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Structured version control with timestamps</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">updates: continuous update model with frequency &#x27;Continuous updates through November 30, 2026&#x27;, specific snapshot timestamp (August 2025) with metrics (45K+ unique admissions, 50K released, 1.6B rows, 23TB waveforms). update_details: site status tracking via GitHub interface/Google Form, Standards Project and Data Acquisition Project tracking, documentation updates in Chorus_SOP repository. retention_limit: NIH data sharing policies govern retention. Missing: formal version numbers, structured changelog</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Good provenance tracking with timestamped snapshots, GitHub-based tracking systems, and clear update frequency. Missing: formal version changelog or release notes documenting specific changes between snapshots</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">Continuous update model appropriate for ongoing multi-center data collection. August 2025 snapshot timestamp plausible within 9/2022-11/2026 timeline</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">GitHub tracking aligns with maintainer GitHub organization (chorus-ai). NIH data sharing policy retention consistent with federal funding requirements</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-human_subject_research">
+  <div class="yaml">
+    <div class="field-name">human_subject_research</div>
+    <pre>human_subject_research:
+  id: chorus:hsr:1
+  name: CHoRUS Human Subjects Research
+  description: &#x27;Retrospective data collection from critically ill patients (ICU, PICU, NICU) approved
+    through institutional review processes at 14 data acquisition centers. Community-facing ethics focus
+    groups conducted to determine what data is appropriate for public sharing. Legal framework established
+    for collecting data at scale. Patient-focused efforts determine ethical and legal approaches to manage
+    privacy and bias while accounting for Social Determinants of Health. Project includes expertise from
+    law, ethics, health services, biomedical science, engineering, and scientific journal publications
+    disciplines. Ethics of AI component addressed through AIM-AHEAD training curriculum (safety, risk,
+    and legal considerations; IRB, HIPAA/GDPR compliance for OMOP/FHIR data).
+
+    &#x27;
+  involves_human_subjects: true
+  ethics_review_board:
+  - Institutional review boards at 14 data acquisition centers across United States
+  - Community-facing ethics focus groups determining appropriate data for public sharing
+  - Legal and ethical advisory teams including law and ethics discipline experts
+  - Privacy and accountability review processes per project three-pillar structure (Data, Ethics, People)
+  regulatory_compliance:
+  - HIPAA (Health Insurance Portability and Accountability Act) compliance for protected health information
+  - 45 CFR 46 (Common Rule) for human subjects research protections
+  - Institutional data privacy regulations at each of the 14 contributing sites
+  - NIH Common Fund Bridge2AI program ethical and trustworthy AI requirements
+  - IRB protocol drafting and HIPAA/GDPR compliance guidance provided in training curriculum</pre>
+  </div>
+  <div class="anns"><div class="ann ann-issue" style="border-left-color:#e67e22;">
+  <div class="ann-head">
+    <span class="badge" style="background:#e67e22;">⚠ medium</span>
+    <span class="ann-label">R10 · consistency</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">human_subject_research=True but informed consent not documented</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">human_subject_research, informed_consent</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">Add consent procedure documentation</span></div>
+  </div>
+</div><div class="ann ann-issue" style="border-left-color:#e67e22;">
+  <div class="ann-head">
+    <span class="badge" style="background:#e67e22;">⚠ medium</span>
+    <span class="ann-label">R20 · consistency</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">human_subject_research.involves_human_subjects=True and ethics_review_board lists 14 IRBs, but no specific IRB approval numbers or protocols documented</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">human_subject_research, ethical_reviews</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">Add IRB protocol numbers from at least lead institution (MGH) for transparency</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">4/5</span>
+    <span class="ann-label">R20 Q8 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Ethical and Privacy Declarations</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Comprehensive ethics with minor gaps</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">human_subject_research.involves_human_subjects: true, ethics_review_board: Institutional review boards at 14 data acquisition centers, community-facing ethics focus groups, legal and ethical advisory teams. regulatory_compliance: HIPAA, 45 CFR 46 (Common Rule), institutional data privacy regulations, NIH ethical AI requirements. preprocessing_strategies includes de-identification: OMOP transformation, OHNLP tokenization, DICOM header de-identification, privacy scan tool. sensitive_elements: 4 categories documented (PHI-clinical EHR, waveforms/EEG, imaging, SDOH)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive ethical documentation covering IRB review, regulatory compliance, de-identification methods, and privacy protections. Missing: specific IRB protocol numbers, explicit informed consent approach (retrospective waiver likely), participant compensation details, vulnerable population safeguards (though PICU/NICU implies pediatric protections)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">HIPAA and 45 CFR 46 compliance appropriate for US-based multi-center health data. De-identification methods semantically appropriate for each data type</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Ethics review at 14 sites aligns with 14 data acquisition centers. Community ethics focus groups support public sharing claims. Minor gap: no IRB protocol numbers provided despite multi-site coordination</span></div>
+  </div>
+</div></div>
+</div>
+
+
+<div class="field" id="field-external_resources">
+  <div class="yaml">
+    <div class="field-name">external_resources</div>
+    <pre>external_resources:
+- id: chorus:resource:1
+  name: CHoRUS Project Website
+  description: Official project website with dataset overview, team information, project components, and
+    access instructions
+  external_resources:
+  - https://chorus4ai.org/
+- id: chorus:resource:2
+  name: CHoRUS GitHub Organization
+  description: Comprehensive GitHub organization with 28 repositories including software, documentation,
+    SOPs, and tooling
+  external_resources:
+  - https://github.com/chorus-ai
+- id: chorus:resource:3
+  name: Chorus_SOP Documentation Site
+  description: Centralized standard operating protocol documentation with interactive workflow diagrams
+    for data extraction and contribution
+  external_resources:
+  - https://github.com/chorus-ai/Chorus_SOP
+- id: chorus:resource:4
+  name: NIH RePORTER Project Details
+  description: Federal grant information and project details from NIH Research Portfolio Online Reporting
+    Tools for grant 1OT2OD032701-01
+  external_resources:
+  - https://reporter.nih.gov/project-details/10472824
+- id: chorus:resource:5
+  name: Bridge2AI Program
+  description: Parent NIH Common Fund program supporting AI-ready biomedical datasets across four data
+    generation projects
+  external_resources:
+  - https://bridge2ai.org/
+  - https://bridge2ai.org/chorus
+- id: chorus:resource:6
+  name: AIM-AHEAD Bridge2AI Training Program
+  description: Partnership with AIM-AHEAD for Bridge2AI Clinical Care Training Program (Cohort 1 and Cohort
+    2) providing AI/ML training for underrepresented trainees
+  external_resources:
+  - https://aim-ahead.net/
+- id: chorus:resource:7
+  name: OHDSI Community and OMOP CDM
+  description: Observational Health Data Sciences and Informatics community supporting OMOP Common Data
+    Model used for CHoRUS structured EHR data
+  external_resources:
+  - https://www.ohdsi.org/
+- id: chorus:resource:8
+  name: Published Research (Neurocritical Care)
+  description: Peer-reviewed publication documenting CHoRUS dataset methodology and design in Neurocritical
+    Care journal
+  external_resources:
+  - https://doi.org/10.1007/s12028-024-02007</pre>
+  </div>
+  <div class="anns"><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">5/5</span>
+    <span class="ann-label">R20 Q14 (Technical Documentation)</span>
+    <span class="ann-sub">Associated Publications</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Multiple references and dataset citation</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">external_resources: 8 resources including peer-reviewed publication (Neurocritical Care journal, DOI: 10.1007/s12028-024-02007), NIH RePORTER project details (https://reporter.nih.gov/project-details/10472824), GitHub organization (https://github.com/chorus-ai), project website (https://chorus4ai.org/), Bridge2AI program (https://bridge2ai.org/chorus), AIM-AHEAD training partnership, OHDSI community, Chorus_SOP documentation</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional external resource documentation with formal peer-reviewed publication DOI, federal grant tracking, comprehensive GitHub repositories, and community partnerships</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">DOI 10.1007/s12028-024-02007 format valid for Springer journal (Neurocritical Care). NIH RePORTER URL structure correct for grant 10472824</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Publication in Neurocritical Care aligns with critical care focus. GitHub organization (chorus-ai) consistent with software/tools documentation. AIM-AHEAD partnership matches training uses described</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q16 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Findability (Persistent Links)</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">page: https://chorus4ai.org/, id: https://chorus4ai.org/, external_resources: 8 persistent URLs including NIH RePORTER (https://reporter.nih.gov/project-details/10472824), GitHub (https://github.com/chorus-ai), Bridge2AI (https://bridge2ai.org/chorus), publication DOI (https://doi.org/10.1007/s12028-024-02007)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent findability with multiple persistent URLs across project website, federal grant database, GitHub organization, and peer-reviewed publication</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All URL formats valid. NIH RePORTER, GitHub, and DOI URLs follow standard patterns</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">All URLs point to consistent CHoRUS project resources across different platforms</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q20 (FAIRness &amp; Accessibility)</span>
+    <span class="ann-sub">Interlinking Across Platforms</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">external_resources: 8 cross-platform links (chorus4ai.org project website, GitHub chorus-ai organization with 28 repositories, NIH RePORTER federal grant database, Bridge2AI program portal, AIM-AHEAD training partnership, OHDSI community, peer-reviewed publication DOI 10.1007/s12028-024-02007)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exceptional interlinking across project website, code repository (GitHub), federal grant tracking (NIH RePORTER), parent program (Bridge2AI), training partnerships (AIM-AHEAD), standards communities (OHDSI), and scholarly literature (publication DOI)</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">All platform links follow standard URL patterns. NIH RePORTER, GitHub, DOI, and domain URLs structurally valid</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">Cross-platform links consistently reference CHoRUS project across all resources. GitHub organization (chorus-ai) matches software tools documented</span></div>
+  </div>
+</div><div class="ann ann-r20">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">1/1</span>
+    <span class="ann-label">R20 Q6 (Metadata Quality &amp; Content)</span>
+    <span class="ann-sub">Dataset Identification Metadata</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">level</span><span class="ann-v">Pass</span></div>
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">id: https://chorus4ai.org/, page: https://chorus4ai.org/, external_resources: includes DOI 10.1007/s12028-024-02007 (peer-reviewed publication), NIH RePORTER project link https://reporter.nih.gov/project-details/10472824</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Multiple persistent identifiers provided including project URL, publication DOI, and federal grant tracking</span></div>
+    <div class="ann-row"><span class="ann-k">correctness</span><span class="ann-v">DOI format valid (10.1007/s12028-024-02007), NIH RePORTER URL structure correct</span></div>
+    <div class="ann-row"><span class="ann-k">consistency</span><span class="ann-v">All URLs point to consistent CHoRUS project resources</span></div>
+  </div>
+</div></div>
+</div>
+
+<h2>Unmatched feedback</h2>
+<div class="unmatched"><div style="color:#777;font-size:0.88em;margin-bottom:8px;">Feedback that referenced multiple fields or no specific field.</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 2.Dataset Access and Retrieval</span>
+    <span class="ann-sub">Regulatory Restrictions and Confidentiality Level Specified</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Regulatory compliance: HIPAA, 45 CFR 46, institutional regulations, NIH ethical AI requirements</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive regulatory compliance documentation</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 2.Dataset Access and Retrieval</span>
+    <span class="ann-sub">Distribution Formats and File Types Specified</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">5 formats: OMOP CDM, WFDB, DICOM, OHNLP tokenized, EDF+/Persyst</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive format specification with standard formats and schemas</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 2.Dataset Access and Retrieval</span>
+    <span class="ann-sub">Related Datasets and External Resources Linked</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">8 external resources including GitHub org (28 repos), OHDSI, Bridge2AI, publication DOI</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Excellent external resource linkage</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 3.Data Reuse and Interoperability</span>
+    <span class="ann-sub">License Terms Allow Reuse</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Controlled access with DUA specifying research use permissions</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Clear license allowing reuse for approved research</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 3.Data Reuse and Interoperability</span>
+    <span class="ann-sub">Data Formats Are Standardized</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">All 5 modalities use international standards: OMOP, WFDB, DICOM, OHNLP, EDF+/Persyst</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exemplary use of standardized formats</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 3.Data Reuse and Interoperability</span>
+    <span class="ann-sub">Schema or Ontology Conformance Stated</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">OMOP CDM, DICOM, WFDB/PhysioNet, OHNLP, EDF+/Persyst schemas with validation</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive schema conformance with validation</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 3.Data Reuse and Interoperability</span>
+    <span class="ann-sub">Variable Metadata with Identifiers Defined</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">OMOP vocabulary and concept IDs; published schemas for all 5 modalities</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Variable-level metadata through OMOP CDM and published schemas</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 3.Data Reuse and Interoperability</span>
+    <span class="ann-sub">Use Guidance Provided</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">4 intended uses, 3 discouraged uses with detailed rationale</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive use guidance covering technical, ethical, temporal considerations</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 4.Ethical Use and Privacy Safeguards</span>
+    <span class="ann-sub">IRB or Ethics Review Documented</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">IRBs at 14 centers, community ethics focus groups, legal/ethical advisory teams</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive multi-layered ethics oversight</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 4.Ethical Use and Privacy Safeguards</span>
+    <span class="ann-sub">Privacy Protections Beyond Deidentification</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Secure enclave, DUA prohibiting re-identification, community ethics focus groups, federated access</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Multi-layered privacy protections: technical, legal, governance, architectural</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#c0392b;">✗ 0/1</span>
+    <span class="ann-label">R10 4.Ethical Use and Privacy Safeguards</span>
+    <span class="ann-sub">Informed Consent Obtained from Participants</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">No explicit mention of consent procedures</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Retrospective collection but consent procedures not documented</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 4.Ethical Use and Privacy Safeguards</span>
+    <span class="ann-sub">Vulnerable Populations and Compensation Documented</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Pediatric/neonatal ICU patients with community ethics focus groups and SDOH framework</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Vulnerable populations acknowledged with appropriate protections</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 5.Data Composition and Structure</span>
+    <span class="ann-sub">Cohort or Subpopulations Characteristics Described</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">ICU/PICU/NICU patients, 14 hospitals, 45K+ current/100K+ target with SDOH</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive population description with diversity measures</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 5.Data Composition and Structure</span>
+    <span class="ann-sub">Number of Instances or Samples Reported</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">45K+ admissions, 50K released, 100K+ target, 1.6B OMOP rows, 23TB waveforms, 7,642 radiology</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Highly specific instance counts across multiple dimensions</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 5.Data Composition and Structure</span>
+    <span class="ann-sub">Variable-Level Metadata and Tabular Flag</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">OMOP CDM tabular structure with 1.6B rows and OHDSI tool stack</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Tabular structure confirmed with comprehensive variable metadata</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 5.Data Composition and Structure</span>
+    <span class="ann-sub">Data Topics or Conditions Represented</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Acute/critical illness, complication prediction, treatment response in ICU/PICU/NICU</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Clear clinical topics and research focus</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 5.Data Composition and Structure</span>
+    <span class="ann-sub">Data Quality Issues and Anomalies Documented</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Transparent documentation of ongoing expansion, incomplete modalities, federated sampling</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Current completeness status and ongoing processes clearly stated</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#c0392b;">✗ 0/1</span>
+    <span class="ann-label">R10 6.Data Provenance and Version Tracking</span>
+    <span class="ann-sub">Dataset Version Number Provided</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">No version field</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Version numbering scheme not documented</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#c0392b;">✗ 0/1</span>
+    <span class="ann-label">R10 6.Data Provenance and Version Tracking</span>
+    <span class="ann-sub">Version Access Methods Documented</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">No version access documentation</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Version access mechanisms not described</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 6.Data Provenance and Version Tracking</span>
+    <span class="ann-sub">Change Descriptions and Errata Provided</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Current status (Aug 2025) vs target documented with GitHub tracking</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Current status clear but historical change log absent</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 6.Data Provenance and Version Tracking</span>
+    <span class="ann-sub">Provenance and Source Derivation Documented</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">4 source types from 14 centers with transformation pipelines documented</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive provenance documentation</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 7.Scientific Motivation and Funding Transparency</span>
+    <span class="ann-sub">Funding Sources and Mechanisms Listed</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">NIH Common Fund Bridge2AI with detailed grant info including $5,880,300 total funding</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive funding documentation</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 7.Scientific Motivation and Funding Transparency</span>
+    <span class="ann-sub">Grant IDs or Award Numbers Present</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">OT2OD032701 (1OT2OD032701-01) with NIH RePORTER link</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Grant number documented in multiple locations with valid NIH format</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 8.Technical Transparency</span>
+    <span class="ann-sub">Collection Mechanisms and Settings Described</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">4 collection mechanisms with specific systems and volumes</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive collection documentation</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 8.Technical Transparency</span>
+    <span class="ann-sub">Data Acquisition Methods Listed</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">5 acquisition methods for all modalities with volumes and schemas</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Detailed acquisition methods with complete modality coverage</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 8.Technical Transparency</span>
+    <span class="ann-sub">Preprocessing, Cleaning, and Labeling Strategies</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">5 preprocessing + 2 cleaning + 1 labeling strategies</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive processing documentation with specific tools and SOPs</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 8.Technical Transparency</span>
+    <span class="ann-sub">Software and Tools Documented</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">7 tools including OHDSI, OHNLP, chorus_waveform, privacy_scan_tool, DeGauss</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Extensive tool documentation with GitHub organization (28 repos)</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 8.Technical Transparency</span>
+    <span class="ann-sub">External Standards and Resources Referenced</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">8 resources including Chorus_SOP, GitHub, OHDSI, publication DOI 10.1007/s12028-024-02007</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive external resources with publication DOI</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 9.Dataset Evaluation and Limitations Disclosure</span>
+    <span class="ann-sub">Known Limitations Documented</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Ongoing expansion limitations, incomplete modalities, partial availability documented</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Transparent limitation documentation with current/target metrics</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#c0392b;">✗ 0/1</span>
+    <span class="ann-label">R10 9.Dataset Evaluation and Limitations Disclosure</span>
+    <span class="ann-sub">Systematic Biases Identified and Described</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">No explicit bias analysis beyond equity focus</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Equity efforts documented but systematic bias analysis absent</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 9.Dataset Evaluation and Limitations Disclosure</span>
+    <span class="ann-sub">Data Anomalies and Quality Issues Noted</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Ongoing QA, harmonization challenges, schema validation needs documented</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Quality issues acknowledged with harmonization complexity</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 9.Dataset Evaluation and Limitations Disclosure</span>
+    <span class="ann-sub">Sensitive Content and Warnings Provided</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">4 sensitive element categories with detailed sensitivity_details</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive sensitive content documentation</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 9.Dataset Evaluation and Limitations Disclosure</span>
+    <span class="ann-sub">Ethical Review Details Including Conflicts</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">IRB at 14 centers, community ethics, legal/ethical advisory, regulatory compliance</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive ethical review documentation</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 10.Cross-Platform and Community Integration</span>
+    <span class="ann-sub">Dataset Published on a Recognized Platform</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Secure enclave (Azure) + NIH Bridge2AI + GitHub organization (28 repos)</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Appropriate platform for controlled access sensitive data</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 10.Cross-Platform and Community Integration</span>
+    <span class="ann-sub">Citation and DOI for Cross-referencing</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Publication DOI 10.1007/s12028-024-02007 + grant number OT2OD032701</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Citable publication DOI in peer-reviewed journal</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 10.Cross-Platform and Community Integration</span>
+    <span class="ann-sub">Community Standards or Schema Conformance</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">5 standards: OMOP (OHDSI), DICOM, WFDB/PhysioNet, OHNLP, EDF+/Persyst</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Exemplary community standards conformance</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 10.Cross-Platform and Community Integration</span>
+    <span class="ann-sub">Outreach Materials and Documentation Links</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Chorus_SOP, AIM-AHEAD training (2 cohorts), 28 GitHub repos, websites</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Comprehensive outreach and documentation</span></div>
+    
+  </div>
+</div><div class="ann ann-r10">
+  <div class="ann-head">
+    <span class="badge" style="background:#27ae60;">✓ 1/1</span>
+    <span class="ann-label">R10 10.Cross-Platform and Community Integration</span>
+    <span class="ann-sub">Related Datasets with Typed Relationships</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">evidence</span><span class="ann-v">Bridge2AI ecosystem (4 projects), OHDSI network, federated multi-center structure</span></div>
+    <div class="ann-row"><span class="ann-k">quality</span><span class="ann-v">Integration with Bridge2AI and OHDSI ecosystems</span></div>
+    
+  </div>
+</div><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R10 · content_accuracy</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">No systematic bias analysis despite multi-center critical care dataset</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">known_biases</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">Document potential systematic biases</span></div>
+  </div>
+</div><div class="ann ann-issue" style="border-left-color:#f1c40f;">
+  <div class="ann-head">
+    <span class="badge" style="background:#f1c40f;">⚠ low</span>
+    <span class="ann-label">R10 · semantic_understanding</span>
+  </div>
+  <div class="ann-body">
+    <div class="ann-row"><span class="ann-k">issue</span><span class="ann-v">Version tracking absent despite ongoing expansion</span></div>
+    <div class="ann-row"><span class="ann-k">fields</span><span class="ann-v">version</span></div>
+    <div class="ann-row"><span class="ann-k">fix</span><span class="ann-v">Implement version numbering scheme</span></div>
+  </div>
+</div></div>
+<h2>Recommendations</h2>
+<div class="recs"><ol>
+<li><b style="color:#9b59b6;">R10</b> &middot; Register dataset with DOI through DataCite</li>
+<li><b style="color:#9b59b6;">R10</b> &middot; Document informed consent procedures for retrospective collection</li>
+<li><b style="color:#9b59b6;">R10</b> &middot; Implement version numbering scheme (e.g., v1.0 = 45K, v2.0 = 100K)</li>
+<li><b style="color:#9b59b6;">R10</b> &middot; Add systematic bias analysis section</li>
+<li><b style="color:#9b59b6;">R10</b> &middot; Document version access methods once versioning implemented</li>
+<li><b style="color:#9b59b6;">R10</b> &middot; Clarify conflicts of interest disclosure</li>
+<li><b style="color:#9b59b6;">R10</b> &middot; Consider dataset-specific DOI in addition to publication DOI</li>
+<li><b style="color:#9b59b6;">R10</b> &middot; Document historical change log as dataset evolves</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Add specific IRB protocol numbers from at least the lead institution (Massachusetts General Hospital) for enhanced transparency and reproducibility</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Add unified deidentification method field explicitly stating approach (likely HIPAA Safe Harbor based on described transformations) to complement detailed preprocessing strategies</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Implement formal version numbering system and structured changelog documenting progression from initial release through 100K patient target</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Expand instances and subpopulations documentation with specific demographic distributions (age ranges, race/ethnicity percentages, sex/gender) to support health equity research claims</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Standardize grant number format across all fields to 1OT2OD032701-01 (full NIH format with project prefix)</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Add informed_consent field documenting retrospective waiver approach approved by 14 IRBs for consistency with other ethics fields</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Document participant compensation (likely none for retrospective study) and add vulnerable_populations field explicitly addressing PICU/NICU pediatric protections</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Consider adding RRID identifier for dataset software tools (especially OHDSI, OHNLP, DeGauss) to enhance tool citability</li>
+<li><b style="color:#9b59b6;">R20</b> &middot; Add errata field to document known issues or corrections as dataset continues expansion through November 2026</li>
+</ol></div>
+</div></body></html>
