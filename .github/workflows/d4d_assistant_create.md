@@ -86,7 +86,7 @@ This workflow is triggered when a user requests creation of a new D4D datasheet,
 
 **CRITICAL**: This assistant uses deterministic settings for reproducible D4D generation:
 
-- **Model**: `claude-opus-4-8` (pinned for consistency)
+- **Model**: `claude-opus-5` (pinned for consistency)
 - **Temperature**: `0.0` (maximum determinism - same input produces same output)
 - **Schema**: Local version-controlled file (`data_sheets_schema_all.yaml`)
 - **Prompts**: External version-controlled files (hashed for tracking)
@@ -800,7 +800,7 @@ I've created a new D4D datasheet for **${DATASET_NAME}** and opened a pull reque
 - **Sections Populated**: <list major sections with content>
 
 ## Generation Details
-- **Model**: claude-opus-4-8 (deterministic)
+- **Model**: claude-opus-5 (deterministic)
 - **Temperature**: 0.0
 - **Quality Level**: <quality_level> (comprehensive/acceptable/minimal)
 - **Input Mode**: <file/url>

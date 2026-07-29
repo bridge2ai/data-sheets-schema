@@ -180,7 +180,7 @@ class D4DMetadataGenerator:
 
         # Extract model settings
         model_config = self.config.get('model', {})
-        self.model_name = model_config.get('name', 'claude-sonnet-4-5-20250929')
+        self.model_name = model_config.get('name', 'claude-opus-5')
         self.temperature = model_config.get('temperature', 0.0)
         self.max_tokens = model_config.get('max_tokens', 16000)
 

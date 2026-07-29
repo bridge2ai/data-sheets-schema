@@ -87,7 +87,7 @@ This workflow is triggered when a user requests edits to an existing D4D datashe
 
 **IMPORTANT**: All assistant edits maintain deterministic settings for reproducibility:
 
-- **Model**: `claude-opus-4-8` (pinned)
+- **Model**: `claude-opus-5` (pinned)
 - **Temperature**: `0.0` (deterministic)
 - **Schema**: Local version-controlled file
 - **Prompts**: External version-controlled files
