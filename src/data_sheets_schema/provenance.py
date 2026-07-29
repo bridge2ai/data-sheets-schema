@@ -21,7 +21,6 @@ with the reason, never silently filled.
 from __future__ import annotations
 
 import hashlib
-import json
 import os
 import platform
 import subprocess

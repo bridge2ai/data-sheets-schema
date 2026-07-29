@@ -28,10 +28,17 @@ class TestRenderCLI(unittest.TestCase):
         self.output_file = self.test_path / "rendered" / "sample.html"
         self.runner = CliRunner()
 
+        # The render CLI validates before writing, and validate_d4d_yaml unwraps
+        # the DatasetCollection format — it extracts `resources` and validates
+        # each as a `Dataset`. So `id` belongs on the resource, not at the top
+        # level; without it the fixture fails validation instead of exercising
+        # the output-path and CSS behaviour these tests are about.
         sample_data = {
             "DatasetCollection": {
                 "resources": [
                     {
+                        "id": "https://example.org/datasets/sample",
+                        "name": "Sample Dataset",
                         "title": "Sample Dataset",
                         "description": "A compact test datasheet."
                     }
