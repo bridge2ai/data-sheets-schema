@@ -126,9 +126,24 @@ def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
     for u in res["usage"]:
         click.echo(f"   {u['phase']:10} in={u['input_tokens']} out={u['output_tokens']} "
                    f"cache_read={u['cache_read']} cache_write={u['cache_write']}")
-    click.echo(f"✓ {res['project']} {res['label']}")
+
+    problems = res.get("validation_problems") or []
+    if problems:
+        # The first live run printed a tick over two records that failed
+        # validation. A run that produced invalid output has not succeeded,
+        # and must not exit 0.
+        click.echo(f"❌ {res['project']} {res['label']} — "
+                   f"{len(problems)} validation failure(s)", err=True)
+        for p in problems:
+            click.echo(f"   {p.get('artifact')}", err=True)
+            click.echo(f"     {p.get('error')}", err=True)
+        click.echo("   Resume state kept; fix and re-run to redo only what "
+                   "is needed.", err=True)
+        sys.exit(2)
+
+    click.echo(f"✓ {res['project']} {res['label']} — both records validate")
     for k, v in res["outputs"].items():
-        click.echo(f"   {k:6} {v}")
+        click.echo(f"   {k:10} {v}")
 
 
 @api.command("batch")
@@ -187,6 +202,21 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
             spent_out += sum(u["output_tokens"] or 0 for u in res["usage"])
             cached = sum(u["cache_read"] or 0 for u in res["usage"])
             note = f"  (resumed, skipped {len(res['skipped'])})" if res["skipped"] else ""
+            vp = res.get("validation_problems") or []
+            if vp:
+                # A sweep must not count an invalid record as a success, or the
+                # summary line reports work that cannot be used.
+                click.echo(f"   ❌ invalid output ({len(vp)} failure(s)) "
+                           f"in={spent_in:,} out={spent_out:,}", err=True)
+                for p in vp:
+                    click.echo(f"      {p.get('artifact')}: {p.get('error')}",
+                               err=True)
+                failed.append((s.project, s.label,
+                               f"{len(vp)} validation failure(s)"))
+                if not continue_on_error:
+                    click.echo("stopping; re-run to resume", err=True)
+                    break
+                continue
             click.echo(f"   ✓ in={spent_in:,} out={spent_out:,} cache_read={cached:,}{note}")
             ok.append(s.label)
         except Exception as exc:                       # noqa: BLE001

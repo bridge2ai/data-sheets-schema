@@ -67,7 +67,8 @@ class TestPromptResolution(unittest.TestCase):
     def test_no_placeholders_survive(self):
         text = resolve_prompt(spec())
         for token in ("{PROJECT}", "{ARM}", "{METHOD}", "{BUNDLE}",
-                      "{LABEL}", "{MANIFEST_LINE}"):
+                      "{LABEL}", "{MANIFEST_LINE}", "{RUNTIME}",
+                      "{PROVIDER}", "{MODEL}"):
             self.assertNotIn(token, text)
 
     def test_generic_prompt_differs_between_projects_only_mechanically(self):
@@ -97,6 +98,14 @@ class TestPromptResolution(unittest.TestCase):
                                 bundle=Path("data/preprocessed/concatenated/VOICE_preprocessed.txt")))
         self.assertIn("tuned prompt", t)
         self.assertIn("components/VOICE.md", t)
+
+    def test_header_states_the_real_runtime_not_a_hardcoded_one(self):
+        """The first live API run emitted "Agent runtime: Claude Code"."""
+        from data_sheets_schema.api_runner import RUNTIME
+        t = resolve_prompt(spec())
+        self.assertIn(f"# Agent runtime: {RUNTIME}", t)
+        self.assertNotIn("# Agent runtime: Claude Code", t)
+        self.assertNotIn("claude-opus-5[1m]", t)
 
     def test_prompt_files_reflect_the_condition(self):
         self.assertEqual(spec().prompt_files, [GENERIC_PROMPT])
@@ -265,7 +274,7 @@ class TestExecuteOffline(unittest.TestCase):
         res = self.api.execute(s)
         for p in (s.full_path, s.core_path, s.report_path):
             self.assertTrue(p.exists(), f"missing {p}")
-        self.assertTrue((self.out / "CHORUS_d4d_metadata.yaml").exists(),
+        self.assertTrue((self.out / "CHORUS_provenance.yaml").exists(),
                         "provenance record not written")
         self.assertEqual(len(res["usage"]), 6)
 
@@ -279,7 +288,7 @@ class TestExecuteOffline(unittest.TestCase):
         import yaml as _yaml
         s = spec(out_dir=self.out)
         self.api.execute(s)
-        d = _yaml.safe_load((self.out / "CHORUS_d4d_metadata.yaml").read_text())
+        d = _yaml.safe_load((self.out / "CHORUS_provenance.yaml").read_text())
         self.assertEqual(d["record_mode"], "live")
         self.assertEqual(d["model"]["agent_runtime"], RUNTIME)
         # claude-opus-5 rejects `temperature`, so the record must say the
@@ -420,3 +429,76 @@ class TestResumeAndRetry(unittest.TestCase):
                 system="s", messages=[{"role": "user", "content": []}],
                 sleep=lambda _: None)
         self.assertEqual(calls["n"], 1)
+
+
+class TestMetadataPlacementIsUnified(unittest.TestCase):
+    """One filename and one placement rule for a run's metadata.
+
+    There used to be three: provenance named `_provenance.yaml` in the study
+    layout but `_d4d_metadata.yaml` in the assistant layout, and the progress
+    file landing beside the *full* record while provenance landed in the
+    `_core` directory. That cost real time — run state was misread twice while
+    watching the first live run.
+    """
+
+    def test_provenance_sits_with_the_report_in_study_layout(self):
+        s = spec()
+        self.assertEqual(s.provenance_path.parent, s.report_path.parent)
+        self.assertTrue(s.provenance_path.name.endswith("_provenance.yaml"))
+
+    def test_provenance_sits_with_the_report_in_assistant_layout(self):
+        s = spec(out_dir=Path("data/sheets_d4dassistant"))
+        self.assertEqual(s.provenance_path.parent, s.report_path.parent)
+        self.assertTrue(s.provenance_path.name.endswith("_provenance.yaml"))
+
+    def test_filename_is_identical_across_layouts(self):
+        self.assertEqual(spec().provenance_path.name,
+                         spec(out_dir=Path("x")).provenance_path.name)
+
+    def test_progress_shares_the_metadata_directory(self):
+        from data_sheets_schema.api_runner import _progress_path
+        for s in (spec(), spec(out_dir=Path("data/sheets_d4dassistant"))):
+            self.assertEqual(_progress_path(s).parent, s.metadata_dir)
+
+    def test_old_assistant_filename_is_gone(self):
+        for s in (spec(), spec(out_dir=Path("x"))):
+            self.assertNotIn("_d4d_metadata", str(s.provenance_path))
+
+    def test_assistant_config_declares_the_aligned_name(self):
+        from data_sheets_schema.provenance import load_generation_config
+        pat = ((load_generation_config().get("output") or {})
+               .get("metadata_filename_pattern", ""))
+        self.assertIn("_provenance.yaml", pat)
+
+
+class TestOutputValidation(unittest.TestCase):
+    """A run must not report success on a record that fails validation.
+
+    The first live run completed six phases, exited 0 and printed a tick while
+    emitting a full record whose five DataSubsets lacked required ids and a core
+    record carrying slots CoreDataset does not accept.
+    """
+
+    def test_reconcile_core_is_shown_the_core_schema(self):
+        """The bug that produced the invalid core record."""
+        req = build_phase(spec(), "reconcile_core", carry={})
+        self.assertIn("CoreDataset", req.cached_blocks[0]["text"])
+        self.assertNotIn("`Dataset` — slot inventory",
+                         req.cached_blocks[0]["text"])
+
+    def test_digest_states_required_keys_of_object_ranges(self):
+        """DataSubset requires `id`; the digest must say so."""
+        d = schema_digest.build("Dataset")
+        by_name = {n.name: n for n in d.nested}
+        self.assertIn("DataSubset", by_name)
+        self.assertIn("id", by_name["DataSubset"].required)
+        self.assertIn("Object ranges — required keys",
+                      schema_digest.digest_text("Dataset"))
+
+    def test_missing_artifact_is_reported_as_a_problem(self):
+        import tempfile
+        from data_sheets_schema.api_runner import validate_outputs
+        with tempfile.TemporaryDirectory() as td:
+            problems = validate_outputs(spec(out_dir=Path(td)))
+        self.assertTrue(problems)
+        self.assertTrue(any(p["error"] == "missing" for p in problems))

@@ -30,6 +30,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import subprocess
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -111,6 +112,23 @@ class RunSpec:
                 f"{self.project}_reconciliation.md")
 
     @property
+    def metadata_dir(self) -> Path:
+        """Where a run's *metadata* lives — provenance and resume state.
+
+        One rule for both layouts, alongside the reconciliation report. This
+        used to be three rules: provenance named `_provenance.yaml` in the study
+        layout but `_d4d_metadata.yaml` in the assistant layout, and the
+        progress file landing beside the *full* record while provenance landed
+        in the `_core` directory. Reading a run's state then meant knowing which
+        of three conventions applied.
+        """
+        return self.out_dir or self.report_path.parent
+
+    @property
+    def provenance_path(self) -> Path:
+        return self.metadata_dir / f"{self.project}_provenance.yaml"
+
+    @property
     def prompt_files(self) -> list[Path]:
         files = [GENERIC_PROMPT]
         if self.condition == "tuned":
@@ -132,6 +150,8 @@ def resolve_prompt(spec: RunSpec) -> str:
     in the request is the text that was hashed.
     """
     body = prompt_body()
+    ident = provider_identity()
+    settings = _model_settings()
     subs = {
         "{PROJECT}": spec.project,
         "{ARM}": spec.arm,
@@ -139,6 +159,13 @@ def resolve_prompt(spec: RunSpec) -> str:
         "{BUNDLE}": str(spec.bundle),
         "{LABEL}": spec.label,
         "{MANIFEST_LINE}": spec.manifest_line,
+        # Substituted, not hardcoded. The first live API run emitted records
+        # headed "Agent runtime: Claude Code" on "claude-opus-5[1m]" because
+        # this prompt was written for the agent path and reused verbatim — the
+        # artifact asserted a runtime and model it never touched.
+        "{RUNTIME}": RUNTIME,
+        "{PROVIDER}": ident["provider"] or PROVIDER,
+        "{MODEL}": settings["name"],
     }
     for k, v in subs.items():
         body = body.replace(k, v)
@@ -266,7 +293,12 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     """
     if phase not in PHASES:
         raise ValueError(f"unknown phase {phase!r}")
-    cls = "CoreDataset" if phase == "core" else "Dataset"
+    # Keyed off which artifact the phase writes, not off the phase name.
+    # `reconcile_core` rewrites the CORE record but was being shown the Dataset
+    # digest, so it reintroduced full-schema slots (`splits`, `subsets`,
+    # `third_party_sharing`) that CoreDataset does not accept — the first live
+    # run produced a core record that failed validation for exactly that.
+    cls = "CoreDataset" if PHASE_ARTIFACT.get(phase) == "core" else "Dataset"
     digest = schema_digest.digest_text(cls)
     bundle_text = spec.bundle.read_text(encoding="utf-8", errors="ignore")
 
@@ -416,8 +448,7 @@ PROGRESS_SUFFIX = "_api_progress.json"
 
 
 def _progress_path(spec: RunSpec) -> Path:
-    base = spec.out_dir or spec.full_path.parent
-    return base / f"{spec.project}{PROGRESS_SUFFIX}"
+    return spec.metadata_dir / f"{spec.project}{PROGRESS_SUFFIX}"
 
 
 def _load_progress(spec: RunSpec) -> dict[str, Any]:
@@ -443,6 +474,39 @@ def _save_progress(spec: RunSpec, completed: list[str],
 def _artifact_path(spec: RunSpec, artifact: str) -> Path:
     return {"full": spec.full_path, "core": spec.core_path,
             "report": spec.report_path}[artifact]
+
+
+FULL_SCHEMA_PATH = "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+CORE_SCHEMA_PATH = "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+
+
+def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
+    """LinkML-validate both records, returning problems rather than raising.
+
+    Returned so the caller can record the outcome in provenance before deciding
+    what to do: a record that fails validation should still be inspectable, and
+    the provenance should say it failed rather than omit the question.
+    """
+    problems: list[dict[str, str]] = []
+    for path, schema, cls in ((spec.full_path, FULL_SCHEMA_PATH, "Dataset"),
+                              (spec.core_path, CORE_SCHEMA_PATH, "CoreDataset")):
+        if not path.exists():
+            problems.append({"artifact": str(path), "error": "missing"})
+            continue
+        try:
+            r = subprocess.run(
+                ["poetry", "run", "linkml-validate", "-s", schema, "-C", cls,
+                 str(path)],
+                capture_output=True, text=True, timeout=180)
+        except Exception as exc:                       # noqa: BLE001
+            problems.append({"artifact": str(path),
+                             "error": f"validator did not run: {exc}"})
+            continue
+        if r.returncode != 0:
+            detail = (r.stdout + r.stderr).strip().splitlines()
+            problems.append({"artifact": str(path), "class": cls,
+                             "error": " | ".join(detail[:4])})
+    return problems
 
 
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages,
@@ -629,13 +693,25 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     rec.data["phases_skipped"] = skipped or None
     rec.data["record_generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
-    _progress_path(spec).unlink(missing_ok=True)   # run completed
+    # Validate before declaring success. The first live run completed all six
+    # phases, exited 0, printed a tick — and produced a full record whose five
+    # DataSubsets lacked required ids and a core record carrying slots
+    # CoreDataset does not accept. is_complete() returned True throughout,
+    # because it only checks that files exist. An invalid record that looks
+    # finished is worse than a failed run.
+    problems = validate_outputs(spec)
+    rec.data["validation"] = ({"passed": True} if not problems else
+                              {"passed": False, "problems": problems})
 
-    prov_path = (spec.out_dir / f"{spec.project}_d4d_metadata.yaml" if spec.out_dir
-                 else record_path_for(spec.project, spec.method, spec.label))
-    rec.write(prov_path)
+    rec.write(spec.provenance_path)
+
+    # Only now is the run finished. Keeping the progress file on a validation
+    # failure means a rerun resumes instead of regenerating from phase 1.
+    if not problems:
+        _progress_path(spec).unlink(missing_ok=True)
 
     return {"label": spec.label, "project": spec.project, "usage": usage,
-            "skipped": skipped,
+            "skipped": skipped, "validation_problems": problems,
             "outputs": {"full": str(spec.full_path), "core": str(spec.core_path),
-                        "report": str(spec.report_path)}}
+                        "report": str(spec.report_path),
+                        "provenance": str(spec.provenance_path)}}
