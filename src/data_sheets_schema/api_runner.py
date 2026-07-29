@@ -65,18 +65,28 @@ class RunSpec:
     label: str
     condition: str = "generic"          # generic | tuned
     manifest_line: str = "# Source manifest: data/preprocessed/source_manifest.yaml"
+    # The study writes into the run-labelled layout under data/d4d_concatenated.
+    # The GitHub assistant writes flat into data/sheets_d4dassistant. Rather than
+    # two runners, the layout is a parameter — everything else is identical.
+    out_dir: Path | None = None
 
     @property
     def full_path(self) -> Path:
+        if self.out_dir:
+            return self.out_dir / f"{self.project}_d4d.yaml"
         return CONCAT_DIR / self.method / self.label / f"{self.project}_d4d.yaml"
 
     @property
     def core_path(self) -> Path:
+        if self.out_dir:
+            return self.out_dir / f"{self.project}_d4d_core.yaml"
         return (CONCAT_DIR / f"{self.method}_core" / self.label /
                 f"{self.project}_d4d_core.yaml")
 
     @property
     def report_path(self) -> Path:
+        if self.out_dir:
+            return self.out_dir / f"{self.project}_reconciliation.md"
         return (CONCAT_DIR / f"{self.method}_core" / self.label /
                 f"{self.project}_reconciliation.md")
 
@@ -333,7 +343,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False) -> dict[str, Any]:
     }
     rec.data["api_usage"] = usage
     rec.data["record_generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    rec.write(record_path(spec.method, spec.label, spec.project))
+    prov_path = (spec.out_dir / f"{spec.project}_d4d_metadata.yaml" if spec.out_dir
+                 else record_path(spec.method, spec.label, spec.project))
+    rec.write(prov_path)
 
     return {"label": spec.label, "project": spec.project, "usage": usage,
             "outputs": {k: str(v) for k, v in

@@ -180,23 +180,127 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.PAT_FOR_PR }}
 
-      - name: Respond with AI Agent
-        uses: dragon-ai-agent/run-claude-obo@v1.0.2
+      # Replaced dragon-ai-agent/run-claude-obo@v1.0.2, whose repository and
+      # organisation now return 404 (issue #172). That action ran an open-ended
+      # agent; this runs the same deterministic four-phase generation the batch
+      # pipeline uses, so the assistant and the study can no longer diverge.
+      #
+      # Narrower on purpose: this generates a datasheet from a declared input
+      # bundle. It does not handle open-ended edit requests. See #172.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install project
+        run: |
+          pipx install poetry
+          poetry install --no-interaction
+
+      - name: Resolve dataset from the request
+        id: resolve
+        env:
+          PROMPT: ${{ needs.check-mention.outputs.prompt }}
+        run: |
+          set -euo pipefail
+          # The dataset is whichever inputs/ directory the request names. Matching
+          # against what exists avoids inventing a name from free text.
+          DATASET=""
+          for d in data/sheets_d4dassistant/inputs/*/; do
+            name=$(basename "$d")
+            if printf '%s' "$PROMPT" | grep -qiE "(^|[^A-Za-z0-9_])${name}([^A-Za-z0-9_]|$)"; then
+              DATASET="$name"; break
+            fi
+          done
+          if [ -z "$DATASET" ]; then
+            echo "no-dataset=true" >> "$GITHUB_OUTPUT"
+            echo "available=$(ls data/sheets_d4dassistant/inputs/ | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          BUNDLE=$(find "data/sheets_d4dassistant/inputs/$DATASET" -type f \
+                     \( -name '*.txt' -o -name '*.md' \) | sort | head -1)
+          if [ -z "$BUNDLE" ]; then
+            echo "no-bundle=true" >> "$GITHUB_OUTPUT"
+            echo "dataset=$DATASET" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "dataset=$DATASET" >> "$GITHUB_OUTPUT"
+          echo "bundle=$BUNDLE"   >> "$GITHUB_OUTPUT"
+          echo "label=$(date -u +%Y-%m-%d)_claude-opus-5-assistant" >> "$GITHUB_OUTPUT"
+
+      - name: Report unresolvable request
+        if: steps.resolve.outputs.no-dataset == 'true' || steps.resolve.outputs.no-bundle == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_FOR_PR }}
+        run: |
+          if [ "${{ steps.resolve.outputs.no-dataset }}" = "true" ]; then
+            MSG="I could not tell which dataset to generate. Name one of these input directories in your request: ${{ steps.resolve.outputs.available }}"
+          else
+            MSG="Found the input directory for **${{ steps.resolve.outputs.dataset }}** but no .txt or .md file inside it, so there is nothing to read."
+          fi
+          gh issue comment "${{ needs.check-mention.outputs.item-number }}" --body "$MSG"
+          exit 1
+
+      - name: Generate datasheet
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        with:
-          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github-token: ${{ secrets.PAT_FOR_PR }}
-          prompt: ${{ needs.check-mention.outputs.prompt }}
-          user: ${{ needs.check-mention.outputs.user }}
-          item-type: ${{ needs.check-mention.outputs.item-type }}
-          item-number: ${{ needs.check-mention.outputs.item-number }}
-          controllers: ${{ needs.check-mention.outputs.controllers }}
-          agent-name: 'd4dassistant'
-          branch-prefix: 'd4dassistant'
-          robot-version: 'v1.9.7'
-          enable-robot: 'true'
-          enable-obo-scripts: 'true'
-          enable-python-tools: 'true'
-          python-packages: 'aurelian jinja2-cli "wrapt>=1.17.2"'
-          claude-allowed-tools: '["Read", "Glob", "Grep", "FileEdit", "Edit", "Edit(*)", "Write", "Bash", "Bash(git:*)", "Bash(gh:*)", "Bash(poetry:*)", "Bash(make:*)", "Bash(python:*)", "Bash(uv:*)", "Bash(echo:*)", "Bash(cat:*)", "Bash(mkdir:*)", "Bash(grep:*)", "Bash(head:*)", "Bash(tail:*)", "Bash(sort:*)", "Bash(curl:*)", "mcp__github__*", "mcp__artl__*", "WebSearch", "WebFetch"]'
+        run: |
+          set -euo pipefail
+          poetry run d4d api run \
+            --project "${{ steps.resolve.outputs.dataset }}" \
+            --bundle  "${{ steps.resolve.outputs.bundle }}" \
+            --out-dir data/sheets_d4dassistant \
+            --label   "${{ steps.resolve.outputs.label }}" \
+            --yes
+
+      - name: Validate against the schema
+        run: |
+          set -euo pipefail
+          D=${{ steps.resolve.outputs.dataset }}
+          poetry run linkml-validate \
+            -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
+            -C Dataset "data/sheets_d4dassistant/${D}_d4d.yaml"
+
+      - name: Open a pull request
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.PAT_FOR_PR }}
+        run: |
+          set -euo pipefail
+          D=${{ steps.resolve.outputs.dataset }}
+          BRANCH="d4dassistant/${D}-$(date -u +%Y%m%d-%H%M%S)"
+          git config user.name  "d4dassistant"
+          git config user.email "d4dassistant@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add "data/sheets_d4dassistant/${D}_d4d.yaml" \
+                  "data/sheets_d4dassistant/${D}_d4d_core.yaml" \
+                  "data/sheets_d4dassistant/${D}_reconciliation.md" \
+                  "data/sheets_d4dassistant/${D}_d4d_metadata.yaml"
+          git commit -m "Add ${D} datasheet generated by the D4D assistant
+
+          Four-phase generation from data/sheets_d4dassistant/inputs/${D}/,
+          via the same deterministic path the batch pipeline uses. Requested in
+          #${{ needs.check-mention.outputs.item-number }}."
+          git push -u origin "$BRANCH"
+          URL=$(gh pr create \
+            --title "Add ${D} datasheet (D4D assistant)" \
+            --body "Generated from \`data/sheets_d4dassistant/inputs/${D}/\` in response to #${{ needs.check-mention.outputs.item-number }}.
+
+          Four-phase generation (full, core, audit, reconcile) on the model pinned in \`.github/workflows/d4d_assistant_deterministic.config\`. \`${D}_d4d_metadata.yaml\` records the input, prompt and schema-digest hashes, the git commit, and per-phase token usage.
+
+          Validated against \`Dataset\` before this PR was opened." \
+            --head "$BRANCH")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Report back on the issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.PAT_FOR_PR }}
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            gh issue comment "${{ needs.check-mention.outputs.item-number }}" \
+              --body "Generated the **${{ steps.resolve.outputs.dataset }}** datasheet: ${{ steps.pr.outputs.url }}"
+          else
+            gh issue comment "${{ needs.check-mention.outputs.item-number }}" \
+              --body "Generation failed. [Run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})."
+          fi

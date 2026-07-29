@@ -23,13 +23,31 @@ ARMS = {
 }
 
 
-def _spec(project, arm, label, condition):
+def _spec(project, arm, label, condition, bundle=None, out_dir=None):
+    """Resolve a run spec.
+
+    `project` is a free string rather than a click.Choice because the GitHub
+    assistant generates datasheets for datasets outside the four study
+    projects. A known project resolves its bundle by convention; anything else
+    must declare one, which is checked in `_require_bundle`.
+    """
     from data_sheets_schema.api_runner import RunSpec
     display, method, pattern, manifest = ARMS[arm]
+    resolved = (Path(bundle) if bundle else
+                Path("data/preprocessed/concatenated") / pattern.format(p=project))
     return RunSpec(project=project, arm=display, method=method,
-                   bundle=Path("data/preprocessed/concatenated") /
-                          pattern.format(p=project),
-                   label=label, condition=condition, manifest_line=manifest)
+                   bundle=resolved, label=label, condition=condition,
+                   manifest_line=manifest,
+                   out_dir=Path(out_dir) if out_dir else None)
+
+
+def _require_bundle(spec, project, bundle):
+    if bundle is None and project not in PROJECTS:
+        raise click.ClickException(
+            f"{project!r} is not one of the known projects ({', '.join(PROJECTS)}), "
+            "so its bundle cannot be resolved by convention. Pass --bundle.")
+    if not spec.bundle.exists():
+        raise click.ClickException(f"bundle not found: {spec.bundle}")
 
 
 @click.group()
@@ -38,19 +56,23 @@ def api():
 
 
 @api.command("plan")
-@click.option("--project", type=click.Choice(PROJECTS), required=True)
+@click.option("--project", required=True,
+              help="AI_READI|CHORUS|CM4AI|VOICE, or any dataset name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--label", required=True, help="run label, e.g. 2026-07-29_claude-opus-5-api-generic_rep1")
 @click.option("--condition", type=click.Choice(["generic", "tuned"]),
               default="generic", show_default=True)
+@click.option("--bundle", type=click.Path(), default=None,
+              help="explicit input bundle; required for datasets outside PROJECTS")
+@click.option("--out-dir", type=click.Path(), default=None,
+              help="flat output directory (the assistant layout)")
 @click.option("--json", "as_json", is_flag=True, help="emit the full plan as JSON")
-def plan_cmd(project, arm, label, condition, as_json):
+def plan_cmd(project, arm, label, condition, bundle, out_dir, as_json):
     """Render every phase without calling the API — no key, no charge."""
     from data_sheets_schema.api_runner import plan
-    spec = _spec(project, arm, label, condition)
-    if not spec.bundle.exists():
-        raise click.ClickException(f"bundle not found: {spec.bundle}")
+    spec = _spec(project, arm, label, condition, bundle, out_dir)
+    _require_bundle(spec, project, bundle)
     p = plan(spec)
     if as_json:
         click.echo(json.dumps(p, indent=2))
@@ -72,19 +94,23 @@ def plan_cmd(project, arm, label, condition, as_json):
 
 
 @api.command("run")
-@click.option("--project", type=click.Choice(PROJECTS), required=True)
+@click.option("--project", required=True,
+              help="AI_READI|CHORUS|CM4AI|VOICE, or any dataset name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--label", required=True)
 @click.option("--condition", type=click.Choice(["generic", "tuned"]),
               default="generic", show_default=True)
+@click.option("--bundle", type=click.Path(), default=None,
+              help="explicit input bundle; required for datasets outside PROJECTS")
+@click.option("--out-dir", type=click.Path(), default=None,
+              help="flat output directory (the assistant layout)")
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
-def run_cmd(project, arm, label, condition, yes):
+def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
     """Execute all four phases and write outputs plus a live provenance record."""
     from data_sheets_schema.api_runner import execute, plan
-    spec = _spec(project, arm, label, condition)
-    if not spec.bundle.exists():
-        raise click.ClickException(f"bundle not found: {spec.bundle}")
+    spec = _spec(project, arm, label, condition, bundle, out_dir)
+    _require_bundle(spec, project, bundle)
     if spec.full_path.exists():
         raise click.ClickException(
             f"{spec.full_path} already exists; a run label is never reused")
