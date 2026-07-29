@@ -5,6 +5,7 @@ whole assembly — prompt resolution, cache layout, cost — is inspectable befo
 anything is billed, so the tests exercise exactly what a real run would send.
 """
 
+import json
 import unittest
 from pathlib import Path
 
@@ -161,3 +162,104 @@ class TestPlan(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FakeUsage:
+    input_tokens = 100
+    output_tokens = 50
+    cache_read_input_tokens = 0
+    cache_creation_input_tokens = 100
+
+
+class FakeBlock:
+    type = "text"
+
+    def __init__(self, text):
+        self.text = text
+
+
+class FakeResponse:
+    def __init__(self, text):
+        self.content = [FakeBlock(text)]
+        self.usage = FakeUsage()
+
+
+class FakeMessages:
+    """Returns a plausible payload per phase, in call order."""
+
+    def __init__(self):
+        self.calls = []
+
+    def create(self, **kw):
+        self.calls.append(kw)
+        n = len(self.calls)
+        if n in (1, 2):
+            return FakeResponse("```yaml\nid: x\nname: X\n```")
+        if n == 3:
+            return FakeResponse('{"findings": [], "summary": "none"}')
+        return FakeResponse(json.dumps({
+            "full_yaml": "# header\nid: x\nname: X\n",
+            "core_yaml": "# header\nid: x\n",
+            "report_markdown": "# Reconciliation\nNo discrepancies.\n",
+        }))
+
+
+class FakeClient:
+    def __init__(self):
+        self.messages = FakeMessages()
+
+
+class TestExecuteOffline(unittest.TestCase):
+    """Exercise execute() without the API.
+
+    plan() alone cannot catch this class of bug: execute() imports inside the
+    function body, so a wrong import name survives every plan-based test and
+    only surfaces on a live run. That is exactly what happened — `record_path`
+    was imported from `provenance`, where it does not exist.
+    """
+
+    def setUp(self):
+        import tempfile
+        from data_sheets_schema import api_runner
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.out = Path(self.tmp.name) / "out"
+        self.api = api_runner
+        self._client = api_runner._client
+        api_runner._client = lambda: FakeClient()
+        self.addCleanup(lambda: setattr(api_runner, "_client", self._client))
+
+    def test_execute_writes_all_four_artifacts(self):
+        s = spec(out_dir=self.out)
+        res = self.api.execute(s)
+        for p in (s.full_path, s.core_path, s.report_path):
+            self.assertTrue(p.exists(), f"missing {p}")
+        self.assertTrue((self.out / "CHORUS_d4d_metadata.yaml").exists(),
+                        "provenance record not written")
+        self.assertEqual(len(res["usage"]), 4)
+
+    def test_provenance_record_is_live_and_names_the_prompt(self):
+        import yaml as _yaml
+        s = spec(out_dir=self.out)
+        self.api.execute(s)
+        d = _yaml.safe_load((self.out / "CHORUS_d4d_metadata.yaml").read_text())
+        self.assertEqual(d["record_mode"], "live")
+        self.assertEqual(d["model"]["agent_runtime"], RUNTIME)
+        self.assertEqual(d["model"]["temperature_basis"],
+                         "set on the API request and observed")
+        self.assertEqual(len(d["prompts"]["files"]), 1)
+        self.assertEqual(len(d["prompts"]["files"][0]["sha256"]), 64)
+        self.assertEqual(len(d["api_usage"]), 4)
+
+    def test_every_phase_sends_the_cached_prefix(self):
+        s = spec(out_dir=self.out)
+        client = FakeClient()
+        self.api._client = lambda: client
+        self.api.execute(s)
+        self.assertEqual(len(client.messages.calls), 4)
+        for kw in client.messages.calls:
+            parts = kw["messages"][0]["content"]
+            cached = [p for p in parts if p.get("cache_control")]
+            self.assertEqual(len(cached), 2)
+            self.assertEqual(kw["temperature"], 0.0)
+            self.assertEqual(kw["model"], "claude-opus-5")
