@@ -10,6 +10,79 @@ def runs():
     pass
 
 
+@runs.command()
+@click.option('--label', 'labels', multiple=True,
+              help='Run label(s) to archive; repeatable.')
+@click.option('--reconstructed', is_flag=True,
+              help='Archive every run whose provenance was reconstructed.')
+@click.option('--reason', default=None, help='Recorded in the archive README.')
+@click.option('--execute', is_flag=True,
+              help='Actually move. Without it, only report what would move.')
+def archive(labels, reconstructed, reason, execute):
+    """Move runs out of analysis into data/ATTIC, without deleting them.
+
+    `discover()` walks data/d4d_concatenated, so a move to ATTIC removes a run
+    from every analysis path at once. Nothing is deleted and the layout is
+    preserved, so `d4d runs restore` is the same move reversed.
+
+    Archiving reconstructed runs is a real loss of comparative reach — on this
+    corpus it removes the whole tuned arm and every non-Claude model. Prefer
+    `--require-live` on compare/arm-delta, which excludes them per-analysis
+    without moving anything.
+    """
+    from data_sheets_schema.runs import (
+        archive_runs, discover, record_mode,
+    )
+
+    targets = set(labels)
+    if reconstructed:
+        for run in discover():
+            # Deterministic mappings are not stochastic generations and carry no
+            # generation provenance by design; the validate sweep already skips
+            # them for the same reason.
+            if run.is_core or run.deterministic:
+                continue
+            for proj in run.projects:
+                # `reconstructed` only — never `none`. A run with no provenance
+                # record at all is a different problem, and archiving is not its
+                # answer: the merged records have none because provenance.py
+                # cannot yet express a derived record, which is tracked work
+                # rather than an unattestable run.
+                if record_mode(run.method, run.label, proj) == "reconstructed":
+                    targets.add(run.label)
+    if not targets:
+        click.echo("Nothing selected. Pass --label or --reconstructed."); return
+
+    default_reason = (
+        "Provenance for these runs was reconstructed after the fact rather than "
+        "observed during the run, so their conditions cannot be attested.")
+    res = archive_runs(sorted(targets), reason=reason or default_reason,
+                       dry_run=not execute)
+    verb = "Moved" if execute else "Would move"
+    click.echo(f"{verb} {res['count']} run director(ies) for "
+               f"{len(targets)} label(s) -> {res['archive']}")
+    for src, dest in res["moved"]:
+        click.echo(f"   {src}")
+    if not execute:
+        click.echo("\nDry run. Re-run with --execute to move them.")
+
+
+@runs.command()
+@click.option('--label', 'labels', multiple=True,
+              help='Run label(s) to restore; default all archived.')
+@click.option('--execute', is_flag=True)
+def restore(labels, execute):
+    """Move archived runs back into data/d4d_concatenated."""
+    from data_sheets_schema.runs import restore_runs
+    res = restore_runs(list(labels), dry_run=not execute)
+    verb = "Restored" if execute else "Would restore"
+    click.echo(f"{verb} {res['count']} run director(ies)")
+    for src, dest in res["moved"]:
+        click.echo(f"   {dest}")
+    if not execute and res["count"]:
+        click.echo("\nDry run. Re-run with --execute.")
+
+
 @runs.command('list')
 @click.option('--arm', default=None, help='Filter by arm.')
 @click.option('--full-only', is_flag=True, help='Hide the _core companions.')
@@ -48,13 +121,16 @@ def list_runs(arm, full_only):
 @click.option('--project', required=True)
 @click.option('--label', 'labels', multiple=True,
               help='Run labels to compare; default all for that method.')
-def compare(method, project, labels):
+@click.option('--require-live', is_flag=True,
+              help='Exclude runs whose provenance was reconstructed, not observed.')
+def compare(method, project, labels, require_live):
     """Compare slot coverage across replicates of one method."""
     from data_sheets_schema.runs import compare as do_compare, discover
 
     if not labels:
         labels = [r.label for r in discover() if r.method == method]
-    result = do_compare(method, project, list(labels))
+    result = do_compare(method, project, list(labels),
+                        require_live=require_live)
     if 'error' in result:
         click.echo(f"❌ {result['error']}", err=True)
         raise SystemExit(1)
@@ -67,6 +143,18 @@ def compare(method, project, labels):
             desc = fp.get('Generation Method') or fp.get('Agent runtime') or '?'
             click.echo(f"     {lab:<36} {desc}")
         click.echo("")
+
+    if result.get('excluded_not_live'):
+        click.echo(f"⚠️  excluded, provenance reconstructed not observed: "
+                   f"{', '.join(result['excluded_not_live'])}\n")
+    elif result.get('reconstructed'):
+        # Reported even when not excluding: an agreement figure over
+        # reconstructed records rests on conditions nobody observed, and the
+        # reader should see that without having asked.
+        click.echo(f"ℹ️  {len(result['reconstructed'])} of "
+                   f"{len(result['provenance_modes'])} runs have reconstructed "
+                   f"provenance: {', '.join(result['reconstructed'])}")
+        click.echo("   Re-run with --require-live to exclude them.\n")
 
     if result.get('excluded_incomplete'):
         click.echo(f"⚠️  excluded as still running / incomplete: "

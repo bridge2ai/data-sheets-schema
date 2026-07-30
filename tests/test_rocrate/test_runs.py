@@ -387,3 +387,68 @@ class TestStaleVerdictsAreDetected(unittest.TestCase):
         r = compare("m", "P", ["L", "L2"], self.root)
         self.assertFalse(r["all_verified"])
         self.assertTrue(any("stale" in u for u in r["unverified"]))
+
+
+class TestProvenanceModeReportingAndArchive(unittest.TestCase):
+    """Excluding reconstructed runs is a real loss, so it is opt-in and reported."""
+
+    def test_compare_reports_reconstructed_without_being_asked(self):
+        """A permissive result must never look uniform."""
+        from data_sheets_schema.runs import compare
+        r = compare("claudecode_agent", "CM4AI",
+                    [f"2026-07-27_claude-opus-5_rep{n}" for n in (1, 2, 3)])
+        if "error" in r:
+            self.skipTest("tuned arm not present")
+        self.assertIn("provenance_modes", r)
+        self.assertFalse(r["all_live"])
+        self.assertEqual(len(r["reconstructed"]), 3)
+        self.assertEqual(r["excluded_not_live"], [],
+                         "nothing excluded unless require_live is set")
+
+    def test_require_live_excludes_them(self):
+        from data_sheets_schema.runs import compare
+        r = compare("claudecode_agent", "CM4AI",
+                    [f"2026-07-27_claude-opus-5_rep{n}" for n in (1, 2, 3)],
+                    require_live=True)
+        self.assertIn("error", r, "the whole tuned arm is reconstructed")
+
+    def test_archive_moves_full_and_core_together(self):
+        """Splitting a run's full record from its core leaves it permanently
+        incomplete, since is_complete() requires both plus the report."""
+        from data_sheets_schema.runs import archive_runs
+        r = archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t",
+                         dry_run=True)
+        dirs = {Path(a).parent.name for a, _ in r["moved"]}
+        self.assertIn("claudecode_agent", dirs)
+        self.assertIn("claudecode_agent_core", dirs)
+
+    def test_archive_preserves_layout_so_restore_is_the_inverse(self):
+        from data_sheets_schema.runs import archive_runs
+        r = archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t",
+                         dry_run=True)
+        for src, dest in r["moved"]:
+            self.assertTrue(dest.endswith(
+                f"{Path(src).parent.name}/{Path(src).name}"))
+
+    def test_dry_run_moves_nothing(self):
+        from data_sheets_schema.runs import archive_runs
+        before = sorted(Path("data/d4d_concatenated").rglob("*_d4d.yaml"))
+        archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t", dry_run=True)
+        self.assertEqual(before,
+                         sorted(Path("data/d4d_concatenated").rglob("*_d4d.yaml")))
+
+    def test_archive_roundtrips(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs, restore_runs
+        with tempfile.TemporaryDirectory() as td:
+            concat, attic = Path(td) / "concat", Path(td) / "attic"
+            run = concat / "m" / "L"
+            run.mkdir(parents=True)
+            (run / "P_d4d.yaml").write_text("id: x\n")
+            archive_runs(["L"], reason="t", concat_dir=concat, attic=attic,
+                         dry_run=False)
+            self.assertFalse(run.exists())
+            self.assertTrue((attic / "d4d_concatenated_archived" /
+                             "README.md").exists())
+            restore_runs(["L"], concat_dir=concat, attic=attic, dry_run=False)
+            self.assertTrue((run / "P_d4d.yaml").exists())
