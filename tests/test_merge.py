@@ -211,13 +211,28 @@ class TestDerivedProvenance(unittest.TestCase):
     """
 
     def _sources(self, td):
+        """Fixtures carry provenance, because unattested sources are refused.
+
+        A merge may only consume runs whose conditions can be established, so a
+        fixture without provenance is correctly rejected — the test has to build
+        sources that would really be admissible.
+        """
         import yaml
+        root = Path(td) / "data" / "d4d_concatenated"
         srcs = {}
         for n, slots in ((1, {"title": "T", "a": 1}), (2, {"title": "T", "b": 2})):
-            p = (Path(td) / "data" / "d4d_concatenated" / "claudecode_agent" /
-                 f"lab_rep{n}" / "P_d4d.yaml")
+            label = f"lab_rep{n}"
+            p = root / "claudecode_agent" / label / "P_d4d.yaml"
             p.parent.mkdir(parents=True)
             p.write_text(yaml.safe_dump(slots))
+            prov = root / "claudecode_agent_core" / label / "P_provenance.yaml"
+            prov.parent.mkdir(parents=True)
+            prov.write_text(yaml.safe_dump({
+                "record_mode": "live",
+                "inputs": {"bundle_md5": "a",
+                           "hash_basis": "verified identical to the bytes consumed"},
+                "schema": {"full_md5": "s"}, "model": {"model": "m"},
+                "outputs": {"full": {"md5": "x"}}}))
             srcs[f"rep{n}"] = p
         return srcs
 

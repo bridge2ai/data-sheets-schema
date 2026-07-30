@@ -883,6 +883,17 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
 
     rec.write(spec.provenance_path)
 
+    # Verify what was just written rather than assuming it. The playbook lists a
+    # live record as a completion criterion, and a criterion nothing checks is a
+    # request. This path writes the record itself, so the check is cheap — and
+    # it fails the run rather than leaving an unattestable artifact behind.
+    from data_sheets_schema.runs import check_provenance
+    prov = check_provenance(spec.method, spec.label, spec.project)
+    if not prov["ok"]:
+        raise RuntimeError(
+            f"run {spec.label} for {spec.project} finished without usable "
+            f"provenance: {prov['reason']}")
+
     # Only now is the run finished. Keeping the progress file on a validation
     # failure means a rerun resumes instead of regenerating from phase 1.
     if not problems:

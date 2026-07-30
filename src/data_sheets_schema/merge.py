@@ -400,6 +400,24 @@ def write_merge(result: MergeResult, path: Path, *,
     from data_sheets_schema.provenance import (
         build_derived_record, contribution)
 
+    def _source_label(path: Path) -> str:
+        """The run label a contributing record sits under."""
+        return Path(path).parent.name
+
+    def _source_root(path: Path) -> Path:
+        """The `d4d_concatenated` a source lives under, not the default one.
+
+        Sources may sit outside the working corpus — a probe, a fixture, another
+        checkout. Looking their attestation up in the default directory would
+        report `none` for a record that is perfectly well attested where it
+        actually is.
+        """
+        parts = Path(path).parts
+        if "d4d_concatenated" in parts:
+            i = parts.index("d4d_concatenated")
+            return Path(*parts[:i + 1])
+        return Path(path).parent.parent.parent
+
     def _source_method(path: Path) -> str:
         """The method a contributing record came from, read off its own path.
 
@@ -413,6 +431,26 @@ def write_merge(result: MergeResult, path: Path, *,
             if len(parts) > i + 1:
                 return parts[i + 1]
         return "unknown"
+
+    from data_sheets_schema.runs import ATTESTED, LIVE, attestation
+
+    # The playbook's cross-label carve-out is conditional, so the conditions are
+    # checked here rather than trusted. Prose in a playbook binds an agent that
+    # reads it; this binds the code path regardless.
+    for lab, src in sorted(sources.items()):
+        src_method = _source_method(src)
+        if src_method.endswith("_merged") or "merged" in Path(src).parts:
+            raise ValueError(
+                f"{lab} is itself a derived record. Chaining merges makes the "
+                "source md5s an incomplete account of where the content came "
+                "from, and the provenance stops being checkable in one step.")
+        level = attestation(src_method, _source_label(src), project,
+                            _source_root(src))
+        if level not in (LIVE, ATTESTED):
+            raise ValueError(
+                f"{lab} is {level}: its conditions cannot be established, so a "
+                "record combining it would have inputs that cannot be placed. "
+                "Only complete, attested runs may contribute.")
 
     contributions = [
         contribution(src, label=lab, project=project,

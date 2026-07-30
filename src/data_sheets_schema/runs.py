@@ -260,6 +260,57 @@ VERIFIED_HASH_BASES = frozenset({
 LIVE, ATTESTED, PARTIAL, NO_RECORD = "live", "attested", "partial", "none"
 
 
+# From this date a run is required to write its own provenance. Dated rather
+# than applied to the whole corpus on purpose: 59 existing records were
+# reconstructed after the fact, and 33 of those are fully attested — the
+# 2026-07-27 tuned arm pins its bundle, schema, model and outputs, and lacks only
+# the hardware. Failing them retroactively would discard placeable evidence to
+# enforce a rule that did not exist when they ran. The requirement is about
+# stopping the ratio worsening, so it applies going forward.
+LIVE_REQUIRED_FROM = "2026-07-30"
+
+
+def requires_live(label: str) -> bool:
+    """Whether this run is subject to the live-provenance requirement.
+
+    Read from the label's date prefix, which every run label carries by
+    convention (`{YYYY-MM-DD}_{provider-model-settings}`). A label with no
+    parseable date is treated as subject to the rule: a run that cannot say when
+    it happened is a new run for this purpose, and the alternative — exempting
+    anything unparseable — is an exemption anyone could take by accident.
+    """
+    m = re.match(r"(\d{4}-\d{2}-\d{2})", label or "")
+    return m.group(1) >= LIVE_REQUIRED_FROM if m else True
+
+
+def check_provenance(method: str, label: str, project: str,
+                     concat_dir: Path = CONCAT_DIR) -> dict:
+    """Whether a run satisfies the live-provenance requirement.
+
+    Separate from `is_complete()` deliberately. Folding this into completeness
+    would reclassify every pre-cutoff run in one step and change every
+    downstream count as a side effect of adding a rule.
+    """
+    mode = record_mode(method, label, project, concat_dir)
+    level = attestation(method, label, project, concat_dir)
+    required = requires_live(label)
+    ok = (not required) or mode == "live"
+    if ok:
+        reason = ("live provenance present" if mode == "live"
+                  else f"predates {LIVE_REQUIRED_FROM}; not required")
+    elif mode == "none":
+        reason = ("no provenance record. The run cannot state the conditions it "
+                  "ran under, and nobody can reconstruct them later with "
+                  "certainty.")
+    else:
+        reason = (f"provenance is {mode}, not live. It was assembled after the "
+                  "fact, so it reports what could be recovered rather than what "
+                  "was observed.")
+    return {"method": method, "label": label, "project": project,
+            "record_mode": mode, "attestation": level,
+            "required": required, "ok": ok, "reason": reason}
+
+
 def attestation(method: str, label: str, project: str,
                 concat_dir: Path = CONCAT_DIR) -> str:
     """How well a run's conditions can be established — four levels, not two.
@@ -637,7 +688,8 @@ def archive_runs(labels: list[str], *, reason: str,
                  concat_dir: Path = CONCAT_DIR,
                  attic: Path = ATTIC,
                  archive_name: str = "d4d_concatenated_archived",
-                 dry_run: bool = True) -> dict:
+                 dry_run: bool = True,
+                 allow_partial_labels: bool = False) -> dict:
     """Move whole run directories out of discovery, preserving their layout.
 
     `discover()` walks `concat_dir`, so a move to ATTIC removes a run from every
@@ -651,6 +703,30 @@ def archive_runs(labels: list[str], *, reason: str,
     reconciliation report would leave a run that `is_complete()` reports as
     unfinished forever.
     """
+    # A label is not a unit of attestation. One run directory holds several
+    # projects, and they can differ: 2026-07-28_claude-opus-5-crateonly has
+    # CHORUS and VOICE live while CM4AI is partial. Archiving by label would
+    # move six live records out with three unplaceable ones and report success.
+    collateral: dict[str, list[str]] = {}
+    for label in labels:
+        keep = [f"{m}/{label}/{proj}"
+                for run in discover(concat_dir) if run.label == label
+                and not run.is_core and not run.deterministic
+                for m in [run.method]
+                for proj in run.projects
+                if attestation(run.method, label, proj, concat_dir)
+                in (LIVE, ATTESTED)]
+        if keep:
+            collateral[label] = keep
+    if collateral and not allow_partial_labels:
+        detail = "; ".join(f"{lab} would also move {len(v)} placeable record(s)"
+                           for lab, v in sorted(collateral.items()))
+        raise ValueError(
+            "refusing to archive labels whose projects do not agree: " + detail
+            + ". A label is not a unit of attestation — archiving it moves every "
+              "project it holds. Archive the unplaceable projects on their own, "
+              "or pass allow_partial_labels=True to accept the collateral.")
+
     moved: list[tuple[Path, Path]] = []
     for method_dir in sorted(p for p in concat_dir.iterdir() if p.is_dir()):
         for label_dir in sorted(p for p in method_dir.iterdir() if p.is_dir()):
