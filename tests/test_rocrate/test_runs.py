@@ -387,3 +387,222 @@ class TestStaleVerdictsAreDetected(unittest.TestCase):
         r = compare("m", "P", ["L", "L2"], self.root)
         self.assertFalse(r["all_verified"])
         self.assertTrue(any("stale" in u for u in r["unverified"]))
+
+
+class TestProvenanceModeReportingAndArchive(unittest.TestCase):
+    """Excluding reconstructed runs is a real loss, so it is opt-in and reported."""
+
+    def test_compare_reports_reconstructed_without_being_asked(self):
+        """A permissive result must never look uniform."""
+        from data_sheets_schema.runs import compare
+        r = compare("claudecode_agent", "CM4AI",
+                    [f"2026-07-27_claude-opus-5_rep{n}" for n in (1, 2, 3)])
+        if "error" in r:
+            self.skipTest("tuned arm not present")
+        self.assertIn("provenance_modes", r)
+        self.assertFalse(r["all_live"])
+        self.assertEqual(len(r["reconstructed"]), 3)
+        self.assertEqual(r["excluded_not_live"], [],
+                         "nothing excluded unless require_live is set")
+
+    def test_require_live_is_too_strict_for_the_tuned_arm(self):
+        """Documents why `live` is the wrong gate.
+
+        The tuned arm pins its bundle by verified md5, its schema, its model and
+        every output hash. `require_live` drops all 24 records anyway, over a
+        hardware field that cannot affect a generation.
+        """
+        from data_sheets_schema.runs import compare
+        r = compare("claudecode_agent", "CM4AI",
+                    [f"2026-07-27_claude-opus-5_rep{n}" for n in (1, 2, 3)],
+                    require_live=True)
+        self.assertIn("error", r)
+
+    def test_require_attested_keeps_the_tuned_arm(self):
+        from data_sheets_schema.runs import compare
+        r = compare("claudecode_agent", "CM4AI",
+                    [f"2026-07-27_claude-opus-5_rep{n}" for n in (1, 2, 3)],
+                    require_attested=True)
+        if "error" in r:
+            self.skipTest("tuned arm not present")
+        self.assertEqual(len(r["labels"]), 3)
+        self.assertTrue(r["all_attested"])
+        self.assertFalse(r["all_live"], "attested without being live")
+
+    def test_attestation_levels(self):
+        from data_sheets_schema.runs import (
+            ATTESTED, LIVE, NO_RECORD, PARTIAL, attestation)
+        self.assertEqual(
+            attestation("claudecode_agent",
+                        "2026-07-28_claude-opus-5-generic_rep1", "CM4AI"), LIVE)
+        self.assertEqual(
+            attestation("claudecode_agent",
+                        "2026-07-27_claude-opus-5_rep1", "CM4AI"), ATTESTED)
+        self.assertEqual(
+            attestation("claudecode_agent", "no-such-label", "CM4AI"), NO_RECORD)
+
+    def test_unverified_input_hash_is_not_attested(self):
+        """A bundle md5 computed today says nothing about the bytes consumed."""
+        import tempfile, yaml as _yaml
+        from data_sheets_schema.runs import PARTIAL, attestation
+        with tempfile.TemporaryDirectory() as td:
+            concat = Path(td)
+            d = concat / "m_core" / "L"
+            d.mkdir(parents=True)
+            (d / "P_provenance.yaml").write_text(_yaml.safe_dump({
+                "record_mode": "reconstructed",
+                "inputs": {"bundle_md5": "abc"},      # no verified hash_basis
+                "schema": {"full_md5": "d"},
+                "model": {"model": "m"},
+                "outputs": {"full": {}}}))
+            self.assertEqual(attestation("m", "L", "P", concat), PARTIAL)
+
+    def test_archive_targets_partial_not_merely_reconstructed(self):
+        """Archiving on record_mode would remove 24 placeable tuned-arm records."""
+        from data_sheets_schema.runs import ATTESTED, attestation, discover
+        labels = {r.label for r in discover() if not r.is_core
+                  and not r.deterministic
+                  for p in r.projects
+                  if attestation(r.method, r.label, p) == ATTESTED}
+        self.assertIn("2026-07-27_claude-opus-5_rep1", labels)
+
+    def test_archive_moves_full_and_core_together(self):
+        """Splitting a run's full record from its core leaves it permanently
+        incomplete, since is_complete() requires both plus the report."""
+        from data_sheets_schema.runs import archive_runs
+        r = archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t",
+                         dry_run=True)
+        dirs = {Path(a).parent.name for a, _ in r["moved"]}
+        self.assertIn("claudecode_agent", dirs)
+        self.assertIn("claudecode_agent_core", dirs)
+
+    def test_archive_preserves_layout_so_restore_is_the_inverse(self):
+        from data_sheets_schema.runs import archive_runs
+        r = archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t",
+                         dry_run=True)
+        for src, dest in r["moved"]:
+            self.assertTrue(dest.endswith(
+                f"{Path(src).parent.name}/{Path(src).name}"))
+
+    def test_dry_run_moves_nothing(self):
+        from data_sheets_schema.runs import archive_runs
+        before = sorted(Path("data/d4d_concatenated").rglob("*_d4d.yaml"))
+        archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t", dry_run=True)
+        self.assertEqual(before,
+                         sorted(Path("data/d4d_concatenated").rglob("*_d4d.yaml")))
+
+    def test_archive_roundtrips(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs, restore_runs
+        with tempfile.TemporaryDirectory() as td:
+            concat, attic = Path(td) / "concat", Path(td) / "attic"
+            run = concat / "m" / "L"
+            run.mkdir(parents=True)
+            (run / "P_d4d.yaml").write_text("id: x\n")
+            archive_runs(["L"], reason="t", concat_dir=concat, attic=attic,
+                         dry_run=False)
+            self.assertFalse(run.exists())
+            self.assertTrue((attic / "d4d_concatenated_archived" /
+                             "README.md").exists())
+            restore_runs(["L"], concat_dir=concat, attic=attic, dry_run=False)
+            self.assertTrue((run / "P_d4d.yaml").exists())
+
+
+class TestAttestationRigour(unittest.TestCase):
+    """The checks must mean what they say (#184, #185, #186)."""
+
+    def _record(self, tmp, **overrides):
+        import yaml as _yaml
+        data = {"record_mode": "reconstructed",
+                "inputs": {"bundle_md5": "a",
+                           "hash_basis": "verified identical to the bytes consumed"},
+                "schema": {"full_md5": "s"},
+                "model": {"model": "m"},
+                "outputs": {"full": {"md5": "x"}}}
+        data.update(overrides)
+        d = tmp / "m_core" / "L"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "P_provenance.yaml").write_text(_yaml.safe_dump(data))
+        return tmp
+
+    def test_outputs_block_that_hashes_nothing_is_partial(self):
+        """A truthy dict of empty artifacts pins nothing (#184)."""
+        import tempfile
+        from data_sheets_schema.runs import PARTIAL, attestation
+        with tempfile.TemporaryDirectory() as td:
+            c = self._record(Path(td), outputs={"full": None, "core": None})
+            self.assertEqual(attestation("m", "L", "P", c), PARTIAL)
+
+    def test_outputs_with_an_md5_is_attested(self):
+        import tempfile
+        from data_sheets_schema.runs import ATTESTED, attestation
+        with tempfile.TemporaryDirectory() as td:
+            self.assertEqual(
+                attestation("m", "L", "P", self._record(Path(td))), ATTESTED)
+
+    def test_unverified_hash_basis_is_not_verified(self):
+        """`"verified" in "unverified"` is True — the substring test inverted
+        the intent for the two phrasings most likely to be written (#185)."""
+        import tempfile
+        from data_sheets_schema.runs import PARTIAL, attestation
+        for basis in ("unverified", "not verified against the run",
+                      "unverified — file changed since"):
+            with self.subTest(basis=basis), tempfile.TemporaryDirectory() as td:
+                c = self._record(Path(td),
+                                 inputs={"bundle_md5": "a", "hash_basis": basis})
+                self.assertEqual(attestation("m", "L", "P", c), PARTIAL)
+
+    def test_unrecognised_hash_basis_is_not_trusted(self):
+        import tempfile
+        from data_sheets_schema.runs import PARTIAL, attestation
+        with tempfile.TemporaryDirectory() as td:
+            c = self._record(Path(td),
+                             inputs={"bundle_md5": "a",
+                                     "hash_basis": "looked about right"})
+            self.assertEqual(attestation("m", "L", "P", c), PARTIAL)
+
+    def test_restore_refuses_to_nest_into_an_existing_label(self):
+        """shutil.move puts the source *inside* an existing destination (#186)."""
+        import tempfile
+        from data_sheets_schema.runs import archive_runs, restore_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = Path(td) / "c", Path(td) / "a"
+            run = c / "m" / "L"
+            run.mkdir(parents=True)
+            (run / "P_d4d.yaml").write_text("archived\n")
+            archive_runs(["L"], reason="t", concat_dir=c, attic=a, dry_run=False)
+            run.mkdir(parents=True)
+            (run / "P_d4d.yaml").write_text("regenerated\n")
+            with self.assertRaises(FileExistsError):
+                restore_runs(["L"], concat_dir=c, attic=a, dry_run=False)
+            self.assertFalse((run / "L").exists(), "nothing was nested")
+            self.assertEqual((run / "P_d4d.yaml").read_text(), "regenerated\n")
+
+    def test_archive_refuses_to_overwrite_an_existing_archive(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = Path(td) / "c", Path(td) / "a"
+            for _ in range(2):
+                run = c / "m" / "L"
+                run.mkdir(parents=True)
+                (run / "P_d4d.yaml").write_text("x\n")
+                if _ == 0:
+                    archive_runs(["L"], reason="t", concat_dir=c, attic=a,
+                                 dry_run=False)
+            with self.assertRaises(FileExistsError):
+                archive_runs(["L"], reason="t", concat_dir=c, attic=a,
+                             dry_run=False)
+
+    def test_dry_run_reports_collisions_without_raising(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = Path(td) / "c", Path(td) / "a"
+            run = c / "m" / "L"
+            run.mkdir(parents=True)
+            (run / "P_d4d.yaml").write_text("x\n")
+            (a / "d4d_concatenated_archived" / "m" / "L").mkdir(parents=True)
+            r = archive_runs(["L"], reason="t", concat_dir=c, attic=a,
+                             dry_run=True)
+            self.assertTrue(r["collisions"])

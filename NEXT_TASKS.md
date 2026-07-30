@@ -7,51 +7,48 @@ Last verified: 2026-07-29.
 
 ---
 
-## 1. Merge PR #179 — blocks reproducibility from a clone
+## 1. Decide whether to archive unattestable runs
 
-`cborg-provider` carries the CBORG generation path, the scoring modules, the
-reasoning capture and the playbook's prompt-condition section. Until it lands,
-**a clone of `main` cannot reproduce any of the 2026-07 results.**
+**Not urgent.** `d4d runs archive --unattested` moves runs into `data/ATTIC/`,
+out of `discover()` and therefore out of every analysis. Nothing is deleted;
+`d4d runs restore` is the same move reversed.
 
-Missing from `main` today:
+Dry run today: **16 run directories across 8 labels** — the 2026-04-10 sonnet
+baseline and the 2026-07-23 GPT series. Their bundles were first committed on
+2026-07-28 (`fa90b4ec`), after those runs executed, and the working tree at the
+time is unrecorded — so the bytes they consumed are *unverifiable*, not merely
+unrecorded. That is the whole loss: the GPT-5.5 and GPT-5.6 comparisons.
 
-| path | status |
-|---|---|
-| `src/data_sheets_schema/evidence_score.py` | branch only |
-| `src/data_sheets_schema/reasoning.py` | branch only |
-| `src/data_sheets_schema/merge.py` | branch only |
-| `.claude/commands/d4d-full-core.md` → Prompt Conditions | branch only |
+**`record_mode` is the wrong thing to gate on**, and an earlier version of this
+item said otherwise. Attestation has four levels:
 
-Already on `main`: the source manifest, the four preprocessed bundles, the
-playbook, the provenance guard, `fetch.py`, `api_runner.py`, `schema_digest.py`,
-`runs.py`, and the crate `raw/` inputs (29 files; only the extracted `crate/`
-tree is gitignored).
+| level | meaning | count |
+|---|---|---|
+| `live` | the run wrote its own provenance | 49 |
+| `attested` | reconstructed, but inputs verified and schema/model/outputs pinned | 33 |
+| `partial` | a gap in something that determines the output | 23 |
+| `none` | no record | 5 |
+
+**82 of 110 runs can be placed and reproduced.** The entire 2026-07-27 tuned arm
+is `attested`: it pins the bundle by *verified* md5, the schema by md5, the model,
+and every output hash. Its only gap is the hardware, which cannot affect a
+generation. Gating on `live` would have dropped all 24 records for that.
+
+Prefer `--require-attested` on `compare`/`arm-delta` — it excludes the same runs
+per-analysis without moving anything. `--require-live` remains available and is
+usually the wrong choice.
 
 ---
 
-## 2. Make the live provenance record enforced, not just requested
+## 2. Enforce live provenance for *new* runs
 
 `d4d-full-core.md` lists it as a completion criterion — *"The live provenance
-record is present and its `record_mode` is `live`"* — but nothing checks it.
-`record_mode` appears nowhere in `src/` outside `provenance.py`, so a run that
-never writes one still completes and still gets analysed.
+record is present and its `record_mode` is `live`"* — but nothing checks it, so a
+run that never writes one still completes.
 
-The corpus shows the effect:
-
-```
-record_mode:  live 49,  reconstructed 59
-complete runs 98,  without any provenance record 0
-```
-
-Every run has *a* record, but most were backfilled afterwards. A reconstructed
-record cannot attest to conditions nobody observed, which is the whole point of
-requiring a live one.
-
-Concretely: add `live` to what `is_complete()` or a `d4d runs audit` command
-gates on, so a run lacking a live record is reported as incomplete rather than
-silently pooled with runs that have one. Note this will reclassify 59 existing
-runs — that is the correct outcome, but it changes every downstream count and
-should land deliberately rather than as a side effect.
+Worth doing for new runs, where it is free. Not worth applying backwards: the
+2026-07-27 arm shows a reconstructed record can be fully attestable, so the
+useful invariant is attestation, not authorship of the record.
 
 ---
 

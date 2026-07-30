@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+import shutil
 from pathlib import Path
 
 import yaml
@@ -222,24 +223,149 @@ def validation_status(method: str, label: str, project: str,
     return VALID if v["passed"] else INVALID
 
 
+def record_mode(method: str, label: str, project: str,
+                concat_dir: Path = CONCAT_DIR) -> str:
+    """`live`, `reconstructed`, or `none` — how a run's provenance was obtained.
+
+    A `live` record was written *by the run*, so it observed the model, prompt
+    and inputs. A `reconstructed` one was backfilled afterwards from whatever the
+    headers preserved, with the rest marked `unrecoverable`. Reconstructed does
+    not mean wrong; it means nobody observed it at the time.
+    """
+    import yaml as _yaml
+    from data_sheets_schema.provenance import record_path_for
+    p = record_path_for(project, method, label, concat_dir)
+    if not p.exists():
+        return "none"
+    data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    return str(data.get("record_mode") or "none")
+
+
+# What a record must pin for its run to be re-identifiable. Deliberately not
+# "everything a live record captures": hardware and software versions do not
+# determine a D4D generation, and 56 of 59 reconstructed records name `system`
+# as their only gap. Gating on completeness would reject them for missing a
+# field that changes nothing.
+ATTESTING_FIELDS = ("inputs.bundle_md5", "schema.full_md5", "model.model")
+
+# Recognised `hash_basis` values, matched exactly. A substring test cannot be
+# used here: `"verified" in "unverified"` is True, and so is `"verified" in
+# "not verified against the run"` — the two phrasings most likely to describe an
+# *unverified* hash would both promote the record. `UNVERIFIED` is already part
+# of this module's vocabulary, so that is a phrasing waiting to be written.
+VERIFIED_HASH_BASES = frozenset({
+    "verified identical to the bytes consumed",
+})
+
+LIVE, ATTESTED, PARTIAL, NO_RECORD = "live", "attested", "partial", "none"
+
+
+def attestation(method: str, label: str, project: str,
+                concat_dir: Path = CONCAT_DIR) -> str:
+    """How well a run's conditions can be established — four levels, not two.
+
+    `record_mode` alone is too blunt to gate on. A reconstructed record can pin
+    the bundle by verified md5, the schema by md5, the model, and every output
+    hash — the 2026-07-27 tuned arm does exactly that, and names hardware as its
+    sole gap. Excluding it as "not live" would drop 24 records for missing a
+    field that cannot affect a generation.
+
+    - ``live``     — written by the run, which observed its own conditions.
+    - ``attested`` — reconstructed, but every output-determining field is
+      present and the input bytes were *verified*, not assumed.
+    - ``partial``  — reconstructed with a gap in something that determines the
+      output, most often an unverifiable input bundle.
+    - ``none``     — no record at all.
+
+    `attested` is the level worth gating on. `live` is stronger evidence about
+    *how* the record came to exist, but for the question "can this run be placed
+    and reproduced?" the two are equivalent.
+    """
+    import yaml as _yaml
+    from data_sheets_schema.provenance import record_path_for
+    p = record_path_for(project, method, label, concat_dir)
+    if not p.exists():
+        return NO_RECORD
+    data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    if data.get("record_mode") == "live":
+        return LIVE
+
+    for dotted in ATTESTING_FIELDS:
+        node: Any = data
+        for part in dotted.split("."):
+            node = (node or {}).get(part) if isinstance(node, dict) else None
+        if not node:
+            return PARTIAL
+
+    # Outputs are checked for a *hash*, not for the presence of the block.
+    # `{"full": None, "core": None}` is a truthy dict that pins nothing, so
+    # testing the container let a record naming its artifacts without hashing
+    # any of them count as attested.
+    outputs = data.get("outputs") or {}
+    if not any(isinstance(a, dict) and a.get("md5")
+               for a in outputs.values() if a):
+        return PARTIAL
+
+    # A bundle md5 computed today from a file that may have changed says nothing
+    # about the bytes the run consumed. Only a recognised, explicitly verified
+    # basis counts; anything unrecognised is treated as unverified.
+    basis = ((data.get("inputs") or {}).get("hash_basis") or "").strip().lower()
+    return ATTESTED if basis in VERIFIED_HASH_BASES else PARTIAL
+
+
 def compare(method: str, project: str, labels: list[str],
             concat_dir: Path = CONCAT_DIR,
-            exclude_invalid: bool = True) -> dict:
+            exclude_invalid: bool = True,
+            require_live: bool = False,
+            require_attested: bool = False) -> dict:
     """Slot-level agreement across runs of one method for one project.
 
     Records known to fail validation are excluded by default: comparing slot
     sets between a valid record and a broken one measures the breakage. Records
     of unknown validity are included but counted, so the caller can see how much
     of the result rests on unchecked input.
+
+    Two gates, and ``require_attested`` is the one worth using.
+
+    ``require_live`` keeps only runs that wrote their own provenance. That sounds
+    like the strict choice and is mostly the wrong one: it drops the entire
+    2026-07-27 tuned arm, whose records pin the bundle by *verified* md5, the
+    schema by md5, the model, and every output hash, and whose sole gap is the
+    hardware — which cannot affect a generation. 24 records excluded over a field
+    that changes nothing.
+
+    ``require_attested`` keeps `live` and `attested` alike, dropping only runs
+    with a gap in something that determines the output. On this corpus that is
+    82 runs kept and 23 dropped, and the dropped ones are the 2026-04 and
+    2026-07-23 series whose bundles were only committed on 2026-07-28 — their
+    consumed bytes are genuinely unverifiable, not merely unrecorded.
+
+    Both are off by default, and `attestations` is returned either way, so a
+    permissive result can never look uniform. The strict view is one flag away;
+    the loose view never lies about what it rests on.
     """
     present: dict[str, set[str]] = {}
     incomplete: list[str] = []
     invalid: list[str] = []
     unverified: list[str] = []
+    modes: dict[str, str] = {}
+    levels: dict[str, str] = {}
+    not_live: list[str] = []
+    unattested: list[str] = []
     for label in labels:
         if not is_complete(method, label, project, concat_dir):
             incomplete.append(label)
             continue
+        modes[label] = record_mode(method, label, project, concat_dir)
+        levels[label] = attestation(method, label, project, concat_dir)
+        if levels[label] != LIVE:
+            not_live.append(label)
+            if require_live:
+                continue
+        if levels[label] in (PARTIAL, NO_RECORD):
+            unattested.append(f"{label} ({levels[label]})")
+            if require_attested:
+                continue
         status = validation_status(method, label, project, concat_dir)
         if status == INVALID:
             invalid.append(label)
@@ -282,6 +408,20 @@ def compare(method: str, project: str, labels: list[str],
         "procedures": prints,
         "excluded_incomplete": incomplete,
         "excluded_invalid": invalid,
+        # Always reported, whether or not require_live is set: an agreement
+        # figure over reconstructed records is a claim resting on conditions
+        # nobody observed, and the caller should be able to see that without
+        # having asked.
+        "provenance_modes": modes,
+        "attestations": levels,
+        "reconstructed": not_live,
+        "unattested": unattested,
+        "excluded_not_live": not_live if require_live else [],
+        "excluded_unattested": unattested if require_attested else [],
+        "all_live": not not_live,
+        # The figure that matters: every run can be placed and reproduced, even
+        # where its provenance was recovered afterwards rather than observed.
+        "all_attested": not unattested,
         # Not a warning to be ignored: an agreement figure computed over
         # unverified records is a claim about records nobody has checked.
         "unverified": unverified,
@@ -390,7 +530,8 @@ def check_replicate(method: str, config: str, new_label: str, project: str,
 
 def arm_delta(baseline_method: str, arm_method: str, project: str,
               config: str, replicates: list[str],
-              concat_dir: Path = CONCAT_DIR) -> dict:
+              concat_dir: Path = CONCAT_DIR,
+              require_live: bool = False) -> dict:
     """Paired per-replicate delta between two arms, completeness-gated.
 
     Use this rather than reading record paths directly. Ad-hoc analysis that
@@ -405,11 +546,21 @@ def arm_delta(baseline_method: str, arm_method: str, project: str,
             return False
         # A delta between a valid record and a broken one measures the breakage,
         # not the arm. Excluded here for the same reason incomplete runs are.
-        return validation_status(method, label, project, concat_dir) != INVALID
+        if validation_status(method, label, project, concat_dir) == INVALID:
+            return False
+        # See compare(): off by default, because on this corpus a hard gate
+        # removes the tuned arm and every non-Claude model. Reported either way.
+        return not require_live or record_mode(
+            method, label, project, concat_dir) == "live"
 
     usable = [r for r in replicates
               if _ok(baseline_method, r) and _ok(arm_method, r)]
     skipped = [r for r in replicates if r not in usable]
+    not_live = [
+        r for r in replicates
+        if "live" not in {
+            record_mode(baseline_method, f"{config}_{r}", project, concat_dir),
+            record_mode(arm_method, f"{config}_{r}", project, concat_dir)}]
     unverified = [
         r for r in usable
         if {UNVERIFIED, STALE} & {
@@ -443,6 +594,7 @@ def arm_delta(baseline_method: str, arm_method: str, project: str,
                    else "not resolvable")
 
     return {"project": project, "deltas": deltas, "noise": noise,
+            "reconstructed": not_live, "all_live": not not_live,
             "verdict": verdict, "skipped_incomplete": skipped,
             "unverified": unverified,
             "all_verified": not unverified}
@@ -451,3 +603,113 @@ def arm_delta(baseline_method: str, arm_method: str, project: str,
 def needs_replicate_label(runs: list[Run]) -> list[Run]:
     """Model-based runs whose label lacks an r{N} suffix."""
     return [r for r in runs if not r.deterministic and r.replicate is None]
+
+
+# Archive rather than delete. A run whose provenance was reconstructed is not
+# worthless — it is a real generation whose conditions were recovered after the
+# fact — so removing it from analysis must not destroy it. ATTIC is the existing
+# convention for superseded data (see data/ATTIC/README.md).
+ATTIC = Path("data/ATTIC")
+
+
+def archive_runs(labels: list[str], *, reason: str,
+                 concat_dir: Path = CONCAT_DIR,
+                 attic: Path = ATTIC,
+                 archive_name: str = "d4d_concatenated_archived",
+                 dry_run: bool = True) -> dict:
+    """Move whole run directories out of discovery, preserving their layout.
+
+    `discover()` walks `concat_dir`, so a move to ATTIC removes a run from every
+    analysis without any code needing to know about it — archival and exclusion
+    are the same operation.
+
+    The relative path under `concat_dir` is preserved exactly beneath the archive
+    directory, so restoring is the same move reversed rather than a
+    reconstruction. Both the `{method}` and `{method}_core` directories for a
+    label travel together: separating a full record from its core and
+    reconciliation report would leave a run that `is_complete()` reports as
+    unfinished forever.
+    """
+    moved: list[tuple[Path, Path]] = []
+    for method_dir in sorted(p for p in concat_dir.iterdir() if p.is_dir()):
+        for label_dir in sorted(p for p in method_dir.iterdir() if p.is_dir()):
+            if label_dir.name not in labels:
+                continue
+            dest = attic / archive_name / method_dir.name / label_dir.name
+            moved.append((label_dir, dest))
+
+    # Same hazard in the other direction: archiving a label twice would nest the
+    # second copy inside the first.
+    collisions = [str(d) for _, d in moved if d.exists()]
+    if collisions and not dry_run:
+        raise FileExistsError(
+            "refusing to archive over existing archive directories: "
+            + ", ".join(collisions))
+
+    if not dry_run:
+        for src, dest in moved:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(src), str(dest))
+        _write_archive_note(attic / archive_name, moved, reason)
+
+    return {"archive": str(attic / archive_name),
+            "count": len(moved),
+            "collisions": collisions,
+            "moved": [(str(a), str(b)) for a, b in moved],
+            "dry_run": dry_run}
+
+
+def restore_runs(labels: list[str], *,
+                 concat_dir: Path = CONCAT_DIR,
+                 attic: Path = ATTIC,
+                 archive_name: str = "d4d_concatenated_archived",
+                 dry_run: bool = True) -> dict:
+    """Move archived runs back into discovery — the exact inverse of archiving."""
+    root = attic / archive_name
+    moved: list[tuple[Path, Path]] = []
+    if root.exists():
+        for method_dir in sorted(p for p in root.iterdir() if p.is_dir()):
+            for label_dir in sorted(p for p in method_dir.iterdir() if p.is_dir()):
+                if labels and label_dir.name not in labels:
+                    continue
+                moved.append((label_dir,
+                              concat_dir / method_dir.name / label_dir.name))
+    # shutil.move puts the source *inside* an existing destination rather than
+    # failing, which would nest an archived run under a regenerated one of the
+    # same name (`m/L/L/`) and hide it from discover() while reporting success.
+    collisions = [str(d) for _, d in moved if d.exists()]
+    if collisions and not dry_run:
+        raise FileExistsError(
+            "refusing to restore over existing run directories: "
+            + ", ".join(collisions)
+            + ". Move or remove them first; restoring into them would nest one "
+              "run inside another and hide it from discovery.")
+
+    if not dry_run:
+        for src, dest in moved:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(src), str(dest))
+    return {"count": len(moved),
+            "moved": [(str(a), str(b)) for a, b in moved],
+            "collisions": collisions,
+            "dry_run": dry_run}
+
+
+def _write_archive_note(root: Path, moved: list[tuple[Path, Path]],
+                        reason: str) -> None:
+    """Say why these runs were archived, at the place they were archived to.
+
+    Without it an ATTIC directory is indistinguishable from abandoned output,
+    and the reason for archiving — which is a claim about the runs — is exactly
+    what a later reader needs and cannot reconstruct.
+    """
+    lines = [f"# Archived runs\n", f"\n{reason}\n",
+             "\nThese are real generations, moved out of `data/d4d_concatenated/`",
+             "\nso `discover()` no longer finds them. Nothing was deleted, and the",
+             "\nlayout is preserved, so restoring is the same move reversed:\n",
+             "\n```bash\nd4d runs restore --label <LABEL> --execute\n```\n",
+             f"\n## Contents ({len(moved)} run directories)\n\n"]
+    for _, dest in sorted(moved, key=lambda t: str(t[1])):
+        lines.append(f"- `{dest.parent.name}/{dest.name}`\n")
+    root.mkdir(parents=True, exist_ok=True)
+    (root / "README.md").write_text("".join(lines), encoding="utf-8")
