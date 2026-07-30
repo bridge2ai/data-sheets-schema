@@ -246,8 +246,16 @@ def record_mode(method: str, label: str, project: str,
 # determine a D4D generation, and 56 of 59 reconstructed records name `system`
 # as their only gap. Gating on completeness would reject them for missing a
 # field that changes nothing.
-ATTESTING_FIELDS = ("inputs.bundle_md5", "schema.full_md5", "model.model",
-                    "outputs")
+ATTESTING_FIELDS = ("inputs.bundle_md5", "schema.full_md5", "model.model")
+
+# Recognised `hash_basis` values, matched exactly. A substring test cannot be
+# used here: `"verified" in "unverified"` is True, and so is `"verified" in
+# "not verified against the run"` — the two phrasings most likely to describe an
+# *unverified* hash would both promote the record. `UNVERIFIED` is already part
+# of this module's vocabulary, so that is a phrasing waiting to be written.
+VERIFIED_HASH_BASES = frozenset({
+    "verified identical to the bytes consumed",
+})
 
 LIVE, ATTESTED, PARTIAL, NO_RECORD = "live", "attested", "partial", "none"
 
@@ -288,10 +296,21 @@ def attestation(method: str, label: str, project: str,
             node = (node or {}).get(part) if isinstance(node, dict) else None
         if not node:
             return PARTIAL
+
+    # Outputs are checked for a *hash*, not for the presence of the block.
+    # `{"full": None, "core": None}` is a truthy dict that pins nothing, so
+    # testing the container let a record naming its artifacts without hashing
+    # any of them count as attested.
+    outputs = data.get("outputs") or {}
+    if not any(isinstance(a, dict) and a.get("md5")
+               for a in outputs.values() if a):
+        return PARTIAL
+
     # A bundle md5 computed today from a file that may have changed says nothing
-    # about the bytes the run consumed. Only an explicitly verified basis counts.
-    basis = (data.get("inputs") or {}).get("hash_basis") or ""
-    return ATTESTED if "verified" in basis else PARTIAL
+    # about the bytes the run consumed. Only a recognised, explicitly verified
+    # basis counts; anything unrecognised is treated as unverified.
+    basis = ((data.get("inputs") or {}).get("hash_basis") or "").strip().lower()
+    return ATTESTED if basis in VERIFIED_HASH_BASES else PARTIAL
 
 
 def compare(method: str, project: str, labels: list[str],
@@ -619,6 +638,14 @@ def archive_runs(labels: list[str], *, reason: str,
             dest = attic / archive_name / method_dir.name / label_dir.name
             moved.append((label_dir, dest))
 
+    # Same hazard in the other direction: archiving a label twice would nest the
+    # second copy inside the first.
+    collisions = [str(d) for _, d in moved if d.exists()]
+    if collisions and not dry_run:
+        raise FileExistsError(
+            "refusing to archive over existing archive directories: "
+            + ", ".join(collisions))
+
     if not dry_run:
         for src, dest in moved:
             dest.parent.mkdir(parents=True, exist_ok=True)
@@ -627,6 +654,7 @@ def archive_runs(labels: list[str], *, reason: str,
 
     return {"archive": str(attic / archive_name),
             "count": len(moved),
+            "collisions": collisions,
             "moved": [(str(a), str(b)) for a, b in moved],
             "dry_run": dry_run}
 
@@ -646,12 +674,24 @@ def restore_runs(labels: list[str], *,
                     continue
                 moved.append((label_dir,
                               concat_dir / method_dir.name / label_dir.name))
+    # shutil.move puts the source *inside* an existing destination rather than
+    # failing, which would nest an archived run under a regenerated one of the
+    # same name (`m/L/L/`) and hide it from discover() while reporting success.
+    collisions = [str(d) for _, d in moved if d.exists()]
+    if collisions and not dry_run:
+        raise FileExistsError(
+            "refusing to restore over existing run directories: "
+            + ", ".join(collisions)
+            + ". Move or remove them first; restoring into them would nest one "
+              "run inside another and hide it from discovery.")
+
     if not dry_run:
         for src, dest in moved:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(src), str(dest))
     return {"count": len(moved),
             "moved": [(str(a), str(b)) for a, b in moved],
+            "collisions": collisions,
             "dry_run": dry_run}
 
 
