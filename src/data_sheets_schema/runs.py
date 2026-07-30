@@ -241,10 +241,64 @@ def record_mode(method: str, label: str, project: str,
     return str(data.get("record_mode") or "none")
 
 
+# What a record must pin for its run to be re-identifiable. Deliberately not
+# "everything a live record captures": hardware and software versions do not
+# determine a D4D generation, and 56 of 59 reconstructed records name `system`
+# as their only gap. Gating on completeness would reject them for missing a
+# field that changes nothing.
+ATTESTING_FIELDS = ("inputs.bundle_md5", "schema.full_md5", "model.model",
+                    "outputs")
+
+LIVE, ATTESTED, PARTIAL, NO_RECORD = "live", "attested", "partial", "none"
+
+
+def attestation(method: str, label: str, project: str,
+                concat_dir: Path = CONCAT_DIR) -> str:
+    """How well a run's conditions can be established — four levels, not two.
+
+    `record_mode` alone is too blunt to gate on. A reconstructed record can pin
+    the bundle by verified md5, the schema by md5, the model, and every output
+    hash — the 2026-07-27 tuned arm does exactly that, and names hardware as its
+    sole gap. Excluding it as "not live" would drop 24 records for missing a
+    field that cannot affect a generation.
+
+    - ``live``     — written by the run, which observed its own conditions.
+    - ``attested`` — reconstructed, but every output-determining field is
+      present and the input bytes were *verified*, not assumed.
+    - ``partial``  — reconstructed with a gap in something that determines the
+      output, most often an unverifiable input bundle.
+    - ``none``     — no record at all.
+
+    `attested` is the level worth gating on. `live` is stronger evidence about
+    *how* the record came to exist, but for the question "can this run be placed
+    and reproduced?" the two are equivalent.
+    """
+    import yaml as _yaml
+    from data_sheets_schema.provenance import record_path_for
+    p = record_path_for(project, method, label, concat_dir)
+    if not p.exists():
+        return NO_RECORD
+    data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    if data.get("record_mode") == "live":
+        return LIVE
+
+    for dotted in ATTESTING_FIELDS:
+        node: Any = data
+        for part in dotted.split("."):
+            node = (node or {}).get(part) if isinstance(node, dict) else None
+        if not node:
+            return PARTIAL
+    # A bundle md5 computed today from a file that may have changed says nothing
+    # about the bytes the run consumed. Only an explicitly verified basis counts.
+    basis = (data.get("inputs") or {}).get("hash_basis") or ""
+    return ATTESTED if "verified" in basis else PARTIAL
+
+
 def compare(method: str, project: str, labels: list[str],
             concat_dir: Path = CONCAT_DIR,
             exclude_invalid: bool = True,
-            require_live: bool = False) -> dict:
+            require_live: bool = False,
+            require_attested: bool = False) -> dict:
     """Slot-level agreement across runs of one method for one project.
 
     Records known to fail validation are excluded by default: comparing slot
@@ -252,15 +306,23 @@ def compare(method: str, project: str, labels: list[str],
     of unknown validity are included but counted, so the caller can see how much
     of the result rests on unchecked input.
 
-    ``require_live`` is **off by default, and the reporting is what makes that
-    safe.** Enabling it drops every run whose provenance was reconstructed rather
-    than observed — measured on this corpus that is the entire tuned arm (24
-    records) and every non-Claude model (13), leaving one model under three
-    prompt conditions on a single date. So a hard default would silently shrink
-    the study to the runs that happen to postdate provenance capture.
+    Two gates, and ``require_attested`` is the one worth using.
 
-    With it off, `provenance_modes` and `reconstructed` are always returned, so
-    a permissive result can never look uniform. The strict view is one flag away;
+    ``require_live`` keeps only runs that wrote their own provenance. That sounds
+    like the strict choice and is mostly the wrong one: it drops the entire
+    2026-07-27 tuned arm, whose records pin the bundle by *verified* md5, the
+    schema by md5, the model, and every output hash, and whose sole gap is the
+    hardware — which cannot affect a generation. 24 records excluded over a field
+    that changes nothing.
+
+    ``require_attested`` keeps `live` and `attested` alike, dropping only runs
+    with a gap in something that determines the output. On this corpus that is
+    82 runs kept and 23 dropped, and the dropped ones are the 2026-04 and
+    2026-07-23 series whose bundles were only committed on 2026-07-28 — their
+    consumed bytes are genuinely unverifiable, not merely unrecorded.
+
+    Both are off by default, and `attestations` is returned either way, so a
+    permissive result can never look uniform. The strict view is one flag away;
     the loose view never lies about what it rests on.
     """
     present: dict[str, set[str]] = {}
@@ -268,15 +330,22 @@ def compare(method: str, project: str, labels: list[str],
     invalid: list[str] = []
     unverified: list[str] = []
     modes: dict[str, str] = {}
+    levels: dict[str, str] = {}
     not_live: list[str] = []
+    unattested: list[str] = []
     for label in labels:
         if not is_complete(method, label, project, concat_dir):
             incomplete.append(label)
             continue
         modes[label] = record_mode(method, label, project, concat_dir)
-        if modes[label] != "live":
+        levels[label] = attestation(method, label, project, concat_dir)
+        if levels[label] != LIVE:
             not_live.append(label)
             if require_live:
+                continue
+        if levels[label] in (PARTIAL, NO_RECORD):
+            unattested.append(f"{label} ({levels[label]})")
+            if require_attested:
                 continue
         status = validation_status(method, label, project, concat_dir)
         if status == INVALID:
@@ -325,9 +394,15 @@ def compare(method: str, project: str, labels: list[str],
         # nobody observed, and the caller should be able to see that without
         # having asked.
         "provenance_modes": modes,
+        "attestations": levels,
         "reconstructed": not_live,
+        "unattested": unattested,
         "excluded_not_live": not_live if require_live else [],
+        "excluded_unattested": unattested if require_attested else [],
         "all_live": not not_live,
+        # The figure that matters: every run can be placed and reproduced, even
+        # where its provenance was recovered afterwards rather than observed.
+        "all_attested": not unattested,
         # Not a warning to be ignored: an agreement figure computed over
         # unverified records is a claim about records nobody has checked.
         "unverified": unverified,

@@ -7,50 +7,48 @@ Last verified: 2026-07-29.
 
 ---
 
-## 1. Decide whether to archive reconstructed-provenance runs
+## 1. Decide whether to archive unattestable runs
 
-**Not urgent, and deliberately not done automatically.** `d4d runs archive
---reconstructed` moves runs whose provenance was backfilled rather than observed
-into `data/ATTIC/`, taking them out of `discover()` and therefore out of every
-analysis. Nothing is deleted; `d4d runs restore` is the same move reversed.
+**Not urgent.** `d4d runs archive --unattested` moves runs into `data/ATTIC/`,
+out of `discover()` and therefore out of every analysis. Nothing is deleted;
+`d4d runs restore` is the same move reversed.
 
-Dry run today: **52 run directories across 17 labels.** What leaves the active
-corpus:
+Dry run today: **16 run directories across 8 labels** — the 2026-04-10 sonnet
+baseline and the 2026-07-23 GPT series. Their bundles were first committed on
+2026-07-28 (`fa90b4ec`), after those runs executed, and the working tree at the
+time is unrecorded — so the bytes they consumed are *unverifiable*, not merely
+unrecorded. That is the whole loss: the GPT-5.5 and GPT-5.6 comparisons.
 
-| series | records | what is lost |
+**`record_mode` is the wrong thing to gate on**, and an earlier version of this
+item said otherwise. Attestation has four levels:
+
+| level | meaning | count |
 |---|---|---|
-| `2026-07-27_claude-opus-5` | 24 | **the entire tuned arm** |
-| `2026-07-23_gpt-5.5-high-fast` ×3 | 12 | GPT-5.5 comparison |
-| `2026-07-23_gpt-5.6-sol-ultra-fast` | 4 | GPT-5.6 comparison |
-| `2026-04-10_sonnet-4.6` | 4 | sonnet baseline |
-| `crateonly-denoised`, `programme-deprimed` | 9 | partial arms |
+| `live` | the run wrote its own provenance | 49 |
+| `attested` | reconstructed, but inputs verified and schema/model/outputs pinned | 33 |
+| `partial` | a gap in something that determines the output | 23 |
+| `none` | no record | 5 |
 
-What remains is one model under three prompt conditions on a single date.
-Generic-vs-tuned becomes impossible, because tuned has zero live runs.
+**82 of 110 runs can be placed and reproduced.** The entire 2026-07-27 tuned arm
+is `attested`: it pins the bundle by *verified* md5, the schema by md5, the model,
+and every output hash. Its only gap is the hardware, which cannot affect a
+generation. Gating on `live` would have dropped all 24 records for that.
 
-**The lighter option is already in place and needs no decision.** `compare` and
-`arm_delta` take `--require-live`, off by default, and always report the
-live/reconstructed split whether or not it is set — so a permissive result can
-never look uniform, and the strict view is one flag away. Prefer that unless
-there is a reason to shrink the corpus itself.
-
-Deterministic mappings and the merged records are excluded from `--reconstructed`
-selection: the former are not stochastic generations, and the latter have *no*
-provenance for a known and tracked reason (item 3), which archiving would
-misrepresent as unattestable.
+Prefer `--require-attested` on `compare`/`arm-delta` — it excludes the same runs
+per-analysis without moving anything. `--require-live` remains available and is
+usually the wrong choice.
 
 ---
 
 ## 2. Enforce live provenance for *new* runs
 
 `d4d-full-core.md` lists it as a completion criterion — *"The live provenance
-record is present and its `record_mode` is `live`"* — but nothing checks it.
-`record_mode` is not consulted in `src/` outside `provenance.py` and the
-reporting added above, so a run that never writes one still completes.
+record is present and its `record_mode` is `live`"* — but nothing checks it, so a
+run that never writes one still completes.
 
-Corpus today: **49 live, 59 reconstructed.** Gating going forward is what stops
-that ratio moving in the wrong direction. Gating backward is item 1, and is a
-different and much more expensive decision.
+Worth doing for new runs, where it is free. Not worth applying backwards: the
+2026-07-27 arm shows a reconstructed record can be fully attestable, so the
+useful invariant is attestation, not authorship of the record.
 
 ---
 

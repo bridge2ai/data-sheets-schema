@@ -13,29 +13,35 @@ def runs():
 @runs.command()
 @click.option('--label', 'labels', multiple=True,
               help='Run label(s) to archive; repeatable.')
-@click.option('--reconstructed', is_flag=True,
-              help='Archive every run whose provenance was reconstructed.')
+@click.option('--unattested', is_flag=True,
+              help='Archive runs with a gap in something that determines the output.')
 @click.option('--reason', default=None, help='Recorded in the archive README.')
 @click.option('--execute', is_flag=True,
               help='Actually move. Without it, only report what would move.')
-def archive(labels, reconstructed, reason, execute):
+def archive(labels, unattested, reason, execute):
     """Move runs out of analysis into data/ATTIC, without deleting them.
 
     `discover()` walks data/d4d_concatenated, so a move to ATTIC removes a run
     from every analysis path at once. Nothing is deleted and the layout is
     preserved, so `d4d runs restore` is the same move reversed.
 
-    Archiving reconstructed runs is a real loss of comparative reach — on this
-    corpus it removes the whole tuned arm and every non-Claude model. Prefer
-    `--require-live` on compare/arm-delta, which excludes them per-analysis
-    without moving anything.
+    Selection is by attestation, not by `record_mode`. Archiving everything
+    merely "reconstructed" would remove the 2026-07-27 tuned arm, whose records
+    pin the bundle by verified md5, the schema, the model and every output hash,
+    and whose only gap is the hardware. `--unattested` targets the runs that
+    genuinely cannot be placed: the 2026-04 and 2026-07-23 series, whose bundles
+    were first committed on 2026-07-28, so the bytes they consumed are
+    unverifiable rather than merely unrecorded.
+
+    Prefer `--require-attested` on compare/arm-delta, which excludes the same
+    runs per-analysis without moving anything.
     """
     from data_sheets_schema.runs import (
-        archive_runs, discover, record_mode,
+        NO_RECORD, PARTIAL, archive_runs, attestation, discover,
     )
 
     targets = set(labels)
-    if reconstructed:
+    if unattested:
         for run in discover():
             # Deterministic mappings are not stochastic generations and carry no
             # generation provenance by design; the validate sweep already skips
@@ -43,19 +49,23 @@ def archive(labels, reconstructed, reason, execute):
             if run.is_core or run.deterministic:
                 continue
             for proj in run.projects:
-                # `reconstructed` only — never `none`. A run with no provenance
-                # record at all is a different problem, and archiving is not its
-                # answer: the merged records have none because provenance.py
-                # cannot yet express a derived record, which is tracked work
-                # rather than an unattestable run.
-                if record_mode(run.method, run.label, proj) == "reconstructed":
+                # PARTIAL only — never NO_RECORD. A run with no provenance at
+                # all is a different problem, and archiving is not its answer:
+                # the merged records have none because provenance.py cannot yet
+                # express a derived record, which is tracked work rather than an
+                # unattestable run.
+                if attestation(run.method, run.label, proj) == PARTIAL:
                     targets.add(run.label)
     if not targets:
-        click.echo("Nothing selected. Pass --label or --reconstructed."); return
+        click.echo("Nothing selected. Pass --label or --unattested."); return
 
     default_reason = (
-        "Provenance for these runs was reconstructed after the fact rather than "
-        "observed during the run, so their conditions cannot be attested.")
+        "These runs have a gap in something that determines their output — most "
+        "often an input bundle whose consumed bytes cannot be verified, because "
+        "the bundles were first committed after the runs executed. Runs whose "
+        "provenance was merely reconstructed, but which pin their inputs, "
+        "schema, model and outputs, are NOT archived: they can be placed and "
+        "reproduced, and only their hardware is unrecorded.")
     res = archive_runs(sorted(targets), reason=reason or default_reason,
                        dry_run=not execute)
     verb = "Moved" if execute else "Would move"
@@ -122,15 +132,19 @@ def list_runs(arm, full_only):
 @click.option('--label', 'labels', multiple=True,
               help='Run labels to compare; default all for that method.')
 @click.option('--require-live', is_flag=True,
-              help='Exclude runs whose provenance was reconstructed, not observed.')
-def compare(method, project, labels, require_live):
+              help='Exclude runs that did not write their own provenance. '
+                   'Usually too strict — prefer --require-attested.')
+@click.option('--require-attested', is_flag=True,
+              help='Exclude runs with a gap in something that determines the output.')
+def compare(method, project, labels, require_live, require_attested):
     """Compare slot coverage across replicates of one method."""
     from data_sheets_schema.runs import compare as do_compare, discover
 
     if not labels:
         labels = [r.label for r in discover() if r.method == method]
     result = do_compare(method, project, list(labels),
-                        require_live=require_live)
+                        require_live=require_live,
+                        require_attested=require_attested)
     if 'error' in result:
         click.echo(f"❌ {result['error']}", err=True)
         raise SystemExit(1)
@@ -147,14 +161,23 @@ def compare(method, project, labels, require_live):
     if result.get('excluded_not_live'):
         click.echo(f"⚠️  excluded, provenance reconstructed not observed: "
                    f"{', '.join(result['excluded_not_live'])}\n")
+    elif result.get('excluded_unattested'):
+        click.echo(f"⚠️  excluded, output-determining fields incomplete: "
+                   f"{', '.join(result['excluded_unattested'])}\n")
+    elif result.get('unattested'):
+        click.echo(f"⚠️  {len(result['unattested'])} run(s) cannot be fully "
+                   f"placed: {', '.join(result['unattested'])}")
+        click.echo("   Re-run with --require-attested to exclude them.\n")
     elif result.get('reconstructed'):
         # Reported even when not excluding: an agreement figure over
         # reconstructed records rests on conditions nobody observed, and the
         # reader should see that without having asked.
         click.echo(f"ℹ️  {len(result['reconstructed'])} of "
                    f"{len(result['provenance_modes'])} runs have reconstructed "
-                   f"provenance: {', '.join(result['reconstructed'])}")
-        click.echo("   Re-run with --require-live to exclude them.\n")
+                   f"provenance, but all are fully attested — inputs, schema, "
+                   f"model and outputs are pinned.")
+        click.echo("   Only the hardware is unrecorded, which cannot affect a "
+                   "generation.\n")
 
     if result.get('excluded_incomplete'):
         click.echo(f"⚠️  excluded as still running / incomplete: "

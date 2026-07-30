@@ -405,12 +405,66 @@ class TestProvenanceModeReportingAndArchive(unittest.TestCase):
         self.assertEqual(r["excluded_not_live"], [],
                          "nothing excluded unless require_live is set")
 
-    def test_require_live_excludes_them(self):
+    def test_require_live_is_too_strict_for_the_tuned_arm(self):
+        """Documents why `live` is the wrong gate.
+
+        The tuned arm pins its bundle by verified md5, its schema, its model and
+        every output hash. `require_live` drops all 24 records anyway, over a
+        hardware field that cannot affect a generation.
+        """
         from data_sheets_schema.runs import compare
         r = compare("claudecode_agent", "CM4AI",
                     [f"2026-07-27_claude-opus-5_rep{n}" for n in (1, 2, 3)],
                     require_live=True)
-        self.assertIn("error", r, "the whole tuned arm is reconstructed")
+        self.assertIn("error", r)
+
+    def test_require_attested_keeps_the_tuned_arm(self):
+        from data_sheets_schema.runs import compare
+        r = compare("claudecode_agent", "CM4AI",
+                    [f"2026-07-27_claude-opus-5_rep{n}" for n in (1, 2, 3)],
+                    require_attested=True)
+        if "error" in r:
+            self.skipTest("tuned arm not present")
+        self.assertEqual(len(r["labels"]), 3)
+        self.assertTrue(r["all_attested"])
+        self.assertFalse(r["all_live"], "attested without being live")
+
+    def test_attestation_levels(self):
+        from data_sheets_schema.runs import (
+            ATTESTED, LIVE, NO_RECORD, PARTIAL, attestation)
+        self.assertEqual(
+            attestation("claudecode_agent",
+                        "2026-07-28_claude-opus-5-generic_rep1", "CM4AI"), LIVE)
+        self.assertEqual(
+            attestation("claudecode_agent",
+                        "2026-07-27_claude-opus-5_rep1", "CM4AI"), ATTESTED)
+        self.assertEqual(
+            attestation("claudecode_agent", "no-such-label", "CM4AI"), NO_RECORD)
+
+    def test_unverified_input_hash_is_not_attested(self):
+        """A bundle md5 computed today says nothing about the bytes consumed."""
+        import tempfile, yaml as _yaml
+        from data_sheets_schema.runs import PARTIAL, attestation
+        with tempfile.TemporaryDirectory() as td:
+            concat = Path(td)
+            d = concat / "m_core" / "L"
+            d.mkdir(parents=True)
+            (d / "P_provenance.yaml").write_text(_yaml.safe_dump({
+                "record_mode": "reconstructed",
+                "inputs": {"bundle_md5": "abc"},      # no verified hash_basis
+                "schema": {"full_md5": "d"},
+                "model": {"model": "m"},
+                "outputs": {"full": {}}}))
+            self.assertEqual(attestation("m", "L", "P", concat), PARTIAL)
+
+    def test_archive_targets_partial_not_merely_reconstructed(self):
+        """Archiving on record_mode would remove 24 placeable tuned-arm records."""
+        from data_sheets_schema.runs import ATTESTED, attestation, discover
+        labels = {r.label for r in discover() if not r.is_core
+                  and not r.deterministic
+                  for p in r.projects
+                  if attestation(r.method, r.label, p) == ATTESTED}
+        self.assertIn("2026-07-27_claude-opus-5_rep1", labels)
 
     def test_archive_moves_full_and_core_together(self):
         """Splitting a run's full record from its core leaves it permanently
