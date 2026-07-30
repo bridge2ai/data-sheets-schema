@@ -102,19 +102,43 @@ they exist, generic-vs-tuned comparisons cover the baseline arm only.
 
 ---
 
-## 6. Feed fitness failures back into generation
+## 6. Run the generic-v2 arm — staged, not run
 
-Fitness scoring found systematic defects across all four projects that grounding
-rated ≥0.95. The `form` cluster looks like one prompt or schema-digest fix
-affecting many fields:
+**Staged:** `src/download/prompts/d4d_generic_arm_prompt_v2.md` is v1 plus three
+uniform decision rules, with `condition="generic_v2"` wired through `RunSpec`.
+The analysis plan is registered in `notes/generic_v2_analysis_plan.md`, written
+before any run.
 
-- `creators` — ~47 people collapsed into 2 objects
-- `intended_uses` — 4 distinct uses in 1 object
-- `other_tasks`, `existing_uses` — same shape
+The three rules address the fitness failures, each stated without naming a
+project — which is what keeps the arm generic:
 
-The `substance` cluster is different: values that assert documentation exists
-without supplying it (`cleaning_strategies`: "QC is pending"). AI-READI is
-substance-dominated, CM4AI form-dominated, so a single fix will not cover both.
+1. multivalued slots get one object per distinct entity (form, 50 failures)
+2. a slot carries the information asked for, not a pointer or a "pending" note
+   (substance, 40)
+3. the field asked is the field populated, not its neighbour (target, 41)
+
+**Not run.** 12 generations (4 projects x 3 replicates) under
+`2026-07-30_claude-opus-5-generic-v2_rep{1,2,3}`, then fitness scoring and
+comparison against the v1 baseline per the plan.
+
+Guards in place:
+
+- v1 is untouched and must stay so — it produced the 2026-07-28 baseline this is
+  measured against.
+- Tests assert v2 differs from v1 *only* within the marked block, that the block
+  names no project, dataset identifier or quantity, and that every project
+  receives byte-identical text after mechanical substitution.
+- The prediction is deliberately absent from the prompt. Written there it would
+  instruct the model to produce the result the run is meant to test, which the
+  priming taxonomy excludes from both arms.
+- The fitness judgement cache is keyed on `(axis, model, rubric, corpus, schema)`,
+  so editing `FITNESS_SYSTEM` between the two arms invalidates the comparison
+  automatically instead of silently.
+
+**The rules are NOT in the playbook's uniform decision rules.** Adding them there
+would apply them to any run following the playbook, including runs labelled
+generic v1, and would silently redefine the baseline. Promote them only if v2
+validates.
 
 ---
 

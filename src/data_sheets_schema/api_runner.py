@@ -47,6 +47,14 @@ from data_sheets_schema.provenance import (
 
 PROMPTS = Path("src/download/prompts")
 GENERIC_PROMPT = PROMPTS / "d4d_generic_arm_prompt.md"
+# v2 is v1 plus three uniform decision rules correcting schema-usage failures
+# that fitness scoring found in every project. A separate file rather than an
+# edit: v1 produced the 2026-07-28 series and is the baseline v2 is measured
+# against, so editing it in place would silently redefine that baseline.
+GENERIC_PROMPT_V2 = PROMPTS / "d4d_generic_arm_prompt_v2.md"
+CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
+                     "generic_v2": GENERIC_PROMPT_V2,
+                     "tuned": GENERIC_PROMPT}
 TUNED_PROMPT = PROMPTS / "d4d_tuned_arm_prompt.md"
 COMPONENTS = PROMPTS / "components"
 CONCAT_DIR = Path("data/d4d_concatenated")
@@ -129,8 +137,18 @@ class RunSpec:
         return self.metadata_dir / f"{self.project}_provenance.yaml"
 
     @property
+    def base_prompt(self) -> Path:
+        try:
+            return CONDITION_PROMPTS[self.condition]
+        except KeyError:
+            raise ValueError(
+                f"unknown prompt condition {self.condition!r}; expected one of "
+                f"{sorted(CONDITION_PROMPTS)}. A run under an unrecognised "
+                "condition cannot be placed in the study.") from None
+
+    @property
     def prompt_files(self) -> list[Path]:
-        files = [GENERIC_PROMPT]
+        files = [self.base_prompt]
         if self.condition == "tuned":
             files += [TUNED_PROMPT, COMPONENTS / f"{self.project}.md"]
         return files
@@ -149,7 +167,7 @@ def resolve_prompt(spec: RunSpec) -> str:
     Built here rather than handed to the model as a file reference, so the text
     in the request is the text that was hashed.
     """
-    body = prompt_body()
+    body = prompt_body(spec.base_prompt)
     ident = provider_identity()
     settings = _model_settings()
     subs = {
