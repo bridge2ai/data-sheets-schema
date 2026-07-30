@@ -10,6 +10,7 @@ import unittest
 from pathlib import Path
 
 from data_sheets_schema.evidence_score import (
+    _parse_judgement,
     Partition,
     RecordScore,
     SlotJudgement,
@@ -148,6 +149,41 @@ class TestCombine(unittest.TestCase):
         ranked = combine(scores, presence={})
         self.assertEqual([r.label for r in ranked], ["hi", "lo"])
 
+    def test_ranks_on_summed_support_not_the_mean(self):
+        """The mean cannot separate records that share most of their slots.
+
+        Measured on CM4AI: rep3 carried 12 of 16 divergent slots against rep1's
+        3, yet their evidence means differed by 0.0022 — below the 0.016
+        propagation bias — because 57 shared stable slots dominated the average.
+        """
+        from data_sheets_schema.evidence_score import SlotScore
+        # Both average 1.0; one carries three times the grounded content.
+        scores = ([SlotScore("s%d" % i, "wide", 1.0) for i in range(6)] +
+                  [SlotScore("s%d" % i, "narrow", 1.0) for i in range(2)])
+        ranked = combine(scores, presence={})
+        self.assertEqual(ranked[0].label, "wide")
+        self.assertEqual(ranked[0].evidence, ranked[1].evidence,
+                         "means are equal — only the sum separates them")
+        self.assertEqual(ranked[0].supported_slots, 6.0)
+        self.assertEqual(ranked[1].supported_slots, 2.0)
+
+    def test_unsupported_slots_earn_no_credit(self):
+        """The one property presence lacks: padding must not pay.
+
+        A record with more slots loses to a sparser one when the extra content
+        is not grounded. Untested against real data — this corpus contains no
+        fabrication — so it is pinned here instead.
+        """
+        from data_sheets_schema.evidence_score import SlotScore
+        padded = ([SlotScore("a", "padded", 1.0)] +
+                  [SlotScore("f%d" % i, "padded", 0.0) for i in range(5)])
+        honest = [SlotScore("a", "honest", 1.0), SlotScore("b", "honest", 1.0)]
+        ranked = combine(padded + honest, presence={})
+        self.assertEqual(ranked[0].label, "honest")
+        self.assertEqual(ranked[0].slots_scored, 2)
+        self.assertEqual(ranked[1].slots_scored, 6,
+                         "the padded record has more slots and still loses")
+
     def test_propagated_fraction_is_reported(self):
         from data_sheets_schema.evidence_score import SlotScore
         scores = [SlotScore("x", "a", 1.0, propagated=False),
@@ -163,17 +199,55 @@ class TestPropagationErrorMeasurement(unittest.TestCase):
         recs = {"a": {"x": 1, "y": 1}, "b": {"x": 2, "y": 2}}
         r = measure_propagation_error("P", recs, "bundle", fake_scorer(), sample=5)
         self.assertEqual(r["disagreements"], 0)
-        self.assertIn("safe", r["verdict"])
+        self.assertEqual(r["record_level_spread"], 0.0)
+        self.assertIn("affordable", r["verdict"])
 
-    def test_divergent_judgements_are_caught(self):
-        """If a stable slot scores differently per replicate, say so."""
+    def test_systematic_bias_is_caught(self):
+        """One replicate consistently favoured is the case that breaks ranking."""
         def uneven(*, project, slot, value, bundle):
             return SlotJudgement(supported=1.0 if value == 1 else 0.0)
 
         recs = {"a": {"x": 1, "y": 1}, "b": {"x": 2, "y": 2}}
         r = measure_propagation_error("P", recs, "bundle", uneven, sample=5)
-        self.assertGreater(r["disagreement_rate"], 0.1)
-        self.assertIn("flattens", r["verdict"])
+        self.assertEqual(r["record_level_spread"], 1.0)
+        self.assertIn("biases record scores", r["verdict"])
+
+    def test_scattered_noise_does_not_condemn_propagation(self):
+        """Per-slot disagreement that cancels at record level is affordable.
+
+        The distinction the first version of this measure missed: it counted
+        any nonzero spread as a disagreement, which is ~always true of a
+        continuous scorer, and condemned propagation on incidence alone.
+        """
+        # 'a' wins slot x by 0.4, 'b' wins slot y by 0.4 — every slot disagrees,
+        # yet neither record is favoured overall.
+        scores = {("x", "a"): 0.9, ("x", "b"): 0.5,
+                  ("y", "a"): 0.5, ("y", "b"): 0.9}
+
+        def scattered(*, project, slot, value, bundle):
+            return SlotJudgement(supported=scores[(slot, value)])
+
+        recs = {"a": {"x": "a", "y": "a"}, "b": {"x": "b", "y": "b"}}
+        r = measure_propagation_error("P", recs, "bundle", scattered, sample=5)
+        self.assertEqual(r["disagreement_rate"], 1.0, "every slot differs")
+        self.assertEqual(r["record_level_spread"], 0.0, "yet nothing is biased")
+        self.assertIn("affordable", r["verdict"])
+
+    def test_material_disagreement_ignores_small_wobbles(self):
+        """A 0.05 difference is scorer noise, not a change of judgement."""
+        def wobble(*, project, slot, value, bundle):
+            return SlotJudgement(supported=0.9 if value == "a" else 0.85)
+
+        recs = {"a": {"x": "a", "y": "a"}, "b": {"x": "b", "y": "b"}}
+        r = measure_propagation_error("P", recs, "bundle", wobble, sample=5)
+        self.assertEqual(r["disagreement_rate"], 1.0)
+        self.assertEqual(r["material_disagreements"], 0)
+
+    def test_detail_is_returned_for_audit(self):
+        recs = {"a": {"x": 1}, "b": {"x": 2}}
+        r = measure_propagation_error("P", recs, "bundle", fake_scorer(), sample=5)
+        self.assertEqual(len(r["detail"]), 1)
+        self.assertEqual(set(r["detail"][0]["scores"]), {"a", "b"})
 
     def test_no_stable_slots_is_reported_not_crashed(self):
         recs = {"a": {"x": 1}, "b": {"y": 1}}
@@ -212,6 +286,51 @@ class TestAgainstTheRealCorpus(unittest.TestCase):
         rec = load_record(f)
         self.assertNotIn("DatasetCollection", rec)
         self.assertGreater(len(rec), 10)
+
+
+class TestJudgementParsing(unittest.TestCase):
+    """Parsing a reply that the model did not finish writing.
+
+    `google/claude-opus-5-high` spends output budget on a thinking block before
+    emitting anything, so a ceiling sized for the answer gets consumed by the
+    reasoning and the JSON is cut mid-string. `supported` is emitted first, so
+    the score is fully present in the fragment even when the reason is not, and
+    discarding a complete number because its trailing prose is missing would
+    throw away a judgement that was actually made.
+    """
+
+    def test_complete_reply(self):
+        j = _parse_judgement('{"supported": 0.5, "reason": "partly"}')
+        self.assertEqual(j.supported, 0.5)
+        self.assertEqual(j.reason, "partly")
+
+    def test_reply_truncated_inside_reason_keeps_the_score(self):
+        j = _parse_judgement('{"supported": 0.95, "reason": "The Dataverse pag')
+        self.assertEqual(j.supported, 0.95)
+        self.assertIn("truncated", j.reason)
+
+    def test_truncated_integer_score(self):
+        self.assertEqual(
+            _parse_judgement('{"supported": 1, "reason": "yes beca').supported,
+            1.0)
+
+    def test_prose_around_the_json_is_tolerated(self):
+        j = _parse_judgement('Here you go:\n{"supported": 0.0, "reason": "no"}\n')
+        self.assertEqual(j.supported, 0.0)
+
+    def test_empty_reply_raises_rather_than_scoring_zero(self):
+        """The failure mode this guards: an all-thinking response.
+
+        Defaulting an unreadable reply to 0.0 would let the scorer's own
+        exhaustion look like an unsupported claim, dragging the record's
+        evidence average down for a reason that has nothing to do with it.
+        """
+        with self.assertRaises(ValueError):
+            _parse_judgement("")
+
+    def test_json_without_supported_raises(self):
+        with self.assertRaises(ValueError):
+            _parse_judgement('{"reason": "forgot the score"}')
 
 
 if __name__ == "__main__":
