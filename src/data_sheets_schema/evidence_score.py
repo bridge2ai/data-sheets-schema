@@ -56,6 +56,64 @@ import yaml
 
 from data_sheets_schema import reasoning
 
+@dataclass(frozen=True)
+class JudgementContext:
+    """Everything that can change a judgement's answer, in one declared place.
+
+    The cache key is derived from this, not hand-assembled at each call site.
+    That distinction is the whole point. Keyed by hand, the cache omitted the
+    *bundle* — so judging `is_tabular: true` for AI-READI and then VOICE made one
+    API call and gave VOICE the wrong verdict (#180). Patching that in place left
+    two more inputs unkeyed, both of which were already live:
+
+    - **the rubric.** `SCORER_SYSTEM` was edited mid-session; every judgement
+      cached before the edit kept answering the old rubric.
+    - **the schema.** Fitness is judged against `slot_spec()` output, so changing
+      a slot's description or range invalidates every fitness judgement about it.
+      In a schema project that is not hypothetical.
+
+    Adding a field here changes every fingerprint automatically, so the next
+    input cannot be forgotten the way these three were. Fields that do not apply
+    to an axis stay empty rather than being omitted, so the two axes remain
+    comparable and a grounding entry can never be mistaken for a fitness one.
+    """
+
+    axis: str                 # grounding | fitness
+    model: str
+    rubric: str               # digest of the system prompt actually sent
+    corpus: str = ""          # bundle digest — grounding only
+    schema: str = ""          # schema digest — fitness only
+
+    def fingerprint(self) -> str:
+        payload = json.dumps(
+            {"axis": self.axis, "model": self.model, "rubric": self.rubric,
+             "corpus": self.corpus, "schema": self.schema}, sort_keys=True)
+        return hashlib.md5(payload.encode("utf-8")).hexdigest()[:16]
+
+    def as_entry(self) -> dict[str, str]:
+        """The context fields as stored on every cache entry.
+
+        Written in full rather than as the fingerprint alone so an entry is
+        self-describing: a cache can be audited, and a mismatch can say *which*
+        dimension moved instead of only that something did.
+        """
+        return {"axis": self.axis, "model": self.model, "rubric": self.rubric,
+                "corpus": self.corpus, "schema": self.schema}
+
+    @staticmethod
+    def mismatch(entry: dict[str, Any], current: "JudgementContext") -> str | None:
+        """Which dimension makes a stored entry unusable, if any."""
+        for fieldname in ("axis", "model", "rubric", "corpus", "schema"):
+            if entry.get(fieldname, "") != getattr(current, fieldname):
+                return fieldname
+        return None
+
+
+def digest_of(text: str) -> str:
+    """Short digest of any text that participates in a judgement's identity."""
+    return hashlib.md5((text or "").encode("utf-8")).hexdigest()[:12]
+
+
 def bundle_fingerprint(bundle: str) -> str:
     """Short digest identifying which corpus a grounding judgement was made against.
 
@@ -423,9 +481,9 @@ class LLMSlotScorer:
         # measurement should cost nothing, and without this every re-analysis
         # pays that again.
         self.cache_path = Path(cache_path) if cache_path else None
-        self._cache_loaded = False
+        self._loaded: set[str] = set()
         self.cache_loaded = 0
-        self.cache_skipped_other_model = 0
+        self.cache_skipped: dict[str, int] = {}
         self._memo: dict[tuple[str, str, str], SlotJudgement] = {}
         self.calls = 0
         self.memo_hits = 0
@@ -441,40 +499,35 @@ class LLMSlotScorer:
             self._client = api_runner._client()
         if self._model is None:
             self._model = api_runner._model_settings()["name"]
-        self._load_cache(self._model)
         return self._client, self._model
 
-    def _load_cache(self, model: str) -> None:
-        """Warm the memo from disk, keeping only this model's judgements.
+    def _load_cache(self, ctx: "JudgementContext") -> None:
+        """Warm the memo from disk, keeping only entries made in this context.
 
-        Loaded here rather than in __init__ because the model is resolved
-        lazily. Filtering on it matters: a judgement is a function of the model
-        as much as of the claim, and silently reusing another model's verdicts
-        would make a comparison between models return itself.
+        Deferred past __init__ because the model resolves lazily. Every entry
+        carries the context it was produced under, so a mismatch is skipped and
+        *named* — a cache that silently returns judgements from another model,
+        rubric or corpus would make a comparison return itself.
         """
-        if self._cache_loaded or not self.cache_path:
+        fp = ctx.fingerprint()
+        if fp in self._loaded or not self.cache_path:
             return
-        self._cache_loaded = True
+        self._loaded.add(fp)
         if not self.cache_path.exists():
             return
-        skipped = 0
+        skipped: dict[str, int] = {}
         for line in self.cache_path.read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
             e = json.loads(line)
-            if e.get("model") != model:
-                skipped += 1
+            why = JudgementContext.mismatch(e, ctx)
+            if why is not None:
+                skipped[why] = skipped.get(why, 0) + 1
                 continue
-            # Entries written before bundle fingerprinting carry no `bundle`
-            # key. They cannot be placed against a corpus, so they are dropped
-            # rather than assumed to match the current one.
-            if not e.get("bundle"):
-                skipped += 1
-                continue
-            self._memo[(e["slot"], e["value"], e["bundle"])] = SlotJudgement(
+            self._memo[(fp, e["slot"], e["value"])] = SlotJudgement(
                 supported=e["supported"], reason=e.get("reason", ""))
         self.cache_loaded = len(self._memo)
-        self.cache_skipped_other_model = skipped
+        self.cache_skipped = skipped
 
     def __call__(self, *, project: str, slot: str, value: Any,
                  bundle: str) -> SlotJudgement:
@@ -482,15 +535,13 @@ class LLMSlotScorer:
         # so it cannot be consulted until the model is known.
         client, model = self._resolve()
 
-        # The bundle belongs in the key. Grounding asks "is this value supported
-        # by *these documents*", so the same value against a different corpus is
-        # a different question. Keyed on (slot, value) alone, a scorer reused
-        # across projects returned AI-READI's verdict for VOICE on every slot
-        # whose value collides — `is_tabular: true`, `status`, `license`. The
-        # per-project cache files callers happened to use were the only thing
-        # preventing it, and nothing enforced that.
-        key = (slot, json.dumps(value, sort_keys=True, default=str),
-               bundle_fingerprint(bundle))
+        ctx = JudgementContext(axis="grounding", model=model,
+                               rubric=digest_of(SCORER_SYSTEM),
+                               corpus=digest_of(bundle))
+        self._load_cache(ctx)
+
+        key = (ctx.fingerprint(), slot,
+               json.dumps(value, sort_keys=True, default=str))
         if key in self._memo:
             self.memo_hits += 1
             return self._memo[key]
@@ -553,8 +604,7 @@ class LLMSlotScorer:
             self.cache_path.parent.mkdir(parents=True, exist_ok=True)
             with self.cache_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({
-                    "model": model, "slot": slot, "value": key[1],
-                    "bundle": key[2],
+                    **ctx.as_entry(), "slot": slot, "value": key[2],
                     "supported": judgement.supported,
                     "reason": judgement.reason}, ensure_ascii=False) + "\n")
         return judgement
@@ -712,9 +762,10 @@ class LLMSlotFitnessScorer:
         self.max_tokens = max_tokens
         self.log_path = Path(log_path) if log_path else None
         self.cache_path = Path(cache_path) if cache_path else None
-        self._cache_loaded = False
+        self._loaded: set[str] = set()
         self.cache_loaded = 0
-        self._memo: dict[tuple[str, str], FitnessJudgement] = {}
+        self._memo: dict[tuple[str, str, str], FitnessJudgement] = {}
+        self.cache_skipped: dict[str, int] = {}
         self._specs: dict[str, str] = {}
         self.calls = 0
         self.memo_hits = 0
@@ -728,25 +779,44 @@ class LLMSlotFitnessScorer:
             self._client = api_runner._client()
         if self._model is None:
             self._model = api_runner._model_settings()["name"]
-        self._load_cache(self._model)
         return self._client, self._model
 
-    def _load_cache(self, model: str) -> None:
-        if self._cache_loaded or not self.cache_path:
+    def _context(self, model: str) -> "JudgementContext":
+        from data_sheets_schema import schema_digest
+        return JudgementContext(
+            axis="fitness", model=model, rubric=digest_of(FITNESS_SYSTEM),
+            schema=schema_digest.fingerprint(
+                schema_digest.digest_text(self.class_name, self.schema_path)))
+
+    def _load_cache(self, ctx: "JudgementContext") -> None:
+        """Keep only entries produced under this exact context.
+
+        Fitness has no corpus, but it does have a *schema*: judgements are made
+        against `slot_spec()` output, so editing a slot's description or range
+        invalidates every judgement about it. That input was unkeyed until the
+        context was introduced, which in a schema project is a live hazard
+        rather than a theoretical one.
+        """
+        fp = ctx.fingerprint()
+        if fp in self._loaded or not self.cache_path:
             return
-        self._cache_loaded = True
+        self._loaded.add(fp)
         if not self.cache_path.exists():
             return
+        skipped: dict[str, int] = {}
         for line in self.cache_path.read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
             e = json.loads(line)
-            if e.get("model") != model:
+            why = JudgementContext.mismatch(e, ctx)
+            if why is not None:
+                skipped[why] = skipped.get(why, 0) + 1
                 continue
-            self._memo[(e["slot"], e["value"])] = FitnessJudgement(
+            self._memo[(fp, e["slot"], e["value"])] = FitnessJudgement(
                 fitness=e["fitness"], failure=e.get("failure", "none"),
                 reason=e.get("reason", ""))
         self.cache_loaded = len(self._memo)
+        self.cache_skipped = skipped
 
     def as_slot_scorer(self) -> "SlotScorer":
         """Adapt to the SlotScorer protocol, so `run_plan` and
@@ -778,8 +848,11 @@ class LLMSlotFitnessScorer:
         from.
         """
         client, model = self._resolve()
+        ctx = self._context(model)
+        self._load_cache(ctx)
 
-        key = (slot, json.dumps(value, sort_keys=True, default=str))
+        key = (ctx.fingerprint(), slot,
+               json.dumps(value, sort_keys=True, default=str))
         if key in self._memo:
             self.memo_hits += 1
             return self._memo[key]
@@ -827,7 +900,7 @@ class LLMSlotFitnessScorer:
             self.cache_path.parent.mkdir(parents=True, exist_ok=True)
             with self.cache_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({
-                    "model": model, "slot": slot, "value": key[1],
+                    **ctx.as_entry(), "slot": slot, "value": key[2],
                     "fitness": judgement.fitness, "failure": judgement.failure,
                     "reason": judgement.reason}, ensure_ascii=False) + "\n")
         return judgement

@@ -337,6 +337,58 @@ if __name__ == "__main__":
     unittest.main()
 
 
+class TestJudgementContext(unittest.TestCase):
+    """Every input that changes an answer must change the key (#180 and after).
+
+    The original key was assembled by hand at the call site and omitted the
+    bundle. Patching that in place left the rubric and the schema unkeyed, both
+    of which were already live hazards — the rubric had been edited mid-session,
+    and the schema changes routinely in a schema project. A declared context
+    makes the next omission impossible rather than merely unlikely.
+    """
+
+    def _ctx(self, **kw):
+        from data_sheets_schema.evidence_score import JudgementContext
+        base = dict(axis="fitness", model="m", rubric="r", corpus="", schema="s")
+        base.update(kw)
+        return JudgementContext(**base)
+
+    def test_every_field_participates_in_the_fingerprint(self):
+        base = self._ctx()
+        for fieldname, other in (("axis", "grounding"), ("model", "m2"),
+                                 ("rubric", "r2"), ("corpus", "c2"),
+                                 ("schema", "s2")):
+            with self.subTest(field=fieldname):
+                self.assertNotEqual(base.fingerprint(),
+                                    self._ctx(**{fieldname: other}).fingerprint(),
+                                    f"{fieldname} must change the key")
+
+    def test_identical_contexts_agree(self):
+        self.assertEqual(self._ctx().fingerprint(), self._ctx().fingerprint())
+
+    def test_mismatch_names_the_dimension_that_moved(self):
+        from data_sheets_schema.evidence_score import JudgementContext
+        cur = self._ctx(rubric="new")
+        self.assertEqual(
+            JudgementContext.mismatch(self._ctx(rubric="old").as_entry(), cur),
+            "rubric")
+
+    def test_matching_entry_reports_no_mismatch(self):
+        from data_sheets_schema.evidence_score import JudgementContext
+        self.assertIsNone(
+            JudgementContext.mismatch(self._ctx().as_entry(), self._ctx()))
+
+    def test_entries_without_context_are_rejected(self):
+        """Pre-context entries cannot be placed and must not be assumed current."""
+        from data_sheets_schema.evidence_score import JudgementContext
+        self.assertIsNotNone(
+            JudgementContext.mismatch({"model": "m", "slot": "s"}, self._ctx()))
+
+    def test_grounding_and_fitness_entries_never_collide(self):
+        self.assertNotEqual(self._ctx(axis="fitness", corpus="", schema="s"),
+                            self._ctx(axis="grounding", corpus="c", schema=""))
+
+
 class TestBundleKeyedCache(unittest.TestCase):
     """Grounding judgements must not cross corpora (#180).
 
@@ -382,18 +434,25 @@ class TestBundleKeyedCache(unittest.TestCase):
         self.assertEqual(len(calls), 1)
         self.assertEqual(sc.memo_hits, 2)
 
-    def test_cache_entries_without_a_bundle_are_dropped(self):
-        """Pre-fix entries cannot be placed against a corpus, so they are unusable."""
-        from data_sheets_schema.evidence_score import LLMSlotScorer
+    def test_a_rubric_edit_invalidates_cached_judgements(self):
+        """The hazard that was live and unnoticed: SCORER_SYSTEM was edited
+        mid-session and every judgement cached before it kept answering the old
+        rubric."""
+        from data_sheets_schema.evidence_score import (
+            JudgementContext, LLMSlotScorer)
         import json as _json
         from tempfile import TemporaryDirectory
+        old = JudgementContext(axis="grounding", model="m", rubric="OLD",
+                               corpus="c")
         with TemporaryDirectory() as td:
             p = Path(td) / "cache.jsonl"
-            p.write_text(_json.dumps({"model": "m", "slot": "s", "value": "1",
-                                      "supported": 1.0}) + "\n")
+            p.write_text(_json.dumps({**old.as_entry(), "slot": "s",
+                                      "value": "1", "supported": 1.0}) + "\n")
             sc = LLMSlotScorer(client=object(), model="m", cache_path=p)
-            sc._load_cache("m")
+            sc._load_cache(JudgementContext(axis="grounding", model="m",
+                                            rubric="NEW", corpus="c"))
             self.assertEqual(sc.cache_loaded, 0)
+            self.assertEqual(sc.cache_skipped, {"rubric": 1})
 
     def test_bundle_fingerprint_is_stable_and_short(self):
         from data_sheets_schema.evidence_score import bundle_fingerprint
