@@ -562,18 +562,33 @@ def _transient_error_type(exc: Exception) -> str | None:
     String matching alone would be fragile, but as a fallback it covers SDK
     versions that do not attach a parsed body to a mid-stream error.
     """
-    body = getattr(exc, "body", None)
-    if isinstance(body, dict):
-        kind = body.get("type")
-        if isinstance(kind, str) and kind in TRANSIENT_ERROR_TYPES:
-            return kind
-        inner = body.get("error")
-        if isinstance(inner, dict):
-            kind = inner.get("type")
-            if isinstance(kind, str) and kind in TRANSIENT_ERROR_TYPES:
-                return kind
+    declared = _declared_error_type(exc)
+    if declared is not None:
+        # The body stated a type. Trust it either way — falling through to text
+        # matching let a 400 whose message merely *quoted* "overloaded_error" be
+        # retried five times, which is the opposite of this function's purpose.
+        # D4D requests carry dataset prose, so an error echoing back offending
+        # content can contain almost any token.
+        return declared if declared in TRANSIENT_ERROR_TYPES else None
+
+    # No parsed body — the case the text fallback was written for.
     text = str(exc)
     return next((k for k in TRANSIENT_ERROR_TYPES if k in text), None)
+
+
+def _declared_error_type(exc: Exception) -> str | None:
+    """The `type` the error body states, transient or not, if it states one."""
+    body = getattr(exc, "body", None)
+    if not isinstance(body, dict):
+        return None
+    inner = body.get("error")
+    if isinstance(inner, dict) and isinstance(inner.get("type"), str):
+        return inner["type"]
+    kind = body.get("type")
+    # A bare {"type": "error"} envelope names no condition; keep looking.
+    if isinstance(kind, str) and kind != "error":
+        return kind
+    return None
 
 
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages,

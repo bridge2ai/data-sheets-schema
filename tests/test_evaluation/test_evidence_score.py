@@ -335,3 +335,69 @@ class TestJudgementParsing(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestBundleKeyedCache(unittest.TestCase):
+    """Grounding judgements must not cross corpora (#180).
+
+    Grounding asks "is this supported by *these documents*", so the same value
+    against a different bundle is a different question. Keyed on (slot, value)
+    alone, a scorer reused across projects returned one project's verdict for
+    another on every slot whose value collides.
+    """
+
+    def _scorer(self, calls):
+        from data_sheets_schema.evidence_score import LLMSlotScorer
+        import data_sheets_schema.api_runner as ar
+
+        class Resp:
+            def __init__(self, t):
+                self.content = [type("B", (), {"type": "text", "text": t})()]
+                self.stop_reason = "end_turn"
+                self.usage = None
+
+        def fake(client, *, model, max_tokens, temperature, system, messages):
+            calls.append(messages[0]["content"][0]["text"])
+            return Resp('{"supported": 1.0, "reason": "ok"}')
+
+        self._real = ar._call_with_retry
+        ar._call_with_retry = fake
+        self.addCleanup(lambda: setattr(ar, "_call_with_retry", self._real))
+        return LLMSlotScorer(client=object(), model="m")
+
+    def test_same_value_in_two_corpora_is_judged_twice(self):
+        calls = []
+        sc = self._scorer(calls)
+        sc(project="A", slot="is_tabular", value=True, bundle="CORPUS-A")
+        sc(project="B", slot="is_tabular", value=True, bundle="CORPUS-B")
+        self.assertEqual(len(calls), 2, "each corpus must be judged on its own")
+        self.assertIn("CORPUS-A", calls[0])
+        self.assertIn("CORPUS-B", calls[1])
+
+    def test_same_value_same_corpus_still_memoises(self):
+        calls = []
+        sc = self._scorer(calls)
+        for _ in range(3):
+            sc(project="A", slot="is_tabular", value=True, bundle="CORPUS-A")
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(sc.memo_hits, 2)
+
+    def test_cache_entries_without_a_bundle_are_dropped(self):
+        """Pre-fix entries cannot be placed against a corpus, so they are unusable."""
+        from data_sheets_schema.evidence_score import LLMSlotScorer
+        import json as _json
+        from tempfile import TemporaryDirectory
+        with TemporaryDirectory() as td:
+            p = Path(td) / "cache.jsonl"
+            p.write_text(_json.dumps({"model": "m", "slot": "s", "value": "1",
+                                      "supported": 1.0}) + "\n")
+            sc = LLMSlotScorer(client=object(), model="m", cache_path=p)
+            sc._load_cache("m")
+            self.assertEqual(sc.cache_loaded, 0)
+
+    def test_bundle_fingerprint_is_stable_and_short(self):
+        from data_sheets_schema.evidence_score import bundle_fingerprint
+        a, b = bundle_fingerprint("x" * 90_000), bundle_fingerprint("x" * 90_000)
+        self.assertEqual(a, b)
+        self.assertEqual(len(a), 12)
+        self.assertNotEqual(a, bundle_fingerprint("y" * 90_000))

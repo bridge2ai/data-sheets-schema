@@ -670,3 +670,69 @@ class TestMidStreamErrorClassification(unittest.TestCase):
                                sleep=lambda _: None)
         self.assertEqual(calls["n"], 3)
         self.assertIsNotNone(out)
+
+
+class TestErrorBodyIsAuthoritative(unittest.TestCase):
+    """A stated non-transient type must not be overridden by message text (#182).
+
+    D4D requests carry dataset prose, so an error echoing back offending content
+    can contain almost any token. Falling through to substring matching let a
+    deterministic 400 be retried MAX_ATTEMPTS times.
+    """
+
+    def _exc(self, inner_type, message="", status=400):
+        class E(Exception):
+            def __init__(s):
+                s.body = {"type": "error",
+                          "error": {"type": inner_type, "message": message}}
+                s.status_code = status
+
+            def __str__(s):
+                return str(s.body)
+        return E()
+
+    def test_text_cannot_promote_a_declared_client_error(self):
+        from data_sheets_schema.api_runner import _transient_error_type
+        exc = self._exc("invalid_request_error",
+                        "field 'notes' contains: retry on overloaded_error")
+        self.assertIsNone(_transient_error_type(exc))
+
+    def test_declared_transient_type_still_retries(self):
+        from data_sheets_schema.api_runner import _transient_error_type
+        self.assertEqual(_transient_error_type(self._exc("overloaded_error")),
+                         "overloaded_error")
+
+    def test_text_fallback_survives_for_bodyless_errors(self):
+        from data_sheets_schema.api_runner import _transient_error_type
+        self.assertEqual(
+            _transient_error_type(Exception("{'type': 'overloaded_error'}")),
+            "overloaded_error")
+
+    def test_bare_error_envelope_falls_through_to_text(self):
+        """{"type": "error"} names no condition, so it must not short-circuit."""
+        from data_sheets_schema.api_runner import _transient_error_type
+
+        class E(Exception):
+            body = {"type": "error"}
+
+            def __str__(self):
+                return "overloaded_error happened"
+        self.assertEqual(_transient_error_type(E()), "overloaded_error")
+
+    def test_a_declared_400_is_not_retried_end_to_end(self):
+        from data_sheets_schema.api_runner import _call_with_retry
+        exc = self._exc("invalid_request_error", "quotes overloaded_error")
+        calls = {"n": 0}
+
+        class C:
+            class messages:
+                @staticmethod
+                def stream(**kw):
+                    calls["n"] += 1
+                    raise exc
+
+        with self.assertRaises(Exception):
+            _call_with_retry(C(), model="claude-opus-5", max_tokens=10,
+                             temperature=None, system="s", messages=[],
+                             sleep=lambda _: None)
+        self.assertEqual(calls["n"], 1, "must fail fast, not retry five times")

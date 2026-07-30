@@ -82,7 +82,18 @@ def _truncate(text: str | None, limit: int = DESCRIPTION_CHARS) -> str | None:
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 
 
+_BUILD_CACHE: dict[tuple[str, str], "ClassDigest"] = {}
+
+
 def build(class_name: str, schema_path: Path | None = None) -> ClassDigest:
+    """Memoised on (class_name, schema_path); see _build_uncached."""
+    key = (class_name, str(schema_path or ""))
+    if key not in _BUILD_CACHE:
+        _BUILD_CACHE[key] = _build_uncached(class_name, schema_path)
+    return _BUILD_CACHE[key]
+
+
+def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDigest:
     """Slot inventory for one target class."""
     path = Path(schema_path) if schema_path else CLASS_SCHEMA.get(class_name)
     if path is None:

@@ -44,6 +44,7 @@ across 57 slots; error that consistently favours one replicate does not.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import random
 import re
@@ -54,6 +55,15 @@ from typing import Any, Callable, Iterable, Protocol
 import yaml
 
 from data_sheets_schema import reasoning
+
+def bundle_fingerprint(bundle: str) -> str:
+    """Short digest identifying which corpus a grounding judgement was made against.
+
+    Stored rather than the bundle itself: the bundles run to 80k+ tokens, and a
+    cache entry only needs to answer "was this the same corpus?".
+    """
+    return hashlib.md5((bundle or "").encode("utf-8")).hexdigest()[:12]
+
 
 # A scorer judges one slot's value against the bundle, returning 0.0-1.0.
 # Injected rather than imported so this module is testable without an API key.
@@ -416,7 +426,7 @@ class LLMSlotScorer:
         self._cache_loaded = False
         self.cache_loaded = 0
         self.cache_skipped_other_model = 0
-        self._memo: dict[tuple[str, str], SlotJudgement] = {}
+        self._memo: dict[tuple[str, str, str], SlotJudgement] = {}
         self.calls = 0
         self.memo_hits = 0
         self.truncated = 0
@@ -455,7 +465,13 @@ class LLMSlotScorer:
             if e.get("model") != model:
                 skipped += 1
                 continue
-            self._memo[(e["slot"], e["value"])] = SlotJudgement(
+            # Entries written before bundle fingerprinting carry no `bundle`
+            # key. They cannot be placed against a corpus, so they are dropped
+            # rather than assumed to match the current one.
+            if not e.get("bundle"):
+                skipped += 1
+                continue
+            self._memo[(e["slot"], e["value"], e["bundle"])] = SlotJudgement(
                 supported=e["supported"], reason=e.get("reason", ""))
         self.cache_loaded = len(self._memo)
         self.cache_skipped_other_model = skipped
@@ -466,7 +482,15 @@ class LLMSlotScorer:
         # so it cannot be consulted until the model is known.
         client, model = self._resolve()
 
-        key = (slot, json.dumps(value, sort_keys=True, default=str))
+        # The bundle belongs in the key. Grounding asks "is this value supported
+        # by *these documents*", so the same value against a different corpus is
+        # a different question. Keyed on (slot, value) alone, a scorer reused
+        # across projects returned AI-READI's verdict for VOICE on every slot
+        # whose value collides — `is_tabular: true`, `status`, `license`. The
+        # per-project cache files callers happened to use were the only thing
+        # preventing it, and nothing enforced that.
+        key = (slot, json.dumps(value, sort_keys=True, default=str),
+               bundle_fingerprint(bundle))
         if key in self._memo:
             self.memo_hits += 1
             return self._memo[key]
@@ -530,6 +554,7 @@ class LLMSlotScorer:
             with self.cache_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({
                     "model": model, "slot": slot, "value": key[1],
+                    "bundle": key[2],
                     "supported": judgement.supported,
                     "reason": judgement.reason}, ensure_ascii=False) + "\n")
         return judgement
