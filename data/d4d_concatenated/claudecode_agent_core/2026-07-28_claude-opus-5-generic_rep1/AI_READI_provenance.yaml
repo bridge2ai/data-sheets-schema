@@ -69,3 +69,13 @@ outputs:
   report: null
 unrecoverable: null
 notes: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/AI_READI_d4d.yaml
+      md5: ec33d1d811e96b40987d33b9ef840cc1
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/AI_READI_d4d_core.yaml
+      md5: b5a1b1cbc4bc8be958843781029d8397
+  recorded_by: d4d runs validate

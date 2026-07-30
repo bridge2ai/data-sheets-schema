@@ -73,3 +73,13 @@ outputs:
     slots: null
 unrecoverable: null
 notes: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/CHORUS_d4d.yaml
+      md5: f223d33aca9ff0443c8d928e2c48bd52
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep3/CHORUS_d4d_core.yaml
+      md5: 4e82caa308fec10dc88bac52e47db743
+  recorded_by: d4d runs validate

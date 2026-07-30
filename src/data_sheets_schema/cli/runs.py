@@ -104,7 +104,9 @@ def validate_cmd(method, project, label, recheck, dry_run):
     from data_sheets_schema.api_runner import (
         RunSpec, validate_outputs, validation_block,
     )
-    from data_sheets_schema.provenance import record_path_for
+    from data_sheets_schema.provenance import (
+        ProvenanceRecord, record_path_for,
+    )
     from data_sheets_schema.runs import (
         STALE, UNVERIFIED, discover, is_complete, validation_status,
     )
@@ -158,8 +160,12 @@ def validate_cmd(method, project, label, recheck, dry_run):
         # carrying a verdict about bytes that no longer exist.
         data["validation"] = validation_block(spec, problems,
                                               recorded_by="d4d runs validate")
-        rec.write_text(_yaml.safe_dump(data, sort_keys=False,
-                                       allow_unicode=True), encoding="utf-8")
+        # Rewrite through Record.write so the file keeps its header. Dumping
+        # `data` directly loses the two leading comment lines that point a
+        # reader at the module defining this format — safe_load drops comments
+        # and safe_dump cannot restore them. An earlier sweep stripped them
+        # from 97 records this way.
+        ProvenanceRecord(data=data).write(rec)
         passed += 1 if not problems else 0
         failed += 1 if problems else 0
 

@@ -69,3 +69,13 @@ outputs:
   report: null
 unrecoverable: null
 notes: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly_rep1/VOICE_d4d.yaml
+      md5: a5f7b2a3e489d4318bf3cfb119f6e167
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep1/VOICE_d4d_core.yaml
+      md5: efe800f716b31c05ba8257c0dbacd035
+  recorded_by: d4d runs validate
