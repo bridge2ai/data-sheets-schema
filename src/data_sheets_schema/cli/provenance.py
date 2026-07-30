@@ -64,3 +64,73 @@ def backfill(verified, dry_run):
                 written += 1
     click.echo(f"\n{'would write' if dry_run else 'wrote'} "
                f"{skipped or written} record(s)")
+
+
+@provenance.command('reasoning')
+@click.option('--method', default=None, help='limit to one method')
+@click.option('--project', default=None)
+@click.option('--label', default=None, help='limit to one run label')
+@click.option('--path', type=click.Path(), default=None,
+              help='read one reasoning log directly instead of discovering runs')
+def reasoning_cmd(method, project, label, path):
+    """Summarise captured model reasoning for generation runs.
+
+    Reports presence and availability separately on purpose. Through the CBORG
+    proxy every thinking block arrives signed but empty, so a summary that
+    conflated the two would read as "no reasoning happened" when what actually
+    happened is that the endpoint withheld it. The token estimate is the only
+    quantitative trace that survives in that case.
+    """
+    from pathlib import Path as _Path
+
+    from data_sheets_schema import reasoning as _reasoning
+    from data_sheets_schema.api_runner import CONCAT_DIR
+    from data_sheets_schema.runs import discover
+
+    logs: list[_Path] = []
+    if path:
+        logs = [_Path(path)]
+    else:
+        for run in discover():
+            if method and run.method != method:
+                continue
+            if label and run.label != label:
+                continue
+            for proj in run.projects:
+                if project and proj != project:
+                    continue
+                logs.append(CONCAT_DIR / f"{run.method}_core" / run.label /
+                            f"{proj}_reasoning.jsonl")
+
+    logs = [p for p in logs if p.exists()]
+    if not logs:
+        click.echo("No reasoning logs found. They are written by `d4d api run`; "
+                   "runs generated before reasoning capture have none, and that "
+                   "is unrecoverable rather than unverified.")
+        return
+
+    total: list[dict] = []
+    for p in sorted(logs):
+        entries = _reasoning.read(p)
+        total.extend(entries)
+        s = _reasoning.summarise(entries)
+        click.echo(f"\n{p}")
+        click.echo(f"  entries {s['entries']}, with a reasoning block "
+                   f"{s['with_reasoning_block']}, with reasoning text "
+                   f"{s['with_reasoning_text']}")
+        if s.get('reasoning_tokens_estimate_total'):
+            click.echo(f"  reasoning tokens (estimated) "
+                       f"{s['reasoning_tokens_estimate_total']:,} total, "
+                       f"{s['reasoning_tokens_estimate_max']:,} max")
+        if s['truncated']:
+            click.echo(f"  ⚠️  {s['truncated']} response(s) stopped at "
+                       f"max_tokens")
+
+    if len(logs) > 1:
+        s = _reasoning.summarise(total)
+        click.echo(f"\n{len(logs)} log(s), {s['entries']} entries, "
+                   f"{s['with_reasoning_text']} with reasoning text")
+    if total and not any(e.get('reasoning_available') for e in total):
+        click.echo("\nNo reasoning text was available in any entry. The blocks "
+                   "are signed but empty — the endpoint strips the plaintext. "
+                   "Runs made directly against the Anthropic API capture it.")

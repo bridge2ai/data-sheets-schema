@@ -39,7 +39,7 @@ from typing import Any
 
 import yaml
 
-from data_sheets_schema import schema_digest
+from data_sheets_schema import reasoning, schema_digest
 from data_sheets_schema.provenance import (
     DETERMINISTIC_CONFIG,
     load_generation_config,
@@ -451,6 +451,18 @@ def _progress_path(spec: RunSpec) -> Path:
     return spec.metadata_dir / f"{spec.project}{PROGRESS_SUFFIX}"
 
 
+def _reasoning_path(spec: RunSpec) -> Path:
+    """Beside the provenance record, under the same metadata_dir rule.
+
+    Reasoning is provenance about how the record came to say what it says, so
+    it belongs with the provenance rather than beside the record. Keeping the
+    two placement rules identical is deliberate — the earlier split, where a
+    run's metadata landed in two directories, is what made the monitor report
+    "no progress file" while five phases had completed.
+    """
+    return spec.metadata_dir / f"{spec.project}_reasoning.jsonl"
+
+
 def _load_progress(spec: RunSpec) -> dict[str, Any]:
     p = _progress_path(spec)
     if not p.exists():
@@ -689,6 +701,16 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
 
         text = "".join(b.text for b in resp.content
                        if getattr(b, "type", "") == "text")
+
+        # Written before the truncation check below, so a phase that dies of
+        # max_tokens still leaves the record showing where its budget went —
+        # that is exactly the case where the thinking share is the diagnosis.
+        cap = reasoning.capture(resp)
+        reasoning.append(_reasoning_path(spec),
+                         {"phase": ph, "label": spec.label,
+                          "project": spec.project, "model": settings["name"],
+                          **cap.to_dict()})
+
         usage.append({
             "phase": ph,
             "input_tokens": getattr(resp.usage, "input_tokens", None),
