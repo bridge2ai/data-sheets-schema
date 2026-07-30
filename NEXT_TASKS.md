@@ -55,32 +55,25 @@ should land deliberately rather than as a side effect.
 
 ---
 
-## 3. Finish the coverage-merge investigation (#176, step 1)
+## 3. Unblock merged records from shipping (#176, step 2)
 
-Referent coherence is measured and typed (`merge.py`). Two of four projects
-cannot take an unguarded merge:
+Step 1 is **done** — feasibility measured across all four projects, results in
+#176. Guarded merge validates everywhere and gains +0.023 to +0.042 mean fitness;
+the coverage gain is only +1 to +4 slots, so the case for merging rests on
+shared-field quality, not coverage.
 
-| project | verdict |
-|---|---|
-| AI_READI | coherent — `license` differs only in form |
-| CHORUS | coherent — `id` is a homepage URL vs a CURIE |
-| CM4AI | **incoherent** — `version`/`issued`/`doi` present only in rep2 |
-| VOICE | **incoherent** — same three, plus `id` referential |
+Two things block a merged record from being usable, neither of them measurement:
 
-Remaining: does `guarded=True` still gain coverage worth having? A guarded merge
-pins referent fields to one base, so its gain is strictly smaller than the
-unguarded union's. If the gain collapses to a slot or two, the merge is not worth
-the machinery and #176 should say so.
-
-Not yet done:
-- Provenance for derived records — `provenance.py` has no way to say "consumed
-  other generated records", so a merged record cannot honestly claim
-  `record_mode: live`. **Blocks any merge from shipping.**
-- The playbook forbids cross-label reads in four places. A merged record is
+- **`provenance.py` cannot express "consumed other generated records."** A merged
+  record therefore cannot honestly claim `record_mode: live`, and claiming it
+  would be the unobserved provenance assertion that module exists to prevent.
+  Needs a `derived_from` block naming every contributing label and md5.
+- **The playbook forbids cross-label reads in four places.** A merged record is
   cross-label by definition and needs an explicit carve-out, not a quiet
   exception.
 
----
+Artifacts are under `data/d4d_concatenated/claudecode_agent_merged/` with a
+README marking them non-shippable.
 
 ## 4. Fix rubric20's stub scoring
 
