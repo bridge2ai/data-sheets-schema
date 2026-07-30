@@ -100,6 +100,45 @@ Before launching an agent, the orchestrator may inspect output directory names
 only to choose a new version label. Do not put older D4D contents into an agent's
 context.
 
+### The one exception: derivation, which is not generation
+
+The rules above govern **generation** — producing a record from source documents.
+They exist to stop a fact with no evidence behind it migrating from an old record
+into a new one, acquiring apparent support on the way.
+
+A **derived** record is a different operation and the rules do not apply to it,
+because the failure they prevent cannot occur:
+
+- It consumes generated records *as its declared inputs*, not as a shortcut
+  around evidence. Reading them is the operation, not a leak into it.
+- It introduces no new facts. Every value in a derived record was already in a
+  contributing record; a merge selects and combines, it never asserts.
+- Its provenance says so. `record_mode: derived` names every contributing record
+  by md5 and states the rule that combined them, so what it consumed is
+  checkable rather than hidden — which is exactly what the boundary above is
+  protecting.
+
+Conditions, all of which must hold:
+
+1. **A generation phase may never derive.** Phases 1–4 remain bound by the rules
+   above without exception. Derivation runs after a set of complete runs exists,
+   as a separate operation with its own method directory.
+2. **Only complete, attested runs may contribute.** A partially-attested run
+   cannot be placed, so combining it would produce a record whose inputs cannot
+   be established. See `attestation()` in `runs.py`.
+3. **The output is written under a distinct method**, never into a contributing
+   run's directory, so a derived record can never be mistaken for a generated
+   one or re-consumed as if it were.
+4. **A derived record may not contribute to another derived record.** Chained
+   merges make the source md5s an incomplete account of what the content came
+   from, and the provenance stops being checkable in one step.
+5. **A derived record is not a replicate.** It must not enter agreement or noise
+   figures: it is an order statistic over the runs being measured, so including
+   it would bias the very variance it was built from.
+
+Anything that does not meet all five is generation, and is bound by the rules
+above.
+
 ## Prompt Conditions and Priming
 
 Every run belongs to exactly one prompt condition, and the record must say which.

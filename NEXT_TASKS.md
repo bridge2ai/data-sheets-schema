@@ -7,48 +7,49 @@ Last verified: 2026-07-29.
 
 ---
 
-## 1. Decide whether to archive unattestable runs
+## 1. Archiving unattestable runs — done
 
-**Not urgent.** `d4d runs archive --unattested` moves runs into `data/ATTIC/`,
-out of `discover()` and therefore out of every analysis. Nothing is deleted;
-`d4d runs restore` is the same move reversed.
+`d4d runs archive --unattested --execute` moved **10 run directories across 5
+labels** into `data/ATTIC/d4d_concatenated_archived/`: the 2026-04-10 sonnet
+baseline and the four 2026-07-23 GPT series. Their bundles were first committed
+on 2026-07-28, after those runs, so the bytes they consumed are unverifiable.
+Nothing was deleted — `d4d runs restore --execute` reverses it.
 
-Dry run today: **16 run directories across 8 labels** — the 2026-04-10 sonnet
-baseline and the 2026-07-23 GPT series. Their bundles were first committed on
-2026-07-28 (`fa90b4ec`), after those runs executed, and the working tree at the
-time is unrecorded — so the bytes they consumed are *unverifiable*, not merely
-unrecorded. That is the whole loss: the GPT-5.5 and GPT-5.6 comparisons.
+Corpus: **partial 23 → 3**. What remains partial is CM4AI under the three
+`crateonly` labels.
 
-**`record_mode` is the wrong thing to gate on**, and an earlier version of this
-item said otherwise. Attestation has four levels:
+Those three were **skipped deliberately**, and the reason is a defect the dry run
+caught before anything moved: a label is not a unit of attestation.
+`2026-07-28_claude-opus-5-crateonly` holds CHORUS and VOICE *live* alongside CM4AI
+*partial*, so archiving by label would have moved six placeable records out with
+three unplaceable ones and reported success. `archive_runs` now refuses a label
+whose projects disagree, and the sweep skips them with a message.
 
-| level | meaning | count |
-|---|---|---|
-| `live` | the run wrote its own provenance | 49 |
-| `attested` | reconstructed, but inputs verified and schema/model/outputs pinned | 33 |
-| `partial` | a gap in something that determines the output | 23 |
-| `none` | no record | 5 |
+Remaining, if wanted: archive at project granularity so CM4AI's crateonly records
+can go without taking CHORUS and VOICE. Low value — `--require-attested` already
+excludes them per-analysis.
 
-**82 of 110 runs can be placed and reproduced.** The entire 2026-07-27 tuned arm
-is `attested`: it pins the bundle by *verified* md5, the schema by md5, the model,
-and every output hash. Its only gap is the hardware, which cannot affect a
-generation. Gating on `live` would have dropped all 24 records for that.
-
-Prefer `--require-attested` on `compare`/`arm-delta` — it excludes the same runs
-per-analysis without moving anything. `--require-live` remains available and is
-usually the wrong choice.
+**What left the active corpus:** the GPT-5.5, GPT-5.6 and sonnet-4.6 comparisons.
+They are restorable in one command, and `--require-attested` was already
+excluding them from any analysis that asked.
 
 ---
 
-## 2. Enforce live provenance for *new* runs
+## 2. Live provenance for new runs — done
 
-`d4d-full-core.md` lists it as a completion criterion — *"The live provenance
-record is present and its `record_mode` is `live`"* — but nothing checks it, so a
-run that never writes one still completes.
+Required from `2026-07-30`, read from the label's date prefix. Dated rather than
+corpus-wide on purpose: 33 pre-cutoff records are fully attested despite being
+reconstructed, and failing them retroactively would discard placeable evidence to
+enforce a rule that postdates them.
 
-Worth doing for new runs, where it is free. Not worth applying backwards: the
-2026-07-27 arm shows a reconstructed record can be fully attestable, so the
-useful invariant is attestation, not authorship of the record.
+- `d4d runs check --strict` exits non-zero if any run subject to the rule lacks
+  live provenance — usable as a gate after a generation step.
+- `api_runner.execute()` verifies the record it just wrote and fails the run
+  rather than leaving an unattestable artifact behind.
+- A label with no parseable date is **subject** to the rule. Exempting anything
+  unparseable is an exemption taken by accident.
+
+Corpus today: 98 runs checked, 0 subject to the requirement, 0 failing.
 
 ---
 
@@ -60,10 +61,16 @@ and the rule that combined them, with `model`, `prompts` and `inputs.bundle_md5`
 explicitly marked not-applicable rather than left absent. All four guarded merges
 under `2026-07-29_guarded-union/` have one.
 
-**Remains:** the playbook forbids cross-label reads in four places, and a merged
-record is cross-label by definition. That needs an explicit carve-out rather than
-a quiet exception, since the rule exists to stop factual leakage between runs and
-a merge is the one case where crossing is intended.
+**Done:** the playbook now carries an explicit carve-out. Derivation is not
+generation — it consumes generated records as declared inputs rather than as a
+shortcut around evidence, introduces no new facts, and states what it consumed by
+md5. Five conditions bound it, and three are enforced in code rather than trusted
+to prose: a source must be complete and attested, a derived record may not
+contribute to another, and the output goes under a distinct method. The remaining
+two (generation phases never derive; a derived record is not a replicate) are
+structural.
+
+Merged records are now shippable.
 
 ---
 

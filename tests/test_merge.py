@@ -211,13 +211,28 @@ class TestDerivedProvenance(unittest.TestCase):
     """
 
     def _sources(self, td):
+        """Fixtures carry provenance, because unattested sources are refused.
+
+        A merge may only consume runs whose conditions can be established, so a
+        fixture without provenance is correctly rejected — the test has to build
+        sources that would really be admissible.
+        """
         import yaml
+        root = Path(td) / "data" / "d4d_concatenated"
         srcs = {}
         for n, slots in ((1, {"title": "T", "a": 1}), (2, {"title": "T", "b": 2})):
-            p = (Path(td) / "data" / "d4d_concatenated" / "claudecode_agent" /
-                 f"lab_rep{n}" / "P_d4d.yaml")
+            label = f"lab_rep{n}"
+            p = root / "claudecode_agent" / label / "P_d4d.yaml"
             p.parent.mkdir(parents=True)
             p.write_text(yaml.safe_dump(slots))
+            prov = root / "claudecode_agent_core" / label / "P_provenance.yaml"
+            prov.parent.mkdir(parents=True)
+            prov.write_text(yaml.safe_dump({
+                "record_mode": "live",
+                "inputs": {"bundle_md5": "a",
+                           "hash_basis": "verified identical to the bytes consumed"},
+                "schema": {"full_md5": "s"}, "model": {"model": "m"},
+                "outputs": {"full": {"md5": "x"}}}))
             srcs[f"rep{n}"] = p
         return srcs
 
@@ -372,3 +387,64 @@ class TestConditionComparability(unittest.TestCase):
         for name, axes in CONDITION_AXES.items():
             with self.subTest(condition=name):
                 self.assertEqual(set(axes), {"base", "tuned"})
+
+
+class TestCarveOutEnforcement(unittest.TestCase):
+    """The playbook's conditions must hold on every path (#192, #193)."""
+
+    def _corpus(self, td, mode="live", method="claudecode_agent"):
+        """A source record with provenance, at an arbitrary root."""
+        import yaml
+        root = Path(td) / "data" / "d4d_concatenated"
+        label = "lab_rep1"
+        rec = root / method / label / "P_d4d.yaml"
+        rec.parent.mkdir(parents=True, exist_ok=True)
+        rec.write_text(yaml.safe_dump({"title": "T"}))
+        prov = root / f"{method}_core" / label / "P_provenance.yaml"
+        prov.parent.mkdir(parents=True, exist_ok=True)
+        body = {"record_mode": mode,
+                "inputs": {"bundle_md5": "a",
+                           "hash_basis": "verified identical to the bytes consumed"},
+                "schema": {"full_md5": "s"}, "model": {"model": "m"},
+                "outputs": {"full": {"md5": "x"}}}
+        prov.write_text(yaml.safe_dump(body))
+        return rec
+
+    def test_a_derived_source_is_refused_by_record_mode_not_by_name(self):
+        """A method not named *_merged must still be caught (#192)."""
+        from data_sheets_schema.merge import check_sources
+        with TemporaryDirectory() as td:
+            src = self._corpus(td, mode="derived", method="claudecode_agent_union")
+            with self.assertRaises(ValueError) as ctx:
+                check_sources({"a": src}, "P")
+            self.assertIn("itself a derived record", str(ctx.exception))
+
+    def test_a_live_source_passes(self):
+        from data_sheets_schema.merge import check_sources
+        with TemporaryDirectory() as td:
+            check_sources({"a": self._corpus(td)}, "P")
+
+    def test_union_merge_checks_when_given_paths(self):
+        """The condition is about whether the merge is legitimate, so it must
+        not depend on the caller having asked for provenance (#193)."""
+        from data_sheets_schema.evidence_score import load_record
+        from data_sheets_schema.merge import union_merge
+        with TemporaryDirectory() as td:
+            src = self._corpus(td, mode="derived")
+            recs = {"a": load_record(src), "b": load_record(src)}
+            with self.assertRaises(ValueError):
+                union_merge(recs, project="P", base="a", guarded=True,
+                            judge=judge(), source_paths={"a": src, "b": src})
+
+    def test_an_empty_project_is_refused_rather_than_failing_everything(self):
+        from data_sheets_schema.merge import check_sources
+        with TemporaryDirectory() as td:
+            with self.assertRaises(ValueError) as ctx:
+                check_sources({"a": self._corpus(td)}, "")
+            self.assertIn("needs the project", str(ctx.exception))
+
+    def test_attestation_is_read_where_the_source_lives(self):
+        """A source outside the working corpus must not report `none`."""
+        from data_sheets_schema.merge import check_sources
+        with TemporaryDirectory() as td:
+            check_sources({"a": self._corpus(td)}, "P")   # would raise if wrong

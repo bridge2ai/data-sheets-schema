@@ -56,6 +56,16 @@ def archive(labels, unattested, reason, execute):
                 # unattestable run.
                 if attestation(run.method, run.label, proj) == PARTIAL:
                     targets.add(run.label)
+        # Drop labels whose projects disagree: archiving one would move
+        # placeable records out alongside the unplaceable ones.
+        mixed = {run.label for run in discover()
+                 if not run.is_core and not run.deterministic
+                 and run.label in targets
+                 for proj in run.projects
+                 if attestation(run.method, run.label, proj) != PARTIAL}
+        for lab in sorted(mixed):
+            click.echo(f"   ⏭  skipping {lab}: it also holds placeable records")
+        targets -= mixed
     if not targets:
         click.echo("Nothing selected. Pass --label or --unattested."); return
 
@@ -91,6 +101,52 @@ def restore(labels, execute):
         click.echo(f"   {dest}")
     if not execute and res["count"]:
         click.echo("\nDry run. Re-run with --execute.")
+
+
+@runs.command("check")
+@click.option("--method", default=None)
+@click.option("--label", default=None)
+@click.option("--project", default=None)
+@click.option("--strict", is_flag=True,
+              help="Exit non-zero if any run fails, for use as a gate.")
+def check_cmd(method, label, project, strict):
+    """Verify runs satisfy the live-provenance requirement.
+
+    Runs labelled on or after the cutoff must have written their own provenance.
+    Earlier runs are reported as not-required rather than failed: 33 of them are
+    fully attested despite being reconstructed, and failing those retroactively
+    would discard placeable evidence to enforce a rule that postdates them.
+
+    Use `--strict` after a generation run so a missing record fails the step
+    rather than being noticed later.
+    """
+    from data_sheets_schema.runs import check_provenance, discover, is_complete
+
+    rows = []
+    for run in discover():
+        if run.is_core or run.deterministic:
+            continue
+        if method and run.method != method:
+            continue
+        if label and run.label != label:
+            continue
+        for proj in run.projects:
+            if project and proj != project:
+                continue
+            if not is_complete(run.method, run.label, proj):
+                continue
+            rows.append(check_provenance(run.method, run.label, proj))
+
+    failed = [r for r in rows if not r["ok"]]
+    required = [r for r in rows if r["required"]]
+    for r in failed:
+        click.echo(f"   ❌ {r['project']:9} {r['label']:44} {r['reason']}")
+    click.echo(f"\n{len(rows)} run(s) checked, {len(required)} subject to the "
+               f"requirement, {len(failed)} failing")
+    if not failed:
+        click.echo("All runs subject to the live-provenance requirement satisfy it.")
+    if strict and failed:
+        raise SystemExit(1)
 
 
 @runs.command('list')

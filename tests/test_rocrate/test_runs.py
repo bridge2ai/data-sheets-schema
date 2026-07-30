@@ -470,16 +470,22 @@ class TestProvenanceModeReportingAndArchive(unittest.TestCase):
         """Splitting a run's full record from its core leaves it permanently
         incomplete, since is_complete() requires both plus the report."""
         from data_sheets_schema.runs import archive_runs
+        # allow_partial_labels: this exercises the move mechanics, not the
+        # policy. The label is fully attested, so the collateral guard would
+        # (correctly) refuse it.
         r = archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t",
-                         dry_run=True)
+                         dry_run=True, allow_partial_labels=True)
         dirs = {Path(a).parent.name for a, _ in r["moved"]}
         self.assertIn("claudecode_agent", dirs)
         self.assertIn("claudecode_agent_core", dirs)
 
     def test_archive_preserves_layout_so_restore_is_the_inverse(self):
         from data_sheets_schema.runs import archive_runs
+        # allow_partial_labels: this exercises the move mechanics, not the
+        # policy. The label is fully attested, so the collateral guard would
+        # (correctly) refuse it.
         r = archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t",
-                         dry_run=True)
+                         dry_run=True, allow_partial_labels=True)
         for src, dest in r["moved"]:
             self.assertTrue(dest.endswith(
                 f"{Path(src).parent.name}/{Path(src).name}"))
@@ -487,7 +493,8 @@ class TestProvenanceModeReportingAndArchive(unittest.TestCase):
     def test_dry_run_moves_nothing(self):
         from data_sheets_schema.runs import archive_runs
         before = sorted(Path("data/d4d_concatenated").rglob("*_d4d.yaml"))
-        archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t", dry_run=True)
+        archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t",
+                     dry_run=True, allow_partial_labels=True)
         self.assertEqual(before,
                          sorted(Path("data/d4d_concatenated").rglob("*_d4d.yaml")))
 
@@ -606,3 +613,120 @@ class TestAttestationRigour(unittest.TestCase):
             r = archive_runs(["L"], reason="t", concat_dir=c, attic=a,
                              dry_run=True)
             self.assertTrue(r["collisions"])
+
+
+class TestArchiveDoesNotTakeCollateral(unittest.TestCase):
+    """A label is not a unit of attestation.
+
+    One run directory holds several projects and they can differ:
+    2026-07-28_claude-opus-5-crateonly has CHORUS and VOICE live while CM4AI is
+    partial. Archiving by label moves every project it holds, so an unguarded
+    sweep would have moved six placeable records out with three unplaceable
+    ones and reported success.
+    """
+
+    def _tree(self, td, attestations):
+        """attestations: {project: 'live'|'partial'} for one label."""
+        import yaml as _yaml
+        concat = Path(td) / "concat"
+        for proj, level in attestations.items():
+            full = concat / "m" / "L"
+            core = concat / "m_core" / "L"
+            full.mkdir(parents=True, exist_ok=True)
+            core.mkdir(parents=True, exist_ok=True)
+            (full / f"{proj}_d4d.yaml").write_text("id: x\n")
+            (core / f"{proj}_d4d_core.yaml").write_text("id: x\n")
+            (core / f"{proj}_reconciliation.md").write_text("ok\n")
+            rec = {"record_mode": "live" if level == "live" else "reconstructed",
+                   "inputs": {"bundle_md5": "a",
+                              "hash_basis": "verified identical to the bytes consumed"},
+                   "schema": {"full_md5": "s"}, "model": {"model": "m"},
+                   "outputs": {"full": {"md5": "x"}}}
+            if level == "partial":
+                rec["inputs"] = {"bundle_md5": "a", "hash_basis": "unverified"}
+            (core / f"{proj}_provenance.yaml").write_text(_yaml.safe_dump(rec))
+        return concat
+
+    def test_a_mixed_label_is_refused(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            concat = self._tree(td, {"KEEP": "live", "DROP": "partial"})
+            with self.assertRaises(ValueError) as ctx:
+                archive_runs(["L"], reason="t", concat_dir=concat,
+                             attic=Path(td) / "attic", dry_run=True)
+            self.assertIn("do not agree", str(ctx.exception))
+
+    def test_a_uniformly_partial_label_is_archived(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            concat = self._tree(td, {"A": "partial", "B": "partial"})
+            r = archive_runs(["L"], reason="t", concat_dir=concat,
+                             attic=Path(td) / "attic", dry_run=True)
+            self.assertEqual(r["count"], 2)
+
+    def test_collateral_can_be_accepted_explicitly(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            concat = self._tree(td, {"KEEP": "live", "DROP": "partial"})
+            r = archive_runs(["L"], reason="t", concat_dir=concat,
+                             attic=Path(td) / "attic", dry_run=True,
+                             allow_partial_labels=True)
+            self.assertGreater(r["count"], 0)
+
+
+class TestLiveProvenanceRequirement(unittest.TestCase):
+    """Required for new runs, not applied retroactively."""
+
+    def test_the_cutoff_is_read_from_the_label_date(self):
+        from data_sheets_schema.runs import LIVE_REQUIRED_FROM, requires_live
+        self.assertFalse(requires_live("2026-07-28_claude-opus-5-generic_rep1"))
+        self.assertTrue(requires_live(f"{LIVE_REQUIRED_FROM}_anything_rep1"))
+        self.assertTrue(requires_live("2027-01-01_later_rep1"))
+
+    def test_an_undated_label_is_subject_to_the_rule(self):
+        """Exempting anything unparseable is an exemption taken by accident."""
+        from data_sheets_schema.runs import requires_live
+        self.assertTrue(requires_live("no-date-here"))
+        self.assertTrue(requires_live(""))
+
+    def test_pre_cutoff_runs_pass_without_live_provenance(self):
+        from data_sheets_schema.runs import check_provenance
+        r = check_provenance("claudecode_agent",
+                             "2026-07-27_claude-opus-5_rep1", "CM4AI")
+        if r["record_mode"] == "none":
+            self.skipTest("tuned arm not present")
+        self.assertTrue(r["ok"])
+        self.assertFalse(r["required"])
+
+    def test_a_post_cutoff_run_without_provenance_fails(self):
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            r = check_provenance("m", "2099-01-01_future_rep1", "P",
+                                 Path(td))
+            self.assertFalse(r["ok"])
+            self.assertIn("no provenance record", r["reason"])
+
+
+class TestImplausibleDatesAreNotExemptions(unittest.TestCase):
+    """An exemption anyone can take by writing a wrong date is not a rule (#194)."""
+
+    def test_a_pre_project_date_is_treated_as_malformed(self):
+        from data_sheets_schema.runs import requires_live
+        for label in ("0001-01-01_x", "1970-01-01_x", "2016-07-30_x"):
+            with self.subTest(label=label):
+                self.assertTrue(requires_live(label))
+
+    def test_a_real_pre_cutoff_date_is_still_exempt(self):
+        from data_sheets_schema.runs import requires_live
+        self.assertFalse(requires_live("2026-07-28_claude-opus-5-generic_rep1"))
+        self.assertFalse(requires_live("2026-04-10_sonnet-4.6"))
+
+    def test_the_floor_sits_below_the_earliest_real_run(self):
+        from data_sheets_schema.runs import (
+            EARLIEST_PLAUSIBLE_RUN, LIVE_REQUIRED_FROM)
+        self.assertLess(EARLIEST_PLAUSIBLE_RUN, LIVE_REQUIRED_FROM)
+        self.assertLess(EARLIEST_PLAUSIBLE_RUN, "2026-04-10")
