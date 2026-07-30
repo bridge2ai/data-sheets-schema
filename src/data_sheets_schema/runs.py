@@ -258,6 +258,14 @@ VERIFIED_HASH_BASES = frozenset({
 })
 
 LIVE, ATTESTED, PARTIAL, NO_RECORD = "live", "attested", "partial", "none"
+# A derived record is not a generation, so it cannot be graded as one. It has no
+# model, no prompt and no input bundle *by design* — they are marked
+# `not_applicable` — and grading it against ATTESTING_FIELDS reports a correctly
+# formed derived record as a defective generation. What makes it placeable is
+# different: its sources pinned by md5, the rule that combined them, and its own
+# output hashed.
+DERIVED = "derived"
+DERIVED_FIELDS = ("sources", "derivation")
 
 
 # From this date a run is required to write its own provenance. Dated rather
@@ -352,6 +360,15 @@ def attestation(method: str, label: str, project: str,
     if data.get("record_mode") == "live":
         return LIVE
 
+    if data.get("record_mode") == "derived":
+        if not all(data.get(f) for f in DERIVED_FIELDS):
+            return PARTIAL
+        outputs = data.get("outputs") or {}
+        if not any(isinstance(a, dict) and a.get("md5")
+                   for a in outputs.values() if a):
+            return PARTIAL
+        return DERIVED
+
     for dotted in ATTESTING_FIELDS:
         node: Any = data
         for part in dotted.split("."):
@@ -414,12 +431,21 @@ def compare(method: str, project: str, labels: list[str],
     levels: dict[str, str] = {}
     not_live: list[str] = []
     unattested: list[str] = []
+    derived: list[str] = []
     for label in labels:
         if not is_complete(method, label, project, concat_dir):
             incomplete.append(label)
             continue
         modes[label] = record_mode(method, label, project, concat_dir)
         levels[label] = attestation(method, label, project, concat_dir)
+        # The playbook's fifth carve-out condition, enforced rather than stated:
+        # a derived record is an order statistic over the runs being measured, so
+        # including it in an agreement figure would bias the very variance it was
+        # built from. Excluded unconditionally — there is no flag for this,
+        # because there is no analysis for which it is correct.
+        if levels[label] == DERIVED:
+            derived.append(label)
+            continue
         if levels[label] != LIVE:
             not_live.append(label)
             if require_live:
@@ -478,6 +504,7 @@ def compare(method: str, project: str, labels: list[str],
         "attestations": levels,
         "reconstructed": not_live,
         "unattested": unattested,
+        "excluded_derived": derived,
         "excluded_not_live": not_live if require_live else [],
         "excluded_unattested": unattested if require_attested else [],
         "all_live": not not_live,
@@ -696,111 +723,160 @@ ATTIC = Path("data/ATTIC")
 
 
 def archive_runs(labels: list[str], *, reason: str,
+                 projects: list[str] | None = None,
                  concat_dir: Path = CONCAT_DIR,
                  attic: Path = ATTIC,
                  archive_name: str = "d4d_concatenated_archived",
                  dry_run: bool = True,
                  allow_partial_labels: bool = False) -> dict:
-    """Move whole run directories out of discovery, preserving their layout.
+    """Move runs out of discovery, preserving their layout.
 
     `discover()` walks `concat_dir`, so a move to ATTIC removes a run from every
     analysis without any code needing to know about it — archival and exclusion
     are the same operation.
 
+    Operates on **files**, not directories, so whole-label and per-project
+    archiving are the same code path. ``projects`` narrows the move to records
+    whose filenames carry those project prefixes; without it every file under a
+    matching label directory moves.
+
+    Per-project archiving is what a mixed label needs.
+    `2026-07-28_claude-opus-5-crateonly` holds CHORUS and VOICE *live* alongside
+    CM4AI *partial*; archiving by label would move six placeable records out with
+    three unplaceable ones. Naming the project moves only CM4AI's records and
+    leaves the label otherwise intact.
+
     The relative path under `concat_dir` is preserved exactly beneath the archive
     directory, so restoring is the same move reversed rather than a
-    reconstruction. Both the `{method}` and `{method}_core` directories for a
-    label travel together: separating a full record from its core and
-    reconciliation report would leave a run that `is_complete()` reports as
-    unfinished forever.
+    reconstruction. When a whole label moves, its `{method}` and `{method}_core`
+    directories travel together: separating a full record from its core and
+    reconciliation report would leave a run `is_complete()` reports as unfinished
+    forever.
     """
-    # A label is not a unit of attestation. One run directory holds several
-    # projects, and they can differ: 2026-07-28_claude-opus-5-crateonly has
-    # CHORUS and VOICE live while CM4AI is partial. Archiving by label would
-    # move six live records out with three unplaceable ones and report success.
-    collateral: dict[str, list[str]] = {}
-    for label in labels:
-        keep = [f"{m}/{label}/{proj}"
-                for run in discover(concat_dir) if run.label == label
-                and not run.is_core and not run.deterministic
-                for m in [run.method]
-                for proj in run.projects
-                if attestation(run.method, label, proj, concat_dir)
-                in (LIVE, ATTESTED)]
-        if keep:
-            collateral[label] = keep
-    if collateral and not allow_partial_labels:
-        detail = "; ".join(f"{lab} would also move {len(v)} placeable record(s)"
-                           for lab, v in sorted(collateral.items()))
-        raise ValueError(
-            "refusing to archive labels whose projects do not agree: " + detail
-            + ". A label is not a unit of attestation — archiving it moves every "
-              "project it holds. Archive the unplaceable projects on their own, "
-              "or pass allow_partial_labels=True to accept the collateral.")
+    wanted = set(projects or [])
+
+    def _files_for(label_dir: Path) -> list[Path]:
+        files = [f for f in sorted(label_dir.rglob("*")) if f.is_file()]
+        if not wanted:
+            return files
+        return [f for f in files
+                if any(f.name.startswith(f"{proj}_") for proj in wanted)]
+
+    # A label is not a unit of attestation — one run directory holds several
+    # projects and they can differ. Checked only when moving whole labels; naming
+    # the projects is the precise alternative, so it needs no such guard.
+    if not wanted:
+        collateral: dict[str, list[str]] = {}
+        for label in labels:
+            keep = [f"{run.method}/{label}/{proj}"
+                    for run in discover(concat_dir) if run.label == label
+                    and not run.is_core and not run.deterministic
+                    for proj in run.projects
+                    if attestation(run.method, label, proj, concat_dir)
+                    in (LIVE, ATTESTED)]
+            if keep:
+                collateral[label] = keep
+        if collateral and not allow_partial_labels:
+            detail = "; ".join(
+                f"{lab} would also move {len(v)} placeable record(s)"
+                for lab, v in sorted(collateral.items()))
+            raise ValueError(
+                "refusing to archive labels whose projects do not agree: "
+                + detail + ". A label is not a unit of attestation — archiving "
+                "it moves every project it holds. Pass projects=[...] to move "
+                "only the unplaceable ones, or allow_partial_labels=True to "
+                "accept the collateral.")
 
     moved: list[tuple[Path, Path]] = []
     for method_dir in sorted(p for p in concat_dir.iterdir() if p.is_dir()):
         for label_dir in sorted(p for p in method_dir.iterdir() if p.is_dir()):
             if label_dir.name not in labels:
                 continue
-            dest = attic / archive_name / method_dir.name / label_dir.name
-            moved.append((label_dir, dest))
+            for f in _files_for(label_dir):
+                rel = f.relative_to(concat_dir)
+                moved.append((f, attic / archive_name / rel))
 
-    # Same hazard in the other direction: archiving a label twice would nest the
-    # second copy inside the first.
     collisions = [str(d) for _, d in moved if d.exists()]
     if collisions and not dry_run:
         raise FileExistsError(
-            "refusing to archive over existing archive directories: "
-            + ", ".join(collisions))
+            "refusing to archive over existing archive entries: "
+            + ", ".join(collisions[:5]))
 
     if not dry_run:
         for src, dest in moved:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(src), str(dest))
+        _prune_empty(concat_dir)
         _write_archive_note(attic / archive_name, moved, reason)
 
     return {"archive": str(attic / archive_name),
             "count": len(moved),
+            "labels": sorted(labels),
+            "projects": sorted(wanted) or None,
             "collisions": collisions,
             "moved": [(str(a), str(b)) for a, b in moved],
             "dry_run": dry_run}
 
 
 def restore_runs(labels: list[str], *,
+                 projects: list[str] | None = None,
                  concat_dir: Path = CONCAT_DIR,
                  attic: Path = ATTIC,
                  archive_name: str = "d4d_concatenated_archived",
                  dry_run: bool = True) -> dict:
-    """Move archived runs back into discovery — the exact inverse of archiving."""
+    """Move archived records back into discovery — the exact inverse of archiving."""
     root = attic / archive_name
+    wanted = set(projects or [])
     moved: list[tuple[Path, Path]] = []
     if root.exists():
-        for method_dir in sorted(p for p in root.iterdir() if p.is_dir()):
-            for label_dir in sorted(p for p in method_dir.iterdir() if p.is_dir()):
-                if labels and label_dir.name not in labels:
-                    continue
-                moved.append((label_dir,
-                              concat_dir / method_dir.name / label_dir.name))
-    # shutil.move puts the source *inside* an existing destination rather than
-    # failing, which would nest an archived run under a regenerated one of the
-    # same name (`m/L/L/`) and hide it from discover() while reporting success.
+        for f in sorted(root.rglob("*")):
+            if not f.is_file() or f.name == "README.md":
+                continue
+            rel = f.relative_to(root)
+            label = rel.parts[1] if len(rel.parts) > 1 else ""
+            if labels and label not in labels:
+                continue
+            if wanted and not any(f.name.startswith(f"{proj}_")
+                                  for proj in wanted):
+                continue
+            moved.append((f, concat_dir / rel))
+
+    # shutil.move puts a source *inside* an existing destination directory
+    # rather than failing; for files it would overwrite. Either way a record
+    # regenerated while its predecessor sat in ATTIC would be silently replaced
+    # or hidden, with the command reporting success.
     collisions = [str(d) for _, d in moved if d.exists()]
     if collisions and not dry_run:
         raise FileExistsError(
-            "refusing to restore over existing run directories: "
-            + ", ".join(collisions)
-            + ". Move or remove them first; restoring into them would nest one "
-              "run inside another and hide it from discovery.")
+            "refusing to restore over existing records: "
+            + ", ".join(collisions[:5])
+            + ". Move or remove them first; restoring would overwrite a record "
+              "that was regenerated while this one was archived.")
 
     if not dry_run:
         for src, dest in moved:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(src), str(dest))
+        _prune_empty(root)
     return {"count": len(moved),
-            "moved": [(str(a), str(b)) for a, b in moved],
             "collisions": collisions,
+            "moved": [(str(a), str(b)) for a, b in moved],
             "dry_run": dry_run}
+
+
+def _prune_empty(root: Path) -> None:
+    """Remove directories emptied by a move, deepest first.
+
+    Without this a per-project archive leaves the label directory behind holding
+    nothing, and `discover()` treats an empty label directory as a run with no
+    records — visible in listings, absent from every analysis.
+    """
+    for d in sorted((p for p in root.rglob("*") if p.is_dir()),
+                    key=lambda p: len(p.parts), reverse=True):
+        try:
+            next(d.iterdir())
+        except StopIteration:
+            d.rmdir()
 
 
 def _write_archive_note(root: Path, moved: list[tuple[Path, Path]],

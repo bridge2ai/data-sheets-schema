@@ -201,6 +201,19 @@ if __name__ == "__main__":
     unittest.main()
 
 
+def _prov(out_path):
+    """Where a merged record's provenance lands.
+
+    The canonical `{method}_core/{label}/` location, resolved against the corpus
+    the record was written into — not beside the record, and not in the default
+    corpus.
+    """
+    from data_sheets_schema.merge import _source_root
+    from data_sheets_schema.provenance import record_path_for
+    return record_path_for("P", "claudecode_agent_merged", "lab",
+                           _source_root(out_path))
+
+
 class TestDerivedProvenance(unittest.TestCase):
     """A merged record must be able to say how it came to exist (#176 step 2).
 
@@ -246,8 +259,7 @@ class TestDerivedProvenance(unittest.TestCase):
             out = Path(td) / "merged" / "P_d4d.yaml"
             write_merge(r, out, sources=srcs, project="P",
                         method="claudecode_agent_merged", label="lab")
-            rec = yaml.safe_load(
-                (out.parent / "P_provenance.yaml").read_text())
+            rec = yaml.safe_load(_prov(out).read_text())
             self.assertEqual(rec["record_mode"], "derived")
             self.assertEqual(rec["record_type"], "d4d_derived_provenance")
             self.assertEqual(len(rec["sources"]), 2)
@@ -265,7 +277,7 @@ class TestDerivedProvenance(unittest.TestCase):
             out = Path(td) / "merged" / "P_d4d.yaml"
             write_merge(r, out, sources=srcs, project="P",
                         method="claudecode_agent_merged", label="lab")
-            rec = yaml.safe_load((out.parent / "P_provenance.yaml").read_text())
+            rec = yaml.safe_load(_prov(out).read_text())
             self.assertEqual({s["method"] for s in rec["sources"]},
                              {"claudecode_agent"})
 
@@ -280,7 +292,7 @@ class TestDerivedProvenance(unittest.TestCase):
             out = Path(td) / "merged" / "P_d4d.yaml"
             write_merge(r, out, sources=srcs, project="P",
                         method="claudecode_agent_merged", label="lab")
-            rec = yaml.safe_load((out.parent / "P_provenance.yaml").read_text())
+            rec = yaml.safe_load(_prov(out).read_text())
             fields = {n["field"] for n in rec["not_applicable"]}
             self.assertEqual(fields, {"model", "prompts", "inputs.bundle_md5"})
             self.assertNotIn("model", rec)
@@ -301,7 +313,7 @@ class TestDerivedProvenance(unittest.TestCase):
             out = Path(td) / "merged" / "P_d4d.yaml"
             write_merge(r, out)
             self.assertTrue(out.exists())
-            self.assertFalse((out.parent / "P_provenance.yaml").exists())
+            self.assertFalse(_prov(out).exists())
 
     def test_contributed_slots_sum_to_the_record(self):
         import yaml
@@ -313,7 +325,7 @@ class TestDerivedProvenance(unittest.TestCase):
             out = Path(td) / "merged" / "P_d4d.yaml"
             write_merge(r, out, sources=srcs, project="P",
                         method="claudecode_agent_merged", label="lab")
-            rec = yaml.safe_load((out.parent / "P_provenance.yaml").read_text())
+            rec = yaml.safe_load(_prov(out).read_text())
             self.assertEqual(sum(s["contributed_slots"] for s in rec["sources"]),
                              len(r.record))
 

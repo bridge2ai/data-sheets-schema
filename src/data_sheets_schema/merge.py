@@ -304,7 +304,10 @@ def _source_root(path: Path) -> Path:
     if "d4d_concatenated" in parts:
         i = parts.index("d4d_concatenated")
         return Path(*parts[:i + 1])
-    return Path(path).parent.parent.parent
+    # No recognisable corpus root: treat the record's own directory as one, so
+    # provenance lands beside it rather than in whatever the default happens to
+    # be. A probe writing to /tmp keeps its provenance in /tmp.
+    return Path(path).parent
 
 
 def union_merge(records: dict[str, dict[str, Any]], *,
@@ -502,5 +505,17 @@ def write_merge(result: MergeResult, path: Path, *,
         project, method, label, sources=contributions, derivation=rule,
         outputs={"full": path},
         extra_notes=[result.report.verdict] if result.report else None)
-    rec.write(provenance_path or path.with_name(f"{project}_provenance.yaml"))
+    # The canonical path, not beside the record. `record_path_for` resolves to
+    # `{method}_core/{label}/`, and every consumer — attestation, record_mode,
+    # check_provenance — looks there. Writing it next to the record left four
+    # correctly-formed derived records reporting `none`, provenance present and
+    # invisible.
+    # Resolved against the corpus the record is being written into, not the
+    # default one. `record_path_for` defaults to the working corpus, so a merge
+    # written to a temp directory would have deposited its provenance in the
+    # real repository — right convention, wrong tree.
+    from data_sheets_schema.provenance import record_path_for
+    rec.write(provenance_path
+              or record_path_for(project, method, label,
+                                 _source_root(path)))
     return path

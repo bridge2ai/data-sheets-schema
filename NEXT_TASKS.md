@@ -9,29 +9,35 @@ Last verified: 2026-07-29.
 
 ## 1. Archiving unattestable runs — done
 
-`d4d runs archive --unattested --execute` moved **10 run directories across 5
-labels** into `data/ATTIC/d4d_concatenated_archived/`: the 2026-04-10 sonnet
-baseline and the four 2026-07-23 GPT series. Their bundles were first committed
-on 2026-07-28, after those runs, so the bytes they consumed are unverifiable.
-Nothing was deleted — `d4d runs restore --execute` reverses it.
+`d4d runs archive --unattested --execute` moved the 2026-04-10 sonnet baseline
+and the four 2026-07-23 GPT series into `data/ATTIC/`, then CM4AI's three
+`crateonly` records. Their bundles were first committed after those runs, so the
+bytes they consumed are unverifiable rather than merely unrecorded. Nothing was
+deleted — `d4d runs restore --execute` reverses it.
 
-Corpus: **partial 23 → 3**. What remains partial is CM4AI under the three
-`crateonly` labels.
+**Corpus: partial 23 → 0.**
 
-Those three were **skipped deliberately**, and the reason is a defect the dry run
-caught before anything moved: a label is not a unit of attestation.
-`2026-07-28_claude-opus-5-crateonly` holds CHORUS and VOICE *live* alongside CM4AI
-*partial*, so archiving by label would have moved six placeable records out with
-three unplaceable ones and reported success. `archive_runs` now refuses a label
-whose projects disagree, and the sweep skips them with a message.
+| level | count |
+|---|---|
+| live | 49 |
+| attested | 33 |
+| derived | 4 |
+| none | 1 |
 
-Remaining, if wanted: archive at project granularity so CM4AI's crateonly records
-can go without taking CHORUS and VOICE. Low value — `--require-attested` already
-excludes them per-analysis.
+The single `none` is `2026-07-29_coverage-union`, the deliberately-kept
+incoherent unguarded merge; it has no provenance because it was written by a
+probe, and its README says so.
 
-**What left the active corpus:** the GPT-5.5, GPT-5.6 and sonnet-4.6 comparisons.
-They are restorable in one command, and `--require-attested` was already
-excluding them from any analysis that asked.
+Archiving operates on **files**, so whole-label and per-project moves are one
+code path. That was needed because a label is not a unit of attestation:
+`2026-07-28_claude-opus-5-crateonly` held CHORUS and VOICE *live* alongside CM4AI
+*partial*. An earlier version skipped such labels to avoid collateral, which
+prevented data loss and also prevented the archive doing its job. Naming the
+project moves exactly the unplaceable records.
+
+**What left the active corpus:** the GPT-5.5, GPT-5.6 and sonnet-4.6 comparisons,
+and CM4AI's crateonly arm. All restorable in one command, and `--require-attested`
+was already excluding them from any analysis that asked.
 
 ---
 
