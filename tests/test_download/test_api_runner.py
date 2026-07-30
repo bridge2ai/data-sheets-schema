@@ -587,3 +587,86 @@ class TestTransportErrorsAreRetried(unittest.TestCase):
                              temperature=None, system="s", messages=[],
                              sleep=lambda _: None)
         self.assertEqual(calls["n"], 1)
+
+
+class TestMidStreamErrorClassification(unittest.TestCase):
+    """Errors that arrive inside a 200 stream, not as an HTTP status.
+
+    The SDK opens the stream, gets a 200, then receives an SSE `error` event and
+    raises APIStatusError carrying the *stream's* status — 200. So the 5xx check
+    never fires and an obviously transient `overloaded_error` was killing runs
+    on the first attempt. Classification has to read the error body.
+    """
+
+    def _err(self, body, status=200):
+        class MidStream(Exception):
+            def __init__(self):
+                self.body = body
+                self.status_code = status
+
+            def __str__(self):
+                return str(body)
+        return MidStream()
+
+    def test_overloaded_error_nested_in_body_is_transient(self):
+        from data_sheets_schema.api_runner import _transient_error_type
+        exc = self._err({"type": "error",
+                         "error": {"type": "overloaded_error",
+                                   "message": "Overloaded"}})
+        self.assertEqual(_transient_error_type(exc), "overloaded_error")
+
+    def test_overloaded_error_flat_in_body_is_transient(self):
+        from data_sheets_schema.api_runner import _transient_error_type
+        self.assertEqual(
+            _transient_error_type(self._err({"type": "overloaded_error"})),
+            "overloaded_error")
+
+    def test_message_text_is_the_fallback(self):
+        """Covers SDK versions that attach no parsed body to a stream error."""
+        from data_sheets_schema.api_runner import _transient_error_type
+        self.assertEqual(
+            _transient_error_type(Exception("{'type': 'overloaded_error'}")),
+            "overloaded_error")
+
+    def test_client_errors_stay_non_transient(self):
+        from data_sheets_schema.api_runner import _transient_error_type
+        for kind in ("invalid_request_error", "authentication_error",
+                     "permission_error", "not_found_error"):
+            with self.subTest(kind=kind):
+                exc = self._err({"error": {"type": kind}}, status=400)
+                self.assertIsNone(_transient_error_type(exc))
+
+    def test_overloaded_stream_error_is_actually_retried(self):
+        from data_sheets_schema.api_runner import _call_with_retry
+        exc = self._err({"type": "error",
+                         "error": {"type": "overloaded_error"}})
+        calls = {"n": 0}
+
+        class C:
+            class messages:
+                @staticmethod
+                def stream(**kw):
+                    calls["n"] += 1
+                    if calls["n"] <= 2:
+                        raise exc
+
+                    class S:
+                        def __enter__(s):
+                            return s
+
+                        def __exit__(s, *e):
+                            return False
+
+                        def get_final_message(s):
+                            class M:
+                                content = []
+                                stop_reason = "end_turn"
+                                usage = None
+                            return M()
+                    return S()
+
+        out = _call_with_retry(C(), model="claude-opus-5", max_tokens=10,
+                               temperature=None, system="s", messages=[],
+                               sleep=lambda _: None)
+        self.assertEqual(calls["n"], 3)
+        self.assertIsNotNone(out)

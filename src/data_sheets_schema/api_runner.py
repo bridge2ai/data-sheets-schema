@@ -535,6 +535,35 @@ def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
     return problems
 
 
+# Server-side conditions that clear on their own. `overloaded_error` is the one
+# that matters in practice: CBORG fronts Vertex, and a busy upstream returns it
+# mid-stream rather than as an HTTP status.
+TRANSIENT_ERROR_TYPES = frozenset({
+    "overloaded_error", "api_error", "rate_limit_error", "timeout_error",
+})
+
+
+def _transient_error_type(exc: Exception) -> str | None:
+    """The error body's own `type`, when it names a retryable condition.
+
+    Reads the structured body first and only falls back to the message text.
+    String matching alone would be fragile, but as a fallback it covers SDK
+    versions that do not attach a parsed body to a mid-stream error.
+    """
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        kind = body.get("type")
+        if isinstance(kind, str) and kind in TRANSIENT_ERROR_TYPES:
+            return kind
+        inner = body.get("error")
+        if isinstance(inner, dict):
+            kind = inner.get("type")
+            if isinstance(kind, str) and kind in TRANSIENT_ERROR_TYPES:
+                return kind
+    text = str(exc)
+    return next((k for k in TRANSIENT_ERROR_TYPES if k in text), None)
+
+
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages,
                      sleep=time.sleep):
     """One API call, retrying transient failures.
@@ -587,6 +616,15 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                 pass
             status = getattr(exc, "status_code", None)
             if status is not None and 500 <= status < 600:
+                transient = True
+            # Mid-stream errors carry the *stream's* status, which is 200: the
+            # connection opened fine and the failure arrived later as an SSE
+            # `error` event. So an `overloaded_error` reaches here as a plain
+            # APIStatusError with status_code 200, matches none of the checks
+            # above, and kills the run on the first attempt — which is what
+            # happened to the first fitness sweep. Classify on the error body's
+            # own type, which is where the transience is actually stated.
+            if not transient and _transient_error_type(exc):
                 transient = True
             if not transient or attempt == MAX_ATTEMPTS:
                 raise
