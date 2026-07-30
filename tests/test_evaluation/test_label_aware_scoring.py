@@ -115,23 +115,30 @@ class TestWhatActuallyDiscriminates(unittest.TestCase):
                                                 label=lbl))
         return out
 
-    def test_rubric20_is_constant_and_cannot_rank(self):
-        results = self._scores("CM4AI")
+    def test_rubric20_now_discriminates(self):
+        """These two tests previously asserted the opposite.
+
+        They pinned the stub — every numeric question scoring 4, every record
+        totalling 71/88 — as a documented finding rather than a passing feature.
+        Now that the questions are measured, the assertions invert: across the
+        corpus rubric20 returns five distinct totals with an 8-point spread.
+        """
+        results = self._scores("AI_READI")
         if len(results) < 3:
             self.skipTest("generic runs not present")
-        self.assertEqual(len({r.rubric20_total for r in results}), 1,
-                         "rubric20 unexpectedly discriminates — re-check the "
-                         "stub scoring in evaluate_d4d.py")
+        self.assertGreater(
+            len({r.rubric20_total for r in results}), 1,
+            "rubric20 has stopped discriminating — check evaluate_d4d.py")
 
-    def test_rubric20_awards_every_question_the_same_stub_value(self):
+    def test_rubric20_numeric_scores_land_on_declared_bands(self):
         results = self._scores("CHORUS")
         if not results:
             self.skipTest("generic runs not present")
         scores = {q.score for q in results[0].rubric20_scores
                   if q.score_type == "numeric"}
-        self.assertEqual(scores, {4},
-                         "rubric20 numeric scoring is a 0-or-4 stub; any other "
-                         "value means it has been implemented properly")
+        self.assertNotEqual(scores, {4}, "the 0-or-4 stub is back")
+        self.assertTrue(scores <= {0, 3, 5},
+                        f"scores must be rubric bands, got {sorted(scores)}")
 
     def test_rubric10_does_discriminate(self):
         results = self._scores("CM4AI")

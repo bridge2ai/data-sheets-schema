@@ -25,7 +25,7 @@ import os
 import platform
 import subprocess
 import sys
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -254,6 +254,122 @@ class ProvenanceRecord:
             + yaml.safe_dump(self.data, sort_keys=False, allow_unicode=True),
             encoding="utf-8")
         return path
+
+
+@dataclass
+class Contribution:
+    """One generated record that a derived record consumed.
+
+    The md5 is the point. A derived record that merely names its sources is not
+    reproducible: the sources are themselves stochastic outputs that can be
+    regenerated under the same label with different content. Pinning the bytes is
+    what makes "this came from those" checkable rather than asserted.
+    """
+
+    label: str
+    project: str
+    method: str
+    path: str
+    md5: str
+    slots: int | None = None
+    contributed_slots: int | None = None   # how many slots this source supplied
+
+
+def contribution(path: Path, *, label: str, project: str, method: str,
+                 contributed_slots: int | None = None) -> Contribution:
+    art = _artifact(path)
+    if art is None:
+        raise FileNotFoundError(f"contributing record does not exist: {path}")
+    return Contribution(label=label, project=project, method=method,
+                        path=art["path"], md5=art["md5"], slots=art["slots"],
+                        contributed_slots=contributed_slots)
+
+
+def _arm_of_sources(sources: list["Contribution"]) -> str:
+    arms = {_arm_for(c.method) for c in sources}
+    if len(arms) == 1:
+        return arms.pop()
+    # A merge across arms is a different object from a merge within one, and
+    # flattening that to a single name would hide it.
+    return "mixed: " + ", ".join(sorted(arms))
+
+
+def build_derived_record(project: str, method: str, label: str, *,
+                         sources: list[Contribution],
+                         derivation: str,
+                         outputs: dict[str, Path],
+                         concat_dir: Path = CONCAT_DIR,
+                         extra_notes: list[str] | None = None
+                         ) -> ProvenanceRecord:
+    """Provenance for a record built from other generated records.
+
+    A fourth mode alongside `live` and `reconstructed`, rather than a flag on
+    either. A merged record did not observe a generation and is not a recovered
+    account of one — no model produced it, no bundle was read, no prompt was
+    sent. Recording it as `live` would assert a generation that never happened;
+    recording it as `reconstructed` would imply an original run to recover.
+
+    So the model, prompt and input-bundle fields are absent by construction, and
+    what takes their place is the source list: every contributing record pinned
+    by md5, plus a statement of the rule that combined them. That is the whole
+    factual content of a derived record, and it is checkable — re-running the
+    same rule over the same bytes must reproduce it.
+
+    This is what blocked merged records from shipping: `provenance.py` could not
+    express "consumed other generated records", and claiming any existing mode
+    would have been a false statement about how the artifact came to exist.
+    """
+    if not sources:
+        raise ValueError(
+            "a derived record must name its sources; a merge whose inputs are "
+            "unrecorded cannot be reproduced or audited")
+
+    # An absent output is fatal here, unlike in a generation record where a
+    # phase may legitimately not have produced a report. The output is the whole
+    # reason a derived record exists: one whose artifact is missing describes
+    # nothing, yet would still be discovered and counted as provenance.
+    missing = [k for k, v in outputs.items() if not Path(v).exists()]
+    if missing or not outputs:
+        raise FileNotFoundError(
+            "a derived record must describe an artifact that exists; missing: "
+            + (", ".join(f"{k}={outputs[k]}" for k in missing) or "(no outputs given)"))
+
+    data: dict[str, Any] = {
+        "record_version": RECORD_VERSION,
+        "record_type": "d4d_derived_provenance",
+        "record_mode": "derived",
+        "record_generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        # The arm comes from the sources, not from the derived method: a merge
+        # of baseline records is still about the baseline arm, and asking
+        # `_arm_for` about a merged method only yields "unknown".
+        "run": {"label": label, "project": project, "method": method,
+                "arm": _arm_of_sources(sources),
+                "replicate": None},
+        # Stated, not implied. A reader must not have to infer from the absence
+        # of a model field that no model was involved.
+        "derivation": {
+            "rule": derivation,
+            "source_count": len(sources),
+            "reproducible": ("re-running this rule over the pinned source bytes "
+                             "must reproduce this record"),
+        },
+        "sources": [asdict(c) for c in sources],
+        "schema": schema_facts(),
+        "software": software_facts(),
+        "repo": repo_facts(),
+        "outputs": {k: _artifact(v) for k, v in outputs.items()},
+        "not_applicable": [
+            {"field": "model",
+             "reason": "no model produced this record; it combines existing ones"},
+            {"field": "prompts",
+             "reason": "no prompt was sent"},
+            {"field": "inputs.bundle_md5",
+             "reason": "no source bundle was read; the inputs are the records "
+                       "listed under `sources`"},
+        ],
+        "notes": list(extra_notes or []) or None,
+    }
+    return ProvenanceRecord(data=data)
 
 
 def build_record(project: str, method: str, label: str, *, mode: str,

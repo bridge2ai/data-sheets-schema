@@ -1,0 +1,79 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_derived_provenance
+record_mode: derived
+record_generated_at: '2026-07-30T06:44:09+00:00'
+run:
+  label: 2026-07-29_guarded-union
+  project: VOICE
+  method: claudecode_agent_merged
+  arm: baseline
+  replicate: null
+derivation:
+  rule: Union of slots across 3 replicates; where several supplied one slot, the best-fitting
+    value was taken (referent-bearing fields pinned to base `rep2`). 73 slots were
+    contested.
+  source_count: 3
+  reproducible: re-running this rule over the pinned source bytes must reproduce this
+    record
+sources:
+- label: rep1
+  project: VOICE
+  method: claudecode_agent
+  path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d.yaml
+  md5: b330893fc08b4aef2aa15bb829e0f4c6
+  slots: 76
+  contributed_slots: 19
+- label: rep2
+  project: VOICE
+  method: claudecode_agent
+  path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/VOICE_d4d.yaml
+  md5: e9344c832f73e4638f099cb388053b25
+  slots: 79
+  contributed_slots: 51
+- label: rep3
+  project: VOICE
+  method: claudecode_agent
+  path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/VOICE_d4d.yaml
+  md5: 9d0940929bdde63c139ceab25d95fc43
+  slots: 75
+  contributed_slots: 13
+schema:
+  declared_version: 1.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_md5: 633a2d2c490364d66f45d8ee2959a329
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_md5: c23d85ec2abfa2178de2737278f690e1
+  merged_schema_carries_version: false
+  note: The version is declared in the source schema but the merged artefacts predate
+    it; they will carry it after the next `make full-schema`. Content md5s identify
+    exactly what was used.
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: 2f38c71e133008e55076113a657c1204ecb79748
+  commit_short: 2f38c71e
+  branch: next-tasks
+  dirty: true
+  dirty_file_count: 7
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent_merged/2026-07-29_guarded-union/VOICE_d4d.yaml
+    md5: dadf7b4fcf4fde98e3c0fb170bae88ab
+    bytes: 136210
+    slots: 83
+not_applicable:
+- field: model
+  reason: no model produced this record; it combines existing ones
+- field: prompts
+  reason: no prompt was sent
+- field: inputs.bundle_md5
+  reason: no source bundle was read; the inputs are the records listed under `sources`
+notes:
+- INCOHERENT — version, issued, doi present in only some replicates; id assert different
+  referents

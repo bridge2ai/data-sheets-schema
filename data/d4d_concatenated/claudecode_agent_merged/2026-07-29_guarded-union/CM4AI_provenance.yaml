@@ -1,0 +1,78 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_derived_provenance
+record_mode: derived
+record_generated_at: '2026-07-30T06:44:00+00:00'
+run:
+  label: 2026-07-29_guarded-union
+  project: CM4AI
+  method: claudecode_agent_merged
+  arm: baseline
+  replicate: null
+derivation:
+  rule: Union of slots across 3 replicates; where several supplied one slot, the best-fitting
+    value was taken (referent-bearing fields pinned to base `rep3`). 57 slots were
+    contested.
+  source_count: 3
+  reproducible: re-running this rule over the pinned source bytes must reproduce this
+    record
+sources:
+- label: rep1
+  project: CM4AI
+  method: claudecode_agent
+  path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/CM4AI_d4d.yaml
+  md5: 9650dff42e799d54bc3fad9532ff1a8d
+  slots: 60
+  contributed_slots: 12
+- label: rep2
+  project: CM4AI
+  method: claudecode_agent
+  path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/CM4AI_d4d.yaml
+  md5: 7c30081883a69d84d7e0a5c1c4bfa91d
+  slots: 63
+  contributed_slots: 21
+- label: rep3
+  project: CM4AI
+  method: claudecode_agent
+  path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/CM4AI_d4d.yaml
+  md5: 2602c554b46417e5a4c51e2032cdff0f
+  slots: 69
+  contributed_slots: 37
+schema:
+  declared_version: 1.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_md5: 633a2d2c490364d66f45d8ee2959a329
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_md5: c23d85ec2abfa2178de2737278f690e1
+  merged_schema_carries_version: false
+  note: The version is declared in the source schema but the merged artefacts predate
+    it; they will carry it after the next `make full-schema`. Content md5s identify
+    exactly what was used.
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: 2f38c71e133008e55076113a657c1204ecb79748
+  commit_short: 2f38c71e
+  branch: next-tasks
+  dirty: true
+  dirty_file_count: 7
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent_merged/2026-07-29_guarded-union/CM4AI_d4d.yaml
+    md5: f4e9af04e3b47d3ea9ef82dbec2b2987
+    bytes: 119334
+    slots: 70
+not_applicable:
+- field: model
+  reason: no model produced this record; it combines existing ones
+- field: prompts
+  reason: no prompt was sent
+- field: inputs.bundle_md5
+  reason: no source bundle was read; the inputs are the records listed under `sources`
+notes:
+- INCOHERENT — version, issued, doi present in only some replicates
