@@ -480,6 +480,32 @@ FULL_SCHEMA_PATH = "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
 CORE_SCHEMA_PATH = "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
 
 
+def validation_block(spec: RunSpec, problems: list[dict[str, str]],
+                     recorded_by: str = "api_runner.execute") -> dict[str, Any]:
+    """The validation verdict, bound to the exact bytes it was reached on.
+
+    A verdict alone is a cached assertion about a file: edit the record and the
+    provenance still says `passed: true`. Recording each artifact's md5 makes a
+    stale verdict detectable rather than merely improbable — `validation_status`
+    re-hashes and reports STALE when they diverge. Hashing a 50-150 KB file is
+    microseconds, so this stays cheap enough for an analysis hot path, which
+    re-validating never would be.
+
+    md5 to match `provenance._artifact()`, which already hashes run outputs that
+    way; see INPUT_HASH there for why prompts use sha256 and these do not.
+    """
+    from data_sheets_schema.provenance import _md5
+    artifacts = {}
+    for name, path in (("full", spec.full_path), ("core", spec.core_path)):
+        artifacts[name] = {"path": str(path),
+                           "md5": _md5(path) if path.exists() else None}
+    block: dict[str, Any] = {"passed": not problems, "artifacts": artifacts,
+                             "recorded_by": recorded_by}
+    if problems:
+        block["problems"] = problems
+    return block
+
+
 def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
     """LinkML-validate both records, returning problems rather than raising.
 
@@ -546,6 +572,19 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                 getattr(anthropic, "APIConnectionError", ()),
                 getattr(anthropic, "InternalServerError", ()),
             ))
+            # Raw httpx transport errors are not wrapped in an anthropic class
+            # when they occur mid-stream, so classifying only on anthropic types
+            # misses them. A 64k-token streamed response through a proxy is a
+            # long-lived connection; `RemoteProtocolError: peer closed
+            # connection without sending complete message body` killed the
+            # second live CHORUS run in phase 1 without a single retry.
+            # TransportError is the base for connect/read/write/protocol/timeout.
+            try:
+                import httpx
+                if isinstance(exc, httpx.TransportError):
+                    transient = True
+            except ImportError:          # pragma: no cover - httpx ships with the SDK
+                pass
             status = getattr(exc, "status_code", None)
             if status is not None and 500 <= status < 600:
                 transient = True
@@ -700,8 +739,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # because it only checks that files exist. An invalid record that looks
     # finished is worse than a failed run.
     problems = validate_outputs(spec)
-    rec.data["validation"] = ({"passed": True} if not problems else
-                              {"passed": False, "problems": problems})
+    rec.data["validation"] = validation_block(spec, problems)
 
     rec.write(spec.provenance_path)
 

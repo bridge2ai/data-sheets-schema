@@ -171,22 +171,92 @@ def is_complete(method: str, label: str, project: str,
     return full.exists() and core.exists() and report.exists()
 
 
+VALID, INVALID, UNVERIFIED, STALE = "valid", "invalid", "unverified", "stale"
+
+
+def validation_status(method: str, label: str, project: str,
+                      concat_dir: Path = CONCAT_DIR) -> str:
+    """Whether a run's records are known to validate against the schema.
+
+    Three states, deliberately — `is_complete()` only checks that three files
+    exist, so a record that fails LinkML validation is "complete" and gets
+    analysed. But validating on demand is not an option either: the corpus holds
+    100+ records and each validation costs seconds, so calling the validator
+    from an analysis hot path would make `compare()` unusable.
+
+    So the answer is read from the run's own provenance record, which
+    `api_runner.execute()` now writes. A run whose record predates that, or was
+    produced by the agent path, reports UNVERIFIED — not VALID. Treating absence
+    of evidence as validity is how an invalid record enters an analysis, which
+    is exactly what this exists to prevent. Populate it with `d4d runs validate`.
+    """
+    from data_sheets_schema.provenance import record_path_for
+    rec = record_path_for(project, method, label, concat_dir)
+    if not rec.exists():
+        return UNVERIFIED
+    try:
+        data = yaml.safe_load(rec.read_text(encoding="utf-8")) or {}
+    except Exception:
+        return UNVERIFIED
+    v = data.get("validation")
+    if not isinstance(v, dict) or "passed" not in v:
+        return UNVERIFIED
+
+    # A verdict is about specific bytes. Re-hash the artifacts it was reached
+    # on: if a record was edited since, the recorded `passed` is a claim about
+    # a file that no longer exists in that form. STALE rather than UNVERIFIED
+    # because the diagnosis differs — "validated, then changed" is a different
+    # problem from "never checked" — and both mean do not rely on it.
+    from data_sheets_schema.provenance import _md5
+    artifacts = v.get("artifacts")
+    if isinstance(artifacts, dict) and artifacts:
+        for entry in artifacts.values():
+            if not isinstance(entry, dict):
+                continue
+            recorded, path = entry.get("md5"), entry.get("path")
+            if not recorded or not path:
+                continue
+            if _md5(Path(path)) != recorded:
+                return STALE
+
+    return VALID if v["passed"] else INVALID
+
+
 def compare(method: str, project: str, labels: list[str],
-            concat_dir: Path = CONCAT_DIR) -> dict:
-    """Slot-level agreement across runs of one method for one project."""
+            concat_dir: Path = CONCAT_DIR,
+            exclude_invalid: bool = True) -> dict:
+    """Slot-level agreement across runs of one method for one project.
+
+    Records known to fail validation are excluded by default: comparing slot
+    sets between a valid record and a broken one measures the breakage. Records
+    of unknown validity are included but counted, so the caller can see how much
+    of the result rests on unchecked input.
+    """
     present: dict[str, set[str]] = {}
     incomplete: list[str] = []
+    invalid: list[str] = []
+    unverified: list[str] = []
     for label in labels:
         if not is_complete(method, label, project, concat_dir):
             incomplete.append(label)
             continue
+        status = validation_status(method, label, project, concat_dir)
+        if status == INVALID:
+            invalid.append(label)
+            if exclude_invalid:
+                continue
+        elif status in (UNVERIFIED, STALE):
+            # STALE is grouped with UNVERIFIED for reporting: both mean the
+            # record's validity is unknown *now*, whatever was true before.
+            unverified.append(f"{label} ({status})" if status == STALE else label)
         p = record_path(method, label, project, concat_dir)
         if p:
             present[label] = slots(p)
     if len(present) < 2:
         return {"error": f"need >=2 COMPLETE runs with {project} under {method}; "
                          f"found {len(present)}"
-                         + (f"; excluded as incomplete: {incomplete}" if incomplete else "")}
+                         + (f"; excluded as incomplete: {incomplete}" if incomplete else "")
+                         + (f"; excluded as invalid: {invalid}" if invalid else "")}
     sets = list(present.values())
     stable = set.intersection(*sets)
     union = set.union(*sets)
@@ -211,6 +281,11 @@ def compare(method: str, project: str, labels: list[str],
         "same_procedure": same_procedure,
         "procedures": prints,
         "excluded_incomplete": incomplete,
+        "excluded_invalid": invalid,
+        # Not a warning to be ignored: an agreement figure computed over
+        # unverified records is a claim about records nobody has checked.
+        "unverified": unverified,
+        "all_verified": not unverified and not invalid,
     }
 
 
@@ -324,10 +399,22 @@ def arm_delta(baseline_method: str, arm_method: str, project: str,
     (a spurious +12 and a spurious -14). The gate belongs in the analysis path,
     not only in the CLI.
     """
+    def _ok(method: str, r: str) -> bool:
+        label = f"{config}_{r}"
+        if not is_complete(method, label, project, concat_dir):
+            return False
+        # A delta between a valid record and a broken one measures the breakage,
+        # not the arm. Excluded here for the same reason incomplete runs are.
+        return validation_status(method, label, project, concat_dir) != INVALID
+
     usable = [r for r in replicates
-              if is_complete(baseline_method, f"{config}_{r}", project, concat_dir)
-              and is_complete(arm_method, f"{config}_{r}", project, concat_dir)]
+              if _ok(baseline_method, r) and _ok(arm_method, r)]
     skipped = [r for r in replicates if r not in usable]
+    unverified = [
+        r for r in usable
+        if {UNVERIFIED, STALE} & {
+            validation_status(baseline_method, f"{config}_{r}", project, concat_dir),
+            validation_status(arm_method, f"{config}_{r}", project, concat_dir)}]
 
     deltas, base_sets, arm_sets = {}, [], []
     for r in usable:
@@ -356,7 +443,9 @@ def arm_delta(baseline_method: str, arm_method: str, project: str,
                    else "not resolvable")
 
     return {"project": project, "deltas": deltas, "noise": noise,
-            "verdict": verdict, "skipped_incomplete": skipped}
+            "verdict": verdict, "skipped_incomplete": skipped,
+            "unverified": unverified,
+            "all_verified": not unverified}
 
 
 def needs_replicate_label(runs: list[Run]) -> list[Run]:

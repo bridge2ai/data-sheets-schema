@@ -207,3 +207,183 @@ class TestProcedureFingerprint(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestValidityIsSeparateFromCompleteness(unittest.TestCase):
+    """`is_complete()` answers a different question from "does this validate".
+
+    Completeness is "did all three files get written". A record that fails
+    LinkML validation is complete by that definition, so analysis paths would
+    happily compare a valid record against a broken one — which measures the
+    breakage rather than the arm.
+    """
+
+    def setUp(self):
+        import tempfile
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+
+    def _run(self, label, project="P", method="m", validation=None):
+        import yaml as _yaml
+        base = self.root / method / label
+        core = self.root / f"{method}_core" / label
+        base.mkdir(parents=True, exist_ok=True)
+        core.mkdir(parents=True, exist_ok=True)
+        (base / f"{project}_d4d.yaml").write_text("id: x\nname: X\n")
+        (core / f"{project}_d4d_core.yaml").write_text("id: x\n")
+        (core / f"{project}_reconciliation.md").write_text("# r\n")
+        if validation is not None:
+            (core / f"{project}_provenance.yaml").write_text(
+                _yaml.safe_dump({"validation": validation}))
+
+    def test_absent_provenance_is_unverified_not_valid(self):
+        from data_sheets_schema.runs import UNVERIFIED, validation_status
+        self._run("a")
+        self.assertEqual(validation_status("m", "a", "P", self.root), UNVERIFIED)
+
+    def test_provenance_without_a_validation_field_is_unverified(self):
+        from data_sheets_schema.runs import UNVERIFIED, validation_status
+        self._run("a", validation={})
+        self.assertEqual(validation_status("m", "a", "P", self.root), UNVERIFIED)
+
+    def test_recorded_pass_and_fail_are_read(self):
+        from data_sheets_schema.runs import INVALID, VALID, validation_status
+        self._run("good", validation={"passed": True})
+        self._run("bad", validation={"passed": False})
+        self.assertEqual(validation_status("m", "good", "P", self.root), VALID)
+        self.assertEqual(validation_status("m", "bad", "P", self.root), INVALID)
+
+    def test_an_invalid_record_is_still_complete(self):
+        """The gap this closes: complete does not imply usable."""
+        from data_sheets_schema.runs import INVALID, is_complete, validation_status
+        self._run("bad", validation={"passed": False})
+        self.assertTrue(is_complete("m", "bad", "P", self.root))
+        self.assertEqual(validation_status("m", "bad", "P", self.root), INVALID)
+
+    def test_compare_excludes_invalid_records(self):
+        from data_sheets_schema.runs import compare
+        self._run("a", validation={"passed": True})
+        self._run("b", validation={"passed": True})
+        self._run("c", validation={"passed": False})
+        r = compare("m", "P", ["a", "b", "c"], self.root)
+        self.assertEqual(r["excluded_invalid"], ["c"])
+        self.assertNotIn("c", r["labels"])
+
+    def test_compare_declares_unverified_input(self):
+        """An agreement figure over unchecked records must say so."""
+        from data_sheets_schema.runs import compare
+        self._run("a")
+        self._run("b")
+        r = compare("m", "P", ["a", "b"], self.root)
+        self.assertEqual(sorted(r["unverified"]), ["a", "b"])
+        self.assertFalse(r["all_verified"])
+
+    def test_compare_reports_all_verified_when_it_is(self):
+        from data_sheets_schema.runs import compare
+        self._run("a", validation={"passed": True})
+        self._run("b", validation={"passed": True})
+        self.assertTrue(compare("m", "P", ["a", "b"], self.root)["all_verified"])
+
+    def test_compare_errors_name_the_invalid_exclusions(self):
+        from data_sheets_schema.runs import compare
+        self._run("a", validation={"passed": True})
+        self._run("b", validation={"passed": False})
+        r = compare("m", "P", ["a", "b"], self.root)
+        self.assertIn("error", r)
+        self.assertIn("invalid", r["error"])
+
+    def test_exclude_invalid_can_be_disabled_deliberately(self):
+        from data_sheets_schema.runs import compare
+        self._run("a", validation={"passed": True})
+        self._run("b", validation={"passed": False})
+        r = compare("m", "P", ["a", "b"], self.root, exclude_invalid=False)
+        self.assertIn("b", r["labels"])
+        self.assertEqual(r["excluded_invalid"], ["b"])
+
+
+class TestStaleVerdictsAreDetected(unittest.TestCase):
+    """A verdict is a claim about specific bytes, not about a filename.
+
+    Validity is recorded rather than recomputed, because validating inside an
+    analysis hot path would cost seconds per record across a 100-record corpus.
+    The price is that an edited record keeps its old verdict — unless the
+    verdict is bound to the artifacts' hashes, which is what this checks.
+    """
+
+    def setUp(self):
+        import tempfile
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.full = self.root / "m" / "L" / "P_d4d.yaml"
+        self.core = self.root / "m_core" / "L" / "P_d4d_core.yaml"
+        for p in (self.full, self.core):
+            p.parent.mkdir(parents=True, exist_ok=True)
+        self.full.write_text("id: x\nname: X\n")
+        self.core.write_text("id: x\n")
+        (self.core.parent / "P_reconciliation.md").write_text("# r\n")
+
+    def _record(self, passed=True, with_hashes=True):
+        import hashlib
+        import yaml as _yaml
+        block = {"passed": passed}
+        if with_hashes:
+            block["artifacts"] = {
+                name: {"path": str(p),
+                       "md5": hashlib.md5(p.read_bytes()).hexdigest()}
+                for name, p in (("full", self.full), ("core", self.core))}
+        (self.core.parent / "P_provenance.yaml").write_text(
+            _yaml.safe_dump({"validation": block}))
+
+    def test_unedited_record_stays_valid(self):
+        from data_sheets_schema.runs import VALID, validation_status
+        self._record()
+        self.assertEqual(validation_status("m", "L", "P", self.root), VALID)
+
+    def test_editing_the_full_record_makes_the_verdict_stale(self):
+        from data_sheets_schema.runs import STALE, validation_status
+        self._record()
+        self.full.write_text("id: x\nname: EDITED\n")
+        self.assertEqual(validation_status("m", "L", "P", self.root), STALE)
+
+    def test_editing_the_core_record_makes_the_verdict_stale(self):
+        from data_sheets_schema.runs import STALE, validation_status
+        self._record()
+        self.core.write_text("id: y\n")
+        self.assertEqual(validation_status("m", "L", "P", self.root), STALE)
+
+    def test_stale_beats_a_recorded_pass(self):
+        """A `passed: true` about bytes that changed is not a pass."""
+        from data_sheets_schema.runs import STALE, validation_status
+        self._record(passed=True)
+        self.full.write_text("something else entirely\n")
+        self.assertNotEqual(validation_status("m", "L", "P", self.root), "valid")
+        self.assertEqual(validation_status("m", "L", "P", self.root), STALE)
+
+    def test_a_verdict_without_hashes_cannot_be_checked(self):
+        """Older records carry no hashes; they are read at face value.
+
+        Documented rather than silently tolerated: staleness detection only
+        applies to verdicts written with artifact hashes.
+        """
+        from data_sheets_schema.runs import VALID, validation_status
+        self._record(with_hashes=False)
+        self.full.write_text("edited but undetectable\n")
+        self.assertEqual(validation_status("m", "L", "P", self.root), VALID)
+
+    def test_compare_reports_stale_runs_as_unverified(self):
+        from data_sheets_schema.runs import compare
+        self._record()
+        # a second, untouched run to compare against
+        f2 = self.root / "m" / "L2" / "P_d4d.yaml"
+        c2 = self.root / "m_core" / "L2" / "P_d4d_core.yaml"
+        for p in (f2, c2):
+            p.parent.mkdir(parents=True, exist_ok=True)
+        f2.write_text("id: x\nname: X\n")
+        c2.write_text("id: x\n")
+        (c2.parent / "P_reconciliation.md").write_text("# r\n")
+        self.full.write_text("id: x\nname: EDITED\n")     # make L stale
+        r = compare("m", "P", ["L", "L2"], self.root)
+        self.assertFalse(r["all_verified"])
+        self.assertTrue(any("stale" in u for u in r["unverified"]))

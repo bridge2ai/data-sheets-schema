@@ -502,3 +502,88 @@ class TestOutputValidation(unittest.TestCase):
             problems = validate_outputs(spec(out_dir=Path(td)))
         self.assertTrue(problems)
         self.assertTrue(any(p["error"] == "missing" for p in problems))
+
+
+class TestTransportErrorsAreRetried(unittest.TestCase):
+    """Mid-stream connection drops must retry, not abort the run.
+
+    The second live CHORUS run died in phase 1 on
+    `httpx.RemoteProtocolError: peer closed connection without sending complete
+    message body`. It was never retried: the classifier only recognised
+    anthropic's own exception classes, and a raw httpx transport error is not
+    wrapped in one when it surfaces mid-stream. Streaming a 64k-token response
+    through a proxy is a long-lived connection, so this is an expected failure
+    mode rather than a fluke.
+    """
+
+    def _flaky(self, exc, fail_times):
+        calls = {"n": 0}
+
+        class C:
+            class messages:
+                @staticmethod
+                def create(**kw):
+                    calls["n"] += 1
+                    if calls["n"] <= fail_times:
+                        raise exc
+                    return FakeResponse("ok")
+
+                @classmethod
+                def stream(cls, **kw):
+                    outer = cls
+
+                    class _S:
+                        def __enter__(self):
+                            self._m = outer.create(**kw)
+                            return self
+
+                        def __exit__(self, *e):
+                            return False
+
+                        def get_final_message(self):
+                            return self._m
+                    return _S()
+        return C(), calls
+
+    def test_remote_protocol_error_is_retried(self):
+        import httpx
+        from data_sheets_schema.api_runner import _call_with_retry
+        exc = httpx.RemoteProtocolError(
+            "peer closed connection without sending complete message body")
+        client, calls = self._flaky(exc, fail_times=2)
+        out = _call_with_retry(client, model="claude-opus-5", max_tokens=10,
+                               temperature=None, system="s", messages=[],
+                               sleep=lambda _: None)
+        self.assertEqual(calls["n"], 3)
+        self.assertIsNotNone(out)
+
+    def test_read_timeout_is_retried(self):
+        import httpx
+        from data_sheets_schema.api_runner import _call_with_retry
+        client, calls = self._flaky(httpx.ReadTimeout("slow"), fail_times=1)
+        _call_with_retry(client, model="claude-opus-5", max_tokens=10,
+                         temperature=None, system="s", messages=[],
+                         sleep=lambda _: None)
+        self.assertEqual(calls["n"], 2)
+
+    def test_a_persistent_transport_error_still_gives_up(self):
+        import httpx
+        from data_sheets_schema.api_runner import _call_with_retry, MAX_ATTEMPTS
+        client, calls = self._flaky(httpx.ConnectError("down"), fail_times=99)
+        with self.assertRaises(httpx.ConnectError):
+            _call_with_retry(client, model="claude-opus-5", max_tokens=10,
+                             temperature=None, system="s", messages=[],
+                             sleep=lambda _: None)
+        self.assertEqual(calls["n"], MAX_ATTEMPTS)
+
+    def test_a_bad_request_is_not_retried(self):
+        """400s are deterministic; retrying only delays the real error."""
+        from data_sheets_schema.api_runner import _call_with_retry
+        err = Exception("`temperature` is deprecated for this model")
+        err.status_code = 400
+        client, calls = self._flaky(err, fail_times=99)
+        with self.assertRaises(Exception):
+            _call_with_retry(client, model="claude-opus-5", max_tokens=10,
+                             temperature=None, system="s", messages=[],
+                             sleep=lambda _: None)
+        self.assertEqual(calls["n"], 1)
