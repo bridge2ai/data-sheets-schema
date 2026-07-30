@@ -269,6 +269,12 @@ LIVE, ATTESTED, PARTIAL, NO_RECORD = "live", "attested", "partial", "none"
 # stopping the ratio worsening, so it applies going forward.
 LIVE_REQUIRED_FROM = "2026-07-30"
 
+# A label dated before the project existed is not a date, it is a malformed
+# label. Without a floor, `0001-01-01_x` or a mistyped `2016-07-30` exempts a run
+# from the requirement — an exemption anyone can take by writing one. The
+# unparseable case was already handled; this closes the parseable-nonsense case.
+EARLIEST_PLAUSIBLE_RUN = "2024-01-01"
+
 
 def requires_live(label: str) -> bool:
     """Whether this run is subject to the live-provenance requirement.
@@ -280,7 +286,12 @@ def requires_live(label: str) -> bool:
     anything unparseable — is an exemption anyone could take by accident.
     """
     m = re.match(r"(\d{4}-\d{2}-\d{2})", label or "")
-    return m.group(1) >= LIVE_REQUIRED_FROM if m else True
+    if not m:
+        return True
+    dated = m.group(1)
+    if dated < EARLIEST_PLAUSIBLE_RUN:
+        return True          # malformed, not old
+    return dated >= LIVE_REQUIRED_FROM
 
 
 def check_provenance(method: str, label: str, project: str,

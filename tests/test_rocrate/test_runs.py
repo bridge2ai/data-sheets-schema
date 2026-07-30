@@ -709,3 +709,24 @@ class TestLiveProvenanceRequirement(unittest.TestCase):
                                  Path(td))
             self.assertFalse(r["ok"])
             self.assertIn("no provenance record", r["reason"])
+
+
+class TestImplausibleDatesAreNotExemptions(unittest.TestCase):
+    """An exemption anyone can take by writing a wrong date is not a rule (#194)."""
+
+    def test_a_pre_project_date_is_treated_as_malformed(self):
+        from data_sheets_schema.runs import requires_live
+        for label in ("0001-01-01_x", "1970-01-01_x", "2016-07-30_x"):
+            with self.subTest(label=label):
+                self.assertTrue(requires_live(label))
+
+    def test_a_real_pre_cutoff_date_is_still_exempt(self):
+        from data_sheets_schema.runs import requires_live
+        self.assertFalse(requires_live("2026-07-28_claude-opus-5-generic_rep1"))
+        self.assertFalse(requires_live("2026-04-10_sonnet-4.6"))
+
+    def test_the_floor_sits_below_the_earliest_real_run(self):
+        from data_sheets_schema.runs import (
+            EARLIEST_PLAUSIBLE_RUN, LIVE_REQUIRED_FROM)
+        self.assertLess(EARLIEST_PLAUSIBLE_RUN, LIVE_REQUIRED_FROM)
+        self.assertLess(EARLIEST_PLAUSIBLE_RUN, "2026-04-10")
