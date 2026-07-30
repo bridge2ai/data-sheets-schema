@@ -67,3 +67,13 @@ unrecoverable:
 - field: system
   reason: hardware was not captured when this run executed
 notes: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate/2026-07-27_claude-opus-5_rep1/VOICE_d4d.yaml
+      md5: 0b0036412d10dcf7629c4d4805919b47
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep1/VOICE_d4d_core.yaml
+      md5: 727377d29f9ee70f55562287ddf68f47
+  recorded_by: d4d runs validate

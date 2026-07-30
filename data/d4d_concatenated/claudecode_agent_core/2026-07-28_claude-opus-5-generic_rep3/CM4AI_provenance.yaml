@@ -73,3 +73,13 @@ outputs:
     slots: null
 unrecoverable: null
 notes: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/CM4AI_d4d.yaml
+      md5: 2602c554b46417e5a4c51e2032cdff0f
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep3/CM4AI_d4d_core.yaml
+      md5: 34f4d9312d5a7d596632b8551c737323
+  recorded_by: d4d runs validate

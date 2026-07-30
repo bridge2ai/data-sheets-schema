@@ -230,9 +230,16 @@ make gen-d4d-html
 | claudecode_assistant | Alternative | Interactive refinement | ⭐⭐⭐⭐⭐ | Medium |
 | claudecode | Legacy | API automation | ⭐⭐⭐ | Medium |
 | gpt5 | Comparison | Benchmarking | ⭐⭐ | Slow |
-| curated | Reference | Gold standard | ⭐⭐⭐⭐⭐ | Manual |
+| curated | Comparison | ChatGPT chat arm — **not** a gold standard | ⭐⭐ | Manual paste |
 
 **Key finding**: claudecode_agent outperforms GPT-5 by 3.26× on multi-document synthesis.
+
+⚠️ **`curated` is a misnomer.** Those records were generated through a ChatGPT
+chat interface by pasting in the prompt, schema and input docs — they were not
+hand-curated and are not a reference. They also document superseded releases
+(AI-READI v2.0.0, VOICE v2.0, CM4AI B35XWX v1.4), so scoring current output
+against them penalises correct facts as errors. There is no CHORUS record.
+**The repository has no gold standard.** See issue #177.
 
 **Use claudecode_agent for new datasheets**:
 ```bash
@@ -328,6 +335,42 @@ make gen-d4d-html
 ```bash
 make d4d-pipeline-{individual|concatenated|full}-gpt5
 ```
+
+## Model Reasoning Capture
+
+Each API generation phase and each evidence-scoring judgement writes a
+structured reasoning record beside the run's provenance:
+
+```
+data/d4d_concatenated/{METHOD}_core/{LABEL}/{PROJECT}_reasoning.jsonl
+```
+
+One JSON line per phase (`full`, `core`, `audit`, …) recording whether a
+thinking block was returned, whether its text was available, an estimate of the
+tokens spent reasoning, and the `stop_reason`.
+
+```bash
+d4d provenance reasoning --method claudecode_agent --label 2026-07-29_...
+d4d provenance reasoning --path some/log.jsonl
+```
+
+⚠️ **Through CBORG the reasoning text is not available.** Verified 2026-07-29 on
+`google/claude-opus-5-high`: the thinking block arrives with a valid
+`signature` and `thinking: ''`, both streaming and non-streaming, and the stream
+emits no `thinking_delta` events at all. The proxy forwards the signed envelope
+and strips the plaintext. The logs therefore record `reasoning_present: true,
+reasoning_available: false` — a deliberately different claim from "no reasoning
+happened". Runs made directly against the Anthropic API (`ANTHROPIC_API_KEY`)
+capture the text with no code change.
+
+Because `output_tokens` bills thinking and visible text together,
+`reasoning_tokens_estimate` (output tokens minus a 4-chars-per-token estimate of
+the visible text) is the only surviving measure of reasoning effort when the
+text is withheld. It is sound for comparison, not for cost attribution.
+
+This is also why `max_tokens` must be sized for the reasoning rather than the
+answer — a call can spend its entire budget thinking and return empty text. See
+`src/data_sheets_schema/reasoning.py`.
 
 ## Null/Empty Value Handling
 

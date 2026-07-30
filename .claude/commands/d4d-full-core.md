@@ -33,6 +33,28 @@ Two execution modes are supported:
   date and the selected model. All outputs for one run use the exact same label.
 - Never overwrite a populated version directory. For another run with the same
   date and model, append `-r2`, `-r3`, and so on.
+- `-r{N}` means a **revision** (changed pipeline), not a replicate. For repeated
+  samples of the *same* procedure, use `_rep{N}`; `d4d runs list` reports the two
+  differently because runs that differ in procedure are not comparable as
+  samples.
+
+Header substitution fields used below:
+
+| Field | Meaning |
+|---|---|
+| `{RUNTIME}` | what is executing — `Claude Code`, `Claude API (direct)`, `Codex CLI` |
+| `{PROVIDER}` | `Anthropic`, `OpenAI`, or the proxy actually reached |
+| `{MODEL}` | the model identifier the request carries |
+| `{EFFORT}` | reasoning effort, where the runtime exposes one |
+| `{MODE}` | `four-phase project agent` or `independent` |
+| `{CONDITION}` | `generic` or `tuned` — see Prompt Conditions below |
+| `{PROMPT_PATHS}` | the resolved prompt file(s) this run was launched with |
+| `{METHOD}` | output method directory, e.g. `claudecode_agent` |
+
+Substitute these; never leave a literal `{...}` in a written record, and never
+carry over a value from a different runtime. Records once shipped headed
+`Agent runtime: Claude Code` on `claude-opus-5[1m]` from a run that touched
+neither, because a prompt written for one path was reused verbatim by another.
 
 ## Inputs (per project)
 
@@ -77,6 +99,73 @@ or override structure.
 Before launching an agent, the orchestrator may inspect output directory names
 only to choose a new version label. Do not put older D4D contents into an agent's
 context.
+
+## Prompt Conditions and Priming
+
+Every run belongs to exactly one prompt condition, and the record must say which.
+Two conditions exist:
+
+- **generic** — `src/download/prompts/d4d_generic_arm_prompt.md`. Every project
+  and every arm receives *this exact text*; only mechanical fields are
+  substituted (project, arm, method, bundle, label, runtime, provider, model).
+  Nothing in it is specific to a project, dataset, or input set.
+- **tuned** — `src/download/prompts/d4d_tuned_arm_prompt.md` plus the project's
+  component file in `src/download/prompts/components/{PROJECT}.md`. Carries
+  project-specific and input-set-specific content deliberately.
+
+The difference between the two is what the prompt-condition study measures, so
+**adding a project-specific sentence to the generic prompt silently creates a
+third condition and destroys the comparison.**
+
+### The priming taxonomy
+
+Four kinds of statement can be added to a generation prompt. They are not
+equivalent, and only the first two are ever acceptable:
+
+| kind | example | generic | tuned |
+|---|---|---|---|
+| **decision rule** | "prefer omission over inference" | ✅ if applied to every project identically | ✅ |
+| **factual disambiguation** | "this bundle describes a release programme, not one release" | ❌ project-specific | ✅ |
+| **quality warning** | "earlier runs conflated two entities here" | ❌ | ⚠️ steers behaviour; avoid |
+| **outcome expectation** | "expect roughly 60 populated slots" | ❌ | ❌ **never, in any condition** |
+
+Outcome expectations are excluded from *both* conditions. They tell the model
+what answer to produce rather than what the evidence is, so a record generated
+under one cannot be read as evidence about the evidence.
+
+`-deprimed` is **not** a third supported condition. It names the 2026-07-28
+series that removed outcome expectations but retained per-project factual notes,
+making it neither generic nor tuned. Those runs are retained under that label for
+the record; do not create new ones.
+
+### Uniform decision rules (all conditions, all projects)
+
+These are part of the method rather than tuning, because each applies identically
+to every project. Enforce them whether or not a prompt file was used to launch:
+
+- Populate a slot only where the declared bundle supports it. **Prefer omission
+  over inference:** an absent slot is a correct answer when the evidence is
+  absent, and a plausible guess is not.
+- Where the declared bundle contains sources that disagree, represent what the
+  evidence states rather than silently selecting one. Do not merge distinct
+  entities into a single claim.
+- `Dataset` admits one referent. Choose the one the declared bundle best
+  supports, state that choice in the reconciliation report, and hold to it
+  consistently across both records.
+- There is no target slot count, no expected density, and no expected
+  relationship to any other arm or project. Apply your own judgment about what
+  the evidence supports.
+
+The last rule is the load-bearing one: it is what makes a slot count an
+observation rather than a target.
+
+### Recording the condition
+
+Both file headers carry a `# Mode:` line naming the condition and a `# Prompt:`
+line naming the resolved prompt file(s) — see the header blocks below. A record
+that does not name its prompt condition cannot be placed in the study, and a run
+launched without one of the two prompt files above is neither condition; say so
+in the provenance `notes` rather than picking a label.
 
 ## Runtime Cases
 
@@ -161,7 +250,8 @@ File header:
 # Provider: {PROVIDER}
 # Model: {MODEL}
 # Reasoning effort: {EFFORT}
-# Mode: {MODE}
+# Mode: {MODE}, {CONDITION} prompt
+# Prompt: {PROMPT_PATHS}
 # Source bundle: data/preprocessed/concatenated/{PROJECT}_preprocessed.txt
 # Source manifest: data/preprocessed/source_manifest.yaml
 # Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
@@ -211,7 +301,8 @@ File header:
 # Schema path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
 # Model: {MODEL}
 # Reasoning effort: {EFFORT}
-# Mode: {MODE}
+# Mode: {MODE}, {CONDITION} prompt
+# Prompt: {PROMPT_PATHS}
 # Sources: data/preprocessed/concatenated/{PROJECT}_preprocessed.txt + {full D4D path}
 # Source manifest: data/preprocessed/source_manifest.yaml
 # Prior D4D factual reuse: prohibited

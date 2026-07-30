@@ -117,3 +117,18 @@ class TestSchemaStats(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TestDigestBuildIsMemoised(unittest.TestCase):
+    """Rebuilding cost ~0.5s per call and was paid once per distinct slot (#181)."""
+
+    def test_repeated_builds_return_the_same_object(self):
+        from data_sheets_schema import schema_digest
+        a = schema_digest.build("Dataset")
+        b = schema_digest.build("Dataset")
+        self.assertIs(a, b)
+
+    def test_different_classes_are_cached_separately(self):
+        from data_sheets_schema import schema_digest
+        self.assertIsNot(schema_digest.build("Dataset"),
+                         schema_digest.build("CoreDataset"))

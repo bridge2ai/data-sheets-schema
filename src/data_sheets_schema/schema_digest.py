@@ -49,10 +49,26 @@ class SlotDigest:
 
 
 @dataclass
+class NestedClass:
+    """A class used as a slot range, and what it requires.
+
+    Without this the digest names a range (`subsets — Subset [many]`) but never
+    says that `Subset` requires an `id`. The first live API run emitted five
+    subsets, none with an id, and the record failed validation — the model was
+    never told. Ranges are only useful alongside their obligations.
+    """
+
+    name: str
+    required: list[str] = field(default_factory=list)
+    optional: list[str] = field(default_factory=list)
+
+
+@dataclass
 class ClassDigest:
     class_name: str
     schema_path: str
     slots: list[SlotDigest] = field(default_factory=list)
+    nested: list[NestedClass] = field(default_factory=list)
 
     @property
     def required_names(self) -> list[str]:
@@ -66,7 +82,18 @@ def _truncate(text: str | None, limit: int = DESCRIPTION_CHARS) -> str | None:
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 
 
+_BUILD_CACHE: dict[tuple[str, str], "ClassDigest"] = {}
+
+
 def build(class_name: str, schema_path: Path | None = None) -> ClassDigest:
+    """Memoised on (class_name, schema_path); see _build_uncached."""
+    key = (class_name, str(schema_path or ""))
+    if key not in _BUILD_CACHE:
+        _BUILD_CACHE[key] = _build_uncached(class_name, schema_path)
+    return _BUILD_CACHE[key]
+
+
+def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDigest:
     """Slot inventory for one target class."""
     path = Path(schema_path) if schema_path else CLASS_SCHEMA.get(class_name)
     if path is None:
@@ -96,6 +123,26 @@ def build(class_name: str, schema_path: Path | None = None) -> ClassDigest:
             enum_truncated=truncated,
         ))
     digest.slots.sort(key=lambda s: s.name)
+
+    # One level of nesting only. Deeper recursion reproduces most of the schema
+    # and defeats the point of a digest; one level is what a generation run
+    # needs to populate a slot's object without guessing its required keys.
+    seen: set[str] = set()
+    for slot in digest.slots:
+        rng = slot.range
+        if not rng or rng in seen:
+            continue
+        cls = sv.get_class(rng)
+        if cls is None:
+            continue
+        seen.add(rng)
+        req, opt = [], []
+        for sub in sv.class_induced_slots(rng):
+            (req if sub.required else opt).append(str(sub.name))
+        if req or opt:
+            digest.nested.append(NestedClass(name=rng, required=sorted(req),
+                                             optional=sorted(opt)))
+    digest.nested.sort(key=lambda n: n.name)
     return digest
 
 
@@ -122,6 +169,20 @@ def render(digest: ClassDigest) -> str:
             shown = ", ".join(f"`{v}`" for v in s.enum_values)
             tail = f" (+{s.enum_truncated} more)" if s.enum_truncated else ""
             lines.append(f"Permitted: {shown}{tail}")
+        lines.append("")
+
+    if digest.nested:
+        lines += [
+            "# Object ranges — required keys",
+            "",
+            "A slot whose range is one of these takes an object (or list of "
+            "objects). Any listed **required** key must be present on every such "
+            "object, or the record fails validation.",
+            "",
+        ]
+        for n in digest.nested:
+            req = ", ".join(f"`{k}`" for k in n.required) if n.required else "none"
+            lines.append(f"- **{n.name}** — required: {req}")
         lines.append("")
     return "\n".join(lines)
 

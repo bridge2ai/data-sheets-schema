@@ -80,3 +80,97 @@ def compare(method, project, labels):
     click.echo(f"  agreement:              {result['agreement']:.1%}")
     if result['varying']:
         click.echo(f"\n  slots not present in every run:\n    {', '.join(result['varying'])}")
+
+
+@runs.command("validate")
+@click.option("--method", help="limit to one method (default: all discovered)")
+@click.option("--project", help="limit to one project")
+@click.option("--label", help="limit to one run label")
+@click.option("--recheck", is_flag=True,
+              help="re-validate runs whose provenance already records a result")
+@click.option("--dry-run", is_flag=True, help="list what would be validated")
+def validate_cmd(method, project, label, recheck, dry_run):
+    """Record whether each run's records validate, into its provenance.
+
+    `is_complete()` only checks that three files exist, so an invalid record is
+    "complete" and gets analysed. Validity is read from provenance rather than
+    computed on demand — the corpus holds 100+ records and each validation costs
+    seconds, so validating inside `compare()` would make it unusable. This sweep
+    populates that field once.
+
+    A run with no recorded result is UNVERIFIED, never assumed valid.
+    """
+    import yaml as _yaml
+    from data_sheets_schema.api_runner import (
+        RunSpec, validate_outputs, validation_block,
+    )
+    from data_sheets_schema.provenance import (
+        ProvenanceRecord, record_path_for,
+    )
+    from data_sheets_schema.runs import (
+        STALE, UNVERIFIED, discover, is_complete, validation_status,
+    )
+
+    targets = []
+    for run in discover():
+        if run.is_core or run.deterministic:
+            continue          # core records are validated with their full pair
+        if method and run.method != method:
+            continue
+        if label and run.label != label:
+            continue
+        for proj in run.projects:
+            if project and proj != project:
+                continue
+            if not is_complete(run.method, run.label, proj):
+                continue
+            status = validation_status(run.method, run.label, proj)
+            # STALE is re-validated like UNVERIFIED: its verdict
+            # describes bytes the file no longer has.
+            if not recheck and status not in (UNVERIFIED, STALE):
+                continue
+            targets.append((run.method, run.label, proj))
+
+    click.echo(f"🔍 {len(targets)} run(s) to validate")
+    if dry_run:
+        for m, l, p in targets:
+            click.echo(f"   {p:9} {m:34} {l}")
+        return
+
+    passed = failed = norec = 0
+    for m, l, p in targets:
+        spec = RunSpec(project=p, arm="", method=m,
+                       bundle=Path("data/preprocessed/concatenated") /
+                              f"{p}_preprocessed.txt", label=l)
+        problems = validate_outputs(spec)
+        rec = record_path_for(p, m, l)
+        icon = "✓" if not problems else "❌"
+        click.echo(f"   {icon} {p:9} {l}")
+        for q in problems:
+            click.echo(f"        {q.get('error','')[:130]}")
+        if not rec.exists():
+            # Do not invent a provenance record here. It would have to assert a
+            # model, inputs and a mode this command cannot observe, which is the
+            # class of false claim provenance.py exists to prevent.
+            norec += 1
+            continue
+        data = _yaml.safe_load(rec.read_text(encoding="utf-8")) or {}
+        # validation_block, not an inline dict: it binds the verdict to the
+        # artifacts' md5s so a record edited afterwards reports STALE instead of
+        # carrying a verdict about bytes that no longer exist.
+        data["validation"] = validation_block(spec, problems,
+                                              recorded_by="d4d runs validate")
+        # Rewrite through Record.write so the file keeps its header. Dumping
+        # `data` directly loses the two leading comment lines that point a
+        # reader at the module defining this format — safe_load drops comments
+        # and safe_dump cannot restore them. An earlier sweep stripped them
+        # from 97 records this way.
+        ProvenanceRecord(data=data).write(rec)
+        passed += 1 if not problems else 0
+        failed += 1 if problems else 0
+
+    click.echo(f"\n{passed} valid, {failed} invalid, "
+               f"{norec} with no provenance record to update")
+    if norec:
+        click.echo("Runs without a provenance record stay UNVERIFIED. Backfill "
+                   "one with `d4d provenance backfill` first.")

@@ -78,7 +78,7 @@ data/
 ├── d4d_individual/              # D4D YAMLs from individual docs
 │   ├── claudecode_agent/        # ✅ Current (v5+)
 │   ├── gpt5/                    # Comparison
-│   └── curated/                 # Hand-curated reference
+│   └── curated/                 # ChatGPT chat arm (misnamed; see #177)
 │
 ├── d4d_concatenated/            # Synthesized comprehensive D4D YAMLs
 │   ├── claudecode_agent/        # ✅ Current (v5+)

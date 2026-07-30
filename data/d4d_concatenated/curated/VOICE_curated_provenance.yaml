@@ -1,0 +1,60 @@
+# D4D generation provenance record (reconstructed)
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: reconstructed
+record_generated_at: '2026-07-29T19:05:57+00:00'
+run:
+  label: null
+  project: VOICE
+  method: curated
+  arm: comparison
+  replicate: null
+model:
+  generation_method: ChatGPT chat interface, manual paste
+  agent_runtime: ChatGPT web chat
+  provider: OpenAI
+  model: null
+  temperature: null
+prompts:
+  paths: null
+  note: pasted into a chat session; not recoverable
+inputs:
+  bundle_path: null
+  bundle_md5: null
+  documents_vintage:
+    describes: https://doi.org/10.13026/3xt6-rf05
+    version: '2.0'
+    scale: 442 participants
+outputs:
+  full:
+    path: data/d4d_concatenated/curated/VOICE_curated.yaml
+    md5: c2adc0c535cb21a628e310d8cc5a2b71
+    bytes: 17295
+repo:
+  commit: 2b730155789095d8c09ce67d077807a5cca5fcf6
+  commit_short: 2b730155
+  branch: fix-curated-mislabel
+  dirty: true
+  dirty_file_count: 5
+unrecoverable:
+- field: model.model
+  reason: the chat session did not record which model version answered
+- field: model.temperature
+  reason: not exposed by the chat interface
+- field: prompts
+  reason: pasted into a chat session and not saved
+- field: inputs.bundle_md5
+  reason: the input docs were pasted manually; the exact bytes are not recoverable
+- field: record_generated_at (of the run)
+  reason: the generation date was not recorded
+notes:
+- 'Generated through a ChatGPT chat interface by pasting in the prompt, schema and
+  input documents. Not hand-curated and not a reference. The records also document
+  superseded releases — AI-READI v2.0.0 (1,067 participants), VOICE v2.0 (442 participants),
+  CM4AI B35XWX v1.4 — so they are not comparable to records generated from the current
+  corpus, which describes AI-READI v3.0.0, VOICE 3.1.0 (833 participants) and CM4AI
+  HIGT4C. There is no CHORUS record. See issue #177.'
+- 'Reconstructed on 2026-07-29 from what is knowable: the file itself and the release
+  it describes. Every field that would require knowing how the run was performed is
+  listed as unrecoverable rather than guessed.'

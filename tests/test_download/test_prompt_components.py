@@ -61,7 +61,8 @@ class TestGenericPromptIsGeneric(unittest.TestCase):
     def test_declares_its_substitution_fields(self):
         text = GENERIC.read_text(encoding="utf-8")
         for field in ("{PROJECT}", "{ARM}", "{METHOD}", "{BUNDLE}",
-                      "{LABEL}", "{MANIFEST_LINE}"):
+                      "{LABEL}", "{MANIFEST_LINE}", "{RUNTIME}",
+                      "{PROVIDER}", "{MODEL}"):
             self.assertIn(field, text)
 
     def test_carries_the_uniform_decision_rules(self):
