@@ -55,6 +55,53 @@ GENERIC_PROMPT_V2 = PROMPTS / "d4d_generic_arm_prompt_v2.md"
 CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
                      "generic_v2": GENERIC_PROMPT_V2,
                      "tuned": GENERIC_PROMPT}
+
+# Which generic base each condition is built on. The generic/tuned comparison
+# assumes both arms share a base and differ only in the project-specific block;
+# once a second generic base exists that assumption stops holding silently.
+# `tuned` is pinned to v1 because the 2026-07-27 tuned series was produced under
+# it — so comparing `generic_v2` against `tuned` would measure the three added
+# decision rules *and* the tuned block together while appearing to measure only
+# tuning. Recorded here so the pairing is checkable rather than implied.
+# Each condition on two axes: which generic base it is built on, and whether it
+# carries project-specific tuning. A comparison is interpretable when the two
+# conditions differ on *one* axis — that is the thing being measured.
+CONDITION_AXES = {
+    "generic":    {"base": "v1", "tuned": False},
+    "generic_v2": {"base": "v2", "tuned": False},
+    "tuned":      {"base": "v1", "tuned": True},
+}
+
+
+def condition_delta(a: str, b: str) -> list[str]:
+    """Which axes two conditions differ on."""
+    ax, bx = CONDITION_AXES.get(a), CONDITION_AXES.get(b)
+    if ax is None or bx is None:
+        return ["unknown condition"]
+    return [k for k in ("base", "tuned") if ax[k] != bx[k]]
+
+
+def comparable_conditions(a: str, b: str) -> bool:
+    """True when a difference between the two is attributable to one change.
+
+    `generic` vs `generic_v2` differs only in base — that is the v2 experiment.
+    `generic` vs `tuned` differs only in tuning — that is the study's main
+    comparison. `generic_v2` vs `tuned` differs in **both**, so a difference
+    between them measures the three added decision rules and the tuned block
+    together while appearing to measure only tuning.
+    """
+    return len(condition_delta(a, b)) == 1
+
+
+def confounded_note(a: str, b: str) -> str | None:
+    """Why a comparison would confound two changes, when it would."""
+    delta = condition_delta(a, b)
+    if len(delta) <= 1:
+        return None
+    return (f"{a} and {b} differ on {' and '.join(delta)}. A difference between "
+            "them cannot be attributed to either alone. Compare each condition "
+            "against one that differs from it on a single axis — a tuned arm "
+            "needs a tuned counterpart on the same generic base.")
 TUNED_PROMPT = PROMPTS / "d4d_tuned_arm_prompt.md"
 COMPONENTS = PROMPTS / "components"
 CONCAT_DIR = Path("data/d4d_concatenated")

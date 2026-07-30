@@ -83,6 +83,11 @@ Stated now so it cannot be reinterpreted afterwards:
    fitness.
 4. `d4d runs compare --require-attested` for agreement; v2 runs must write live
    provenance.
+5. Compare **v2 against v1 only**. `comparable_conditions()` permits it because
+   the two differ on one axis (base). It refuses `generic_v2` vs `tuned`, which
+   differ on both base and tuning, so a difference there could not be attributed
+   to either — if v2 is promoted, a matching `tuned_v2` is needed before the
+   generic/tuned comparison resumes.
 
 ## Confounds to state in any result
 

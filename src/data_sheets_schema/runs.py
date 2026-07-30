@@ -528,6 +528,27 @@ def check_replicate(method: str, config: str, new_label: str, project: str,
             "input_unverified_against": input_unknown or None}
 
 
+def condition_of(method: str, label: str, project: str,
+                 concat_dir: Path = CONCAT_DIR) -> str | None:
+    """The prompt condition a run recorded, read from its provenance prompts."""
+    import yaml as _yaml
+    from data_sheets_schema.provenance import record_path_for
+    p = record_path_for(project, method, label, concat_dir)
+    if not p.exists():
+        return None
+    data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    paths = ((data.get("prompts") or {}).get("files")
+             or (data.get("prompts") or {}).get("paths") or [])
+    joined = " ".join(str(x) for x in paths)
+    if "d4d_generic_arm_prompt_v2.md" in joined:
+        return "generic_v2"
+    if "d4d_tuned_arm_prompt.md" in joined:
+        return "tuned"
+    if "d4d_generic_arm_prompt.md" in joined:
+        return "generic"
+    return None
+
+
 def arm_delta(baseline_method: str, arm_method: str, project: str,
               config: str, replicates: list[str],
               concat_dir: Path = CONCAT_DIR,

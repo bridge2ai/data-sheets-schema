@@ -342,6 +342,15 @@ class D4DEvaluator:
     # quantity each threshold is about. The rest describe tiers of depth
     # ("No X" / "basic X" / "comprehensive X"), which are scored by how much of
     # the question's own declared field set is populated.
+    # Q1 is the one measured question whose bands leave a gap: 0 is "<=40%",
+    # 3 is "~70%", 5 is ">=90%", and nothing states what 41-69% scores. One rule
+    # resolves it — a gap between two bands is split at the midpoint — and it is
+    # applied to *both* boundaries. Taking the midpoint at one end and the
+    # stated threshold at the other, as an earlier version did, made a record at
+    # 45% score 0 while a record at 85% scored 3, for no stated reason.
+    Q1_BAND_THRESHOLDS = ((5, 0.80),    # midpoint of 70 and 90
+                          (3, 0.55),    # midpoint of 40 and 70
+                          (0, 0.0))
     RUBRIC20_MEASURES = {
         1: "proportion_populated",   # <=40% / ~70% / >=90% of fields
         2: "char_length",            # <50 / 50-200 / >200 chars
@@ -416,12 +425,20 @@ class D4DEvaluator:
         total = len(field_paths) or 1
         frac = populated / total
         if measure == "proportion_populated":
-            score = 5 if frac >= 0.9 else 3 if frac >= 0.55 else 0
+            score = self._band_for(frac, self.Q1_BAND_THRESHOLDS)
         else:
             # Tiered: nothing populated is 0, everything is 5, partial is 3.
             score = 0 if populated == 0 else (5 if populated == total else 3)
         return score, (f"{bands.get(score, '')} "
                        f"({populated}/{total} fields populated)")
+
+    @staticmethod
+    def _band_for(value, thresholds):
+        """Highest band whose threshold the measurement reaches."""
+        for score, floor in thresholds:
+            if value >= floor:
+                return score
+        return 0
 
     @staticmethod
     def _count_items(found_values) -> int:

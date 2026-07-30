@@ -301,3 +301,74 @@ class TestDerivedProvenance(unittest.TestCase):
             rec = yaml.safe_load((out.parent / "P_provenance.yaml").read_text())
             self.assertEqual(sum(s["contributed_slots"] for s in rec["sources"]),
                              len(r.record))
+
+
+class TestDerivedRecordRequiresItsArtifact(unittest.TestCase):
+    """A derived record exists to describe an artifact (#189).
+
+    Unlike a generation record, where a phase may legitimately not have produced
+    a report, a derived record whose output is missing describes nothing — yet
+    would still be discovered and counted as provenance.
+    """
+
+    def _source(self):
+        from data_sheets_schema.provenance import Contribution
+        return Contribution(label="r1", project="P", method="m", path="p",
+                            md5="abc", slots=1)
+
+    def test_missing_output_is_refused(self):
+        from data_sheets_schema.provenance import build_derived_record
+        with self.assertRaises(FileNotFoundError):
+            build_derived_record("P", "m", "L", sources=[self._source()],
+                                 derivation="rule",
+                                 outputs={"full": Path("/nonexistent.yaml")})
+
+    def test_empty_outputs_is_refused(self):
+        from data_sheets_schema.provenance import build_derived_record
+        with self.assertRaises(FileNotFoundError):
+            build_derived_record("P", "m", "L", sources=[self._source()],
+                                 derivation="rule", outputs={})
+
+    def test_existing_output_is_accepted(self):
+        from data_sheets_schema.provenance import build_derived_record
+        with TemporaryDirectory() as td:
+            f = Path(td) / "r.yaml"
+            f.write_text("id: x\n")
+            rec = build_derived_record("P", "m", "L", sources=[self._source()],
+                                       derivation="rule", outputs={"full": f})
+            self.assertTrue(rec.data["outputs"]["full"]["md5"])
+
+
+class TestConditionComparability(unittest.TestCase):
+    """A comparison must isolate one change (#190)."""
+
+    def test_the_v2_experiment_is_comparable(self):
+        from data_sheets_schema.api_runner import comparable_conditions
+        self.assertTrue(comparable_conditions("generic", "generic_v2"),
+                        "v1 vs v2 differs only in base — that is the experiment")
+
+    def test_the_tuning_comparison_is_comparable(self):
+        from data_sheets_schema.api_runner import comparable_conditions
+        self.assertTrue(comparable_conditions("generic", "tuned"))
+
+    def test_crossing_both_axes_is_refused(self):
+        from data_sheets_schema.api_runner import (
+            comparable_conditions, condition_delta, confounded_note)
+        self.assertFalse(comparable_conditions("generic_v2", "tuned"))
+        self.assertEqual(sorted(condition_delta("generic_v2", "tuned")),
+                         ["base", "tuned"])
+        self.assertIn("cannot be attributed to either alone",
+                      confounded_note("generic_v2", "tuned"))
+
+    def test_a_comparable_pair_has_no_note(self):
+        from data_sheets_schema.api_runner import confounded_note
+        self.assertIsNone(confounded_note("generic", "tuned"))
+
+    def test_every_condition_declares_both_axes(self):
+        from data_sheets_schema.api_runner import (
+            CONDITION_AXES, CONDITION_PROMPTS)
+        self.assertEqual(set(CONDITION_AXES), set(CONDITION_PROMPTS),
+                         "a condition without declared axes cannot be placed")
+        for name, axes in CONDITION_AXES.items():
+            with self.subTest(condition=name):
+                self.assertEqual(set(axes), {"base", "tuned"})

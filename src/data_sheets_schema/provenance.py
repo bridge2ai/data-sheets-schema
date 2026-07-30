@@ -324,6 +324,16 @@ def build_derived_record(project: str, method: str, label: str, *,
             "a derived record must name its sources; a merge whose inputs are "
             "unrecorded cannot be reproduced or audited")
 
+    # An absent output is fatal here, unlike in a generation record where a
+    # phase may legitimately not have produced a report. The output is the whole
+    # reason a derived record exists: one whose artifact is missing describes
+    # nothing, yet would still be discovered and counted as provenance.
+    missing = [k for k, v in outputs.items() if not Path(v).exists()]
+    if missing or not outputs:
+        raise FileNotFoundError(
+            "a derived record must describe an artifact that exists; missing: "
+            + (", ".join(f"{k}={outputs[k]}" for k in missing) or "(no outputs given)"))
+
     data: dict[str, Any] = {
         "record_version": RECORD_VERSION,
         "record_type": "d4d_derived_provenance",

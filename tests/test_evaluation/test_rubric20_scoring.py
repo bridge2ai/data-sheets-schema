@@ -114,3 +114,35 @@ class TestDeclaredMaximumMatchesTheQuestions(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestQ1BandInterpolation(unittest.TestCase):
+    """Q1 is the only measured question whose bands leave a gap (#188).
+
+    0 is "<=40%", 3 is "~70%", 5 is ">=90%", and nothing states what 41-69%
+    scores. One rule — split a gap at the midpoint — must govern both
+    boundaries. An earlier version interpolated the lower boundary and took the
+    upper one literally, so a record at 45% scored 0 while one at 85% scored 3.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.ev = D4DEvaluator(str(RUBRIC10_PATH), str(RUBRIC20_PATH))
+
+    def test_both_boundaries_come_from_the_same_rule(self):
+        thresholds = dict((s, f) for s, f in self.ev.Q1_BAND_THRESHOLDS)
+        self.assertAlmostEqual(thresholds[3], (0.40 + 0.70) / 2)
+        self.assertAlmostEqual(thresholds[5], (0.70 + 0.90) / 2)
+
+    def test_bands_are_monotonic_in_the_measurement(self):
+        prev = -1
+        for frac in (0.0, 0.3, 0.45, 0.55, 0.6, 0.79, 0.8, 0.95, 1.0):
+            band = self.ev._band_for(frac, self.ev.Q1_BAND_THRESHOLDS)
+            self.assertGreaterEqual(band, prev, f"band fell at {frac}")
+            prev = band
+
+    def test_a_fully_populated_record_reaches_the_top_band(self):
+        self.assertEqual(self.ev._band_for(1.0, self.ev.Q1_BAND_THRESHOLDS), 5)
+
+    def test_an_empty_record_reaches_the_bottom_band(self):
+        self.assertEqual(self.ev._band_for(0.0, self.ev.Q1_BAND_THRESHOLDS), 0)
