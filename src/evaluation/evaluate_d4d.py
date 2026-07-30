@@ -17,6 +17,7 @@ Date: 2025-11-17
 
 import argparse
 import json
+import re
 import csv
 import subprocess
 import tempfile
@@ -337,6 +338,120 @@ class D4DEvaluator:
             max_score=5
         )
 
+    # Questions whose bands state an explicit numeric threshold, and the
+    # quantity each threshold is about. The rest describe tiers of depth
+    # ("No X" / "basic X" / "comprehensive X"), which are scored by how much of
+    # the question's own declared field set is populated.
+    RUBRIC20_MEASURES = {
+        1: "proportion_populated",   # <=40% / ~70% / >=90% of fields
+        2: "char_length",            # <50 / 50-200 / >200 chars
+        3: "item_count",             # <3 / 3-7 / >=8 keywords
+        4: "distinct_types",         # 1 / 2-3 / >3 file types
+    }
+
+    def _raw_values(self, d4d_data, field_paths):
+        """The actual field values, not `_is_field_present`'s descriptions.
+
+        `_is_field_present` returns display strings — `"keywords: list
+        (non-empty)"` — and truncates text at 100 characters. Measuring those
+        would count the length of a description rather than the content, and cap
+        every long entry at the same value. Anything that measures must read the
+        values directly.
+        """
+        out = []
+        for f in field_paths:
+            v = self._extract_field_value(d4d_data, f)
+            if v is not None and v != "" and v != [] and v != {}:
+                out.append(v)
+        return out
+
+    def _score_numeric_rubric20(self, question, d4d_data, field_paths,
+                                is_present, found_values):
+        """Score a 0-5 question by measuring it, not by asserting a constant.
+
+        This previously returned 0 when a field was absent and a flat 4 when it
+        was present — never 1, 2, 3 or 5. Measured across the whole corpus that
+        made rubric20 return 71/88 for *every* record, so it could not rank
+        anything, and the one rubric meant to discriminate on quality was inert.
+
+        Four questions state an explicit numeric threshold and are measured
+        directly. The remaining thirteen describe tiers — "No bias
+        documentation" / "basic bias identification" / "comprehensive bias
+        categorization" — and are scored by how much of the question's own
+        declared field set is populated: none, some, all.
+
+        **That is a coverage proxy for depth, not a measurement of depth.** A
+        record can populate every field of a question shallowly and score 5
+        here. Judging whether the content is actually comprehensive is what the
+        `d4d-rubric20-semantic` agent is for; this path is the free, fast,
+        deterministic one, and it should not be read as more than it is.
+        """
+        bands = {int(k): v for k, v in question['scoring'].items()}
+        measure = self.RUBRIC20_MEASURES.get(question['id'], "field_coverage")
+
+        if not is_present and measure != "proportion_populated":
+            return 0, bands.get(0, "Not present")
+
+        values = self._raw_values(d4d_data, field_paths)
+
+        if measure == "char_length":
+            n = max((len(str(v)) for v in values), default=0)
+            score = 5 if n > 200 else 3 if n >= 50 else 0
+            return score, f"{bands.get(score, '')} (measured {n} chars)"
+
+        if measure == "item_count":
+            n = self._count_items(values)
+            score = 5 if n >= 8 else 3 if n >= 3 else 0
+            return score, f"{bands.get(score, '')} (measured {n} items)"
+
+        if measure == "distinct_types":
+            n = self._count_distinct_types(values)
+            score = 5 if n > 3 else 3 if n >= 2 else 0
+            return score, f"{bands.get(score, '')} (measured {n} distinct)"
+
+        # proportion_populated and field_coverage share a denominator: the
+        # question's own declared fields. Only the band boundaries differ.
+        populated = sum(1 for f in field_paths
+                        if self._is_field_present(d4d_data, [f])[0])
+        total = len(field_paths) or 1
+        frac = populated / total
+        if measure == "proportion_populated":
+            score = 5 if frac >= 0.9 else 3 if frac >= 0.55 else 0
+        else:
+            # Tiered: nothing populated is 0, everything is 5, partial is 3.
+            score = 0 if populated == 0 else (5 if populated == total else 3)
+        return score, (f"{bands.get(score, '')} "
+                       f"({populated}/{total} fields populated)")
+
+    @staticmethod
+    def _count_items(found_values) -> int:
+        n = 0
+        for v in found_values:
+            if isinstance(v, (list, tuple, set)):
+                n += len(v)
+            elif isinstance(v, str):
+                # A single string may still enumerate several items.
+                n += len([x for x in re.split(r"[,;\n]", v) if x.strip()])
+            elif v is not None:
+                n += 1
+        return n
+
+    @staticmethod
+    def _count_distinct_types(found_values) -> int:
+        seen = set()
+        for v in found_values:
+            items = v if isinstance(v, (list, tuple)) else [v]
+            for it in items:
+                if isinstance(it, dict):
+                    for key in ("format", "file_type", "media_type", "type",
+                                "extension"):
+                        if it.get(key):
+                            seen.add(str(it[key]).lower())
+                            break
+                elif it is not None:
+                    seen.add(str(it).lower())
+        return len(seen)
+
     def _score_rubric20_question(self, d4d_data: Dict[str, Any], question: Dict[str, Any]) -> QuestionScore:
         """Score a single question from rubric20"""
         field_paths = question['field']
@@ -354,18 +469,8 @@ class D4DEvaluator:
             max_score = 1
             score_label = "Pass" if is_present else "Fail"
         else:
-            # Numeric scoring (0-5)
-            # For now, use simple heuristic: present = 3-5, not present = 0
-            # More sophisticated scoring would analyze content quality
-            if not is_present:
-                score = 0
-                score_label = list(question['scoring'].values())[
-                    0]  # Get "0" description
-            else:
-                # Simple heuristic: if present, give middle-high score
-                score = 4
-                score_label = "Field present with content"
-
+            score, score_label = self._score_numeric_rubric20(
+                question, d4d_data, field_paths, is_present, found_values)
             max_score = 5
 
         return QuestionScore(

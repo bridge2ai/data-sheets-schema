@@ -52,31 +52,46 @@ useful invariant is attestation, not authorship of the record.
 
 ---
 
-## 3. Unblock merged records from shipping (#176, step 2)
+## 3. Ship merged records — provenance done, playbook carve-out remains
 
-Step 1 is **done** — feasibility measured across all four projects, results in
-#176. Guarded merge validates everywhere and gains +0.023 to +0.042 mean fitness;
-the coverage gain is only +1 to +4 slots, so the case for merging rests on
-shared-field quality, not coverage.
+**Done:** `record_mode: derived` exists. A merged record now carries a provenance
+record naming every contributing replicate by md5, how many slots each supplied,
+and the rule that combined them, with `model`, `prompts` and `inputs.bundle_md5`
+explicitly marked not-applicable rather than left absent. All four guarded merges
+under `2026-07-29_guarded-union/` have one.
 
-Two things block a merged record from being usable, neither of them measurement:
+**Remains:** the playbook forbids cross-label reads in four places, and a merged
+record is cross-label by definition. That needs an explicit carve-out rather than
+a quiet exception, since the rule exists to stop factual leakage between runs and
+a merge is the one case where crossing is intended.
 
-- **`provenance.py` cannot express "consumed other generated records."** A merged
-  record therefore cannot honestly claim `record_mode: live`, and claiming it
-  would be the unobserved provenance assertion that module exists to prevent.
-  Needs a `derived_from` block naming every contributing label and md5.
-- **The playbook forbids cross-label reads in four places.** A merged record is
-  cross-label by definition and needs an explicit carve-out, not a quiet
-  exception.
+---
 
-Artifacts are under `data/d4d_concatenated/claudecode_agent_merged/` with a
-README marking them non-shippable.
+## 4. Rubric20 scoring — done
 
-## 4. Fix rubric20's stub scoring
+`_score_rubric20_question` returned 0 or a flat 4, never 1/2/3/5, so every record
+in the corpus scored 71/88 and the rubric could not rank anything.
 
-`src/evaluation/evaluate_d4d.py:352-361` returns literally 0 or 4, never 1/2/3/5.
-This is why rubric20 reports 71/88 for every record in the corpus and cannot rank
-anything. Independent of all other work.
+Now measured. Four questions state explicit numeric thresholds (proportion of
+fields populated, character length, keyword count, distinct file types) and are
+measured directly; the other thirteen describe tiers — "no X" / "basic X" /
+"comprehensive X" — and are scored by how much of the question's own declared
+field set is populated.
+
+Corpus after the fix: five distinct totals spanning 59–67 of 88, an 8-point
+spread. It separates projects (AI-READI 63–67 > CM4AI 63 > CHORUS 59–61) and some
+replicates within a project.
+
+⚠️ **The tiered half is a coverage proxy for depth, not a measurement of depth.**
+A record that populates every field of a question shallowly still scores 5.
+Judging whether content is genuinely comprehensive is what `d4d-rubric20-semantic`
+is for; this path is the free, deterministic one and should not be read as more.
+
+Also corrected: the rubric declared "84 points (16 numeric + 4 pass/fail)" while
+its questions define 17 numeric + 3 pass/fail = 88. The questions are what get
+scored, so the prose was stale — and it is why the presence and LLM paths used
+different denominators. A test now fails if the two drift apart again. **The LLM
+evaluation paths still divide by 84 and need updating to match.**
 
 ---
 

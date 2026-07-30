@@ -145,7 +145,7 @@ d4d_evaluation_rubric:
     interoperability, and FAIR compliance. Each element is linked to specific metadata fields
     and tasks described in the D4D schema (data_sheets_schema_all.yaml).
 
-    Total maximum score: 84 points (16 numeric questions × 5 points + 4 pass/fail questions × 1 point)
+    Total maximum score: 88 points (17 numeric questions × 5 points + 3 pass/fail questions × 1 point)
 
   scoring_scale:
     quantitative: 0–5
