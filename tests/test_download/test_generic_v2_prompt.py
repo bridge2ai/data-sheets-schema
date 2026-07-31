@@ -150,3 +150,55 @@ class TestConditionResolution(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestEveryConditionIsReachable(unittest.TestCase):
+    """A condition that cannot be launched is not staged, it is stranded.
+
+    `generic_v2` was written, tested, and documented while the CLI's
+    `--condition` choices were spelled out inline in three places — so every
+    entry point rejected it. The list is now derived from the registry.
+    """
+
+    def test_the_cli_offers_every_registered_condition(self):
+        from click.testing import CliRunner
+        from data_sheets_schema.api_runner import CONDITION_PROMPTS
+        from data_sheets_schema.cli.api import plan_cmd
+        help_text = CliRunner().invoke(plan_cmd, ["--help"]).output
+        for condition in CONDITION_PROMPTS:
+            with self.subTest(condition=condition):
+                self.assertIn(condition, help_text)
+
+    def test_generic_v2_plans_without_error(self):
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.api import plan_cmd
+        r = CliRunner().invoke(plan_cmd, [
+            "--project", "CHORUS", "--condition", "generic_v2",
+            "--arm", "baseline",
+            "--label", "2026-07-30_claude-opus-5-generic-v2_rep1"])
+        if r.exit_code != 0 and "bundle" in (r.output or ""):
+            self.skipTest("bundle not present")
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertIn("d4d_generic_arm_prompt_v2.md", r.output)
+
+
+class TestTheRunGuardsAgree(unittest.TestCase):
+    """execute() raises if its own provenance check fails — after six phases.
+
+    A mismatch between where the record is written and where the check looks
+    would fail a good run at the very end, having spent the whole generation.
+    """
+
+    def test_write_and_check_resolve_to_the_same_path(self):
+        from pathlib import Path
+        from data_sheets_schema.api_runner import RunSpec
+        from data_sheets_schema.provenance import record_path_for
+        spec = RunSpec(project="CHORUS", arm="baseline",
+                       method="claudecode_agent", bundle=Path("b"),
+                       label="2026-07-30_x_rep1", condition="generic_v2")
+        self.assertEqual(spec.provenance_path,
+                         record_path_for(spec.project, spec.method, spec.label))
+
+    def test_a_post_cutoff_label_is_subject_to_the_requirement(self):
+        from data_sheets_schema.runs import requires_live
+        self.assertTrue(requires_live("2026-07-30_claude-opus-5-generic-v2_rep1"))
