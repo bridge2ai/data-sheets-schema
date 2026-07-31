@@ -104,7 +104,7 @@ class TestProvenance(unittest.TestCase):
         self.assertIsNotNone(declared_schema_version())
         f = schema_facts()
         self.assertEqual(f["declared_version"], declared_schema_version())
-        self.assertTrue(f["full_md5"])
+        self.assertTrue(f["full_sha256"])
         self.assertIn("data_sheets_schema.yaml", f["declared_in"])
 
     def test_record_flags_when_merged_schema_lacks_the_version(self):
@@ -219,3 +219,138 @@ class TestCuratedIsNotAReference(unittest.TestCase):
             self.assertIn("model.model", fields)
             self.assertIn("prompts", fields)
             self.assertIsNone(rec["model"]["model"])
+
+
+class TestHashUnification(unittest.TestCase):
+    """One algorithm for new records, both readable for old ones (#168).
+
+    The format used sha256 for prompts and md5 for inputs, artifacts and
+    schemas. Switching the writer alone would have been a silent corpus-wide
+    regression: 82 of 89 records carried md5-bound validation verdicts and
+    `validation_status` re-hashes to detect staleness, so every one would have
+    reported STALE.
+    """
+
+    def test_new_artifacts_are_hashed_with_sha256(self):
+        import tempfile
+        from data_sheets_schema.provenance import _artifact
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td) / "x.yaml"
+            f.write_text("id: x\n")
+            art = _artifact(f)
+            self.assertIn("sha256", art)
+            self.assertNotIn("md5", art)
+
+    def test_a_reader_accepts_either_algorithm(self):
+        from data_sheets_schema.provenance import recorded_hash
+        self.assertEqual(recorded_hash({"sha256": "a"}), ("sha256", "a"))
+        self.assertEqual(recorded_hash({"md5": "b"}), ("md5", "b"))
+        self.assertEqual(recorded_hash({"sha256": "a", "md5": "b"}),
+                         ("sha256", "a"), "sha256 preferred when both present")
+        self.assertIsNone(recorded_hash({"path": "p"}))
+
+    def test_verification_uses_the_algorithm_the_record_carries(self):
+        import hashlib
+        import tempfile
+        from data_sheets_schema.provenance import verify_entry
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td) / "x.txt"
+            f.write_bytes(b"content")
+            md5 = hashlib.md5(b"content").hexdigest()
+            sha = hashlib.sha256(b"content").hexdigest()
+            self.assertTrue(verify_entry({"path": str(f), "md5": md5}))
+            self.assertTrue(verify_entry({"path": str(f), "sha256": sha}))
+            self.assertFalse(verify_entry({"path": str(f), "md5": "wrong"}))
+            self.assertIsNone(verify_entry({"path": str(f)}),
+                              "no hash recorded is unknowable, not false")
+
+    def test_migration_refuses_to_rehash_a_stale_entry(self):
+        """Re-hashing without verifying would launder a stale verdict.
+
+        The record would gain a correct sha256 for content that no longer
+        matches the verdict attached to it, erasing exactly the staleness
+        `validation_status` exists to surface.
+        """
+        import tempfile
+        import yaml as _yaml
+        from data_sheets_schema.provenance import migrate_record_hashes
+        with tempfile.TemporaryDirectory() as td:
+            art = Path(td) / "a.yaml"
+            art.write_text("changed since the hash was taken\n")
+            rec = Path(td) / "P_provenance.yaml"
+            rec.write_text(_yaml.safe_dump({
+                "outputs": {"full": {"path": str(art), "md5": "staleandwrong"}}}))
+            r = migrate_record_hashes(rec, dry_run=True)
+            self.assertEqual(r["migrated"], [])
+            self.assertEqual(len(r["skipped"]), 1)
+            self.assertIn("no longer matches", r["skipped"][0]["why"])
+
+    def test_migration_rewrites_a_verified_entry(self):
+        import hashlib
+        import tempfile
+        import yaml as _yaml
+        from data_sheets_schema.provenance import migrate_record_hashes
+        with tempfile.TemporaryDirectory() as td:
+            art = Path(td) / "a.yaml"
+            art.write_bytes(b"stable")
+            rec = Path(td) / "P_provenance.yaml"
+            rec.write_text(_yaml.safe_dump({"outputs": {"full": {
+                "path": str(art), "md5": hashlib.md5(b"stable").hexdigest()}}}))
+            migrate_record_hashes(rec, dry_run=False)
+            out = _yaml.safe_load(rec.read_text())["outputs"]["full"]
+            self.assertEqual(out["sha256"], hashlib.sha256(b"stable").hexdigest())
+            self.assertNotIn("md5", out)
+
+    def test_the_corpus_carries_no_stale_verdicts_after_migration(self):
+        from data_sheets_schema.runs import STALE, discover, validation_status
+        stale = [(r.method, r.label, p) for r in discover()
+                 if not r.is_core and not r.deterministic
+                 for p in r.projects
+                 if validation_status(r.method, r.label, p) == STALE]
+        self.assertEqual(stale, [], f"migration introduced staleness: {stale}")
+
+
+class TestMd5IsDeprecatedInTheSchema(unittest.TestCase):
+    """#125: md5 is not collision-resistant and should not be the default."""
+
+    def test_the_md5_slot_is_marked_deprecated(self):
+        from linkml_runtime import SchemaView
+        sv = SchemaView("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
+        self.assertTrue(sv.get_slot("md5").deprecated)
+
+    def test_sha256_is_not_deprecated(self):
+        from linkml_runtime import SchemaView
+        sv = SchemaView("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
+        self.assertFalse(sv.get_slot("sha256").deprecated)
+
+    def test_the_generic_hash_slot_asks_for_the_algorithm(self):
+        """A bare digest cannot be verified without knowing what produced it."""
+        from linkml_runtime import SchemaView
+        sv = SchemaView("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
+        self.assertIn("algorithm", (sv.get_slot("hash").description or "").lower())
+
+
+class TestSchemaArtifactsStayInSync(unittest.TestCase):
+    """Three representations must agree (#205).
+
+    Deprecating `md5` regenerated the full merged schema but not the core one or
+    the Python model, so the slot was deprecated when read one way and not
+    another. `make check-sync` catches this — it simply had not been run.
+    """
+
+    def test_the_deprecation_reaches_both_merged_schemas(self):
+        for name in ("data_sheets_schema_all.yaml",
+                     "data_sheets_schema_core_all.yaml"):
+            with self.subTest(schema=name):
+                p = Path("src/data_sheets_schema/schema") / name
+                if not p.exists():
+                    self.skipTest(f"{name} not present")
+                self.assertIn("DEPRECATED", p.read_text(),
+                              f"{name} predates the md5 deprecation")
+
+    def test_md5_is_deprecated_in_the_core_schema_too(self):
+        from linkml_runtime import SchemaView
+        p = Path("src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
+        if not p.exists():
+            self.skipTest("core schema not present")
+        self.assertTrue(SchemaView(str(p)).get_slot("md5").deprecated)

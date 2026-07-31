@@ -41,18 +41,18 @@ system:
     this run
 inputs:
   bundle_path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
-  bundle_md5: 3694e188106bbf8b1871d44450925e9a
   bundle_bytes: 322554
   hash_basis: verified identical to the bytes consumed
   source_manifest:
     path: data/preprocessed/source_manifest.yaml
     md5: e633ee3827eb151efca663f14d0b2f5c
+  bundle_sha256: 2c071543a14978fbe2a9a595538580d062969aa72b806fe44a17513d8531ba82
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_d4d.yaml
-    md5: b0eb9073a815e2995bb7eefd485b2737
     bytes: 126564
     slots: 63
+    sha256: 39788989e9cc58f00ee823fbf750477f968c0989eb3ceb8330601e3b26c6ee4b
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_d4d_core.yaml
     md5: 95c3e5f9d0991035fc8399928ef5faff
@@ -72,8 +72,8 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_d4d.yaml
-      md5: b0eb9073a815e2995bb7eefd485b2737
+      sha256: 39788989e9cc58f00ee823fbf750477f968c0989eb3ceb8330601e3b26c6ee4b
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_d4d_core.yaml
-      md5: d8d7ae7fc6b53d0e0e60c019fdf15058
+      sha256: 1d6cf589d5bf80d2dcbba6e105d93f3e77de20753c146b921e8f50eaaedc0c11
   recorded_by: d4d runs validate

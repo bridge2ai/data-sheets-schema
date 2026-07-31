@@ -49,12 +49,12 @@ system:
   memory_bytes: 68719476736
 inputs:
   bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
-  bundle_md5: 8aadffca28403aaa675e59b93721ea96
   bundle_bytes: 420804
   hash_basis: verified identical to the bytes consumed
   source_manifest:
     path: data/preprocessed/source_manifest.yaml
     md5: e633ee3827eb151efca663f14d0b2f5c
+  bundle_sha256: 71b29a488af95b2eaff29377fbd745fecbd3b7910f3932277b75dbf8461b4ee9
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep2/AI_READI_d4d.yaml
@@ -78,8 +78,8 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep2/AI_READI_d4d.yaml
-      md5: a9856130fff784a16d09ae9ed8aecf4c
+      sha256: 14c90360d0470c67a603583b42d5fd8c725cab1dcd55dfa9700d46a263a3a8cf
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep2/AI_READI_d4d_core.yaml
-      md5: b62d87422e7abfca2e8634d056869ba1
+      sha256: d6fe1755769166a42372eeb270f5b812f6fb2b639e29a1c9851d2abbffe2d90f
   recorded_by: d4d runs validate

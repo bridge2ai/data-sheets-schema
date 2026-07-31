@@ -1,4 +1,4 @@
-# D4D generation provenance record (reconstructed)
+# D4D generation provenance record
 # record_version 1 — see src/data_sheets_schema/provenance.py
 record_version: 1
 record_type: d4d_generation_provenance
@@ -29,8 +29,8 @@ inputs:
 outputs:
   full:
     path: data/d4d_concatenated/curated/AI_READI_curated.yaml
-    md5: df31eab14152b14b4b162f94552e9efd
     bytes: 7303
+    sha256: 12f08bddcddf2eb00c181308e886e927667b1db2e7710b45182f34616102cdbf
 repo:
   commit: 2b730155789095d8c09ce67d077807a5cca5fcf6
   commit_short: 2b730155

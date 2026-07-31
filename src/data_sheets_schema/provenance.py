@@ -50,6 +50,18 @@ DETERMINISTIC_CONFIG = Path(".github/workflows/d4d_assistant_deterministic.confi
 # each hash field names its algorithm: prompts (new) use sha256, input bundles
 # keep md5 so existing records stay comparable. Unifying on sha256 means
 # rewriting those records and is deliberately left as a separate decision.
+# One algorithm. The record format previously used sha256 for prompts and md5
+# for inputs, artifacts and schemas — deliberate at the time (the GitHub
+# assistant used sha256; 33 existing records used md5) but historical rather than
+# principled, and md5 is not a defensible integrity hash in 2026.
+#
+# Switching the writer alone would have been a silent corpus-wide regression: 82
+# of 89 records carry md5-bound validation verdicts, and `validation_status`
+# re-hashes to detect staleness, so every one would have reported STALE. Readers
+# are therefore algorithm-agnostic — they verify with whichever hash the record
+# carries — and existing records are migrated only after their recorded md5 is
+# confirmed to still match, which proves the bytes are the ones it described.
+HASH_ALGORITHM = "sha256"
 PROMPT_HASH = "sha256"
 INPUT_HASH = "md5"
 
@@ -212,9 +224,9 @@ def schema_facts() -> dict[str, Any]:
         "declared_version": version,
         "declared_in": str(SOURCE_SCHEMA),
         "full_path": str(FULL_SCHEMA),
-        "full_md5": _md5(FULL_SCHEMA),
+        "full_sha256": _sha256(FULL_SCHEMA),
         "core_path": str(CORE_SCHEMA),
-        "core_md5": _md5(CORE_SCHEMA),
+        "core_sha256": _sha256(CORE_SCHEMA),
         "merged_schema_carries_version": merged_carries_version,
     }
     if version and not merged_carries_version:
@@ -238,8 +250,37 @@ def _slot_count(path: Path) -> int | None:
 def _artifact(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
-    return {"path": str(path), "md5": _md5(path), "bytes": path.stat().st_size,
+    return {"path": str(path), "sha256": _sha256(path),
+            "bytes": path.stat().st_size,
             "slots": _slot_count(path) if path.suffix == ".yaml" else None}
+
+
+def recorded_hash(entry: dict[str, Any]) -> tuple[str, str] | None:
+    """The (algorithm, value) an entry actually carries.
+
+    sha256 preferred, md5 accepted. A record written before the unification is
+    still verifiable on its own terms — refusing to read md5 would turn every
+    historical verdict into an unverifiable one, which is the opposite of what
+    hashing them was for.
+    """
+    for algo in ("sha256", "md5"):
+        if entry.get(algo):
+            return algo, entry[algo]
+    return None
+
+
+def hash_file(path: Path, algorithm: str = HASH_ALGORITHM) -> str | None:
+    return _sha256(path) if algorithm == "sha256" else _md5(path)
+
+
+def verify_entry(entry: dict[str, Any]) -> bool | None:
+    """Does the file still hash to what the entry recorded? None if unknowable."""
+    got = recorded_hash(entry)
+    path = entry.get("path")
+    if not got or not path or not Path(path).exists():
+        return None
+    algo, value = got
+    return hash_file(Path(path), algo) == value
 
 
 @dataclass
@@ -260,7 +301,7 @@ class ProvenanceRecord:
 class Contribution:
     """One generated record that a derived record consumed.
 
-    The md5 is the point. A derived record that merely names its sources is not
+    The hash is the point. A derived record that merely names its sources is not
     reproducible: the sources are themselves stochastic outputs that can be
     regenerated under the same label with different content. Pinning the bytes is
     what makes "this came from those" checkable rather than asserted.
@@ -270,7 +311,7 @@ class Contribution:
     project: str
     method: str
     path: str
-    md5: str
+    sha256: str
     slots: int | None = None
     contributed_slots: int | None = None   # how many slots this source supplied
 
@@ -281,7 +322,8 @@ def contribution(path: Path, *, label: str, project: str, method: str,
     if art is None:
         raise FileNotFoundError(f"contributing record does not exist: {path}")
     return Contribution(label=label, project=project, method=method,
-                        path=art["path"], md5=art["md5"], slots=art["slots"],
+                        path=art["path"], sha256=art["sha256"],
+                        slots=art["slots"],
                         contributed_slots=contributed_slots)
 
 
@@ -532,3 +574,67 @@ def record_path_for(project: str, method: str, label: str,
                     concat_dir: Path = CONCAT_DIR) -> Path:
     base = method[:-5] if method.endswith("_core") else method
     return concat_dir / f"{base}_core" / label / f"{project}_provenance.yaml"
+
+
+def migrate_record_hashes(path: Path, *, dry_run: bool = True) -> dict[str, Any]:
+    """Replace md5 with sha256 in one record, but only where verifiable.
+
+    The verification order is the point. An entry is re-hashed only after its
+    recorded md5 is confirmed to still match the file, which proves the bytes are
+    the ones that hash described. Re-hashing without that check would launder a
+    *stale* verdict into a fresh-looking one — the record would gain a correct
+    sha256 for content that no longer matches the verdict attached to it, and the
+    staleness that `validation_status` exists to surface would be erased.
+
+    Entries that cannot be verified keep their md5 and are reported, not
+    rewritten.
+    """
+    import yaml as _yaml
+
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    migrated: list[str] = []
+    skipped: list[dict[str, str]] = []
+
+    def _walk(node: Any, trail: str = "") -> None:
+        if isinstance(node, dict):
+            if node.get("md5") and node.get("path") and not node.get("sha256"):
+                p = Path(node["path"])
+                if not p.exists():
+                    skipped.append({"at": trail, "why": "file absent"})
+                elif _md5(p) != node["md5"]:
+                    skipped.append({"at": trail, "why": "recorded md5 no longer "
+                                    "matches; the entry is stale and must not "
+                                    "be re-hashed"})
+                else:
+                    node["sha256"] = _sha256(p)
+                    node.pop("md5")
+                    migrated.append(trail)
+            for k, v in node.items():
+                _walk(v, f"{trail}.{k}" if trail else k)
+        elif isinstance(node, list):
+            for i, v in enumerate(node):
+                _walk(v, f"{trail}[{i}]")
+
+    _walk(data)
+
+    # Scalar hash fields, which carry no path of their own.
+    for section, key, target in (("inputs", "bundle_md5", "bundle_sha256"),
+                                 ("inputs", "source_manifest", None)):
+        node = data.get(section) or {}
+        if key == "bundle_md5" and node.get(key) and not node.get(target):
+            bundle = node.get("bundle_path")
+            if bundle and Path(bundle).exists() and _md5(Path(bundle)) == node[key]:
+                node[target] = _sha256(Path(bundle))
+                node.pop(key)
+                migrated.append(f"{section}.{key}")
+            else:
+                skipped.append({"at": f"{section}.{key}",
+                                "why": "bundle absent or no longer matches"})
+
+    if migrated and not dry_run:
+        if skipped:
+            data.setdefault("notes", None)
+        ProvenanceRecord(data=data).write(path)
+
+    return {"path": str(path), "migrated": migrated, "skipped": skipped,
+            "dry_run": dry_run}

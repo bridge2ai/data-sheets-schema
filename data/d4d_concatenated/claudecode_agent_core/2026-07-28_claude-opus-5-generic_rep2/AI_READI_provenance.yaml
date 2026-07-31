@@ -49,28 +49,28 @@ system:
   memory_bytes: 68719476736
 inputs:
   bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
-  bundle_md5: 8aadffca28403aaa675e59b93721ea96
   bundle_bytes: 420804
   hash_basis: verified identical to the bytes consumed
   source_manifest:
     path: data/preprocessed/source_manifest.yaml
-    md5: ab62657ae5ca24d62258c2d2634a425b
+    sha256: 0690e3e03cb2a4e555ec24ceb41e84315fc7376f952dadf7c00ac530ab6ab005
+  bundle_sha256: 71b29a488af95b2eaff29377fbd745fecbd3b7910f3932277b75dbf8461b4ee9
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/AI_READI_d4d.yaml
-    md5: 5db55d6be92f1a1d684e561c2e079c0b
     bytes: 102384
     slots: 77
+    sha256: 2088430a546fbc14d79908805fc6146e9578e4001747932a9209d6ba432c7966
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep2/AI_READI_d4d_core.yaml
-    md5: 1a7c7f6ab64508bf6881cdec51fa75bd
     bytes: 86125
     slots: 63
+    sha256: bb0d16c266257ac31019d1be2390a2d5671896f2f2453d9906ae44a7ec8ca4fe
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep2/AI_READI_reconciliation.md
-    md5: a611bbedfa88fc26c523680f064e222a
     bytes: 17268
     slots: null
+    sha256: 69e3c868ab1534a594232ae6deaf75f7a77f64a6252c6302dfa066874f6fd021
 unrecoverable: null
 notes: null
 validation:
@@ -78,8 +78,8 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/AI_READI_d4d.yaml
-      md5: 5db55d6be92f1a1d684e561c2e079c0b
+      sha256: 2088430a546fbc14d79908805fc6146e9578e4001747932a9209d6ba432c7966
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep2/AI_READI_d4d_core.yaml
-      md5: 1a7c7f6ab64508bf6881cdec51fa75bd
+      sha256: bb0d16c266257ac31019d1be2390a2d5671896f2f2453d9906ae44a7ec8ca4fe
   recorded_by: d4d runs validate

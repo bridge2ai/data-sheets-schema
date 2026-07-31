@@ -22,23 +22,23 @@ sources:
   project: VOICE
   method: claudecode_agent
   path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d.yaml
-  md5: b330893fc08b4aef2aa15bb829e0f4c6
   slots: 76
   contributed_slots: 19
+  sha256: 9fb09858808071f6317658e4f484590cd419fc0656994d76fca864033c86f47b
 - label: rep2
   project: VOICE
   method: claudecode_agent
   path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/VOICE_d4d.yaml
-  md5: e9344c832f73e4638f099cb388053b25
   slots: 79
   contributed_slots: 51
+  sha256: e0971890d44667d8e960e15b349f0f29b176da3dab4907199d302a390f43b095
 - label: rep3
   project: VOICE
   method: claudecode_agent
   path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/VOICE_d4d.yaml
-  md5: 9d0940929bdde63c139ceab25d95fc43
   slots: 75
   contributed_slots: 13
+  sha256: e1f5dabde20fc9d5813898bfcec865b6bf4006ade404cf5beab326a8c1e32f6f
 schema:
   declared_version: 1.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
@@ -64,9 +64,9 @@ repo:
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent_merged/2026-07-29_guarded-union/VOICE_d4d.yaml
-    md5: dadf7b4fcf4fde98e3c0fb170bae88ab
     bytes: 136210
     slots: 83
+    sha256: 98013bb3b1df8ac3090842ad2dce87ecf9d5dd6eb1944211e1e03a0fc880cdb2
 not_applicable:
 - field: model
   reason: no model produced this record; it combines existing ones

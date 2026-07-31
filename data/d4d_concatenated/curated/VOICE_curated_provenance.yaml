@@ -1,4 +1,4 @@
-# D4D generation provenance record (reconstructed)
+# D4D generation provenance record
 # record_version 1 — see src/data_sheets_schema/provenance.py
 record_version: 1
 record_type: d4d_generation_provenance
@@ -29,8 +29,8 @@ inputs:
 outputs:
   full:
     path: data/d4d_concatenated/curated/VOICE_curated.yaml
-    md5: c2adc0c535cb21a628e310d8cc5a2b71
     bytes: 17295
+    sha256: f2f7ccd2d3837913a4382b9b5e1f4087ad1295ced3d756befc1dab3eb0337f2e
 repo:
   commit: 2b730155789095d8c09ce67d077807a5cca5fcf6
   commit_short: 2b730155

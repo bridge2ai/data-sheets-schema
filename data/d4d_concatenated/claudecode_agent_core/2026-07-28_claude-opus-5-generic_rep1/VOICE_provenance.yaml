@@ -49,28 +49,28 @@ system:
   memory_bytes: 68719476736
 inputs:
   bundle_path: data/preprocessed/concatenated/VOICE_preprocessed.txt
-  bundle_md5: e637eb752ee8cab5f9f7a52782250469
   bundle_bytes: 377706
   hash_basis: verified identical to the bytes consumed
   source_manifest:
     path: data/preprocessed/source_manifest.yaml
-    md5: ab62657ae5ca24d62258c2d2634a425b
+    sha256: 0690e3e03cb2a4e555ec24ceb41e84315fc7376f952dadf7c00ac530ab6ab005
+  bundle_sha256: 580122afbf50190d235c91dfad2de6db36ae3af1c3b86ed58e827fe8fcc762d3
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d.yaml
-    md5: b330893fc08b4aef2aa15bb829e0f4c6
     bytes: 136880
     slots: 76
+    sha256: 9fb09858808071f6317658e4f484590cd419fc0656994d76fca864033c86f47b
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d_core.yaml
-    md5: 278e09f0dd477681c185f4c28546ae82
     bytes: 111446
     slots: 65
+    sha256: b276728c59be3be492f7deecbe8b618a8d38730a02588d17451989e3dbbe8bee
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/VOICE_reconciliation.md
-    md5: 6dafc7e9c35495b9a17b59296c86e068
     bytes: 20028
     slots: null
+    sha256: 983c1742211638eb07a807df344f51370c3d4d218cea1036ef3b56104adaf945
 unrecoverable: null
 notes: null
 validation:
@@ -78,8 +78,8 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d.yaml
-      md5: b330893fc08b4aef2aa15bb829e0f4c6
+      sha256: 9fb09858808071f6317658e4f484590cd419fc0656994d76fca864033c86f47b
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d_core.yaml
-      md5: 278e09f0dd477681c185f4c28546ae82
+      sha256: b276728c59be3be492f7deecbe8b618a8d38730a02588d17451989e3dbbe8bee
   recorded_by: d4d runs validate

@@ -42,28 +42,28 @@ system:
     this run
 inputs:
   bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
-  bundle_md5: 8aadffca28403aaa675e59b93721ea96
   bundle_bytes: 420804
   hash_basis: verified identical to the bytes consumed
   source_manifest:
     path: data/preprocessed/source_manifest.yaml
     md5: e633ee3827eb151efca663f14d0b2f5c
+  bundle_sha256: 71b29a488af95b2eaff29377fbd745fecbd3b7910f3932277b75dbf8461b4ee9
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent/2026-07-27_claude-opus-5_rep3/AI_READI_d4d.yaml
-    md5: 0a04efda7273fab97b336a4a19799857
     bytes: 103699
     slots: 82
+    sha256: cc4010bafbca58bdd31de4bdf24e13f3efa23021713ce0e082ab07cba70e5795
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep3/AI_READI_d4d_core.yaml
-    md5: 9d6e039e7b7b1d5a6862a4d824de8c3d
     bytes: 90046
     slots: 68
+    sha256: 2d2512aaf8d23a8cf127ac7be51eb12b2d1864160ff0bd892e711b05465b6259
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep3/AI_READI_reconciliation.md
-    md5: 3e2a4a2461b2c6394b694bf221129fa6
     bytes: 20112
     slots: null
+    sha256: ff68fce8deb0ffecde43232968918f2763ca32744812c7e4e3645eb1bc1538bf
 unrecoverable:
 - field: system
   reason: hardware was not captured when this run executed
@@ -73,8 +73,8 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent/2026-07-27_claude-opus-5_rep3/AI_READI_d4d.yaml
-      md5: 0a04efda7273fab97b336a4a19799857
+      sha256: cc4010bafbca58bdd31de4bdf24e13f3efa23021713ce0e082ab07cba70e5795
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep3/AI_READI_d4d_core.yaml
-      md5: 9d6e039e7b7b1d5a6862a4d824de8c3d
+      sha256: 2d2512aaf8d23a8cf127ac7be51eb12b2d1864160ff0bd892e711b05465b6259
   recorded_by: d4d runs validate

@@ -41,28 +41,28 @@ system:
     this run
 inputs:
   bundle_path: data/preprocessed/concatenated/CM4AI_crate_only.txt
-  bundle_md5: 965b0aa654facd9992fda14ff4535a25
   bundle_bytes: 115604
   hash_basis: verified identical to the bytes consumed
   source_manifest:
     path: data/preprocessed/source_manifest.yaml
     md5: e633ee3827eb151efca663f14d0b2f5c
+  bundle_sha256: eceaa90c6d9e93afb37c9dfa91a28d23af620c4cdad7ad9d868321028820b02c
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-denoised_rep1/CM4AI_d4d.yaml
-    md5: 5ec70a9395b9a271eb9651ec5de5d979
     bytes: 106949
     slots: 55
+    sha256: dcc6d6198ee70f395f01a0a5ebdff9055c0ca9baa6d7b9ffafb1c79fbd179cdf
   core:
     path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-denoised_rep1/CM4AI_d4d_core.yaml
-    md5: 1d5662ad9ecb35c2d9ab672c3abc50dc
     bytes: 89758
     slots: 51
+    sha256: b1d9ea73bc0f1c81f60ee5da50f2b97996ad60f1005869315619dab3565454ce
   report:
     path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-denoised_rep1/CM4AI_reconciliation.md
-    md5: c6573a63edbc7bb1eb35979ef9faed05
     bytes: 20680
     slots: null
+    sha256: 0ac810e17f92a35587ac37a2d36a98ca53213757ecf31adf66c35e6a0a3ab3ea
 unrecoverable:
 - field: system
   reason: hardware was not captured when this run executed
@@ -72,8 +72,8 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-denoised_rep1/CM4AI_d4d.yaml
-      md5: 5ec70a9395b9a271eb9651ec5de5d979
+      sha256: dcc6d6198ee70f395f01a0a5ebdff9055c0ca9baa6d7b9ffafb1c79fbd179cdf
     core:
       path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-denoised_rep1/CM4AI_d4d_core.yaml
-      md5: 1d5662ad9ecb35c2d9ab672c3abc50dc
+      sha256: b1d9ea73bc0f1c81f60ee5da50f2b97996ad60f1005869315619dab3565454ce
   recorded_by: d4d runs validate

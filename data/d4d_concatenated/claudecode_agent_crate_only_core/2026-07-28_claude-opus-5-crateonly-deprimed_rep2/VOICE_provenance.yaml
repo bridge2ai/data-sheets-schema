@@ -49,12 +49,12 @@ system:
   memory_bytes: 68719476736
 inputs:
   bundle_path: data/preprocessed/concatenated/VOICE_crate_only.txt
-  bundle_md5: e0da1c226b05e944a617e2b0cdf9b6a0
   bundle_bytes: 320923
   hash_basis: verified identical to the bytes consumed
   source_manifest:
     path: data/preprocessed/source_manifest.yaml
     md5: e633ee3827eb151efca663f14d0b2f5c
+  bundle_sha256: da2bddfa78b1591ce695ddceae57f08d74c693b521f89bf9d8c83cf2efc37f31
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep2/VOICE_d4d.yaml
@@ -78,8 +78,8 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep2/VOICE_d4d.yaml
-      md5: 002a5e64ef7f1c0b04471fe85bad75cd
+      sha256: ff1c8521162a9d04d0e7433865e3bf427a0f8eb24c5ee57e269f52f9a59e6fc3
     core:
       path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep2/VOICE_d4d_core.yaml
-      md5: 35c6c2e2573b084a2cbd4f0e58d230b4
+      sha256: 084de2896c6e1292582bc924981ac6a4b57a73cb963ef7bc920d7ef7004cf645
   recorded_by: d4d runs validate

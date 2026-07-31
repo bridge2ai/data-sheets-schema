@@ -41,28 +41,28 @@ system:
     this run
 inputs:
   bundle_path: data/preprocessed/concatenated/VOICE_preprocessed_with_crate.txt
-  bundle_md5: 5c47f10064daed5d314dbd302fdff979
   bundle_bytes: 698761
   hash_basis: verified identical to the bytes consumed
   source_manifest:
     path: data/preprocessed/source_manifest.yaml
     md5: e633ee3827eb151efca663f14d0b2f5c
+  bundle_sha256: 99c85d42e64d2980634e4c43e6fb18785d72f2c9e9ab845c46969106cce99c1f
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent_crate/2026-07-27_claude-opus-5_rep1/VOICE_d4d.yaml
-    md5: 0b0036412d10dcf7629c4d4805919b47
     bytes: 173025
     slots: 81
+    sha256: 80e933389002259765fd49ced5b4f50c39bdc2aeacc3953afaad9308f6ce781b
   core:
     path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep1/VOICE_d4d_core.yaml
-    md5: 727377d29f9ee70f55562287ddf68f47
     bytes: 151742
     slots: 71
+    sha256: b9655eb6ec2f682b7865932f9380d671e896bb0c7b5a5c76d1a586c65d0e0069
   report:
     path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep1/VOICE_reconciliation.md
-    md5: 3824bf8db759a41d48f6dd54a5181d0c
     bytes: 24984
     slots: null
+    sha256: fd0fcb0249a01f1e66296d86d2c98990b22142851d90df3bffc1dcd498ddfc48
 unrecoverable:
 - field: system
   reason: hardware was not captured when this run executed
@@ -72,8 +72,8 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent_crate/2026-07-27_claude-opus-5_rep1/VOICE_d4d.yaml
-      md5: 0b0036412d10dcf7629c4d4805919b47
+      sha256: 80e933389002259765fd49ced5b4f50c39bdc2aeacc3953afaad9308f6ce781b
     core:
       path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep1/VOICE_d4d_core.yaml
-      md5: 727377d29f9ee70f55562287ddf68f47
+      sha256: b9655eb6ec2f682b7865932f9380d671e896bb0c7b5a5c76d1a586c65d0e0069
   recorded_by: d4d runs validate

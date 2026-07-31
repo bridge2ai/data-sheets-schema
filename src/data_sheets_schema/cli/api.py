@@ -6,6 +6,8 @@ from pathlib import Path
 
 import click
 
+from data_sheets_schema.api_runner import CONDITION_PROMPTS
+
 from data_sheets_schema.constants import PROJECTS
 
 ARMS = {
@@ -22,6 +24,13 @@ ARMS = {
                     "claudecode_agent_healthsheet", "{p}_healthsheet_only.txt",
                     "# Source manifest: not used; this arm declares its single source bundle explicitly"),
 }
+
+
+# Read from the registry rather than repeated inline. The list was written out
+# three times, so adding `generic_v2` to CONDITION_PROMPTS left it unreachable
+# from every CLI entry point — the condition was staged, tested, and could not be
+# launched.
+_CONDITIONS = sorted(CONDITION_PROMPTS)
 
 
 def _spec(project, arm, label, condition, bundle=None, out_dir=None):
@@ -62,7 +71,7 @@ def api():
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--label", required=True, help="run label, e.g. 2026-07-29_claude-opus-5-api-generic_rep1")
-@click.option("--condition", type=click.Choice(["generic", "tuned"]),
+@click.option("--condition", type=click.Choice(_CONDITIONS),
               default="generic", show_default=True)
 @click.option("--bundle", type=click.Path(), default=None,
               help="explicit input bundle; required for datasets outside PROJECTS")
@@ -100,7 +109,7 @@ def plan_cmd(project, arm, label, condition, bundle, out_dir, as_json):
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--label", required=True)
-@click.option("--condition", type=click.Choice(["generic", "tuned"]),
+@click.option("--condition", type=click.Choice(_CONDITIONS),
               default="generic", show_default=True)
 @click.option("--bundle", type=click.Path(), default=None,
               help="explicit input bundle; required for datasets outside PROJECTS")
@@ -151,7 +160,7 @@ def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
               help="comma-separated")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
-@click.option("--condition", type=click.Choice(["generic", "tuned"]),
+@click.option("--condition", type=click.Choice(_CONDITIONS),
               default="generic", show_default=True)
 @click.option("--replicates", type=int, default=3, show_default=True)
 @click.option("--label-prefix", required=True,
