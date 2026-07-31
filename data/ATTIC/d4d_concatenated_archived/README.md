@@ -10,15 +10,17 @@ layout is preserved, so restoring is the same move reversed:
 d4d runs restore --label <LABEL> --execute
 ```
 
-## Contents (10 run directories)
+## Contents (12 run directories)
 
-- `claudecode_agent/2026-04-10_sonnet-4.6`
-- `claudecode_agent/2026-07-23_gpt-5.5-high-fast`
-- `claudecode_agent/2026-07-23_gpt-5.5-high-fast-r2`
-- `claudecode_agent/2026-07-23_gpt-5.5-high-fast-r3`
-- `claudecode_agent/2026-07-23_gpt-5.6-sol-ultra-fast`
-- `claudecode_agent_core/2026-04-10_sonnet-4.6`
-- `claudecode_agent_core/2026-07-23_gpt-5.5-high-fast`
-- `claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r2`
-- `claudecode_agent_core/2026-07-23_gpt-5.5-high-fast-r3`
-- `claudecode_agent_core/2026-07-23_gpt-5.6-sol-ultra-fast`
+- `2026-07-28_claude-opus-5-crateonly_rep1/CM4AI_d4d.yaml`
+- `2026-07-28_claude-opus-5-crateonly_rep2/CM4AI_d4d.yaml`
+- `2026-07-28_claude-opus-5-crateonly_rep3/CM4AI_d4d.yaml`
+- `2026-07-28_claude-opus-5-crateonly_rep1/CM4AI_d4d_core.yaml`
+- `2026-07-28_claude-opus-5-crateonly_rep1/CM4AI_provenance.yaml`
+- `2026-07-28_claude-opus-5-crateonly_rep1/CM4AI_reconciliation.md`
+- `2026-07-28_claude-opus-5-crateonly_rep2/CM4AI_d4d_core.yaml`
+- `2026-07-28_claude-opus-5-crateonly_rep2/CM4AI_provenance.yaml`
+- `2026-07-28_claude-opus-5-crateonly_rep2/CM4AI_reconciliation.md`
+- `2026-07-28_claude-opus-5-crateonly_rep3/CM4AI_d4d_core.yaml`
+- `2026-07-28_claude-opus-5-crateonly_rep3/CM4AI_provenance.yaml`
+- `2026-07-28_claude-opus-5-crateonly_rep3/CM4AI_reconciliation.md`

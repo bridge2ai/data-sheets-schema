@@ -1,0 +1,71 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_derived_provenance
+record_mode: derived
+record_generated_at: '2026-07-30T22:54:20+00:00'
+run:
+  label: lab
+  project: P
+  method: claudecode_agent_merged
+  arm: baseline
+  replicate: null
+derivation:
+  rule: Union of slots across 2 replicates; where several supplied one slot, the best-fitting
+    value was taken (referent-bearing fields pinned to base `rep1`). 0 slots were
+    contested.
+  source_count: 2
+  reproducible: re-running this rule over the pinned source bytes must reproduce this
+    record
+sources:
+- label: rep1
+  project: P
+  method: claudecode_agent
+  path: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/tmpw90gxocb/data/d4d_concatenated/claudecode_agent/lab_rep1/P_d4d.yaml
+  md5: ddc4486bbba05656bd74b38679afea50
+  slots: 2
+  contributed_slots: 2
+- label: rep2
+  project: P
+  method: claudecode_agent
+  path: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/tmpw90gxocb/data/d4d_concatenated/claudecode_agent/lab_rep2/P_d4d.yaml
+  md5: 8e954c36a5ed429f89d2a0879a62a87c
+  slots: 2
+  contributed_slots: 1
+schema:
+  declared_version: 1.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_md5: 633a2d2c490364d66f45d8ee2959a329
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_md5: c23d85ec2abfa2178de2737278f690e1
+  merged_schema_carries_version: false
+  note: The version is declared in the source schema but the merged artefacts predate
+    it; they will carry it after the next `make full-schema`. Content md5s identify
+    exactly what was used.
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: 742e33cb5f0fbf0b2b5e4ad27c96a303cecc0b29
+  commit_short: 742e33cb
+  branch: project-granular-archive
+  dirty: true
+  dirty_file_count: 24
+outputs:
+  full:
+    path: /var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/tmpw90gxocb/merged/P_d4d.yaml
+    md5: 5cce8492547e15b08c26f65d0004b874
+    bytes: 19
+    slots: 3
+not_applicable:
+- field: model
+  reason: no model produced this record; it combines existing ones
+- field: prompts
+  reason: no prompt was sent
+- field: inputs.bundle_md5
+  reason: no source bundle was read; the inputs are the records listed under `sources`
+notes:
+- coherent — replicates agree on every referent-bearing field

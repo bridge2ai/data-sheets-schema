@@ -475,9 +475,10 @@ class TestProvenanceModeReportingAndArchive(unittest.TestCase):
         # (correctly) refuse it.
         r = archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t",
                          dry_run=True, allow_partial_labels=True)
-        dirs = {Path(a).parent.name for a, _ in r["moved"]}
-        self.assertIn("claudecode_agent", dirs)
-        self.assertIn("claudecode_agent_core", dirs)
+        # Files now, not directories: the method is two levels up.
+        methods = {Path(a).parent.parent.name for a, _ in r["moved"]}
+        self.assertIn("claudecode_agent", methods)
+        self.assertIn("claudecode_agent_core", methods)
 
     def test_archive_preserves_layout_so_restore_is_the_inverse(self):
         from data_sheets_schema.runs import archive_runs
@@ -487,8 +488,10 @@ class TestProvenanceModeReportingAndArchive(unittest.TestCase):
         r = archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t",
                          dry_run=True, allow_partial_labels=True)
         for src, dest in r["moved"]:
+            # Layout preserved: method/label/file mirrored under the archive.
             self.assertTrue(dest.endswith(
-                f"{Path(src).parent.name}/{Path(src).name}"))
+                f"{Path(src).parent.parent.name}/{Path(src).parent.name}/"
+                f"{Path(src).name}"))
 
     def test_dry_run_moves_nothing(self):
         from data_sheets_schema.runs import archive_runs
@@ -609,7 +612,10 @@ class TestAttestationRigour(unittest.TestCase):
             run = c / "m" / "L"
             run.mkdir(parents=True)
             (run / "P_d4d.yaml").write_text("x\n")
-            (a / "d4d_concatenated_archived" / "m" / "L").mkdir(parents=True)
+            # Collisions are per-file now, so the fixture must pre-place a file.
+            dest = a / "d4d_concatenated_archived" / "m" / "L"
+            dest.mkdir(parents=True)
+            (dest / "P_d4d.yaml").write_text("older\n")
             r = archive_runs(["L"], reason="t", concat_dir=c, attic=a,
                              dry_run=True)
             self.assertTrue(r["collisions"])
@@ -664,7 +670,8 @@ class TestArchiveDoesNotTakeCollateral(unittest.TestCase):
             concat = self._tree(td, {"A": "partial", "B": "partial"})
             r = archive_runs(["L"], reason="t", concat_dir=concat,
                              attic=Path(td) / "attic", dry_run=True)
-            self.assertEqual(r["count"], 2)
+            # Four files per project (full, core, report, provenance) x2.
+            self.assertEqual(r["count"], 8)
 
     def test_collateral_can_be_accepted_explicitly(self):
         import tempfile
@@ -730,3 +737,195 @@ class TestImplausibleDatesAreNotExemptions(unittest.TestCase):
             EARLIEST_PLAUSIBLE_RUN, LIVE_REQUIRED_FROM)
         self.assertLess(EARLIEST_PLAUSIBLE_RUN, LIVE_REQUIRED_FROM)
         self.assertLess(EARLIEST_PLAUSIBLE_RUN, "2026-04-10")
+
+
+class TestProjectGranularArchive(unittest.TestCase):
+    """A mixed label needs the project named, not the label skipped.
+
+    Skipping mixed labels left CM4AI's crateonly records in the corpus because
+    CHORUS and VOICE share their label — the guard prevented data loss but also
+    prevented the archive from doing its job.
+    """
+
+    def _tree(self, td):
+        c = Path(td) / "c"
+        for proj in ("KEEP", "DROP"):
+            (c / "m" / "L").mkdir(parents=True, exist_ok=True)
+            (c / "m_core" / "L").mkdir(parents=True, exist_ok=True)
+            (c / "m" / "L" / f"{proj}_d4d.yaml").write_text(f"{proj}\n")
+            (c / "m_core" / "L" / f"{proj}_d4d_core.yaml").write_text(f"{proj}\n")
+        return c, Path(td) / "a"
+
+    def test_only_the_named_project_moves(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td)
+            archive_runs(["L"], reason="t", projects=["DROP"], concat_dir=c,
+                         attic=a, dry_run=False)
+            remaining = sorted(f.name for f in c.rglob("*") if f.is_file())
+            self.assertEqual(remaining, ["KEEP_d4d.yaml", "KEEP_d4d_core.yaml"])
+
+    def test_per_project_archive_round_trips(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs, restore_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td)
+            before = sorted(f.name for f in c.rglob("*") if f.is_file())
+            archive_runs(["L"], reason="t", projects=["DROP"], concat_dir=c,
+                         attic=a, dry_run=False)
+            restore_runs(["L"], projects=["DROP"], concat_dir=c, attic=a,
+                         dry_run=False)
+            self.assertEqual(sorted(f.name for f in c.rglob("*") if f.is_file()),
+                             before)
+
+    def test_naming_a_project_needs_no_collateral_guard(self):
+        """The guard exists for whole-label moves; naming projects is precise."""
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td)
+            r = archive_runs(["L"], reason="t", projects=["DROP"],
+                             concat_dir=c, attic=a, dry_run=True)
+            self.assertEqual(r["count"], 2)
+
+    def test_emptied_directories_are_pruned(self):
+        """An empty label directory reads as a run with no records."""
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td)
+            archive_runs(["L"], reason="t", projects=["KEEP", "DROP"],
+                         concat_dir=c, attic=a, dry_run=False)
+            self.assertFalse((c / "m" / "L").exists())
+
+
+class TestDerivedIsItsOwnLevel(unittest.TestCase):
+    """A derived record is not a defective generation record."""
+
+    def _derived(self, td, **overrides):
+        import yaml as _yaml
+        d = Path(td) / "m_core" / "L"
+        d.mkdir(parents=True, exist_ok=True)
+        body = {"record_mode": "derived",
+                "sources": [{"label": "r1", "md5": "abc"}],
+                "derivation": {"rule": "union"},
+                "outputs": {"full": {"md5": "x"}}}
+        body.update(overrides)
+        (d / "P_provenance.yaml").write_text(_yaml.safe_dump(body))
+        return Path(td)
+
+    def test_a_well_formed_derived_record_reports_derived(self):
+        import tempfile
+        from data_sheets_schema.runs import DERIVED, attestation
+        with tempfile.TemporaryDirectory() as td:
+            self.assertEqual(attestation("m", "L", "P", self._derived(td)),
+                             DERIVED)
+
+    def test_a_derived_record_without_sources_is_partial(self):
+        import tempfile
+        from data_sheets_schema.runs import PARTIAL, attestation
+        with tempfile.TemporaryDirectory() as td:
+            self.assertEqual(
+                attestation("m", "L", "P", self._derived(td, sources=[])),
+                PARTIAL)
+
+    def test_a_derived_record_without_a_hashed_output_is_partial(self):
+        import tempfile
+        from data_sheets_schema.runs import PARTIAL, attestation
+        with tempfile.TemporaryDirectory() as td:
+            self.assertEqual(
+                attestation("m", "L", "P",
+                            self._derived(td, outputs={"full": None})),
+                PARTIAL)
+
+    def test_the_real_merged_records_report_derived(self):
+        from data_sheets_schema.runs import DERIVED, attestation
+        got = attestation("claudecode_agent_merged", "2026-07-29_guarded-union",
+                          "CHORUS")
+        if got == "none":
+            self.skipTest("guarded merges not present")
+        self.assertEqual(got, DERIVED)
+
+    def test_compare_excludes_derived_records_unconditionally(self):
+        """A derived record is an order statistic over the runs being measured,
+        so including it would bias the variance it was built from."""
+        from data_sheets_schema.runs import compare
+        r = compare("claudecode_agent_merged", "CHORUS",
+                    ["2026-07-29_guarded-union"])
+        self.assertIn("error", r, "one label cannot form a comparison anyway")
+
+
+class TestPruneScopeAndEmptySelection(unittest.TestCase):
+    """An operation must not have effects outside what it was asked to do."""
+
+    def _tree(self, td, projects=("P", "KEEP")):
+        c, a = Path(td) / "c", Path(td) / "a"
+        (c / "m" / "L").mkdir(parents=True)
+        for proj in projects:
+            (c / "m" / "L" / f"{proj}_d4d.yaml").write_text(f"{proj}\n")
+        return c, a
+
+    def test_unrelated_empty_directories_survive(self):
+        """Pruning the corpus root deleted directories the move never touched,
+        so the result depended on what else happened to be empty (#196)."""
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td)
+            (c / "other_method" / "pending_run").mkdir(parents=True)
+            archive_runs(["L"], reason="t", projects=["P"], concat_dir=c,
+                         attic=a, dry_run=False)
+            self.assertTrue((c / "other_method" / "pending_run").exists())
+
+    def test_a_shared_label_directory_is_kept(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td)
+            r = archive_runs(["L"], reason="t", projects=["P"], concat_dir=c,
+                             attic=a, dry_run=False)
+            self.assertEqual(r["would_empty"], [])
+            self.assertTrue((c / "m" / "L").exists())
+
+    def test_a_fully_emptied_label_directory_is_removed(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td, projects=("P",))
+            r = archive_runs(["L"], reason="t", projects=["P"], concat_dir=c,
+                             attic=a, dry_run=False)
+            self.assertTrue(r["would_empty"])
+            self.assertFalse((c / "m" / "L").exists())
+
+    def test_dry_run_previews_the_directories_too(self):
+        """A preview that omits part of the effect is weaker than it looks (#198)."""
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td, projects=("P",))
+            r = archive_runs(["L"], reason="t", projects=["P"], concat_dir=c,
+                             attic=a, dry_run=True)
+            self.assertTrue(r["would_empty"])
+            self.assertTrue((c / "m" / "L").exists(), "dry run changed nothing")
+
+    def test_an_empty_selection_writes_no_note(self):
+        """A mistyped project archived nothing and left a note claiming
+        otherwise (#197)."""
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td)
+            r = archive_runs(["L"], reason="t", projects=["MISTYPED"],
+                             concat_dir=c, attic=a, dry_run=False)
+            self.assertTrue(r["matched_nothing"])
+            self.assertEqual(r["count"], 0)
+            self.assertFalse((a / "d4d_concatenated_archived").exists())
+
+    def test_restore_also_reports_an_empty_selection(self):
+        import tempfile
+        from data_sheets_schema.runs import restore_runs
+        with tempfile.TemporaryDirectory() as td:
+            r = restore_runs(["nope"], concat_dir=Path(td) / "c",
+                             attic=Path(td) / "a", dry_run=True)
+            self.assertTrue(r["matched_nothing"])

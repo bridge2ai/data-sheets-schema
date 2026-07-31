@@ -15,10 +15,12 @@ def runs():
               help='Run label(s) to archive; repeatable.')
 @click.option('--unattested', is_flag=True,
               help='Archive runs with a gap in something that determines the output.')
+@click.option('--project', 'project', multiple=True,
+              help='Archive only these projects within the labels; repeatable.')
 @click.option('--reason', default=None, help='Recorded in the archive README.')
 @click.option('--execute', is_flag=True,
               help='Actually move. Without it, only report what would move.')
-def archive(labels, unattested, reason, execute):
+def archive(labels, unattested, project, reason, execute):
     """Move runs out of analysis into data/ATTIC, without deleting them.
 
     `discover()` walks data/d4d_concatenated, so a move to ATTIC removes a run
@@ -41,6 +43,7 @@ def archive(labels, unattested, reason, execute):
     )
 
     targets = set(labels)
+    unplaceable: set[str] = set()
     if unattested:
         for run in discover():
             # Deterministic mappings are not stochastic generations and carry no
@@ -56,18 +59,27 @@ def archive(labels, unattested, reason, execute):
                 # unattestable run.
                 if attestation(run.method, run.label, proj) == PARTIAL:
                     targets.add(run.label)
-        # Drop labels whose projects disagree: archiving one would move
-        # placeable records out alongside the unplaceable ones.
-        mixed = {run.label for run in discover()
-                 if not run.is_core and not run.deterministic
-                 and run.label in targets
-                 for proj in run.projects
-                 if attestation(run.method, run.label, proj) != PARTIAL}
-        for lab in sorted(mixed):
-            click.echo(f"   ⏭  skipping {lab}: it also holds placeable records")
-        targets -= mixed
+                    unplaceable.add(proj)
+
+    # Name the projects rather than skipping mixed labels. A label is not a unit
+    # of attestation, and an earlier version dropped whole labels to avoid
+    # collateral — which left CM4AI's crateonly records in the corpus because
+    # CHORUS and VOICE share their label. Moving by project takes exactly the
+    # unplaceable records.
+    if unattested and not project:
+        project = tuple(sorted(unplaceable))
+        if project:
+            click.echo(f"   archiving only: {', '.join(project)}")
     if not targets:
-        click.echo("Nothing selected. Pass --label or --unattested."); return
+        # Distinguish "you asked for nothing" from "nothing matched". Reporting
+        # a clean corpus as a usage error reads as though the command were
+        # invoked wrongly.
+        if unattested:
+            click.echo("No unattestable runs found — every run in the corpus "
+                       "can be placed. Nothing to archive.")
+        else:
+            click.echo("Nothing selected. Pass --label or --unattested.")
+        return
 
     default_reason = (
         "These runs have a gap in something that determines their output — most "
@@ -77,12 +89,24 @@ def archive(labels, unattested, reason, execute):
         "schema, model and outputs, are NOT archived: they can be placed and "
         "reproduced, and only their hardware is unrecorded.")
     res = archive_runs(sorted(targets), reason=reason or default_reason,
-                       dry_run=not execute)
+                       projects=list(project) or None, dry_run=not execute)
+    if res["matched_nothing"]:
+        click.echo(f"No records matched. Labels: {', '.join(sorted(targets))}"
+                   + (f"; projects: {', '.join(project)}" if project else "")
+                   + ".\nNothing was archived and no note was written — check "
+                     "the names.")
+        return
+
     verb = "Moved" if execute else "Would move"
-    click.echo(f"{verb} {res['count']} run director(ies) for "
+    click.echo(f"{verb} {res['count']} record file(s) across "
                f"{len(targets)} label(s) -> {res['archive']}")
     for src, dest in res["moved"]:
         click.echo(f"   {src}")
+    if res["would_empty"]:
+        click.echo(f"\n{'Removed' if execute else 'Would remove'} "
+                   f"{len(res['would_empty'])} emptied director(ies):")
+        for d in res["would_empty"]:
+            click.echo(f"   {d}")
     if not execute:
         click.echo("\nDry run. Re-run with --execute to move them.")
 
@@ -90,13 +114,16 @@ def archive(labels, unattested, reason, execute):
 @runs.command()
 @click.option('--label', 'labels', multiple=True,
               help='Run label(s) to restore; default all archived.')
+@click.option('--project', 'projects', multiple=True,
+              help='Restore only these projects; default all.')
 @click.option('--execute', is_flag=True)
-def restore(labels, execute):
-    """Move archived runs back into data/d4d_concatenated."""
+def restore(labels, projects, execute):
+    """Move archived records back into data/d4d_concatenated."""
     from data_sheets_schema.runs import restore_runs
-    res = restore_runs(list(labels), dry_run=not execute)
+    res = restore_runs(list(labels), projects=list(projects) or None,
+                       dry_run=not execute)
     verb = "Restored" if execute else "Would restore"
-    click.echo(f"{verb} {res['count']} run director(ies)")
+    click.echo(f"{verb} {res['count']} record file(s)")
     for src, dest in res["moved"]:
         click.echo(f"   {dest}")
     if not execute and res["count"]:
