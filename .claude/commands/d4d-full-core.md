@@ -462,6 +462,14 @@ and it marks what it cannot recover rather than filling it in.
 - The core header contains `Phase 4 reconciliation: completed`.
 - The Phase 3/4 reconciliation report is present.
 - The live provenance record is present and its `record_mode` is `live`.
+- `d4d runs check --strict` passes for the run. **Recording provenance is not the
+  same as recording it correctly.** This path writes provenance as a step
+  separate from writing the artifacts, so a record can pin a state the files
+  merely passed through — one reconciliation report was hashed before its
+  closing rows were appended, and a whole series was hashed before its headers
+  were edited. The API path cannot do this, because it writes provenance
+  in-process after every phase; running the check gives this path the same
+  property. Re-run `d4d runs validate` and check again if anything changed.
 - Final summary to the user: per project, report full/core line counts as
   informational metadata, never as a quality gate, plus validation status.
 

@@ -60,17 +60,14 @@ outputs:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d.yaml
     bytes: 136880
     slots: 76
-    sha256: 9fb09858808071f6317658e4f484590cd419fc0656994d76fca864033c86f47b
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d_core.yaml
     bytes: 111446
     slots: 65
-    sha256: b276728c59be3be492f7deecbe8b618a8d38730a02588d17451989e3dbbe8bee
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/VOICE_reconciliation.md
     bytes: 20028
     slots: null
-    sha256: 983c1742211638eb07a807df344f51370c3d4d218cea1036ef3b56104adaf945
 unrecoverable: null
 notes: null
 validation:

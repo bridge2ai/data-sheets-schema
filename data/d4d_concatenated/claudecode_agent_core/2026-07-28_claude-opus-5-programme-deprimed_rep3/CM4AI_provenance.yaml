@@ -52,15 +52,12 @@ outputs:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-programme-deprimed_rep3/CM4AI_d4d.yaml
     bytes: 120648
     slots: 60
-    sha256: e649e1119bc0145ead6113100845ebbf28c494931ab7e4ef2a7d8387ce29ec17
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep3/CM4AI_d4d_core.yaml
-    md5: d04f62c8c1b1c7dd6f527cfb6deb3c6a
     bytes: 104166
     slots: 55
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep3/CM4AI_reconciliation.md
-    md5: c8397a10afea6fffe7be4e25fd477a9f
     bytes: 19778
     slots: null
 unrecoverable:

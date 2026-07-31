@@ -61,17 +61,14 @@ outputs:
     path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly_rep3/VOICE_d4d.yaml
     bytes: 77125
     slots: 67
-    sha256: 55a7fe6cc4142c361bec9af839dd0d521b66abdcb94a9ed3a786a18f2736e923
   core:
     path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep3/VOICE_d4d_core.yaml
     bytes: 70852
     slots: 58
-    sha256: 747dabda606aaa910abfd519435460f99d23b9f2130a3f3b3d6ca089ccdac533
   report:
     path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep3/VOICE_reconciliation.md
     bytes: 24759
     slots: null
-    sha256: 4c98ab390279fc9282d29a4e148ec5379b7b932700a45099a4ebbb25f8fa7ffc
 unrecoverable: null
 notes: null
 validation:

@@ -60,12 +60,10 @@ outputs:
     path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly_rep1/VOICE_d4d.yaml
     bytes: 64091
     slots: 68
-    sha256: 45c9c743c42f16c5055c89bfc7a9a178358bf3e62abc117c3f957332e166b1ac
   core:
     path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep1/VOICE_d4d_core.yaml
     bytes: 61371
     slots: 60
-    sha256: 6dd5cffb01abb6072cd764ef795481b1c4e6f1c06eac68a66b85634638c15c41
   report: null
 unrecoverable: null
 notes: null

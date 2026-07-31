@@ -30,7 +30,6 @@ outputs:
   full:
     path: data/d4d_concatenated/curated/AI_READI_curated.yaml
     bytes: 7303
-    sha256: 12f08bddcddf2eb00c181308e886e927667b1db2e7710b45182f34616102cdbf
 repo:
   commit: 2b730155789095d8c09ce67d077807a5cca5fcf6
   commit_short: 2b730155

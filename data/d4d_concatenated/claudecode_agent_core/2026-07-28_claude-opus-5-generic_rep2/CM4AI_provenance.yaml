@@ -60,17 +60,14 @@ outputs:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/CM4AI_d4d.yaml
     bytes: 97858
     slots: 63
-    sha256: 1bf736aa622453b3b4984076f7c945e78d1cacbadedc6350a5e98d5e12cd8c95
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep2/CM4AI_d4d_core.yaml
     bytes: 87733
     slots: 58
-    sha256: dec3dd1a8423ce4d2527a3cc560e30c1cbed5e018e413a28d435ff430230bf19
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep2/CM4AI_reconciliation.md
     bytes: 15046
     slots: null
-    sha256: 07c47fe427fd5a73f807d931a487d65dbd74fa170e8b55e3cc9d744147586a2d
 unrecoverable: null
 notes: null
 validation:

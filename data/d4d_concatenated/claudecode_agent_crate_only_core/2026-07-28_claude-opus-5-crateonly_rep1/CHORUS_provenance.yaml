@@ -61,12 +61,10 @@ outputs:
     path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly_rep1/CHORUS_d4d.yaml
     bytes: 48626
     slots: 56
-    sha256: d471ae50e19c597410f1db22cd81434dfdaa7b299e441ad5dcf14da075daca77
   core:
     path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly_rep1/CHORUS_d4d_core.yaml
     bytes: 40341
     slots: 48
-    sha256: d02d293226c2f1c5fec6f7a18dcbb23a88087e7aaa01efbf080df538198e10e0
   report: null
 unrecoverable: null
 notes: null

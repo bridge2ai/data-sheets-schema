@@ -76,17 +76,14 @@ outputs:
     path: data/d4d_concatenated/claudecode_agent/2026-07-29_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml
     bytes: 32700
     slots: 53
-    sha256: 4e21643adacbfb963cd4f2db843acc3bbbb3c113d75e58ed386833a44f02cf3e
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-29_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml
     bytes: 30883
     slots: 49
-    sha256: e0ad635d62962fba66b6a3d4c5c3bf9739f588e7a8823485250e7b0f5397bf45
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-29_claude-opus-5-api-generic_rep1/CHORUS_reconciliation.md
     bytes: 13296
     slots: null
-    sha256: 29a8d9d3f07a3cc7822fd6429736e278f254d7c7aea9cd570e1af21439016a87
 unrecoverable: null
 unverified:
 - field: model.temperature

@@ -60,17 +60,14 @@ outputs:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/CHORUS_d4d.yaml
     bytes: 55356
     slots: 53
-    sha256: b377fcec307d0e6d77a3fd00433277b573a7b9be7614fbcbb5618e757dce05dc
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep2/CHORUS_d4d_core.yaml
     bytes: 50502
     slots: 47
-    sha256: 5e1b9dd2202edd07dc9c540301cd55145a3b99952b57e2a089cd5354bdd8a6a6
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep2/CHORUS_reconciliation.md
     bytes: 13672
     slots: null
-    sha256: 75f9ad0671a06cee8ccc3c15a5082f12c24a6136e88853c110c8962851a5d9ea
 unrecoverable: null
 notes: null
 validation:

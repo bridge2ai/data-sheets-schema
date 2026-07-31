@@ -53,17 +53,14 @@ outputs:
     path: data/d4d_concatenated/claudecode_agent_crate/2026-07-27_claude-opus-5_rep3/CM4AI_d4d.yaml
     bytes: 111981
     slots: 83
-    sha256: 9f47e98de69f02d7160c66752c89074eab6459e225bbcc261275b16d978f32b7
   core:
     path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep3/CM4AI_d4d_core.yaml
     bytes: 94922
     slots: 71
-    sha256: f218774282668f0e84e84afaf82ae1f1b6b6f5409f6820d679a45f7dcdb23cb8
   report:
     path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep3/CM4AI_reconciliation.md
     bytes: 22232
     slots: null
-    sha256: bd7f00e81d0e82c714dbc2a6e7c6fa8107609d73fc8b19f011a575eab9690a79
 unrecoverable:
 - field: system
   reason: hardware was not captured when this run executed

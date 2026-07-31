@@ -53,17 +53,14 @@ outputs:
     path: data/d4d_concatenated/claudecode_agent/2026-07-27_claude-opus-5_rep1/AI_READI_d4d.yaml
     bytes: 142095
     slots: 81
-    sha256: dc429ba4d9e62c9abe28247b4fe89c9b25f57c0d4ee6948a02faf25fb36e4657
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep1/AI_READI_d4d_core.yaml
     bytes: 114696
     slots: 66
-    sha256: 97ebbb6ba032dade713378295cbc0725825a85698079677b186cf3c90a83023e
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep1/AI_READI_reconciliation.md
     bytes: 21400
     slots: null
-    sha256: 14d14d44ed620cbf3fccd9276b21cdccec345aed8905066a1b0acc9d73330838
 unrecoverable:
 - field: system
   reason: hardware was not captured when this run executed
