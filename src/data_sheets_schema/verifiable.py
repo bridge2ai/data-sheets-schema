@@ -12,10 +12,37 @@ accession, a participant count, a release date: these are tokens that must appea
 record states `10.13026/249v-w155` and no input document contains it, the record
 invented it — and no comparison with another record was needed to know that.
 
+## The asymmetry, which is the whole basis of this module
+
+**Absence is evidence; presence is not.** A token absent from every declared
+source cannot have been read from one, so `ungrounded` is a real finding.
+`grounded` means only that the characters occur somewhere in the corpus, which is
+much weaker:
+
+- **Coincidence passes.** `participants: 2025` is "grounded" by a document that
+  says "published in 2025". The check has no notion of what the number counts.
+- **Correct derivation fails.** A record stating 2,000 participants from a source
+  describing "1,000 cases and 1,000 controls" is reported ungrounded, correctly
+  by this method's rule and wrongly as a matter of fact.
+
+So the `rate` is *not* an accuracy score, and must not be reported as one. It is
+the proportion of stated tokens that could be located, and its useful direction is
+downward: a record that drops relative to its peers is asserting things its
+sources do not contain. Treat `ungrounded` as a list to read, not a number to
+optimise.
+
 This deliberately does not attempt prose. "The dataset addresses a gap in
 multimodal voice research" is not checkable this way and is not the target;
 `evidence_score.py` covers the schema-fitness question, and neither addresses
 whether a claim is *true* in general.
+
+## What is not counted, and which way that biases the rate
+
+Counts below four digits are skipped: in an 80k-token corpus a three-digit
+figure matches something almost always, so including them would manufacture
+grounding rather than measure it. Accessions cover five prefixes. Both
+exclusions shrink the denominator, and both therefore bias the reported rate
+*upward* — the check is more forgiving than it looks, not less.
 
 ## Why identifiers are excluded
 
@@ -42,7 +69,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterator
 
-FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
+# Resolved from this file, not the working directory. Running the CLI from a
+# subdirectory tried to open `tests/src/data_sheets_schema/schema/...`.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+FULL_SCHEMA = _REPO_ROOT / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
 
 # Token kinds that must appear verbatim in a source document if they are real.
 # Deliberately narrow: each is a string a human copied from somewhere, not a
@@ -108,6 +138,26 @@ class RecordCheck:
         return {k: (v[0], v[1]) for k, v in out.items()}
 
 
+def declared_bundle(method: str, label: str, project: str) -> Path | None:
+    """The bundle a run actually declared, read from its provenance.
+
+    Not `{project}_preprocessed.txt`. Arms read different inputs — `crate_only`
+    reads `{project}_crate_only.txt` — and checking every run against the
+    baseline bundle reported the whole crate arm as fabricating everything: 0 of
+    5 DOIs, 0 of 11 URLs, 0 of 3 dates on one CHORUS record, for values that are
+    presumably in the crate it was given. The provenance already records the
+    answer; assuming it was the failure.
+    """
+    import yaml as _yaml
+    from data_sheets_schema.provenance import record_path_for
+    rec = record_path_for(project, method, label)
+    if not rec.exists():
+        return None
+    data = _yaml.safe_load(rec.read_text(encoding="utf-8")) or {}
+    path = (data.get("inputs") or {}).get("bundle_path")
+    return Path(path) if path else None
+
+
 def identifier_slots(schema_path: Path = FULL_SCHEMA) -> set[str]:
     """Slots whose string values are constructed identifiers, not assertions.
 
@@ -149,19 +199,26 @@ def renderings(kind: str, value: str) -> list[str]:
     where a bundle-wide rewrite hides which transformations were applied.
     """
     v = normalise(kind, value)
+    if kind == "count":
+        return number_renderings(v)
     if kind != "iso_date":
         return [v]
+    # Validated as a real calendar date, not merely three numbers. `MONTHS[m-1]`
+    # with m == 0 indexes backwards and rendered `2025-00-17` as "December 17,
+    # 2025" — an impossible date reported as grounded. `date()` rejects month 0,
+    # day 31 in June, and 29 February in a common year alike.
+    import datetime
     try:
-        y, m, d = (int(x) for x in value.split("-"))
-        month = MONTHS[m - 1]
-    except (ValueError, IndexError):
+        parts = [int(x) for x in value.split("-")]
+        dt = datetime.date(*parts)
+    except (ValueError, TypeError):
         return [v]
+    y, m, d, month = dt.year, dt.month, dt.day, MONTHS[dt.month - 1]
     return [v,
             f"{month} {d}, {y}".lower(),
             f"{month} {d:02d}, {y}".lower(),
             f"{d} {month} {y}".lower(),
             f"{d:02d} {month} {y}".lower(),
-            f"{month} {y}".lower(),          # month precision in the source
             f"{m:02d}/{d:02d}/{y}",
             f"{m}/{d}/{y}",
             f"{y}/{m:02d}/{d:02d}"]
@@ -239,10 +296,61 @@ def check_record(record: dict[str, Any], bundle: str, *,
     haystack = normalise_bundle(bundle)
     result = RecordCheck(project=project, label=label)
     for claim in extract(record, skip_slots=skip_slots):
-        claim.grounded = any(r in haystack
-                             for r in renderings(claim.kind, claim.value))
+        claim.grounded = any(
+            grounded_in(claim.kind, r, haystack)
+            for r in renderings(claim.kind, claim.value))
         result.claims.append(claim)
     return result
+
+
+# A token must not match inside a longer one. `10.1234/x` found inside
+# `10.1234/xyz`, or `1234` inside `12345`, reports a fabricated value as
+# grounded — the failure this module exists to catch, produced by the module
+# itself. Characters that can legitimately continue each kind of token.
+# A period is ambiguous: `10.1234/x.5` continues the DOI, `10.1234/x.` ends a
+# sentence. So a dot counts as continuation only when a word character follows
+# it — otherwise a DOI at the end of a sentence would never be found.
+_CONTINUES = {
+    "doi": r"(?:[\w/:-]|\.\w)",
+    "url": r"(?:[\w/:%?=&#-]|\.\w)",
+    "accession": r"[\w-]",
+    "count": r"[\d,]",
+    "iso_date": r"[\d-]",
+}
+# What may *precede* is narrower than what may follow. A slash is a path
+# separator, not part of the token: the VOICE bundle carries
+# `zenodo.org/doi/10.5281/zenodo.12760724`, and treating `/` as continuation
+# meant a DOI inside a URL path was never found — a real DOI reported as
+# invented. Only characters that would make it a *different, longer* identifier
+# are excluded.
+_PRECEDES = {
+    "doi": r"[\w.-]",
+    "url": r"[\w.-]",
+    "accession": r"[\w-]",
+    "count": r"[\d,]",
+    "iso_date": r"[\d-]",
+}
+
+
+def grounded_in(kind: str, rendering: str, haystack: str) -> bool:
+    """Is this rendering present as a whole token, not inside a longer one?"""
+    after = _CONTINUES.get(kind, r"\w")
+    before = _PRECEDES.get(kind, r"\w")
+    pat = re.compile(rf"(?<!{before}){re.escape(rendering)}(?!{after})")
+    return bool(pat.search(haystack))
+
+
+def number_renderings(value: str) -> list[str]:
+    """A figure as a document might write it, with and without separators.
+
+    `61937` appears in the VOICE bundle as `61,937` and was reported as invented.
+    Sources group thousands; records do not.
+    """
+    digits = value.replace(",", "")
+    if not digits.isdigit():
+        return [value]
+    grouped = f"{int(digits):,}"
+    return list(dict.fromkeys([digits, grouped, grouped.replace(",", " ")]))
 
 
 def normalise_bundle(bundle: str) -> str:

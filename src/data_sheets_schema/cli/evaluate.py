@@ -34,20 +34,34 @@ def verifiable_cmd(project, method, labels, show):
     """
     import yaml as _yaml
     from data_sheets_schema.runs import discover, record_path
-    from data_sheets_schema.verifiable import check_record, identifier_slots
+    from data_sheets_schema.verifiable import (
+        check_record, declared_bundle, identifier_slots,
+    )
 
     skip = identifier_slots()
     wanted = set(labels)
     rows = []
     for run in discover():
-        if run.is_core or run.deterministic or run.method != method:
+        # Skip core/deterministic runs only when the caller did not name one.
+        # Filtering them unconditionally made `--method claudecode_agent_core`
+        # report "No records matched" for records that plainly exist.
+        if run.method != method:
+            continue
+        if (run.is_core or run.deterministic) and method == "claudecode_agent":
             continue
         if wanted and run.label not in wanted:
             continue
         for proj in run.projects:
             if project and proj != project:
                 continue
-            bundle = Path("data/preprocessed/concatenated") / f"{proj}_preprocessed.txt"
+            # The bundle the run declared, not the baseline one. See
+            # verifiable.declared_bundle: arms read different inputs, and
+            # assuming the baseline reported the whole crate arm as inventing
+            # every value it stated.
+            bundle = declared_bundle(run.method, run.label, proj)
+            if bundle is None:
+                bundle = (Path("data/preprocessed/concatenated")
+                          / f"{proj}_preprocessed.txt")
             rec = record_path(run.method, run.label, proj)
             if not (bundle.exists() and rec and rec.exists()):
                 continue
