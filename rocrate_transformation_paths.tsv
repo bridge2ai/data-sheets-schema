@@ -1,0 +1,5 @@
+path	direction	entry_point	implementation	notes
+1	RO-Crate -> D4D	.claude/agents/scripts/rocrate_to_d4d.py	TSV mapping, multi-crate merge	Driven by the d4d-rocrate agent. Applies an external mapping table; supports merging several crates and ranking sources by informativeness.
+2	RO-Crate -> D4D	d4d rocrate map	repo's own static mapping	Reports the declared mapping quality of every field it fills. Used by the generation study via `d4d rocrate emit-map-arm`; prefer for anything compared against a generated arm.
+3	RO-Crate -> D4D	src/fairscape_integration/fairscape_to_d4d.py	SSSOM-guided	FAIRSCAPE crates specifically.
+4	D4D -> RO-Crate	src/fairscape_integration/d4d_to_fairscape.py	Pydantic, emits ROCrateV1_2	The only outbound path. A different subsystem from 1-3, not their inverse.
