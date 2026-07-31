@@ -747,7 +747,7 @@ class TestExtractionRefusesProse(unittest.TestCase):
     validator noticed, after the run was billed in full.
     """
 
-    def test_prose_raises_rather_than_being_written(self):
+    def test_prose_raises_from_extract(self):
         from data_sheets_schema.api_runner import _extract
         with self.assertRaises(RuntimeError) as ctx:
             _extract("I need to emit the corrected core record. The core "
@@ -783,18 +783,135 @@ class TestExtractionRefusesProse(unittest.TestCase):
                      "yaml"),
             "id: last")
 
-    def test_json_is_validated_too(self):
+    def test_an_audit_must_match_the_audit_contract(self):
+        """Accepting any JSON object let `{"error": "unable to audit"}` through
+        and fed it into reconciliation as though an audit had happened. An
+        earlier version of this test asserted `{"a": 1}` was accepted, codifying
+        the gap rather than catching it."""
         from data_sheets_schema.api_runner import _extract
-        self.assertEqual(_extract('```json\n{"a": 1}\n```', "json"), '{"a": 1}')
-        with self.assertRaises(RuntimeError):
-            _extract("no json here at all", "json")
+        ok = '{"findings": [], "summary": "clean"}'
+        self.assertEqual(_extract(f"```json\n{ok}\n```", "json"), ok)
+        for bad in ('{"a": 1}', '{"error": "unable to audit"}', "not json"):
+            with self.subTest(body=bad):
+                with self.assertRaises(RuntimeError):
+                    _extract(bad, "json")
 
     def test_markdown_reports_are_prose_by_design(self):
         from data_sheets_schema.api_runner import _extract
         self.assertEqual(_extract("# Report\n\nAll good.", "md"),
                          "# Report\n\nAll good.")
 
-    def test_the_audit_ceiling_exceeds_what_truncated(self):
-        """Two AI-READI runs truncated mid-audit at 12000."""
+    def test_a_report_containing_a_fenced_example_is_not_truncated(self):
+        """The regression this guards was mine: trying fences first for *every*
+        kind reduced a report to the snippet it quoted. Reports routinely quote
+        corrected slots, so this would have destroyed reports across a sweep.
+        """
+        from data_sheets_schema.api_runner import _extract
+        report = ("# Reconciliation\n\nCorrected block:\n\n"
+                  "```yaml\nid: https://example.org/x\n```\n\nNo contradictions.")
+        out = _extract(report, "md")
+        self.assertTrue(out.startswith("# Reconciliation"))
+        self.assertTrue(out.endswith("No contradictions."))
+
+    def test_an_empty_report_is_refused(self):
+        from data_sheets_schema.api_runner import _extract
+        for empty in ("", "   ", "\n\n"):
+            with self.subTest(body=repr(empty)):
+                with self.assertRaises(RuntimeError):
+                    _extract(empty, "md")
+
+    def test_narration_with_a_colon_is_still_refused(self):
+        """`Note: ...` parses as a mapping, so requiring a mapping was not
+        enough. A record names slots the schema defines; prose does not."""
+        from data_sheets_schema.api_runner import _extract
+        for prose in ("Note: I need to emit the corrected core record.",
+                      "Core slots available: acquisition_methods, anomalies",
+                      "Summary: the schema does not have that slot."):
+            with self.subTest(prose=prose[:30]):
+                with self.assertRaises(RuntimeError):
+                    _extract(prose, "yaml")
+
+    def test_narration_followed_by_a_real_record_keeps_the_record(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(
+            _extract("I will now emit it.\n```yaml\nid: z\ntitle: q\n```",
+                     "yaml"),
+            "id: z\ntitle: q")
+
+    def test_uppercase_fence_labels_are_recognised(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract("```YAML\nid: x\n```", "yaml"), "id: x")
+
+    def test_the_audit_ceiling_has_real_headroom(self):
+        """Two AI-READI runs truncated mid-audit at 12000.
+
+        `> 12000` would be satisfied by 12001, which would not have stopped
+        them. The requirement is headroom, so the assertion states it.
+        """
         from data_sheets_schema.api_runner import PHASE_MAX_TOKENS
-        self.assertGreater(PHASE_MAX_TOKENS["audit"], 12000)
+        self.assertGreaterEqual(PHASE_MAX_TOKENS["audit"], 24000)
+
+
+class TestARejectedPhaseWritesNothing(unittest.TestCase):
+    """`_extract` raising must leave no artifact and no resumable progress.
+
+    Tested through `execute()`, not `_extract`. A unit test of the extractor
+    proves the string is refused; it does not prove the run refuses to write it,
+    and writing a bad artifact is the failure that actually cost a billed run.
+    """
+
+    def _client(self, body):
+        class Resp:
+            def __init__(self):
+                self.content = [type("B", (), {"type": "text", "text": body})()]
+                self.stop_reason = "end_turn"
+                self.usage = type("U", (), {
+                    "input_tokens": 1, "output_tokens": 1,
+                    "cache_read_input_tokens": 0,
+                    "cache_creation_input_tokens": 0})()
+
+        class C:
+            class messages:
+                @staticmethod
+                def stream(**kw):
+                    class S:
+                        def __enter__(s):
+                            return s
+
+                        def __exit__(s, *e):
+                            return False
+
+                        def get_final_message(s):
+                            return Resp()
+                    return S()
+        return C()
+
+    def test_prose_in_phase_one_leaves_no_record_and_no_progress(self):
+        import tempfile
+        from pathlib import Path
+        from data_sheets_schema.api_runner import RunSpec, execute
+
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "out"
+            bundle = Path(td) / "b.txt"
+            bundle.write_text("some source text")
+            spec = RunSpec(project="P", arm="baseline",
+                           method="claudecode_agent", bundle=bundle,
+                           label="2026-07-31_x_rep1", out_dir=out)
+            with self.assertRaises(RuntimeError):
+                execute(spec, client=self._client(
+                    "I need to emit the record but the schema lacks that slot."))
+            written = {p.name for p in out.rglob("*") if p.is_file()} \
+                if out.exists() else set()
+
+            # No record, no provenance, and nothing resumable.
+            self.assertEqual(
+                {n for n in written
+                 if n.endswith((".yaml", "_progress.json", ".md"))}, set(),
+                "a refused phase must not leave an artifact or progress file")
+
+            # The reasoning log *should* survive. It is written before the
+            # extraction check on purpose, so a phase that fails still records
+            # what it cost — that is the one thing worth keeping from a run
+            # that produced nothing usable.
+            self.assertIn("P_reasoning.jsonl", written)

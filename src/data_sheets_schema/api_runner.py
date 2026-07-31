@@ -33,6 +33,7 @@ import re
 import subprocess
 import time
 from dataclasses import dataclass, field
+from functools import lru_cache
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -507,21 +508,47 @@ def provider_identity() -> dict[str, Any]:
     return {"provider": None, "base_url": None, "key_env": None}
 
 
+@lru_cache(maxsize=1)
+def _known_slots() -> frozenset[str]:
+    """Every slot name the schema defines, for telling a record from prose."""
+    from linkml_runtime import SchemaView
+    return frozenset(SchemaView(FULL_SCHEMA_PATH).all_slots())
+
+
+def _looks_like_a_record(parsed: dict) -> bool:
+    """Does this mapping name schema slots, or is it narration with a colon?
+
+    Requiring a mapping was not enough. `Note: I need to emit the corrected
+    core record.` parses as `{"Note": "I need to emit..."}` — a perfectly good
+    mapping, and exactly the narration the check exists to reject. A record
+    names slots the schema defines; prose does not.
+    """
+    return bool(_known_slots() & {str(k) for k in parsed})
+
+
 def _extract(text: str, kind: str) -> str:
     """Pull YAML or JSON out of a response, refusing anything that is neither.
 
-    Falling back to the raw text when no fence was found wrote the model's
+    Falling back to the raw response when no fence was found wrote the model's
     *narration* into a record. One core file began "I need to emit the corrected
     core record. The core schema (CoreDataset) does not have..." and was saved as
     the artifact; only the downstream validator noticed, after the run had been
     billed in full.
 
-    So every candidate is parsed before it is accepted, and a phase that produced
-    no parseable body fails loudly rather than writing prose to disk. Candidates
-    are tried last-fence-first: a model that reasons before answering puts the
-    answer at the end.
+    Markdown is returned untouched and never fence-extracted. A reconciliation
+    report is prose that routinely *quotes* corrected slots in fenced blocks, so
+    extracting the fence would reduce the report to the example inside it —
+    which is what an earlier version of this function did.
     """
-    fences = re.findall(r"```(?:ya?ml|json)?\s*\n(.*?)```", text, re.S)
+    if kind == "md":
+        if not text.strip():
+            raise RuntimeError(
+                "response contained no report text. A phase that produces "
+                "nothing must fail rather than write an empty artifact.")
+        return text.strip()
+
+    fences = re.findall(r"```(?:ya?ml|json)?\s*\n(.*?)```", text,
+                        re.S | re.I)
     candidates = [f.strip() for f in reversed(fences)] + [text.strip()]
 
     for candidate in candidates:
@@ -532,19 +559,20 @@ def _extract(text: str, kind: str) -> str:
                       else yaml.safe_load(candidate))
         except (yaml.YAMLError, json.JSONDecodeError):
             continue
-        # A bare string parses as YAML — prose would sail through a parse check
-        # alone. A record is a mapping.
-        if kind in ("yaml", "json") and not isinstance(parsed, dict):
+        if not isinstance(parsed, dict):
+            continue
+        # The audit phase has a declared shape; anything else fed into
+        # reconciliation would be an audit that never happened.
+        if kind == "json" and "findings" not in parsed:
+            continue
+        if kind == "yaml" and not _looks_like_a_record(parsed):
             continue
         return candidate
 
-    if kind == "md":
-        return text.strip()
-
     raise RuntimeError(
-        f"response contained no parseable {kind} object. The model appears to "
-        f"have written prose instead of a record; first 200 characters: "
-        f"{text.strip()[:200]!r}")
+        f"response contained no parseable {kind} object of the expected shape. "
+        f"The model appears to have written prose instead of a record; first "
+        f"200 characters: {text.strip()[:200]!r}")
 
 
 PROGRESS_SUFFIX = "_api_progress.json"
