@@ -15,7 +15,7 @@
     
     
       
-        <title>Slot: md5 - data-sheets-schema</title>
+        <title>Slot: md5 (DEPRECATED) - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-md5" class="md-skip">
+        <a href="#slot-md5-deprecated" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: md5
+              Slot: md5  <span style="color: red;"><strong> (DEPRECATED) </strong></span>
             
           </span>
         </div>
@@ -390,8 +390,8 @@
   </a>
 
 
-<h1 id="slot-md5">Slot: md5</h1>
-<p><em>MD5 hash value of the data (128-bit cryptographic hash).</em></p>
+<h1 id="slot-md5-deprecated">Slot: md5  <span style="color: red;"><strong> (DEPRECATED) </strong></span></h1>
+<p><em>DEPRECATED. MD5 hash value of the data (128-bit). MD5 is not collision-resistant and is unsuitable for integrity verification; it is retained only so that records written before this deprecation remain readable. Use <code>sha256</code>, or <code>hash</code> where the algorithm varies.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/md5Checksum">d4d:md5Checksum</a>
 Alias: md5</p>
 <!-- no inheritance hierarchy -->
@@ -468,7 +468,11 @@ annotations:
   d4d:docExample:
     tag: d4d:docExample
     value: d41d8cd98f00b204e9800998ecf8427e
-description: MD5 hash value of the data (128-bit cryptographic hash).
+description: DEPRECATED. MD5 hash value of the data (128-bit). MD5 is not collision-resistant
+  and is unsuitable for integrity verification; it is retained only so that records
+  written before this deprecation remain readable. Use `sha256`, or `hash` where the
+  algorithm varies.
+deprecated: Use sha256 instead; MD5 is not collision-resistant.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 broad_mappings:
 - dcterms:identifier
