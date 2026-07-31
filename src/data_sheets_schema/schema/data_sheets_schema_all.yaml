@@ -5,6 +5,7 @@ title: data-sheets-schema
 see_also:
 - https://bridge2ai.github.io/data-sheets-schema
 id: https://w3id.org/bridge2ai/data-sheets-schema
+version: 1.0.0
 license: MIT
 prefixes:
   AIO:
@@ -1542,8 +1543,11 @@ slots:
       d4d:docExample:
         tag: d4d:docExample
         value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-    description: 'Cryptographic hash value of the data for integrity verification
-      (e.g., SHA-256: ''e3b0c44298fc1c149afb...'', MD5: ''d41d8cd98f00b204e9800998ecf8427e'').'
+    description: Cryptographic hash value of the data for integrity verification,
+      where the algorithm is recorded alongside or implied by context. Prefer the
+      specific `sha256` slot when the algorithm is known. State the algorithm with
+      the value when using this slot, since a bare digest cannot be verified without
+      knowing what produced it.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     broad_mappings:
     - dcterms:identifier
@@ -1556,7 +1560,11 @@ slots:
       d4d:docExample:
         tag: d4d:docExample
         value: d41d8cd98f00b204e9800998ecf8427e
-    description: MD5 hash value of the data (128-bit cryptographic hash).
+    description: DEPRECATED. MD5 hash value of the data (128-bit). MD5 is not collision-resistant
+      and is unsuitable for integrity verification; it is retained only so that records
+      written before this deprecation remain readable. Use `sha256`, or `hash` where
+      the algorithm varies.
+    deprecated: Use sha256 instead; MD5 is not collision-resistant.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     broad_mappings:
     - dcterms:identifier
@@ -33316,8 +33324,11 @@ classes:
           d4d:docExample:
             tag: d4d:docExample
             value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-        description: 'Cryptographic hash value of the data for integrity verification
-          (e.g., SHA-256: ''e3b0c44298fc1c149afb...'', MD5: ''d41d8cd98f00b204e9800998ecf8427e'').'
+        description: Cryptographic hash value of the data for integrity verification,
+          where the algorithm is recorded alongside or implied by context. Prefer
+          the specific `sha256` slot when the algorithm is known. State the algorithm
+          with the value when using this slot, since a bare digest cannot be verified
+          without knowing what produced it.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         broad_mappings:
         - dcterms:identifier
@@ -33333,7 +33344,11 @@ classes:
           d4d:docExample:
             tag: d4d:docExample
             value: d41d8cd98f00b204e9800998ecf8427e
-        description: MD5 hash value of the data (128-bit cryptographic hash).
+        description: DEPRECATED. MD5 hash value of the data (128-bit). MD5 is not
+          collision-resistant and is unsuitable for integrity verification; it is
+          retained only so that records written before this deprecation remain readable.
+          Use `sha256`, or `hash` where the algorithm varies.
+        deprecated: Use sha256 instead; MD5 is not collision-resistant.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         broad_mappings:
         - dcterms:identifier

@@ -22,23 +22,23 @@ sources:
   project: AI_READI
   method: claudecode_agent
   path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/AI_READI_d4d.yaml
-  md5: ec33d1d811e96b40987d33b9ef840cc1
   slots: 79
   contributed_slots: 21
+  sha256: a5fa7b8bb3adb699913157ae9f42e2b03482f42207c297f355bbf4b18c03b76e
 - label: rep2
   project: AI_READI
   method: claudecode_agent
   path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/AI_READI_d4d.yaml
-  md5: 5db55d6be92f1a1d684e561c2e079c0b
   slots: 77
   contributed_slots: 13
+  sha256: 2088430a546fbc14d79908805fc6146e9578e4001747932a9209d6ba432c7966
 - label: rep3
   project: AI_READI
   method: claudecode_agent
   path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/AI_READI_d4d.yaml
-  md5: 923418daf69a6567e57c0b7a5fc16aaa
   slots: 80
   contributed_slots: 47
+  sha256: ef3c2db3a04a40e155cc8beeb703a376f6b649492dab07282cc2d2ceaa946cb1
 schema:
   declared_version: 1.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
@@ -64,9 +64,9 @@ repo:
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent_merged/2026-07-29_guarded-union/AI_READI_d4d.yaml
-    md5: 4315afd093f6f0fb079642b10e0f4d0e
     bytes: 131266
     slots: 81
+    sha256: 2dff2f76ded4ac97e825af69df9e2ec26ed75f5fc3927d5191ba2778f17d1eaf
 not_applicable:
 - field: model
   reason: no model produced this record; it combines existing ones

@@ -208,16 +208,18 @@ def validation_status(method: str, label: str, project: str,
     # a file that no longer exists in that form. STALE rather than UNVERIFIED
     # because the diagnosis differs — "validated, then changed" is a different
     # problem from "never checked" — and both mean do not rely on it.
-    from data_sheets_schema.provenance import _md5
+    from data_sheets_schema.provenance import verify_entry
     artifacts = v.get("artifacts")
     if isinstance(artifacts, dict) and artifacts:
         for entry in artifacts.values():
             if not isinstance(entry, dict):
                 continue
-            recorded, path = entry.get("md5"), entry.get("path")
-            if not recorded or not path:
-                continue
-            if _md5(Path(path)) != recorded:
+            # Verified with whichever algorithm the record carries. Records
+            # predating the sha256 unification hold md5, and refusing to read it
+            # would turn every historical verdict unverifiable — the opposite of
+            # what binding them to a hash was for.
+            ok = verify_entry(entry)
+            if ok is False:
                 return STALE
 
     return VALID if v["passed"] else INVALID
@@ -246,7 +248,11 @@ def record_mode(method: str, label: str, project: str,
 # determine a D4D generation, and 56 of 59 reconstructed records name `system`
 # as their only gap. Gating on completeness would reject them for missing a
 # field that changes nothing.
-ATTESTING_FIELDS = ("inputs.bundle_md5", "schema.full_md5", "model.model")
+# Either hash satisfies these: a record written before the sha256 unification
+# pins its inputs just as firmly as one written after.
+ATTESTING_FIELDS = (("inputs.bundle_sha256", "inputs.bundle_md5"),
+                    ("schema.full_sha256", "schema.full_md5"),
+                    ("model.model",))
 
 # Recognised `hash_basis` values, matched exactly. A substring test cannot be
 # used here: `"verified" in "unverified"` is True, and so is `"verified" in
@@ -364,16 +370,19 @@ def attestation(method: str, label: str, project: str,
         if not all(data.get(f) for f in DERIVED_FIELDS):
             return PARTIAL
         outputs = data.get("outputs") or {}
-        if not any(isinstance(a, dict) and a.get("md5")
+        if not any(isinstance(a, dict) and (a.get("sha256") or a.get("md5"))
                    for a in outputs.values() if a):
             return PARTIAL
         return DERIVED
 
-    for dotted in ATTESTING_FIELDS:
+    def _get(dotted: str) -> Any:
         node: Any = data
         for part in dotted.split("."):
             node = (node or {}).get(part) if isinstance(node, dict) else None
-        if not node:
+        return node
+
+    for alternatives in ATTESTING_FIELDS:
+        if not any(_get(d) for d in alternatives):
             return PARTIAL
 
     # Outputs are checked for a *hash*, not for the presence of the block.
@@ -381,7 +390,7 @@ def attestation(method: str, label: str, project: str,
     # testing the container let a record naming its artifacts without hashing
     # any of them count as attested.
     outputs = data.get("outputs") or {}
-    if not any(isinstance(a, dict) and a.get("md5")
+    if not any(isinstance(a, dict) and (a.get("sha256") or a.get("md5"))
                for a in outputs.values() if a):
         return PARTIAL
 

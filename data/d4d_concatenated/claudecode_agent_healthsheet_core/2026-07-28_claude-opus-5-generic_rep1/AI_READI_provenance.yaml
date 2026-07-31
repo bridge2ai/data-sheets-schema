@@ -49,28 +49,28 @@ system:
   memory_bytes: 68719476736
 inputs:
   bundle_path: data/preprocessed/concatenated/AI_READI_healthsheet_only.txt
-  bundle_md5: a66b16818139bca4018efe11cae5cc7a
   bundle_bytes: 56453
   hash_basis: verified identical to the bytes consumed
   source_manifest:
     path: data/preprocessed/source_manifest.yaml
-    md5: ab62657ae5ca24d62258c2d2634a425b
+    sha256: 0690e3e03cb2a4e555ec24ceb41e84315fc7376f952dadf7c00ac530ab6ab005
+  bundle_sha256: ef2f5a5c98c56f565728c09305ecee10f47586472533b3648c2421c637ed210a
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent_healthsheet/2026-07-28_claude-opus-5-generic_rep1/AI_READI_d4d.yaml
-    md5: 15930d991b80867576a06337d198414e
     bytes: 70400
     slots: 73
+    sha256: beb99f181c7577b0129a3aa219e27f477e96b7dc8d3e7a90abe2a8edb65bdcfc
   core:
     path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-generic_rep1/AI_READI_d4d_core.yaml
-    md5: 33b2a3e7a1b366c8f1aa70116f0fe7f5
     bytes: 59328
     slots: 62
+    sha256: c3fa46b9248897148ce8131b330a7c1a908c9c318735f60c5a92577de645c2b8
   report:
     path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-generic_rep1/AI_READI_reconciliation.md
-    md5: 36850a89129e416b238055e82865e47b
     bytes: 15901
     slots: null
+    sha256: e0350694eb3d3f3d26dea9f020e36b301e9da622cd22488ead2b94808028ae16
 unrecoverable: null
 notes: null
 validation:
@@ -78,8 +78,8 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent_healthsheet/2026-07-28_claude-opus-5-generic_rep1/AI_READI_d4d.yaml
-      md5: 15930d991b80867576a06337d198414e
+      sha256: beb99f181c7577b0129a3aa219e27f477e96b7dc8d3e7a90abe2a8edb65bdcfc
     core:
       path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-generic_rep1/AI_READI_d4d_core.yaml
-      md5: 33b2a3e7a1b366c8f1aa70116f0fe7f5
+      sha256: c3fa46b9248897148ce8131b330a7c1a908c9c318735f60c5a92577de645c2b8
   recorded_by: d4d runs validate

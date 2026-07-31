@@ -49,12 +49,12 @@ system:
   memory_bytes: 68719476736
 inputs:
   bundle_path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
-  bundle_md5: 1ce7d891fa81ad4b1f8290ddeec33461
   bundle_bytes: 36184
   hash_basis: verified identical to the bytes consumed
   source_manifest:
     path: data/preprocessed/source_manifest.yaml
     md5: e633ee3827eb151efca663f14d0b2f5c
+  bundle_sha256: 6408491fe45cbee1767bd71b2b0dbe06e6fced3aaebdc0a85d423bced989f3f8
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep2/CHORUS_d4d.yaml
@@ -78,8 +78,8 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep2/CHORUS_d4d.yaml
-      md5: d832952f254f6dfb88d5b9c8d1f4962e
+      sha256: a3c055369b76886bcc1fcd60695fd6b3387bef307923a6c71496bac93d007f89
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep2/CHORUS_d4d_core.yaml
-      md5: 875a6ae7d896db0f96b06a8f24a3cf11
+      sha256: 6c57a2892129b6a16886f1068aff3ec79b9af79bf057b4aa11b2ebb3e43fd050
   recorded_by: d4d runs validate

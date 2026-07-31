@@ -22,23 +22,23 @@ sources:
   project: CM4AI
   method: claudecode_agent
   path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/CM4AI_d4d.yaml
-  md5: 9650dff42e799d54bc3fad9532ff1a8d
   slots: 60
   contributed_slots: 12
+  sha256: 9caee8875df034151ed7c5eb1657831bc45f2e40202c1d4b7a767be97c7b4f90
 - label: rep2
   project: CM4AI
   method: claudecode_agent
   path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/CM4AI_d4d.yaml
-  md5: 7c30081883a69d84d7e0a5c1c4bfa91d
   slots: 63
   contributed_slots: 21
+  sha256: 1bf736aa622453b3b4984076f7c945e78d1cacbadedc6350a5e98d5e12cd8c95
 - label: rep3
   project: CM4AI
   method: claudecode_agent
   path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/CM4AI_d4d.yaml
-  md5: 2602c554b46417e5a4c51e2032cdff0f
   slots: 69
   contributed_slots: 37
+  sha256: 6cb9ca3834993f43bc2babc954234463f694d46e92e1ccd53e081cd270294696
 schema:
   declared_version: 1.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
@@ -64,9 +64,9 @@ repo:
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent_merged/2026-07-29_guarded-union/CM4AI_d4d.yaml
-    md5: f4e9af04e3b47d3ea9ef82dbec2b2987
     bytes: 119334
     slots: 70
+    sha256: e7db836a4b6202f443731798c84c5b11ff923748544ad2566f470414f9fd1af8
 not_applicable:
 - field: model
   reason: no model produced this record; it combines existing ones
