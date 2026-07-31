@@ -736,3 +736,65 @@ class TestErrorBodyIsAuthoritative(unittest.TestCase):
                              temperature=None, system="s", messages=[],
                              sleep=lambda _: None)
         self.assertEqual(calls["n"], 1, "must fail fast, not retry five times")
+
+
+class TestExtractionRefusesProse(unittest.TestCase):
+    """A phase must not write the model's narration as a record.
+
+    Falling back to raw text when no fence was found saved a core file beginning
+    "I need to emit the corrected core record. The core schema (CoreDataset)
+    does not have..." — prose, written as the artifact. Only the downstream
+    validator noticed, after the run was billed in full.
+    """
+
+    def test_prose_raises_rather_than_being_written(self):
+        from data_sheets_schema.api_runner import _extract
+        with self.assertRaises(RuntimeError) as ctx:
+            _extract("I need to emit the corrected core record. The core "
+                     "schema does not have that slot.", "yaml")
+        self.assertIn("no parseable yaml", str(ctx.exception))
+
+    def test_a_bare_scalar_is_not_a_record(self):
+        """Prose parses as a YAML string, so parsing alone is not enough."""
+        from data_sheets_schema.api_runner import _extract
+        with self.assertRaises(RuntimeError):
+            _extract("just a sentence with no colon", "yaml")
+
+    def test_a_fenced_record_is_extracted(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract("preamble\n```yaml\nid: x\n```", "yaml"),
+                         "id: x")
+
+    def test_an_unfenced_record_is_accepted(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract("id: x\nname: y", "yaml"), "id: x\nname: y")
+
+    def test_narration_before_a_fence_is_discarded(self):
+        """A model that reasons before answering puts the answer last."""
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(
+            _extract("Let me think about this.\n```yaml\nid: z\n```", "yaml"),
+            "id: z")
+
+    def test_the_last_fence_wins(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(
+            _extract("```yaml\nid: first\n```\nrevised:\n```yaml\nid: last\n```",
+                     "yaml"),
+            "id: last")
+
+    def test_json_is_validated_too(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract('```json\n{"a": 1}\n```', "json"), '{"a": 1}')
+        with self.assertRaises(RuntimeError):
+            _extract("no json here at all", "json")
+
+    def test_markdown_reports_are_prose_by_design(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract("# Report\n\nAll good.", "md"),
+                         "# Report\n\nAll good.")
+
+    def test_the_audit_ceiling_exceeds_what_truncated(self):
+        """Two AI-READI runs truncated mid-audit at 12000."""
+        from data_sheets_schema.api_runner import PHASE_MAX_TOKENS
+        self.assertGreater(PHASE_MAX_TOKENS["audit"], 12000)

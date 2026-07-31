@@ -122,7 +122,11 @@ PHASES = ("full", "core", "audit", "reconcile_full", "reconcile_core", "report")
 PHASE_MAX_TOKENS = {
     "full": 64000, "reconcile_full": 64000,
     "core": 56000, "reconcile_core": 56000,
-    "audit": 12000, "report": 12000,
+    # 24000, not 12000. The original was derived from records generated before
+    # the v2 rules existed, and two AI-READI runs truncated mid-audit — a phase
+    # that fails at its ceiling costs the whole run, since the phases before it
+    # are already billed.
+    "audit": 24000, "report": 12000,
 }
 DEFAULT_MAX_TOKENS = 64000
 
@@ -504,9 +508,43 @@ def provider_identity() -> dict[str, Any]:
 
 
 def _extract(text: str, kind: str) -> str:
-    """Pull YAML or JSON out of a response that may be fenced."""
-    fence = re.search(r"```(?:ya?ml|json)?\s*\n(.*?)```", text, re.S)
-    return (fence.group(1) if fence else text).strip()
+    """Pull YAML or JSON out of a response, refusing anything that is neither.
+
+    Falling back to the raw text when no fence was found wrote the model's
+    *narration* into a record. One core file began "I need to emit the corrected
+    core record. The core schema (CoreDataset) does not have..." and was saved as
+    the artifact; only the downstream validator noticed, after the run had been
+    billed in full.
+
+    So every candidate is parsed before it is accepted, and a phase that produced
+    no parseable body fails loudly rather than writing prose to disk. Candidates
+    are tried last-fence-first: a model that reasons before answering puts the
+    answer at the end.
+    """
+    fences = re.findall(r"```(?:ya?ml|json)?\s*\n(.*?)```", text, re.S)
+    candidates = [f.strip() for f in reversed(fences)] + [text.strip()]
+
+    for candidate in candidates:
+        if not candidate:
+            continue
+        try:
+            parsed = (json.loads(candidate) if kind == "json"
+                      else yaml.safe_load(candidate))
+        except (yaml.YAMLError, json.JSONDecodeError):
+            continue
+        # A bare string parses as YAML — prose would sail through a parse check
+        # alone. A record is a mapping.
+        if kind in ("yaml", "json") and not isinstance(parsed, dict):
+            continue
+        return candidate
+
+    if kind == "md":
+        return text.strip()
+
+    raise RuntimeError(
+        f"response contained no parseable {kind} object. The model appears to "
+        f"have written prose instead of a record; first 200 characters: "
+        f"{text.strip()[:200]!r}")
 
 
 PROGRESS_SUFFIX = "_api_progress.json"
