@@ -3968,7 +3968,7 @@
                     "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type."
                 },
                 "hash": {
-                    "description": "Cryptographic hash value of the data for integrity verification (e.g., SHA-256: 'e3b0c44298fc1c149afb...', MD5: 'd41d8cd98f00b204e9800998ecf8427e').",
+                    "description": "Cryptographic hash value of the data for integrity verification, where the algorithm is recorded alongside or implied by context. Prefer the specific `sha256` slot when the algorithm is known. State the algorithm with the value when using this slot, since a bare digest cannot be verified without knowing what produced it.",
                     "type": [
                         "string",
                         "null"
@@ -4019,7 +4019,7 @@
                     ]
                 },
                 "md5": {
-                    "description": "MD5 hash value of the data (128-bit cryptographic hash).",
+                    "description": "DEPRECATED. MD5 hash value of the data (128-bit). MD5 is not collision-resistant and is unsuitable for integrity verification; it is retained only so that records written before this deprecation remain readable. Use `sha256`, or `hash` where the algorithm varies.",
                     "type": [
                         "string",
                         "null"
@@ -7418,5 +7418,5 @@
     ],
     "title": "data-sheets-schema",
     "type": "object",
-    "version": null
+    "version": "1.0.0"
 }

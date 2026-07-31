@@ -6,6 +6,7 @@
     "https://bridge2ai.github.io/data-sheets-schema"
   ],
   "id": "https://w3id.org/bridge2ai/data-sheets-schema",
+  "version": "1.0.0",
   "imports": [
     "linkml:types",
     "D4D_Base_import",
@@ -1985,7 +1986,7 @@
           "@type": "Annotation"
         }
       ],
-      "description": "Cryptographic hash value of the data for integrity verification (e.g., SHA-256: 'e3b0c44298fc1c149afb...', MD5: 'd41d8cd98f00b204e9800998ecf8427e').",
+      "description": "Cryptographic hash value of the data for integrity verification, where the algorithm is recorded alongside or implied by context. Prefer the specific `sha256` slot when the algorithm is known. State the algorithm with the value when using this slot, since a bare digest cannot be verified without knowing what produced it.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/hashValue"
@@ -2011,7 +2012,8 @@
           "@type": "Annotation"
         }
       ],
-      "description": "MD5 hash value of the data (128-bit cryptographic hash).",
+      "description": "DEPRECATED. MD5 hash value of the data (128-bit). MD5 is not collision-resistant and is unsuitable for integrity verification; it is retained only so that records written before this deprecation remain readable. Use `sha256`, or `hash` where the algorithm varies.",
+      "deprecated": "Use sha256 instead; MD5 is not collision-resistant.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/md5Checksum"
@@ -13134,9 +13136,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-04-15T21:22:11",
-  "source_file_size": 32030,
-  "generation_date": "2026-04-15T23:59:22",
+  "source_file_date": "2026-07-28T18:11:45",
+  "source_file_size": 32348,
+  "generation_date": "2026-07-30T19:09:25",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

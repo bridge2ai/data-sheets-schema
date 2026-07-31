@@ -6,6 +6,8 @@ from pathlib import Path
 
 import click
 
+from data_sheets_schema.api_runner import CONDITION_PROMPTS
+
 from data_sheets_schema.constants import PROJECTS
 
 ARMS = {
@@ -28,9 +30,7 @@ ARMS = {
 # three times, so adding `generic_v2` to CONDITION_PROMPTS left it unreachable
 # from every CLI entry point — the condition was staged, tested, and could not be
 # launched.
-_CONDITIONS = sorted(__import__(
-    "data_sheets_schema.api_runner", fromlist=["CONDITION_PROMPTS"]
-).CONDITION_PROMPTS)
+_CONDITIONS = sorted(CONDITION_PROMPTS)
 
 
 def _spec(project, arm, label, condition, bundle=None, out_dir=None):

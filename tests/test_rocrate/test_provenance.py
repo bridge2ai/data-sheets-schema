@@ -328,3 +328,29 @@ class TestMd5IsDeprecatedInTheSchema(unittest.TestCase):
         from linkml_runtime import SchemaView
         sv = SchemaView("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
         self.assertIn("algorithm", (sv.get_slot("hash").description or "").lower())
+
+
+class TestSchemaArtifactsStayInSync(unittest.TestCase):
+    """Three representations must agree (#205).
+
+    Deprecating `md5` regenerated the full merged schema but not the core one or
+    the Python model, so the slot was deprecated when read one way and not
+    another. `make check-sync` catches this — it simply had not been run.
+    """
+
+    def test_the_deprecation_reaches_both_merged_schemas(self):
+        for name in ("data_sheets_schema_all.yaml",
+                     "data_sheets_schema_core_all.yaml"):
+            with self.subTest(schema=name):
+                p = Path("src/data_sheets_schema/schema") / name
+                if not p.exists():
+                    self.skipTest(f"{name} not present")
+                self.assertIn("DEPRECATED", p.read_text(),
+                              f"{name} predates the md5 deprecation")
+
+    def test_md5_is_deprecated_in_the_core_schema_too(self):
+        from linkml_runtime import SchemaView
+        p = Path("src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
+        if not p.exists():
+            self.skipTest("core schema not present")
+        self.assertTrue(SchemaView(str(p)).get_slot("md5").deprecated)

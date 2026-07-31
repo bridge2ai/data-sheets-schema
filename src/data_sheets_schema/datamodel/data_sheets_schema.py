@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-04-15T23:59:24
+# Generation date: 2026-07-30T19:09:26
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -60,7 +60,7 @@ from linkml_runtime.linkml_model.types import Boolean, Date, Datetime, Float, In
 from linkml_runtime.utils.metamodelcore import Bool, URI, URIorCURIE, XSDDate, XSDDateTime
 
 metamodel_version = "1.7.0"
-version = None
+version = "1.0.0"
 
 # Namespaces
 AIO = CurieNamespace('AIO', 'https://w3id.org/aio/')
