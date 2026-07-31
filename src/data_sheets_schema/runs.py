@@ -802,11 +802,17 @@ def archive_runs(labels: list[str], *, reason: str,
             "refusing to archive over existing archive entries: "
             + ", ".join(collisions[:5]))
 
-    if not dry_run:
+    # Reported in both modes, so a dry run previews the whole effect. Moving one
+    # project out of a shared label leaves the directory; moving every project
+    # removes it. Those are materially different outcomes and a preview that
+    # showed only the file moves presented them identically.
+    emptied = _would_empty(moved, concat_dir)
+
+    if not dry_run and moved:
         for src, dest in moved:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(src), str(dest))
-        _prune_empty(concat_dir)
+        _prune(emptied)
         _write_archive_note(attic / archive_name, moved, reason)
 
     return {"archive": str(attic / archive_name),
@@ -814,6 +820,11 @@ def archive_runs(labels: list[str], *, reason: str,
             "labels": sorted(labels),
             "projects": sorted(wanted) or None,
             "collisions": collisions,
+            "would_empty": [str(d) for d in emptied],
+            # An empty selection is reported rather than treated as success: a
+            # mistyped project name otherwise archives nothing and leaves a note
+            # claiming otherwise.
+            "matched_nothing": not moved,
             "moved": [(str(a), str(b)) for a, b in moved],
             "dry_run": dry_run}
 
@@ -853,30 +864,59 @@ def restore_runs(labels: list[str], *,
             + ". Move or remove them first; restoring would overwrite a record "
               "that was regenerated while this one was archived.")
 
-    if not dry_run:
+    emptied = _would_empty(moved, root)
+    if not dry_run and moved:
         for src, dest in moved:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(src), str(dest))
-        _prune_empty(root)
+        _prune(emptied)
     return {"count": len(moved),
+            "would_empty": [str(d) for d in emptied],
+            "matched_nothing": not moved,
             "collisions": collisions,
             "moved": [(str(a), str(b)) for a, b in moved],
             "dry_run": dry_run}
 
 
-def _prune_empty(root: Path) -> None:
-    """Remove directories emptied by a move, deepest first.
+def _would_empty(moved: list[tuple[Path, Path]], root: Path) -> list[Path]:
+    """Directories the move would leave empty, deepest first.
 
-    Without this a per-project archive leaves the label directory behind holding
-    nothing, and `discover()` treats an empty label directory as a run with no
-    records — visible in listings, absent from every analysis.
+    Scoped to the parents of the files that moved. Pruning the whole corpus root
+    instead deleted empty directories the operation never touched — a directory
+    someone created ahead of a run would vanish because an unrelated archive
+    happened to run, and the resulting corpus depended on what else was empty at
+    the time.
     """
-    for d in sorted((p for p in root.rglob("*") if p.is_dir()),
-                    key=lambda p: len(p.parts), reverse=True):
-        try:
-            next(d.iterdir())
-        except StopIteration:
-            d.rmdir()
+    leaving: dict[Path, set[Path]] = {}
+    for src, _ in moved:
+        leaving.setdefault(src.parent, set()).add(src)
+
+    doomed: list[Path] = []
+    for d, going in leaving.items():
+        cur = d
+        while cur != root and root in cur.parents or cur == d:
+            if not cur.exists():
+                break
+            remaining = [f for f in cur.rglob("*")
+                         if f.is_file() and f not in going
+                         and not any(str(f).startswith(str(x)) for x in doomed)]
+            if remaining:
+                break
+            doomed.append(cur)
+            cur = cur.parent
+            if cur == root:
+                break
+    return sorted(set(doomed), key=lambda p: len(p.parts), reverse=True)
+
+
+def _prune(dirs: list[Path]) -> None:
+    """Remove the named directories, deepest first, if empty."""
+    for d in sorted(dirs, key=lambda p: len(p.parts), reverse=True):
+        if d.exists():
+            try:
+                next(d.iterdir())
+            except StopIteration:
+                d.rmdir()
 
 
 def _write_archive_note(root: Path, moved: list[tuple[Path, Path]],

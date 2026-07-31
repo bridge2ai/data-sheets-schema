@@ -854,3 +854,78 @@ class TestDerivedIsItsOwnLevel(unittest.TestCase):
         r = compare("claudecode_agent_merged", "CHORUS",
                     ["2026-07-29_guarded-union"])
         self.assertIn("error", r, "one label cannot form a comparison anyway")
+
+
+class TestPruneScopeAndEmptySelection(unittest.TestCase):
+    """An operation must not have effects outside what it was asked to do."""
+
+    def _tree(self, td, projects=("P", "KEEP")):
+        c, a = Path(td) / "c", Path(td) / "a"
+        (c / "m" / "L").mkdir(parents=True)
+        for proj in projects:
+            (c / "m" / "L" / f"{proj}_d4d.yaml").write_text(f"{proj}\n")
+        return c, a
+
+    def test_unrelated_empty_directories_survive(self):
+        """Pruning the corpus root deleted directories the move never touched,
+        so the result depended on what else happened to be empty (#196)."""
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td)
+            (c / "other_method" / "pending_run").mkdir(parents=True)
+            archive_runs(["L"], reason="t", projects=["P"], concat_dir=c,
+                         attic=a, dry_run=False)
+            self.assertTrue((c / "other_method" / "pending_run").exists())
+
+    def test_a_shared_label_directory_is_kept(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td)
+            r = archive_runs(["L"], reason="t", projects=["P"], concat_dir=c,
+                             attic=a, dry_run=False)
+            self.assertEqual(r["would_empty"], [])
+            self.assertTrue((c / "m" / "L").exists())
+
+    def test_a_fully_emptied_label_directory_is_removed(self):
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td, projects=("P",))
+            r = archive_runs(["L"], reason="t", projects=["P"], concat_dir=c,
+                             attic=a, dry_run=False)
+            self.assertTrue(r["would_empty"])
+            self.assertFalse((c / "m" / "L").exists())
+
+    def test_dry_run_previews_the_directories_too(self):
+        """A preview that omits part of the effect is weaker than it looks (#198)."""
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td, projects=("P",))
+            r = archive_runs(["L"], reason="t", projects=["P"], concat_dir=c,
+                             attic=a, dry_run=True)
+            self.assertTrue(r["would_empty"])
+            self.assertTrue((c / "m" / "L").exists(), "dry run changed nothing")
+
+    def test_an_empty_selection_writes_no_note(self):
+        """A mistyped project archived nothing and left a note claiming
+        otherwise (#197)."""
+        import tempfile
+        from data_sheets_schema.runs import archive_runs
+        with tempfile.TemporaryDirectory() as td:
+            c, a = self._tree(td)
+            r = archive_runs(["L"], reason="t", projects=["MISTYPED"],
+                             concat_dir=c, attic=a, dry_run=False)
+            self.assertTrue(r["matched_nothing"])
+            self.assertEqual(r["count"], 0)
+            self.assertFalse((a / "d4d_concatenated_archived").exists())
+
+    def test_restore_also_reports_an_empty_selection(self):
+        import tempfile
+        from data_sheets_schema.runs import restore_runs
+        with tempfile.TemporaryDirectory() as td:
+            r = restore_runs(["nope"], concat_dir=Path(td) / "c",
+                             attic=Path(td) / "a", dry_run=True)
+            self.assertTrue(r["matched_nothing"])

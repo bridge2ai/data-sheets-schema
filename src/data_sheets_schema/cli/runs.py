@@ -71,7 +71,15 @@ def archive(labels, unattested, project, reason, execute):
         if project:
             click.echo(f"   archiving only: {', '.join(project)}")
     if not targets:
-        click.echo("Nothing selected. Pass --label or --unattested."); return
+        # Distinguish "you asked for nothing" from "nothing matched". Reporting
+        # a clean corpus as a usage error reads as though the command were
+        # invoked wrongly.
+        if unattested:
+            click.echo("No unattestable runs found — every run in the corpus "
+                       "can be placed. Nothing to archive.")
+        else:
+            click.echo("Nothing selected. Pass --label or --unattested.")
+        return
 
     default_reason = (
         "These runs have a gap in something that determines their output — most "
@@ -82,11 +90,23 @@ def archive(labels, unattested, project, reason, execute):
         "reproduced, and only their hardware is unrecorded.")
     res = archive_runs(sorted(targets), reason=reason or default_reason,
                        projects=list(project) or None, dry_run=not execute)
+    if res["matched_nothing"]:
+        click.echo(f"No records matched. Labels: {', '.join(sorted(targets))}"
+                   + (f"; projects: {', '.join(project)}" if project else "")
+                   + ".\nNothing was archived and no note was written — check "
+                     "the names.")
+        return
+
     verb = "Moved" if execute else "Would move"
     click.echo(f"{verb} {res['count']} record file(s) across "
                f"{len(targets)} label(s) -> {res['archive']}")
     for src, dest in res["moved"]:
         click.echo(f"   {src}")
+    if res["would_empty"]:
+        click.echo(f"\n{'Removed' if execute else 'Would remove'} "
+                   f"{len(res['would_empty'])} emptied director(ies):")
+        for d in res["would_empty"]:
+            click.echo(f"   {d}")
     if not execute:
         click.echo("\nDry run. Re-run with --execute to move them.")
 
