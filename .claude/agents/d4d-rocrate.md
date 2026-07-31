@@ -38,6 +38,30 @@ Path 2 is what the generation study uses (`d4d rocrate emit-map-arm`), so prefer
 it for anything that will be compared against a generated arm. Use this agent for
 crates outside that pipeline.
 
+## Checking the mapping rather than trusting a number
+
+    poetry run python .claude/agents/scripts/check_mapping_coverage.py --strict
+
+Reports coverage against the *current* schema and names any mapped field that
+resolves to nothing. An earlier version of this doc asserted "95.2% coverage (83
+fields)", true in March against a `Dataset` of 87 induced slots; the class has
+since grown to 94, and nothing recomputed the ratio. A written-down coverage
+figure decays silently every time the schema grows, which is the opposite of what
+the figure is for.
+
+The checker counts three things separately, because conflating them is how a
+broken row hides. A mapping may target a slot of `Dataset` **directly**, or a slot
+of a **nested** class it reaches — `md5`, `bytes` and `media_type` belong to
+`File` and are perfectly valid — or **nothing at all**. Only the third is a
+defect, and grading against `Dataset` alone reported eight valid mappings as
+broken, burying the two real ones.
+
+A row naming a nonexistent slot is invisible at run time: the transformation
+produces an absent field, indistinguishable from a crate that simply lacked the
+property, and reports success either way. That is how a row mapping to
+`vulnerable_populations` survived its rename to `at_risk_populations` for five
+months.
+
 The same table is machine-readable at `src/docs/rocrate_transformation_paths.tsv`,
 and is copied to `docs/` by `make gendoc`. The source copy is the tracked one:
 `docs/` is generated, and `make clean` empties it.
@@ -51,7 +75,7 @@ You are an expert on transforming RO-Crate JSON-LD metadata into D4D (Datasheets
 
 This skill transforms RO-Crate JSON-LD metadata files into valid D4D YAML datasheets by:
 
-1. **Loading the authoritative mapping** - Uses TSV file with 83 mapped fields (95.2% coverage)
+1. **Loading the authoritative mapping** - Uses the TSV mapping table; run `check_mapping_coverage.py` for the current figure rather than trusting one written here
 2. **Parsing RO-Crate structure** - Extracts properties from JSON-LD @graph including EVI extensions
 3. **Building D4D structure** - Maps RO-Crate properties to D4D fields with transformations
 4. **Validating output** - Checks generated YAML against D4D schema
@@ -200,7 +224,7 @@ cat data/test/transformation_report.txt
 
 ### Covered Fields (83 total)
 
-The transformation uses an authoritative TSV mapping with 95.2% D4D field coverage:
+The transformation uses an authoritative TSV mapping. Its coverage is measured, not asserted — see below:
 
 | Category | Fields | Examples |
 |----------|--------|----------|
@@ -491,7 +515,7 @@ To extend the transformation:
 
 | Method | Coverage | Accuracy | Speed | Manual Effort |
 |--------|----------|----------|-------|---------------|
-| **RO-Crate Transform** | 95.2% (83 fields) | High (mapped fields) | Fast (2-15s) | Low |
+| **RO-Crate Transform** | measured, see `check_mapping_coverage.py` | High (mapped fields) | Fast (2-15s) | Low |
 | **Manual Creation** | 100% | High | Slow (hours) | High |
 | **LLM Extraction** | Variable (60-90%) | Medium | Medium (30-60s) | Medium |
 | **Template Fill** | Low (30-50%) | High | Fast (seconds) | High |
