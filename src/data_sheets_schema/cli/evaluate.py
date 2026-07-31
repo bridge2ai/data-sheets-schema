@@ -14,6 +14,81 @@ def evaluate():
     """D4D evaluation commands."""
     pass
 
+@evaluate.command("verifiable")
+@click.option("--project", default=None, help="limit to one project")
+@click.option("--method", default="claudecode_agent")
+@click.option("--label", "labels", multiple=True, help="run label(s); default all")
+@click.option("--show", default=0, type=int,
+              help="list up to N ungrounded values per record")
+def verifiable_cmd(project, method, labels, show):
+    """Check the values a record states against the documents it declared.
+
+    Answers the half of #165 that survives having no gold standard: a DOI, a
+    date, a count and an accession must appear literally in a source document,
+    because that is where they came from. No reference record is needed, and no
+    LLM.
+
+    `stated` is printed beside `grounded` on purpose. A record that states
+    nothing is trivially correct on everything it states, so the ratio alone
+    would rank an empty record top.
+    """
+    import yaml as _yaml
+    from data_sheets_schema.runs import discover, record_path
+    from data_sheets_schema.verifiable import (
+        check_record, declared_bundle, identifier_slots,
+    )
+
+    skip = identifier_slots()
+    wanted = set(labels)
+    rows = []
+    for run in discover():
+        # Skip core/deterministic runs only when the caller did not name one.
+        # Filtering them unconditionally made `--method claudecode_agent_core`
+        # report "No records matched" for records that plainly exist.
+        if run.method != method:
+            continue
+        if (run.is_core or run.deterministic) and method == "claudecode_agent":
+            continue
+        if wanted and run.label not in wanted:
+            continue
+        for proj in run.projects:
+            if project and proj != project:
+                continue
+            # The bundle the run declared, not the baseline one. See
+            # verifiable.declared_bundle: arms read different inputs, and
+            # assuming the baseline reported the whole crate arm as inventing
+            # every value it stated.
+            bundle = declared_bundle(run.method, run.label, proj)
+            if bundle is None:
+                bundle = (Path("data/preprocessed/concatenated")
+                          / f"{proj}_preprocessed.txt")
+            rec = record_path(run.method, run.label, proj)
+            if not (bundle.exists() and rec and rec.exists()):
+                continue
+            r = check_record(_yaml.safe_load(rec.read_text(encoding="utf-8")),
+                             bundle.read_text(encoding="utf-8"),
+                             project=proj, label=run.label, skip_slots=skip)
+            rows.append(r)
+
+    if not rows:
+        click.echo("No records matched."); return
+
+    click.echo(f"{'project':10}{'label':38}{'stated':>7}{'grounded':>9}{'rate':>7}")
+    for r in sorted(rows, key=lambda x: (x.project, x.label)):
+        rate = f"{r.rate:.1%}" if r.rate is not None else "  n/a"
+        click.echo(f"{r.project:10}{r.label:38}{r.stated:>7}{r.grounded:>9}{rate:>7}")
+        for c in r.ungrounded[:show]:
+            click.echo(f"    [{c.kind}] {c.slot}: {c.value[:70]}")
+
+    total_stated = sum(r.stated for r in rows)
+    total_ok = sum(r.grounded for r in rows)
+    click.echo(f"\n{total_ok}/{total_stated} values grounded across "
+               f"{len(rows)} record(s)")
+    click.echo("A value is 'ungrounded' when it appears in no declared source "
+               "document. Identifiers the generator mints are excluded — they "
+               "are not claims about the world.")
+
+
 @evaluate.command()
 @click.option('--project', type=click.Choice(PROJECTS),
               help='Evaluate specific project only (default: all)')
