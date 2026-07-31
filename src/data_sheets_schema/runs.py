@@ -326,13 +326,27 @@ def check_provenance(method: str, label: str, project: str,
     # report was pinned before its closing rows were appended. The API path
     # cannot do this, because it writes provenance in-process after all phases.
     # Checking at the end of a run gives the agent path the same property.
-    drifted = [k for k, e in
-               (((_prov(method, label, project, concat_dir) or {})
-                 .get("validation") or {}).get("artifacts") or {}).items()
+    artifacts = (((_prov(method, label, project, concat_dir) or {})
+                  .get("validation") or {}).get("artifacts") or {})
+    drifted = [k for k, e in artifacts.items()
                if isinstance(e, dict) and _verify(e) is False]
+    # Three outcomes, not two. `verify_entry` returns None when a file is absent
+    # — unknowable is not mismatched, and conflating them would report a moved
+    # file as tampering. But treating unknowable as *fine* inverts the gate: it
+    # gave its strongest assurance exactly where there was least to go on, so a
+    # run with no validation block, or whose artifacts were deleted, passed.
+    unverifiable = [k for k, e in artifacts.items()
+                    if isinstance(e, dict) and _verify(e) is None]
+    if not artifacts:
+        unverifiable = ["(no validation block)"]
 
-    ok = ((not required) or mode == "live") and not drifted
-    if drifted:
+    ok = (((not required) or mode == "live")
+          and not drifted and not unverifiable)
+    if unverifiable and not drifted:
+        reason = (f"nothing to verify: {', '.join(unverifiable)}. A run that "
+                  "cannot be checked is not a run that passed — record "
+                  "validation with `d4d runs validate`.")
+    elif drifted:
         reason = (f"artifacts changed after provenance was recorded: "
                   f"{', '.join(drifted)}. The record pins bytes the files no "
                   "longer have — re-run `d4d runs validate` so the record "
@@ -350,6 +364,7 @@ def check_provenance(method: str, label: str, project: str,
                   "was observed.")
     return {"method": method, "label": label, "project": project,
             "record_mode": mode, "attestation": level, "drifted": drifted,
+            "unverifiable": unverifiable,
             "required": required, "ok": ok, "reason": reason}
 
 

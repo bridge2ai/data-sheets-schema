@@ -3,7 +3,7 @@
 record_version: 1
 record_type: d4d_derived_provenance
 record_mode: derived
-record_generated_at: '2026-07-31T03:40:37+00:00'
+record_generated_at: '2026-07-31T02:05:07+00:00'
 run:
   label: 2026-07-29_guarded-union
   project: CHORUS
@@ -45,7 +45,7 @@ schema:
   full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
   full_sha256: 2065cea2d1a01c390ac1ef1d3db94be101f203f2a2682c0eee489ec29e45ebe9
   core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
-  core_sha256: 4a0a8b88e2fba9db3c4be91314bc41365af98df78683f6cba4e45d2d5e2fc5c6
+  core_sha256: 124b2494a1771366d2687a3f9f97782427942a5621643b23b6f004e3e2f04ee1
   merged_schema_carries_version: true
 software:
   data_sheets_schema: 0.1.0
@@ -53,17 +53,17 @@ software:
   linkml_runtime: 1.9.4
   python: 3.13.12
 repo:
-  commit: 29cfd3a4bc14b2bf7dab1ec7e613b9fd7344f0c6
-  commit_short: 29cfd3a4
-  branch: outputs-hash-unification
+  commit: 7373b9bcb51aa7ae9761f9b1621decbb50a3fcde
+  commit_short: 7373b9bc
+  branch: pre-run-checks
   dirty: true
-  dirty_file_count: 90
+  dirty_file_count: 96
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent_merged/2026-07-29_guarded-union/CHORUS_d4d.yaml
+    sha256: 88ab3adaa8ba1b9f1036c312ae6588b5e7086c93c0e0ed0ec5b0a83664d37f24
     bytes: 58900
     slots: 59
-    sha256: 88ab3adaa8ba1b9f1036c312ae6588b5e7086c93c0e0ed0ec5b0a83664d37f24
 not_applicable:
 - field: model
   reason: no model produced this record; it combines existing ones

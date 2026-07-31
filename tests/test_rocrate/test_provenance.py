@@ -470,3 +470,76 @@ class TestTheEndOfRunGate(unittest.TestCase):
                 if not r["ok"]:
                     failing.append(f"{proj}/{run.label}: {r['reason'][:50]}")
         self.assertEqual(failing[:3], [], f"{len(failing)} runs fail the gate")
+
+
+class TestNothingToVerifyIsNotAPass(unittest.TestCase):
+    """The gate must not give its strongest assurance where there is least
+    to go on (#208).
+
+    `verify_entry` returns None for an absent file — unknowable is not
+    mismatched, and conflating them would report a moved file as tampering. But
+    treating unknowable as *fine* inverted the gate's purpose: a run with no
+    validation block, or whose artifacts were deleted, passed `--strict`.
+    """
+
+    def _record(self, td, body):
+        import yaml as _yaml
+        c = Path(td)
+        d = c / "m_core" / "2026-07-30_x_rep1"
+        d.mkdir(parents=True)
+        (d / "P_provenance.yaml").write_text(_yaml.safe_dump(body))
+        return c
+
+    def test_a_record_with_no_validation_block_does_not_pass(self):
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            c = self._record(td, {"record_mode": "live"})
+            r = check_provenance("m", "2026-07-30_x_rep1", "P", c)
+            self.assertFalse(r["ok"])
+            self.assertIn("nothing to verify", r["reason"])
+
+    def test_a_missing_artifact_does_not_pass(self):
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            c = self._record(td, {"record_mode": "live", "validation": {
+                "artifacts": {"full": {"path": f"{td}/gone.yaml",
+                                       "sha256": "abc"}}}})
+            r = check_provenance("m", "2026-07-30_x_rep1", "P", c)
+            self.assertFalse(r["ok"])
+            self.assertEqual(r["unverifiable"], ["full"])
+            self.assertEqual(r["drifted"], [], "absent is not drifted")
+
+    def test_a_present_matching_artifact_passes(self):
+        import hashlib
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            a = Path(td) / "a.yaml"
+            a.write_bytes(b"x")
+            c = self._record(td, {"record_mode": "live", "validation": {
+                "artifacts": {"full": {
+                    "path": str(a),
+                    "sha256": hashlib.sha256(b"x").hexdigest()}}}})
+            r = check_provenance("m", "2026-07-30_x_rep1", "P", c)
+            self.assertTrue(r["ok"])
+            self.assertEqual(r["unverifiable"], [])
+
+    def test_drift_and_absence_are_reported_separately(self):
+        """Different conditions with different remedies: re-validate versus
+        find out where the artifact went."""
+        import hashlib
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            a = Path(td) / "a.yaml"
+            a.write_bytes(b"edited")
+            c = self._record(td, {"record_mode": "live", "validation": {
+                "artifacts": {
+                    "full": {"path": str(a),
+                             "sha256": hashlib.sha256(b"original").hexdigest()},
+                    "core": {"path": f"{td}/gone.yaml", "sha256": "abc"}}}})
+            r = check_provenance("m", "2026-07-30_x_rep1", "P", c)
+            self.assertEqual(r["drifted"], ["full"])
+            self.assertEqual(r["unverifiable"], ["core"])
