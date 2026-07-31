@@ -383,3 +383,73 @@ class TestTheDeclaredBundleIsUsed(unittest.TestCase):
         r = check_record(yaml.safe_load(rec.read_text()), b.read_text(),
                          skip_slots=identifier_slots())
         self.assertGreater(r.rate, 0.5)
+
+
+class TestCountBoundaryEdges(unittest.TestCase):
+    """A count must not ground inside a different quantity (#211).
+
+    The first boundary fix used `[\\d,]`, which stopped `1234` matching `12345`
+    but left `1234.5` (a different number) and `v1234` (a version string) both
+    grounding — the same false-grounding class the work was meant to remove.
+    """
+
+    def _g(self, value, bundle):
+        from data_sheets_schema.verifiable import check_record
+        return check_record({"counts": value}, bundle,
+                            skip_slots=set()).grounded == 1
+
+    def test_a_decimal_is_a_different_quantity(self):
+        self.assertFalse(self._g("1234", "value 1234.5"))
+        self.assertFalse(self._g("1234", "1234.5 kg"))
+
+    def test_a_version_string_does_not_ground_a_count(self):
+        self.assertFalse(self._g("1234", "v1234"))
+        self.assertFalse(self._g("1234", "rev1234"))
+
+    def test_a_sentence_ending_period_still_grounds(self):
+        self.assertTrue(self._g("1234", "there were 1234."))
+
+    def test_bracketed_and_grouped_forms_ground(self):
+        self.assertTrue(self._g("1234", "(1234)"))
+        self.assertTrue(self._g("1234", "total 1,234 items"))
+
+    def test_a_longer_number_still_does_not_ground(self):
+        self.assertFalse(self._g("1234", "12345"))
+        self.assertFalse(self._g("1234", "912345"))
+
+
+class TestDeclaredBundleIsRootRelative(unittest.TestCase):
+    """Resolved from the repository, not the working directory (#212).
+
+    The failure was silent: the provenance record was not found, None was
+    returned, and the caller fell back to the baseline bundle — the
+    wrong-sources bug this function exists to prevent, producing a
+    plausible-looking number from the wrong input.
+    """
+
+    def test_it_returns_an_absolute_path(self):
+        from data_sheets_schema.verifiable import declared_bundle
+        b = declared_bundle("claudecode_agent",
+                            "2026-07-28_claude-opus-5-generic_rep1", "CHORUS")
+        if b is None:
+            self.skipTest("run not present")
+        self.assertTrue(b.is_absolute())
+        self.assertTrue(b.exists())
+
+    def test_it_works_from_a_foreign_directory(self):
+        import os
+        import tempfile
+        from data_sheets_schema.verifiable import declared_bundle
+        cwd = os.getcwd()
+        try:
+            os.chdir(tempfile.mkdtemp())
+            b = declared_bundle("claudecode_agent",
+                                "2026-07-28_claude-opus-5-generic_rep1",
+                                "CHORUS")
+            if b is None:
+                self.skipTest("run not present")
+            self.assertTrue(b.exists(),
+                            "silently falling back to the baseline bundle is "
+                            "the bug this guards")
+        finally:
+            os.chdir(cwd)

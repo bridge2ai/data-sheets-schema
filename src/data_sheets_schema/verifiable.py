@@ -150,12 +150,23 @@ def declared_bundle(method: str, label: str, project: str) -> Path | None:
     """
     import yaml as _yaml
     from data_sheets_schema.provenance import record_path_for
-    rec = record_path_for(project, method, label)
+
+    # Both the lookup and the result are resolved from the repository root, not
+    # the working directory. `FULL_SCHEMA` above was fixed for this and the
+    # assumption crept back in a few lines below it. The failure is silent: the
+    # record is not found, None is returned, and the caller falls back to the
+    # baseline bundle — which is exactly the wrong-sources bug this function
+    # exists to prevent, now producing a plausible number from the wrong input.
+    rec = record_path_for(project, method, label,
+                          _REPO_ROOT / "data/d4d_concatenated")
     if not rec.exists():
         return None
     data = _yaml.safe_load(rec.read_text(encoding="utf-8")) or {}
     path = (data.get("inputs") or {}).get("bundle_path")
-    return Path(path) if path else None
+    if not path:
+        return None
+    p = Path(path)
+    return p if p.is_absolute() else _REPO_ROOT / p
 
 
 def identifier_slots(schema_path: Path = FULL_SCHEMA) -> set[str]:
@@ -314,7 +325,9 @@ _CONTINUES = {
     "doi": r"(?:[\w/:-]|\.\w)",
     "url": r"(?:[\w/:%?=&#-]|\.\w)",
     "accession": r"[\w-]",
-    "count": r"[\d,]",
+    # A dot continues a count only when a digit follows: `1234.5` is a different
+    # quantity, while `1234.` ends a sentence. Same shape as the DOI rule.
+    "count": r"(?:[\d,]|\.\d)",
     "iso_date": r"[\d-]",
 }
 # What may *precede* is narrower than what may follow. A slash is a path
@@ -327,7 +340,8 @@ _PRECEDES = {
     "doi": r"[\w.-]",
     "url": r"[\w.-]",
     "accession": r"[\w-]",
-    "count": r"[\d,]",
+    # Letters too: `v1234` is a version identifier, not the count 1234.
+    "count": r"[\w,.]",
     "iso_date": r"[\d-]",
 }
 
