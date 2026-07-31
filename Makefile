@@ -294,6 +294,7 @@ $(DOCDIR):
 
 gendoc: $(DOCDIR)
 	cp $(SRC)/docs/*md $(DOCDIR) ; \
+	cp $(SRC)/docs/*.tsv $(DOCDIR) 2>/dev/null || true ; \
 	$(RUN) gen-doc ${GEN_DARGS} -d $(DOCDIR) $(SOURCE_SCHEMA_PATH) ; \
 	mkdir -p $(DOCDIR)/html_output/concatenated ; \
 	mkdir -p $(DOCDIR)/html_output/concatenated/curated ; \

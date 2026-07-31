@@ -38,7 +38,9 @@ Path 2 is what the generation study uses (`d4d rocrate emit-map-arm`), so prefer
 it for anything that will be compared against a generated arm. Use this agent for
 crates outside that pipeline.
 
-The same table is machine-readable at `docs/rocrate_transformation_paths.tsv`.
+The same table is machine-readable at `src/docs/rocrate_transformation_paths.tsv`,
+and is copied to `docs/` by `make gendoc`. The source copy is the tracked one:
+`docs/` is generated, and `make clean` empties it.
 
 
 # D4D RO-Crate Transformer
