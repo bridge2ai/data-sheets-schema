@@ -460,3 +460,43 @@ class TestCarveOutEnforcement(unittest.TestCase):
         from data_sheets_schema.merge import check_sources
         with TemporaryDirectory() as td:
             check_sources({"a": self._corpus(td)}, "P")   # would raise if wrong
+
+
+class TestTestsDoNotWriteIntoTheCorpus(unittest.TestCase):
+    """A test wrote a provenance record into the real repository (#195).
+
+    `write_merge` resolved the provenance path with `record_path_for`, which
+    defaults to the working corpus, so a merge written to a temp directory
+    deposited its record in `data/d4d_concatenated/` — right convention, wrong
+    tree. It reached `main` as `claudecode_agent_merged_core/lab/P_provenance.yaml`:
+    provenance for a run that does not exist.
+
+    The cause is fixed; these pin it, because the failure is silent — the test
+    passes, and the artifact appears somewhere nobody was looking.
+    """
+
+    def test_a_merge_outside_the_corpus_keeps_its_provenance_outside(self):
+        import yaml
+        from data_sheets_schema.evidence_score import load_record
+        with TemporaryDirectory() as td:
+            srcs = TestDerivedProvenance()._sources(td)
+            recs = {k: load_record(v) for k, v in srcs.items()}
+            r = union_merge(recs, base="rep1", guarded=True, judge=judge())
+            out = Path(td) / "elsewhere" / "P_d4d.yaml"
+            write_merge(r, out, sources=srcs, project="P",
+                        method="claudecode_agent_merged", label="lab")
+            written = [p for p in Path(td).rglob("*_provenance.yaml")]
+            self.assertTrue(written, "provenance should exist under the temp root")
+            for p in written:
+                self.assertIn(td, str(p.resolve()))
+
+    def test_the_working_corpus_holds_no_fixture_labels(self):
+        """Names the fixtures actually used, so a leak is caught at its source."""
+        corpus = Path("data/d4d_concatenated")
+        if not corpus.exists():
+            self.skipTest("corpus not present")
+        for fixture in ("lab", "lab_rep1", "lab_rep2", "L"):
+            with self.subTest(fixture=fixture):
+                self.assertEqual(
+                    sorted(str(p) for p in corpus.glob(f"*/{fixture}")), [],
+                    f"a test wrote {fixture!r} into the working corpus")
