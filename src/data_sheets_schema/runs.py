@@ -342,7 +342,14 @@ def check_provenance(method: str, label: str, project: str,
 
     ok = (((not required) or mode == "live")
           and not drifted and not unverifiable)
-    if unverifiable and not drifted:
+    # Ordered by how fundamental the condition is, because the remedies differ.
+    # A record that does not exist is not the same as one with nothing to
+    # verify: the first needs a record written, the second needs it validated.
+    if mode == "none":
+        reason = ("no provenance record. The run cannot state the conditions it "
+                  "ran under, and nobody can reconstruct them later with "
+                  "certainty.")
+    elif unverifiable and not drifted:
         reason = (f"nothing to verify: {', '.join(unverifiable)}. A run that "
                   "cannot be checked is not a run that passed — record "
                   "validation with `d4d runs validate`.")
@@ -354,10 +361,6 @@ def check_provenance(method: str, label: str, project: str,
     elif ok:
         reason = ("live provenance present" if mode == "live"
                   else f"predates {LIVE_REQUIRED_FROM}; not required")
-    elif mode == "none":
-        reason = ("no provenance record. The run cannot state the conditions it "
-                  "ran under, and nobody can reconstruct them later with "
-                  "certainty.")
     else:
         reason = (f"provenance is {mode}, not live. It was assembled after the "
                   "fact, so it reports what could be recovered rather than what "
