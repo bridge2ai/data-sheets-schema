@@ -1,0 +1,141 @@
+_distributions:
+  - id: https://physionet.org/content/b2ai-voice/3.1.0/
+    name: PhysioNet feature-only release, version 3.1.0
+    description: >-
+      The current published release, comprising the features, phenotype and metadata directories described
+      above. Access is restricted to credentialed users who sign the Bridge2AI Voice Registered Access
+      Agreement; no training is required. DOI 10.13026/8xbn-nq66; latest-version DOI 10.13026/37yb-1t42.
+      Published 1 May 2026. PhysioNet reports 93 views of this version and 801 across all versions.
+  - id: https://physionet.org/content/b2ai-voice/3.0.0/
+    name: PhysioNet feature-only release, version 3.0.0
+    description: >-
+      Superseded release of 16 December 2025 under DOI 10.13026/k81f-qr68, credentialed access. Contained
+      833 participants, feature record counts from 29,020 spectrograms to 32,236 torchaudio pitch traces,
+      and a phenotype layout in which adhd_adult, ptsd_adult and psychiatric_history sat under diagnosis
+      and voice_perception and voice_problem_severity sat under task.
+  - id: https://physionet.org/content/b2ai-voice/1.1/
+    name: PhysioNet feature-only release, version 1.1
+    description: >-
+      Superseded release of 17 January 2025 under DOI 10.13026/249v-w155, restricted to registered users
+      who sign the specified data use agreement. Contained 12,523 recordings for 306 participants and
+      shipped five files: spectrograms.parquet, mfcc.parquet, phenotype.tsv with phenotype.json, and
+      static_features.tsv with static_features.json. The files for this version are no longer available.
+  - id: https://www.synapse.org/Synapse:syn72370534/
+    name: Synapse controlled-access raw audio, adult cohort
+    description: >-
+      Raw waveform distribution for the adult cohort, released only after Data Access Compliance Office
+      review, execution of a Data Use Agreement and a Data Use and Transfer Agreement signed by an
+      authorized institutional official.
+  - id: https://healthdatanexus.ai/
+    name: Health Data Nexus, version 1.0
+    description: >-
+      The first feature-only release, published end of November 2024 under DOI 10.57764/qb6h-em84 on a
+      platform that provides cloud compute alongside the dataset rather than allowing data downloads.
+
+use_repository:
+  - name: No repository of downstream uses
+    description: >-
+      Asked whether a repository links to any or all papers or systems that use the dataset, the
+      healthsheet answers no. Users are asked to cite the protocol development paper (Bensoussan et al.,
+      Interspeech 2024) and the versioned PhysioNet dataset citation.
+
+other_tasks:
+  - name: Study of confounders of voice and speech
+    description: >-
+      The protocols deliberately capture confounders and social habits known to affect voice and speech,
+      such as smoking status and hydration status, alongside demographic factors that could affect voice
+      such as weight, socio-economic status and literacy status, supporting analysis of these factors in
+      their own right.
+  - name: Methodological work on voice data standards
+    description: >-
+      The consortium's stated aims include developing bioinformatics standards for voice data, benchmarks
+      of diversity metrics, and evidence-based recording protocols, for which the dataset and its
+      accompanying documentation serve as the reference implementation.
+
+compression: gzip
+
+dialect:
+  name: Tab-separated with header row and JSON sidecar dictionaries
+  description: >-
+    Phenotypic tables, static features and audio quality metrics are distributed as tab-separated values
+    with a header row; the documented read is pandas.read_csv(path, sep="\t", header=0). Each TSV is
+    accompanied by a JSON data dictionary with the same file stem, whose keys match the column names of
+    the data file and whose values give a description, the question posed to the participant where
+    applicable, and the data type of the response. Dense features are distributed as Apache Parquet, a
+    column-oriented binary format read with any Parquet-capable library.
+
+is_tabular: false
+
+imputation_protocols:
+  - name: No imputation performed
+    description: >-
+      No imputation of missing values is documented. The healthsheet states that there was no
+      pre-processing for cleaning the data, that some questions are optional, and that a missingness table
+      is distributed with the dataset so that users can handle missingness themselves.
+
+resources:
+  - id: https://physionet.org/content/b2ai-voice-pediatric/1.1.0/
+    name: Bridge2AI-Voice Pediatric Dataset
+    title: Bridge2AI-Voice Pediatric Dataset
+    version: 1.1.0
+    doi: 10.13026/h995-bt35
+    page: https://physionet.org/content/b2ai-voice-pediatric/1.1.0/
+    issued: '2026-05-01T00:00:00Z'
+    license: Bridge2AI Voice Registered Access License
+    publisher: https://physionet.org/
+    description: >-
+      A companion Bridge2AI-Voice release published as a distinct PhysioNet project rather than a version
+      of the adult dataset. It contains derived audio features for 23,533 recordings collected from 300
+      participants aged 2 to 18 at the Hospital for Sick Children, under a protocol approved by the
+      Hospital for Sick Children Research Ethics Board. Eligibility required age 2 to 18 and English
+      proficiency; individuals over 18 and non-verbal individuals were excluded. Non-patients were
+      recruited through research postings. All data were collected through reproschema-ui on tablets, with
+      a headset used for most recordings and the built-in tablet microphone used where a child could not
+      tolerate headphones or had complex medical conditions; all participants completed recording and
+      demographic collection in one session, with parents or decision-makers completing the medical-history
+      survey on a separate tablet where the child could not.
+      The release provides the same nine Parquet feature families as the adult release, with 23,533
+      records for the torchaudio features and phonetic posteriorgrams and 23,532 for the SPARC features,
+      plus static_features.tsv and audio_quality_metrics.tsv. Version 1.1.0 released no new participants
+      relative to 1.0.0 but published audio features for all free speech tasks after manual checking for
+      unconsented speakers and personally identifiable information, and added audio quality metrics and
+      per-recording metadata. Latest-version DOI 10.13026/mf9s-5r03. Access is restricted to credentialed
+      users who sign the data use agreement; raw pediatric audio is distributed separately via Synapse at
+      https://www.synapse.org/Synapse:syn73617068. PhysioNet reports 42 views of this version and 119
+      across both versions.
+    creators:
+      - name: Bridge2AI-Voice Consortium
+        description: >-
+          The pediatric release carries substantially the same consortium author list as the adult release,
+          led by Yael Bensoussan and concluding with Satrajit Ghosh, with Jennifer Siu as pediatric cohort
+          lead.
+    funders:
+      - name: NIH Common Fund, Bridge2AI Program
+        description: >-
+          NIH project number 3OT2OD032720-01S1, "Bridge2AI: Voice as a Biomarker of Health - Building an
+          ethically sourced, bioaccoustic database to understand disease like never before".
+    ethical_reviews:
+      - name: Hospital for Sick Children Research Ethics Board
+        description: >-
+          Data collection and sharing were approved by the Research Ethics Board at the Hospital for Sick
+          Children.
+    addressing_gaps:
+      - name: Non-generalizability of adult voice norms to children
+        description: >-
+          Pediatric and adult voice and speech production are fundamentally different because the
+          respiratory system and larynx undergo rapid functional maturation throughout childhood, which
+          influences acoustic features such as fundamental frequency. Evidence and normative data derived
+          from adults cannot be generalized to pediatric populations.
+      - name: Scarcity of open pediatric voice datasets
+        description: >-
+          Despite the clinical importance of detecting pediatric communication disorders such as autism
+          spectrum disorder and speech delays, the availability of large-scale pediatric datasets remains
+          limited. Privacy issues, consent processes and the need for developmentally appropriate tasks
+          have contributed to the lack of publicly available pediatric datasets that enable machine
+          learning for pediatric voice analysis.
+    keywords:
+      - voice
+      - pediatric
+      - health
+      - biomarkers
+      - bridge2ai

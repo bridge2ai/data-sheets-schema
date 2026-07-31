@@ -549,7 +549,18 @@ def _extract(text: str, kind: str) -> str:
 
     fences = re.findall(r"```(?:ya?ml|json)?\s*\n(.*?)```", text,
                         re.S | re.I)
-    candidates = [f.strip() for f in reversed(fences)] + [text.strip()]
+    # An *unclosed* fence is common enough to handle: the model opens ```yaml,
+    # emits the record, and never closes it. And a response sometimes begins
+    # with a bare `yaml` line — a fence marker whose backticks did not survive.
+    # Both produce a perfectly good record that a strict reader throws away,
+    # and each rejection costs every phase already billed for that run.
+    unclosed = re.findall(r"```(?:ya?ml|json)?\s*\n(.*)\Z", text, re.S | re.I)
+    stripped = re.sub(r"\A\s*(?:ya?ml|json)\s*\n", "", text,
+                      flags=re.I)
+
+    candidates = ([f.strip() for f in reversed(fences)]
+                  + [f.strip() for f in unclosed]
+                  + [stripped.strip(), text.strip()])
 
     for candidate in candidates:
         if not candidate:
@@ -816,6 +827,20 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # reconciliation or redo it.
     progress = _load_progress(spec) if resume else {}
     done = set(progress.get("completed", []))
+    # A *finished* run has no progress file — success deletes it — so resuming
+    # found nothing and re-ran all six phases of work already paid for. The
+    # artifacts on disk are the durable record of what completed; the progress
+    # file only adds the phases that leave no artifact of their own.
+    # Only an *entirely* complete run may be inferred from artifacts. `full` and
+    # `reconcile_full` write the same file, as do `core` and `reconcile_core`,
+    # so a partially-complete run cannot be reconstructed this way: a record
+    # written by phase 1 alone would mark reconciliation done and ship
+    # unreconciled output as finished. When every artifact is present there is
+    # no such ambiguity — nothing remains to run either way.
+    if (resume and not done
+            and all(_artifact_path(spec, a).exists()
+                    for a in ("full", "core", "report"))):
+        done = set(PHASES)
     carry: dict[str, str] = {}
     if "Audit findings" in progress:
         carry["Audit findings"] = progress["Audit findings"]
@@ -954,7 +979,13 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # request. This path writes the record itself, so the check is cheap — and
     # it fails the run rather than leaving an unattestable artifact behind.
     from data_sheets_schema.runs import check_provenance
-    prov = check_provenance(spec.method, spec.label, spec.project)
+    # Checked against the corpus this run wrote into, not the default one. With
+    # `out_dir` set — the GitHub assistant's layout — the gate looked in
+    # data/d4d_concatenated, found no record, and failed every run that had in
+    # fact written one correctly. Same class as the declared-bundle bug: a path
+    # assumed rather than derived.
+    prov = check_provenance(spec.method, spec.label, spec.project,
+                            record=spec.provenance_path)
     if not prov["ok"]:
         raise RuntimeError(
             f"run {spec.label} for {spec.project} finished without usable "

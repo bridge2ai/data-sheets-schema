@@ -309,15 +309,29 @@ def requires_live(label: str) -> bool:
 
 
 def check_provenance(method: str, label: str, project: str,
-                     concat_dir: Path = CONCAT_DIR) -> dict:
+                     concat_dir: Path = CONCAT_DIR,
+                     record: Path | None = None) -> dict:
     """Whether a run satisfies the live-provenance requirement.
 
     Separate from `is_complete()` deliberately. Folding this into completeness
     would reclassify every pre-cutoff run in one step and change every
     downstream count as a side effect of adding a rule.
     """
-    mode = record_mode(method, label, project, concat_dir)
-    level = attestation(method, label, project, concat_dir)
+    # A caller that just wrote the record passes its path. Re-deriving it has
+    # now been wrong twice — once for the assistant's flat layout, once outside
+    # the repository root — and the writer always knows where it wrote.
+    if record is not None:
+        import yaml as _yaml
+        data = (_yaml.safe_load(record.read_text(encoding="utf-8")) or {}) \
+            if record.exists() else {}
+        mode = str(data.get("record_mode") or "none")
+        level = LIVE if mode == "live" else NO_RECORD if not data else PARTIAL
+        artifacts = ((data.get("validation") or {}).get("artifacts") or {})
+    else:
+        mode = record_mode(method, label, project, concat_dir)
+        level = attestation(method, label, project, concat_dir)
+        artifacts = (((_prov(method, label, project, concat_dir) or {})
+                      .get("validation") or {}).get("artifacts") or {})
     required = requires_live(label)
 
     # Re-verify, do not merely note the presence of a hash. The agent path
@@ -326,8 +340,6 @@ def check_provenance(method: str, label: str, project: str,
     # report was pinned before its closing rows were appended. The API path
     # cannot do this, because it writes provenance in-process after all phases.
     # Checking at the end of a run gives the agent path the same property.
-    artifacts = (((_prov(method, label, project, concat_dir) or {})
-                  .get("validation") or {}).get("artifacts") or {})
     drifted = [k for k, e in artifacts.items()
                if isinstance(e, dict) and _verify(e) is False]
     # Three outcomes, not two. `verify_entry` returns None when a file is absent
@@ -337,7 +349,10 @@ def check_provenance(method: str, label: str, project: str,
     # run with no validation block, or whose artifacts were deleted, passed.
     unverifiable = [k for k, e in artifacts.items()
                     if isinstance(e, dict) and _verify(e) is None]
-    if not artifacts:
+    # A record written moments ago has no validation block — `d4d runs validate`
+    # adds it afterwards. Only demand one when the caller did not hand us the
+    # record it just produced.
+    if not artifacts and record is None:
         unverifiable = ["(no validation block)"]
 
     ok = (((not required) or mode == "live")

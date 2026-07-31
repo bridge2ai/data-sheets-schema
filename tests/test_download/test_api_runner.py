@@ -915,3 +915,103 @@ class TestARejectedPhaseWritesNothing(unittest.TestCase):
             # what it cost — that is the one thing worth keeping from a run
             # that produced nothing usable.
             self.assertIn("P_reasoning.jsonl", written)
+
+
+class TestExtractionToleratesFenceArtifacts(unittest.TestCase):
+    """A valid record must not be thrown away over a formatting artifact.
+
+    The guard rejected a response beginning `yaml\\n# D4D Datasheet...` — a
+    perfectly good record whose fence backticks did not survive. Each such
+    rejection costs every phase already billed for that run, so the reader has
+    to be tolerant of the wrapper while still strict about the content.
+    """
+
+    def test_a_stray_language_marker_is_stripped(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract("yaml\n# header\nid: x\ntitle: y", "yaml"),
+                         "# header\nid: x\ntitle: y")
+
+    def test_an_unclosed_fence_is_accepted(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract("```yaml\nid: x\ntitle: y", "yaml"),
+                         "id: x\ntitle: y")
+
+    def test_tolerance_does_not_admit_prose(self):
+        """The point is a looser wrapper, not a looser record."""
+        from data_sheets_schema.api_runner import _extract
+        for prose in ("yaml\nNote: I need to emit the record.",
+                      "```yaml\nSummary: the schema lacks that slot."):
+            with self.subTest(prose=prose[:28]):
+                with self.assertRaises(RuntimeError):
+                    _extract(prose, "yaml")
+
+
+class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
+    """A finished run must not be redone.
+
+    Success deletes the progress file, so resuming a *completed* run found no
+    record of it and re-ran all six phases of work already paid for. The
+    artifacts on disk are the durable evidence of what completed.
+    """
+
+    def _spec(self, td):
+        from data_sheets_schema.api_runner import RunSpec
+        out = Path(td) / "out"
+        b = Path(td) / "b.txt"
+        b.write_text("src")
+        return RunSpec(project="P", arm="baseline", method="claudecode_agent",
+                       bundle=b, label="2026-07-31_x_rep1", out_dir=out)
+
+    def test_a_completed_run_reruns_nothing(self):
+        import tempfile
+        from data_sheets_schema.api_runner import execute
+
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            spec.out_dir.mkdir(parents=True)
+            spec.full_path.write_text("id: x\n")
+            spec.core_path.write_text("id: x\n")
+            spec.report_path.write_text("# report\n")
+
+            called = {"n": 0}
+
+            class C:
+                class messages:
+                    @staticmethod
+                    def stream(**kw):
+                        called["n"] += 1
+                        raise AssertionError("no phase should have been called")
+
+            execute(spec, client=C())
+            self.assertEqual(called["n"], 0,
+                             "a completed run must cost nothing to resume")
+
+    def test_a_partial_run_is_not_inferred_from_artifacts(self):
+        """`full` and `reconcile_full` write the same file.
+
+        Inferring completion per-artifact marked reconciliation done when only
+        phase 1 had run, shipping an unreconciled record as finished. Only a
+        wholly complete run may be inferred; a partial one falls back to the
+        progress file, which is what distinguishes the two phases.
+        """
+        import tempfile
+        from data_sheets_schema.api_runner import execute
+
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            spec.out_dir.mkdir(parents=True)
+            spec.full_path.write_text("id: x\n")     # phase 1 only
+
+            calls = {"n": 0}
+
+            class C:
+                class messages:
+                    @staticmethod
+                    def stream(**kw):
+                        calls["n"] += 1
+                        raise RuntimeError("stop after the first call")
+
+            with self.assertRaises(RuntimeError):
+                execute(spec, client=C())
+            self.assertGreater(calls["n"], 0,
+                               "a partial run must not be treated as complete")
