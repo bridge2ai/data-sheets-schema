@@ -58,12 +58,10 @@ inputs:
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent_healthsheet/2026-07-28_claude-opus-5-deprimed_rep3/AI_READI_d4d.yaml
-    md5: c89ffc08e6fb6f759423c09086d2be75
     bytes: 70589
     slots: 74
   core:
     path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-deprimed_rep3/AI_READI_d4d_core.yaml
-    md5: 7cf665f3f0a25b0cd693844cd8d43e60
     bytes: 57064
     slots: 61
   report: null

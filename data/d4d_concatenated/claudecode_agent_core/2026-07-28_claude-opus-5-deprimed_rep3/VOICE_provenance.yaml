@@ -58,17 +58,14 @@ inputs:
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep3/VOICE_d4d.yaml
-    md5: 2dc69b49273153d6eecce4bc8f8e73d1
     bytes: 108370
     slots: 77
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep3/VOICE_d4d_core.yaml
-    md5: d8762e5ba1a9729adfadbe09b763ea99
     bytes: 86946
     slots: 65
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep3/VOICE_reconciliation.md
-    md5: 45fa30bbb8113e7499aa16cee978c614
     bytes: 18764
     slots: null
 unrecoverable: null

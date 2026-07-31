@@ -53,17 +53,14 @@ outputs:
     path: data/d4d_concatenated/claudecode_agent/2026-07-27_claude-opus-5_rep1/VOICE_d4d.yaml
     bytes: 159728
     slots: 75
-    sha256: 3b51c806b733513755914b6671a8c831da27105196b34c7336a240ee3833e294
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep1/VOICE_d4d_core.yaml
     bytes: 132716
     slots: 63
-    sha256: 7d689413e4c5a095de6e996b16d6f6fbcdb41f2e736bf1d65ca599d92f97eaa2
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep1/VOICE_reconciliation.md
     bytes: 17485
     slots: null
-    sha256: 615f26f55f9891d4e8d6a9dfc9c8b832fa2027bdcd6c424f9ab6e3808cc014ef
 unrecoverable:
 - field: system
   reason: hardware was not captured when this run executed

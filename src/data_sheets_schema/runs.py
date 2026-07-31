@@ -319,21 +319,69 @@ def check_provenance(method: str, label: str, project: str,
     mode = record_mode(method, label, project, concat_dir)
     level = attestation(method, label, project, concat_dir)
     required = requires_live(label)
-    ok = (not required) or mode == "live"
-    if ok:
-        reason = ("live provenance present" if mode == "live"
-                  else f"predates {LIVE_REQUIRED_FROM}; not required")
-    elif mode == "none":
+
+    # Re-verify, do not merely note the presence of a hash. The agent path
+    # records provenance as a step separate from writing the artifacts, so a
+    # hash can describe a state the file passed through — one reconciliation
+    # report was pinned before its closing rows were appended. The API path
+    # cannot do this, because it writes provenance in-process after all phases.
+    # Checking at the end of a run gives the agent path the same property.
+    artifacts = (((_prov(method, label, project, concat_dir) or {})
+                  .get("validation") or {}).get("artifacts") or {})
+    drifted = [k for k, e in artifacts.items()
+               if isinstance(e, dict) and _verify(e) is False]
+    # Three outcomes, not two. `verify_entry` returns None when a file is absent
+    # — unknowable is not mismatched, and conflating them would report a moved
+    # file as tampering. But treating unknowable as *fine* inverts the gate: it
+    # gave its strongest assurance exactly where there was least to go on, so a
+    # run with no validation block, or whose artifacts were deleted, passed.
+    unverifiable = [k for k, e in artifacts.items()
+                    if isinstance(e, dict) and _verify(e) is None]
+    if not artifacts:
+        unverifiable = ["(no validation block)"]
+
+    ok = (((not required) or mode == "live")
+          and not drifted and not unverifiable)
+    # Ordered by how fundamental the condition is, because the remedies differ.
+    # A record that does not exist is not the same as one with nothing to
+    # verify: the first needs a record written, the second needs it validated.
+    if mode == "none":
         reason = ("no provenance record. The run cannot state the conditions it "
                   "ran under, and nobody can reconstruct them later with "
                   "certainty.")
+    elif unverifiable and not drifted:
+        reason = (f"nothing to verify: {', '.join(unverifiable)}. A run that "
+                  "cannot be checked is not a run that passed — record "
+                  "validation with `d4d runs validate`.")
+    elif drifted:
+        reason = (f"artifacts changed after provenance was recorded: "
+                  f"{', '.join(drifted)}. The record pins bytes the files no "
+                  "longer have — re-run `d4d runs validate` so the record "
+                  "describes what actually shipped.")
+    elif ok:
+        reason = ("live provenance present" if mode == "live"
+                  else f"predates {LIVE_REQUIRED_FROM}; not required")
     else:
         reason = (f"provenance is {mode}, not live. It was assembled after the "
                   "fact, so it reports what could be recovered rather than what "
                   "was observed.")
     return {"method": method, "label": label, "project": project,
-            "record_mode": mode, "attestation": level,
+            "record_mode": mode, "attestation": level, "drifted": drifted,
+            "unverifiable": unverifiable,
             "required": required, "ok": ok, "reason": reason}
+
+
+def _prov(method: str, label: str, project: str,
+          concat_dir: Path = CONCAT_DIR) -> dict | None:
+    import yaml as _yaml
+    from data_sheets_schema.provenance import record_path_for
+    p = record_path_for(project, method, label, concat_dir)
+    return (_yaml.safe_load(p.read_text(encoding="utf-8")) or {}) if p.exists() else None
+
+
+def _verify(entry: dict) -> bool | None:
+    from data_sheets_schema.provenance import verify_entry
+    return verify_entry(entry)
 
 
 def attestation(method: str, label: str, project: str,
@@ -385,13 +433,15 @@ def attestation(method: str, label: str, project: str,
         if not any(_get(d) for d in alternatives):
             return PARTIAL
 
-    # Outputs are checked for a *hash*, not for the presence of the block.
-    # `{"full": None, "core": None}` is a truthy dict that pins nothing, so
-    # testing the container let a record naming its artifacts without hashing
-    # any of them count as attested.
-    outputs = data.get("outputs") or {}
+    # The pinning artifact hash lives in `validation.artifacts`, not `outputs`.
+    # `outputs` used to carry one, recorded before the artifacts were final, and
+    # 77 live records pinned a state their files merely passed through. Hashing
+    # moved to after the run; `outputs` now describes rather than asserts, so a
+    # record is attested when *something* pins its artifacts, wherever that is.
+    pinned = data.get("outputs") or {}
+    validated = ((data.get("validation") or {}).get("artifacts") or {})
     if not any(isinstance(a, dict) and (a.get("sha256") or a.get("md5"))
-               for a in outputs.values() if a):
+               for a in list(pinned.values()) + list(validated.values()) if a):
         return PARTIAL
 
     # A bundle md5 computed today from a file that may have changed says nothing

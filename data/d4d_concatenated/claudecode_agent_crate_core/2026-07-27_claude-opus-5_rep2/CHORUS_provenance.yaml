@@ -53,17 +53,14 @@ outputs:
     path: data/d4d_concatenated/claudecode_agent_crate/2026-07-27_claude-opus-5_rep2/CHORUS_d4d.yaml
     bytes: 68285
     slots: 70
-    sha256: f9397a894b5b775c4bf7f53dae2cbeec91406690547edb4eb1e87a17473dbde4
   core:
     path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep2/CHORUS_d4d_core.yaml
     bytes: 64349
     slots: 63
-    sha256: a30fb9343caad4a382cfbe5243fbe0ab770876f939bb35a4c11ceb4bb6335ad5
   report:
     path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-27_claude-opus-5_rep2/CHORUS_reconciliation.md
     bytes: 21977
     slots: null
-    sha256: 493c2a4e3d116ab2a64eba7ab27612d6a983539c632cdc22db996d3ec02fbdc4
 unrecoverable:
 - field: system
   reason: hardware was not captured when this run executed

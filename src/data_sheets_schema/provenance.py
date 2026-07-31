@@ -248,11 +248,35 @@ def _slot_count(path: Path) -> int | None:
 
 
 def _artifact(path: Path) -> dict[str, Any] | None:
+    """Describe an artifact without asserting its integrity.
+
+    No hash, deliberately. A hash is a *claim*, and this one was made at the
+    wrong moment: the agent path recorded provenance as a separate step from
+    writing the artifacts, so 77 live records hashed a state their files merely
+    passed through — one reconciliation report was hashed before its closing
+    rows were appended, and the `-deprimed` series was hashed before its headers
+    were relabelled. Nothing verified the claim, so it stayed wrong.
+
+    Integrity now lives in exactly one place: `validation.artifacts`, written by
+    `d4d runs validate` *after* the run, and re-checked by `validation_status`.
+    Hashing after the artifacts are final removes the race rather than
+    detecting it.
+
+    `bytes` and `slots` remain. They describe rather than assert, and a
+    description that drifts is a stale note, not a false guarantee.
+    """
     if not path.exists():
         return None
-    return {"path": str(path), "sha256": _sha256(path),
-            "bytes": path.stat().st_size,
+    return {"path": str(path), "bytes": path.stat().st_size,
             "slots": _slot_count(path) if path.suffix == ".yaml" else None}
+
+
+def _hashed_artifact(path: Path) -> dict[str, Any] | None:
+    """Describe an artifact *and* pin it. Only for use after a run is complete."""
+    art = _artifact(path)
+    if art is None:
+        return None
+    return {**art, "sha256": _sha256(path)}
 
 
 def recorded_hash(entry: dict[str, Any]) -> tuple[str, str] | None:
@@ -318,7 +342,9 @@ class Contribution:
 
 def contribution(path: Path, *, label: str, project: str, method: str,
                  contributed_slots: int | None = None) -> Contribution:
-    art = _artifact(path)
+    # Hashed: a contributing record must be pinned, or "this came from those"
+    # is an assertion rather than something checkable.
+    art = _hashed_artifact(path)
     if art is None:
         raise FileNotFoundError(f"contributing record does not exist: {path}")
     return Contribution(label=label, project=project, method=method,
@@ -399,7 +425,10 @@ def build_derived_record(project: str, method: str, label: str, *,
         "schema": schema_facts(),
         "software": software_facts(),
         "repo": repo_facts(),
-        "outputs": {k: _artifact(v) for k, v in outputs.items()},
+        # Hashed here, unlike a generation record: a derived record has no
+        # validation block, its output is written and hashed in one step, and
+        # the whole point of the record is to pin what came from what.
+        "outputs": {k: _hashed_artifact(v) for k, v in outputs.items()},
         "not_applicable": [
             {"field": "model",
              "reason": "no model produced this record; it combines existing ones"},
@@ -638,3 +667,35 @@ def migrate_record_hashes(path: Path, *, dry_run: bool = True) -> dict[str, Any]
 
     return {"path": str(path), "migrated": migrated, "skipped": skipped,
             "dry_run": dry_run}
+
+
+def strip_output_hashes(path: Path, *, dry_run: bool = True) -> dict[str, Any]:
+    """Remove integrity claims from `outputs`, keeping the description.
+
+    Not a cover-up of the 89 stale hashes: it is the removal of a claim that was
+    made at the wrong moment and never checked. The artifacts themselves are
+    pinned by `validation.artifacts`, written after the run and verified
+    164/164. Keeping a second, earlier, unverified hash meant maintaining two
+    claims about the same bytes and believing the wrong one.
+
+    `bytes` and `slots` stay. A stale description is a note that has drifted; a
+    stale hash is a guarantee that is false.
+    """
+    import yaml as _yaml
+
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if data.get("record_mode") == "derived":
+        # A derived record has no validation block; its outputs are the only
+        # pinning it has, and they are written and hashed in one step.
+        return {"path": str(path), "removed": [], "skipped": "derived record"}
+
+    removed = []
+    for key, entry in (data.get("outputs") or {}).items():
+        if not isinstance(entry, dict):
+            continue
+        for algo in ("sha256", "md5"):
+            if entry.pop(algo, None) is not None:
+                removed.append(f"outputs.{key}.{algo}")
+    if removed and not dry_run:
+        ProvenanceRecord(data=data).write(path)
+    return {"path": str(path), "removed": removed, "dry_run": dry_run}

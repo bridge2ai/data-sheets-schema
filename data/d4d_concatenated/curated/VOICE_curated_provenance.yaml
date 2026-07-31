@@ -30,7 +30,6 @@ outputs:
   full:
     path: data/d4d_concatenated/curated/VOICE_curated.yaml
     bytes: 17295
-    sha256: f2f7ccd2d3837913a4382b9b5e1f4087ad1295ced3d756befc1dab3eb0337f2e
 repo:
   commit: 2b730155789095d8c09ce67d077807a5cca5fcf6
   commit_short: 2b730155

@@ -231,13 +231,16 @@ class TestHashUnification(unittest.TestCase):
     reported STALE.
     """
 
-    def test_new_artifacts_are_hashed_with_sha256(self):
+    def test_new_hashes_use_sha256_not_md5(self):
+        """Applies wherever a hash is still taken — validation blocks, derived
+        records, contributions. `_artifact` itself no longer hashes at all; see
+        TestOutputsDescribeRatherThanAssert."""
         import tempfile
-        from data_sheets_schema.provenance import _artifact
+        from data_sheets_schema.provenance import _hashed_artifact
         with tempfile.TemporaryDirectory() as td:
             f = Path(td) / "x.yaml"
             f.write_text("id: x\n")
-            art = _artifact(f)
+            art = _hashed_artifact(f)
             self.assertIn("sha256", art)
             self.assertNotIn("md5", art)
 
@@ -354,3 +357,189 @@ class TestSchemaArtifactsStayInSync(unittest.TestCase):
         if not p.exists():
             self.skipTest("core schema not present")
         self.assertTrue(SchemaView(str(p)).get_slot("md5").deprecated)
+
+
+class TestOutputsDescribeRatherThanAssert(unittest.TestCase):
+    """One hash-bearing section, written after the run (#203).
+
+    `outputs` used to carry a hash recorded before the artifacts were final. In
+    the agent path — which writes provenance as a step separate from writing
+    the artifacts — that pinned a state the files merely passed through: 77 live
+    records drifted, one report hashed before its closing rows were appended and
+    a whole series hashed before its headers were edited. Nothing verified it,
+    so it stayed wrong.
+    """
+
+    def test_a_generation_output_entry_carries_no_hash(self):
+        import tempfile
+        from data_sheets_schema.provenance import _artifact
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td) / "x.yaml"
+            f.write_text("id: x\n")
+            art = _artifact(f)
+            self.assertNotIn("sha256", art)
+            self.assertNotIn("md5", art)
+            self.assertIn("bytes", art)
+            self.assertIn("slots", art)
+
+    def test_the_hashed_form_is_still_available_for_derived_records(self):
+        import tempfile
+        from data_sheets_schema.provenance import _hashed_artifact
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td) / "x.yaml"
+            f.write_text("id: x\n")
+            self.assertIn("sha256", _hashed_artifact(f))
+
+    def test_the_corpus_has_no_hashes_in_generation_outputs(self):
+        import yaml as _yaml
+        offenders = []
+        for p in Path("data/d4d_concatenated").rglob("*_provenance.yaml"):
+            d = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+            if d.get("record_mode") == "derived":
+                continue          # its outputs are its only pinning
+            for k, e in (d.get("outputs") or {}).items():
+                if isinstance(e, dict) and (e.get("sha256") or e.get("md5")):
+                    offenders.append(f"{p.parent.name}/{p.name}:{k}")
+        self.assertEqual(offenders[:5], [], f"{len(offenders)} hashed outputs")
+
+    def test_derived_records_keep_their_output_hash(self):
+        import yaml as _yaml
+        seen = 0
+        for p in Path("data/d4d_concatenated").rglob("*_provenance.yaml"):
+            d = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+            if d.get("record_mode") != "derived":
+                continue
+            for e in (d.get("outputs") or {}).values():
+                if isinstance(e, dict) and e.get("path"):
+                    self.assertTrue(e.get("sha256"),
+                                    "a derived record has no validation block; "
+                                    "its outputs are its only pinning")
+                    seen += 1
+        if not seen:
+            self.skipTest("no derived records present")
+
+
+class TestTheEndOfRunGate(unittest.TestCase):
+    """`d4d runs check` re-verifies rather than noting a hash is present."""
+
+    def _fixture(self, td, content=b"original"):
+        import hashlib
+        import yaml as _yaml
+        c = Path(td)
+        label = "2026-07-30_x_rep1"
+        art = c / "m" / label / "P_d4d.yaml"
+        art.parent.mkdir(parents=True)
+        art.write_bytes(content)
+        prov = c / "m_core" / label / "P_provenance.yaml"
+        prov.parent.mkdir(parents=True)
+        prov.write_text(_yaml.safe_dump({
+            "record_mode": "live",
+            "validation": {"artifacts": {"full": {
+                "path": str(art),
+                "sha256": hashlib.sha256(content).hexdigest()}}}}))
+        return c, label, art
+
+    def test_a_matching_run_passes(self):
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            c, label, _ = self._fixture(td)
+            self.assertTrue(check_provenance("m", label, "P", c)["ok"])
+
+    def test_an_artifact_edited_after_the_record_fails(self):
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            c, label, art = self._fixture(td)
+            art.write_bytes(b"edited after the record was written")
+            r = check_provenance("m", label, "P", c)
+            self.assertFalse(r["ok"])
+            self.assertEqual(r["drifted"], ["full"])
+            self.assertIn("changed after provenance was recorded", r["reason"])
+
+    def test_the_whole_corpus_passes_the_gate(self):
+        from data_sheets_schema.runs import check_provenance, discover, is_complete
+        failing = []
+        for run in discover():
+            if run.is_core or run.deterministic:
+                continue
+            for proj in run.projects:
+                if not is_complete(run.method, run.label, proj):
+                    continue
+                r = check_provenance(run.method, run.label, proj)
+                if not r["ok"]:
+                    failing.append(f"{proj}/{run.label}: {r['reason'][:50]}")
+        self.assertEqual(failing[:3], [], f"{len(failing)} runs fail the gate")
+
+
+class TestNothingToVerifyIsNotAPass(unittest.TestCase):
+    """The gate must not give its strongest assurance where there is least
+    to go on (#208).
+
+    `verify_entry` returns None for an absent file — unknowable is not
+    mismatched, and conflating them would report a moved file as tampering. But
+    treating unknowable as *fine* inverted the gate's purpose: a run with no
+    validation block, or whose artifacts were deleted, passed `--strict`.
+    """
+
+    def _record(self, td, body):
+        import yaml as _yaml
+        c = Path(td)
+        d = c / "m_core" / "2026-07-30_x_rep1"
+        d.mkdir(parents=True)
+        (d / "P_provenance.yaml").write_text(_yaml.safe_dump(body))
+        return c
+
+    def test_a_record_with_no_validation_block_does_not_pass(self):
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            c = self._record(td, {"record_mode": "live"})
+            r = check_provenance("m", "2026-07-30_x_rep1", "P", c)
+            self.assertFalse(r["ok"])
+            self.assertIn("nothing to verify", r["reason"])
+
+    def test_a_missing_artifact_does_not_pass(self):
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            c = self._record(td, {"record_mode": "live", "validation": {
+                "artifacts": {"full": {"path": f"{td}/gone.yaml",
+                                       "sha256": "abc"}}}})
+            r = check_provenance("m", "2026-07-30_x_rep1", "P", c)
+            self.assertFalse(r["ok"])
+            self.assertEqual(r["unverifiable"], ["full"])
+            self.assertEqual(r["drifted"], [], "absent is not drifted")
+
+    def test_a_present_matching_artifact_passes(self):
+        import hashlib
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            a = Path(td) / "a.yaml"
+            a.write_bytes(b"x")
+            c = self._record(td, {"record_mode": "live", "validation": {
+                "artifacts": {"full": {
+                    "path": str(a),
+                    "sha256": hashlib.sha256(b"x").hexdigest()}}}})
+            r = check_provenance("m", "2026-07-30_x_rep1", "P", c)
+            self.assertTrue(r["ok"])
+            self.assertEqual(r["unverifiable"], [])
+
+    def test_drift_and_absence_are_reported_separately(self):
+        """Different conditions with different remedies: re-validate versus
+        find out where the artifact went."""
+        import hashlib
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            a = Path(td) / "a.yaml"
+            a.write_bytes(b"edited")
+            c = self._record(td, {"record_mode": "live", "validation": {
+                "artifacts": {
+                    "full": {"path": str(a),
+                             "sha256": hashlib.sha256(b"original").hexdigest()},
+                    "core": {"path": f"{td}/gone.yaml", "sha256": "abc"}}}})
+            r = check_provenance("m", "2026-07-30_x_rep1", "P", c)
+            self.assertEqual(r["drifted"], ["full"])
+            self.assertEqual(r["unverifiable"], ["core"])

@@ -58,17 +58,14 @@ inputs:
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep3/AI_READI_d4d.yaml
-    md5: e1f64726e1d02b1521db6b788af3c0b8
     bytes: 128187
     slots: 83
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep3/AI_READI_d4d_core.yaml
-    md5: c465d937947bbc222699524b11742d19
     bytes: 99679
     slots: 67
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-deprimed_rep3/AI_READI_reconciliation.md
-    md5: 774844fedc89d1fc467207717254ee77
     bytes: 21085
     slots: null
 unrecoverable: null
