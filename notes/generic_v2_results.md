@@ -117,12 +117,32 @@ fitness averages ~800 values per arm, failures are the tail. Mean fitness is
 the wrong statistic for this intervention and should not be reported as the
 result.
 
-**Unresolved discrepancy.** These v1 means differ slightly from the plan's
-baseline table (0.901 / 0.847 / 0.850 / 0.912) although the failure counts
-reproduce exactly. The denominator used for the baseline means is evidently not
-the one used here. Failure counts are unaffected; the mean-fitness column should
-be treated as internally consistent but not comparable to the plan's table until
-that is run down.
+**The plan's mean-fitness row cannot be reproduced, and should not be used.**
+These v1 means differ from the plan's baseline table (0.901 / 0.847 / 0.850 /
+0.912) even though the failure counts reproduce exactly. Four candidate
+denominators were tried against the cache:
+
+| denominator | AI_READI | CHORUS | CM4AI | VOICE |
+|---|---|---|---|---|
+| plan's table | 0.901 | 0.847 | 0.850 | 0.912 |
+| every populated v1 slot instance | 0.884 | 0.840 | 0.861 | 0.910 |
+| whole cache file | 0.873 | 0.824 | 0.871 | 0.896 |
+| cache as it stood before v2 scoring | 0.872 | 0.833 | 0.857 | 0.907 |
+| mean of per-record means | 0.884 | 0.840 | 0.862 | 0.910 |
+| deduplicated (slot, value) pairs | 0.872 | 0.833 | 0.857 | 0.908 |
+
+None matches, and the plan's figures are not a consistent over- or
+under-estimate: higher than every candidate for AI-READI, CHORUS and VOICE, but
+*lower* for CM4AI. So it is not a subset relation or an off-by-one in the
+denominator — those numbers appear to come from a scorer state that no longer
+exists on disk.
+
+This does not affect the result. Failure counts reproduce the pre-registered
+table exactly, and mean fitness is in any case the wrong statistic for this
+intervention. The mean-fitness column here is internally consistent — v1 and v2
+computed identically — and is reported only as a check that nothing moved
+sharply. Treat the plan's row as unrecoverable rather than as a target. Tracked
+in #216.
 
 ## Verdict
 
