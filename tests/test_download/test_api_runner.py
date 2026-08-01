@@ -1161,6 +1161,12 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
         spec.report_path.write_text("# report\n")
         if not provenance:
             return
+        self._write_provenance(spec, label=label)
+
+    def _write_provenance(self, spec, *, label=None):
+        """Provenance matching whatever is on disk *now*."""
+        import hashlib
+        import yaml as _yaml
         def sha(p):
             return hashlib.sha256(p.read_bytes()).hexdigest()
         spec.provenance_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1219,6 +1225,36 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
                              "the provenance record was rewritten on resume")
             self.assertEqual(len(result["usage"]), 6)
             self.assertTrue(result.get("already_complete"))
+
+    def test_a_resumed_run_reports_real_validation_problems(self):
+        """Resuming must not hand back a clean bill nobody checked.
+
+        The early return asserted `validation_problems: []` about records the
+        call never examined, so a run that had failed validation came back clean
+        the moment it was resumed — and `batch` counts its successes from that
+        field, which is how a broken run reads as a passing one.
+        """
+        import tempfile
+        from data_sheets_schema.api_runner import execute
+
+        bad = ("id: x\ntitle: T\nname: n\ndescription: d\n"
+               "keywords: [a]\ninstances: not-a-list\n")
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            spec.out_dir.mkdir(parents=True, exist_ok=True)
+            # Lay the invalid records down *first*, then hash them, so the
+            # provenance is internally consistent and the run resumes.
+            spec.full_path.write_text(bad)
+            spec.core_path.write_text(bad)
+            spec.report_path.write_text("# report\n")
+            self._write_provenance(spec)
+
+            result = execute(spec, client=self._no_api({"n": 0}))
+            self.assertTrue(result.get("already_complete"),
+                            "expected the run to resume, not re-run")
+            self.assertNotEqual(
+                result["validation_problems"], [],
+                "a resumed run reported clean without validating")
 
     def test_artifacts_without_provenance_are_not_adopted(self):
         """Three files on disk do not say who wrote them."""

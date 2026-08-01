@@ -963,9 +963,16 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             existing = yaml.safe_load(
                 spec.provenance_path.read_text(encoding="utf-8")) or {}
             _progress_path(spec).unlink(missing_ok=True)
+            # Re-validate rather than report a clean bill nobody checked.
+            # Returning `[]` here asserted "no problems" about records this call
+            # never looked at, so a run that had failed validation came back
+            # clean the moment it was resumed — and `batch` counts successes
+            # from exactly this field. Validation is local and free, and it
+            # checks the bytes on disk now rather than a claim recorded earlier.
+            problems = validate_outputs(spec)
             return {"label": spec.label, "project": spec.project,
                     "usage": existing.get("api_usage") or [],
-                    "skipped": list(PHASES), "validation_problems": [],
+                    "skipped": list(PHASES), "validation_problems": problems,
                     "already_complete": True,
                     "outputs": {"full": str(spec.full_path),
                                 "core": str(spec.core_path),
