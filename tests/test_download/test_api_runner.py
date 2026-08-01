@@ -385,12 +385,49 @@ class TestResumeAndRetry(unittest.TestCase):
                 super().create(**kw)
                 return Truncated("```yaml\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```")
 
+        import unittest.mock as _mock
         s = spec(out_dir=self.out)
         client = FakeClient(); client.messages = TruncMessages()
-        with self.assertRaises(RuntimeError) as ctx:
-            self.api.execute(s, client=client)
+        with _mock.patch("data_sheets_schema.api_runner.time.sleep"):
+            with self.assertRaises(RuntimeError) as ctx:
+                self.api.execute(s, client=client)
+        # Retried first — a ceiling one attempt overran is not a fact about the
+        # phase — but never written, which is the property that matters.
         self.assertIn("max_tokens", str(ctx.exception))
         self.assertFalse(s.full_path.exists(), "truncated record was written")
+
+    def test_an_unusable_body_is_retried_not_fatal(self):
+        """A 200 whose body is unusable is not a permanent failure.
+
+        A live CHORUS run returned the whole of `**Phase 2 - Core record.**`
+        for phase 2 - `end_turn`, nine tokens of reasoning, no record - and
+        killed a run whose phase 1 had already been billed. The transport-level
+        retry cannot see this, because at that layer the call succeeded.
+        """
+        import unittest.mock as _mock
+
+        duds = {"n": 0}
+
+        class OneDud(FakeMessages):
+            def create(self, **kw):
+                resp = super().create(**kw)
+                blob = " ".join(p.get("text", "")
+                                for p in kw["messages"][0]["content"])
+                # Exactly one dud, on the core phase, then behave.
+                if "core record" in blob.lower() and duds["n"] == 0:
+                    duds["n"] += 1
+                    return FakeResponse("**Phase 2 - Core record.**")
+                return resp
+
+        s = spec(out_dir=self.out)
+        client = FakeClient()
+        client.messages = OneDud()
+        with _mock.patch("data_sheets_schema.api_runner.time.sleep"):
+            self.api.execute(s, client=client)
+
+        self.assertEqual(duds["n"], 1, "the dud never landed")
+        self.assertTrue(s.core_path.exists(),
+                        "the retry did not recover the core record")
 
     def test_transient_errors_are_retried(self):
         import anthropic

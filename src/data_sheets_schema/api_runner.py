@@ -978,47 +978,70 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
 
         needed = {k: carry[k] for k in PHASE_NEEDS[ph] if k in carry}
         req = build_phase(spec, ph, carry=needed)
-        resp = _call_with_retry(
-            client,
-            model=settings["name"],
-            max_tokens=PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
-            temperature=settings["temperature"],
-            system=req.system,
-            messages=req.messages)
 
-        text = "".join(b.text for b in resp.content
-                       if getattr(b, "type", "") == "text")
+        # A 200 whose body is unusable is not a permanent failure, and treating
+        # it as one is expensive. A live CHORUS run returned the whole of
+        # `**Phase 2 — Core record.**` for phase 2 — stop_reason `end_turn`,
+        # nine tokens of reasoning, no record — and killed a run whose phase 1
+        # had already spent ~16k reasoning tokens. `_call_with_retry` cannot see
+        # this: at the transport layer the call succeeded. So the *usability* of
+        # the body is retried here, on the same budget, and only a phase that
+        # fails every attempt takes the run down with it.
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            resp = _call_with_retry(
+                client,
+                model=settings["name"],
+                max_tokens=PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
+                temperature=settings["temperature"],
+                system=req.system,
+                messages=req.messages)
 
-        # Written before the truncation check below, so a phase that dies of
-        # max_tokens still leaves the record showing where its budget went —
-        # that is exactly the case where the thinking share is the diagnosis.
-        cap = reasoning.capture(resp)
-        reasoning.append(_reasoning_path(spec),
-                         {"phase": ph, "label": spec.label,
-                          "project": spec.project, "model": settings["name"],
-                          **cap.to_dict()})
+            text = "".join(b.text for b in resp.content
+                           if getattr(b, "type", "") == "text")
 
-        usage.append({
-            "phase": ph,
-            "input_tokens": getattr(resp.usage, "input_tokens", None),
-            "output_tokens": getattr(resp.usage, "output_tokens", None),
-            "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
-            "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
-            "max_tokens": PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
-            "stop_reason": getattr(resp, "stop_reason", None),
-        })
+            # Written before the checks below, so a phase that dies of
+            # max_tokens still leaves the record showing where its budget went —
+            # that is exactly the case where the thinking share is the diagnosis.
+            cap = reasoning.capture(resp)
+            reasoning.append(_reasoning_path(spec),
+                             {"phase": ph, "label": spec.label,
+                              "project": spec.project, "model": settings["name"],
+                              "attempt": attempt, **cap.to_dict()})
 
-        # A truncated record is worse than none: it validates as broken YAML or,
-        # worse, as a shorter valid record. Fail loudly rather than write it.
-        if getattr(resp, "stop_reason", None) == "max_tokens":
-            raise RuntimeError(
-                f"phase {ph!r} hit max_tokens "
-                f"({PHASE_MAX_TOKENS.get(ph)}); output truncated. Raise the "
-                f"limit for this phase rather than writing a partial record.")
+            usage.append({
+                "phase": ph,
+                "attempt": attempt,
+                "input_tokens": getattr(resp.usage, "input_tokens", None),
+                "output_tokens": getattr(resp.usage, "output_tokens", None),
+                "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
+                "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
+                "max_tokens": PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
+                "stop_reason": getattr(resp, "stop_reason", None),
+            })
 
-        body = _extract(text, "json" if ph == "audit" else
+            # A truncated record is worse than none: it validates as broken YAML
+            # or, worse, as a shorter valid record. Never write it — but a
+            # ceiling that one attempt overran is not a fact about the phase, so
+            # this is retried too rather than ending the run outright.
+            truncated = getattr(resp, "stop_reason", None) == "max_tokens"
+            problem = (f"hit max_tokens ({PHASE_MAX_TOKENS.get(ph)}); output "
+                       f"truncated" if truncated else None)
+            if not truncated:
+                try:
+                    body = _extract(
+                        text, "json" if ph == "audit" else
                         ("md" if ph == "report" else "yaml"),
                         *PHASE_SCHEMA.get(ph, (FULL_SCHEMA_PATH, "Dataset")))
+                    break
+                except RuntimeError as exc:
+                    problem = str(exc)
+            if attempt == MAX_ATTEMPTS:
+                raise RuntimeError(
+                    f"phase {ph!r} produced no usable output in "
+                    f"{MAX_ATTEMPTS} attempts. Last problem: {problem}")
+            print(f"   phase {ph} attempt {attempt} unusable "
+                  f"({problem.splitlines()[0][:70]}); retrying")
+            time.sleep(BACKOFF_BASE_SECONDS ** attempt)
         if ph == "audit":
             carry["Audit findings"] = body
         elif artifact:
