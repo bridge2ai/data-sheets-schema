@@ -27,6 +27,7 @@ bundle plus digest form a cached prefix reused across all four phases.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -213,6 +214,29 @@ def prompt_body(path: Path = GENERIC_PROMPT) -> str:
     return text.split("## Prompt body", 1)[1].strip()
 
 
+def _run_date() -> str:
+    """The date this run is actually happening, UTC, as the header states it.
+
+    Same clock as `record_generated_at` in provenance, so the record header and
+    its provenance cannot disagree about when the run took place.
+    """
+    return datetime.now(timezone.utc).date().isoformat()
+
+
+def resolved_prompt_digest(spec: RunSpec) -> dict[str, Any]:
+    """A hash of the text the model is actually sent.
+
+    The module docstring claimed the resolved text's hash goes into provenance.
+    It did not: only the *file* was hashed, so two runs whose requests differed
+    in project, arm, label, model, provider or date were indistinguishable by
+    their recorded prompt evidence. Substitution is exactly what makes the file
+    and the request different objects, so the request needs its own hash.
+    """
+    text = resolve_prompt(spec)
+    return {"sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+            "bytes": len(text.encode("utf-8"))}
+
+
 def resolve_prompt(spec: RunSpec) -> str:
     """The exact instruction text this run will receive.
 
@@ -236,9 +260,21 @@ def resolve_prompt(spec: RunSpec) -> str:
         "{RUNTIME}": RUNTIME,
         "{PROVIDER}": ident["provider"] or PROVIDER,
         "{MODEL}": settings["name"],
+        # v2 introduced `{DATE}` but nothing substituted it, so the literal
+        # string reached the model. Its records carry the right date only
+        # because the model read it off `{LABEL}` and guessed correctly.
+        "{DATE}": _run_date(),
     }
     for k, v in subs.items():
         body = body.replace(k, v)
+
+    # v1 hardcodes `# Generated: 2026-07-28` where every neighbouring header
+    # line takes a placeholder, so every record produced under it since that
+    # date carries a false one — the twelve baseline-generic runs made on
+    # 2026-07-31 all claim 2026-07-28. Normalising the resolved text fixes it
+    # without editing v1, whose bytes are pinned as the published baseline for
+    # the 2026-07-28 series. See #214.
+    body = re.sub(r"(?m)^(\s*#\s*Generated:).*$", rf"\1 {_run_date()}", body)
 
     if spec.condition == "tuned":
         comp = COMPONENTS / f"{spec.project}.md"
@@ -1115,6 +1151,14 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             f"{provider_identity()['base_url']}.",
         ] + ([f"Resumed run; phases skipped as already present: {', '.join(skipped)}."]
              if skipped else []))
+    # The file hash alone does not identify the request. Substitution is what
+    # makes the file and the resolved text different objects, so two runs
+    # differing in project, arm, label, model, provider or date shared a prompt
+    # hash and were indistinguishable by their recorded prompt evidence — while
+    # the module docstring claimed the resolved text was what got hashed. Record
+    # both: the file for provenance of the source, the resolution for the
+    # request actually sent.
+    rec.data["prompts"]["resolved"] = resolved_prompt_digest(spec)
     ident = provider_identity()
     rec.data["model"] = {
         "generation_method": "schema-grounded API, six phases",

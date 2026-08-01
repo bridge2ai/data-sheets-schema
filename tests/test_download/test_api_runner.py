@@ -200,6 +200,70 @@ def _rate_limit_error(message: str):
     return anthropic.RateLimitError(message, response=resp, body=None)
 
 
+class TestGeneratedDateIsTheRunDate(unittest.TestCase):
+    """#214: both prompts stamped a wrong date, in opposite directions."""
+
+    def _resolved(self, condition):
+        from data_sheets_schema.api_runner import resolve_prompt
+        from data_sheets_schema.cli.api import _spec
+        return resolve_prompt(_spec("CHORUS", "baseline",
+                                    "2026-08-01_x_rep1", condition, None, None))
+
+    def _today(self):
+        from datetime import datetime, timezone
+        return datetime.now(timezone.utc).date().isoformat()
+
+    def test_v2_no_longer_leaks_a_literal_placeholder(self):
+        """`{DATE}` was never in the substitution table, so the literal string
+        reached the model; its records read correctly only because the model
+        inferred the date from `{LABEL}`."""
+        body = self._resolved("generic_v2")
+        self.assertNotIn("{DATE}", body)
+        self.assertIn(f"# Generated: {self._today()}", body)
+
+    def test_v1_hardcoded_date_is_normalised_not_emitted(self):
+        """v1 hardcodes 2026-07-28 where every neighbouring header line takes a
+        placeholder, so every run since carried a false date."""
+        body = self._resolved("generic")
+        self.assertNotIn("2026-07-28", body)
+        self.assertIn(f"# Generated: {self._today()}", body)
+
+    def test_v1_file_bytes_are_untouched(self):
+        """The fix must not edit v1: its bytes are the pinned baseline for the
+        2026-07-28 series, and editing them redefines what v2 is measured
+        against."""
+        from data_sheets_schema.api_runner import GENERIC_PROMPT
+        self.assertIn("# Generated: 2026-07-28",
+                      GENERIC_PROMPT.read_text(encoding="utf-8"),
+                      "v1 was edited; normalisation should happen on the "
+                      "resolved text instead")
+
+
+class TestResolvedPromptIsHashed(unittest.TestCase):
+    """The module docstring claimed the resolved text's hash was recorded. Only
+    the file was hashed, so runs differing by substitution were
+    indistinguishable by their prompt evidence."""
+
+    def _digest(self, project, condition="generic"):
+        from data_sheets_schema.api_runner import resolved_prompt_digest
+        from data_sheets_schema.cli.api import _spec
+        return resolved_prompt_digest(
+            _spec(project, "baseline", "2026-08-01_x_rep1", condition, None, None))
+
+    def test_substitution_changes_the_resolved_hash(self):
+        self.assertNotEqual(self._digest("CHORUS")["sha256"],
+                            self._digest("CM4AI")["sha256"],
+                            "same file, different request, same hash")
+
+    def test_the_same_request_hashes_the_same(self):
+        self.assertEqual(self._digest("CHORUS"), self._digest("CHORUS"))
+
+    def test_the_digest_states_its_algorithm_and_size(self):
+        d = self._digest("CHORUS")
+        self.assertEqual(len(d["sha256"]), 64)
+        self.assertGreater(d["bytes"], 0)
+
+
 class FakeResponse:
     def __init__(self, text):
         self.content = [FakeBlock(text)]
