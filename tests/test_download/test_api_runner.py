@@ -190,6 +190,16 @@ class FakeBlock:
         self.text = text
 
 
+
+def _rate_limit_error(message: str):
+    """A real `anthropic.RateLimitError`; the SDK needs an httpx response."""
+    import anthropic
+    import httpx
+    req = httpx.Request("POST", "https://example.invalid/v1/messages")
+    resp = httpx.Response(429, request=req, json={"error": {"message": message}})
+    return anthropic.RateLimitError(message, response=resp, body=None)
+
+
 class FakeResponse:
     def __init__(self, text):
         self.content = [FakeBlock(text)]
@@ -428,6 +438,46 @@ class TestResumeAndRetry(unittest.TestCase):
         self.assertEqual(duds["n"], 1, "the dud never landed")
         self.assertTrue(s.core_path.exists(),
                         "the retry did not recover the core record")
+
+    def test_a_rate_limit_waits_for_the_stated_reset(self):
+        """The backoff ladder is 30s; a CBORG window can be 10 minutes.
+
+        23 runs of one sweep died because every attempt was spent inside a
+        single window. The error says when it resets — honour that.
+        """
+        from datetime import datetime, timezone
+        from data_sheets_schema.api_runner import _rate_limit_pause
+
+        now = datetime(2026, 7, 31, 20, 20, 0, tzinfo=timezone.utc)
+        exc = _rate_limit_error(
+            "Error code: 429 - Rate limit exceeded. Limit type: requests. "
+            "Current limit: 20, Remaining: 0. "
+            "Limit resets at: 2026-07-31 20:28:19 UTC")
+        pause = _rate_limit_pause(exc, now=now)
+        self.assertAlmostEqual(pause, 8 * 60 + 19 + 2, delta=1)
+
+    def test_a_rate_limit_without_a_reset_time_still_pauses(self):
+        from data_sheets_schema.api_runner import (
+            _rate_limit_pause, RATE_LIMIT_FALLBACK)
+        exc = _rate_limit_error("429 slow down")
+        self.assertEqual(_rate_limit_pause(exc), RATE_LIMIT_FALLBACK)
+
+    def test_a_rate_limit_pause_is_capped(self):
+        """A malformed or far-future reset must not park a run for hours."""
+        from datetime import datetime, timezone
+        from data_sheets_schema.api_runner import (
+            _rate_limit_pause, RATE_LIMIT_MAX_PAUSE)
+        exc = _rate_limit_error("Limit resets at: 2027-01-01 00:00:00 UTC")
+        self.assertEqual(
+            _rate_limit_pause(exc, now=datetime(2026, 7, 31, tzinfo=timezone.utc)),
+            RATE_LIMIT_MAX_PAUSE)
+
+    def test_a_non_rate_limit_error_is_not_treated_as_one(self):
+        import anthropic
+        from data_sheets_schema.api_runner import _rate_limit_pause
+        self.assertIsNone(_rate_limit_pause(ValueError("nope")))
+        self.assertIsNone(
+            _rate_limit_pause(anthropic.APIConnectionError(request=None)))
 
     def test_transient_errors_are_retried(self):
         import anthropic

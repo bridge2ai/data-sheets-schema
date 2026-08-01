@@ -875,8 +875,43 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             if not transient or attempt == MAX_ATTEMPTS:
                 raise
             last = exc
-            sleep(BACKOFF_BASE_SECONDS ** attempt)
+            # A rate limit is not the same shape of transient as a dropped
+            # connection, and treating it as one loses runs. CBORG's limit is
+            # *requests* — 20 per roughly ten minutes — so the whole 2+4+8+16s
+            # ladder expires inside a single window and every attempt is spent
+            # before the budget refills. 23 runs died this way in one sweep.
+            # The error states when it resets; wait for that rather than guess.
+            sleep(_rate_limit_pause(exc) or BACKOFF_BASE_SECONDS ** attempt)
     raise last  # unreachable; keeps type checkers honest
+
+
+RATE_LIMIT_MAX_PAUSE = 15 * 60      # never sleep longer than this on one attempt
+RATE_LIMIT_FALLBACK = 90            # limit hit, but no reset time stated
+
+
+def _rate_limit_pause(exc: Exception, *, now: datetime | None = None) -> float | None:
+    """Seconds to wait for a rate limit to clear, or None if not a rate limit.
+
+    CBORG reports `Limit resets at: 2026-07-31 20:28:19 UTC` in the error body.
+    Honouring that is the difference between a run that pauses and a run that
+    dies: the reset can be ten minutes out, and the ordinary backoff ladder is
+    thirty seconds long.
+    """
+    import anthropic          # imported here, as in `_call_with_retry`
+    if not isinstance(exc, getattr(anthropic, "RateLimitError", ())):
+        return None
+    m = re.search(r"resets at:\s*([\d]{4}-[\d]{2}-[\d]{2}[ T][\d]{2}:[\d]{2}:[\d]{2})",
+                  str(exc))
+    if not m:
+        return RATE_LIMIT_FALLBACK
+    try:
+        reset = datetime.strptime(m.group(1).replace("T", " "),
+                                  "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return RATE_LIMIT_FALLBACK
+    current = now or datetime.now(timezone.utc)
+    # +2s so the request lands after the window turns over, not on the boundary.
+    return max(1.0, min((reset - current).total_seconds() + 2, RATE_LIMIT_MAX_PAUSE))
 
 
 def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
