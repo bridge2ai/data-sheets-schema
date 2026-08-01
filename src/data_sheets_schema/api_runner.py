@@ -33,6 +33,7 @@ import re
 import subprocess
 import time
 from dataclasses import dataclass, field
+from functools import lru_cache
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -122,7 +123,11 @@ PHASES = ("full", "core", "audit", "reconcile_full", "reconcile_core", "report")
 PHASE_MAX_TOKENS = {
     "full": 64000, "reconcile_full": 64000,
     "core": 56000, "reconcile_core": 56000,
-    "audit": 12000, "report": 12000,
+    # 24000, not 12000. The original was derived from records generated before
+    # the v2 rules existed, and two AI-READI runs truncated mid-audit — a phase
+    # that fails at its ceiling costs the whole run, since the phases before it
+    # are already billed.
+    "audit": 24000, "report": 12000,
 }
 DEFAULT_MAX_TOKENS = 64000
 
@@ -503,10 +508,161 @@ def provider_identity() -> dict[str, Any]:
     return {"provider": None, "base_url": None, "key_env": None}
 
 
-def _extract(text: str, kind: str) -> str:
-    """Pull YAML or JSON out of a response that may be fenced."""
-    fence = re.search(r"```(?:ya?ml|json)?\s*\n(.*?)```", text, re.S)
-    return (fence.group(1) if fence else text).strip()
+FULL_SCHEMA_PATH = "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+CORE_SCHEMA_PATH = "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+
+
+@lru_cache(maxsize=4)
+def _known_slots(schema_path: str = FULL_SCHEMA_PATH,
+                 class_name: str = "Dataset") -> frozenset[str]:
+    """The slots the *target class* accepts at its root.
+
+    Not `all_slots()`. Every slot the schema file mentions is a far looser test
+    than it looks: the core schema names 262 slots but `CoreDataset` accepts 79
+    of them, so two thirds of that vocabulary belongs to some other class and
+    would wave through root keys the target class cannot hold.
+    """
+    from linkml_runtime import SchemaView
+    sv = SchemaView(schema_path)
+    return frozenset(s.name for s in sv.class_induced_slots(class_name))
+
+
+# Which vocabulary each record-producing phase is checked against. Using the
+# full schema for a core response let full-only root keys pass a check that
+# exists precisely to catch a core record that drifted back into full slots.
+PHASE_SCHEMA = {
+    "full": (FULL_SCHEMA_PATH, "Dataset"),
+    "reconcile_full": (FULL_SCHEMA_PATH, "Dataset"),
+    "core": (CORE_SCHEMA_PATH, "CoreDataset"),
+    "reconcile_core": (CORE_SCHEMA_PATH, "CoreDataset"),
+}
+
+
+def _looks_like_a_record(parsed: dict, schema_path: str = FULL_SCHEMA_PATH,
+                         class_name: str = "Dataset") -> bool:
+    """Is this the record the phase was asked for, or something else entirely?
+
+    Three separate things have reached this guard and been let through, each
+    after a loosening that fixed a real false rejection:
+
+    * narration — `Note: I need to emit the corrected core record.` parses as a
+      perfectly good mapping. Requiring *some* known slot was not enough,
+      because narration sits happily beside one (`Note: ...` plus `id: x`).
+    * refusals — `title: I cannot produce the requested record` names nothing
+      but real slots, so a vocabulary test alone cannot see it.
+    * fragments — a stray `id: x` example, or the 8-key `_distributions` blob
+      that one VOICE core run actually wrote to disk.
+
+    So the test is structural rather than lexical: a record carries the root
+    identifier, spends its keys entirely on slots the target class defines, and
+    is not a two-key stub. Every one of the 46 real records on disk satisfies
+    all three; the fragment satisfies none.
+    """
+    keys = {str(k) for k in parsed}
+    if "id" not in keys:
+        return False
+    if keys - _known_slots(schema_path, class_name):
+        return False
+    return len(keys) >= MIN_RECORD_SLOTS
+
+
+# Real records carry 47-84 top-level slots (full) and 42-69 (core); refusals
+# and examples carry one or two. The floor sits far below every observed record
+# because its job is to separate a record from a stub, not to police
+# completeness — a genuinely sparse record is the validator's business.
+MIN_RECORD_SLOTS = 5
+
+
+def _audit_is_well_formed(parsed: dict) -> bool:
+    """Does this JSON actually carry an audit, or merely the word `findings`?
+
+    `{"findings": null}` and `{"findings": "unable to audit"}` both satisfy a
+    key-presence test, and both were accepted. Either one is then handed to
+    both reconciliation phases as though an audit had happened — three more
+    billed calls spent correcting a record against nothing.
+    """
+    findings = parsed.get("findings")
+    if not isinstance(findings, list):
+        return False
+    return all(isinstance(f, dict) and {"severity", "slot", "issue"} <= set(f)
+               for f in findings)
+
+
+def _extract(text: str, kind: str,
+             schema_path: str = FULL_SCHEMA_PATH,
+             class_name: str = "Dataset") -> str:
+    """Pull YAML or JSON out of a response, refusing anything that is neither.
+
+    Falling back to the raw response when no fence was found wrote the model's
+    *narration* into a record. One core file began "I need to emit the corrected
+    core record. The core schema (CoreDataset) does not have..." and was saved as
+    the artifact; only the downstream validator noticed, after the run had been
+    billed in full.
+
+    Markdown is returned untouched and never fence-extracted. A reconciliation
+    report is prose that routinely *quotes* corrected slots in fenced blocks, so
+    extracting the fence would reduce the report to the example inside it —
+    which is what an earlier version of this function did.
+    """
+    if kind == "md":
+        if not text.strip():
+            raise RuntimeError(
+                "response contained no report text. A phase that produces "
+                "nothing must fail rather than write an empty artifact.")
+        return text.strip()
+
+    fences = re.findall(r"```(?:ya?ml|json)?\s*\n(.*?)```", text,
+                        re.S | re.I)
+    # An *unclosed* fence is common enough to handle: the model opens ```yaml,
+    # emits the record, and never closes it. And a response sometimes begins
+    # with a bare `yaml` line — a fence marker whose backticks did not survive.
+    # Both produce a perfectly good record that a strict reader throws away,
+    # and each rejection costs every phase already billed for that run.
+    unclosed = re.findall(r"```(?:ya?ml|json)?\s*\n(.*)\Z", text, re.S | re.I)
+    stripped = re.sub(r"\A\s*(?:ya?ml|json)\s*\n", "", text,
+                      flags=re.I)
+
+    def accepts(candidate: str) -> bool:
+        if not candidate:
+            return False
+        try:
+            parsed = (json.loads(candidate) if kind == "json"
+                      else yaml.safe_load(candidate))
+        except (yaml.YAMLError, json.JSONDecodeError):
+            return False
+        if not isinstance(parsed, dict):
+            return False
+        # Each phase has a declared shape; anything else carried forward would
+        # be a record, or an audit, that never happened.
+        if kind == "json":
+            return _audit_is_well_formed(parsed)
+        return _looks_like_a_record(parsed, schema_path, class_name)
+
+    # Fences first, and *all* of them. Taking the last one on the grounds that
+    # the model corrects itself as it goes is a guess about narrative order,
+    # not evidence: a complete record followed by a one-line `id: x` example
+    # silently became that example. Where two fences both look like the
+    # requested record, the response is ambiguous and no positional rule can
+    # say which was meant — so fail, rather than pick and write the wrong one.
+    good = [f.strip() for f in fences if accepts(f.strip())]
+    distinct = {yaml.safe_dump(yaml.safe_load(g), sort_keys=True) for g in good}
+    if len(distinct) > 1:
+        raise RuntimeError(
+            f"response contained {len(distinct)} different fenced {kind} "
+            f"objects that each look like the requested record. Refusing to "
+            f"guess which was intended.")
+    if good:
+        return good[0]
+
+    for candidate in ([f.strip() for f in unclosed]
+                      + [stripped.strip(), text.strip()]):
+        if accepts(candidate):
+            return candidate
+
+    raise RuntimeError(
+        f"response contained no parseable {kind} object of the expected shape. "
+        f"The model appears to have written prose instead of a record; first "
+        f"200 characters: {text.strip()[:200]!r}")
 
 
 PROGRESS_SUFFIX = "_api_progress.json"
@@ -553,8 +709,6 @@ def _artifact_path(spec: RunSpec, artifact: str) -> Path:
             "report": spec.report_path}[artifact]
 
 
-FULL_SCHEMA_PATH = "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
-CORE_SCHEMA_PATH = "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
 
 
 def validation_block(spec: RunSpec, problems: list[dict[str, str]],
@@ -721,8 +875,43 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             if not transient or attempt == MAX_ATTEMPTS:
                 raise
             last = exc
-            sleep(BACKOFF_BASE_SECONDS ** attempt)
+            # A rate limit is not the same shape of transient as a dropped
+            # connection, and treating it as one loses runs. CBORG's limit is
+            # *requests* — 20 per roughly ten minutes — so the whole 2+4+8+16s
+            # ladder expires inside a single window and every attempt is spent
+            # before the budget refills. 23 runs died this way in one sweep.
+            # The error states when it resets; wait for that rather than guess.
+            sleep(_rate_limit_pause(exc) or BACKOFF_BASE_SECONDS ** attempt)
     raise last  # unreachable; keeps type checkers honest
+
+
+RATE_LIMIT_MAX_PAUSE = 15 * 60      # never sleep longer than this on one attempt
+RATE_LIMIT_FALLBACK = 90            # limit hit, but no reset time stated
+
+
+def _rate_limit_pause(exc: Exception, *, now: datetime | None = None) -> float | None:
+    """Seconds to wait for a rate limit to clear, or None if not a rate limit.
+
+    CBORG reports `Limit resets at: 2026-07-31 20:28:19 UTC` in the error body.
+    Honouring that is the difference between a run that pauses and a run that
+    dies: the reset can be ten minutes out, and the ordinary backoff ladder is
+    thirty seconds long.
+    """
+    import anthropic          # imported here, as in `_call_with_retry`
+    if not isinstance(exc, getattr(anthropic, "RateLimitError", ())):
+        return None
+    m = re.search(r"resets at:\s*([\d]{4}-[\d]{2}-[\d]{2}[ T][\d]{2}:[\d]{2}:[\d]{2})",
+                  str(exc))
+    if not m:
+        return RATE_LIMIT_FALLBACK
+    try:
+        reset = datetime.strptime(m.group(1).replace("T", " "),
+                                  "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return RATE_LIMIT_FALLBACK
+    current = now or datetime.now(timezone.utc)
+    # +2s so the request lands after the window turns over, not on the boundary.
+    return max(1.0, min((reset - current).total_seconds() + 2, RATE_LIMIT_MAX_PAUSE))
 
 
 def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
@@ -750,14 +939,74 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # reconciliation or redo it.
     progress = _load_progress(spec) if resume else {}
     done = set(progress.get("completed", []))
+    # A *finished* run has no progress file — success deletes it — so resuming
+    # found nothing and re-ran all six phases of work already paid for. The
+    # artifacts on disk are the durable record of what completed; the progress
+    # file only adds the phases that leave no artifact of their own.
+    # Completion is inferred from the *provenance record*, never from artifacts
+    # alone. Three files on disk say nothing about who wrote them: with a flat
+    # `out_dir` the paths carry no label at all, so a new label would adopt an
+    # older run's outputs and restamp them as its own. Even for a legitimate
+    # same-label resume, continuing here rebuilds the record from the current
+    # bundle and writes `api_usage: []` over six phases of real token
+    # accounting — destroying the measurement the sweep exists to collect.
+    #
+    # So a run already carrying provenance that matches this spec, and whose
+    # artifact hashes still verify, is returned exactly as it was found.
+    if (resume and not done and spec.provenance_path.exists()
+            and all(_artifact_path(spec, a).exists()
+                    for a in ("full", "core", "report"))):
+        from data_sheets_schema.runs import check_provenance
+        prior = check_provenance(spec.method, spec.label, spec.project,
+                                 record=spec.provenance_path)
+        if prior["ok"]:
+            existing = yaml.safe_load(
+                spec.provenance_path.read_text(encoding="utf-8")) or {}
+            _progress_path(spec).unlink(missing_ok=True)
+            # Re-validate rather than report a clean bill nobody checked.
+            # Returning `[]` here asserted "no problems" about records this call
+            # never looked at, so a run that had failed validation came back
+            # clean the moment it was resumed — and `batch` counts successes
+            # from exactly this field. Validation is local and free, and it
+            # checks the bytes on disk now rather than a claim recorded earlier.
+            problems = validate_outputs(spec)
+            return {"label": spec.label, "project": spec.project,
+                    "usage": existing.get("api_usage") or [],
+                    "skipped": list(PHASES), "validation_problems": problems,
+                    "already_complete": True,
+                    "outputs": {"full": str(spec.full_path),
+                                "core": str(spec.core_path),
+                                "report": str(spec.report_path),
+                                "provenance": str(spec.provenance_path)}}
     carry: dict[str, str] = {}
     if "Audit findings" in progress:
         carry["Audit findings"] = progress["Audit findings"]
-    for artifact, name in (("full", "Completed full record"),
-                           ("core", "Completed core record")):
+    # An artifact on disk is only resumable if it is still a record. One VOICE
+    # core artifact was an 8-key fragment with no `id`, written by the looser
+    # extraction guard — and its progress file listed `core` as completed, so a
+    # resume would have carried that fragment into reconciliation and spent two
+    # further phases correcting a record that was never there. Re-checking on
+    # the way *in* costs nothing and localises the damage to the phase that
+    # produced it.
+    for artifact, name, produced_by in (
+            ("full", "Completed full record", ("full", "reconcile_full")),
+            ("core", "Completed core record", ("core", "reconcile_core"))):
         path = _artifact_path(spec, artifact)
-        if path.exists():
-            carry[name] = path.read_text(encoding="utf-8")
+        if not path.exists():
+            continue
+        body = path.read_text(encoding="utf-8")
+        schema_path, class_name = PHASE_SCHEMA[artifact]
+        try:
+            parsed = yaml.safe_load(body)
+        except yaml.YAMLError:
+            parsed = None
+        if isinstance(parsed, dict) and _looks_like_a_record(
+                parsed, schema_path, class_name):
+            carry[name] = body
+        else:
+            # Not a record: forget the phases that claim to have written it so
+            # they run again, rather than resuming on top of a fragment.
+            done -= set(produced_by)
     if "reconcile_full" in done and "Completed full record" in carry:
         carry["Reconciled full record"] = carry["Completed full record"]
 
@@ -771,46 +1020,70 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
 
         needed = {k: carry[k] for k in PHASE_NEEDS[ph] if k in carry}
         req = build_phase(spec, ph, carry=needed)
-        resp = _call_with_retry(
-            client,
-            model=settings["name"],
-            max_tokens=PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
-            temperature=settings["temperature"],
-            system=req.system,
-            messages=req.messages)
 
-        text = "".join(b.text for b in resp.content
-                       if getattr(b, "type", "") == "text")
+        # A 200 whose body is unusable is not a permanent failure, and treating
+        # it as one is expensive. A live CHORUS run returned the whole of
+        # `**Phase 2 — Core record.**` for phase 2 — stop_reason `end_turn`,
+        # nine tokens of reasoning, no record — and killed a run whose phase 1
+        # had already spent ~16k reasoning tokens. `_call_with_retry` cannot see
+        # this: at the transport layer the call succeeded. So the *usability* of
+        # the body is retried here, on the same budget, and only a phase that
+        # fails every attempt takes the run down with it.
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            resp = _call_with_retry(
+                client,
+                model=settings["name"],
+                max_tokens=PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
+                temperature=settings["temperature"],
+                system=req.system,
+                messages=req.messages)
 
-        # Written before the truncation check below, so a phase that dies of
-        # max_tokens still leaves the record showing where its budget went —
-        # that is exactly the case where the thinking share is the diagnosis.
-        cap = reasoning.capture(resp)
-        reasoning.append(_reasoning_path(spec),
-                         {"phase": ph, "label": spec.label,
-                          "project": spec.project, "model": settings["name"],
-                          **cap.to_dict()})
+            text = "".join(b.text for b in resp.content
+                           if getattr(b, "type", "") == "text")
 
-        usage.append({
-            "phase": ph,
-            "input_tokens": getattr(resp.usage, "input_tokens", None),
-            "output_tokens": getattr(resp.usage, "output_tokens", None),
-            "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
-            "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
-            "max_tokens": PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
-            "stop_reason": getattr(resp, "stop_reason", None),
-        })
+            # Written before the checks below, so a phase that dies of
+            # max_tokens still leaves the record showing where its budget went —
+            # that is exactly the case where the thinking share is the diagnosis.
+            cap = reasoning.capture(resp)
+            reasoning.append(_reasoning_path(spec),
+                             {"phase": ph, "label": spec.label,
+                              "project": spec.project, "model": settings["name"],
+                              "attempt": attempt, **cap.to_dict()})
 
-        # A truncated record is worse than none: it validates as broken YAML or,
-        # worse, as a shorter valid record. Fail loudly rather than write it.
-        if getattr(resp, "stop_reason", None) == "max_tokens":
-            raise RuntimeError(
-                f"phase {ph!r} hit max_tokens "
-                f"({PHASE_MAX_TOKENS.get(ph)}); output truncated. Raise the "
-                f"limit for this phase rather than writing a partial record.")
+            usage.append({
+                "phase": ph,
+                "attempt": attempt,
+                "input_tokens": getattr(resp.usage, "input_tokens", None),
+                "output_tokens": getattr(resp.usage, "output_tokens", None),
+                "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
+                "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
+                "max_tokens": PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
+                "stop_reason": getattr(resp, "stop_reason", None),
+            })
 
-        body = _extract(text, "json" if ph == "audit" else
-                        ("md" if ph == "report" else "yaml"))
+            # A truncated record is worse than none: it validates as broken YAML
+            # or, worse, as a shorter valid record. Never write it — but a
+            # ceiling that one attempt overran is not a fact about the phase, so
+            # this is retried too rather than ending the run outright.
+            truncated = getattr(resp, "stop_reason", None) == "max_tokens"
+            problem = (f"hit max_tokens ({PHASE_MAX_TOKENS.get(ph)}); output "
+                       f"truncated" if truncated else None)
+            if not truncated:
+                try:
+                    body = _extract(
+                        text, "json" if ph == "audit" else
+                        ("md" if ph == "report" else "yaml"),
+                        *PHASE_SCHEMA.get(ph, (FULL_SCHEMA_PATH, "Dataset")))
+                    break
+                except RuntimeError as exc:
+                    problem = str(exc)
+            if attempt == MAX_ATTEMPTS:
+                raise RuntimeError(
+                    f"phase {ph!r} produced no usable output in "
+                    f"{MAX_ATTEMPTS} attempts. Last problem: {problem}")
+            print(f"   phase {ph} attempt {attempt} unusable "
+                  f"({problem.splitlines()[0][:70]}); retrying")
+            time.sleep(BACKOFF_BASE_SECONDS ** attempt)
         if ph == "audit":
             carry["Audit findings"] = body
         elif artifact:
@@ -888,7 +1161,13 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # request. This path writes the record itself, so the check is cheap — and
     # it fails the run rather than leaving an unattestable artifact behind.
     from data_sheets_schema.runs import check_provenance
-    prov = check_provenance(spec.method, spec.label, spec.project)
+    # Checked against the corpus this run wrote into, not the default one. With
+    # `out_dir` set — the GitHub assistant's layout — the gate looked in
+    # data/d4d_concatenated, found no record, and failed every run that had in
+    # fact written one correctly. Same class as the declared-bundle bug: a path
+    # assumed rather than derived.
+    prov = check_provenance(spec.method, spec.label, spec.project,
+                            record=spec.provenance_path)
     if not prov["ok"]:
         raise RuntimeError(
             f"run {spec.label} for {spec.project} finished without usable "

@@ -135,7 +135,7 @@ class TestPhaseAssembly(unittest.TestCase):
         self.assertIn("never consult a previously generated", req.system.lower())
 
     def test_carry_forward_is_included_when_supplied(self):
-        req = build_phase(spec(), "core", carry={"Completed full record": "id: x"})
+        req = build_phase(spec(), "core", carry={"Completed full record": "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]"})
         blob = " ".join(p["text"] for p in req.messages[0]["content"])
         self.assertIn("Completed full record", blob)
 
@@ -190,6 +190,16 @@ class FakeBlock:
         self.text = text
 
 
+
+def _rate_limit_error(message: str):
+    """A real `anthropic.RateLimitError`; the SDK needs an httpx response."""
+    import anthropic
+    import httpx
+    req = httpx.Request("POST", "https://example.invalid/v1/messages")
+    resp = httpx.Response(429, request=req, json={"error": {"message": message}})
+    return anthropic.RateLimitError(message, response=resp, body=None)
+
+
 class FakeResponse:
     def __init__(self, text):
         self.content = [FakeBlock(text)]
@@ -219,7 +229,7 @@ class FakeMessages:
             return FakeResponse('{"findings": [], "summary": "none"}')
         if phase == "report":
             return FakeResponse("# Reconciliation\nNo discrepancies.\n")
-        return FakeResponse(f"```yaml\n# {phase}\nid: x\nname: X\n```")
+        return FakeResponse(f"```yaml\n# {phase}\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```")
 
     def stream(self, **kw):
         """Mirror the SDK's streaming context manager.
@@ -383,14 +393,91 @@ class TestResumeAndRetry(unittest.TestCase):
         class TruncMessages(FakeMessages):
             def create(self, **kw):
                 super().create(**kw)
-                return Truncated("```yaml\nid: x\n```")
+                return Truncated("```yaml\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```")
 
+        import unittest.mock as _mock
         s = spec(out_dir=self.out)
         client = FakeClient(); client.messages = TruncMessages()
-        with self.assertRaises(RuntimeError) as ctx:
-            self.api.execute(s, client=client)
+        with _mock.patch("data_sheets_schema.api_runner.time.sleep"):
+            with self.assertRaises(RuntimeError) as ctx:
+                self.api.execute(s, client=client)
+        # Retried first — a ceiling one attempt overran is not a fact about the
+        # phase — but never written, which is the property that matters.
         self.assertIn("max_tokens", str(ctx.exception))
         self.assertFalse(s.full_path.exists(), "truncated record was written")
+
+    def test_an_unusable_body_is_retried_not_fatal(self):
+        """A 200 whose body is unusable is not a permanent failure.
+
+        A live CHORUS run returned the whole of `**Phase 2 - Core record.**`
+        for phase 2 - `end_turn`, nine tokens of reasoning, no record - and
+        killed a run whose phase 1 had already been billed. The transport-level
+        retry cannot see this, because at that layer the call succeeded.
+        """
+        import unittest.mock as _mock
+
+        duds = {"n": 0}
+
+        class OneDud(FakeMessages):
+            def create(self, **kw):
+                resp = super().create(**kw)
+                blob = " ".join(p.get("text", "")
+                                for p in kw["messages"][0]["content"])
+                # Exactly one dud, on the core phase, then behave.
+                if "core record" in blob.lower() and duds["n"] == 0:
+                    duds["n"] += 1
+                    return FakeResponse("**Phase 2 - Core record.**")
+                return resp
+
+        s = spec(out_dir=self.out)
+        client = FakeClient()
+        client.messages = OneDud()
+        with _mock.patch("data_sheets_schema.api_runner.time.sleep"):
+            self.api.execute(s, client=client)
+
+        self.assertEqual(duds["n"], 1, "the dud never landed")
+        self.assertTrue(s.core_path.exists(),
+                        "the retry did not recover the core record")
+
+    def test_a_rate_limit_waits_for_the_stated_reset(self):
+        """The backoff ladder is 30s; a CBORG window can be 10 minutes.
+
+        23 runs of one sweep died because every attempt was spent inside a
+        single window. The error says when it resets — honour that.
+        """
+        from datetime import datetime, timezone
+        from data_sheets_schema.api_runner import _rate_limit_pause
+
+        now = datetime(2026, 7, 31, 20, 20, 0, tzinfo=timezone.utc)
+        exc = _rate_limit_error(
+            "Error code: 429 - Rate limit exceeded. Limit type: requests. "
+            "Current limit: 20, Remaining: 0. "
+            "Limit resets at: 2026-07-31 20:28:19 UTC")
+        pause = _rate_limit_pause(exc, now=now)
+        self.assertAlmostEqual(pause, 8 * 60 + 19 + 2, delta=1)
+
+    def test_a_rate_limit_without_a_reset_time_still_pauses(self):
+        from data_sheets_schema.api_runner import (
+            _rate_limit_pause, RATE_LIMIT_FALLBACK)
+        exc = _rate_limit_error("429 slow down")
+        self.assertEqual(_rate_limit_pause(exc), RATE_LIMIT_FALLBACK)
+
+    def test_a_rate_limit_pause_is_capped(self):
+        """A malformed or far-future reset must not park a run for hours."""
+        from datetime import datetime, timezone
+        from data_sheets_schema.api_runner import (
+            _rate_limit_pause, RATE_LIMIT_MAX_PAUSE)
+        exc = _rate_limit_error("Limit resets at: 2027-01-01 00:00:00 UTC")
+        self.assertEqual(
+            _rate_limit_pause(exc, now=datetime(2026, 7, 31, tzinfo=timezone.utc)),
+            RATE_LIMIT_MAX_PAUSE)
+
+    def test_a_non_rate_limit_error_is_not_treated_as_one(self):
+        import anthropic
+        from data_sheets_schema.api_runner import _rate_limit_pause
+        self.assertIsNone(_rate_limit_pause(ValueError("nope")))
+        self.assertIsNone(
+            _rate_limit_pause(anthropic.APIConnectionError(request=None)))
 
     def test_transient_errors_are_retried(self):
         import anthropic
@@ -400,7 +487,7 @@ class TestResumeAndRetry(unittest.TestCase):
             calls["n"] += 1
             if calls["n"] < 3:
                 raise anthropic.APIConnectionError(request=None)
-            return FakeResponse("```yaml\nid: x\n```")
+            return FakeResponse("```yaml\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```")
 
         client = FakeClient()
         client.messages.create = flaky
@@ -736,3 +823,544 @@ class TestErrorBodyIsAuthoritative(unittest.TestCase):
                              temperature=None, system="s", messages=[],
                              sleep=lambda _: None)
         self.assertEqual(calls["n"], 1, "must fail fast, not retry five times")
+
+
+class TestExtractionRefusesProse(unittest.TestCase):
+    """A phase must not write the model's narration as a record.
+
+    Falling back to raw text when no fence was found saved a core file beginning
+    "I need to emit the corrected core record. The core schema (CoreDataset)
+    does not have..." — prose, written as the artifact. Only the downstream
+    validator noticed, after the run was billed in full.
+    """
+
+    def test_prose_raises_from_extract(self):
+        from data_sheets_schema.api_runner import _extract
+        with self.assertRaises(RuntimeError) as ctx:
+            _extract("I need to emit the corrected core record. The core "
+                     "schema does not have that slot.", "yaml")
+        self.assertIn("no parseable yaml", str(ctx.exception))
+
+    def test_a_bare_scalar_is_not_a_record(self):
+        """Prose parses as a YAML string, so parsing alone is not enough."""
+        from data_sheets_schema.api_runner import _extract
+        with self.assertRaises(RuntimeError):
+            _extract("just a sentence with no colon", "yaml")
+
+    def test_a_fenced_record_is_extracted(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract("preamble\n```yaml\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```", "yaml"),
+                         "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]")
+
+    def test_an_unfenced_record_is_accepted(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract("id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]", "yaml"), "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]")
+
+    def test_narration_before_a_fence_is_discarded(self):
+        """A model that reasons before answering puts the answer last."""
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(
+            _extract("Let me think about this.\n```yaml\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```", "yaml"),
+            "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]")
+
+    def test_two_candidate_records_are_ambiguous_not_last_wins(self):
+        """This test previously asserted the opposite, and was wrong to.
+
+        "The model corrects itself as it goes, so take the last fence" is a
+        guess about narrative order, not evidence. Under it, a complete record
+        followed by a one-line `id: x` illustration silently became that
+        illustration. Where two fences each look like the requested record,
+        nothing in the response says which was meant — so fail rather than
+        write the wrong one into a billed run.
+        """
+        from data_sheets_schema.api_runner import _extract
+        first = "id: first\ntitle: T\nname: n\ndescription: d\nkeywords: [a]"
+        last = "id: last\ntitle: U\nname: m\ndescription: e\nkeywords: [b]"
+        with self.assertRaises(RuntimeError) as ctx:
+            _extract(f"```yaml\n{first}\n```\nrevised:\n```yaml\n{last}\n```",
+                     "yaml")
+        self.assertIn("refusing to guess", str(ctx.exception).lower())
+
+    def test_a_record_followed_by_a_small_example_keeps_the_record(self):
+        """The concrete case the last-fence rule got wrong."""
+        from data_sheets_schema.api_runner import _extract
+        rec = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]"
+        out = _extract(f"```yaml\n{rec}\n```\nfor example:\n```yaml\nid: x\n```",
+                       "yaml")
+        self.assertEqual(out, rec)
+
+    def test_an_audit_must_match_the_audit_contract(self):
+        """Accepting any JSON object let `{"error": "unable to audit"}` through
+        and fed it into reconciliation as though an audit had happened. An
+        earlier version of this test asserted `{"a": 1}` was accepted, codifying
+        the gap rather than catching it."""
+        from data_sheets_schema.api_runner import _extract
+        ok = '{"findings": [], "summary": "clean"}'
+        self.assertEqual(_extract(f"```json\n{ok}\n```", "json"), ok)
+        for bad in ('{"a": 1}', '{"error": "unable to audit"}', "not json"):
+            with self.subTest(body=bad):
+                with self.assertRaises(RuntimeError):
+                    _extract(bad, "json")
+
+    def test_markdown_reports_are_prose_by_design(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract("# Report\n\nAll good.", "md"),
+                         "# Report\n\nAll good.")
+
+    def test_a_report_containing_a_fenced_example_is_not_truncated(self):
+        """The regression this guards was mine: trying fences first for *every*
+        kind reduced a report to the snippet it quoted. Reports routinely quote
+        corrected slots, so this would have destroyed reports across a sweep.
+        """
+        from data_sheets_schema.api_runner import _extract
+        report = ("# Reconciliation\n\nCorrected block:\n\n"
+                  "```yaml\nid: https://example.org/x\n```\n\nNo contradictions.")
+        out = _extract(report, "md")
+        self.assertTrue(out.startswith("# Reconciliation"))
+        self.assertTrue(out.endswith("No contradictions."))
+
+    def test_an_empty_report_is_refused(self):
+        from data_sheets_schema.api_runner import _extract
+        for empty in ("", "   ", "\n\n"):
+            with self.subTest(body=repr(empty)):
+                with self.assertRaises(RuntimeError):
+                    _extract(empty, "md")
+
+    def test_narration_with_a_colon_is_still_refused(self):
+        """`Note: ...` parses as a mapping, so requiring a mapping was not
+        enough. A record names slots the schema defines; prose does not."""
+        from data_sheets_schema.api_runner import _extract
+        for prose in ("Note: I need to emit the corrected core record.",
+                      "Core slots available: acquisition_methods, anomalies",
+                      "Summary: the schema does not have that slot."):
+            with self.subTest(prose=prose[:30]):
+                with self.assertRaises(RuntimeError):
+                    _extract(prose, "yaml")
+
+    def test_narration_followed_by_a_real_record_keeps_the_record(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(
+            _extract("I will now emit it.\n```yaml\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```",
+                     "yaml"),
+            "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]")
+
+    def test_a_refusal_naming_real_slots_is_refused(self):
+        """A vocabulary test alone cannot see a refusal.
+
+        `title: I cannot produce the requested record` spends every key on a
+        real slot, so "names at least one known slot" accepted it and wrote the
+        refusal to disk as the record.
+        """
+        from data_sheets_schema.api_runner import _extract
+        for refusal in ("title: I cannot produce the requested record",
+                        "description: The documents do not support this record."):
+            with self.subTest(refusal=refusal[:30]):
+                with self.assertRaises(RuntimeError):
+                    _extract(f"```yaml\n{refusal}\n```", "yaml")
+
+    def test_narration_beside_a_real_slot_is_refused(self):
+        """Narration sits happily next to `id:`, which is how it got through."""
+        from data_sheets_schema.api_runner import _extract
+        with self.assertRaises(RuntimeError):
+            _extract("```yaml\nNote: here is my narration\nid: x\n```", "yaml")
+
+    def test_a_record_must_carry_the_root_identifier(self):
+        """The fragment this catches was real output, not a hypothetical.
+
+        One VOICE core run wrote an 8-key blob with no `id` and keys like
+        `_distributions` that are not slots at all.
+        """
+        from data_sheets_schema.api_runner import _extract
+        with self.assertRaises(RuntimeError):
+            _extract("```yaml\ntitle: T\nname: n\ndescription: d\n"
+                     "keywords: [a]\npurposes: []\n```", "yaml")
+
+    def test_a_core_response_may_not_use_full_only_slots(self):
+        """Checking a core response against the full schema defeats the point.
+
+        `_known_slots` also used `all_slots()`, which for the core schema is 262
+        names against the 79 `CoreDataset` actually accepts.
+        """
+        from linkml_runtime import SchemaView
+        from data_sheets_schema.api_runner import (
+            _extract, CORE_SCHEMA_PATH, FULL_SCHEMA_PATH)
+        full = {s.name for s in
+                SchemaView(FULL_SCHEMA_PATH).class_induced_slots("Dataset")}
+        core = {s.name for s in
+                SchemaView(CORE_SCHEMA_PATH).class_induced_slots("CoreDataset")}
+        full_only = sorted(full - core)
+        self.assertTrue(full_only, "expected some Dataset-only slots")
+        body = ("id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+                f"{full_only[0]}: []")
+        _extract(f"```yaml\n{body}\n```", "yaml")          # fine as a full record
+        with self.assertRaises(RuntimeError):
+            _extract(f"```yaml\n{body}\n```", "yaml",
+                     CORE_SCHEMA_PATH, "CoreDataset")
+
+    def test_an_audit_must_carry_usable_findings(self):
+        """`findings` present is not `findings` usable.
+
+        `{"findings": null}` and `{"findings": "unable to audit"}` were both
+        accepted and handed to both reconciliation phases — three further
+        billed calls correcting a record against an audit that never ran.
+        """
+        from data_sheets_schema.api_runner import _extract
+        for body in ('{"findings": null}',
+                     '{"findings": "unable to audit"}',
+                     '{"findings": [{"note": "malformed"}]}',
+                     '{"summary": "no findings key at all"}'):
+            with self.subTest(body=body[:34]):
+                with self.assertRaises(RuntimeError):
+                    _extract(f"```json\n{body}\n```", "json")
+
+    def test_a_well_formed_audit_is_accepted(self):
+        from data_sheets_schema.api_runner import _extract
+        good = ('{"findings": [{"severity": "high", "slot": "id", '
+                '"issue": "mismatch"}], "summary": "one finding"}')
+        self.assertEqual(_extract(f"```json\n{good}\n```", "json"), good)
+
+    def test_an_audit_with_no_findings_is_still_an_audit(self):
+        """An empty list is a result; null is an absence."""
+        from data_sheets_schema.api_runner import _extract
+        good = '{"findings": [], "summary": "no contradictions"}'
+        self.assertEqual(_extract(f"```json\n{good}\n```", "json"), good)
+
+    def test_uppercase_fence_labels_are_recognised(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract("```YAML\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```", "yaml"), "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]")
+
+    def test_the_audit_ceiling_has_real_headroom(self):
+        """Two AI-READI runs truncated mid-audit at 12000.
+
+        `> 12000` would be satisfied by 12001, which would not have stopped
+        them. The requirement is headroom, so the assertion states it.
+        """
+        from data_sheets_schema.api_runner import PHASE_MAX_TOKENS
+        self.assertGreaterEqual(PHASE_MAX_TOKENS["audit"], 24000)
+
+
+class TestARejectedPhaseWritesNothing(unittest.TestCase):
+    """`_extract` raising must leave no artifact and no resumable progress.
+
+    Tested through `execute()`, not `_extract`. A unit test of the extractor
+    proves the string is refused; it does not prove the run refuses to write it,
+    and writing a bad artifact is the failure that actually cost a billed run.
+    """
+
+    def _client(self, body):
+        class Resp:
+            def __init__(self):
+                self.content = [type("B", (), {"type": "text", "text": body})()]
+                self.stop_reason = "end_turn"
+                self.usage = type("U", (), {
+                    "input_tokens": 1, "output_tokens": 1,
+                    "cache_read_input_tokens": 0,
+                    "cache_creation_input_tokens": 0})()
+
+        class C:
+            class messages:
+                @staticmethod
+                def stream(**kw):
+                    class S:
+                        def __enter__(s):
+                            return s
+
+                        def __exit__(s, *e):
+                            return False
+
+                        def get_final_message(s):
+                            return Resp()
+                    return S()
+        return C()
+
+    def test_prose_in_phase_one_leaves_no_record_and_no_progress(self):
+        import tempfile
+        from pathlib import Path
+        from data_sheets_schema.api_runner import RunSpec, execute
+
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "out"
+            bundle = Path(td) / "b.txt"
+            bundle.write_text("some source text")
+            spec = RunSpec(project="P", arm="baseline",
+                           method="claudecode_agent", bundle=bundle,
+                           label="2026-07-31_x_rep1", out_dir=out)
+            with self.assertRaises(RuntimeError):
+                execute(spec, client=self._client(
+                    "I need to emit the record but the schema lacks that slot."))
+            written = {p.name for p in out.rglob("*") if p.is_file()} \
+                if out.exists() else set()
+
+            # No record, no provenance, and nothing resumable.
+            self.assertEqual(
+                {n for n in written
+                 if n.endswith((".yaml", "_progress.json", ".md"))}, set(),
+                "a refused phase must not leave an artifact or progress file")
+
+            # The reasoning log *should* survive. It is written before the
+            # extraction check on purpose, so a phase that fails still records
+            # what it cost — that is the one thing worth keeping from a run
+            # that produced nothing usable.
+            self.assertIn("P_reasoning.jsonl", written)
+
+
+class TestExtractionToleratesFenceArtifacts(unittest.TestCase):
+    """A valid record must not be thrown away over a formatting artifact.
+
+    The guard rejected a response beginning `yaml\\n# D4D Datasheet...` — a
+    perfectly good record whose fence backticks did not survive. Each such
+    rejection costs every phase already billed for that run, so the reader has
+    to be tolerant of the wrapper while still strict about the content.
+    """
+
+    def test_a_stray_language_marker_is_stripped(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract("yaml\n# header\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]", "yaml"),
+                         "# header\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]")
+
+    def test_an_unclosed_fence_is_accepted(self):
+        from data_sheets_schema.api_runner import _extract
+        self.assertEqual(_extract("```yaml\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]", "yaml"),
+                         "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]")
+
+    def test_tolerance_does_not_admit_prose(self):
+        """The point is a looser wrapper, not a looser record."""
+        from data_sheets_schema.api_runner import _extract
+        for prose in ("yaml\nNote: I need to emit the record.",
+                      "```yaml\nSummary: the schema lacks that slot."):
+            with self.subTest(prose=prose[:28]):
+                with self.assertRaises(RuntimeError):
+                    _extract(prose, "yaml")
+
+
+class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
+    """A finished run must not be redone.
+
+    Success deletes the progress file, so resuming a *completed* run found no
+    record of it and re-ran all six phases of work already paid for. The
+    artifacts on disk are the durable evidence of what completed.
+    """
+
+    def _spec(self, td):
+        from data_sheets_schema.api_runner import RunSpec
+        out = Path(td) / "out"
+        b = Path(td) / "b.txt"
+        b.write_text("src")
+        return RunSpec(project="P", arm="baseline", method="claudecode_agent",
+                       bundle=b, label="2026-07-31_x_rep1", out_dir=out)
+
+    REC = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+
+    def _complete_run(self, spec, *, provenance=True, label=None):
+        """Lay down a finished run: three artifacts and its provenance record."""
+        import hashlib
+        import yaml as _yaml
+        spec.out_dir.mkdir(parents=True, exist_ok=True)
+        spec.full_path.write_text(self.REC)
+        spec.core_path.write_text(self.REC)
+        spec.report_path.write_text("# report\n")
+        if not provenance:
+            return
+        self._write_provenance(spec, label=label)
+
+    def _write_provenance(self, spec, *, label=None):
+        """Provenance matching whatever is on disk *now*."""
+        import hashlib
+        import yaml as _yaml
+        def sha(p):
+            return hashlib.sha256(p.read_bytes()).hexdigest()
+        spec.provenance_path.parent.mkdir(parents=True, exist_ok=True)
+        spec.provenance_path.write_text(_yaml.safe_dump({
+            "record_mode": "live",
+            "run": {"method": spec.method, "label": label or spec.label,
+                    "project": spec.project},
+            "api_usage": [{"phase": ph, "input_tokens": 100,
+                           "output_tokens": 200} for ph in
+                          ("full", "core", "audit", "reconcile_full",
+                           "reconcile_core", "report")],
+            "validation": {"artifacts": {
+                "full": {"path": str(spec.full_path), "sha256": sha(spec.full_path)},
+                "core": {"path": str(spec.core_path), "sha256": sha(spec.core_path)},
+            }},
+        }))
+
+    def _no_api(self, called):
+        class C:
+            class messages:
+                @staticmethod
+                def stream(**kw):
+                    called["n"] += 1
+                    raise AssertionError("no phase should have been called")
+        return C
+
+    def test_a_completed_run_reruns_nothing(self):
+        import tempfile
+        from data_sheets_schema.api_runner import execute
+
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            self._complete_run(spec)
+            called = {"n": 0}
+            execute(spec, client=self._no_api(called))
+            self.assertEqual(called["n"], 0,
+                             "a completed run must cost nothing to resume")
+
+    def test_resuming_a_completed_run_preserves_its_provenance(self):
+        """Resume must not restamp the record it is resuming.
+
+        Continuing through `execute` rebuilds provenance from the *current*
+        bundle and writes `api_usage: []` over six phases of real token
+        accounting. For a study whose output is the measurement, a resume that
+        silently erases the cost evidence is worse than one that re-runs.
+        """
+        import tempfile
+        from data_sheets_schema.api_runner import execute
+
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            self._complete_run(spec)
+            before = spec.provenance_path.read_text()
+            result = execute(spec, client=self._no_api({"n": 0}))
+            self.assertEqual(spec.provenance_path.read_text(), before,
+                             "the provenance record was rewritten on resume")
+            self.assertEqual(len(result["usage"]), 6)
+            self.assertTrue(result.get("already_complete"))
+
+    def test_a_resumed_run_reports_real_validation_problems(self):
+        """Resuming must not hand back a clean bill nobody checked.
+
+        The early return asserted `validation_problems: []` about records the
+        call never examined, so a run that had failed validation came back clean
+        the moment it was resumed — and `batch` counts its successes from that
+        field, which is how a broken run reads as a passing one.
+        """
+        import tempfile
+        from data_sheets_schema.api_runner import execute
+
+        bad = ("id: x\ntitle: T\nname: n\ndescription: d\n"
+               "keywords: [a]\ninstances: not-a-list\n")
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            spec.out_dir.mkdir(parents=True, exist_ok=True)
+            # Lay the invalid records down *first*, then hash them, so the
+            # provenance is internally consistent and the run resumes.
+            spec.full_path.write_text(bad)
+            spec.core_path.write_text(bad)
+            spec.report_path.write_text("# report\n")
+            self._write_provenance(spec)
+
+            result = execute(spec, client=self._no_api({"n": 0}))
+            self.assertTrue(result.get("already_complete"),
+                            "expected the run to resume, not re-run")
+            self.assertNotEqual(
+                result["validation_problems"], [],
+                "a resumed run reported clean without validating")
+
+    def test_artifacts_without_provenance_are_not_adopted(self):
+        """Three files on disk do not say who wrote them."""
+        import tempfile
+        from data_sheets_schema.api_runner import execute
+
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            self._complete_run(spec, provenance=False)
+            called = {"n": 0}
+            with self.assertRaises(AssertionError):
+                execute(spec, client=self._no_api(called))
+            self.assertEqual(called["n"], 1, "should have re-run phase 1")
+
+    def test_a_flat_out_dir_does_not_let_a_new_label_claim_old_outputs(self):
+        """With `out_dir` set, artifact paths carry no label at all.
+
+        So a fresh label sees the previous run's files at exactly the paths it
+        would write, and inferring completion from them would restamp another
+        run's outputs as its own.
+        """
+        import tempfile
+        from data_sheets_schema.api_runner import RunSpec, execute
+
+        with tempfile.TemporaryDirectory() as td:
+            old = self._spec(td)
+            self._complete_run(old)
+            new = RunSpec(project="P", arm="baseline", method="claudecode_agent",
+                          bundle=old.bundle, label="2026-07-31_DIFFERENT_rep1",
+                          out_dir=old.out_dir)
+            self.assertEqual(new.full_path, old.full_path)
+            called = {"n": 0}
+            with self.assertRaises(AssertionError):
+                execute(new, client=self._no_api(called))
+            self.assertEqual(called["n"], 1,
+                             "the new label claimed the old run's outputs")
+
+    def test_a_corrupt_artifact_is_not_resumed_on_top_of(self):
+        """The exact debris one VOICE run left: progress said `core` was done,
+        and the core on disk was an 8-key fragment with no `id`. Resuming would
+        have carried it into reconciliation and billed two more phases against
+        a record that never existed."""
+        import json
+        import tempfile
+        from data_sheets_schema.api_runner import execute, _progress_path
+
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            spec.out_dir.mkdir(parents=True)
+            spec.full_path.write_text(self.REC)
+            spec.core_path.write_text(
+                "_distributions: []\ncompression: none\ndialect: x\n")
+            _progress_path(spec).parent.mkdir(parents=True, exist_ok=True)
+            _progress_path(spec).write_text(json.dumps(
+                {"completed": ["full", "core", "audit", "reconcile_full"]}))
+
+            ran = []
+
+            class C:
+                class messages:
+                    @staticmethod
+                    def stream(**kw):
+                        raise AssertionError("stop")
+
+            def record(spec_, ph, **kw):
+                ran.append(ph)
+                raise AssertionError("stop")
+
+            import data_sheets_schema.api_runner as m
+            original = m.build_phase
+            m.build_phase = lambda s_, ph, **kw: record(s_, ph, **kw)
+            try:
+                with self.assertRaises(AssertionError):
+                    execute(spec, client=C())
+            finally:
+                m.build_phase = original
+
+            self.assertEqual(ran[0], "core",
+                             f"expected core to re-run, resumed at {ran[:1]}")
+
+    def test_a_partial_run_is_not_inferred_from_artifacts(self):
+        """`full` and `reconcile_full` write the same file.
+
+        Inferring completion per-artifact marked reconciliation done when only
+        phase 1 had run, shipping an unreconciled record as finished. Only a
+        wholly complete run may be inferred; a partial one falls back to the
+        progress file, which is what distinguishes the two phases.
+        """
+        import tempfile
+        from data_sheets_schema.api_runner import execute
+
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            spec.out_dir.mkdir(parents=True)
+            spec.full_path.write_text("id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n")     # phase 1 only
+
+            calls = {"n": 0}
+
+            class C:
+                class messages:
+                    @staticmethod
+                    def stream(**kw):
+                        calls["n"] += 1
+                        raise RuntimeError("stop after the first call")
+
+            with self.assertRaises(RuntimeError):
+                execute(spec, client=C())
+            self.assertGreater(calls["n"], 0,
+                               "a partial run must not be treated as complete")

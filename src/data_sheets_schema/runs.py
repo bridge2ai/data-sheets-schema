@@ -309,15 +309,76 @@ def requires_live(label: str) -> bool:
 
 
 def check_provenance(method: str, label: str, project: str,
-                     concat_dir: Path = CONCAT_DIR) -> dict:
+                     concat_dir: Path = CONCAT_DIR,
+                     record: Path | None = None) -> dict:
     """Whether a run satisfies the live-provenance requirement.
 
     Separate from `is_complete()` deliberately. Folding this into completeness
     would reclassify every pre-cutoff run in one step and change every
     downstream count as a side effect of adding a rule.
     """
-    mode = record_mode(method, label, project, concat_dir)
-    level = attestation(method, label, project, concat_dir)
+    # A caller that just wrote the record passes its path. Re-deriving it has
+    # now been wrong twice — once for the assistant's flat layout, once outside
+    # the repository root — and the writer always knows where it wrote.
+    if record is not None:
+        # Unparseable is "no usable record", not an exception. This is called at
+        # the end of `execute()`, after all six phases are billed, so a record
+        # truncated by a full disk or an interrupted write used to turn a
+        # completed run into a traceback — when the gate's whole job is to turn
+        # "cannot be attested" into a clean failure carrying a reason.
+        data = {}
+        unreadable = None
+        if record.exists():
+            try:
+                data = yaml.safe_load(record.read_text(encoding="utf-8")) or {}
+            except (yaml.YAMLError, OSError, UnicodeDecodeError) as exc:
+                unreadable = f"{type(exc).__name__}: {str(exc).splitlines()[0][:90]}"
+            if not isinstance(data, dict):
+                unreadable = unreadable or (
+                    f"expected a mapping, found {type(data).__name__}")
+                data = {}
+        if unreadable:
+            return {"method": method, "label": label, "project": project,
+                    "record_mode": "none", "attestation": NO_RECORD,
+                    "drifted": [], "unverifiable": ["(unreadable record)"],
+                    "required": requires_live(label), "ok": False,
+                    "reason": (f"provenance record at {record} could not be read "
+                               f"({unreadable}). A run whose record cannot be "
+                               "parsed cannot state the conditions it ran under.")}
+        # Knowing where the record is does not establish that it is *this*
+        # run's record. Without this check a valid live record for some other
+        # run satisfies the gate, and the artifact hashes verify — against that
+        # other run's files. The result is a false attribution that every
+        # downstream count inherits.
+        identity = data.get("run") or {}
+        wanted = {"method": method, "label": label, "project": project}
+        mismatch = {k: (identity.get(k), v) for k, v in wanted.items()
+                    if identity.get(k) != v}
+        if data and mismatch:
+            # `unverifiable` answers "which artifacts could not be checked", so
+            # run-identity field names do not belong in it — anything counting
+            # unverifiable artifacts would silently include them. The mismatch
+            # gets its own key, and the reason states it in full.
+            return {**wanted, "record_mode": str(data.get("record_mode") or "none"),
+                    "attestation": NO_RECORD, "drifted": [],
+                    "unverifiable": [], "identity_mismatch": sorted(mismatch),
+                    "required": requires_live(label),
+                    "ok": False,
+                    "reason": (
+                        "provenance record does not identify which run it "
+                        "describes (no `run` block), so it cannot be attributed "
+                        "to this one." if not identity else
+                        "provenance record describes a different run: "
+                        + "; ".join(f"{k} is {got!r}, expected {exp!r}"
+                                    for k, (got, exp) in sorted(mismatch.items())))}
+        mode = str(data.get("record_mode") or "none")
+        level = LIVE if mode == "live" else NO_RECORD if not data else PARTIAL
+        artifacts = ((data.get("validation") or {}).get("artifacts") or {})
+    else:
+        mode = record_mode(method, label, project, concat_dir)
+        level = attestation(method, label, project, concat_dir)
+        artifacts = (((_prov(method, label, project, concat_dir) or {})
+                      .get("validation") or {}).get("artifacts") or {})
     required = requires_live(label)
 
     # Re-verify, do not merely note the presence of a hash. The agent path
@@ -326,8 +387,6 @@ def check_provenance(method: str, label: str, project: str,
     # report was pinned before its closing rows were appended. The API path
     # cannot do this, because it writes provenance in-process after all phases.
     # Checking at the end of a run gives the agent path the same property.
-    artifacts = (((_prov(method, label, project, concat_dir) or {})
-                  .get("validation") or {}).get("artifacts") or {})
     drifted = [k for k, e in artifacts.items()
                if isinstance(e, dict) and _verify(e) is False]
     # Three outcomes, not two. `verify_entry` returns None when a file is absent
@@ -337,6 +396,12 @@ def check_provenance(method: str, label: str, project: str,
     # run with no validation block, or whose artifacts were deleted, passed.
     unverifiable = [k for k, e in artifacts.items()
                     if isinstance(e, dict) and _verify(e) is None]
+    # No exemption for a caller-supplied path. The reasoning for one was that a
+    # record written moments ago has no validation block yet — but `execute()`
+    # writes its validation block before it calls this, so the exemption bought
+    # nothing and cost the gate its point: a file containing the single line
+    # `record_mode: live` passed, which is the absence-of-evidence pass the
+    # `unverifiable` branch exists to stop.
     if not artifacts:
         unverifiable = ["(no validation block)"]
 
