@@ -144,6 +144,11 @@ computed identically — and is reported only as a check that nothing moved
 sharply. Treat the plan's row as unrecoverable rather than as a target. Tracked
 in #216.
 
+Every number in this file is emitted by `scripts/generic_v2_report.py`, which
+reads only the judgement cache and the records and makes no API calls. Run it
+to regenerate the tables rather than trusting them; `--check` fails if v1 has
+drifted from the pre-registered failure counts.
+
 ## Verdict
 
 The three rules landed. Two of them (substance, target) cut their target defect
