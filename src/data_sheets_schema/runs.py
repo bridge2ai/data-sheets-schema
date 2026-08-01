@@ -321,9 +321,30 @@ def check_provenance(method: str, label: str, project: str,
     # now been wrong twice — once for the assistant's flat layout, once outside
     # the repository root — and the writer always knows where it wrote.
     if record is not None:
-        import yaml as _yaml
-        data = (_yaml.safe_load(record.read_text(encoding="utf-8")) or {}) \
-            if record.exists() else {}
+        # Unparseable is "no usable record", not an exception. This is called at
+        # the end of `execute()`, after all six phases are billed, so a record
+        # truncated by a full disk or an interrupted write used to turn a
+        # completed run into a traceback — when the gate's whole job is to turn
+        # "cannot be attested" into a clean failure carrying a reason.
+        data = {}
+        unreadable = None
+        if record.exists():
+            try:
+                data = yaml.safe_load(record.read_text(encoding="utf-8")) or {}
+            except (yaml.YAMLError, OSError, UnicodeDecodeError) as exc:
+                unreadable = f"{type(exc).__name__}: {str(exc).splitlines()[0][:90]}"
+            if not isinstance(data, dict):
+                unreadable = unreadable or (
+                    f"expected a mapping, found {type(data).__name__}")
+                data = {}
+        if unreadable:
+            return {"method": method, "label": label, "project": project,
+                    "record_mode": "none", "attestation": NO_RECORD,
+                    "drifted": [], "unverifiable": ["(unreadable record)"],
+                    "required": requires_live(label), "ok": False,
+                    "reason": (f"provenance record at {record} could not be read "
+                               f"({unreadable}). A run whose record cannot be "
+                               "parsed cannot state the conditions it ran under.")}
         # Knowing where the record is does not establish that it is *this*
         # run's record. Without this check a valid live record for some other
         # run satisfies the gate, and the artifact hashes verify — against that
@@ -334,9 +355,14 @@ def check_provenance(method: str, label: str, project: str,
         mismatch = {k: (identity.get(k), v) for k, v in wanted.items()
                     if identity.get(k) != v}
         if data and mismatch:
+            # `unverifiable` answers "which artifacts could not be checked", so
+            # run-identity field names do not belong in it — anything counting
+            # unverifiable artifacts would silently include them. The mismatch
+            # gets its own key, and the reason states it in full.
             return {**wanted, "record_mode": str(data.get("record_mode") or "none"),
                     "attestation": NO_RECORD, "drifted": [],
-                    "unverifiable": sorted(mismatch), "required": requires_live(label),
+                    "unverifiable": [], "identity_mismatch": sorted(mismatch),
+                    "required": requires_live(label),
                     "ok": False,
                     "reason": (
                         "provenance record does not identify which run it "

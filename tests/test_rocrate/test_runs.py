@@ -780,6 +780,45 @@ class TestAnExplicitRecordPathIsStillEvidence(unittest.TestCase):
             self.assertFalse(out["ok"])
             self.assertIn("does not identify", out["reason"])
 
+    def test_an_unreadable_record_fails_rather_than_raising(self):
+        """This gate runs *after* all six phases are billed.
+
+        So a record truncated by a full disk or an interrupted write turned a
+        completed, fully-paid run into a traceback — when the gate's whole job
+        is to turn "cannot be attested" into a clean failure with a reason.
+        """
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        for name, body in (("malformed", "record_mode: live\n  bad: [indent\n"),
+                           ("not a mapping", "- a\n- b\n"),
+                           ("a bare scalar", "just a string\n")):
+            with self.subTest(record=name):
+                with tempfile.TemporaryDirectory() as td:
+                    rec = self._write(td, body)
+                    out = check_provenance("m", "2026-07-31_x_rep1", "P",
+                                           record=rec)
+                    self.assertFalse(out["ok"])
+                    self.assertIn("could not be read", out["reason"])
+
+    def test_identity_mismatch_does_not_pollute_unverifiable(self):
+        """`unverifiable` answers "which artifacts could not be checked".
+
+        Run-identity field names in that list mean anything counting
+        unverifiable artifacts silently counts field names too.
+        """
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            rec = self._write(td, {
+                "record_mode": "live",
+                "run": {"method": "OTHER", "label": "L2", "project": "P2"},
+                "validation": {"artifacts": {}}})
+            out = check_provenance("m", "2026-07-31_x_rep1", "P", record=rec)
+            self.assertFalse(out["ok"])
+            self.assertEqual(out["unverifiable"], [])
+            self.assertEqual(out["identity_mismatch"],
+                             ["label", "method", "project"])
+
     def test_a_matching_record_with_verifiable_artifacts_passes(self):
         """The gate must still admit the case it exists to admit."""
         import hashlib
