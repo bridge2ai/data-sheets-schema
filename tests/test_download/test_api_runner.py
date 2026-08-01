@@ -255,6 +255,37 @@ class TestTemporalValuesAreNormalisedOnWrite(unittest.TestCase):
         self.assertIn("# Generated: 2026-08-01", out)
         self.assertIn("# Arm: baseline", out)
 
+    def test_prose_in_a_block_scalar_is_never_rewritten(self):
+        """A description is free prose, and prose quoting a field name matches
+        the pattern exactly. Rewriting it edits a record's *content* rather
+        than its serialisation — the one thing this must never do."""
+        import yaml as _yaml
+        doc = ("id: x\ndescription: |\n  Fields present in the manifest:\n"
+               "  issued: 2026-05-01\n  end_date: 2026-06-30\n"
+               "issued: 2026-05-01\n")
+        out = self._n(doc)
+        before, after = _yaml.safe_load(doc), _yaml.safe_load(out)
+        self.assertEqual(before["description"], after["description"],
+                         "prose inside a block scalar was rewritten")
+        self.assertEqual(after["issued"], "2026-05-01T00:00:00Z",
+                         "the real field should still be normalised")
+
+    def test_folded_scalars_are_also_protected(self):
+        import yaml as _yaml
+        doc = ("id: x\nnotes: >-\n  A folded note mentioning\n"
+               "  start_date: 2026-01-01\nstart_date: 2026-01-01\n")
+        out = self._n(doc)
+        before, after = _yaml.safe_load(doc), _yaml.safe_load(out)
+        self.assertEqual(before["notes"], after["notes"])
+        self.assertEqual(after["start_date"], "2026-01-01")
+
+    def test_a_block_scalar_ends_at_a_dedent(self):
+        """Fields after a block must still be normalised."""
+        import yaml as _yaml
+        doc = ("id: x\ndescription: |\n  some prose\nissued: 2026-05-01\n")
+        after = _yaml.safe_load(self._n(doc))
+        self.assertEqual(after["issued"], "2026-05-01T00:00:00Z")
+
     def test_nested_records_keep_their_structure(self):
         import yaml as _yaml
         doc = ("id: x\ncollection_timeframes:\n  - start_date: 2026-05-01\n"

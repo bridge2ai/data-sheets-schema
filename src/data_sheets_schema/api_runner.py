@@ -716,9 +716,12 @@ DATETIME_SLOTS = ("issued", "created_on", "last_updated_on")
 DATE_SLOTS = ("start_date", "end_date")
 
 _TEMPORAL_LINE = re.compile(
-    r"(?m)^(?P<indent>[ \t]*-?[ \t]*)(?P<slot>"
+    r"^(?P<indent>[ \t]*-?[ \t]*)(?P<slot>"
     + "|".join(DATETIME_SLOTS + DATE_SLOTS)
     + r"):[ \t]+(?P<value>\S.*?)[ \t]*$")
+# A block scalar opens with `|`/`>` (plus optional chomping/indent indicators)
+# and owns every following line indented further than its key.
+_BLOCK_OPEN = re.compile(r"^(?P<indent>[ \t]*)(?:-[ \t]+)?[\w.-]+:[ \t]*[|>][+-]?\d*[ \t]*$")
 _DATE_ONLY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _DATETIME = re.compile(
     r"^(?P<date>\d{4}-\d{2}-\d{2})[T ](?P<time>\d{2}:\d{2}(?::\d{2})?)"
@@ -731,6 +734,9 @@ def normalise_temporal(text: str) -> str:
     Text-level on purpose. Parsing and re-dumping the YAML would drop the `#`
     header block every record carries — the provenance the reader sees first.
     """
+    def indent_of(line: str) -> int:
+        return len(line) - len(line.lstrip(" \t"))
+
     def fix(m: re.Match) -> str:
         raw = m.group("value").strip()
         # Leave alone anything that is not a plain scalar: nulls, aliases,
@@ -754,7 +760,27 @@ def normalise_temporal(text: str) -> str:
             return m.group(0)                    # unrecognised: do not guess
         return f"{m.group('indent')}{m.group('slot')}: '{out}'"
 
-    return _TEMPORAL_LINE.sub(fix, text)
+    # Line by line, skipping block scalars. A description is free prose, and
+    # prose quoting a field name — "Fields present in the manifest:\nissued:
+    # 2026-05-01" — matches the pattern exactly. Rewriting that edits the
+    # *content* of a record rather than its serialisation, which is the one
+    # thing this function must never do.
+    out_lines: list[str] = []
+    block_indent: int | None = None
+    for line in text.splitlines(keepends=True):
+        stripped = line.rstrip("\n\r")
+        if block_indent is not None:
+            if not stripped.strip() or indent_of(stripped) > block_indent:
+                out_lines.append(line)                 # still inside the block
+                continue
+            block_indent = None                        # block ended
+        if (opener := _BLOCK_OPEN.match(stripped)):
+            block_indent = len(opener.group("indent"))
+            out_lines.append(line)
+            continue
+        out_lines.append(_TEMPORAL_LINE.sub(fix, stripped)
+                         + line[len(stripped):])
+    return "".join(out_lines)
 
 
 PROGRESS_SUFFIX = "_api_progress.json"
