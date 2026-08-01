@@ -200,6 +200,72 @@ def _rate_limit_error(message: str):
     return anthropic.RateLimitError(message, response=resp, body=None)
 
 
+class TestTemporalValuesAreNormalisedOnWrite(unittest.TestCase):
+    """#215. Two failures were showing up as one.
+
+    `issued: 2026-05-01T00:00:00Z` is a *correct* RFC 3339 value that the
+    validator rejects, because unquoted YAML hands it a `datetime` object where
+    a string is required — the generator was right and the serialisation lost
+    it. `issued: '2026-06-30'` is genuinely wrong. Quoting plus shaping to the
+    slot's declared range fixes both.
+    """
+
+    def _n(self, text):
+        from data_sheets_schema.api_runner import normalise_temporal
+        return normalise_temporal(text)
+
+    def test_a_correct_but_unquoted_value_is_quoted(self):
+        self.assertEqual(self._n("issued: 2026-05-01T00:00:00Z"),
+                         "issued: '2026-05-01T00:00:00Z'")
+
+    def test_a_naive_datetime_gains_a_zone(self):
+        self.assertEqual(self._n("issued: '2026-05-01T00:00:00'"),
+                         "issued: '2026-05-01T00:00:00Z'")
+
+    def test_a_date_in_a_datetime_slot_is_widened(self):
+        self.assertEqual(self._n("issued: '2026-06-30'"),
+                         "issued: '2026-06-30T00:00:00Z'")
+
+    def test_an_explicit_offset_is_kept_not_rewritten(self):
+        self.assertEqual(self._n("issued: 2026-05-01T00:00:00+00:00"),
+                         "issued: '2026-05-01T00:00:00+00:00'")
+
+    def test_a_datetime_in_a_date_slot_is_narrowed(self):
+        self.assertEqual(self._n("    end_date: '2026-05-01T00:00:00Z'"),
+                         "    end_date: '2026-05-01'")
+
+    def test_indentation_and_list_markers_survive(self):
+        self.assertEqual(self._n("  - start_date: 2026-05-01"),
+                         "  - start_date: '2026-05-01'")
+
+    def test_values_it_cannot_read_are_left_alone(self):
+        """Guessing at an unrecognised value would corrupt a record to make a
+        validator happy."""
+        for line in ("issued: null", "issued: ~", "issued: *anchor",
+                     "issued: not-a-date", "issued: [2026-05-01]",
+                     "description: issued: something"):
+            with self.subTest(line=line):
+                self.assertEqual(self._n(line), line)
+
+    def test_the_header_comment_block_survives(self):
+        """A YAML re-dump would drop the `#` header every record carries — the
+        provenance a reader sees first. Hence text-level."""
+        doc = "# Generated: 2026-08-01\n# Arm: baseline\nid: x\nissued: 2026-05-01T00:00:00Z\n"
+        out = self._n(doc)
+        self.assertIn("# Generated: 2026-08-01", out)
+        self.assertIn("# Arm: baseline", out)
+
+    def test_nested_records_keep_their_structure(self):
+        import yaml as _yaml
+        doc = ("id: x\ncollection_timeframes:\n  - start_date: 2026-05-01\n"
+               "    end_date: 2026-06-30\n    description: a window\n")
+        loaded = _yaml.safe_load(self._n(doc))
+        self.assertEqual(set(loaded["collection_timeframes"][0]),
+                         {"start_date", "end_date", "description"})
+        self.assertEqual(loaded["collection_timeframes"][0]["start_date"],
+                         "2026-05-01")
+
+
 class TestGeneratedDateIsTheRunDate(unittest.TestCase):
     """#214: both prompts stamped a wrong date, in opposite directions."""
 

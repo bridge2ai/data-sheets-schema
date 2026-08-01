@@ -701,6 +701,62 @@ def _extract(text: str, kind: str,
         f"200 characters: {text.strip()[:200]!r}")
 
 
+# Slots whose range is temporal, by the shape the validator demands. Two
+# separate failures were showing up as one (#215):
+#
+#   issued: 2026-05-01T00:00:00Z      <- CORRECT value, rejected. Unquoted, so
+#                                        PyYAML hands the validator a datetime
+#                                        object where a string is required.
+#   issued: '2026-05-01T00:00:00'     <- genuinely wrong: no timezone.
+#   issued: '2026-06-30'              <- genuinely wrong: a date, not a datetime.
+#
+# So the generator was right half the time and the serialisation lost it. Both
+# are fixed by emitting a quoted value shaped to the slot's range.
+DATETIME_SLOTS = ("issued", "created_on", "last_updated_on")
+DATE_SLOTS = ("start_date", "end_date")
+
+_TEMPORAL_LINE = re.compile(
+    r"(?m)^(?P<indent>[ \t]*-?[ \t]*)(?P<slot>"
+    + "|".join(DATETIME_SLOTS + DATE_SLOTS)
+    + r"):[ \t]+(?P<value>\S.*?)[ \t]*$")
+_DATE_ONLY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_DATETIME = re.compile(
+    r"^(?P<date>\d{4}-\d{2}-\d{2})[T ](?P<time>\d{2}:\d{2}(?::\d{2})?)"
+    r"(?:\.\d+)?(?P<zone>Z|[+-]\d{2}:?\d{2})?$")
+
+
+def normalise_temporal(text: str) -> str:
+    """Quote and shape temporal values to the range their slot declares.
+
+    Text-level on purpose. Parsing and re-dumping the YAML would drop the `#`
+    header block every record carries — the provenance the reader sees first.
+    """
+    def fix(m: re.Match) -> str:
+        raw = m.group("value").strip()
+        # Leave alone anything that is not a plain scalar: nulls, aliases,
+        # inline comments, flow collections, block scalars.
+        if (not raw or raw in {"null", "~"} or raw[0] in "*&[{|>#"
+                or " #" in raw):
+            return m.group(0)
+        val = raw.strip("'\"")
+        want_datetime = m.group("slot") in DATETIME_SLOTS
+        if _DATE_ONLY.match(val):
+            out = f"{val}T00:00:00Z" if want_datetime else val
+        elif (dt := _DATETIME.match(val)):
+            if want_datetime:
+                time = dt.group("time")
+                if len(time) == 5:               # HH:MM -> HH:MM:SS
+                    time += ":00"
+                out = f"{dt.group('date')}T{time}{dt.group('zone') or 'Z'}"
+            else:
+                out = dt.group("date")           # a date slot keeps only the date
+        else:
+            return m.group(0)                    # unrecognised: do not guess
+        return f"{m.group('indent')}{m.group('slot')}: '{out}'"
+
+    return _TEMPORAL_LINE.sub(fix, text)
+
+
 PROGRESS_SUFFIX = "_api_progress.json"
 
 
@@ -1124,6 +1180,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             carry["Audit findings"] = body
         elif artifact:
             target.parent.mkdir(parents=True, exist_ok=True)
+            if artifact in ("full", "core"):
+                body = normalise_temporal(body)
             target.write_text(body, encoding="utf-8")
             label = {"full": "Completed full record",
                      "core": "Completed core record",
