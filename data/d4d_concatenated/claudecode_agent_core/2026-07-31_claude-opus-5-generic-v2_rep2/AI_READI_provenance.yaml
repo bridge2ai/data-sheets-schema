@@ -3,7 +3,7 @@
 record_version: 1
 record_type: d4d_generation_provenance
 record_mode: live
-record_generated_at: '2026-07-31T17:18:33+00:00'
+record_generated_at: '2026-08-01T01:00:52+00:00'
 run:
   label: 2026-07-31_claude-opus-5-generic-v2_rep2
   project: AI_READI
@@ -21,7 +21,7 @@ model:
     reconcile_full: 64000
     core: 56000
     reconcile_core: 56000
-    audit: 12000
+    audit: 24000
     report: 12000
   temperature: null
   temperature_basis: not applicable to this model
@@ -47,11 +47,11 @@ software:
   linkml_runtime: 1.9.4
   python: 3.13.12
 repo:
-  commit: 3f495ea34552713616fdbd98f44e502706d8d1e3
-  commit_short: 3f495ea3
-  branch: main
+  commit: 6bcf27b3da01a55c6bd51cd56b4a375005b52e71
+  commit_short: 6bcf27b3
+  branch: api-sweep-fixes
   dirty: true
-  dirty_file_count: 5
+  dirty_file_count: 21
 system:
   platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
   machine: arm64
@@ -71,15 +71,15 @@ inputs:
 outputs:
   full:
     path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml
-    bytes: 98979
-    slots: 72
+    bytes: 106047
+    slots: 69
   core:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d_core.yaml
-    bytes: 79957
-    slots: 58
+    bytes: 83327
+    slots: 55
   report:
     path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_reconciliation.md
-    bytes: 17118
+    bytes: 20511
     slots: null
 unrecoverable: null
 unverified:
@@ -96,57 +96,41 @@ notes:
   suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
 - Model settings read from .github/workflows/d4d_assistant_deterministic.config.
 - 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
-api_usage:
-- phase: full
-  input_tokens: 2045
-  output_tokens: 43963
-  cache_read: 149449
-  cache_write: 0
-  max_tokens: 64000
-  stop_reason: end_turn
-- phase: core
-  input_tokens: 33320
-  output_tokens: 318
-  cache_read: 0
-  cache_write: 146432
-  max_tokens: 56000
-  stop_reason: end_turn
-- phase: audit
-  input_tokens: 33683
-  output_tokens: 7250
-  cache_read: 0
-  cache_write: 149449
-  max_tokens: 12000
-  stop_reason: end_turn
-- phase: reconcile_full
-  input_tokens: 40566
-  output_tokens: 34209
-  cache_read: 149449
-  cache_write: 0
-  max_tokens: 64000
-  stop_reason: end_turn
-- phase: reconcile_core
-  input_tokens: 42053
-  output_tokens: 29117
-  cache_read: 0
-  cache_write: 146432
-  max_tokens: 56000
-  stop_reason: end_turn
-- phase: report
-  input_tokens: 9307
-  output_tokens: 6650
-  cache_read: 0
-  cache_write: 149449
-  max_tokens: 12000
-  stop_reason: end_turn
-phases_skipped: null
+- 'Resumed run; phases skipped as already present: full, core, audit, reconcile_full,
+  reconcile_core, report.'
+api_usage: []
+phases_skipped:
+- full
+- core
+- audit
+- reconcile_full
+- reconcile_core
+- report
 validation:
-  passed: true
+  passed: false
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml
-      md5: d7b17cac1ec6e4527c455e783530457a
+      md5: 9978cab5d41dc70fc18011c614af7eaa
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d_core.yaml
-      md5: d39303a739581911215956f17c0309ca
-  recorded_by: d4d runs validate
+      md5: 22dad1269afd0467e0e2a0c2e9c35b72
+  recorded_by: api_runner.execute
+  problems:
+  - artifact: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml
+    class: Dataset
+    error: '[ERROR] [data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml/0]
+      ''IsNewVersionOf'' is not one of [''derives_from'', ''supplements'', ''is_supplemented_by'',
+      ''is_version_of'', ''is_new_version_of'', ''replaces'', ''is_replaced_by'',
+      ''is_required_by'', ''requires'', ''is_part_of'', ''has_part'', ''is_referenced_by'',
+      ''references'', ''is_identical_to''] in /related_datasets/0/relationship_type
+      | [ERROR] [data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml/0]
+      ''IsNewVersionOf'' is not one of [''derives_from'', ''supplements'', ''is_supplemented_by'',
+      ''is_version_of'', ''is_new_version_of'', ''replaces'', ''is_replaced_by'',
+      ''is_required_by'', ''requires'', ''is_part_of'', ''has_part'', ''is_referenced_by'',
+      ''references'', ''is_identical_to''] in /related_datasets/1/relationship_type
+      | [ERROR] [data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml/0]
+      ''HasPart'' is not one of [''derives_from'', ''supplements'', ''is_supplemented_by'',
+      ''is_version_of'', ''is_new_version_of'', ''replaces'', ''is_replaced_by'',
+      ''is_required_by'', ''requires'', ''is_part_of'', ''has_part'', ''is_referenced_by'',
+      ''references'', ''is_identical_to''] in /related_datasets/2/relationship_type'

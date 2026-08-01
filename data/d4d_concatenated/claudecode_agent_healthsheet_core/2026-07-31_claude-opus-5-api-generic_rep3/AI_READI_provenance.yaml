@@ -1,0 +1,168 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-08-01T08:44:27+00:00'
+run:
+  label: 2026-07-31_claude-opus-5-api-generic_rep3
+  project: AI_READI
+  method: claudecode_agent_healthsheet
+  arm: healthsheet_only
+  replicate: 3
+model:
+  generation_method: schema-grounded API, six phases
+  agent_runtime: Claude API (direct)
+  provider: LBL CBORG (proxy to Anthropic)
+  base_url: https://api.cborg.lbl.gov
+  model: google/claude-opus-5-high
+  max_tokens_by_phase:
+    full: 64000
+    reconcile_full: 64000
+    core: 56000
+    reconcile_core: 56000
+    audit: 24000
+    report: 12000
+  temperature: null
+  temperature_basis: not applicable to this model
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt.md
+    sha256: 0fbc626bc3a51d74a8ba3d8e2813752f3bc5ce9366ee5f19c99089afdfd9e8dc
+    bytes: 5754
+    exists: true
+schema:
+  declared_version: 1.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: 2065cea2d1a01c390ac1ef1d3db94be101f203f2a2682c0eee489ec29e45ebe9
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: 4a0a8b88e2fba9db3c4be91314bc41365af98df78683f6cba4e45d2d5e2fc5c6
+  merged_schema_carries_version: true
+  digest_md5: 34d24ff30fb6ad0f10d82af09ddc1fba
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: 4e45f04d0dd7535d257134dd122115206eda8176
+  commit_short: 4e45f04d
+  branch: api-sweep-fixes
+  dirty: true
+  dirty_file_count: 73
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/AI_READI_healthsheet_only.txt
+  bundle_md5: a66b16818139bca4018efe11cae5cc7a
+  bundle_bytes: 56453
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: ab62657ae5ca24d62258c2d2634a425b
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent_healthsheet/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_d4d.yaml
+    bytes: 40834
+    slots: 67
+  core:
+    path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_d4d_core.yaml
+    bytes: 39900
+    slots: 58
+  report:
+    path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_reconciliation.md
+    bytes: 15016
+    slots: null
+unrecoverable: null
+unverified:
+- field: model.temperature
+  value: null
+  reason: 'google/claude-opus-5-high rejects `temperature` (400: deprecated for this
+    model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+    is not sent and does not apply. Sampling for this model family is selected by
+    model-name suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). google/claude-opus-5-high rejects `temperature`
+  (400: deprecated for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
+- 'Resumed run; phases skipped as already present: full.'
+api_usage:
+- phase: core
+  attempt: 1
+  input_tokens: 14520
+  output_tokens: 431
+  cache_read: 0
+  cache_write: 21637
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: core
+  attempt: 2
+  input_tokens: 14520
+  output_tokens: 405
+  cache_read: 21637
+  cache_write: 0
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: core
+  attempt: 3
+  input_tokens: 14520
+  output_tokens: 12498
+  cache_read: 21637
+  cache_write: 0
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: audit
+  attempt: 1
+  input_tokens: 27052
+  output_tokens: 5789
+  cache_read: 7254
+  cache_write: 17400
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: reconcile_full
+  attempt: 1
+  input_tokens: 17368
+  output_tokens: 14320
+  cache_read: 24654
+  cache_write: 0
+  max_tokens: 64000
+  stop_reason: end_turn
+- phase: reconcile_core
+  attempt: 1
+  input_tokens: 30437
+  output_tokens: 13595
+  cache_read: 0
+  cache_write: 21637
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: report
+  attempt: 1
+  input_tokens: 4687
+  output_tokens: 5462
+  cache_read: 0
+  cache_write: 24654
+  max_tokens: 12000
+  stop_reason: end_turn
+phases_skipped:
+- full
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_d4d.yaml
+      md5: e4b6ff02f24d6d188dd44a9604f02fe3
+    core:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_d4d_core.yaml
+      md5: da2ddbe54cdb445a86cd52da70d60bcf
+  recorded_by: api_runner.execute

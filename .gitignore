@@ -148,3 +148,6 @@ data/ro-crate_packages/*/crate/
 
 # Poster/slide artifacts are kept local-only and never committed to this repo.
 data/poster_assets/
+
+# Resume scaffolding for `d4d api` runs — deleted on success, never a record.
+*_api_progress.json

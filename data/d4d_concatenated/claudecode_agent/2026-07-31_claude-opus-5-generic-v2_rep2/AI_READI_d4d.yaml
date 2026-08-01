@@ -33,11 +33,11 @@ description: >-
   order to support downstream artificial intelligence and machine learning research into
   salutogenesis, the pathway from disease back to health. The public release contains no
   protected health information; sex, race/ethnicity, and medication information are held under
-  controlled access.
+  controlled access. The dataset is published on the FAIRhub data portal, which the dataset
+  metadata records as the publisher.
 version: 3.0.0
 doi: 10.60775/fairhub.3
 page: https://fairhub.io/datasets/3
-publisher: https://fairhub.io
 created_by: AI-READI Consortium
 issued: '2025-11-17T00:00:00Z'
 language: en
@@ -47,12 +47,6 @@ status: >-
   Published. Version 3.0.0 is the current release on FAIRhub and supersedes version 2.0.0,
   which the FAIRhub record marks as no longer accessible. Enrollment for the study is ongoing
   and further versions are anticipated.
-citation: >-
-  AI-READI Consortium (2025). Flagship Dataset of Type 2 Diabetes from the AI-READI Project
-  (Version 3.0.0) [Dataset]. FAIRhub. https://doi.org/10.60775/fairhub.3. The dataset
-  documentation additionally directs users to the citation instructions maintained at
-  https://docs.aireadi.org/docs/3/citation, and the dataset license requires that the source
-  and any funder of the data be acknowledged in publications reporting its use.
 is_tabular: false
 total_file_count: 356343
 total_size_bytes: 3815969779678
@@ -107,7 +101,7 @@ purposes:
       collection, preparation and sharing of data for AI/ML purposes, including guidance from
       bioethicists and adherence to the FAIR (Findable, Accessible, Interoperable, Reusable)
       principles, so that AI-READI can serve as a model for future efforts to develop other
-      medical and health datasets targeted for AI/ML.
+      medical/health datasets targeted for AI/ML.
 
 addressing_gaps:
   - name: Lack of AI-ready datasets for training models on T2DM
@@ -159,16 +153,20 @@ tasks:
 creators:
   - name: AI-READI Consortium
     description: >-
-      Organisational creator of record for the dataset, recorded in the FAIRhub DataCite-style
-      dataset description as the sole creator with name type Organizational. The consortium
-      spans investigators, clinical research staff, data scientists, project managers and
-      interns at multiple United States institutions; membership is listed at
-      https://aireadi.org/team. The BMJ Open protocol lists consortium collaborators as Amir
-      Bahmani, Sally Baxter, Edward Boyko, Christopher Chute, Aaron Cohen, Jorge Contreras,
-      Garrison Cottrell, Virginia de Sa, Jeffrey Edberg, Nicole Ehrhardt, Nicholas Evans, Irl
-      Hirsch, Michelle Hribar, Samantha Hurst, Aaron Lee, Cecilia Lee, T.Y. Alvin Liu, Bonnie
-      Maldenado, Gerald McGwin Jr., Shannon McWeeney, Cynthia Owsley, Bhavesh Patel, Sara
-      Singer, Michael Snyder, Bradley Voytek, Joseph Yracheta and Linda Zangwill.
+      Sole creator of record for the dataset: the FAIRhub DataCite-style dataset description
+      lists exactly one creator, "AI-READI Consortium", with name type Organizational. The
+      healthsheet states that the dataset was created by members of the AI-READI project,
+      referred to as the AI-READI Consortium, with details of each member and their institution
+      at https://aireadi.org. The consortium spans investigators, clinical research staff, data
+      scientists, project managers and interns at multiple United States institutions. The BMJ
+      Open protocol lists consortium collaborators as Amir Bahmani, Sally Baxter, Edward Boyko,
+      Christopher Chute, Aaron Cohen, Jorge Contreras, Garrison Cottrell, Virginia de Sa,
+      Jeffrey Edberg, Nicole Ehrhardt, Nicholas Evans, Irl Hirsch, Michelle Hribar, Samantha
+      Hurst, Aaron Lee, Cecilia Lee, T.Y. Alvin Liu, Bonnie Maldenado, Gerald McGwin Jr.,
+      Shannon McWeeney, Cynthia Owsley, Bhavesh Patel, Sara Singer, Michael Snyder, Bradley
+      Voytek, Joseph Yracheta and Linda Zangwill. The individuals recorded below are listed in
+      the bundle as study principal investigators (FAIRhub studyDescription overallOfficialList
+      and the Nature Metabolism consortium author list), not as creators in the DataCite record.
   - name: Aaron Y. Lee
     description: >-
       Study Principal Investigator and responsible party, MD, ORCID
@@ -212,8 +210,10 @@ creators:
     description: Study Principal Investigator, PhD, University of California San Diego, ORCID https://orcid.org/0000-0001-9843-2845.
   - name: Hiroshi Ishikawa
     description: >-
-      Principal Investigator listed in the Nature Metabolism AI-READI Consortium author list,
-      University of Washington.
+      Principal Investigator listed in the Nature Metabolism AI-READI Consortium author list.
+      The affiliation superscripts in that author list are disordered in the extracted text, so
+      his institution cannot be reliably determined from the declared bundle and no affiliation
+      is asserted here.
   - name: T. Y. Alvin Liu
     description: >-
       Study Principal Investigator, MD, Johns Hopkins University, ORCID
@@ -262,14 +262,12 @@ funders:
       institution neither creates nor manages the dataset; that is done by the awardees.
   - name: National Institutes of Health grant P30DK035816
     description: >-
-      Additional NIH support acknowledged in the BMJ Open protocol and in the Nature Metabolism
-      comment. P30 DK035816 is the grant supporting the University of Washington Nutrition and
-      Obesity Research Center, which performs the centralised clinical laboratory assays.
+      Additional NIH grant acknowledged as supporting this research in the BMJ Open protocol
+      funding statement and in the Nature Metabolism acknowledgements.
   - name: National Institutes of Health grant UL1TR003096
     description: >-
-      Additional NIH support acknowledged in the BMJ Open protocol; UL1TR003096 supports the
-      University of Alabama at Birmingham Center for Clinical and Translational Science, which
-      hosts the study biorepository.
+      Additional NIH grant acknowledged as supporting this research in the BMJ Open protocol
+      funding statement.
   - name: Research to Prevent Blindness
     description: >-
       Non-federal funder acknowledged in the BMJ Open protocol as supporting this research, and
@@ -296,10 +294,9 @@ relationships:
       All instances are part of the same prospective data generation project (AI-READI), and
       this relationship is explicit in the dataset structure. There is currently only one study
       visit per participant, so instances are not linked longitudinally in this release,
-      although approximately 10 percent of the cohort is planned to be invited back for a
-      follow-up visit in year 4 of the project. Within a participant, files across data type,
-      modality and device directories are related by the participant identifier used as the
-      folder name.
+      although a subgroup of the cohort is planned to be invited back for a follow-up visit in
+      year 4 of the project. Within a participant, files across data type, modality and device
+      directories are related by the participant identifier used as the folder name.
 
 subpopulations:
   - name: Hispanic participants
@@ -357,6 +354,200 @@ subpopulations:
       group, so the intended equal balance across the four severity groups has not yet been
       achieved.
 
+variables:
+  - variable_name: nt_pro_bnp
+    description: >-
+      N-terminal pro-B-type natriuretic peptide, EDTA plasma test, units pg/mL, reference range
+      varies by age. Included as a severity and outcome predictor of heart failure.
+  - variable_name: troponin_t
+    description: >-
+      Troponin-T, EDTA plasma test, units ng/L, reference range female <11, male <16. Included
+      as a marker of myocardial injury.
+  - variable_name: c_peptide
+    description: >-
+      C peptide, EDTA plasma test, units ng/mL, reference range 1.1-4.4. Included as an
+      indicator of insulin production.
+  - variable_name: insulin
+    description: >-
+      Insulin, EDTA plasma test, units ng/mL, reference range 0.0-24.9. Included as a marker
+      for diabetes.
+  - variable_name: c_reactive_protein_high_sensitivity
+    description: >-
+      C reactive protein, high sensitivity, serum test, units mg/L, reference range 0.0-10.0.
+      Included as an inflammation marker and risk factor for T2DM.
+  - variable_name: total_cholesterol
+    description: Total cholesterol, serum test, units mg/dL, reference range <200. Cardiovascular disease risk factor.
+  - variable_name: triglycerides
+    description: Triglycerides, serum test, units mg/dL, reference range <150. Cardiovascular disease risk factor.
+  - variable_name: hdl_cholesterol
+    description: >-
+      High-density lipoprotein cholesterol, serum test, units mg/dL, reference range >39.
+      Cardiovascular disease risk factor.
+  - variable_name: ldl_cholesterol_calculated
+    description: >-
+      Low-density lipoprotein cholesterol (calculated), serum test, units mg/dL, reference
+      range <130. Cardiovascular disease risk factor.
+  - variable_name: glucose
+    description: Glucose, serum test, units mg/dL, reference range 62-125. Marker for diabetes.
+  - variable_name: blood_urea_nitrogen
+    description: >-
+      Blood urea nitrogen, serum test, units mg/dL, reference range 8.0-21.0. Marker for kidney
+      and liver function.
+  - variable_name: creatinine
+    description: >-
+      Creatinine, serum test, units mg/dL, reference range female 0.38-1.02, male 0.51-1.18.
+      Marker for kidney function.
+  - variable_name: bun_creatinine_ratio
+    description: Blood urea nitrogen to creatinine ratio, serum test. Indicator of kidney function.
+  - variable_name: sodium
+    description: Sodium, serum test, units mEq/L, reference range 135-145. Marker of metabolic health.
+  - variable_name: potassium
+    description: Potassium, serum test, units mEq/L, reference range 3.6-5.2. Marker of metabolic health.
+  - variable_name: chloride
+    description: Chloride, serum test, units mEq/L, reference range 98-108. Marker of metabolic health.
+  - variable_name: carbon_dioxide_total
+    description: Carbon dioxide, total, serum test, units mEq/L, reference range 22-32. Marker of metabolic health.
+  - variable_name: calcium
+    description: Calcium, serum test, units mg/dL, reference range 8.9-10.2. Marker of metabolic health.
+  - variable_name: protein_total
+    description: Protein, total, serum test, units g/dL, reference range 6.0-8.2. Useful tool for overall health status.
+  - variable_name: albumin
+    description: Albumin, serum test, units g/dL, reference range 3.5-5.2. Useful tool for overall health status.
+  - variable_name: globulin_total_calculated
+    description: Globulin, total (calculated), serum test, units g/dL. Useful tool for overall health status.
+  - variable_name: albumin_globulin_ratio
+    description: A/G ratio (calculated), serum test. Useful tool for overall health status.
+  - variable_name: bilirubin_total
+    description: Bilirubin, total, serum test, units mg/dL, reference range 0.2-1.3. Marker of liver health.
+  - variable_name: alkaline_phosphatase
+    description: Alkaline phosphatase, serum test, units IU/L, reference range varies by age. Marker of liver health.
+  - variable_name: aspartate_aminotransferase
+    description: Aspartate aminotransferase (AST), serum test, units IU/L, reference range 9-38. Marker of liver health.
+  - variable_name: alanine_aminotransferase
+    description: >-
+      Alanine aminotransferase (ALT), serum test, units IU/L, reference range female age 7-33
+      and male age 0-49: 10-64; male age 50+: 10-48. Marker of liver health.
+  - variable_name: hba1c
+    description: Haemoglobin A1c, whole blood test, units percent, reference range 4.0-6.0. Marker for diabetes.
+  - variable_name: white_blood_cell
+    description: White blood cell count, whole blood test, units x10E3/uL, reference range 3.4-10.8.
+  - variable_name: red_blood_cell
+    description: Red blood cell count, whole blood test, units x10E6/uL, reference range 3.77-5.80.
+  - variable_name: haemoglobin
+    description: Haemoglobin, whole blood test, units g/dL, reference range 11.1-17.7.
+  - variable_name: haematocrit
+    description: Haematocrit, whole blood test, units percent, reference range 34.0-51.0.
+  - variable_name: mcv
+    description: Mean corpuscular volume, whole blood test, units fL, reference range 79-97.
+  - variable_name: mch
+    description: Mean corpuscular haemoglobin, whole blood test, units pg, reference range 26.6-33.0.
+  - variable_name: mchc
+    description: Mean corpuscular haemoglobin concentration, whole blood test, units g/dL, reference range 31.5-35.7.
+  - variable_name: rdw
+    description: Red blood cell distribution width, whole blood test, units percent, reference range 11.6-15.4.
+  - variable_name: platelets
+    description: Platelet count, whole blood test, units x10E3/uL, reference range 150-450.
+  - variable_name: urine_creatinine
+    description: >-
+      Urine creatinine, urine test, units mg/dL, no reference range given. Urinary biomarker
+      for early diabetic nephropathy.
+  - variable_name: urine_albumin
+    description: >-
+      Urine albumin, urine test, units mg/dL, no reference range given. Urinary biomarker for
+      early diabetic nephropathy.
+  - variable_name: continuous_glucose
+    description: >-
+      Blood glucose measurement from the Dexcom G6 continuous glucose monitor, units mg/dL,
+      recorded every 5 minutes over the 10-day at-home monitoring period.
+  - variable_name: steps
+    description: Number of steps, from the Garmin Vivosmart 5 physical activity monitor over 10 days.
+  - variable_name: heart_rate_wearable
+    description: Heart rate, from the Garmin Vivosmart 5 physical activity monitor over 10 days.
+  - variable_name: respiratory_rate
+    description: Respiration rate, from the Garmin Vivosmart 5 physical activity monitor over 10 days.
+  - variable_name: oxygen_saturation
+    description: Oxygen saturation (SpO2), from the Garmin Vivosmart 5 physical activity monitor over 10 days.
+  - variable_name: sleep
+    description: >-
+      Sleep duration and sleep phases (circadian and diurnal rhythm), from the Garmin Vivosmart
+      5 physical activity monitor over 10 days.
+  - variable_name: stress
+    description: Stress level, from the Garmin Vivosmart 5 physical activity monitor over 10 days.
+  - variable_name: physical_activity_calorie
+    description: Physical activity calorie expenditure, from the Garmin Vivosmart 5 over 10 days.
+  - variable_name: ambient_temperature
+    description: Ambient temperature, from the custom LeeLab Anura in-home environmental sensor over 10 days.
+  - variable_name: relative_humidity
+    description: Relative humidity, from the custom LeeLab Anura in-home environmental sensor over 10 days.
+  - variable_name: nitrogen_oxides
+    description: Nitrogen oxides (NO and NO2), from the custom LeeLab Anura in-home environmental sensor over 10 days.
+  - variable_name: volatile_organic_compounds
+    description: Volatile organic compounds, from the custom LeeLab Anura in-home environmental sensor over 10 days.
+  - variable_name: particulate_matter
+    description: >-
+      Particulate matter at PM1.0, PM2.5, PM4 and PM10 size fractions, from the custom LeeLab
+      Anura in-home environmental sensor over 10 days.
+  - variable_name: multispectral_light_intensity
+    description: >-
+      Eleven multi-spectral light intensity measurements, from the custom LeeLab Anura in-home
+      environmental sensor over 10 days.
+  - variable_name: systolic_blood_pressure
+    description: >-
+      Systolic blood pressure, measured twice separated by two minutes with an automatic
+      oscillometric medically approved device.
+  - variable_name: diastolic_blood_pressure
+    description: >-
+      Diastolic blood pressure, measured twice separated by two minutes with an automatic
+      oscillometric medically approved device.
+  - variable_name: heart_rate_clinic
+    description: Heart rate, measured twice separated by two minutes at the in-person visit.
+  - variable_name: height
+    description: Standing height, measured at the in-person visit.
+  - variable_name: weight
+    description: Body weight, measured at the in-person visit.
+  - variable_name: waist_circumference
+    description: Waist circumference, measured at the in-person visit.
+  - variable_name: hip_circumference
+    description: Hip circumference, measured at the in-person visit.
+  - variable_name: waist_hip_ratio
+    description: Waist-to-hip ratio, calculated from measured waist and hip circumference.
+  - variable_name: body_mass_index
+    description: Body mass index, calculated from measured height and weight.
+  - variable_name: visual_acuity_logmar
+    description: >-
+      Best-corrected letter visual acuity, measured separately for the right and left eye under
+      photopic conditions and under mesopic conditions through a 2.0 neutral density filter,
+      expressed as the logarithm of the minimum angle of resolution (lower is better).
+      Snellen-format visual acuity variables present in earlier versions were dropped in
+      version 3.0.0.
+  - variable_name: contrast_sensitivity_log_cs
+    description: >-
+      Letter contrast sensitivity measured monocularly with the Mars chart under photopic and
+      mesopic conditions, expressed as log contrast sensitivity (higher is better).
+  - variable_name: autorefraction
+    description: >-
+      Autorefraction for each eye: spherical and cylindrical components expressed in dioptres
+      with cylindrical axis, obtained with the Topcon KR-800 autorefractor.
+  - variable_name: moca_total_score
+    description: >-
+      Montreal Cognitive Assessment total score administered on iPad via the MoCA Duo
+      application; maximum possible score 30, higher numbers representing better performance.
+      Section subscores, Memory Index Score and task completion times are also recorded.
+  - variable_name: monofilament_test
+    description: >-
+      Peripheral neuropathy monofilament test result: yes/no perception of a 10 g filament at
+      three locations on each foot, ten times per location, with the participant's eyes closed
+      and shoes and socks removed.
+  - variable_name: ecg_position
+    description: >-
+      Participant position during the 12-lead ECG, recorded as 0, 30, 60 or 90 degrees relative
+      to supine.
+  - variable_name: fitness_tracker_wrist_and_handedness
+    description: >-
+      Self-reported data sheet returned with the monitoring devices indicating which wrist the
+      fitness tracker was worn on, the participant's dominant hand, and where in the home the
+      environmental sensor was placed.
+
 anomalies:
   - name: Modalities missing for some participants
     description: >-
@@ -386,18 +577,18 @@ anomalies:
       that lead to a modality being skipped and data missing.
 
 missing_data_documentation:
-  - name: Missing modality and item non-response, handled without imputation
+  - name: Sources of missingness and the quality checks applied at data entry
     description: >-
       Missingness in this dataset arises from three documented sources: participants declining
       individual study elements, device-level loss (dead battery, late return, lost or collided
-      data), and item non-response in self-administered surveys. No imputation was applied;
-      missing values are left missing. Data quality control at entry used REDCap range checks
-      that flagged out-of-range clinical values for review by Data Managers and clinical
-      research coordinators, checks for incorrect flow through prescribed skip patterns, checks
-      for missing data that could be filled directly from other portions of an individual's
-      record, and checks for omission or duplication of records; corrections were made only
-      under the guidance and approval of the site principal investigator, and values that could
-      not be logically corrected were reviewed by the site PI for possible removal.
+      data), and item non-response in self-administered surveys. Data quality control at entry
+      used REDCap range checks that flagged out-of-range clinical values for review by Data
+      Managers and clinical research coordinators, checks for incorrect flow through prescribed
+      skip patterns, checks for missing data that could be filled directly from other portions
+      of an individual's record, and checks for omission or duplication of records; corrections
+      were made only under the guidance and approval of the site principal investigator, and
+      values that could not be logically corrected were reviewed by the site PI for possible
+      removal.
 
 known_limitations:
   - name: Balance targets not yet achieved
@@ -429,8 +620,8 @@ known_limitations:
   - name: Cross-sectional design with a single visit
     description: >-
       The protocol is a single visit lasting between 2.5 and 4 hours, so this release supports
-      cross-sectional analysis only. Longitudinal data are planned for approximately 10 percent
-      of the cohort at a year-4 follow-up visit and are not present here.
+      cross-sectional analysis only. Longitudinal data are planned for a subgroup of the cohort
+      at a year-4 follow-up visit and are not present here.
   - name: Public release omits sex, race, ethnicity and medications
     description: >-
       To prevent stigmatisation of findings and protect privacy, the public dataset is stripped
@@ -705,10 +896,14 @@ acquisition_methods:
   - name: Derived from electronic health records and administrative records
     description: >-
       Recruitment pools and eligibility indicators were derived by screening electronic health
-      records for ICD-10 codes R73.09 (pre-diabetes) and E11.X (T2DM) among patients aged 40
-      and older with an encounter at the site health system. The IRB protocol also describes
-      obtaining driving and accident records from the Department of Licensing. Past health
-      records and traffic and accident reports are held under controlled access.
+      records among patients aged 40 and older with an encounter at the site health system. The
+      BMJ Open protocol states verbatim that "Patients with T2DM and pre-diabetes are
+      identified by screening electronic health records for ICD-10 diagnosis codes R73.09 and
+      E11.X, respectively", and that patients without diabetes will not have encounters with
+      these ICD codes; the healthsheet refers more generally to screening for diabetes and
+      prediabetes ICD-10 codes. The IRB protocol also describes obtaining driving and accident
+      records from the Department of Licensing. Past health records and traffic and accident
+      reports are held under controlled access.
 
 collection_mechanisms:
   - name: REDCap electronic data capture
@@ -745,7 +940,7 @@ collection_mechanisms:
       recorded where in the home the sensor was placed.
   - name: Retinal imaging device suite
     description: >-
-      Six imaging systems chosen for different but partially overlapping modalities: Optomed
+      Seven imaging systems chosen for different but partially overlapping modalities: Optomed
       Aurora IQ handheld fundus camera (Oulu, Finland; undilated, 4 images per participant);
       iCare EIDON widefield truecolor confocal fundus system (Raleigh, North Carolina; 12
       images); Heidelberg Spectralis HRA OCT/OCTA (Heidelberg, Germany; 6 images); Topcon
@@ -869,8 +1064,15 @@ collection_timeframes:
       training and years 2 to 4 for subject recruitment and data collection. The FAIRhub study
       metadata gives an actual start date of 19 July 2023 and an anticipated completion date of
       1 January 2027; the BMJ Open protocol states enrolment began 18 July 2023 and will
-      continue until 30 November 2026. Approximately 4 to 10 percent of participants are
-      expected to undergo a follow-up examination in year 4.
+      continue until 30 November 2026.
+  - name: Planned year-4 follow-up visit
+    description: >-
+      A subgroup of participants is to be invited back for a follow-up examination in year 4.
+      The sources give different figures for its size: the healthsheet states that
+      approximately 4 percent of participants are expected to undergo a follow-up examination
+      in year 4, while the NIH RePORTER abstract, the dataset README and the FAIRhub study
+      description state that longitudinal data will be collected from 10 percent of the study
+      cohort.
 
 direct_collection:
   - name: Direct collection from participants
@@ -957,13 +1159,14 @@ human_subject_research:
     ClinicalTrials.gov as NCT06002048, with overall status "Enrolling by invitation", an
     anticipated enrollment of 4,000 participants, and three locations: University of Alabama at
     Birmingham (Birmingham, Alabama 35233), University of California San Diego (San Diego,
-    California 92093) and University of Washington (Seattle, Washington 98109). Eligibility is
-    all sexes, minimum age 40 years, maximum age 85 years, healthy volunteers not accepted as a
-    separate category; inclusion criteria are adults 40 years or older, patients with and
-    without type 2 diabetes, able to provide consent, and able to read and speak English;
-    exclusion criteria are adults older than 85, pregnancy, gestational diabetes and type 1
-    diabetes. Oversight review status is submitted and approved under UW IRB STUDY00016228 with
-    reliance agreements at UAB and UCSD. Biospecimen retention is "Samples With DNA".
+    California 92093) and University of Washington (Seattle, Washington 98109). The eligibility
+    module records sex "All", minimum age 40 years, maximum age 85 years, and the
+    healthyVolunteers flag set to "No"; inclusion criteria are adults 40 years or older,
+    patients with and without type 2 diabetes, able to provide consent, and able to read and
+    speak English; exclusion criteria are adults older than 85, pregnancy, gestational diabetes
+    and type 1 diabetes. Oversight review status is submitted and approved under UW IRB
+    STUDY00016228 with reliance agreements at UAB and UCSD. Biospecimen retention is "Samples
+    With DNA".
 
 informed_consent:
   - name: Electronic or in-person informed consent with documented withdrawal terms
@@ -1333,6 +1536,25 @@ regulatory_restrictions:
     Safe Harbor method. No export control regime such as ITAR or EAR is identified in the
     source material.
 
+related_datasets:
+  - relationship_type: IsNewVersionOf
+    target_dataset: https://doi.org/10.60775/fairhub.2
+    description: >-
+      Version 2.0.0 of the same dataset, released 8 November 2024 with 1,067 participants. The
+      FAIRhub record for that version states it is no longer accessible and directs users to
+      the latest version.
+  - relationship_type: IsNewVersionOf
+    target_dataset: https://doi.org/10.60775/fairhub.1
+    description: >-
+      Version 1.0.0 of the same dataset, released 3 May 2024 with 204 participants from the
+      pilot data collection phase.
+  - relationship_type: HasPart
+    target_dataset: https://doi.org/10.60775/fairhub.4
+    description: >-
+      "Mini Version" of the AI-READI dataset, a 100-participant subset intended for pipeline
+      development. The FAIRhub API records it as a child record (data.child = 4) of this
+      dataset rather than as a version of it.
+
 maintainers:
   - name: AI-READI project team
     description: >-
@@ -1400,7 +1622,8 @@ external_resources:
       information (licence, training prerequisites, the mini-subset version and Azure Storage
       access), dataset documentation using the Healthsheet template with per-domain detail,
       AI-readiness considerations covering FAIR principles and ethical practices, additional
-      resources and a changelog. Shared under CC-BY 4.0.
+      resources and a changelog. Shared under CC-BY 4.0. Citation instructions for version
+      3.0.0 are at https://docs.aireadi.org/docs/3/citation.
   - name: AI-READI project website
     description: https://aireadi.org - project overview, team listing (https://aireadi.org/team), data sharing goals (https://aireadi.org/goals/data-sharing) and contact page.
   - name: FAIRhub data portal record
@@ -1434,11 +1657,6 @@ external_resources:
       AI-READI Consortium. AI-READI: rethinking AI data collection, preparation and sharing in
       diabetes research and beyond. Nat Metab 2024;6:2210-2212.
       doi:10.1038/s42255-024-01165-x.
-  - name: FAIRhub mini version of the dataset
-    description: >-
-      A smaller version of the dataset is available for pipeline development, recorded as a
-      distinct FAIRhub record with DOI 10.60775/fairhub.4 and comprising 100 participants. It is
-      a separate resource rather than a version of this dataset.
   - name: AI-READI research internship programme
     description: >-
       https://shileyeye.ucsd.edu/research/ai_readi - a year-long research internship providing

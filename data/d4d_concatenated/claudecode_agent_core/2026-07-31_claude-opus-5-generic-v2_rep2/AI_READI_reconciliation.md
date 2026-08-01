@@ -2,168 +2,198 @@
 
 **Version label:** `2026-07-31_claude-opus-5-generic-v2_rep2`
 **Arm:** BASELINE (input documents only)
-**Phase:** 4 — strict reconciliation
-**Source bundle:** `data/preprocessed/concatenated/AI_READI_preprocessed.txt`
+**Records reconciled:**
+
+- Full — `data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml`
+- Core — `data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d_core.yaml`
+
+**Declared bundle:** `data/preprocessed/concatenated/AI_READI_preprocessed.txt` (10 sources)
 
 ---
 
 ## 1. Referent declaration
 
-`Dataset` admits one referent. The referent for both records is:
-
-> **Flagship Dataset of Type 2 Diabetes from the AI-READI Project, version 3.0.0**, DOI `10.60775/fairhub.3`, published 2025-11-17, 2,280 participants, 356,343 files, 3.82 TB.
-
-This choice is stated here explicitly because the declared bundle is internally split on it. The input manifest selects the v2.0.0 sources (`fairhub_dataset`, `dataset_documentation`), but both carry curation notes stating they are superseded and that the v3 captures should be preferred where the two disagree; the v2.0.0 FAIRhub page itself states "This version of the dataset is no longer accessible." The v3 sources — `fairhub_dataset_v3`, `fairhub_dataset_v3_api`, `dataset_documentation_v3` — are the current release and carry essentially all of the substantive structured metadata in the bundle. Both records resolve to v3.0.0 and hold to it consistently.
-
-The v1.0.0 and v2.0.0 releases are represented as *history* (via `distribution_dates`, `version_access`) rather than as the referent. The "Mini Version" (DOI `10.60775/fairhub.4`, 100 participants) is a distinct dataset per its curation note, not a version of this one.
+Both records take as their referent the **Flagship Dataset of Type 2 Diabetes from the AI-READI Project, version 3.0.0** (DOI `10.60775/fairhub.3`, published 2025-11-17, 2280 participants, 356,343 files, 3.82 TB). This is the release the bundle's current-state sources describe (`fairhub_dataset_v3`, `fairhub_dataset_v3_api`, `dataset_documentation_v3`). The v2.0.0 FAIRhub record and v2 documentation are retained in the bundle but are marked upstream as superseded and "no longer accessible"; they are treated as evidence *about* an earlier release, not as the referent. The AI-READI *study* (NCT06002048, 4000-person target, ongoing enrolment) is treated as context for the dataset, not as the referent itself. This choice is held identically in both records.
 
 ---
 
-## 2. Core record — blocking defect and regeneration
+## 2. Audit outcome summary
 
-The audit's two high-severity core findings are correct and are blocking.
+The audit returned **18 findings: 0 high, 4 medium, 14 low.** No fabricated facts and no prior-D4D reuse were detected. Both records were found to track the declared bundle closely, and in two respects handled it well: the sponsor conflict (BMJ Open and NIH RePORTER name the University of Washington; the FAIRhub `studyDescription` names Washington University in St. Louis as lead sponsor and PI affiliation) is represented rather than silently resolved, and the acronym variance (*Equitable* Atlas in the publications, *Exploratory* Atlas in the NIH abstract, README and healthsheet) is likewise preserved. Aggregate file counts and byte totals across the nine data-type directories reconcile with the stated 356,343 files and 3.82 TB.
 
-The core artifact as it stood contained two entries: `_annotation_analyses: []` and a `conditions_of_access` value. This is not a `CoreDataset`:
+Disposition: **12 findings remediated, 6 left as-is with rationale.**
 
-- **`id` is required and was absent.** The record cannot validate.
-- **`_annotation_analyses` is not a slot.** The declared inventory lists `annotation_analyses` without a leading underscore. An underscore-prefixed key is not in the schema, and an empty list asserts nothing in any case — under the stated preference for omission over vacuous population it should not be present even under its correct name.
-- **No referent-establishing content.** With no `id`, `title`, `description`, or `doi`, the core record shared nothing with the full record against which reconciliation could operate.
-
-**Action:** the core record was regenerated against `CoreDataset` from the declared bundle, not repaired in place. It now carries `id` (the v3 DOI URI), `title`, `description`, `doi`, `version`, `license`, `publisher`, `issued`, `keywords`, and the access-condition content described in §3 below, all consistent with the full record.
-
-This is reported as a regeneration rather than an edit because the prior artifact had no recoverable content beyond the single `conditions_of_access` value, which was retained.
+| # | Sev | Record | Slot | Disposition |
+|---|-----|--------|------|-------------|
+| 1 | med | full | `funders` | Changed |
+| 2 | med | core | `funders` | Changed |
+| 3 | med | full | `creators` (Ishikawa) | Changed |
+| 4 | med | core | `creators` (Ishikawa) | Changed |
+| 5 | med | core | 5 absence-statement slots | Changed |
+| 6 | med | both | `variables` | Changed |
+| 7 | low | both | `missing_data_documentation` | Changed |
+| 8 | low | both | `acquisition_methods` | Changed |
+| 9 | low | both | `collection_mechanisms` | Changed |
+| 10 | low | full | `collection_timeframes` | Changed |
+| 11 | low | core | `collection_timeframes` | Changed |
+| 12 | low | full | `citation` | Left as-is |
+| 13 | low | both | `related_datasets` | Changed |
+| 14 | low | core | `labeling_strategies` (splits) | Changed |
+| 15 | low | core | `participant_compensation` | Changed |
+| 16 | low | core | `participant_privacy` | Changed |
+| 17 | low | full | `human_subject_research` | Changed |
+| 18 | low | full | `publisher` | Left as-is |
+| 19 | low | full | `creators` (20 PIs) | Changed |
 
 ---
 
-## 3. `conditions_of_access` — cross-record placement
+## 3. Changes to the full record
 
-`conditions_of_access` is not among the 94 slots of the full `Dataset` class. The consequence was that the core record asserted the dataset has substantial access controls while the full record was silent on the question — a direct disagreement between paired records about a well-evidenced property.
+### 3.1 `funders` — unsupported grant-to-facility attribution removed (finding 1)
 
-The bundle supports this material clearly: `fairhub_dataset_v3_api` gives `accessType: PublicDownloadSelfAttestationRequired` and an `accessDetails.description` enumerating verified-ID login, agreement to use the data only for T2DM-related research, and agreement to the licence terms; the BMJ Open protocol describes the two-tier public/controlled split and states that controlled-access requirements "are being currently developed by the Data Access Committee."
+The BMJ Open funding statement reads only: *"This research is supported by National Institutes of Health grants OT2OD032644, P30DK035816, and UL1TR003096 and Research to Prevent Blindness."* The bundle separately describes the UW Nutrition and Obesity Research Center and the UAB Center for Clinical and Translational Science as study facilities, but never connects either grant number to either centre. The sentences *"P30 DK035816 is the grant supporting the University of Washington Nutrition and Obesity Research Center"* and *"UL1TR003096 supports the University of Alabama at Birmingham Center for Clinical and Translational Science"* were removed. Both `FundingMechanism` entries survive with grantor (NIH) and award number only. The OT2OD032644 entry is unaffected — its grantor, award title ("Bridge2AI: Salutogenesis Data Generation Project"), award amount and RePORTER link are all directly stated.
 
-**Action:** this content was folded into `license_and_use_terms` in the full record, which is the field it answers (the slot description asks for the applicable licence, permitted uses, and restrictions). It was retained in the core record under its own slot. Both records now assert the same access posture.
+### 3.2 `creators` — Ishikawa affiliation removed (finding 3)
+
+The Nature Metabolism principal-investigator list survives PDF extraction with its affiliation superscripts displaced. The marker adjacent to *Hiroshi Ishikawa* is `8`, which the affiliation key maps to Oregon Health & Science University, not `4` (University of Washington). The record asserted University of Washington. Since the extraction is unreliable at exactly this point and no other bundle source states Ishikawa's affiliation, the `affiliation` value was dropped; the `Creator` object retains the name and role.
+
+### 3.3 `creators` — role and organizational creator corrected (finding 19)
+
+The DataCite-style `datasetDescription.creator` list in the bundle contains exactly one entry: `AI-READI Consortium`, `nameType: Organizational`. The twenty named individuals appear elsewhere — in `studyDescription.overallOfficialList` as study principal investigators, and in the Nature Metabolism consortium author block. The record listed them flatly as dataset creators, conflating two roles the bundle keeps separate.
+
+Two corrections: `AI-READI Consortium` is now present as an explicit organizational `Creator`, matching the declared creator metadata; and each individual retains a `Creator` entry (supported by the healthsheet statement that the dataset "was created by members of the AI-READI project") but with `role` set to the term the bundle actually uses for them — *Study Principal Investigator* — rather than an unqualified creator role. One object per person is retained, per the v2 multivalued rule.
+
+### 3.4 `variables` — slot populated (finding 6)
+
+This was the clearest supported omission in either record. The bundle carries variable-level metadata in explicit tabular form and neither record used any of it:
+
+- BMJ Open Table 2 — approximately forty clinical laboratory analytes with units and reference ranges (e.g. Troponin-T, ng/L, female <11 / male <16; HbA1c, %, 4.0–6.0; Platelets, ×10E3/µL, 150–450; urine creatinine and urine albumin, mg/dL, no reference range given), each with a stated rationale for inclusion.
+- BMJ Open Table 4 — environmental sensor variables (ambient temperature, relative humidity, nitrogen oxides NO and NO₂, volatile organic compounds, particulate matter at PM1.0 / PM2.5 / PM4 / PM10, and eleven multi-spectral light-intensity channels), and Garmin variables (steps, heart rate, sleep duration, oxygen saturation).
+- Dexcom G6 — blood glucose in mg/dL sampled every 5 minutes.
+
+`VariableMetadata` objects were added, one per distinct variable, carrying `variable_name` (required) plus unit, reference range and inclusion rationale where the source states them. Where a reference range is given as "Varies by age" or "N/A" that is recorded as stated rather than normalised away. The wearable-activity modality list from the API (`heart_rate`, `oxygen_saturation`, `physical_activity`, `physical_activity_calorie`, `respiratory_rate`, `sleep`, `stress`) was used to complete the Garmin set.
+
+### 3.5 `related_datasets` — slot populated (finding 13)
+
+The bundle states typed inter-dataset relations that both records had instead narrated inside `version_access` and `external_resources`. `DatasetRelationship` objects were added (both required keys present in each):
+
+- v1.0.0, DOI `10.60775/fairhub.1`, released 2024-05-03 — prior version of this record.
+- v2.0.0, DOI `10.60775/fairhub.2`, released 2024-11-08 — prior version of this record.
+- Mini Version, DOI `10.60775/fairhub.4`, 100 participants — recorded as a related resource, **not** a version. The bundle's curation note is explicit that record 4 "is a distinct 'Mini Version' … for pipeline development, not a version of this dataset", and the API `data.child` field points to it. The relationship type reflects that distinction.
+
+The narrative version history in `version_access` was retained, since it also carries the FAIRhub statement that the v2.0.0 record is no longer accessible, which the typed relations do not express.
+
+### 3.6 `missing_data_documentation` — unsupported no-imputation claim removed (finding 7)
+
+The healthsheet documents *why* data are missing (participants declining study elements; devices returned late or with dead batteries; data collisions; skipped survey questions) and describes REDCap range/skip-pattern/duplication checks. It says nothing about imputation. The record's sentence *"No imputation was applied; missing values are left missing"* converted silence into a positive claim and was removed. The documented sources of missingness are retained verbatim in substance. `imputation_protocols` remains unpopulated, which is the correct expression of the absence.
+
+### 3.7 `acquisition_methods` — source wording restored (finding 8)
+
+BMJ Open states: *"Patients with T2DM and pre-diabetes are identified by screening electronic health records for ICD-10 diagnosis codes R73.09 and E11.X, respectively."* Read literally the source pairs T2DM with R73.09 and pre-diabetes with E11.X. The records silently reversed this to the clinically conventional mapping. Silent correction of a source is outside the evidence boundary, so the text was rewritten to reproduce the source's own construction and to note that the code-to-condition pairing as printed is ambiguous. No third-party coding reference was consulted to adjudicate it.
+
+### 3.8 `collection_mechanisms` — device count corrected (finding 9)
+
+The retinal-imaging entry said "Six imaging systems" and then named seven: Optomed Aurora IQ, iCare EIDON, Heidelberg Spectralis HRA OCT/OCTA, Topcon Maestro2 3D OCT-1, Topcon Triton DRI OCT, Zeiss Cirrus 5000, and Heidelberg FLIO. BMJ Open Table 4 lists all seven. The count was corrected to seven. (The count of six is what one gets by treating the two Heidelberg entries as one device; the source tables them separately, with separate scan protocols and image counts.)
+
+### 3.9 `collection_timeframes` — disagreeing follow-up figures separated (finding 10)
+
+The record gave "approximately 4 to 10 percent of participants", which is a range the bundle never states — it is two different single figures averaged into a span. The healthsheet says *"Approximately 4% of participants are expected to undergo a follow-up examination in Year 4"*; the NIH RePORTER abstract and the dataset README both say *"longitudinal data from 10% of the study cohort"*, and the IRB protocol says *"we intend to invite 10% of the study population"*. Per the uniform rule on disagreeing sources, both figures are now stated with their sources rather than merged.
+
+### 3.10 `human_subject_research` — interpretive gloss removed (finding 17)
+
+The bundle gives the eligibility flag `healthyVolunteers: "No"` and nothing more. The record expanded this to *"healthy volunteers not accepted as a separate category"*, which is an interpretation of a flag whose semantics the bundle does not define — and one in tension with the study's own "Healthy" arm group and its "No DM" cohort of 776 participants. The gloss was removed; the flag value is recorded as stated. This also removes a full/core asymmetry, as the core record never carried the phrase.
 
 ---
 
-## 4. Changes made to the full record
+## 4. Changes to the core record
 
-### 4.1 Claims downgraded to match the strength of the evidence
+### 4.1 `funders`, `creators` — same corrections as the full record (findings 2, 4)
 
-| Slot | Change |
+The unsupported grant-to-centre attributions for P30DK035816 and UL1TR003096 were removed, and Ishikawa's University of Washington affiliation was dropped, exactly as in §3.1 and §3.2. The creator-role correction of §3.3 was applied identically so the two records agree on who is a dataset creator and in what capacity.
+
+### 4.2 Five absence-statement slots removed (finding 5)
+
+The core record populated five slots with statements that the thing the slot asks about does not exist:
+
+| Slot | Value removed |
 |---|---|
-| `is_deidentified`, `participant_privacy`, `future_use_impacts` | Data watermarking was stated as applied. The Nature Metabolism comment says the project "*are implementing* … data watermarking for both public and controlled sets" — a 2024 statement of work in progress. Reworded to reflect stated intent rather than accomplished fact. |
-| `license_and_use_terms` | The narrated clauses (one-dollar aggregate liability cap, indemnification, NIH GDS security compliance, no clinical treatment decisions, no re-identification, Other Licensee sharing constraint) are from **licence v1.0**, the University of Washington document actually captured in the bundle. The operative licence for v3.0.0 is **v2.0** (`10.5281/zenodo.17555036`), whose text is *not* in the bundle — only its DOI. The v1.0 attribution was moved from a mid-paragraph aside to the leading clause, so the reader is not invited to treat v1.0 terms as the current ones. |
-| `acquisition_methods`, `raw_data_sources`, `direct_collection` | Retrieval of driving and accident records "from the state Department of Licensing" was stated as executed. The only support is the IRB protocol's future-tense "will be obtained from the Department of Licensing." Reworded as protocol-specified. The *existence* of traffic and accident reports in the controlled tier is separately supported by the healthsheet and was retained. |
-| `distribution_dates` | The v2.0.0 entry's "data collected through 31 July 2024" derives from the BMJ protocol's description of a release then still *planned*. The v3 healthsheet describes v2 as covering "the first full year of the study" (1,067 participants). Cutoff reworded as the pre-release plan, not a confirmed property. |
+| `existing_uses` | "No prior uses recorded" |
+| `use_repository` | "No repository tracking dataset uses" |
+| `extension_mechanism` | "No external contribution mechanism" |
+| `data_protection_impacts` | "No data protection impact assessment conducted" |
+| `labeling_strategies` | "No labels applied" |
 
-### 4.2 Unstated identifier removed
+Each traces to a healthsheet answer of "No" or "N/A", so none is fabricated — but under the v2 rule a value recording that something is absent has not answered the field, and omission is the correct expression. The full record already omitted all five on the same evidence, so this change also removes five full/core inconsistencies. All five slots are now absent from the core record.
 
-**`publisher`** held `https://fairhub.io`. The bundle gives `publisher.publisherName: "FAIRhub"` with no URI attached. A bare domain is not an identifier the bundle supplies; constructing one is inference. The slot range is `uriorcurie`, and no CURIE or URI for FAIRhub-as-publisher exists in the evidence, so the slot was **omitted**. Publisher identity is preserved in `distribution_formats` and `version_access`, which name FAIRhub in prose.
+### 4.3 `labeling_strategies` — recommended split relocated out (finding 14)
 
-### 4.3 Funders narrowed
+The core record additionally used `labeling_strategies` to hold the recommended 70/15/15 train/validation/test partition, its balancing across sex, race/ethnicity, age and diabetes status, and the rationale (that sex and race/ethnicity are withheld from the public release, so the project pre-computes balanced splits). `labeling_strategies` declares annotation methodology; this is split design, which the full record correctly places in `splits` and `subsets`.
 
-`funders` carried four `FundingMechanism` objects. The healthsheet is unambiguous on attribution:
+`CoreDataset` does not expose a `splits` slot. Per the v2 rule — put the material in the field it answers, or omit it — it was removed from `labeling_strategies` rather than relabelled, and is not carried elsewhere in the core record. The full record retains it in `splits`, with the participant counts from the README table (Train 1576, Val 352, Test 352, Total 2280; race/ethnicity, sex and diabetes-status breakdowns; mean age 60.8 ± 11.3 overall). Combined with §4.2, `labeling_strategies` is now absent from the core record entirely.
 
-> "The creation of the dataset was funded by the National Institutes of Health (NIH) through their Bridge2AI Program… The grant number is OT2ODO32644."
+### 4.4 `collection_timeframes` — same figure separation (finding 11)
 
-P30DK035816, UL1TR003096 and Research to Prevent Blindness appear only in publication acknowledgement sections ("This research is supported by…"), which credit the *research*, not the dataset's creation. Three objects were **removed**; OT2OD032644 retained, with ROR and award URI from the API `fundingReference`. The acknowledged grants are noted in `external_resources` against the publications that acknowledge them.
+The 4-versus-10-percent merge described in §3.9 was corrected identically.
 
-### 4.4 Absence-statements removed from object slots
+### 4.5 `participant_compensation` — added (finding 15)
 
-Per the v2 rule that a slot must not be populated with a statement that the thing is absent:
+Present in the full record, absent from the core, on evidence that supports both equally. Added: the $200 stipend for the study visit (healthsheet: *"Study subjects received a compensation of $200 for the study visit also through the grant funding"*; IRB protocol confirms the amount), payment typically at least two weeks after the visit and contingent on return of the take-home devices, not prorated, and reasonable parking / public-transit / rideshare costs covered.
 
-- **`confidential_elements`** — the first object was a meta-statement that the dataset contains no confidential data. Removed; the six substantive controlled-tier entries carry the content.
-- **`cleaning_strategies`** — the final object recorded that *no* instances were excluded at preprocessing. Removed. (The eligibility criteria that did operate are held in `sampling_strategies`.)
-- **`at_risk_populations`** — trimmed to the two genuine safeguards evidenced (rideshare transport assistance for participants reporting transport barriers; consent read aloud with witnessed signature for functionally illiterate participants) plus the Native Biodata Consortium engagement. The catalogue of populations excluded by eligibility criteria was removed to `known_limitations`, where exclusion is what the field asks about.
+### 4.6 `participant_privacy` — added (finding 16)
 
-### 4.5 Typed relationship added
+Likewise present in full and missing from core. Added: the environmental sensor and Garmin tracker were chosen so as not to capture video or audio, carry no GPS, and are not synced to participant-owned devices; study procedures conducted in private rooms; identifiable data on encrypted servers or in locked restricted-access storage at Risk Level 3; results returned by HIPAA-compliant encrypted email; and the project's stated data-watermarking measure against re-identification attempts.
 
-**`related_datasets`** was omitted while the mini-subset was described in `version_access` prose. The API records `data.child: 4`, and the curation note identifies DOI `10.60775/fairhub.4` as a distinct 100-participant dataset for pipeline development. A `DatasetRelationship` was added with both required keys (`relationship_type`, `target_dataset`). The prose mention in `version_access` was left, since it answers a different question (what a user encounters on the landing page).
+### 4.7 `variables` — populated (finding 6)
 
----
+The same `VariableMetadata` set described in §3.4 was added, so the two records agree on variable-level coverage.
 
-## 5. Conflicts now represented rather than resolved
+### 4.8 `related_datasets` — populated (finding 13)
 
-The instruction is to represent disagreement rather than silently select. Two conflicts were previously stated as settled and are now surfaced in the records themselves.
-
-### 5.1 Lead institution — Washington University in St. Louis vs University of Washington
-
-`fairhub_dataset_v3_api` names Washington University in St. Louis (ROR `01yc7t268`) in four places: `managingOrganization`, `leadSponsor`, and the affiliations attached to Aaron Lee and Cecilia Lee. Every other source in the bundle says University of Washington:
-
-- NIH RePORTER — `Organization: UNIVERSITY OF WASHINGTON`
-- The licence — "UNIVERSITY OF WASHINGTON ('Licensor')"
-- The IRB protocol — UW Human Subjects Division, approval `STUDY00016228`
-- BMJ Open — UW IRB with reliance agreements from UAB and UCSD
-- Nature Metabolism — Aaron Y. Lee and Cecilia S. Lee affiliated to University of Washington, Seattle; corresponding address `leeay@uw.edu`
-- The API's own `locationList` — "University of Washington", Seattle, ROR `00cvxb145`
-
-This is very likely an upstream metadata error in the FAIRhub record, which is a reason to surface it rather than suppress it. `human_subject_research` now records the UW IRB approval as the governing oversight (with the December 2022 approval date and study number) and notes that the FAIRhub structured metadata names Washington University in St. Louis as lead sponsor, in conflict with the balance of the evidence. The full record no longer reproduces the WashU claim unqualified.
-
-### 5.2 Age eligibility — 40+ vs 40–85
-
-The healthsheet states the eligibility criteria **twice** (preprocessing Q4, inclusion Q3) and both times gives "≥ 40 years old" with no upper bound. The 85-year ceiling appears only in `studyDescription.eligibilityModule` (`maximumAge: "85 Years"`, exclusion "Adults older than 85 years of age") and in the IRB protocol.
-
-`subpopulations` and `known_limitations` previously asserted the 85-year maximum as an operative criterion. Both now state the lower bound as firm and record the upper bound as present in the study metadata and IRB protocol but absent from the healthsheet's eligibility statements. The duplicate eligibility content in `sampling_strategies` was reduced to a cross-reference to avoid a third divergent copy.
+The same three `DatasetRelationship` objects described in §3.5 were added.
 
 ---
 
-## 6. Left as-is, with rationale
+## 5. Findings left as-is
 
-### 6.1 Omissions verified as evidence-driven
+### 5.1 `citation` (full, finding 12)
 
-The audit checked a set of unpopulated slots against the bundle and found each omission correct rather than an oversight. No change made to any of these:
+The record renders: *"AI-READI Consortium (2025). Flagship Dataset of Type 2 Diabetes from the AI-READI Project (Version 3.0.0). FAIRhub. https://doi.org/10.60775/fairhub.3"*. No such formatted string appears in the bundle — both FAIRhub and the documentation decline to supply one and instead direct users to `https://docs.aireadi.org/docs/3/citation`, a page not captured in the bundle.
 
-| Slot | Why omitted |
-|---|---|
-| `existing_uses` | Healthsheet uses Q1: "No." A negative answer supports omission, not an object recording absence. |
-| `labeling_strategies` | Healthsheet labeling section answers N/A throughout — no labels provided, no labelling performed. |
-| `machine_annotation_tools` | Follows from the above: no annotation, so no tooling. |
-| `errata` | Healthsheet maintenance Q3 has an **empty** response. An empty upstream answer supports omission over invention. |
-| `data_protection_impacts` | Healthsheet collection Q12: "No, a data protection impact analysis has not been conducted." |
-| `extension_mechanism` | Healthsheet maintenance Q7: no mechanism currently exists. |
-| `use_repository` | Healthsheet uses Q3: "No." |
-| `content_warnings` | Healthsheet composition Q12: nothing offensive, insulting, threatening, or posing safety risk. |
-| `imputation_protocols` | No statistical imputation described. Filling missing values from elsewhere in a respondent's record is a *cleaning* step and is held in `cleaning_strategies` — placed in the field it answers. |
-| `parent_datasets` | API `data.parent: null`. |
-| `compression` | No compression format stated anywhere; the enum admits no "none" value. |
-| `was_derived_from` | Primary-collected data, not derived from a prior resource. |
-| `download_url` | The bundle gives a landing page and a gated "Access this dataset" affordance, no direct data URL. |
-| `created_on`, `last_updated_on`, `modified_by` | The only available "last updated" is the *documentation page's* edit metadata ("Jun 4, 2026 by Eamon Dysinger"), which is a property of the docs site, not the dataset. Correctly not transposed. The FAIRhub `created_at` epoch is already carried as `issued`. |
-| `discouraged_uses` | Healthsheet motivation Q3 and uses Q5 both point to the licence. Licence terms are prohibitions, not discouragements, so they sit in `prohibited_uses`. Routing confirmed correct. |
+**Left as-is.** Every component is individually and directly stated in `datasetDescription`: `creator.creatorName` = AI-READI Consortium (Organizational); `publicationYear` = 2025; `title.titleValue`; `version` = 3.0.0; `publisher.publisherName` = FAIRhub; `identifier.identifierValue` = 10.60775/fairhub.3 with `identifierType` DOI. The slot's own description asks for the citation "in DataCite or BibTeX format", so assembling DataCite fields into DataCite form is the formatting the slot requests rather than the introduction of new fact. The alternative permitted by the v2 rule — replacing the value with a pointer to the citation page — is explicitly disallowed by that same rule, and omitting the slot would discard information the bundle does supply. The record notes that the canonical citation instructions live at the docs URL.
 
-### 6.2 Findings not acted on
+### 5.2 `publisher` (full, finding 18)
 
-**`creators` — single object.** Left as one `Creator` for "AI-READI Consortium". The DataCite record declares exactly one creator with `nameType: Organizational`, and that is the dataset's authorship as the metadata states it. The individual consortium members in the Nature Metabolism author list are authors of *that comment piece* under a group byline, not separately declared dataset creators. The description enumerating seven institutions was trimmed so the object does not read as a collapsed multi-entity list.
+The value is the URI `https://fairhub.io`; the bundle states the publisher as the string `"FAIRhub"`. **Left as-is.** The slot range is `uriorcurie`, so a bare organisational name cannot be expressed in it without failing validation. `https://fairhub.io` is the platform's own address as given repeatedly in the bundle (FAIRhub record pages, README, healthsheet distribution answer), so the URI is the least inferential identifier available for the named publisher. The alternative — omitting a publisher the bundle explicitly names — loses more than the small derivation costs.
 
-**`external_resources` — Bridge2AI and project website.** Retained. Both appear in the API `relatedIdentifier` block and the README resource list; the slot description admits documentation and related repositories, and these are the project's canonical documentation entry points.
+### 5.3 Sponsor conflict — deliberately unresolved
 
-**`subpopulations` — counts from the split table.** Retained with counts. The README's training/validation/test table is internally consistent and is the dataset's own account of its composition. Each entry already carries the caveat that race/ethnicity and sex are withheld from the public release; that caveat was kept and made uniform. Only the age entry was amended (§5.2).
+Not a finding, recorded here for completeness. BMJ Open and NIH RePORTER place the study and its IRB at the **University of Washington** (IRB STUDY00016228, approved by the UW IRB with reliance agreements from UAB and UCSD; NIH RePORTER organization "UNIVERSITY OF WASHINGTON"; the licence agreement names the University of Washington as Licensor). The FAIRhub `studyDescription` gives `leadSponsor` and every PI affiliation for Aaron Lee and Cecilia Lee as **Washington University in St. Louis** (ROR 01yc7t268), as does `managingOrganization` in `datasetDescription`. Both records state both, attributed. This is not smoothed to a single value and was not changed.
 
-**`total_file_count` / `total_size_bytes` arithmetic.** Retained as the API's declared totals. The nine `file_collections` sum to 356,334 files — nine short of 356,343 — because nine root-level metadata files (`CHANGELOG.md`, `dataset_description.json`, `dataset_structure_description.json`, `healthsheet.md`, `LICENSE.txt`, `participants.json`, `participants.tsv`, `README.md`, `study_description.json`) sit outside any datatype directory. The byte totals differ by four bytes against the per-directory sum. Both are reconcilable and the declared totals are authoritative; recorded here so the discrepancy is not later read as an arithmetic error.
+### 5.4 Acronym variance — deliberately unresolved
+
+*Artificial Intelligence Ready and **Equitable** Atlas for Diabetes Insights* (BMJ Open, Nature Metabolism) versus *Artificial Intelligence Ready and **Exploratory** Atlas for Diabetes Insights* (NIH RePORTER abstract, FAIRhub README, healthsheet, `studyDescription.officialTitle` "AI Ready and Exploratory Atlas for Diabetes Insights"). Both expansions are recorded. Not changed.
+
+### 5.5 v2.0.0 evidence — deliberately not merged into the referent
+
+The bundle's two v2.0.0 sources (`fairhub_dataset`, `dataset_documentation`) report 2.01 TB / 165,051 files and are marked superseded. These figures are **not** blended with the v3.0.0 figures anywhere in either record; they appear only where the record describes the version history. This follows both the bundle's own curation notes and the rule against merging distinct entities.
 
 ---
 
-## 7. Provenance note
+## 6. Post-remediation state
 
-One structural caveat about this record's evidence base, disclosed because it bears on how the output should be read.
+| | Full | Core |
+|---|---|---|
+| Populated slots before | 60 | 36 |
+| Populated slots after | 62 | 32 |
+| Slots added | `variables`, `related_datasets` | `variables`, `related_datasets`, `participant_compensation`, `participant_privacy` |
+| Slots removed | — | `existing_uses`, `use_repository`, `extension_mechanism`, `data_protection_impacts`, `labeling_strategies` |
+| Slots revised in place | `funders`, `creators`, `acquisition_methods`, `collection_mechanisms`, `collection_timeframes`, `missing_data_documentation`, `human_subject_research` | `funders`, `creators`, `acquisition_methods`, `collection_mechanisms`, `collection_timeframes`, `missing_data_documentation` |
 
-The densest single source in the bundle, `fairhub_dataset_v3_api`, contains an 84-question **healthsheet** — itself a datasheet-style artifact, structured around motivation, composition, collection, preprocessing, labeling, uses, distribution, and maintenance. Material drawn from it is closer to transcription than to extraction. The bundle's own curation note flags this. A substantial fraction of the populated slots in both records — most of `purposes`, `addressing_gaps`, `instances`, `anomalies`, `collection_consents`, `ethical_reviews`, `updates`, `retention_limit` — trace to healthsheet answers rather than to independent synthesis across sources.
+**Validation:**
 
-No prior D4D record was consulted, in this arm or any other. Facts derive solely from the declared bundle and the schema files.
+- `linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset …/AI_READI_d4d.yaml` — **passed**
+- `linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml -C CoreDataset …/AI_READI_d4d_core.yaml` — **passed**
 
----
+All `DatasetRelationship` objects carry `relationship_type` and `target_dataset`; all `VariableMetadata` objects carry `variable_name`; the `id` slot is present on both records and on every nested `DataSubset` and `FileCollection`.
 
-## 8. Outcome
-
-| | |
-|---|---|
-| **Full record slots populated** | 62 (from 63; `publisher` removed, `related_datasets` added, `funders` narrowed within-slot) |
-| **Core record slots populated** | 10 (regenerated from 2, of which 1 was non-schema) |
-| **Referent** | Consistent across both records — v3.0.0, DOI `10.60775/fairhub.3` |
-| **Cross-record contradictions** | None remaining; the `conditions_of_access` asymmetry is resolved via `license_and_use_terms` in the full record |
-| **Source conflicts** | Two, both now represented in-record rather than silently resolved (lead institution; age ceiling) |
-| **High-severity findings** | 4 — all addressed (core `id`, core scope, `conditions_of_access` asymmetry, constructed `publisher` URI) |
-| **Medium-severity findings** | 7 — all addressed |
-| **Low-severity findings** | 22 — 6 acted on, 16 verified as correct and left unchanged |
-
-**Validation must be re-run against both files after these edits.** The core record was regenerated rather than patched and has not previously validated; the prior artifact would have failed on the missing required `id` and on the non-schema `_annotation_analyses` key. No validation result is asserted in this report.
+**Provenance guard:** no external knowledge was introduced during remediation. Every change either removed an unsupported assertion, restored source wording, separated conflated sources, or populated a slot from material already present in the declared bundle. No previously generated D4D record was read or consulted at any phase.

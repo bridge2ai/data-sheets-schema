@@ -3,7 +3,7 @@
 record_version: 1
 record_type: d4d_generation_provenance
 record_mode: live
-record_generated_at: '2026-07-31T20:17:30+00:00'
+record_generated_at: '2026-08-01T01:32:15+00:00'
 run:
   label: 2026-07-31_claude-opus-5-generic-v2_rep1
   project: VOICE
@@ -21,7 +21,7 @@ model:
     reconcile_full: 64000
     core: 56000
     reconcile_core: 56000
-    audit: 12000
+    audit: 24000
     report: 12000
   temperature: null
   temperature_basis: not applicable to this model
@@ -47,11 +47,11 @@ software:
   linkml_runtime: 1.9.4
   python: 3.13.12
 repo:
-  commit: 64c7f37afc243d2fd40ef32e8d31b45de96f4bc0
-  commit_short: 64c7f37a
+  commit: 6bcf27b3da01a55c6bd51cd56b4a375005b52e71
+  commit_short: 6bcf27b3
   branch: api-sweep-fixes
   dirty: true
-  dirty_file_count: 7
+  dirty_file_count: 45
 system:
   platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
   machine: arm64
@@ -96,50 +96,16 @@ notes:
   suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
 - Model settings read from .github/workflows/d4d_assistant_deterministic.config.
 - 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
-api_usage:
-- phase: full
-  input_tokens: 2036
-  output_tokens: 57419
-  cache_read: 7254
-  cache_write: 145334
-  max_tokens: 64000
-  stop_reason: end_turn
-- phase: core
-  input_tokens: 33065
-  output_tokens: 1744
-  cache_read: 0
-  cache_write: 149571
-  max_tokens: 56000
-  stop_reason: end_turn
-- phase: audit
-  input_tokens: 34854
-  output_tokens: 3450
-  cache_read: 7254
-  cache_write: 145334
-  max_tokens: 12000
-  stop_reason: end_turn
-- phase: reconcile_full
-  input_tokens: 36516
-  output_tokens: 31067
-  cache_read: 152588
-  cache_write: 0
-  max_tokens: 64000
-  stop_reason: end_turn
-- phase: reconcile_core
-  input_tokens: 38357
-  output_tokens: 28068
-  cache_read: 0
-  cache_write: 149571
-  max_tokens: 56000
-  stop_reason: end_turn
-- phase: report
-  input_tokens: 5503
-  output_tokens: 5646
-  cache_read: 7254
-  cache_write: 145334
-  max_tokens: 12000
-  stop_reason: end_turn
-phases_skipped: null
+- 'Resumed run; phases skipped as already present: full, core, audit, reconcile_full,
+  reconcile_core, report.'
+api_usage: []
+phases_skipped:
+- full
+- core
+- audit
+- reconcile_full
+- reconcile_core
+- report
 validation:
   passed: false
   artifacts:
