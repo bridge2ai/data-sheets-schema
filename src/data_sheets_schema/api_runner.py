@@ -508,25 +508,89 @@ def provider_identity() -> dict[str, Any]:
     return {"provider": None, "base_url": None, "key_env": None}
 
 
-@lru_cache(maxsize=1)
-def _known_slots() -> frozenset[str]:
-    """Every slot name the schema defines, for telling a record from prose."""
-    from linkml_runtime import SchemaView
-    return frozenset(SchemaView(FULL_SCHEMA_PATH).all_slots())
+FULL_SCHEMA_PATH = "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+CORE_SCHEMA_PATH = "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
 
 
-def _looks_like_a_record(parsed: dict) -> bool:
-    """Does this mapping name schema slots, or is it narration with a colon?
+@lru_cache(maxsize=4)
+def _known_slots(schema_path: str = FULL_SCHEMA_PATH,
+                 class_name: str = "Dataset") -> frozenset[str]:
+    """The slots the *target class* accepts at its root.
 
-    Requiring a mapping was not enough. `Note: I need to emit the corrected
-    core record.` parses as `{"Note": "I need to emit..."}` — a perfectly good
-    mapping, and exactly the narration the check exists to reject. A record
-    names slots the schema defines; prose does not.
+    Not `all_slots()`. Every slot the schema file mentions is a far looser test
+    than it looks: the core schema names 262 slots but `CoreDataset` accepts 79
+    of them, so two thirds of that vocabulary belongs to some other class and
+    would wave through root keys the target class cannot hold.
     """
-    return bool(_known_slots() & {str(k) for k in parsed})
+    from linkml_runtime import SchemaView
+    sv = SchemaView(schema_path)
+    return frozenset(s.name for s in sv.class_induced_slots(class_name))
 
 
-def _extract(text: str, kind: str) -> str:
+# Which vocabulary each record-producing phase is checked against. Using the
+# full schema for a core response let full-only root keys pass a check that
+# exists precisely to catch a core record that drifted back into full slots.
+PHASE_SCHEMA = {
+    "full": (FULL_SCHEMA_PATH, "Dataset"),
+    "reconcile_full": (FULL_SCHEMA_PATH, "Dataset"),
+    "core": (CORE_SCHEMA_PATH, "CoreDataset"),
+    "reconcile_core": (CORE_SCHEMA_PATH, "CoreDataset"),
+}
+
+
+def _looks_like_a_record(parsed: dict, schema_path: str = FULL_SCHEMA_PATH,
+                         class_name: str = "Dataset") -> bool:
+    """Is this the record the phase was asked for, or something else entirely?
+
+    Three separate things have reached this guard and been let through, each
+    after a loosening that fixed a real false rejection:
+
+    * narration — `Note: I need to emit the corrected core record.` parses as a
+      perfectly good mapping. Requiring *some* known slot was not enough,
+      because narration sits happily beside one (`Note: ...` plus `id: x`).
+    * refusals — `title: I cannot produce the requested record` names nothing
+      but real slots, so a vocabulary test alone cannot see it.
+    * fragments — a stray `id: x` example, or the 8-key `_distributions` blob
+      that one VOICE core run actually wrote to disk.
+
+    So the test is structural rather than lexical: a record carries the root
+    identifier, spends its keys entirely on slots the target class defines, and
+    is not a two-key stub. Every one of the 46 real records on disk satisfies
+    all three; the fragment satisfies none.
+    """
+    keys = {str(k) for k in parsed}
+    if "id" not in keys:
+        return False
+    if keys - _known_slots(schema_path, class_name):
+        return False
+    return len(keys) >= MIN_RECORD_SLOTS
+
+
+# Real records carry 47-84 top-level slots (full) and 42-69 (core); refusals
+# and examples carry one or two. The floor sits far below every observed record
+# because its job is to separate a record from a stub, not to police
+# completeness — a genuinely sparse record is the validator's business.
+MIN_RECORD_SLOTS = 5
+
+
+def _audit_is_well_formed(parsed: dict) -> bool:
+    """Does this JSON actually carry an audit, or merely the word `findings`?
+
+    `{"findings": null}` and `{"findings": "unable to audit"}` both satisfy a
+    key-presence test, and both were accepted. Either one is then handed to
+    both reconciliation phases as though an audit had happened — three more
+    billed calls spent correcting a record against nothing.
+    """
+    findings = parsed.get("findings")
+    if not isinstance(findings, list):
+        return False
+    return all(isinstance(f, dict) and {"severity", "slot", "issue"} <= set(f)
+               for f in findings)
+
+
+def _extract(text: str, kind: str,
+             schema_path: str = FULL_SCHEMA_PATH,
+             class_name: str = "Dataset") -> str:
     """Pull YAML or JSON out of a response, refusing anything that is neither.
 
     Falling back to the raw response when no fence was found wrote the model's
@@ -558,27 +622,42 @@ def _extract(text: str, kind: str) -> str:
     stripped = re.sub(r"\A\s*(?:ya?ml|json)\s*\n", "", text,
                       flags=re.I)
 
-    candidates = ([f.strip() for f in reversed(fences)]
-                  + [f.strip() for f in unclosed]
-                  + [stripped.strip(), text.strip()])
-
-    for candidate in candidates:
+    def accepts(candidate: str) -> bool:
         if not candidate:
-            continue
+            return False
         try:
             parsed = (json.loads(candidate) if kind == "json"
                       else yaml.safe_load(candidate))
         except (yaml.YAMLError, json.JSONDecodeError):
-            continue
+            return False
         if not isinstance(parsed, dict):
-            continue
-        # The audit phase has a declared shape; anything else fed into
-        # reconciliation would be an audit that never happened.
-        if kind == "json" and "findings" not in parsed:
-            continue
-        if kind == "yaml" and not _looks_like_a_record(parsed):
-            continue
-        return candidate
+            return False
+        # Each phase has a declared shape; anything else carried forward would
+        # be a record, or an audit, that never happened.
+        if kind == "json":
+            return _audit_is_well_formed(parsed)
+        return _looks_like_a_record(parsed, schema_path, class_name)
+
+    # Fences first, and *all* of them. Taking the last one on the grounds that
+    # the model corrects itself as it goes is a guess about narrative order,
+    # not evidence: a complete record followed by a one-line `id: x` example
+    # silently became that example. Where two fences both look like the
+    # requested record, the response is ambiguous and no positional rule can
+    # say which was meant — so fail, rather than pick and write the wrong one.
+    good = [f.strip() for f in fences if accepts(f.strip())]
+    distinct = {yaml.safe_dump(yaml.safe_load(g), sort_keys=True) for g in good}
+    if len(distinct) > 1:
+        raise RuntimeError(
+            f"response contained {len(distinct)} different fenced {kind} "
+            f"objects that each look like the requested record. Refusing to "
+            f"guess which was intended.")
+    if good:
+        return good[0]
+
+    for candidate in ([f.strip() for f in unclosed]
+                      + [stripped.strip(), text.strip()]):
+        if accepts(candidate):
+            return candidate
 
     raise RuntimeError(
         f"response contained no parseable {kind} object of the expected shape. "
@@ -630,8 +709,6 @@ def _artifact_path(spec: RunSpec, artifact: str) -> Path:
             "report": spec.report_path}[artifact]
 
 
-FULL_SCHEMA_PATH = "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
-CORE_SCHEMA_PATH = "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
 
 
 def validation_block(spec: RunSpec, problems: list[dict[str, str]],
@@ -831,24 +908,63 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # found nothing and re-ran all six phases of work already paid for. The
     # artifacts on disk are the durable record of what completed; the progress
     # file only adds the phases that leave no artifact of their own.
-    # Only an *entirely* complete run may be inferred from artifacts. `full` and
-    # `reconcile_full` write the same file, as do `core` and `reconcile_core`,
-    # so a partially-complete run cannot be reconstructed this way: a record
-    # written by phase 1 alone would mark reconciliation done and ship
-    # unreconciled output as finished. When every artifact is present there is
-    # no such ambiguity — nothing remains to run either way.
-    if (resume and not done
+    # Completion is inferred from the *provenance record*, never from artifacts
+    # alone. Three files on disk say nothing about who wrote them: with a flat
+    # `out_dir` the paths carry no label at all, so a new label would adopt an
+    # older run's outputs and restamp them as its own. Even for a legitimate
+    # same-label resume, continuing here rebuilds the record from the current
+    # bundle and writes `api_usage: []` over six phases of real token
+    # accounting — destroying the measurement the sweep exists to collect.
+    #
+    # So a run already carrying provenance that matches this spec, and whose
+    # artifact hashes still verify, is returned exactly as it was found.
+    if (resume and not done and spec.provenance_path.exists()
             and all(_artifact_path(spec, a).exists()
                     for a in ("full", "core", "report"))):
-        done = set(PHASES)
+        from data_sheets_schema.runs import check_provenance
+        prior = check_provenance(spec.method, spec.label, spec.project,
+                                 record=spec.provenance_path)
+        if prior["ok"]:
+            existing = yaml.safe_load(
+                spec.provenance_path.read_text(encoding="utf-8")) or {}
+            _progress_path(spec).unlink(missing_ok=True)
+            return {"label": spec.label, "project": spec.project,
+                    "usage": existing.get("api_usage") or [],
+                    "skipped": list(PHASES), "validation_problems": [],
+                    "already_complete": True,
+                    "outputs": {"full": str(spec.full_path),
+                                "core": str(spec.core_path),
+                                "report": str(spec.report_path),
+                                "provenance": str(spec.provenance_path)}}
     carry: dict[str, str] = {}
     if "Audit findings" in progress:
         carry["Audit findings"] = progress["Audit findings"]
-    for artifact, name in (("full", "Completed full record"),
-                           ("core", "Completed core record")):
+    # An artifact on disk is only resumable if it is still a record. One VOICE
+    # core artifact was an 8-key fragment with no `id`, written by the looser
+    # extraction guard — and its progress file listed `core` as completed, so a
+    # resume would have carried that fragment into reconciliation and spent two
+    # further phases correcting a record that was never there. Re-checking on
+    # the way *in* costs nothing and localises the damage to the phase that
+    # produced it.
+    for artifact, name, produced_by in (
+            ("full", "Completed full record", ("full", "reconcile_full")),
+            ("core", "Completed core record", ("core", "reconcile_core"))):
         path = _artifact_path(spec, artifact)
-        if path.exists():
-            carry[name] = path.read_text(encoding="utf-8")
+        if not path.exists():
+            continue
+        body = path.read_text(encoding="utf-8")
+        schema_path, class_name = PHASE_SCHEMA[artifact]
+        try:
+            parsed = yaml.safe_load(body)
+        except yaml.YAMLError:
+            parsed = None
+        if isinstance(parsed, dict) and _looks_like_a_record(
+                parsed, schema_path, class_name):
+            carry[name] = body
+        else:
+            # Not a record: forget the phases that claim to have written it so
+            # they run again, rather than resuming on top of a fragment.
+            done -= set(produced_by)
     if "reconcile_full" in done and "Completed full record" in carry:
         carry["Reconciled full record"] = carry["Completed full record"]
 
@@ -901,7 +1017,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                 f"limit for this phase rather than writing a partial record.")
 
         body = _extract(text, "json" if ph == "audit" else
-                        ("md" if ph == "report" else "yaml"))
+                        ("md" if ph == "report" else "yaml"),
+                        *PHASE_SCHEMA.get(ph, (FULL_SCHEMA_PATH, "Dataset")))
         if ph == "audit":
             carry["Audit findings"] = body
         elif artifact:

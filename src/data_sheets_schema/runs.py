@@ -324,6 +324,27 @@ def check_provenance(method: str, label: str, project: str,
         import yaml as _yaml
         data = (_yaml.safe_load(record.read_text(encoding="utf-8")) or {}) \
             if record.exists() else {}
+        # Knowing where the record is does not establish that it is *this*
+        # run's record. Without this check a valid live record for some other
+        # run satisfies the gate, and the artifact hashes verify — against that
+        # other run's files. The result is a false attribution that every
+        # downstream count inherits.
+        identity = data.get("run") or {}
+        wanted = {"method": method, "label": label, "project": project}
+        mismatch = {k: (identity.get(k), v) for k, v in wanted.items()
+                    if identity.get(k) != v}
+        if data and mismatch:
+            return {**wanted, "record_mode": str(data.get("record_mode") or "none"),
+                    "attestation": NO_RECORD, "drifted": [],
+                    "unverifiable": sorted(mismatch), "required": requires_live(label),
+                    "ok": False,
+                    "reason": (
+                        "provenance record does not identify which run it "
+                        "describes (no `run` block), so it cannot be attributed "
+                        "to this one." if not identity else
+                        "provenance record describes a different run: "
+                        + "; ".join(f"{k} is {got!r}, expected {exp!r}"
+                                    for k, (got, exp) in sorted(mismatch.items())))}
         mode = str(data.get("record_mode") or "none")
         level = LIVE if mode == "live" else NO_RECORD if not data else PARTIAL
         artifacts = ((data.get("validation") or {}).get("artifacts") or {})
@@ -349,10 +370,13 @@ def check_provenance(method: str, label: str, project: str,
     # run with no validation block, or whose artifacts were deleted, passed.
     unverifiable = [k for k, e in artifacts.items()
                     if isinstance(e, dict) and _verify(e) is None]
-    # A record written moments ago has no validation block — `d4d runs validate`
-    # adds it afterwards. Only demand one when the caller did not hand us the
-    # record it just produced.
-    if not artifacts and record is None:
+    # No exemption for a caller-supplied path. The reasoning for one was that a
+    # record written moments ago has no validation block yet — but `execute()`
+    # writes its validation block before it calls this, so the exemption bought
+    # nothing and cost the gate its point: a file containing the single line
+    # `record_mode: live` passed, which is the absence-of-evidence pass the
+    # `unverifiable` branch exists to stop.
+    if not artifacts:
         unverifiable = ["(no validation block)"]
 
     ok = (((not required) or mode == "live")

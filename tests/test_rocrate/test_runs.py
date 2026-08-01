@@ -718,6 +718,88 @@ class TestLiveProvenanceRequirement(unittest.TestCase):
             self.assertIn("no provenance record", r["reason"])
 
 
+class TestAnExplicitRecordPathIsStillEvidence(unittest.TestCase):
+    """Passing the record's path says where it is, not that it attests anything.
+
+    The exemption these guard was added for a real reason — a record written
+    moments ago has no validation block, because `d4d runs validate` adds one
+    afterwards. But `execute()` writes its validation block *before* calling
+    the gate, so the exemption bought nothing and cost the gate its purpose.
+    """
+
+    def _write(self, td, data):
+        import yaml
+        p = Path(td) / "prov.yaml"
+        p.write_text(yaml.safe_dump(data) if isinstance(data, dict) else data)
+        return p
+
+    def test_a_record_with_no_artifacts_does_not_pass(self):
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            rec = self._write(td, {
+                "record_mode": "live",
+                "run": {"method": "claudecode_agent", "label": "2026-07-31_x_rep1",
+                        "project": "P"}})
+            out = check_provenance("claudecode_agent", "2026-07-31_x_rep1", "P",
+                                   record=rec)
+            self.assertFalse(out["ok"])
+            self.assertIn("nothing to verify", out["reason"])
+
+    def test_a_bare_mode_line_does_not_pass(self):
+        """The minimal case: one line asserting liveness and nothing else."""
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            rec = self._write(td, "record_mode: live\n")
+            self.assertFalse(
+                check_provenance("m", "2026-07-31_x_rep1", "P", record=rec)["ok"])
+
+    def test_a_record_for_another_run_does_not_pass(self):
+        """Otherwise the hashes verify — against the other run's files."""
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            rec = self._write(td, {
+                "record_mode": "live",
+                "run": {"method": "claudecode_agent",
+                        "label": "2026-07-31_SOMEONE_ELSE_rep1", "project": "Z"},
+                "validation": {"artifacts": {}}})
+            out = check_provenance("claudecode_agent", "2026-07-31_mine_rep1",
+                                   "P", record=rec)
+            self.assertFalse(out["ok"])
+            self.assertIn("different run", out["reason"])
+
+    def test_a_record_that_names_no_run_does_not_pass(self):
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            rec = self._write(td, {"record_mode": "live",
+                                   "validation": {"artifacts": {}}})
+            out = check_provenance("m", "2026-07-31_x_rep1", "P", record=rec)
+            self.assertFalse(out["ok"])
+            self.assertIn("does not identify", out["reason"])
+
+    def test_a_matching_record_with_verifiable_artifacts_passes(self):
+        """The gate must still admit the case it exists to admit."""
+        import hashlib
+        import tempfile
+        from data_sheets_schema.runs import check_provenance
+        with tempfile.TemporaryDirectory() as td:
+            art = Path(td) / "P_d4d.yaml"
+            art.write_text("id: x\n")
+            rec = self._write(td, {
+                "record_mode": "live",
+                "run": {"method": "claudecode_agent",
+                        "label": "2026-07-31_x_rep1", "project": "P"},
+                "validation": {"artifacts": {"full": {
+                    "path": str(art),
+                    "sha256": hashlib.sha256(art.read_bytes()).hexdigest()}}}})
+            out = check_provenance("claudecode_agent", "2026-07-31_x_rep1", "P",
+                                   record=rec)
+            self.assertTrue(out["ok"], out["reason"])
+
+
 class TestImplausibleDatesAreNotExemptions(unittest.TestCase):
     """An exemption anyone can take by writing a wrong date is not a rule (#194)."""
 
