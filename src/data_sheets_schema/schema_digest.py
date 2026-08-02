@@ -34,7 +34,12 @@ CORE_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_core_all.ya
 CLASS_SCHEMA = {"Dataset": FULL_SCHEMA, "CoreDataset": CORE_SCHEMA}
 
 DESCRIPTION_CHARS = 300
-MAX_ENUM_VALUES = 40
+# Above the largest enum in either schema (EncodingEnum, 43). A truncated enum
+# is not like a truncated description: the tail of a description is usually
+# curation notes, but the tail of a vocabulary is values the model is then
+# unable to choose and will approximate instead. At this size the whole
+# vocabulary costs 38 bytes more than the clipped one, in a cached prefix.
+MAX_ENUM_VALUES = 60
 
 
 @dataclass

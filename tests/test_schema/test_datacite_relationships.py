@@ -198,18 +198,38 @@ class TestTheDigestShowsNestedVocabularies(unittest.TestCase):
         digest = self.sd.build("CoreDataset")
         self.assertTrue(any(n.enums for n in digest.nested))
 
-    def test_long_vocabularies_are_truncated_and_say_so(self):
-        """A digest that silently drops values is worse than one that admits
-        it: the model would treat the short list as complete."""
+    def test_no_vocabulary_is_truncated_at_the_current_cap(self):
+        """A clipped enum is the same defect as an absent one, only partial:
+        the hidden values are ones the model cannot choose and will approximate
+        instead. `CoreDistribution.encoding` has 43 values and the cap was 40,
+        so three were invisible. The cap must stay above the largest enum."""
         from data_sheets_schema.schema_digest import MAX_ENUM_VALUES
-        digest = self.sd.build("Dataset")
-        for n in digest.nested:
-            for slot, values in n.enums.items():
-                with self.subTest(cls=n.name, slot=slot):
-                    self.assertLessEqual(len(values), MAX_ENUM_VALUES)
-                    if n.enums_truncated.get(slot):
-                        self.assertIn(f"+{n.enums_truncated[slot]} more",
-                                      self.sd.digest_text("Dataset"))
+        from linkml_runtime import SchemaView
+        for schema in (FULL, CORE):
+            largest = max(len(e.permissible_values or {})
+                          for e in SchemaView(schema).all_enums().values())
+            with self.subTest(schema=schema):
+                self.assertGreaterEqual(MAX_ENUM_VALUES, largest)
+        for cls in ("Dataset", "CoreDataset"):
+            digest = self.sd.build(cls)
+            clipped = [(n.name, s) for n in digest.nested
+                       for s in n.enums_truncated]
+            with self.subTest(cls=cls):
+                self.assertEqual(clipped, [], "vocabulary hidden from the model")
+
+    def test_truncation_still_announces_itself_if_it_ever_happens(self):
+        """Belt and braces: if a future enum outgrows the cap, the digest must
+        say so rather than present a short list as complete."""
+        from data_sheets_schema import schema_digest as sd
+        original = sd.MAX_ENUM_VALUES
+        try:
+            sd.MAX_ENUM_VALUES = 5
+            sd._BUILD_CACHE.clear()
+            text = sd.digest_text("Dataset")
+            self.assertIn("more)", text)
+        finally:
+            sd.MAX_ENUM_VALUES = original
+            sd._BUILD_CACHE.clear()
 
 
 if __name__ == "__main__":
