@@ -255,6 +255,25 @@ class TestTemporalValuesAreNormalisedOnWrite(unittest.TestCase):
         self.assertIn("# Generated: 2026-08-01", out)
         self.assertIn("# Arm: baseline", out)
 
+    def test_normalisation_is_idempotent(self):
+        """A resumed run re-normalises a record already on disk, so a second
+        pass must be a no-op."""
+        for line in ("issued: 2026-05-01",
+                     "  - start_date: 2026-05-01T00:00:00Z",
+                     "issued: '2026-05-01T00:00:00+00:00'",
+                     'issued: "2026-05-01"'):
+            with self.subTest(line=line):
+                once = self._n(line)
+                self.assertEqual(once, self._n(once))
+
+    def test_line_endings_and_indent_styles_survive(self):
+        self.assertEqual(self._n("issued: 2026-05-01\r\n"),
+                         "issued: '2026-05-01T00:00:00Z'\r\n")
+        self.assertEqual(self._n("\tissued: 2026-05-01"),
+                         "\tissued: '2026-05-01T00:00:00Z'")
+        self.assertEqual(self._n("issued: 2026-05-01"),
+                         "issued: '2026-05-01T00:00:00Z'")
+
     def test_prose_in_a_block_scalar_is_never_rewritten(self):
         """A description is free prose, and prose quoting a field name matches
         the pattern exactly. Rewriting it edits a record's *content* rather
