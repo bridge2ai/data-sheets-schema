@@ -61,6 +61,7 @@ def main() -> int:
     by_arm = collections.Counter()
     failures = collections.Counter()
     invalid_by_arm = collections.Counter()
+    causes_per_record: dict[str, set[str]] = {}
     valid = 0
 
     for path in records:
@@ -83,6 +84,7 @@ def main() -> int:
             if kind not in seen:            # one vote per record per kind
                 seen.add(kind)
                 failures[kind] += 1
+        causes_per_record[path] = seen
 
     total = len(records)
     print(f"label prefix: {args.label}")
@@ -93,9 +95,28 @@ def main() -> int:
     for arm in sorted(by_arm):
         print(f"  {arm:34s} {invalid_by_arm[arm]:3d} / {by_arm[arm]:3d}")
 
-    print("\nfailure kinds (records affected)")
+    print("\nfailure kinds (records affected; a record may have several, so "
+          "these sum to more than the record count)")
     for kind, n in failures.most_common():
         print(f"  {n:3d}  {kind}")
+
+    spread = collections.Counter(len(v) for v in causes_per_record.values())
+    print("\ncauses per failing record")
+    for k in sorted(spread):
+        print(f"  {spread[k]:3d} record(s) with {k} distinct cause(s)")
+
+    # The number that matters is records whose *every* cause has a forward fix.
+    # Summing the cause counts instead overstates it — that error put the
+    # prediction in the first draft of the profile note at 3 when it is 7.
+    fixed_forward = {"temporal format"}
+    clearable = [p for p, kinds in causes_per_record.items()
+                 if kinds and all(k in fixed_forward or k.startswith("enum value")
+                                  for k in kinds)]
+    print(f"\n{len(clearable)} of {len(causes_per_record)} failing records have "
+          f"*every* cause fixed forward (temporal or enum).")
+    print(f"A rerun under the current schema and digest should leave "
+          f"{len(causes_per_record) - len(clearable)}, not zero: the rest carry "
+          f"at least one cause with no forward fix.")
     return 0
 
 

@@ -50,6 +50,15 @@ and fewer object-ranged slots to get wrong.
 
 ## By cause
 
+**These count records, and a record may have several causes, so they sum to 28
+rather than 23.** Five records carry more than one:
+
+| causes | records |
+|---|---|
+| 1 | 18 |
+| 2 | 4 |
+| 3 | 1 |
+
 | records | cause | fixed forward? |
 |---|---|---|
 | 11 | temporal format | yes — `normalise_temporal()` on write |
@@ -70,10 +79,19 @@ The nine enum failures split into two kinds that deserve different treatment:
 
 ## What a rerun should show
 
-Temporal and enum causes account for 20 of the 23 failures. If the forward fixes
-work, a rerun under the current schema and digest should land near 3 remaining
-failures rather than 23. If it does not, the fixes did not land and this note is
-the baseline that says so.
+**16 of the 23 failing records have *every* cause fixed forward.** So a rerun
+under the current schema and digest should leave **7**, not zero and not 3.
+
+The seven carry at least one cause with no forward fix — wrong type, union shape
+(#226), or unclassified — alongside a temporal or enum one. Fixing dates and
+vocabularies does not clear them.
+
+An earlier draft of this note predicted 3, by adding the *cause* counts
+(11 + 9 = 20) and treating the sum as records. It is not: causes overlap. The
+number is stated here because it is the falsifiable claim the note exists to
+make, and getting it wrong would have read as the fixes underperforming when 7
+is what the evidence predicts. `scripts/validation_profile.py` now computes it
+rather than leaving it to arithmetic in prose.
 
 The residue — wrong type, union shape, and the three unclassified — is
 uninvestigated. #226 covers the union case, which is unsatisfiable by
