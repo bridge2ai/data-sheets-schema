@@ -2,6 +2,7 @@
 
 import click
 import json
+import collections
 import sys
 from pathlib import Path
 from data_sheets_schema.constants import METHODS
@@ -148,18 +149,95 @@ def html(input_file, output, template, skip_validation):
         sys.exit(1)
 
 @render.command('generate-all')
-@click.option('--method', type=click.Choice(['gpt5', 'claudecode_agent', 'claudecode_assistant', 'curated']),
-              help='Generate HTML for specific method only')
-def generate_all(method):
-    """Generate HTML for all D4D files."""
-    click.echo("🎨 Generating HTML for all D4D files...")
+@click.option('--method', default=None,
+              help='Only this method directory, e.g. claudecode_agent.')
+@click.option('--label', 'labels', multiple=True,
+              help='Only these run labels. Repeatable.')
+@click.option('--project', 'projects', multiple=True,
+              help='Only these projects. Repeatable.')
+@click.option('--publish', is_flag=True,
+              help="Also write each record to the flat, unlabelled path the "
+                   "docs build reads. Only meaningful for one label per "
+                   "method — see the warning it prints.")
+@click.option('--execute', is_flag=True,
+              help='Render. Without this, list what would be rendered.')
+def generate_all(method, labels, projects, publish, execute):
+    """Render every D4D record in the run-labelled corpus to HTML.
 
-    # This would call the bulk HTML generation scripts
-    click.echo("ℹ️  Bulk HTML generation:")
-    click.echo("   Use: make gen-d4d-html")
-    click.echo("")
-    click.echo("   Or process individual files:")
-    click.echo("   d4d render html <file.yaml> -o <output.html>")
+    This used to print instructions and generate nothing, and the script it
+    pointed at read `data/sheets_concatenated`, a directory that no longer
+    exists. Neither knew about run labels, so the output path
+    `data/d4d_html/concatenated/{method}/{PROJECT}.html` had no room for one and
+    a project rendered from two replicates overwrote itself (#176).
+
+    Output is `.../{method}/{label}/{PROJECT}.html`, which cannot collide.
+    """
+    require_repo_context("d4d render generate-all")
+    setup_repo_imports()
+    from src.html.human_readable_renderer import render_yaml_file
+
+    concat = Path("data/d4d_concatenated")
+    out_root = Path("data/d4d_html/concatenated")
+    if not concat.is_dir():
+        raise click.ClickException(f"{concat} not found; nothing to render.")
+
+    jobs = []
+    for record in sorted(concat.glob("*/*/*_d4d.yaml")):
+        m, label = record.parts[2], record.parts[3]
+        project = record.name[: -len("_d4d.yaml")]
+        if method and m != method:
+            continue
+        if labels and label not in labels:
+            continue
+        if projects and project not in projects:
+            continue
+        jobs.append((record, m, label, project))
+
+    if not jobs:
+        raise click.ClickException(
+            "no records matched. `d4d runs list` shows the methods and labels "
+            "available.")
+
+    methods = {m for _, m, _, _ in jobs}
+    selected_labels = {l for _, _, l, _ in jobs}
+    click.echo(f"{len(jobs)} record(s) across {len(methods)} method(s), "
+               f"{len(selected_labels)} label(s)")
+    if publish and len(selected_labels) > 1:
+        # The flat path has no room for a label, so publishing several means
+        # later ones overwrite earlier ones and which survives depends on sort
+        # order — a silent choice of what the docs show.
+        click.echo(
+            f"⚠️  --publish with {len(selected_labels)} labels: the flat copy "
+            "has no room for a label, so later labels overwrite earlier ones "
+            "and which one survives depends on sort order. Publish one label "
+            "at a time.", err=True)
+
+    if not execute:
+        for record, m, label, project in jobs[:20]:
+            click.echo(f"   {m}/{label}/{project}")
+        if len(jobs) > 20:
+            click.echo(f"   ... and {len(jobs) - 20} more")
+        click.echo("\nDry run. Re-run with --execute to render.")
+        return
+
+    rendered = failed = 0
+    for record, m, label, project in jobs:
+        target = out_root / m / label / f"{project}.html"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            render_yaml_file(str(record), str(target))
+            rendered += 1
+            if publish:
+                flat = out_root / m / f"{project}.html"
+                flat.write_bytes(target.read_bytes())
+        except Exception as exc:                       # noqa: BLE001
+            failed += 1
+            click.echo(f"   ❌ {m}/{label}/{project}: {exc}", err=True)
+
+    click.echo(f"\n{rendered} rendered, {failed} failed -> {out_root}/"
+               "{method}/{label}/")
+    if publish:
+        click.echo(f"Also copied to the flat path the docs build reads.")
 
 
 @render.command()
