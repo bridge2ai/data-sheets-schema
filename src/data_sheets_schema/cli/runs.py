@@ -368,3 +368,102 @@ def validate_cmd(method, project, label, recheck, dry_run):
     if norec:
         click.echo("Runs without a provenance record stay UNVERIFIED. Backfill "
                    "one with `d4d provenance backfill` first.")
+
+
+@runs.command("merge")
+@click.option("--method", default="claudecode_agent",
+              help="Method directory the replicates live under.")
+@click.option("--project", required=True)
+@click.option("--label", "labels", multiple=True,
+              help="Replicate labels to merge. Omit to use every replicate of "
+                   "--config.")
+@click.option("--config", default=None,
+              help="Merge every replicate sharing this config prefix, e.g. "
+                   "2026-07-31_claude-opus-5-generic-v2.")
+@click.option("--out-label", default=None,
+              help="Label to write the merged record under "
+                   "(default: <config>_merged).")
+@click.option("--unguarded", is_flag=True,
+              help="Merge referent-bearing fields too. Off by default: "
+                   "replicates can describe different releases, and splicing "
+                   "a version from one into a record built on another states "
+                   "something no replicate said.")
+@click.option("--execute", is_flag=True,
+              help="Write the record. Without this, report and write nothing.")
+def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
+    """Combine replicates into one record that maximises coverage.
+
+    Replicates differ in *coverage* more than in quality — each populates slots
+    the others miss — so a union covers more of the schema than any single
+    replicate, without preferring one on a score that could not discriminate
+    them (#176).
+
+    The merged record is `record_mode: derived`, never `live`: it is not
+    something a model produced, and provenance names every contributor by hash
+    and states the rule that combined them.
+    """
+    import yaml as _yaml
+    from data_sheets_schema.merge import union_merge, write_merge
+
+    from data_sheets_schema.runs import CONCAT_DIR
+    base_dir = CONCAT_DIR / method
+    if config and not labels:
+        labels = tuple(sorted(
+            p.name for p in base_dir.glob(f"{config}_rep*") if p.is_dir()))
+    if not labels:
+        raise click.ClickException(
+            "give --label at least twice, or --config to take every replicate")
+    if len(labels) < 2:
+        raise click.ClickException(
+            f"merging needs at least two replicates; got {len(labels)}")
+
+    records, sources = {}, {}
+    for lab in labels:
+        path = base_dir / lab / f"{project}_d4d.yaml"
+        if not path.exists():
+            raise click.ClickException(f"no record at {path}")
+        loaded = _yaml.safe_load(path.read_text(encoding="utf-8"))
+        if not isinstance(loaded, dict):
+            raise click.ClickException(f"{path} is not a record")
+        records[lab], sources[lab] = loaded, path
+
+    try:
+        result = union_merge(records, project=project, source_paths=sources,
+                             guarded=not unguarded)
+    except ValueError as exc:
+        # `check_sources` refuses to combine runs whose conditions cannot be
+        # established — a derived record inherits its contributors' standing,
+        # so merging an unattested run would launder it. That is a refusal to
+        # report, not a crash to print a traceback for.
+        raise click.ClickException(str(exc)) from exc
+
+    click.echo(f"{project} — {len(records)} replicates under {method}")
+    for lab in sorted(records):
+        contributed = sum(1 for v in result.source_of.values() if v == lab)
+        click.echo(f"   {lab:52s} {len(records[lab]):3d} slots, "
+                   f"{contributed:3d} contributed")
+    union = len(result.record)
+    best = max(len(r) for r in records.values())
+    click.echo(f"   {'merged':52s} {union:3d} slots "
+               f"(+{union - best} over the best single replicate)")
+    if result.contested:
+        click.echo(f"\n{result.contested} slot(s) are held by more than one "
+                   f"replicate. Without a scorer the base's value is used for "
+                   f"each, so the merge is the base record plus the slots only "
+                   f"the others had — it does not adjudicate between differing "
+                   f"values.")
+    if result.guarded:
+        click.echo("Referent-bearing fields taken from the base replicate only "
+                   f"({result.base}); --unguarded to merge them too.")
+
+    out = out_label or f"{(config or labels[0].rsplit('_rep', 1)[0])}_merged"
+    target = base_dir / out / f"{project}_d4d.yaml"
+    if not execute:
+        click.echo(f"\nDry run. Would write {target}")
+        click.echo("Re-run with --execute to write it.")
+        return
+    write_merge(result, target, sources=sources, project=project,
+                method=method, label=out)
+    click.echo(f"\nWrote {target}")
+    click.echo("record_mode: derived — not a generated record, and excluded "
+               "from replicate agreement statistics by construction.")
