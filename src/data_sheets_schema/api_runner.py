@@ -27,6 +27,7 @@ bundle plus digest form a cached prefix reused across all four phases.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -146,6 +147,13 @@ class RunSpec:
     label: str
     condition: str = "generic"          # generic | tuned
     manifest_line: str = "# Source manifest: data/preprocessed/source_manifest.yaml"
+    # Frozen when the run is specified, not read from the clock on each use.
+    # A six-phase run takes tens of minutes and this study's sweep genuinely
+    # ran past midnight UTC, so recomputing per call gave phases of one run
+    # different `# Generated:` dates — and made the provenance digest, which is
+    # computed after the last phase, attest a prompt that was never sent.
+    run_date: str = field(
+        default_factory=lambda: datetime.now(timezone.utc).date().isoformat())
     # The study writes into the run-labelled layout under data/d4d_concatenated.
     # The GitHub assistant writes flat into data/sheets_d4dassistant. Rather than
     # two runners, the layout is a parameter — everything else is identical.
@@ -213,6 +221,20 @@ def prompt_body(path: Path = GENERIC_PROMPT) -> str:
     return text.split("## Prompt body", 1)[1].strip()
 
 
+def resolved_prompt_digest(spec: RunSpec) -> dict[str, Any]:
+    """A hash of the text the model is actually sent.
+
+    The module docstring claimed the resolved text's hash goes into provenance.
+    It did not: only the *file* was hashed, so two runs whose requests differed
+    in project, arm, label, model, provider or date were indistinguishable by
+    their recorded prompt evidence. Substitution is exactly what makes the file
+    and the request different objects, so the request needs its own hash.
+    """
+    text = resolve_prompt(spec)
+    return {"sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+            "bytes": len(text.encode("utf-8"))}
+
+
 def resolve_prompt(spec: RunSpec) -> str:
     """The exact instruction text this run will receive.
 
@@ -236,9 +258,21 @@ def resolve_prompt(spec: RunSpec) -> str:
         "{RUNTIME}": RUNTIME,
         "{PROVIDER}": ident["provider"] or PROVIDER,
         "{MODEL}": settings["name"],
+        # v2 introduced `{DATE}` but nothing substituted it, so the literal
+        # string reached the model. Its records carry the right date only
+        # because the model read it off `{LABEL}` and guessed correctly.
+        "{DATE}": spec.run_date,
     }
     for k, v in subs.items():
         body = body.replace(k, v)
+
+    # v1 hardcodes `# Generated: 2026-07-28` where every neighbouring header
+    # line takes a placeholder, so every record produced under it since that
+    # date carries a false one — the twelve baseline-generic runs made on
+    # 2026-07-31 all claim 2026-07-28. Normalising the resolved text fixes it
+    # without editing v1, whose bytes are pinned as the published baseline for
+    # the 2026-07-28 series. See #214.
+    body = re.sub(r"(?m)^(\s*#\s*Generated:).*$", rf"\1 {spec.run_date}", body)
 
     if spec.condition == "tuned":
         comp = COMPONENTS / f"{spec.project}.md"
@@ -665,6 +699,88 @@ def _extract(text: str, kind: str,
         f"200 characters: {text.strip()[:200]!r}")
 
 
+# Slots whose range is temporal, by the shape the validator demands. Two
+# separate failures were showing up as one (#215):
+#
+#   issued: 2026-05-01T00:00:00Z      <- CORRECT value, rejected. Unquoted, so
+#                                        PyYAML hands the validator a datetime
+#                                        object where a string is required.
+#   issued: '2026-05-01T00:00:00'     <- genuinely wrong: no timezone.
+#   issued: '2026-06-30'              <- genuinely wrong: a date, not a datetime.
+#
+# So the generator was right half the time and the serialisation lost it. Both
+# are fixed by emitting a quoted value shaped to the slot's range.
+DATETIME_SLOTS = ("issued", "created_on", "last_updated_on")
+DATE_SLOTS = ("start_date", "end_date")
+
+_TEMPORAL_LINE = re.compile(
+    r"^(?P<indent>[ \t]*-?[ \t]*)(?P<slot>"
+    + "|".join(DATETIME_SLOTS + DATE_SLOTS)
+    + r"):[ \t]+(?P<value>\S.*?)[ \t]*$")
+# A block scalar opens with `|`/`>` (plus optional chomping/indent indicators)
+# and owns every following line indented further than its key.
+_BLOCK_OPEN = re.compile(r"^(?P<indent>[ \t]*)(?:-[ \t]+)?[\w.-]+:[ \t]*[|>][+-]?\d*[ \t]*$")
+_DATE_ONLY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_DATETIME = re.compile(
+    r"^(?P<date>\d{4}-\d{2}-\d{2})[T ](?P<time>\d{2}:\d{2}(?::\d{2})?)"
+    r"(?:\.\d+)?(?P<zone>Z|[+-]\d{2}:?\d{2})?$")
+
+
+def normalise_temporal(text: str) -> str:
+    """Quote and shape temporal values to the range their slot declares.
+
+    Text-level on purpose. Parsing and re-dumping the YAML would drop the `#`
+    header block every record carries — the provenance the reader sees first.
+    """
+    def indent_of(line: str) -> int:
+        return len(line) - len(line.lstrip(" \t"))
+
+    def fix(m: re.Match) -> str:
+        raw = m.group("value").strip()
+        # Leave alone anything that is not a plain scalar: nulls, aliases,
+        # inline comments, flow collections, block scalars.
+        if (not raw or raw in {"null", "~"} or raw[0] in "*&[{|>#"
+                or " #" in raw):
+            return m.group(0)
+        val = raw.strip("'\"")
+        want_datetime = m.group("slot") in DATETIME_SLOTS
+        if _DATE_ONLY.match(val):
+            out = f"{val}T00:00:00Z" if want_datetime else val
+        elif (dt := _DATETIME.match(val)):
+            if want_datetime:
+                time = dt.group("time")
+                if len(time) == 5:               # HH:MM -> HH:MM:SS
+                    time += ":00"
+                out = f"{dt.group('date')}T{time}{dt.group('zone') or 'Z'}"
+            else:
+                out = dt.group("date")           # a date slot keeps only the date
+        else:
+            return m.group(0)                    # unrecognised: do not guess
+        return f"{m.group('indent')}{m.group('slot')}: '{out}'"
+
+    # Line by line, skipping block scalars. A description is free prose, and
+    # prose quoting a field name — "Fields present in the manifest:\nissued:
+    # 2026-05-01" — matches the pattern exactly. Rewriting that edits the
+    # *content* of a record rather than its serialisation, which is the one
+    # thing this function must never do.
+    out_lines: list[str] = []
+    block_indent: int | None = None
+    for line in text.splitlines(keepends=True):
+        stripped = line.rstrip("\n\r")
+        if block_indent is not None:
+            if not stripped.strip() or indent_of(stripped) > block_indent:
+                out_lines.append(line)                 # still inside the block
+                continue
+            block_indent = None                        # block ended
+        if (opener := _BLOCK_OPEN.match(stripped)):
+            block_indent = len(opener.group("indent"))
+            out_lines.append(line)
+            continue
+        out_lines.append(_TEMPORAL_LINE.sub(fix, stripped)
+                         + line[len(stripped):])
+    return "".join(out_lines)
+
+
 PROGRESS_SUFFIX = "_api_progress.json"
 
 
@@ -1088,6 +1204,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             carry["Audit findings"] = body
         elif artifact:
             target.parent.mkdir(parents=True, exist_ok=True)
+            if artifact in ("full", "core"):
+                body = normalise_temporal(body)
             target.write_text(body, encoding="utf-8")
             label = {"full": "Completed full record",
                      "core": "Completed core record",
@@ -1115,6 +1233,14 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             f"{provider_identity()['base_url']}.",
         ] + ([f"Resumed run; phases skipped as already present: {', '.join(skipped)}."]
              if skipped else []))
+    # The file hash alone does not identify the request. Substitution is what
+    # makes the file and the resolved text different objects, so two runs
+    # differing in project, arm, label, model, provider or date shared a prompt
+    # hash and were indistinguishable by their recorded prompt evidence — while
+    # the module docstring claimed the resolved text was what got hashed. Record
+    # both: the file for provenance of the source, the resolution for the
+    # request actually sent.
+    rec.data["prompts"]["resolved"] = resolved_prompt_digest(spec)
     ident = provider_identity()
     rec.data["model"] = {
         "generation_method": "schema-grounded API, six phases",

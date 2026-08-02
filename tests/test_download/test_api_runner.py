@@ -200,6 +200,229 @@ def _rate_limit_error(message: str):
     return anthropic.RateLimitError(message, response=resp, body=None)
 
 
+class TestTemporalValuesAreNormalisedOnWrite(unittest.TestCase):
+    """#215. Two failures were showing up as one.
+
+    `issued: 2026-05-01T00:00:00Z` is a *correct* RFC 3339 value that the
+    validator rejects, because unquoted YAML hands it a `datetime` object where
+    a string is required — the generator was right and the serialisation lost
+    it. `issued: '2026-06-30'` is genuinely wrong. Quoting plus shaping to the
+    slot's declared range fixes both.
+    """
+
+    def _n(self, text):
+        from data_sheets_schema.api_runner import normalise_temporal
+        return normalise_temporal(text)
+
+    def test_a_correct_but_unquoted_value_is_quoted(self):
+        self.assertEqual(self._n("issued: 2026-05-01T00:00:00Z"),
+                         "issued: '2026-05-01T00:00:00Z'")
+
+    def test_a_naive_datetime_gains_a_zone(self):
+        self.assertEqual(self._n("issued: '2026-05-01T00:00:00'"),
+                         "issued: '2026-05-01T00:00:00Z'")
+
+    def test_a_date_in_a_datetime_slot_is_widened(self):
+        self.assertEqual(self._n("issued: '2026-06-30'"),
+                         "issued: '2026-06-30T00:00:00Z'")
+
+    def test_an_explicit_offset_is_kept_not_rewritten(self):
+        self.assertEqual(self._n("issued: 2026-05-01T00:00:00+00:00"),
+                         "issued: '2026-05-01T00:00:00+00:00'")
+
+    def test_a_datetime_in_a_date_slot_is_narrowed(self):
+        self.assertEqual(self._n("    end_date: '2026-05-01T00:00:00Z'"),
+                         "    end_date: '2026-05-01'")
+
+    def test_indentation_and_list_markers_survive(self):
+        self.assertEqual(self._n("  - start_date: 2026-05-01"),
+                         "  - start_date: '2026-05-01'")
+
+    def test_values_it_cannot_read_are_left_alone(self):
+        """Guessing at an unrecognised value would corrupt a record to make a
+        validator happy."""
+        for line in ("issued: null", "issued: ~", "issued: *anchor",
+                     "issued: not-a-date", "issued: [2026-05-01]",
+                     "description: issued: something"):
+            with self.subTest(line=line):
+                self.assertEqual(self._n(line), line)
+
+    def test_the_header_comment_block_survives(self):
+        """A YAML re-dump would drop the `#` header every record carries — the
+        provenance a reader sees first. Hence text-level."""
+        doc = "# Generated: 2026-08-01\n# Arm: baseline\nid: x\nissued: 2026-05-01T00:00:00Z\n"
+        out = self._n(doc)
+        self.assertIn("# Generated: 2026-08-01", out)
+        self.assertIn("# Arm: baseline", out)
+
+    def test_normalisation_is_idempotent(self):
+        """A resumed run re-normalises a record already on disk, so a second
+        pass must be a no-op."""
+        for line in ("issued: 2026-05-01",
+                     "  - start_date: 2026-05-01T00:00:00Z",
+                     "issued: '2026-05-01T00:00:00+00:00'",
+                     'issued: "2026-05-01"'):
+            with self.subTest(line=line):
+                once = self._n(line)
+                self.assertEqual(once, self._n(once))
+
+    def test_line_endings_and_indent_styles_survive(self):
+        self.assertEqual(self._n("issued: 2026-05-01\r\n"),
+                         "issued: '2026-05-01T00:00:00Z'\r\n")
+        self.assertEqual(self._n("\tissued: 2026-05-01"),
+                         "\tissued: '2026-05-01T00:00:00Z'")
+        self.assertEqual(self._n("issued: 2026-05-01"),
+                         "issued: '2026-05-01T00:00:00Z'")
+
+    def test_prose_in_a_block_scalar_is_never_rewritten(self):
+        """A description is free prose, and prose quoting a field name matches
+        the pattern exactly. Rewriting it edits a record's *content* rather
+        than its serialisation — the one thing this must never do."""
+        import yaml as _yaml
+        doc = ("id: x\ndescription: |\n  Fields present in the manifest:\n"
+               "  issued: 2026-05-01\n  end_date: 2026-06-30\n"
+               "issued: 2026-05-01\n")
+        out = self._n(doc)
+        before, after = _yaml.safe_load(doc), _yaml.safe_load(out)
+        self.assertEqual(before["description"], after["description"],
+                         "prose inside a block scalar was rewritten")
+        self.assertEqual(after["issued"], "2026-05-01T00:00:00Z",
+                         "the real field should still be normalised")
+
+    def test_folded_scalars_are_also_protected(self):
+        import yaml as _yaml
+        doc = ("id: x\nnotes: >-\n  A folded note mentioning\n"
+               "  start_date: 2026-01-01\nstart_date: 2026-01-01\n")
+        out = self._n(doc)
+        before, after = _yaml.safe_load(doc), _yaml.safe_load(out)
+        self.assertEqual(before["notes"], after["notes"])
+        self.assertEqual(after["start_date"], "2026-01-01")
+
+    def test_a_block_scalar_ends_at_a_dedent(self):
+        """Fields after a block must still be normalised."""
+        import yaml as _yaml
+        doc = ("id: x\ndescription: |\n  some prose\nissued: 2026-05-01\n")
+        after = _yaml.safe_load(self._n(doc))
+        self.assertEqual(after["issued"], "2026-05-01T00:00:00Z")
+
+    def test_nested_records_keep_their_structure(self):
+        import yaml as _yaml
+        doc = ("id: x\ncollection_timeframes:\n  - start_date: 2026-05-01\n"
+               "    end_date: 2026-06-30\n    description: a window\n")
+        loaded = _yaml.safe_load(self._n(doc))
+        self.assertEqual(set(loaded["collection_timeframes"][0]),
+                         {"start_date", "end_date", "description"})
+        self.assertEqual(loaded["collection_timeframes"][0]["start_date"],
+                         "2026-05-01")
+
+
+class TestGeneratedDateIsTheRunDate(unittest.TestCase):
+    """#214: both prompts stamped a wrong date, in opposite directions."""
+
+    def _resolved(self, condition):
+        from data_sheets_schema.api_runner import resolve_prompt
+        from data_sheets_schema.cli.api import _spec
+        return resolve_prompt(_spec("CHORUS", "baseline",
+                                    "2026-08-01_x_rep1", condition, None, None))
+
+    def _today(self):
+        from data_sheets_schema.cli.api import _spec
+        return _spec("CHORUS", "baseline", "2026-08-01_x_rep1",
+                     "generic", None, None).run_date
+
+    def test_v2_no_longer_leaks_a_literal_placeholder(self):
+        """`{DATE}` was never in the substitution table, so the literal string
+        reached the model; its records read correctly only because the model
+        inferred the date from `{LABEL}`."""
+        body = self._resolved("generic_v2")
+        self.assertNotIn("{DATE}", body)
+        self.assertIn(f"# Generated: {self._today()}", body)
+
+    def test_v1_hardcoded_date_is_normalised_not_emitted(self):
+        """v1 hardcodes 2026-07-28 where every neighbouring header line takes a
+        placeholder, so every run since carried a false date."""
+        body = self._resolved("generic")
+        self.assertNotIn("2026-07-28", body)
+        self.assertIn(f"# Generated: {self._today()}", body)
+
+    def test_v1_file_bytes_are_untouched(self):
+        """The fix must not edit v1: its bytes are the pinned baseline for the
+        2026-07-28 series, and editing them redefines what v2 is measured
+        against."""
+        from data_sheets_schema.api_runner import GENERIC_PROMPT
+        self.assertIn("# Generated: 2026-07-28",
+                      GENERIC_PROMPT.read_text(encoding="utf-8"),
+                      "v1 was edited; normalisation should happen on the "
+                      "resolved text instead")
+
+
+class TestTheRunDateIsFrozenPerRun(unittest.TestCase):
+    """A six-phase run takes tens of minutes; this study's sweep ran past
+    midnight UTC. Reading the clock on each use is therefore not a hypothetical
+    problem."""
+
+    def _spec_for(self, **kw):
+        from data_sheets_schema.api_runner import RunSpec
+        from pathlib import Path
+        return RunSpec(project="CHORUS", arm="baseline",
+                       method="claudecode_agent",
+                       bundle=Path("data/preprocessed/concatenated/"
+                                   "CHORUS_preprocessed.txt"),
+                       label="2026-08-01_x_rep1", **kw)
+
+    def test_every_phase_of_a_run_sees_the_same_date(self):
+        from data_sheets_schema.api_runner import resolve_prompt
+        spec = self._spec_for()
+        self.assertEqual(resolve_prompt(spec), resolve_prompt(spec))
+
+    def test_the_recorded_digest_matches_the_text_actually_sent(self):
+        """The digest is computed after the last phase. If the date moved, it
+        would attest a prompt that was never sent — defeating the point of
+        recording it at all."""
+        import hashlib
+        from data_sheets_schema.api_runner import (
+            resolve_prompt, resolved_prompt_digest)
+        spec = self._spec_for()
+        sent = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
+        self.assertEqual(sent, resolved_prompt_digest(spec)["sha256"])
+
+    def test_the_date_can_be_pinned_explicitly(self):
+        """Frozen on the spec, so a rerun can reproduce an earlier run's text."""
+        from data_sheets_schema.api_runner import resolve_prompt
+        body = resolve_prompt(self._spec_for(run_date="2026-07-04"))
+        self.assertIn("# Generated: 2026-07-04", body)
+
+    def test_the_default_is_today_in_utc(self):
+        from datetime import datetime, timezone
+        self.assertEqual(self._spec_for().run_date,
+                         datetime.now(timezone.utc).date().isoformat())
+
+
+class TestResolvedPromptIsHashed(unittest.TestCase):
+    """The module docstring claimed the resolved text's hash was recorded. Only
+    the file was hashed, so runs differing by substitution were
+    indistinguishable by their prompt evidence."""
+
+    def _digest(self, project, condition="generic"):
+        from data_sheets_schema.api_runner import resolved_prompt_digest
+        from data_sheets_schema.cli.api import _spec
+        return resolved_prompt_digest(
+            _spec(project, "baseline", "2026-08-01_x_rep1", condition, None, None))
+
+    def test_substitution_changes_the_resolved_hash(self):
+        self.assertNotEqual(self._digest("CHORUS")["sha256"],
+                            self._digest("CM4AI")["sha256"],
+                            "same file, different request, same hash")
+
+    def test_the_same_request_hashes_the_same(self):
+        self.assertEqual(self._digest("CHORUS"), self._digest("CHORUS"))
+
+    def test_the_digest_states_its_algorithm_and_size(self):
+        d = self._digest("CHORUS")
+        self.assertEqual(len(d["sha256"]), 64)
+        self.assertGreater(d["bytes"], 0)
+
+
 class FakeResponse:
     def __init__(self, text):
         self.content = [FakeBlock(text)]

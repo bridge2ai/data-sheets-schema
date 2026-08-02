@@ -41,6 +41,22 @@ failures under v1, from `data/evaluation_llm/judgement_cache/*_fitness.jsonl`:
 
 Mean fitness by project: AI_READI 0.901, CHORUS 0.847, CM4AI 0.850, VOICE 0.912.
 
+> **Annotation added 2026-08-01, after the runs — see #216.** This mean-fitness
+> line cannot be regenerated from the artifacts. Six denominators were tried
+> against the judgement cache and none reproduces it, and the figures here are
+> higher than every candidate for AI-READI, CHORUS and VOICE but *lower* for
+> CM4AI — so it is not a subset relation or a denominator error, but a scorer
+> state no longer on disk. Use the recomputed table in
+> `notes/generic_v2_results.md` instead.
+>
+> The **failure counts above are unaffected** and reproduce exactly (form 50,
+> substance 40, target 41; 37/36/39/19 by project), which is what the result
+> rests on.
+>
+> Left in place rather than corrected: this document is the pre-registration,
+> and silently editing a number in it after seeing the outcome would destroy the
+> property that makes it worth having.
+
 ## Prediction
 
 Each rule targets one class, so each class is tested separately rather than by a
