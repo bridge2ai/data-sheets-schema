@@ -108,26 +108,28 @@ classes:
         inlined_as_list: true
       resources:
         description: >-
-          Individual files or nested file collections within this collection.
-          Allows hierarchical file organization with both File objects and
-          nested FileCollection objects.
-        any_of:
-          - range: File
-          - range: FileCollection
-        # Explicit, because the base slot no longer supplies one. `File` rather
-        # than `FileCollection` since a flat list of files is the ordinary case.
-        # This does not make the union work — `range` and `any_of` are ANDed by
-        # the JSON-Schema generator, so the union has never been satisfiable
-        # here and the slot is unused across the whole corpus. Keeping the
-        # declared range means this module resolves standalone and behaviour is
-        # unchanged from before. See the NOTE below and #226.
+          The individual files in this collection. To describe a group of
+          files as a unit rather than listing them, add another entry to the
+          dataset's `file_collections` — a collection does not nest inside
+          another collection.
+        # `File`, not a `File | FileCollection` union (#226). The union was
+        # declared here for years and was never satisfiable: LinkML ANDs `range`
+        # with `any_of` when generating JSON Schema, so the effective constraint
+        # was `File AND (File OR FileCollection)` — which admits a File and
+        # rejects the nested FileCollection the union existed to allow. Before
+        # the module-validation fix the outer range was `Dataset`, making it
+        # unsatisfiable for every value.
+        #
+        # Nothing was lost by narrowing it. Across 658 `file_collections`
+        # entries in the corpus, **zero** populate `resources` at all and none
+        # nests, so the recursive shape was never used by anything. Expressing
+        # it properly would need an abstract parent over File and
+        # FileCollection, and this schema has no abstract or mixin class among
+        # its 78 — a new idiom for a capability nothing exercises. If nesting is
+        # genuinely needed later, that is the change to make, deliberately.
         range: File
         multivalued: true
         inlined_as_list: true
-        # NOTE: LinkML generator limitation - Generated artifacts (Python datamodel,
-        # JSON Schema) do not fully reflect this union type constraint. The generated
-        # code still types resources as Dataset rather than (File | FileCollection).
-        # This is a known limitation of LinkML's union type handling.
     attributes:
       collection_type:
         description: >-

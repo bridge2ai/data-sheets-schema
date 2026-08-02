@@ -8354,7 +8354,7 @@
     {
       "name": "FileCollection_resources",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
-      "description": "Individual files or nested file collections within this collection. Allows hierarchical file organization with both File objects and nested FileCollection objects.",
+      "description": "The individual files in this collection. To describe a group of files as a unit rather than listing them, add another entry to the dataset's `file_collections` \u2014 a collection does not nest inside another collection.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://schema.org/hasPart"
@@ -8373,16 +8373,6 @@
       "multivalued": true,
       "inlined": true,
       "inlined_as_list": true,
-      "any_of": [
-        {
-          "range": "File",
-          "@type": "AnonymousSlotExpression"
-        },
-        {
-          "range": "FileCollection",
-          "@type": "AnonymousSlotExpression"
-        }
-      ],
       "@type": "SlotDefinition"
     }
   ],
@@ -13398,9 +13388,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-08-01T18:20:27",
+  "source_file_date": "2026-08-01T19:29:40",
   "source_file_size": 32488,
-  "generation_date": "2026-08-01T18:28:17",
+  "generation_date": "2026-08-01T20:36:28",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

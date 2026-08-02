@@ -4301,17 +4301,9 @@
                     ]
                 },
                 "resources": {
-                    "description": "Individual files or nested file collections within this collection. Allows hierarchical file organization with both File objects and nested FileCollection objects.",
+                    "description": "The individual files in this collection. To describe a group of files as a unit rather than listing them, add another entry to the dataset's `file_collections` \u2014 a collection does not nest inside another collection.",
                     "items": {
-                        "$ref": "#/$defs/File",
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "string"
-                            }
-                        ]
+                        "$ref": "#/$defs/File"
                     },
                     "type": [
                         "array",

@@ -34262,15 +34262,12 @@ classes:
         inlined_as_list: true
       resources:
         name: resources
-        description: Individual files or nested file collections within this collection.
-          Allows hierarchical file organization with both File objects and nested
-          FileCollection objects.
+        description: The individual files in this collection. To describe a group
+          of files as a unit rather than listing them, add another entry to the dataset's
+          `file_collections` — a collection does not nest inside another collection.
         range: File
         multivalued: true
         inlined_as_list: true
-        any_of:
-        - range: File
-        - range: FileCollection
     attributes:
       collection_type:
         name: collection_type
@@ -34370,9 +34367,9 @@ classes:
         inlined_as_list: true
       resources:
         name: resources
-        description: Individual files or nested file collections within this collection.
-          Allows hierarchical file organization with both File objects and nested
-          FileCollection objects.
+        description: The individual files in this collection. To describe a group
+          of files as a unit rather than listing them, add another entry to the dataset's
+          `file_collections` — a collection does not nest inside another collection.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:hasPart
         alias: resources
@@ -34385,9 +34382,6 @@ classes:
         range: File
         multivalued: true
         inlined_as_list: true
-        any_of:
-        - range: File
-        - range: FileCollection
       conforms_to:
         name: conforms_to
         annotations:
