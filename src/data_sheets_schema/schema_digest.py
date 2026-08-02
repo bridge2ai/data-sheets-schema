@@ -34,7 +34,12 @@ CORE_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_core_all.ya
 CLASS_SCHEMA = {"Dataset": FULL_SCHEMA, "CoreDataset": CORE_SCHEMA}
 
 DESCRIPTION_CHARS = 300
-MAX_ENUM_VALUES = 40
+# Above the largest enum in either schema (EncodingEnum, 43). A truncated enum
+# is not like a truncated description: the tail of a description is usually
+# curation notes, but the tail of a vocabulary is values the model is then
+# unable to choose and will approximate instead. At this size the whole
+# vocabulary costs 38 bytes more than the clipped one, in a cached prefix.
+MAX_ENUM_VALUES = 60
 
 
 @dataclass
@@ -61,6 +66,16 @@ class NestedClass:
     name: str
     required: list[str] = field(default_factory=list)
     optional: list[str] = field(default_factory=list)
+    # Enum-ranged slots on the nested class, and the values they accept.
+    # Naming the key was not enough. `DatasetRelationship` was rendered as
+    # "required: relationship_type, target_dataset" with no hint that
+    # relationship_type takes a controlled vocabulary, so runs filled it with
+    # DataCite spellings (`IsNewVersionOf`, `Continues`, `References`) and
+    # inventions (`related_to`, `is a later release in the same series as`).
+    # Those are plausible and wrong, which is the hardest kind to catch. A
+    # model cannot choose from a list it has never been shown.
+    enums: dict[str, list[str]] = field(default_factory=dict)
+    enums_truncated: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass
@@ -137,11 +152,21 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
             continue
         seen.add(rng)
         req, opt = [], []
+        enums: dict[str, list[str]] = {}
+        enums_truncated: dict[str, int] = {}
         for sub in sv.class_induced_slots(rng):
             (req if sub.required else opt).append(str(sub.name))
+            sub_enum = sv.get_enum(sub.range) if sub.range else None
+            if sub_enum is not None:
+                values = list((sub_enum.permissible_values or {}).keys())
+                enums[str(sub.name)] = values[:MAX_ENUM_VALUES]
+                extra = len(values) - MAX_ENUM_VALUES
+                if extra > 0:
+                    enums_truncated[str(sub.name)] = extra
         if req or opt:
-            digest.nested.append(NestedClass(name=rng, required=sorted(req),
-                                             optional=sorted(opt)))
+            digest.nested.append(NestedClass(
+                name=rng, required=sorted(req), optional=sorted(opt),
+                enums=enums, enums_truncated=enums_truncated))
     digest.nested.sort(key=lambda n: n.name)
     return digest
 
@@ -183,6 +208,13 @@ def render(digest: ClassDigest) -> str:
         for n in digest.nested:
             req = ", ".join(f"`{k}`" for k in n.required) if n.required else "none"
             lines.append(f"- **{n.name}** — required: {req}")
+            # A controlled vocabulary on a nested slot has to be shown here or
+            # nowhere: the top-level listing never reaches it.
+            for slot_name, values in sorted(n.enums.items()):
+                shown = ", ".join(f"`{v}`" for v in values)
+                extra = n.enums_truncated.get(slot_name, 0)
+                tail = f" (+{extra} more)" if extra else ""
+                lines.append(f"    - `{slot_name}` accepts only: {shown}{tail}")
         lines.append("")
     return "\n".join(lines)
 

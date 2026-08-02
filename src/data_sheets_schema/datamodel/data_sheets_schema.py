@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-07-30T19:09:26
+# Generation date: 2026-08-01T18:04:32
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3556,56 +3556,130 @@ class Boolean(EnumDefinitionImpl):
 
 class DatasetRelationshipTypeEnum(EnumDefinitionImpl):
     """
-    Standardized types of relationships between datasets, based on DataCite Metadata Schema RelationType controlled
-    vocabulary and Dublin Core relationship terms. See https://datacite-metadata-schema.readthedocs.io/ and
-    http://purl.org/dc/terms/
+    Relationships between datasets, aligned one-to-one with the DataCite Metadata Schema RelationType controlled
+    vocabulary and mapped to Dublin Core terms where an equivalent exists.
+    Permissible value names are snake_case, following this schema's naming throughout. The corresponding DataCite term
+    is carried in `aliases` on each value, so the alignment is machine-readable rather than asserted in prose.
+    DataCite publishes no per-term IRIs, which is why the link is an alias and not a `meaning`.
+    All 36 DataCite RelationType values are represented. Generators reading DataCite metadata should map the CamelCase
+    term to the snake_case name via `aliases`; emitting the DataCite spelling directly will not validate.
+    See https://datacite-metadata-schema.readthedocs.io/ and http://purl.org/dc/terms/
     """
     derives_from = PermissibleValue(
         text="derives_from",
-        description="""This dataset is derived from the target dataset through processing, analysis, or transformation. Equivalent to DataCite IsDerivedFrom.""")
+        description="""This dataset is derived from the target dataset through processing, analysis, or transformation.""")
+    is_source_of = PermissibleValue(
+        text="is_source_of",
+        description="""This dataset is a source from which the target dataset was derived. The inverse of derives_from.""")
     supplements = PermissibleValue(
         text="supplements",
-        description="This dataset supplements or adds to the target dataset. Equivalent to DataCite IsSupplementTo.")
+        description="This dataset supplements or adds to the target dataset.")
     is_supplemented_by = PermissibleValue(
         text="is_supplemented_by",
-        description="This dataset is supplemented by the target dataset. Equivalent to DataCite IsSupplementedBy.")
+        description="This dataset is supplemented by the target dataset.")
     is_version_of = PermissibleValue(
         text="is_version_of",
-        description="""This dataset is a version of the target dataset (e.g., updated, corrected, or revised version). Equivalent to DataCite IsVersionOf.""")
+        description="""This dataset is a version of the target dataset (e.g., updated, corrected, or revised version).""")
+    has_version = PermissibleValue(
+        text="has_version",
+        description="This dataset has the target dataset as a version of it. The inverse of is_version_of.")
     is_new_version_of = PermissibleValue(
         text="is_new_version_of",
-        description="""This dataset is a new version that replaces or updates the target dataset. Equivalent to DataCite IsNewVersionOf.""")
+        description="This dataset is a new version that replaces or updates the target dataset.")
+    is_previous_version_of = PermissibleValue(
+        text="is_previous_version_of",
+        description="This dataset is an earlier version of the target dataset. The inverse of is_new_version_of.")
     replaces = PermissibleValue(
         text="replaces",
-        description="This dataset replaces or supersedes the target dataset. Equivalent to DataCite Obsoletes.")
+        description="This dataset replaces or supersedes the target dataset.")
     is_replaced_by = PermissibleValue(
         text="is_replaced_by",
-        description="""This dataset is replaced or superseded by the target dataset. Equivalent to DataCite IsObsoletedBy.""")
+        description="This dataset is replaced or superseded by the target dataset.")
     is_required_by = PermissibleValue(
         text="is_required_by",
-        description="This dataset is required by the target dataset. Equivalent to DataCite IsRequiredBy.")
+        description="This dataset is required by the target dataset.")
     requires = PermissibleValue(
         text="requires",
-        description="This dataset requires the target dataset. Equivalent to DataCite Requires.")
+        description="This dataset requires the target dataset.")
     is_part_of = PermissibleValue(
         text="is_part_of",
-        description="""This dataset is part of the target dataset (e.g., subset, component). Equivalent to DataCite IsPartOf.""")
+        description="This dataset is part of the target dataset (e.g., subset, component).")
     has_part = PermissibleValue(
         text="has_part",
-        description="This dataset has the target dataset as a part. Equivalent to DataCite HasPart.")
+        description="This dataset has the target dataset as a part.")
+    is_published_in = PermissibleValue(
+        text="is_published_in",
+        description="This dataset is published in the target resource, typically a publication or a data journal.")
     is_referenced_by = PermissibleValue(
         text="is_referenced_by",
-        description="""This dataset is referenced or cited by the target dataset. Equivalent to DataCite IsReferencedBy.""")
+        description="This dataset is referenced by the target dataset.")
     references = PermissibleValue(
         text="references",
-        description="This dataset references or cites the target dataset. Equivalent to DataCite References.")
+        description="This dataset references the target dataset.")
+    is_cited_by = PermissibleValue(
+        text="is_cited_by",
+        description="""This dataset is cited by the target dataset. Narrower than is_referenced_by: a citation is a formal bibliographic reference.""")
+    cites = PermissibleValue(
+        text="cites",
+        description="This dataset cites the target dataset.")
+    is_continued_by = PermissibleValue(
+        text="is_continued_by",
+        description="""This dataset is continued by the target dataset, which extends it as a later instalment in the same series.""")
+    continues = PermissibleValue(
+        text="continues",
+        description="This dataset continues the target dataset as a later instalment in the same series.")
+    is_described_by = PermissibleValue(
+        text="is_described_by",
+        description="This dataset is described by the target resource.")
+    describes = PermissibleValue(
+        text="describes",
+        description="This dataset describes the target resource.")
+    has_metadata = PermissibleValue(
+        text="has_metadata",
+        description="This dataset has additional metadata held in the target resource.")
+    is_metadata_for = PermissibleValue(
+        text="is_metadata_for",
+        description="This dataset is metadata for the target dataset.")
+    is_documented_by = PermissibleValue(
+        text="is_documented_by",
+        description="This dataset is documented by the target resource, such as a manual or a data dictionary.")
+    documents = PermissibleValue(
+        text="documents",
+        description="This dataset documents the target dataset.")
+    is_compiled_by = PermissibleValue(
+        text="is_compiled_by",
+        description="""This dataset is compiled or created by the target resource, typically software or an instrument.""")
+    compiles = PermissibleValue(
+        text="compiles",
+        description="This dataset compiles or creates the target dataset.")
+    is_variant_form_of = PermissibleValue(
+        text="is_variant_form_of",
+        description="""This dataset is a variant or different form of the target dataset, such as a different encoding or format. This dataset is the variant; the target is the original.""")
+    is_original_form_of = PermissibleValue(
+        text="is_original_form_of",
+        description="""This dataset is the original form of the target dataset. This dataset is the original; the target is the variant.""")
+    is_reviewed_by = PermissibleValue(
+        text="is_reviewed_by",
+        description="This dataset is reviewed by the target resource.")
+    reviews = PermissibleValue(
+        text="reviews",
+        description="This dataset reviews the target dataset.")
+    is_collected_by = PermissibleValue(
+        text="is_collected_by",
+        description="This dataset is collected by the target resource, such as a study or a collection effort.")
+    collects = PermissibleValue(
+        text="collects",
+        description="This dataset collects the target dataset.")
     is_identical_to = PermissibleValue(
         text="is_identical_to",
-        description="""This dataset is identical to the target dataset (e.g., mirror, copy). Equivalent to DataCite IsIdenticalTo.""")
+        description="This dataset is identical to the target dataset (e.g., mirror, copy).")
 
     _defn = EnumDefinition(
         name="DatasetRelationshipTypeEnum",
-        description="""Standardized types of relationships between datasets, based on DataCite Metadata Schema RelationType controlled vocabulary and Dublin Core relationship terms. See https://datacite-metadata-schema.readthedocs.io/ and http://purl.org/dc/terms/""",
+        description="""Relationships between datasets, aligned one-to-one with the DataCite Metadata Schema RelationType controlled vocabulary and mapped to Dublin Core terms where an equivalent exists.
+Permissible value names are snake_case, following this schema's naming throughout. The corresponding DataCite term is carried in `aliases` on each value, so the alignment is machine-readable rather than asserted in prose. DataCite publishes no per-term IRIs, which is why the link is an alias and not a `meaning`.
+All 36 DataCite RelationType values are represented. Generators reading DataCite metadata should map the CamelCase term to the snake_case name via `aliases`; emitting the DataCite spelling directly will not validate.
+See https://datacite-metadata-schema.readthedocs.io/ and http://purl.org/dc/terms/""",
     )
 
 class ComplianceStatusEnum(EnumDefinitionImpl):

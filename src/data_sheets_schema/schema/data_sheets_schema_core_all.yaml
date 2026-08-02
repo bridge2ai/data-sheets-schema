@@ -916,95 +916,291 @@ enums:
         title: Unknown
   DatasetRelationshipTypeEnum:
     name: DatasetRelationshipTypeEnum
-    description: Standardized types of relationships between datasets, based on DataCite
-      Metadata Schema RelationType controlled vocabulary and Dublin Core relationship
-      terms. See https://datacite-metadata-schema.readthedocs.io/ and http://purl.org/dc/terms/
+    description: 'Relationships between datasets, aligned one-to-one with the DataCite
+      Metadata Schema RelationType controlled vocabulary and mapped to Dublin Core
+      terms where an equivalent exists.
+
+      Permissible value names are snake_case, following this schema''s naming throughout.
+      The corresponding DataCite term is carried in `aliases` on each value, so the
+      alignment is machine-readable rather than asserted in prose. DataCite publishes
+      no per-term IRIs, which is why the link is an alias and not a `meaning`.
+
+      All 36 DataCite RelationType values are represented. Generators reading DataCite
+      metadata should map the CamelCase term to the snake_case name via `aliases`;
+      emitting the DataCite spelling directly will not validate.
+
+      See https://datacite-metadata-schema.readthedocs.io/ and http://purl.org/dc/terms/'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
     permissible_values:
       derives_from:
         text: derives_from
         description: This dataset is derived from the target dataset through processing,
-          analysis, or transformation. Equivalent to DataCite IsDerivedFrom.
+          analysis, or transformation.
+        aliases:
+        - IsDerivedFrom
         broad_mappings:
         - dcterms:source
+      is_source_of:
+        text: is_source_of
+        description: This dataset is a source from which the target dataset was derived.
+          The inverse of derives_from.
+        aliases:
+        - IsSourceOf
+        broad_mappings:
+        - dcterms:relation
       supplements:
         text: supplements
-        description: This dataset supplements or adds to the target dataset. Equivalent
-          to DataCite IsSupplementTo.
+        description: This dataset supplements or adds to the target dataset.
+        aliases:
+        - IsSupplementTo
         broad_mappings:
         - dcterms:relation
       is_supplemented_by:
         text: is_supplemented_by
-        description: This dataset is supplemented by the target dataset. Equivalent
-          to DataCite IsSupplementedBy.
+        description: This dataset is supplemented by the target dataset.
+        aliases:
+        - IsSupplementedBy
         broad_mappings:
         - dcterms:relation
       is_version_of:
         text: is_version_of
         description: This dataset is a version of the target dataset (e.g., updated,
-          corrected, or revised version). Equivalent to DataCite IsVersionOf.
+          corrected, or revised version).
+        aliases:
+        - IsVersionOf
         exact_mappings:
         - dcterms:isVersionOf
+      has_version:
+        text: has_version
+        description: This dataset has the target dataset as a version of it. The inverse
+          of is_version_of.
+        aliases:
+        - HasVersion
+        exact_mappings:
+        - dcterms:hasVersion
       is_new_version_of:
         text: is_new_version_of
         description: This dataset is a new version that replaces or updates the target
-          dataset. Equivalent to DataCite IsNewVersionOf.
+          dataset.
+        aliases:
+        - IsNewVersionOf
         exact_mappings:
         - dcterms:isVersionOf
         broad_mappings:
         - dcterms:replaces
+      is_previous_version_of:
+        text: is_previous_version_of
+        description: This dataset is an earlier version of the target dataset. The
+          inverse of is_new_version_of.
+        aliases:
+        - IsPreviousVersionOf
+        broad_mappings:
+        - dcterms:isReplacedBy
       replaces:
         text: replaces
-        description: This dataset replaces or supersedes the target dataset. Equivalent
-          to DataCite Obsoletes.
+        description: This dataset replaces or supersedes the target dataset.
+        aliases:
+        - Obsoletes
         exact_mappings:
         - dcterms:replaces
       is_replaced_by:
         text: is_replaced_by
         description: This dataset is replaced or superseded by the target dataset.
-          Equivalent to DataCite IsObsoletedBy.
+        aliases:
+        - IsObsoletedBy
         exact_mappings:
         - dcterms:isReplacedBy
       is_required_by:
         text: is_required_by
-        description: This dataset is required by the target dataset. Equivalent to
-          DataCite IsRequiredBy.
+        description: This dataset is required by the target dataset.
+        aliases:
+        - IsRequiredBy
         exact_mappings:
         - dcterms:isRequiredBy
       requires:
         text: requires
-        description: This dataset requires the target dataset. Equivalent to DataCite
-          Requires.
+        description: This dataset requires the target dataset.
+        aliases:
+        - Requires
         exact_mappings:
         - dcterms:requires
       is_part_of:
         text: is_part_of
         description: This dataset is part of the target dataset (e.g., subset, component).
-          Equivalent to DataCite IsPartOf.
+        aliases:
+        - IsPartOf
         exact_mappings:
         - dcterms:isPartOf
       has_part:
         text: has_part
-        description: This dataset has the target dataset as a part. Equivalent to
-          DataCite HasPart.
+        description: This dataset has the target dataset as a part.
+        aliases:
+        - HasPart
         exact_mappings:
         - dcterms:hasPart
+      is_published_in:
+        text: is_published_in
+        description: This dataset is published in the target resource, typically a
+          publication or a data journal.
+        aliases:
+        - IsPublishedIn
+        broad_mappings:
+        - dcterms:isPartOf
       is_referenced_by:
         text: is_referenced_by
-        description: This dataset is referenced or cited by the target dataset. Equivalent
-          to DataCite IsReferencedBy.
+        description: This dataset is referenced by the target dataset.
+        aliases:
+        - IsReferencedBy
         exact_mappings:
         - dcterms:isReferencedBy
       references:
         text: references
-        description: This dataset references or cites the target dataset. Equivalent
-          to DataCite References.
+        description: This dataset references the target dataset.
+        aliases:
+        - References
         exact_mappings:
         - dcterms:references
+      is_cited_by:
+        text: is_cited_by
+        description: 'This dataset is cited by the target dataset. Narrower than is_referenced_by:
+          a citation is a formal bibliographic reference.'
+        aliases:
+        - IsCitedBy
+        broad_mappings:
+        - dcterms:isReferencedBy
+      cites:
+        text: cites
+        description: This dataset cites the target dataset.
+        aliases:
+        - Cites
+        broad_mappings:
+        - dcterms:references
+      is_continued_by:
+        text: is_continued_by
+        description: This dataset is continued by the target dataset, which extends
+          it as a later instalment in the same series.
+        aliases:
+        - IsContinuedBy
+        broad_mappings:
+        - dcterms:relation
+      continues:
+        text: continues
+        description: This dataset continues the target dataset as a later instalment
+          in the same series.
+        aliases:
+        - Continues
+        broad_mappings:
+        - dcterms:relation
+      is_described_by:
+        text: is_described_by
+        description: This dataset is described by the target resource.
+        aliases:
+        - IsDescribedBy
+        broad_mappings:
+        - dcterms:relation
+      describes:
+        text: describes
+        description: This dataset describes the target resource.
+        aliases:
+        - Describes
+        broad_mappings:
+        - dcterms:relation
+      has_metadata:
+        text: has_metadata
+        description: This dataset has additional metadata held in the target resource.
+        aliases:
+        - HasMetadata
+        broad_mappings:
+        - dcterms:relation
+      is_metadata_for:
+        text: is_metadata_for
+        description: This dataset is metadata for the target dataset.
+        aliases:
+        - IsMetadataFor
+        broad_mappings:
+        - dcterms:relation
+      is_documented_by:
+        text: is_documented_by
+        description: This dataset is documented by the target resource, such as a
+          manual or a data dictionary.
+        aliases:
+        - IsDocumentedBy
+        broad_mappings:
+        - dcterms:relation
+      documents:
+        text: documents
+        description: This dataset documents the target dataset.
+        aliases:
+        - Documents
+        broad_mappings:
+        - dcterms:relation
+      is_compiled_by:
+        text: is_compiled_by
+        description: This dataset is compiled or created by the target resource, typically
+          software or an instrument.
+        aliases:
+        - IsCompiledBy
+        broad_mappings:
+        - dcterms:relation
+      compiles:
+        text: compiles
+        description: This dataset compiles or creates the target dataset.
+        aliases:
+        - Compiles
+        broad_mappings:
+        - dcterms:relation
+      is_variant_form_of:
+        text: is_variant_form_of
+        description: This dataset is a variant or different form of the target dataset,
+          such as a different encoding or format. This dataset is the variant; the
+          target is the original.
+        aliases:
+        - IsVariantFormOf
+        exact_mappings:
+        - dcterms:isFormatOf
+      is_original_form_of:
+        text: is_original_form_of
+        description: This dataset is the original form of the target dataset. This
+          dataset is the original; the target is the variant.
+        aliases:
+        - IsOriginalFormOf
+        exact_mappings:
+        - dcterms:hasFormat
+      is_reviewed_by:
+        text: is_reviewed_by
+        description: This dataset is reviewed by the target resource.
+        aliases:
+        - IsReviewedBy
+        broad_mappings:
+        - dcterms:relation
+      reviews:
+        text: reviews
+        description: This dataset reviews the target dataset.
+        aliases:
+        - Reviews
+        broad_mappings:
+        - dcterms:relation
+      is_collected_by:
+        text: is_collected_by
+        description: This dataset is collected by the target resource, such as a study
+          or a collection effort.
+        aliases:
+        - IsCollectedBy
+        broad_mappings:
+        - dcterms:relation
+      collects:
+        text: collects
+        description: This dataset collects the target dataset.
+        aliases:
+        - Collects
+        broad_mappings:
+        - dcterms:relation
       is_identical_to:
         text: is_identical_to
         description: This dataset is identical to the target dataset (e.g., mirror,
-          copy). Equivalent to DataCite IsIdenticalTo.
+          copy).
+        aliases:
+        - IsIdenticalTo
         broad_mappings:
         - dcterms:relation
   ComplianceStatusEnum:
