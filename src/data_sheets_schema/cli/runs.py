@@ -476,3 +476,143 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
     click.echo("record_mode: derived — not a generated record. `d4d runs "
                "compare` excludes it from agreement figures and says so, "
                "because it is built from the runs those figures measure.")
+
+
+def _validates(record: Path) -> bool:
+    """Run the validator, rather than trust a status recorded earlier."""
+    import subprocess
+    schema = "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+    try:
+        return subprocess.run(
+            ["poetry", "run", "linkml-validate", "-s", schema, "-C", "Dataset",
+             str(record)], capture_output=True, text=True,
+            timeout=300).returncode == 0
+    except Exception:                                   # noqa: BLE001
+        return False
+
+
+@runs.command("select")
+@click.option("--method", default="claudecode_agent",
+              help="Method directory the replicates live under.")
+@click.option("--project", required=True)
+@click.option("--config", required=True,
+              help="Config prefix whose replicates are the candidates, e.g. "
+                   "2026-07-31_claude-opus-5-generic-v2.")
+@click.option("--allow-unverified", is_flag=True,
+              help="Consider replicates whose validation status is unknown. "
+                   "Off by default: absence of evidence is not validity.")
+@click.option("--execute", is_flag=True,
+              help="Record the choice in the winner's provenance. Without "
+                   "this, report and write nothing.")
+def select_cmd(method, project, config, allow_unverified, execute):
+    """Mark one replicate canonical, keeping all of them.
+
+    Selection, not merging. Merging splices values across replicates that
+    disagree on 77-98% of the slots they share, for a coverage gain of 1-5 slots
+    (#229) — and a spliced record can assert a participant count from one
+    referent and a DOI from another. A single replicate is internally coherent
+    because one generation produced it.
+
+    The criterion is **validity first, coverage second**. Coverage alone is
+    close to arbitrary here: margins across the generic-v2 config are +0, +1,
+    +2 and +1 slots, and AI-READI is an outright tie. Validity is decisive —
+    it breaks that tie, eliminates a higher-coverage CM4AI replicate, and shows
+    that no VOICE replicate is shippable at all.
+
+    Nothing is moved or copied. The winner's provenance gains a `canonical`
+    block naming every candidate and the criterion, so the choice is auditable
+    and reversible.
+    """
+    import yaml as _yaml
+    from data_sheets_schema.runs import (
+        CONCAT_DIR, INVALID, UNVERIFIED, VALID, is_complete, validation_status)
+    from data_sheets_schema.provenance import ProvenanceRecord, record_path_for
+
+    base_dir = CONCAT_DIR / method
+    labels = sorted(p.name for p in base_dir.glob(f"{config}_rep*") if p.is_dir())
+    if len(labels) < 2:
+        raise click.ClickException(
+            f"selection needs at least two replicates of {config!r}; "
+            f"found {len(labels)}")
+
+    candidates = []
+    for label in labels:
+        record = base_dir / label / f"{project}_d4d.yaml"
+        if not record.exists():
+            candidates.append((label, None, "no record", 0, "no record"))
+            continue
+        if not is_complete(method, label, project, CONCAT_DIR):
+            candidates.append((label, record, "incomplete", 0, "incomplete"))
+            continue
+        loaded = _yaml.safe_load(record.read_text(encoding="utf-8"))
+        slots = len(loaded) if isinstance(loaded, dict) else 0
+        # Validate now, rather than reading the status recorded at generation
+        # time. `compare()` reads the record because it runs over 100+ runs in
+        # an analysis hot path; selection touches three and happens once, so it
+        # can afford the truth. It matters: the schema has moved since these
+        # runs, and CM4AI rep1 is recorded `invalid` but validates against the
+        # current schema — the DataCite alignment admits a value that was
+        # rejected when the run was made. Selecting on the stale claim would
+        # have excluded a perfectly good record.
+        live = VALID if _validates(record) else INVALID
+        recorded = validation_status(method, label, project, CONCAT_DIR)
+        candidates.append((label, record, live, slots, recorded))
+
+    accept = {VALID} | ({UNVERIFIED} if allow_unverified else set())
+    eligible = [c for c in candidates if c[2] in accept]
+
+    click.echo(f"{project} — {len(labels)} replicate(s) of {config}")
+    for label, _record, status, slots, recorded in candidates:
+        mark = "  " if status in accept else "✗ "
+        drift = (f"  (provenance says {recorded}; the schema has moved since "
+                 f"this run)" if recorded != status and
+                 recorded in (VALID, INVALID) else "")
+        click.echo(f" {mark}{label:52s} {slots:3d} slots  {status}{drift}")
+
+    if not eligible:
+        raise click.ClickException(
+            f"no replicate of {project} is eligible. Nothing here can be "
+            f"canonical, and picking the least-bad would ship a record known "
+            f"to be broken. Fix the generator and rerun, or pass "
+            f"--allow-unverified if the statuses are merely unrecorded.")
+
+    # Coverage second, and the label as a deterministic tie-break so repeated
+    # runs agree. Margins are thin enough that ties are ordinary, not freak.
+    eligible.sort(key=lambda c: (-c[3], c[0]))
+    winner = eligible[0]
+    runner_up = eligible[1] if len(eligible) > 1 else None
+    margin = winner[3] - runner_up[3] if runner_up else None
+
+    click.echo(f"\n→ {winner[0]}  ({winner[3]} slots)")
+    if margin == 0:
+        click.echo("   Tied on coverage with the runner-up; the label broke the "
+                   "tie. The choice between them is arbitrary on this "
+                   "criterion.")
+    elif margin is not None:
+        click.echo(f"   {margin} slot(s) ahead of the runner-up — a thin margin "
+                   f"on ~{winner[3]} slots, so read this as 'no reason to "
+                   f"prefer another', not 'clearly best'.")
+
+    if not execute:
+        click.echo("\nDry run. Re-run with --execute to record the choice.")
+        return
+
+    prov_path = record_path_for(project, method, winner[0], CONCAT_DIR)
+    if not prov_path.exists():
+        raise click.ClickException(
+            f"{winner[0]} has no provenance record at {prov_path}; a canonical "
+            f"record must be attributable.")
+    data = _yaml.safe_load(prov_path.read_text(encoding="utf-8")) or {}
+    data["canonical"] = {
+        "criterion": "validates against the current schema, then most slots, then lowest label",
+        "selected_from": [
+            {"label": lab, "slots": n, "validation": st,
+             "validation_recorded_at_run_time": rec}
+            for lab, _r, st, n, rec in candidates],
+        "margin_over_runner_up": margin,
+        "selected_by": "d4d runs select",
+    }
+    ProvenanceRecord(data=data).write(prov_path)
+    click.echo(f"\nRecorded in {prov_path}")
+    click.echo("All replicates kept — this marks one, it does not move or "
+               "delete anything.")
