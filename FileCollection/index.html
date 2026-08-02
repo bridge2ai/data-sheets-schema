@@ -317,8 +317,8 @@
 
 
 
-        FileCollection --&gt; "*" Dataset : resources
-        click Dataset href "../Dataset/"
+        FileCollection --&gt; "*" File : resources
+        click File href "../File/"
 
 
 
@@ -375,7 +375,7 @@
 </tr>
 <tr>
 <td><a href="../resources/">resources</a></td>
-<td>* <br/> <a href="../Dataset/">Dataset</a> or <br/><a href="../File/">File</a> or <br/><a href="./">FileCollection</a></td>
+<td>* <br/> <a href="../File/">File</a> or <br/><a href="../File/">File</a> or <br/><a href="./">FileCollection</a></td>
 <td>Individual files or nested file collections within this collection</td>
 <td>direct</td>
 </tr>
@@ -645,6 +645,7 @@ slot_usage:
     description: Individual files or nested file collections within this collection.
       Allows hierarchical file organization with both File objects and nested FileCollection
       objects.
+    range: File
     multivalued: true
     inlined_as_list: true
     any_of:
@@ -734,6 +735,7 @@ slot_usage:
     description: Individual files or nested file collections within this collection.
       Allows hierarchical file organization with both File objects and nested FileCollection
       objects.
+    range: File
     multivalued: true
     inlined_as_list: true
     any_of:
@@ -852,7 +854,7 @@ attributes:
     - DatasetCollection
     - Dataset
     - FileCollection
-    range: Dataset
+    range: File
     multivalued: true
     inlined_as_list: true
     any_of:

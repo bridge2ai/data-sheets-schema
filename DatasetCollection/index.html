@@ -325,7 +325,7 @@
 <tr>
 <td><a href="../resources/">resources</a></td>
 <td>* <br/> <a href="../Dataset/">Dataset</a></td>
-<td>Sub-resources or component items</td>
+<td>The Dataset records collected in this DatasetCollection</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -528,6 +528,9 @@ slots:
 slot_usage:
   resources:
     name: resources
+    description: The Dataset records collected in this DatasetCollection.
+    range: Dataset
+    multivalued: true
     inlined_as_list: true
 tree_root: true
 
@@ -551,14 +554,14 @@ is_a: Information
 slot_usage:
   resources:
     name: resources
+    description: The Dataset records collected in this DatasetCollection.
+    range: Dataset
+    multivalued: true
     inlined_as_list: true
 attributes:
   resources:
     name: resources
-    description: Sub-resources or component items. In DatasetCollection, contains
-      Dataset objects. In Dataset, contains nested Dataset objects. In FileCollection,
-      contains nested FileCollection objects. The specific range is defined via slot_usage
-      in each class.
+    description: The Dataset records collected in this DatasetCollection.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: schema:hasPart

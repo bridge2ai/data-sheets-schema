@@ -400,16 +400,6 @@ Alias: resources</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
-<td>yes</td>
-</tr>
-<tr>
 <td><a href="../DatasetCollection/">DatasetCollection</a></td>
 <td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>yes</td>
@@ -419,12 +409,22 @@ Alias: resources</p>
 <td>A single component of related observations and/or information that can be rea...</td>
 <td>yes</td>
 </tr>
+<tr>
+<td><a href="../FileCollection/">FileCollection</a></td>
+<td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td>no</td>
+</tr>
 </tbody>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
 <li>
-<p>Range: <a href="../Dataset/">Dataset</a></p>
+<p>Range: <a href="../String/">String</a></p>
 </li>
 <li>
 <p>Multivalued: True</p>
@@ -470,7 +470,7 @@ domain_of:
 - DatasetCollection
 - Dataset
 - FileCollection
-range: Dataset
+range: string
 multivalued: true
 
 </code></pre>
