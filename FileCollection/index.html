@@ -375,8 +375,8 @@
 </tr>
 <tr>
 <td><a href="../resources/">resources</a></td>
-<td>* <br/> <a href="../File/">File</a> or <br/><a href="../File/">File</a> or <br/><a href="./">FileCollection</a></td>
-<td>Individual files or nested file collections within this collection</td>
+<td>* <br/> <a href="../File/">File</a></td>
+<td>The individual files in this collection</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -554,12 +554,6 @@
 <td>range</td>
 <td><a href="./">FileCollection</a></td>
 </tr>
-<tr>
-<td><a href="./">FileCollection</a></td>
-<td><a href="../resources/">resources</a></td>
-<td>any_of[range]</td>
-<td><a href="./">FileCollection</a></td>
-</tr>
 </tbody>
 </table>
 <h2 id="aliases">Aliases</h2>
@@ -642,15 +636,12 @@ slot_usage:
     inlined_as_list: true
   resources:
     name: resources
-    description: Individual files or nested file collections within this collection.
-      Allows hierarchical file organization with both File objects and nested FileCollection
-      objects.
+    description: The individual files in this collection. To describe a group of files
+      as a unit rather than listing them, add another entry to the dataset's `file_collections`
+      — a collection does not nest inside another collection.
     range: File
     multivalued: true
     inlined_as_list: true
-    any_of:
-    - range: File
-    - range: FileCollection
 attributes:
   collection_type:
     name: collection_type
@@ -732,15 +723,12 @@ slot_usage:
     inlined_as_list: true
   resources:
     name: resources
-    description: Individual files or nested file collections within this collection.
-      Allows hierarchical file organization with both File objects and nested FileCollection
-      objects.
+    description: The individual files in this collection. To describe a group of files
+      as a unit rather than listing them, add another entry to the dataset's `file_collections`
+      — a collection does not nest inside another collection.
     range: File
     multivalued: true
     inlined_as_list: true
-    any_of:
-    - range: File
-    - range: FileCollection
 attributes:
   collection_type:
     name: collection_type
@@ -842,9 +830,9 @@ attributes:
     inlined_as_list: true
   resources:
     name: resources
-    description: Individual files or nested file collections within this collection.
-      Allows hierarchical file organization with both File objects and nested FileCollection
-      objects.
+    description: The individual files in this collection. To describe a group of files
+      as a unit rather than listing them, add another entry to the dataset's `file_collections`
+      — a collection does not nest inside another collection.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: schema:hasPart
@@ -857,9 +845,6 @@ attributes:
     range: File
     multivalued: true
     inlined_as_list: true
-    any_of:
-    - range: File
-    - range: FileCollection
   conforms_to:
     name: conforms_to
     annotations:
