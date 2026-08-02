@@ -221,11 +221,18 @@ test-schema: $(SOURCE_SCHEMA_ALL)
 	$(RUN) gen-project ${GEN_PARGS} -d tmp $(SOURCE_SCHEMA_ALL)
 
 # Test individual D4D module schemas
+# GEN_PARGS-free on purpose, but the generator set must match `gen-project`
+# above. Bare `gen-project` runs *every* generator, including shaclgen, which
+# fails on these modules with `KeyError: data-sheets-schema-base` — a generator
+# limitation around imported schemas, not a fault in the modules. The project
+# never builds SHACL, so validating it here only produced a failure nobody could
+# act on, and the target had failed for so long that module-level validation was
+# not running at all.
 test-modules:
 	@echo "Validating all D4D module schemas..."
 	@for module in $(SOURCE_SCHEMA_DIR)D4D_*.yaml; do \
 		echo "Validating $$module..."; \
-		$(RUN) gen-project -d tmp $$module || exit 1; \
+		$(RUN) gen-project -I python -I jsonschema -I jsonld -I owl -d tmp $$module || exit 1; \
 	done
 	@echo "All D4D module schemas validated successfully!"
 

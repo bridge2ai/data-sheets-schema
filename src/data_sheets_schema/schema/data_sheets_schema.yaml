@@ -83,6 +83,10 @@ classes:
       - resources
     slot_usage:
       resources:
+        description: >-
+          The Dataset records collected in this DatasetCollection.
+        range: Dataset
+        multivalued: true
         inlined_as_list: true
 
   # TODO: consider how to distinguish between metadata only vs

@@ -1846,7 +1846,6 @@ slots:
       in each class.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
     slot_uri: schema:hasPart
-    range: Dataset
     multivalued: true
 classes:
   NamedThing:
