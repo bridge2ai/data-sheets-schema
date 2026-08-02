@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-08-01T18:04:32
+# Generation date: 2026-08-01T18:28:18
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2942,7 +2942,7 @@ class FileCollection(Information):
     path: Optional[str] = None
     compression: Optional[Union[str, "CompressionEnum"]] = None
     external_resources: Optional[Union[Union[dict, ExternalResource], list[Union[dict, ExternalResource]]]] = empty_list()
-    resources: Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]] = empty_dict()
+    resources: Optional[Union[dict[Union[str, FileId], Union[dict, File]], list[Union[dict, File]]]] = empty_dict()
     collection_type: Optional[Union[Union[str, "FileCollectionTypeEnum"], list[Union[str, "FileCollectionTypeEnum"]]]] = empty_list()
     file_count: Optional[int] = None
     total_bytes: Optional[int] = None
@@ -2963,7 +2963,7 @@ class FileCollection(Information):
             self.external_resources = [self.external_resources] if self.external_resources is not None else []
         self.external_resources = [v if isinstance(v, ExternalResource) else ExternalResource(**as_dict(v)) for v in self.external_resources]
 
-        self._normalize_inlined_as_list(slot_name="resources", slot_type=Dataset, key_name="id", keyed=True)
+        self._normalize_inlined_as_list(slot_name="resources", slot_type=File, key_name="id", keyed=True)
 
         if not isinstance(self.collection_type, list):
             self.collection_type = [self.collection_type] if self.collection_type is not None else []
@@ -4081,7 +4081,7 @@ slots.external_resources = Slot(uri=DCTERMS.references, name="external_resources
                    model_uri=DATA_SHEETS_SCHEMA.external_resources, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.resources = Slot(uri=SCHEMA.hasPart, name="resources", curie=SCHEMA.curie('hasPart'),
-                   model_uri=DATA_SHEETS_SCHEMA.resources, domain=None, range=Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.resources, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.dataset__file_collections = Slot(uri=D4D.fileCollections, name="dataset__file_collections", curie=D4D.curie('fileCollections'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__file_collections, domain=None, range=Optional[Union[dict[Union[str, FileCollectionId], Union[dict, FileCollection]], list[Union[dict, FileCollection]]]])
@@ -4913,4 +4913,4 @@ slots.FileCollection_external_resources = Slot(uri=DCTERMS.references, name="Fil
                    model_uri=DATA_SHEETS_SCHEMA.FileCollection_external_resources, domain=FileCollection, range=Optional[Union[Union[dict, ExternalResource], list[Union[dict, ExternalResource]]]])
 
 slots.FileCollection_resources = Slot(uri=SCHEMA.hasPart, name="FileCollection_resources", curie=SCHEMA.curie('hasPart'),
-                   model_uri=DATA_SHEETS_SCHEMA.FileCollection_resources, domain=FileCollection, range=Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.FileCollection_resources, domain=FileCollection, range=Optional[Union[dict[Union[str, FileId], Union[dict, File]], list[Union[dict, File]]]])

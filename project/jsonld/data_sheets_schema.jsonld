@@ -1778,7 +1778,7 @@
     },
     {
       "name": "FileTypeEnum",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection/FileTypeEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FileTypeEnum",
       "description": "Types of individual files within datasets.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
       "permissible_values": [
@@ -1831,7 +1831,7 @@
     },
     {
       "name": "FileCollectionTypeEnum",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection/FileCollectionTypeEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FileCollectionTypeEnum",
       "description": "Types of file collections within datasets.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
       "permissible_values": [
@@ -2664,7 +2664,7 @@
         "Dataset",
         "FileCollection"
       ],
-      "range": "Dataset",
+      "range": "string",
       "multivalued": true,
       "@type": "SlotDefinition"
     },
@@ -8178,7 +8178,7 @@
     {
       "name": "DatasetCollection_resources",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
-      "description": "Sub-resources or component items. In DatasetCollection, contains Dataset objects. In Dataset, contains nested Dataset objects. In FileCollection, contains nested FileCollection objects. The specific range is defined via slot_usage in each class.",
+      "description": "The Dataset records collected in this DatasetCollection.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://schema.org/hasPart"
@@ -8369,7 +8369,7 @@
       ],
       "is_usage_slot": true,
       "usage_slot_name": "resources",
-      "range": "Dataset",
+      "range": "File",
       "multivalued": true,
       "inlined": true,
       "inlined_as_list": true,
@@ -13236,7 +13236,7 @@
     },
     {
       "name": "File",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection/File",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/File",
       "description": "A single file within a dataset or file collection. Represents an individual data file, code file, documentation file, etc. Maps to RO-Crate File entities.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
       "aliases": [
@@ -13301,7 +13301,7 @@
     },
     {
       "name": "FileCollection",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection/FileCollection",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FileCollection",
       "description": "A collection of files with shared characteristics (format, purpose, structure). Represents a logical grouping of related files within a dataset, such as all training data files, all image files, or all raw data files. Maps to RO-Crate Dataset entities via schema:hasPart relationships.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
       "aliases": [
@@ -13398,9 +13398,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-07-28T18:11:45",
-  "source_file_size": 32348,
-  "generation_date": "2026-08-01T18:04:30",
+  "source_file_date": "2026-08-01T18:20:27",
+  "source_file_size": 32488,
+  "generation_date": "2026-08-01T18:28:17",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

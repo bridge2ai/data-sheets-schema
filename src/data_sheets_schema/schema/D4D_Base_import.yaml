@@ -502,7 +502,14 @@ slots:
       Sub-resources or component items. In DatasetCollection, contains Dataset objects.
       In Dataset, contains nested Dataset objects. In FileCollection, contains nested
       FileCollection objects. The specific range is defined via slot_usage in each class.
-    range: Dataset
+    # No range here on purpose. `Dataset` is defined in data_sheets_schema.yaml,
+    # which *imports* this module — so naming it here pointed upward, out of this
+    # module's import closure, and `gen-project` could not resolve it. That is
+    # what made `make test-modules` fail on every module, so module-level
+    # validation has never actually run.
+    #
+    # Each class states its own range in slot_usage, which is what the
+    # description above already claimed happened.
     multivalued: true
     slot_uri: schema:hasPart
 

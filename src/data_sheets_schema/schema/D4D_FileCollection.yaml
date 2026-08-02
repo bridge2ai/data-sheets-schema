@@ -11,6 +11,14 @@ see_also:
 
 prefixes:
   d4d: https://w3id.org/bridge2ai/data-sheets-schema/
+  # This module's `default_prefix`. Declared here because a module has to
+  # resolve its own default without relying on another schema in the
+  # closure having declared it.
+  data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
+  # Declared because this module imports `linkml:types`. Without it the module
+  # cannot be built on its own — the prefix resolves only when some *other*
+  # schema that declares it happens to be in the same import closure.
+  linkml: https://w3id.org/linkml/
   dcat: http://www.w3.org/ns/dcat#
   schema: http://schema.org/
   dcterms: http://purl.org/dc/terms/
@@ -21,6 +29,11 @@ default_range: string
 imports:
   - linkml:types
   - D4D_Base_import
+  # FileCollection.external_resources has range ExternalResource, which is
+  # defined in the composition module. Without this import the range does not
+  # resolve and the module cannot be built alone. D4D_Composition imports only
+  # the base, so this introduces no cycle.
+  - D4D_Composition
 
 classes:
 
@@ -101,6 +114,14 @@ classes:
         any_of:
           - range: File
           - range: FileCollection
+        # Explicit, because the base slot no longer supplies one. `File` rather
+        # than `FileCollection` since a flat list of files is the ordinary case.
+        # This does not make the union work — `range` and `any_of` are ANDed by
+        # the JSON-Schema generator, so the union has never been satisfiable
+        # here and the slot is unused across the whole corpus. Keeping the
+        # declared range means this module resolves standalone and behaviour is
+        # unchanged from before. See the NOTE below and #226.
+        range: File
         multivalued: true
         inlined_as_list: true
         # NOTE: LinkML generator limitation - Generated artifacts (Python datamodel,
