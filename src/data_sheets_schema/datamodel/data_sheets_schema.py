@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-08-01T17:49:04
+# Generation date: 2026-08-01T18:04:32
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3654,10 +3654,10 @@ class DatasetRelationshipTypeEnum(EnumDefinitionImpl):
         description="This dataset compiles or creates the target dataset.")
     is_variant_form_of = PermissibleValue(
         text="is_variant_form_of",
-        description="""This dataset is a variant or different form of the target dataset, such as a different encoding or format.""")
+        description="""This dataset is a variant or different form of the target dataset, such as a different encoding or format. This dataset is the variant; the target is the original.""")
     is_original_form_of = PermissibleValue(
         text="is_original_form_of",
-        description="This dataset is the original form of the target dataset.")
+        description="""This dataset is the original form of the target dataset. This dataset is the original; the target is the variant.""")
     is_reviewed_by = PermissibleValue(
         text="is_reviewed_by",
         description="This dataset is reviewed by the target resource.")

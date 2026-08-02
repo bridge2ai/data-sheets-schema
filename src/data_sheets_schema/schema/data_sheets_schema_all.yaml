@@ -1074,16 +1074,16 @@ enums:
           it as a later instalment in the same series.
         aliases:
         - IsContinuedBy
-        exact_mappings:
-        - dcterms:isReplacedBy
+        broad_mappings:
+        - dcterms:relation
       continues:
         text: continues
         description: This dataset continues the target dataset as a later instalment
           in the same series.
         aliases:
         - Continues
-        exact_mappings:
-        - dcterms:replaces
+        broad_mappings:
+        - dcterms:relation
       is_described_by:
         text: is_described_by
         description: This dataset is described by the target resource.
@@ -1145,18 +1145,20 @@ enums:
       is_variant_form_of:
         text: is_variant_form_of
         description: This dataset is a variant or different form of the target dataset,
-          such as a different encoding or format.
+          such as a different encoding or format. This dataset is the variant; the
+          target is the original.
         aliases:
         - IsVariantFormOf
         exact_mappings:
-        - dcterms:hasFormat
+        - dcterms:isFormatOf
       is_original_form_of:
         text: is_original_form_of
-        description: This dataset is the original form of the target dataset.
+        description: This dataset is the original form of the target dataset. This
+          dataset is the original; the target is the variant.
         aliases:
         - IsOriginalFormOf
         exact_mappings:
-        - dcterms:isFormatOf
+        - dcterms:hasFormat
       is_reviewed_by:
         text: is_reviewed_by
         description: This dataset is reviewed by the target resource.

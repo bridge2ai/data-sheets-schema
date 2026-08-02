@@ -78,6 +78,56 @@ class TestDataCiteAlignment(unittest.TestCase):
                          "full and core schemas disagree on the vocabulary")
 
 
+class TestDublinCoreMappingsPointTheRightWay(unittest.TestCase):
+    """An inverted `exact_mappings` is silent: validation cannot see it, and
+    anything consuming the semantic layer infers the reverse relationship."""
+
+    def setUp(self):
+        self.pvs = SchemaView(FULL).get_enum(ENUM).permissible_values
+
+    def _exact(self, name):
+        return set(self.pvs[name].exact_mappings or [])
+
+    def _broad(self, name):
+        return set(self.pvs[name].broad_mappings or [])
+
+    def test_variant_and_original_form_are_not_swapped(self):
+        """`dcterms:hasFormat` puts the *original* in the subject position;
+        `isFormatOf` puts it in the object. DataCite IsVariantFormOf makes this
+        dataset the variant, so it is `isFormatOf` the target."""
+        self.assertIn("dcterms:isFormatOf", self._exact("is_variant_form_of"))
+        self.assertIn("dcterms:hasFormat", self._exact("is_original_form_of"))
+        self.assertNotIn("dcterms:hasFormat", self._exact("is_variant_form_of"))
+        self.assertNotIn("dcterms:isFormatOf", self._exact("is_original_form_of"))
+
+    def test_a_continuation_is_not_claimed_to_be_a_supersession(self):
+        """DataCite Continues means a later instalment in a series. Dublin
+        Core's `replaces` means "supplanted, displaced, or superseded" — a
+        later volume does not supersede the earlier one, and both remain
+        current. Dublin Core has no continuation term, so `relation` is the
+        honest breadth."""
+        for name in ("continues", "is_continued_by"):
+            with self.subTest(name=name):
+                self.assertEqual(self._exact(name), set())
+                self.assertIn("dcterms:relation", self._broad(name))
+
+    def test_inverse_pairs_do_not_share_an_exact_mapping(self):
+        """Two opposite relations mapping to the same dcterms term means at
+        least one of them is wrong."""
+        inverses = [("is_part_of", "has_part"),
+                    ("is_version_of", "has_version"),
+                    ("references", "is_referenced_by"),
+                    ("requires", "is_required_by"),
+                    ("replaces", "is_replaced_by"),
+                    ("is_variant_form_of", "is_original_form_of"),
+                    ("continues", "is_continued_by")]
+        for a, b in inverses:
+            with self.subTest(pair=(a, b)):
+                shared = self._exact(a) & self._exact(b)
+                self.assertEqual(shared, set(),
+                                 f"{a} and {b} are inverses but share {shared}")
+
+
 class TestTheValuesThatFailedNowValidate(unittest.TestCase):
     """The three DataCite spellings seen in real output, by their schema name."""
 

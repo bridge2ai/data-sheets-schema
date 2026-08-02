@@ -1338,8 +1338,8 @@
           "aliases": [
             "IsContinuedBy"
           ],
-          "exact_mappings": [
-            "dcterms:isReplacedBy"
+          "broad_mappings": [
+            "dcterms:relation"
           ]
         },
         {
@@ -1348,8 +1348,8 @@
           "aliases": [
             "Continues"
           ],
-          "exact_mappings": [
-            "dcterms:replaces"
+          "broad_mappings": [
+            "dcterms:relation"
           ]
         },
         {
@@ -1434,22 +1434,22 @@
         },
         {
           "text": "is_variant_form_of",
-          "description": "This dataset is a variant or different form of the target dataset, such as a different encoding or format.",
+          "description": "This dataset is a variant or different form of the target dataset, such as a different encoding or format. This dataset is the variant; the target is the original.",
           "aliases": [
             "IsVariantFormOf"
           ],
           "exact_mappings": [
-            "dcterms:hasFormat"
+            "dcterms:isFormatOf"
           ]
         },
         {
           "text": "is_original_form_of",
-          "description": "This dataset is the original form of the target dataset.",
+          "description": "This dataset is the original form of the target dataset. This dataset is the original; the target is the variant.",
           "aliases": [
             "IsOriginalFormOf"
           ],
           "exact_mappings": [
-            "dcterms:isFormatOf"
+            "dcterms:hasFormat"
           ]
         },
         {
@@ -13400,7 +13400,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-07-28T18:11:45",
   "source_file_size": 32348,
-  "generation_date": "2026-08-01T17:49:03",
+  "generation_date": "2026-08-01T18:04:30",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
