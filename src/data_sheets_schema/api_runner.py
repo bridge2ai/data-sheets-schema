@@ -147,6 +147,13 @@ class RunSpec:
     label: str
     condition: str = "generic"          # generic | tuned
     manifest_line: str = "# Source manifest: data/preprocessed/source_manifest.yaml"
+    # Frozen when the run is specified, not read from the clock on each use.
+    # A six-phase run takes tens of minutes and this study's sweep genuinely
+    # ran past midnight UTC, so recomputing per call gave phases of one run
+    # different `# Generated:` dates — and made the provenance digest, which is
+    # computed after the last phase, attest a prompt that was never sent.
+    run_date: str = field(
+        default_factory=lambda: datetime.now(timezone.utc).date().isoformat())
     # The study writes into the run-labelled layout under data/d4d_concatenated.
     # The GitHub assistant writes flat into data/sheets_d4dassistant. Rather than
     # two runners, the layout is a parameter — everything else is identical.
@@ -214,15 +221,6 @@ def prompt_body(path: Path = GENERIC_PROMPT) -> str:
     return text.split("## Prompt body", 1)[1].strip()
 
 
-def _run_date() -> str:
-    """The date this run is actually happening, UTC, as the header states it.
-
-    Same clock as `record_generated_at` in provenance, so the record header and
-    its provenance cannot disagree about when the run took place.
-    """
-    return datetime.now(timezone.utc).date().isoformat()
-
-
 def resolved_prompt_digest(spec: RunSpec) -> dict[str, Any]:
     """A hash of the text the model is actually sent.
 
@@ -263,7 +261,7 @@ def resolve_prompt(spec: RunSpec) -> str:
         # v2 introduced `{DATE}` but nothing substituted it, so the literal
         # string reached the model. Its records carry the right date only
         # because the model read it off `{LABEL}` and guessed correctly.
-        "{DATE}": _run_date(),
+        "{DATE}": spec.run_date,
     }
     for k, v in subs.items():
         body = body.replace(k, v)
@@ -274,7 +272,7 @@ def resolve_prompt(spec: RunSpec) -> str:
     # 2026-07-31 all claim 2026-07-28. Normalising the resolved text fixes it
     # without editing v1, whose bytes are pinned as the published baseline for
     # the 2026-07-28 series. See #214.
-    body = re.sub(r"(?m)^(\s*#\s*Generated:).*$", rf"\1 {_run_date()}", body)
+    body = re.sub(r"(?m)^(\s*#\s*Generated:).*$", rf"\1 {spec.run_date}", body)
 
     if spec.condition == "tuned":
         comp = COMPONENTS / f"{spec.project}.md"

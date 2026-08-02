@@ -307,8 +307,9 @@ class TestGeneratedDateIsTheRunDate(unittest.TestCase):
                                     "2026-08-01_x_rep1", condition, None, None))
 
     def _today(self):
-        from datetime import datetime, timezone
-        return datetime.now(timezone.utc).date().isoformat()
+        from data_sheets_schema.cli.api import _spec
+        return _spec("CHORUS", "baseline", "2026-08-01_x_rep1",
+                     "generic", None, None).run_date
 
     def test_v2_no_longer_leaks_a_literal_placeholder(self):
         """`{DATE}` was never in the substitution table, so the literal string
@@ -334,6 +335,48 @@ class TestGeneratedDateIsTheRunDate(unittest.TestCase):
                       GENERIC_PROMPT.read_text(encoding="utf-8"),
                       "v1 was edited; normalisation should happen on the "
                       "resolved text instead")
+
+
+class TestTheRunDateIsFrozenPerRun(unittest.TestCase):
+    """A six-phase run takes tens of minutes; this study's sweep ran past
+    midnight UTC. Reading the clock on each use is therefore not a hypothetical
+    problem."""
+
+    def _spec_for(self, **kw):
+        from data_sheets_schema.api_runner import RunSpec
+        from pathlib import Path
+        return RunSpec(project="CHORUS", arm="baseline",
+                       method="claudecode_agent",
+                       bundle=Path("data/preprocessed/concatenated/"
+                                   "CHORUS_preprocessed.txt"),
+                       label="2026-08-01_x_rep1", **kw)
+
+    def test_every_phase_of_a_run_sees_the_same_date(self):
+        from data_sheets_schema.api_runner import resolve_prompt
+        spec = self._spec_for()
+        self.assertEqual(resolve_prompt(spec), resolve_prompt(spec))
+
+    def test_the_recorded_digest_matches_the_text_actually_sent(self):
+        """The digest is computed after the last phase. If the date moved, it
+        would attest a prompt that was never sent — defeating the point of
+        recording it at all."""
+        import hashlib
+        from data_sheets_schema.api_runner import (
+            resolve_prompt, resolved_prompt_digest)
+        spec = self._spec_for()
+        sent = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
+        self.assertEqual(sent, resolved_prompt_digest(spec)["sha256"])
+
+    def test_the_date_can_be_pinned_explicitly(self):
+        """Frozen on the spec, so a rerun can reproduce an earlier run's text."""
+        from data_sheets_schema.api_runner import resolve_prompt
+        body = resolve_prompt(self._spec_for(run_date="2026-07-04"))
+        self.assertIn("# Generated: 2026-07-04", body)
+
+    def test_the_default_is_today_in_utc(self):
+        from datetime import datetime, timezone
+        self.assertEqual(self._spec_for().run_date,
+                         datetime.now(timezone.utc).date().isoformat())
 
 
 class TestResolvedPromptIsHashed(unittest.TestCase):
