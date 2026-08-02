@@ -262,6 +262,14 @@ def compare(method, project, labels, require_live, require_attested):
         click.echo("   Only the hardware is unrecorded, which cannot affect a "
                    "generation.\n")
 
+    if result.get('excluded_derived'):
+        # Say it, rather than letting the record vanish. A silent exclusion
+        # leaves the operator to wonder whether the merge ran at all.
+        click.echo(f"ℹ️  excluded as derived (built from the runs being "
+                   f"compared, so including it would bias the agreement it is "
+                   f"measured against): "
+                   f"{', '.join(result['excluded_derived'])}\n")
+
     if result.get('excluded_incomplete'):
         click.echo(f"⚠️  excluded as still running / incomplete: "
                    f"{', '.join(result['excluded_incomplete'])}\n")
@@ -465,5 +473,6 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
     write_merge(result, target, sources=sources, project=project,
                 method=method, label=out)
     click.echo(f"\nWrote {target}")
-    click.echo("record_mode: derived — not a generated record, and excluded "
-               "from replicate agreement statistics by construction.")
+    click.echo("record_mode: derived — not a generated record. `d4d runs "
+               "compare` excludes it from agreement figures and says so, "
+               "because it is built from the runs those figures measure.")

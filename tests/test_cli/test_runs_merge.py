@@ -102,5 +102,30 @@ class TestMergeCommand(unittest.TestCase):
                              "a merged record must never claim to be live")
 
 
+class TestADerivedRecordIsExcludedAsDerived(unittest.TestCase):
+    """Not as "incomplete". A merged record has no core and no reconciliation
+    report by construction — it is a union of full records, not a run — so
+    testing completeness first sent the reader looking for a run that would
+    never arrive, and made the exclusion an accident of its artifact set."""
+
+    def test_derived_is_checked_before_completeness(self):
+        import inspect
+        from data_sheets_schema import runs as r
+        src = inspect.getsource(r.compare)
+        body = src[src.index("for label in labels:"):]
+        self.assertLess(
+            body.index("== DERIVED"), body.index("is_complete("),
+            "completeness is tested before derivedness, so a merged record "
+            "reports as incomplete")
+
+    def test_the_cli_reports_the_exclusion_rather_than_hiding_it(self):
+        import inspect
+        from data_sheets_schema.cli import runs as cli
+        src = inspect.getsource(cli)
+        self.assertIn("excluded_derived", src,
+                      "compare() reports excluded_derived but the CLI never "
+                      "prints it, so the record vanishes without explanation")
+
+
 if __name__ == "__main__":
     unittest.main()

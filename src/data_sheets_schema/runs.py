@@ -557,19 +557,27 @@ def compare(method: str, project: str, labels: list[str],
     unattested: list[str] = []
     derived: list[str] = []
     for label in labels:
-        if not is_complete(method, label, project, concat_dir):
-            incomplete.append(label)
-            continue
-        modes[label] = record_mode(method, label, project, concat_dir)
-        levels[label] = attestation(method, label, project, concat_dir)
+        # Derived first, *before* completeness. A merged record has no core and
+        # no reconciliation report — it is a union of full records, not a
+        # generation run, so it has neither by construction. Testing
+        # completeness first bucketed it as "still running / incomplete", which
+        # sent the reader looking for a run that will never arrive and made the
+        # exclusion an accident of its artifact set rather than a property of
+        # what it is.
+        level = attestation(method, label, project, concat_dir)
         # The playbook's fifth carve-out condition, enforced rather than stated:
         # a derived record is an order statistic over the runs being measured, so
         # including it in an agreement figure would bias the very variance it was
         # built from. Excluded unconditionally — there is no flag for this,
         # because there is no analysis for which it is correct.
-        if levels[label] == DERIVED:
+        if level == DERIVED:
             derived.append(label)
             continue
+        if not is_complete(method, label, project, concat_dir):
+            incomplete.append(label)
+            continue
+        modes[label] = record_mode(method, label, project, concat_dir)
+        levels[label] = level
         if levels[label] != LIVE:
             not_live.append(label)
             if require_live:
