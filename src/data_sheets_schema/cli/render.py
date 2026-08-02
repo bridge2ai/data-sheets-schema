@@ -222,13 +222,19 @@ def generate_all(method, labels, projects, publish, execute):
 
     rendered = failed = 0
     for record, m, label, project in jobs:
-        target = out_root / m / label / f"{project}.html"
+        # Named from the record — `{PROJECT}_d4d.yaml` -> `{PROJECT}_d4d.html` —
+        # because that is what the published directories already contain and
+        # what the docs build serves. Writing `{PROJECT}.html` instead would
+        # not replace the stale render; the docs glob copies every `*.html`, so
+        # both would ship under two names with nothing saying which is current.
+        stem = record.stem
+        target = out_root / m / label / f"{stem}.html"
         target.parent.mkdir(parents=True, exist_ok=True)
         try:
             render_yaml_file(str(record), str(target))
             rendered += 1
             if publish:
-                flat = out_root / m / f"{project}.html"
+                flat = out_root / m / f"{stem}.html"
                 flat.write_bytes(target.read_bytes())
         except Exception as exc:                       # noqa: BLE001
             failed += 1

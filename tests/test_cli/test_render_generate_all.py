@@ -53,16 +53,16 @@ class TestGenerateAll(unittest.TestCase):
         self.assertEqual(out.exit_code, 0, out.output)
         self.assertTrue(Path(
             "data/d4d_html/concatenated/claudecode_agent/"
-            "2026-08-01_cfg_rep1/P.html").exists())
+            "2026-08-01_cfg_rep1/P_d4d.html").exists())
 
     def test_two_labels_do_not_collide(self):
         """The bug: one output path per (method, project), so the second
         replicate silently replaced the first."""
         self._run("--execute")
         a = Path("data/d4d_html/concatenated/claudecode_agent/"
-                 "2026-08-01_cfg_rep1/P.html")
+                 "2026-08-01_cfg_rep1/P_d4d.html")
         b = Path("data/d4d_html/concatenated/claudecode_agent/"
-                 "2026-08-01_cfg_rep2/P.html")
+                 "2026-08-01_cfg_rep2/P_d4d.html")
         self.assertTrue(a.exists() and b.exists())
         self.assertNotEqual(a.read_bytes(), b.read_bytes(),
                             "both labels rendered to the same content")
@@ -87,10 +87,21 @@ class TestGenerateAll(unittest.TestCase):
         out = self._run("--publish", "--label", "2026-08-01_cfg_rep1")
         self.assertNotIn("overwrite", out.output)
 
+    def test_the_published_name_matches_what_the_docs_already_serve(self):
+        """`{PROJECT}_d4d.yaml` -> `{PROJECT}_d4d.html`, the name already in the
+        published directories. Writing `{PROJECT}.html` would not replace the
+        stale render — the docs glob copies every `*.html`, so both would ship
+        under two names with nothing saying which is current (#235)."""
+        self._run("--publish", "--label", "2026-08-01_cfg_rep1", "--execute")
+        flat = Path("data/d4d_html/concatenated/claudecode_agent")
+        self.assertTrue((flat / "P_d4d.html").exists())
+        self.assertFalse((flat / "P.html").exists(),
+                         "published under a name the docs build does not serve")
+
     def test_publish_writes_the_flat_copy_the_docs_build_reads(self):
         self._run("--publish", "--label", "2026-08-01_cfg_rep1", "--execute")
         self.assertTrue(Path("data/d4d_html/concatenated/claudecode_agent/"
-                             "P.html").exists())
+                             "P_d4d.html").exists())
 
 
 if __name__ == "__main__":
