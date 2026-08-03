@@ -350,6 +350,16 @@ class EquivalenceJudge:
         if len(distinct) < 2:
             return True, "identical"
         sent = _sent(distinct)
+        if len(set(sent)) < 2:
+            # The cap destroyed the only difference between these values. The
+            # judge would be shown two identical blocks and would answer
+            # "equivalent" — correctly, on the evidence, and wrongly about the
+            # dataset. That is #244 taken to its limit, and it is the one
+            # outcome this measure must never report quietly.
+            raise ValueError(
+                f"slot {slot!r}: truncation at {JUDGE_VALUE_CHARS} chars "
+                f"collapses {len(distinct)} distinct values into one; the "
+                "measurement cannot be made at this cap")
         key = _judge_key(slot, sent)
         if key in self._memo:
             self.memo_hits += 1
@@ -506,15 +516,23 @@ def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
             result = compare_records(records, embedder=embedder, judge=judge)
             key = f"{cfg}|{project}"
             rows[key] = result
+            # `is True`, not `bool(...)`: an unjudged slot is None, and
+            # bool(None) would file it under "judged, and they disagreed".
+            # "Nothing was measured" and "nothing agreed" are the two most
+            # different readings this instrument has, and they must not
+            # serialize identically (#250).
+            judged = [r for r in result if r.equivalent is not None]
+            n_equiv = sum(r.equivalent is True for r in result)
             matrix[key] = {
                 "shared": len(result),
-                "equivalent": sum(bool(r.equivalent) for r in result),
+                "equivalent": n_equiv,
+                "unjudged": len(result) - len(judged),
                 "exact": sum(r.exact for r in result),
                 "truncated": sum(r.truncated for r in result),
                 "truncated_at_legacy_cap": sum(r.truncated_at_legacy_cap
                                                for r in result),
-                "rate": (sum(bool(r.equivalent) for r in result) / len(result)
-                         if result else None),
+                "rate": (n_equiv / len(result)
+                         if result and len(judged) == len(result) else None),
                 "judge_model": judge.model,
                 "judge_chars": JUDGE_VALUE_CHARS,
                 "replicates": sorted(records),
@@ -552,8 +570,9 @@ def main(argv: list[str] | None = None) -> int:
         embed_online=a.embed_online)
 
     for key, cell in sorted(matrix.items()):
+        rate = f"{cell['rate']:6.1%}" if cell["rate"] is not None else "     —"
         print(f"{key:38s} {cell['equivalent']:3d}/{cell['shared']:3d} "
-              f"= {cell['rate']:6.1%}  (exact {cell['exact']}, "
+              f"= {rate}  (exact {cell['exact']}, "
               f"truncated {cell['truncated']}, "
               f"would-have-been {cell['truncated_at_legacy_cap']})")
     if a.write:

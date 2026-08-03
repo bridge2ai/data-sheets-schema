@@ -2,6 +2,7 @@
  "v1  (2026-07-28 generic)|AI_READI": {
   "shared": 79,
   "equivalent": 46,
+  "unjudged": 0,
   "exact": 10,
   "truncated": 0,
   "truncated_at_legacy_cap": 6,
@@ -17,6 +18,7 @@
  "v1  (2026-07-28 generic)|CHORUS": {
   "shared": 55,
   "equivalent": 30,
+  "unjudged": 0,
   "exact": 4,
   "truncated": 0,
   "truncated_at_legacy_cap": 1,
@@ -32,6 +34,7 @@
  "v1  (2026-07-28 generic)|CM4AI": {
   "shared": 62,
   "equivalent": 30,
+  "unjudged": 0,
   "exact": 3,
   "truncated": 0,
   "truncated_at_legacy_cap": 5,
@@ -47,6 +50,7 @@
  "v1  (2026-07-28 generic)|VOICE": {
   "shared": 78,
   "equivalent": 29,
+  "unjudged": 0,
   "exact": 4,
   "truncated": 0,
   "truncated_at_legacy_cap": 9,
@@ -62,6 +66,7 @@
  "v2  (2026-07-31 generic-v2)|AI_READI": {
   "shared": 70,
   "equivalent": 37,
+  "unjudged": 0,
   "exact": 12,
   "truncated": 0,
   "truncated_at_legacy_cap": 4,
@@ -77,6 +82,7 @@
  "v2  (2026-07-31 generic-v2)|CHORUS": {
   "shared": 48,
   "equivalent": 18,
+  "unjudged": 0,
   "exact": 1,
   "truncated": 0,
   "truncated_at_legacy_cap": 0,
@@ -92,6 +98,7 @@
  "v2  (2026-07-31 generic-v2)|CM4AI": {
   "shared": 70,
   "equivalent": 36,
+  "unjudged": 0,
   "exact": 16,
   "truncated": 0,
   "truncated_at_legacy_cap": 3,
@@ -107,6 +114,7 @@
  "v2  (2026-07-31 generic-v2)|VOICE": {
   "shared": 78,
   "equivalent": 35,
+  "unjudged": 0,
   "exact": 9,
   "truncated": 0,
   "truncated_at_legacy_cap": 2,

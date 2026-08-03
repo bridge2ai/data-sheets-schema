@@ -265,6 +265,26 @@ class TestJudgeCache(unittest.TestCase):
             with self.assertRaises(OfflineCacheMiss):
                 other("slot", ["a", "b"])
 
+    def test_a_cap_that_collapses_two_values_into_one_refuses_to_judge(self):
+        """#249 — truncation taken to its limit.
+
+        Shown two identical blocks the judge would answer "equivalent",
+        correctly on the evidence and wrongly about the dataset. There is no
+        honest verdict available at that cap, so there is no verdict.
+        """
+        judge = EquivalenceJudge(model="m", cache_path=None, offline=True)
+        with unittest.mock.patch("data_sheets_schema.agreement.JUDGE_VALUE_CHARS", 5):
+            with self.assertRaises(ValueError) as ctx:
+                judge("slot", ["AAAAA_tail_X", "AAAAA_tail_Y"])
+        self.assertIn("collapses", str(ctx.exception))
+        self.assertEqual(judge.calls, 0)
+
+    def test_values_still_distinct_after_the_cap_are_judged_normally(self):
+        judge = EquivalenceJudge(model="m", cache_path=None, offline=True)
+        with unittest.mock.patch("data_sheets_schema.agreement.JUDGE_VALUE_CHARS", 5):
+            with self.assertRaises(OfflineCacheMiss):
+                judge("slot", ["AAAAA_x", "BBBBB_y"])
+
     def test_the_cache_records_the_cap_it_was_judged_under(self):
         with tempfile.TemporaryDirectory() as d:
             path = Path(d) / "c.jsonl"
@@ -387,6 +407,34 @@ class TestPublishedMatrixReproduces(unittest.TestCase):
         for key, cell in published.items():
             self.assertEqual(cell["judge_chars"], JUDGE_VALUE_CHARS, key)
             self.assertTrue(cell["judge_model"], key)
+
+    def test_every_published_slot_actually_carries_a_verdict(self):
+        """#250 — a rate is only a rate if everything in it was judged."""
+        published = json.loads((CACHE / "matrix.json").read_text())
+        for key, cell in published.items():
+            self.assertEqual(cell["unjudged"], 0, key)
+            self.assertIsNotNone(cell["rate"], key)
+
+
+class TestUnjudgedSlotsAreNotCountedAsDisagreement(unittest.TestCase):
+    """#250: `bool(None)` is False, which reads as "judged, and they differed"."""
+
+    def test_an_unjudged_slot_is_none_not_false(self):
+        rows = compare_records({"r1": {"a": "x"}, "r2": {"a": "y"}})
+        self.assertIsNone(rows[0].equivalent)
+
+    def test_the_three_states_are_distinguishable(self):
+        """Judged-equivalent, judged-different and unjudged must not merge."""
+        judged_yes = SlotAgreement("a", 2, False, equivalent=True)
+        judged_no = SlotAgreement("b", 2, False, equivalent=False)
+        unjudged = SlotAgreement("c", 2, False, equivalent=None)
+        rows = [judged_yes, judged_no, unjudged]
+        self.assertEqual(sum(r.equivalent is True for r in rows), 1)
+        self.assertEqual(sum(r.equivalent is False for r in rows), 1)
+        self.assertEqual(sum(r.equivalent is None for r in rows), 1)
+        # The bug: bool() folds the unjudged row into the disagreements.
+        self.assertEqual(sum(bool(r.equivalent) for r in rows), 1)
+        self.assertEqual(len(rows) - sum(bool(r.equivalent) for r in rows), 2)
 
 
 if __name__ == "__main__":
