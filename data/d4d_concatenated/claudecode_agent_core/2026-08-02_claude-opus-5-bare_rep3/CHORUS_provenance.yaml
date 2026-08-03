@@ -1,0 +1,180 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-08-03T04:08:05+00:00'
+run:
+  label: 2026-08-02_claude-opus-5-bare_rep3
+  project: CHORUS
+  method: claudecode_agent
+  arm: baseline
+  replicate: 3
+model:
+  generation_method: schema-grounded API, six phases
+  agent_runtime: Claude API (direct)
+  provider: LBL CBORG (proxy to Anthropic)
+  base_url: https://api.cborg.lbl.gov
+  model: google/claude-opus-5
+  max_tokens_by_phase:
+    full: 64000
+    reconcile_full: 64000
+    core: 56000
+    reconcile_core: 56000
+    audit: 24000
+    report: 12000
+  temperature: null
+  temperature_basis: not applicable to this model
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt_v2.md
+    sha256: 4780613475ef2a629f98b69a934228b58eccd5fe93915fcd259a62cff6583de6
+    bytes: 9110
+    exists: true
+  resolved:
+    sha256: 41a2839c9fe5378498f64c1f2763dd002877104dc344b412728610a0076d7933
+    bytes: 4876
+schema:
+  declared_version: 1.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: 24b57bb635d69b5b26c50a86f8da6742cf1b4a89cfb9c8733f4a54fb0248bf12
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: cf18fa616898852bebf1ac6090e73aef340b01ab1b2b1cc8a9a5a8f4e57b5476
+  merged_schema_carries_version: true
+  digest_md5: 6d88cda735cd8b3821deef771e0cd828
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: e40ee3c7ba20c967674b800efc3c779abdeed44b
+  commit_short: e40ee3c7
+  branch: effort-tier-experiment
+  dirty: true
+  dirty_file_count: 19
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+  bundle_md5: 1ce7d891fa81ad4b1f8290ddeec33461
+  bundle_bytes: 36184
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: ab62657ae5ca24d62258c2d2634a425b
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-08-02_claude-opus-5-bare_rep3/CHORUS_d4d.yaml
+    bytes: 28237
+    slots: 45
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep3/CHORUS_d4d_core.yaml
+    bytes: 26860
+    slots: 41
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep3/CHORUS_reconciliation.md
+    bytes: 16142
+    slots: null
+unrecoverable: null
+unverified:
+- field: model.temperature
+  value: null
+  reason: 'google/claude-opus-5-high rejects `temperature` (400: deprecated for this
+    model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+    is not sent and does not apply. Sampling for this model family is selected by
+    model-name suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). google/claude-opus-5-high rejects `temperature`
+  (400: deprecated for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
+- 'Model mismatch: this run used ''google/claude-opus-5'' while .github/workflows/d4d_assistant_deterministic.config
+  pins ''google/claude-opus-5-high''. The two generation paths are not running the
+  same model.'
+api_usage:
+- phase: full
+  attempt: 1
+  input_tokens: 2030
+  output_tokens: 23973
+  cache_read: 22339
+  cache_write: 0
+  max_tokens: 64000
+  stop_reason: end_turn
+- phase: full
+  attempt: 2
+  input_tokens: 2030
+  output_tokens: 21330
+  cache_read: 0
+  cache_write: 22339
+  max_tokens: 64000
+  stop_reason: end_turn
+- phase: core
+  attempt: 1
+  input_tokens: 12426
+  output_tokens: 8
+  cache_read: 0
+  cache_write: 19623
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: core
+  attempt: 2
+  input_tokens: 12426
+  output_tokens: 11075
+  cache_read: 19623
+  cache_write: 0
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: audit
+  attempt: 1
+  input_tokens: 22549
+  output_tokens: 8120
+  cache_read: 0
+  cache_write: 22339
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: reconcile_full
+  attempt: 1
+  input_tokens: 16156
+  output_tokens: 11825
+  cache_read: 22339
+  cache_write: 0
+  max_tokens: 64000
+  stop_reason: end_turn
+- phase: reconcile_core
+  attempt: 1
+  input_tokens: 25441
+  output_tokens: 10968
+  cache_read: 0
+  cache_write: 19623
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: report
+  attempt: 1
+  input_tokens: 5776
+  output_tokens: 8671
+  cache_read: 22339
+  cache_write: 0
+  max_tokens: 12000
+  stop_reason: end_turn
+phases_skipped: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-02_claude-opus-5-bare_rep3/CHORUS_d4d.yaml
+      md5: cdeaf0bc26743dff52c63ea8dbee5b98
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep3/CHORUS_d4d_core.yaml
+      md5: 5ae290a3ccd51bf9f6b0680be852f556
+  recorded_by: api_runner.execute
