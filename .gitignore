@@ -143,8 +143,47 @@ dmypy.json
 
 # RO-Crate packages: keep the upstream archive (raw/), not the extracted tree.
 # CM4AI's extracted crate is ~47 MB, almost entirely per-file listing HTML
-# (ro-crate-preview.html up to 11.8 MB each). Re-extract from raw/*.zip.
+# (ro-crate-preview.html up to 11.8 MB each).
+#
+# Re-extract from raw/cm4ai_release_metadata.zip, named rather than globbed:
+# raw/ now holds two unrelated archives and `raw/*.zip` matches both. The other
+# is cm4ai_images_untreated.zip, 3.2 GB of immunofluorescence JPEGs under
+# untreated/ — 15,911 files that are not a crate and will not rebuild one.
 data/ro-crate_packages/*/crate/
+
+# ...but "keep the upstream archive" holds for a 1.1 MB metadata zip and stops
+# holding at 3.19 GB. CM4AI's image archives are gigabytes; committing one would
+# push it to a repository that is 60 MB today, and no later `git rm` would get
+# it back out of history.
+#
+# This is not hypothetical. One such archive was staged and then unstaged, which
+# left a 3.19 GB unreferenced blob in .git/objects — invisible to every ordinary
+# git command, never pushed, and 96% of the local repository.
+#
+# Allowlist rather than a pattern per treatment condition: the archive names are
+# upstream's to choose, so anything new in raw/ is ignored until someone decides
+# otherwise. The one zip already tracked is named explicitly.
+#
+# Every archive extension and any depth, because the next one will not be named
+# like the last one — .tar.gz and raw/images/foo.zip both slipped past a plain
+# raw/*.zip when tested. This still only guards archives under raw/; a general
+# "no large file anywhere" check needs a size threshold, which .gitignore cannot
+# express. See #262.
+#
+# Compression suffixes are spelled out rather than written `*.tar.*`, which also
+# swallowed images.tar.md5 and manifest.tar.sha256. A tracked checksum beside an
+# untracked archive is the only way anyone verifies the copy in their raw/ is
+# the right one, so ignoring it defeats the reason the archive is untracked.
+data/ro-crate_packages/*/raw/**/*.zip
+data/ro-crate_packages/*/raw/**/*.tar
+data/ro-crate_packages/*/raw/**/*.tar.gz
+data/ro-crate_packages/*/raw/**/*.tar.bz2
+data/ro-crate_packages/*/raw/**/*.tar.xz
+data/ro-crate_packages/*/raw/**/*.tar.zst
+data/ro-crate_packages/*/raw/**/*.tgz
+data/ro-crate_packages/*/raw/**/*.7z
+data/ro-crate_packages/*/raw/**/*.zip.[0-9][0-9][0-9]
+!data/ro-crate_packages/CM4AI/raw/cm4ai_release_metadata.zip
 
 # Poster/slide artifacts are kept local-only and never committed to this repo.
 data/poster_assets/
