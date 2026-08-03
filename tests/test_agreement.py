@@ -523,6 +523,48 @@ class TestPublishedMatrixReproduces(unittest.TestCase):
             self.assertEqual(cell["unjudged"], 0, key)
             self.assertIsNotNone(cell["rate"], key)
 
+    def test_the_embedding_proxy_still_fails_to_discriminate(self):
+        """The negative result, asserted rather than merely reproducible (#247).
+
+        This is the finding that closes off the cheap route: cosine similarity
+        cannot separate slots the judge called equivalent from slots it called
+        different, because every value is schema-shaped prose about the same
+        dataset and the embedding measures topic. Recomputed here from the
+        committed per-slot rows — no vectors needed, which is the point.
+
+        It is pinned because it is the kind of result someone will want to
+        re-litigate when the judge's cost comes up, and a number in a note is
+        easier to wave away than a red test.
+        """
+        rows = json.loads((CACHE / "CHORUS_v2_rows.json").read_text())
+        eq = [r["similarity"] for r in rows if r["equivalent"]]
+        df = [r["similarity"] for r in rows if not r["equivalent"]]
+        self.assertEqual((len(eq), len(df)), (18, 30))
+        mean_eq, mean_df = sum(eq) / len(eq), sum(df) / len(df)
+        self.assertAlmostEqual(mean_eq, 0.92272, places=4)
+        self.assertAlmostEqual(mean_df, 0.91442, places=4)
+        self.assertLess(mean_eq - mean_df, 0.01,
+                        "if the gap ever exceeds a point, the proxy is worth "
+                        "revisiting and this test should be the thing that says so")
+
+    def test_the_tracked_vector_cache_stays_small(self):
+        """#247: growth here is permanent, so it should be a decision.
+
+        Nothing in git can be un-committed — this blob is already in history at
+        587 KB packed, so deleting it from HEAD would reclaim exactly nothing.
+        What *is* still available is refusing to add ten times more of it. The
+        cache holds 136 vectors, one per distinct CHORUS v2 value; embedding
+        the whole corpus would be 1439 vectors, about 14 MB, tracked forever.
+
+        If you meant to do that, raise this bound in the same commit and say
+        why. The number existing is the point; its exact value is not.
+        """
+        path = CACHE / "embeddings.jsonl"
+        vectors = sum(1 for line in path.read_text().splitlines() if line.strip())
+        self.assertLessEqual(vectors, 200,
+                             f"{vectors} vectors tracked; a full-corpus sweep "
+                             "is ~1439 and adds ~14 MB to history permanently")
+
     def test_missing_similarity_is_counted_rather_than_left_to_be_inferred(self):
         """#253 — only CHORUS v2 was ever embedded; the rest must say so."""
         published = json.loads((CACHE / "matrix.json").read_text())
