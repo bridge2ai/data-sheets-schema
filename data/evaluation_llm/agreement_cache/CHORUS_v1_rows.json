@@ -6,7 +6,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1021,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three agree on the core retrospective acquisition from hospital EHR/PACS/monitors/EEG, but value 1 omits the OHNLP tokenization of notes (derived rather than raw text) present in 2 and 3, and value 3 uniquely asserts a validation/verification step (validated semantic mappings, clinical validatio [truncated]"
  },
  {
@@ -16,7 +18,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1895,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three share the core gap (lack of AI/ML infrastructure and standards in critical care, legal/ethical framework, workforce), but value 1 uniquely asserts a holdout test set addressing the lack of external model validation while values 2 and 3 instead assert missing contextual/social-determinant f"
  },
  {
@@ -26,7 +30,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 862,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state that at-risk groups are included (critically ill adults, pediatric/PICU and neonatal/NICU patients) and list the same protections\u2014controlled access, re-identification-limiting transformation, tokenized notes retained locally, and imaging de-identification\u2014with value 2's mention of a "
  },
  {
@@ -36,7 +42,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1012,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe the same two quality-review activities\u2014characterization reports returned to sites and clinical/SOP validation of semantic mappings\u2014with only differences in wording, minor extra detail (status tracking, best-practice SOPs) and whether the CHoRUSReports tool is explicitly listed."
  },
  {
@@ -46,7 +54,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 2473,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Although all three share the SOP-based site extract workflow, each asserts substantive mechanisms the others omit \u2014 value 1 uniquely describes the cloud enclave with clinical notes kept local and federated sampling, value 2 and 3 uniquely describe Google Form/GoogleScript-GitHub API status updates a"
  },
  {
@@ -56,7 +66,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 542,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state the same timing facts: retrospective collection, NIH project period 2022-09-01 to 2026-11-30, an August 2025 dataset snapshot, and that the calendar span of the clinical encounters is not stated; the extra hospital/admission counts and grant identifiers are incidental detail rather t"
  },
  {
@@ -66,7 +78,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 748,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three assert the same core fact\u2014the dataset contains confidential patient clinical data with every data type under controlled access and clinical notes held locally except tokens\u2014differing only in which supporting details (data-type enumeration vs. de-identification/ethics-review measures) they "
  },
  {
@@ -76,7 +90,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 271,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three list the same set of standards\u2014OMOP CDM (OHDSI) for structured EHR data, OHNLP for clinical notes, DICOM for imaging, WFDB for waveform telemetry, and EDF+/Persyst for EEG\u2014differing only in detail and phrasing."
  },
  {
@@ -86,7 +102,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 2777,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three list the same six Bridge2AI CHoRUS leadership members with identical affiliations plus the consortium entity (60+ members, 20 institutions, 14 data acquisition centers) and identify Eric S. Rosenthal as PI; value 2 merely folds Rosenthal's PI role into the consortium/network entry rather t"
  },
  {
@@ -96,7 +114,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1868,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three name the data-contributing sites/site managers (14 of 20 centers), but values 2 and 3 additionally assert clinical collaborators (and, in value 2, software developer sub-teams) as data collectors, a substantive group that value 1 omits entirely."
  },
  {
@@ -106,7 +126,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 668,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Values 1 and 2 both describe ethics focus groups, legal/regulatory analysis, and re-identification-limiting transformations, whereas value 3 omits these and instead asserts different specifics (privacy scan tool and de-identification repository, imaging de-identification status as of August 2025, lo"
  },
  {
@@ -116,7 +138,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1600,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe the same CHoRUS Bridge2AI multi-center, multi-modal critical care dataset with identical figures (50,000 released admissions, 1.6B OMOP rows, 7,642 radiology admissions, 23 Tb waveforms, 100,000 anticipated admissions, 9 modalities, 14 hospitals, retrospective collection, controll [truncated]"
  },
  {
@@ -126,7 +150,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 606,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state the data were not collected directly from individuals but retrospectively extracted from hospital clinical systems (EHR, PACS, telemetry, EEG) at contributing sites and delivered to CHoRUS; the extra detail in value 3 about ethics focus groups adds no contradicting fact."
  },
  {
@@ -136,7 +162,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1060,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Value 3 lists only the technical file/data-model formats with no mention of access mechanism, while value 2 describes only the controlled-access enclave and registration/.edu-email process with no formats; value 1 asserts both, so each omits substantive facts asserted by the others."
  },
  {
@@ -146,7 +174,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1339,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe the same CHoRUS ethics activities\u2014the Ethical and Trustworthy AI pillar, community-facing ethics focus groups on shareable data, consortium evaluation of community perspectives on trustworthiness/privacy, and patient-focused legal/ethical work on privacy, bias and social determina"
  },
  {
@@ -156,7 +186,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1290,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three report the same existing uses\u2014training activities and publications via the AIM-AHEAD Bridge2AI for Clinical Care Training Program with up to 30 cohort-2 trainees and the same start/end dates\u2014differing only in how much elaborating detail (application dates, workshop topics, website mention)"
  },
  {
@@ -166,7 +198,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1179,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe contribution via the chorus-ai GitHub organization (mapping repo, discussions, developer guide), but value 1 uniquely asserts the primary extension route of sites creating/submitting CHoRUS data extracts under the SOP workflow plus GoogleScript-driven status automation, and value  [truncated]"
  },
  {
@@ -176,8 +210,10 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
-  "truncated": true,
-  "reason": "Value 2 describes a controlled-access cloud enclave, locally retained clinical notes, and licensing/access requirements that the others do not assert, while values 1 and 3 enumerate public web/code resources (with value 1 additionally listing webinar slides and detailed repository/software inventori"
+  "max_chars": 4382,
+  "truncated": false,
+  "truncated_at_legacy_cap": true,
+  "reason": "Value 1 and 3 enumerate public web/code resources (project site, GitHub org, NIH RePORTER, Bridge2AI page, plus a webinar in v1), while value 2 instead asserts a different set of facts\u2014that the dataset is not self-contained, with data in a controlled-access cloud enclave and notes retained locally a"
  },
  {
   "slot": "file_collections",
@@ -186,7 +222,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 3150,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Both list the same nine CHoRUS data collections with identical names, conformance standards (OMOP, OHNLP, DICOM, WFDB/PhysioNet, EDF+/Persyst) and controlled access; the differences are only in level of supplementary detail (metadata status vs. website-reported volumes) and ID formatting, with no co"
  },
  {
@@ -196,7 +234,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1005,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three identify the same funder (NIH Common Fund Bridge2AI program) and the same grant OT2OD032701 with identical application ID, fiscal year, award amount, and project dates, differing only in identifier formatting and minor extra details like the PI name."
  },
  {
@@ -206,7 +246,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1006,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Only the holdout-test-set/marketplace-adoption point is shared; each value asserts substantively different additional impacts (research catalysis and tooling vs. privacy/ethics/community-determined public sharing vs. AI literacy/workforce development), and the repository-under-review caveat appears "
  },
  {
@@ -216,7 +258,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 715,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state human subjects are involved, that the data are clinical records of critically/acutely ill patients including PICU/NICU (ICU) populations, and that no IRB approval or ethics board is named in the sources; the remaining differences are only wording and level of detail."
  },
  {
@@ -226,7 +270,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 22,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "One gives a web URL as the identifier while the other gives a namespaced short code (d4d:CHoRUS); these are different identifier strings, not the same asserted id."
  },
  {
@@ -236,7 +282,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 3008,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "While all three agree on the core counts (50,000 admissions, 1.6B OMOP rows, 7,642 radiology admissions, 100,000 anticipated, 45K unique admissions), value 2 entirely omits substantive instance types asserted by the others (23 Tb waveform telemetry, clinical notes, EEG, 1,000 images), and value 1 om"
  },
  {
@@ -246,7 +294,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1084,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three list the same intended uses (AI/ML model development for critical care, characterizing illness/predicting complications/measuring treatment response, external validation on the sequestered holdout set, and training/education on the Bridge2AI cloud) and the same access conditions (registrat"
  },
  {
@@ -256,7 +306,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 934,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe the same de-identification method (limited re-identification transformation, OHNLP tokenization of notes, imaging de-id in progress), but value 3 dates the imaging status to August 2025 whereas values 1 and 2 date it to the September 2025 webinar, a conflicting factual claim."
  },
  {
@@ -266,7 +318,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 9,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -276,7 +330,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 974,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three lists tag the same dataset with the same topical themes (critical care/illness, AI/ML, Bridge2AI, EHR/EEG/telemetry/imaging data, standards, ethics/privacy, repository, workforce), with value 2 simply being a shorter subset and value 3 adding a few minor extra tags \u2014 no contradictory facts"
  },
  {
@@ -286,7 +342,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 843,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Both state that bias and privacy are actively managed rather than measured, and list the same mitigation approach (federated access, balanced/diverse cohort sampling, contextual factors like distance to hospital, social determinants), with only minor additive detail differences."
  },
  {
@@ -296,7 +354,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 2907,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Beyond shared items (in-progress modality coverage, 50k vs 100k admissions), each value asserts substantive limitations the others omit \u2014 value 1 adds representativeness and imaging count of 7,642, value 3 adds retrospective collection and a repository-under-administrative-review notice while droppi [truncated]"
  },
  {
@@ -306,7 +366,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 586,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe the same single labeling strategy\u2014a visualization and annotation environment labeling data with prediction targets within a multi-center acquire/standardize/tokenize/store/visualize/label pipeline\u2014with differences only in wording and optional descriptive notes about missing annota"
  },
  {
@@ -316,7 +378,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1643,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "While all three agree on controlled access, the signed licensing agreement, the .edu email requirement, and MIT/Apache licensing of code only, value 2 names a different contact (Ciera McCrary, cmccrary@mgh.havard.edu) and omits the access-request addresses (dbold@emory.edu / jared.houghtaling@tuftsm"
  },
  {
@@ -326,7 +390,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 703,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Values 1 and 2 name three tools (OHNLP toolkit, privacy_scan_tool, UF-Geocoding/DeGauss) while value 3 lists only the OHNLP toolkit, omitting two tools asserted by the others."
  },
  {
@@ -336,7 +402,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 918,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three identify the same maintainers\u2014the 60+ member CHoRUS consortium across 20 institutions with Massachusetts General Hospital program management, Ciera McCrary as website contact, and the same access-request emails\u2014differing only in grouping and level of incidental detail."
  },
  {
@@ -346,7 +414,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 987,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three list the same core modality gaps (limited imaging, EEG extraction pending, notes held locally), but value 1 additionally asserts imaging coverage of 7,642 admissions within a 50,000-admission released dataset\u2014a substantive fact absent from the others\u2014and values 1/2 date the status to a Sep [truncated]"
  },
  {
@@ -356,7 +426,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 6,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -366,7 +438,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 706,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Only the trainee use-case element is shared; value 1 uniquely asserts OHDSI/OMOP work and public AI-literacy education, value 2 uniquely asserts an invitation for downstream analytics collaboration, and value 3 uniquely asserts data labeling/annotation and semantic mapping with clinical validation,  [truncated]"
  },
  {
@@ -376,7 +450,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 22,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -386,7 +462,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1473,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "While all three share the core facts (OHNLP tokenization of notes, imaging de-identification in process, controlled access, privacy scan/CTP-deid tooling, no quantified re-identification risk), value 3 uniquely asserts substantive additional facts\u2014DeGauss geocoding linkage to social determinants and"
  },
  {
@@ -396,7 +474,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 2090,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe the same preprocessing pipeline\u2014OMOP CDM standardization, OHNLP-based note tokenization plus re-identification-limiting transformation, waveform conversion scripts, and DeGauss geocoding of OMOP Location entities\u2014differing only in grouping, software metadata, and level of incident"
  },
  {
@@ -406,7 +486,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 2164,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three share the core purposes (public AI-ready critical care dataset for Bridge2AI, diverse/high-resolution/ethically sourced data, holdout test set), but value 1 additionally asserts development of network, tools, standards and unified multi-modal harmonization, and value 3 additionally asserts"
  },
  {
@@ -416,7 +498,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1793,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three identify the same raw sources \u2014 hospital structured EHR and unstructured notes (OMOP/OHNLP), PACS imaging in DICOM, bedside monitor waveform telemetry, and hospital EEG in EDF+/Persyst \u2014 with controlled access and notes retained locally except tokens; they differ only in grouping, added co [truncated]"
  },
  {
@@ -426,7 +510,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 599,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three agree that clinical notes remain local with only tokens in the enclave, but each adds distinct substantive claims the others omit \u2014 value 1 says OMOP and telemetry are held in the enclave, value 2 asserts imaging de-identification is in progress beyond 1000 images as of September 2025, and"
  },
  {
@@ -436,7 +522,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 843,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three agree on restricted/controlled access, but values 2 and 3 assert a published compliance-review notice on the project repository (and value 3 adds registration/licensing access steps) that value 1 omits entirely, while value 1 asserts absent export-control and governance-committee statement"
  },
  {
@@ -446,7 +534,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 846,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Values 1 and 2 both anchor the relationship in admission-level counts (7,642 radiology admissions of 50,000 released), which value 3 omits entirely, while value 3 asserts additional substantive facts absent from the others (per-modality formats DICOM/WFDB/EDF+/OHNLP and validated semantic mappings i"
  },
  {
@@ -456,7 +546,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1136,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe the same sampling approach\u2014aiming for a comprehensive, balanced and diverse cohort via a large-scale legal framework and federated access across the 14 of 20 consortium hospitals, with sampling stated as an aim rather than a verified representativeness procedure\u2014differing only in "
  },
  {
@@ -466,7 +558,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 626,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three affirm sensitive elements are present and enumerate the same categories\u2014EHR clinical data on critically ill patients (demographics/diagnoses/meds/procedures/flowsheets), unstructured notes, PACS imaging, waveform telemetry and EEG, social determinants, and geographic distance\u2014with only wor"
  },
  {
@@ -476,7 +570,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 485,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe the same single sequestered holdout test set for external validation, differing only in naming, attribution of source, and phrasing."
  },
  {
@@ -486,7 +582,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 763,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Value 2 states the documents report no subpopulation distributions and lists extra elements (SDOH, geographic distance, sampling), whereas values 1 and 3 report a 50,000-admission distribution and value 3 omits the demographic/SDOH elements, so they assert differing facts."
  },
  {
@@ -496,7 +594,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 415,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Both describe a single holdout test set data split provisioned for external model validation, differing only in identifier naming and wording."
  },
  {
@@ -506,7 +606,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1476,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three list the same tasks\u2014characterizing illness, predicting complications, measuring treatment response, external validation via holdout data, and annotation/labeling with prediction targets\u2014with the only difference being that value 2 folds the labeling task into the prediction entry rather tha"
  },
  {
@@ -516,7 +618,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 436,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state that the dataset is shared with parties outside the contributing consortium under controlled access; the extra details about trainees, holdout test set, and public-availability goal are elaborations that do not contradict or change the basic fact."
  },
  {
@@ -526,7 +630,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 93,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -536,7 +642,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1051,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three share the 50,000\u2192100,000 expansion core, but they conflict and omit substantively: value 1 dates the in-process imaging/EEG work to a September 2025 webinar while value 3 says August 2025, and values 2 and 3 assert an NIH project period ending 2026-11-30 (plus value 2's repository-migratio"
  },
  {
@@ -546,7 +654,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 957,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Both list identical released/anticipated version contents and the 45K/50K figures, but value 1 additionally asserts substantive access conditions (registration, signed licensing agreement, .edu email requirement) that value 2 omits entirely."
  }
 ]

@@ -59,13 +59,25 @@ import yaml
 CBORG_EMBEDDINGS = "https://api.cborg.lbl.gov/v1/embeddings"
 EMBED_MODEL = "lbl/nomic-embed-text"
 
-# How much of a value each measure actually sees. Values longer than this are
-# cut, and a cut can only hide a disagreement that lives past the cut — so a
-# truncated slot biases towards "equivalent". `SlotAgreement.truncated` records
-# which rows were measured on partial evidence; see issue #244 for how much of
-# the published matrix that covers (30 of 540 slots) and why the conclusion
-# survives it.
-JUDGE_VALUE_CHARS = 4000
+# How much of a value each measure actually sees.
+#
+# A cut can only hide a disagreement that lives past it, so a truncated slot is
+# biased towards "equivalent". The first version of this module capped the judge
+# at 4000 characters, which bit 30 of the 540 published slots — asymmetrically
+# between the two configurations being compared (issue #244).
+#
+# 100k is not "no limit": it is a limit no value in this corpus reaches (the
+# longest is 29,024 characters), chosen so a pathological record cannot silently
+# blow the context window of a paid call. `SlotAgreement.truncated` still
+# records any slot the cap does bite, so the flag stays meaningful rather than
+# becoming decorative.
+JUDGE_VALUE_CHARS = 100_000
+LEGACY_JUDGE_VALUE_CHARS = 4000
+
+# The embedder's cap is a property of the model, not a choice: nomic-embed-text
+# takes 8192 tokens, and 8000 characters is comfortably inside that. Raising it
+# would not buy a better proxy — the proxy was shown not to discriminate at all
+# here (0.923 against 0.914), so the ceiling on its input is not what limits it.
 EMBED_VALUE_CHARS = 8000
 
 EQUIVALENCE_SYSTEM = """\
@@ -113,7 +125,23 @@ class SlotAgreement:
     equivalent: bool | None = None
     reason: str = ""
     scalar: bool = True
-    truncated: bool = False
+    max_chars: int = 0
+
+    @property
+    def truncated(self) -> bool:
+        """Did the cap actually bite this slot?
+
+        Derived from the longest value rather than stored, so the flag tracks
+        the cap instead of recording what some earlier cap happened to do. The
+        raw length is kept alongside it: it is what lets a future reader ask
+        "would a cap of N have changed this?" without re-deriving the corpus.
+        """
+        return self.max_chars > JUDGE_VALUE_CHARS
+
+    @property
+    def truncated_at_legacy_cap(self) -> bool:
+        """Would the original 4000-character cap have bitten it? (#244)"""
+        return self.max_chars > LEGACY_JUDGE_VALUE_CHARS
 
     @property
     def shape(self) -> str:
@@ -131,7 +159,9 @@ class SlotAgreement:
         return {"slot": self.slot, "n_holders": self.n_holders,
                 "shape": self.shape, "exact": self.exact,
                 "similarity": self.similarity, "equivalent": self.equivalent,
-                "truncated": self.truncated, "reason": self.reason}
+                "max_chars": self.max_chars, "truncated": self.truncated,
+                "truncated_at_legacy_cap": self.truncated_at_legacy_cap,
+                "reason": self.reason}
 
 
 class OfflineCacheMiss(RuntimeError):
@@ -215,15 +245,26 @@ class Embedder:
         return sum(sims) / len(sims)
 
 
-def _judge_key(slot: str, distinct: list[str]) -> str:
-    """Unambiguous: the slot and each value are delimited by the encoding.
+def _sent(distinct: list[str]) -> list[str]:
+    """Exactly the text the judge is shown."""
+    return [t[:JUDGE_VALUE_CHARS] for t in distinct]
 
-    Scheme 1 was `slot + "".join(sorted(distinct))`, which had no separator at
-    all, so ("title", ["ab", "c"]) and ("title", ["a", "bc"]) — and even
-    ("titl", ["ex"]) and ("title", ["x"]) — hashed identically and served each
-    other's verdicts (issue #242).
+
+def _judge_key(slot: str, sent: list[str]) -> str:
+    """Keyed on the evidence the judge saw, not on the values it came from.
+
+    This distinction is the whole of #244. Keyed on the full values, raising
+    the character cap leaves the key unchanged, so every verdict reached under
+    the old cap is served again as though it had been reached under the new
+    one — the cache would quietly defeat the fix. Keyed on what was actually
+    sent, widening the cap changes the key for precisely the slots the cap bit
+    and for no others, so they re-judge and the remaining 510 stay cached.
+
+    The encoding is JSON so that the slot and each value are delimited; scheme 1
+    concatenated them bare, and ("titl", ["ex"]) collided with ("title", ["x"])
+    (issue #242).
     """
-    return _digest(json.dumps([slot, sorted(distinct)], ensure_ascii=False))
+    return _digest(json.dumps([slot, sorted(sent)], ensure_ascii=False))
 
 
 def _legacy_judge_key(slot: str, distinct: list[str]) -> str:
@@ -298,7 +339,9 @@ class EquivalenceJudge:
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
         with self.cache_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"rubric": _digest(EQUIVALENCE_SYSTEM),
-                                 "model": self.model, "key": key, "slot": slot,
+                                 "model": self.model,
+                                 "judge_chars": JUDGE_VALUE_CHARS,
+                                 "key": key, "slot": slot,
                                  "equivalent": ok, "reason": reason}) + "\n")
 
     def __call__(self, slot: str, values: list[Any]) -> tuple[bool, str]:
@@ -306,21 +349,38 @@ class EquivalenceJudge:
         distinct = list(dict.fromkeys(rendered))
         if len(distinct) < 2:
             return True, "identical"
-        key = _judge_key(slot, distinct)
+        sent = _sent(distinct)
+        if len(set(sent)) < 2:
+            # The cap destroyed the only difference between these values. The
+            # judge would be shown two identical blocks and would answer
+            # "equivalent" — correctly, on the evidence, and wrongly about the
+            # dataset. That is #244 taken to its limit, and it is the one
+            # outcome this measure must never report quietly.
+            raise ValueError(
+                f"slot {slot!r}: truncation at {JUDGE_VALUE_CHARS} chars "
+                f"collapses {len(distinct)} distinct values into one; the "
+                "measurement cannot be made at this cap")
+        key = _judge_key(slot, sent)
         if key in self._memo:
             self.memo_hits += 1
             return self._memo[key]
-        legacy = self._legacy.get(_legacy_judge_key(slot, distinct))
-        if legacy is not None:
-            self.legacy_hits += 1
-            return legacy
+        # Legacy records are keyed on the full values but were *judged* on the
+        # first 4000 characters. Where nothing reached that cap the two are the
+        # same text and the verdict still stands; where something did, the
+        # cached answer was reached on evidence we would no longer accept, so
+        # the slot has to be re-judged rather than quietly reused.
+        if all(len(t) <= LEGACY_JUDGE_VALUE_CHARS for t in distinct):
+            legacy = self._legacy.get(_legacy_judge_key(slot, distinct))
+            if legacy is not None:
+                self.legacy_hits += 1
+                return legacy
         if self.offline:
             raise OfflineCacheMiss(f"no cached verdict for slot {slot!r}")
 
         client, model = self._resolve()
         from data_sheets_schema.api_runner import _call_with_retry
-        blocks = "\n\n".join(f"--- value {i + 1} ---\n{t[:JUDGE_VALUE_CHARS]}"
-                             for i, t in enumerate(distinct))
+        blocks = "\n\n".join(f"--- value {i + 1} ---\n{t}"
+                             for i, t in enumerate(sent))
         prompt = (f"Field: `{slot}`\n\n{blocks}\n\n"
                   "Do these state the same fact about the dataset?")
         resp = _call_with_retry(client, model=model, max_tokens=self.max_tokens,
@@ -379,7 +439,7 @@ def compare_records(records: dict[str, dict[str, Any]], *,
             exact=len(set(rendered)) == 1,
             scalar=all(isinstance(v, (str, int, float, bool, type(None)))
                        for v in values),
-            truncated=any(len(t) > JUDGE_VALUE_CHARS for t in rendered))
+            max_chars=max(len(t) for t in rendered))
         if embedder is not None:
             try:
                 row.similarity = embedder.similarity(rendered)
@@ -429,10 +489,17 @@ def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
                  projects: tuple[str, ...] = DEFAULT_PROJECTS,
                  reps: int = 3, cache_dir: Path = DEFAULT_CACHE,
                  embed: bool = False, offline: bool = False,
+                 embed_online: bool = False,
                  ) -> tuple[dict[str, dict[str, Any]], dict[str, list[SlotAgreement]]]:
-    """The whole matrix, plus the per-slot rows behind every cell."""
+    """The whole matrix, plus the per-slot rows behind every cell.
+
+    `embed_online` is separate from `offline` so that re-judging a handful of
+    slots cannot quietly buy ~1400 embeddings on the way past. The embedder
+    reads its cache and stops there unless asked otherwise.
+    """
     configs = configs or DEFAULT_CONFIGS
-    embedder = (Embedder(cache_path=cache_dir / "embeddings.jsonl", offline=offline)
+    embedder = (Embedder(cache_path=cache_dir / "embeddings.jsonl",
+                         offline=offline or not embed_online)
                 if embed else None)
     matrix: dict[str, dict[str, Any]] = {}
     rows: dict[str, list[SlotAgreement]] = {}
@@ -449,14 +516,25 @@ def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
             result = compare_records(records, embedder=embedder, judge=judge)
             key = f"{cfg}|{project}"
             rows[key] = result
+            # `is True`, not `bool(...)`: an unjudged slot is None, and
+            # bool(None) would file it under "judged, and they disagreed".
+            # "Nothing was measured" and "nothing agreed" are the two most
+            # different readings this instrument has, and they must not
+            # serialize identically (#250).
+            judged = [r for r in result if r.equivalent is not None]
+            n_equiv = sum(r.equivalent is True for r in result)
             matrix[key] = {
                 "shared": len(result),
-                "equivalent": sum(bool(r.equivalent) for r in result),
+                "equivalent": n_equiv,
+                "unjudged": len(result) - len(judged),
                 "exact": sum(r.exact for r in result),
                 "truncated": sum(r.truncated for r in result),
-                "rate": (sum(bool(r.equivalent) for r in result) / len(result)
-                         if result else None),
+                "truncated_at_legacy_cap": sum(r.truncated_at_legacy_cap
+                                               for r in result),
+                "rate": (n_equiv / len(result)
+                         if result and len(judged) == len(result) else None),
                 "judge_model": judge.model,
+                "judge_chars": JUDGE_VALUE_CHARS,
                 "replicates": sorted(records),
             }
     return matrix, rows
@@ -474,6 +552,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--embed", action="store_true",
                    help="also compute embedding similarity (shown not to "
                         "discriminate here; off by default)")
+    p.add_argument("--embed-online", action="store_true",
+                   help="allow paid embedding calls (off by default, so a "
+                        "re-judge cannot buy ~1400 embeddings in passing)")
     p.add_argument("--offline", action="store_true",
                    help="fail instead of making a paid call")
     p.add_argument("--write", action="store_true",
@@ -485,12 +566,15 @@ def main(argv: list[str] | None = None) -> int:
     matrix, rows = build_matrix(
         root=a.root, method=a.method, configs=configs,
         projects=tuple(a.projects) if a.projects else DEFAULT_PROJECTS,
-        reps=a.reps, cache_dir=a.cache_dir, embed=a.embed, offline=a.offline)
+        reps=a.reps, cache_dir=a.cache_dir, embed=a.embed, offline=a.offline,
+        embed_online=a.embed_online)
 
     for key, cell in sorted(matrix.items()):
+        rate = f"{cell['rate']:6.1%}" if cell["rate"] is not None else "     —"
         print(f"{key:38s} {cell['equivalent']:3d}/{cell['shared']:3d} "
-              f"= {cell['rate']:6.1%}  (exact {cell['exact']}, "
-              f"truncated {cell['truncated']})")
+              f"= {rate}  (exact {cell['exact']}, "
+              f"truncated {cell['truncated']}, "
+              f"would-have-been {cell['truncated_at_legacy_cap']})")
     if a.write:
         a.cache_dir.mkdir(parents=True, exist_ok=True)
         (a.cache_dir / "matrix.json").write_text(

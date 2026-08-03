@@ -6,7 +6,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1369,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three agree on the mixed direct-observation/self-report acquisition and medication cross-verification, but values 2 and 3 additionally assert acquisition via electronic medical record extraction and Department of Licensing driving records (and value 3 REDCap/device exports), which value 1 omits "
  },
  {
@@ -16,7 +18,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1742,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three agree on the AI-ready-data and demographic under-representation gaps, but value 1's third gap (ethical sourcing/FAIR compliance, licensing, watermarking) is substantively different from and absent in values 2 and 3, which instead assert a salutogenesis gap not mentioned in value 1."
  },
  {
@@ -26,7 +30,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1580,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Value 2 omits the internal-review/no-external-audit statement present in values 1 and 3, and value 3 adds an anomaly (devices with no stored results, lost data from collisions) absent from the others, so the three assert different sets of facts."
  },
  {
@@ -36,7 +42,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1485,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "While all three agree no at-risk groups are included and share the minors/pregnancy exclusions and transportation assistance, each asserts substantively different protections absent from the others (value 1: independent-recruiter conflict rules; value 2: privacy-preserving device design, encrypted s"
  },
  {
@@ -46,7 +54,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 391,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three convey the same core fact\u2014there is no formatted citation string and users must follow the citation instructions at https://docs.aireadi.org/docs/3/citation\u2014with the funder/source acknowledgement being a minor licence detail rather than a contradicting claim."
  },
  {
@@ -56,7 +66,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1965,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three share the same site-level QC narrative, but value 2 uniquely asserts a central processing stage with terminology mapping and release-specific methods (1.0.0 ad hoc vs 2.0.0/3.0.0 automated plus custom) while omitting the statement present in values 1 and 3 that no data/instances were exclu"
  },
  {
@@ -66,7 +78,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 2920,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe the same e-consent/in-person consent process, but value 1 additionally asserts that consent explicitly covers secondary use, biobanking and future sharing (future research, AI/ML, repository creation) and describes accommodations for illiterate participants \u2014 substantive facts abo"
  },
  {
@@ -75,9 +89,11 @@
   "shape": "object",
   "exact": false,
   "similarity": null,
-  "equivalent": true,
-  "truncated": true,
-  "reason": "All three describe the same AI-READI collection mechanisms\u2014REDCap electronic capture of questionnaires and clinical data, on-site physical/vital/ECG/monofilament/MoCA measurements with the same named devices, and vision testing (EVA acuity, Mars contrast, ND filter, autorefraction) plus imaging\u2014diff"
+  "equivalent": false,
+  "max_chars": 15262,
+  "truncated": false,
+  "truncated_at_legacy_cap": true,
+  "reason": "While all three describe the same core AI-READI mechanisms (REDCap, clinical measures, vision testing, retinal imaging, at-home devices, biospecimens), value 1 uniquely asserts additional collection mechanisms \u2014 medical record extraction and driving/accident record retrieval from the Department of L"
  },
  {
   "slot": "collection_notifications",
@@ -86,7 +102,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1213,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three assert the same core fact\u2014that participants were actively and knowingly recruited via personalised mailed/emailed invitations, follow-up phone contact and the AI-READI website with study overview and FAQ\u2014differing only in incidental detail (mention of the REDCap interface versus texts and "
  },
  {
@@ -96,7 +114,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1936,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three give the same collection window (2023-07-19 to 2025-05-01) for version 3.0.0 and the same overall study/enrollment timeline (enrolment from 18 July 2023 to 30 Nov 2026, four-year project, completion anticipated 2027-01-01), differing only in supplementary contextual details rather than in "
  },
  {
@@ -106,7 +126,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 619,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state that the dataset contains no confidential or personally identifiable information; value 3's added note about how non-released identifiable study data are secured is supplementary detail that does not contradict or change the conclusion about the released dataset."
  },
  {
@@ -116,7 +138,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 93,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Both name the same standard and version; the URL is merely a locator for the identical specification."
  },
  {
@@ -126,7 +150,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 251,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Value 2 asserts conformance to an additional schema (dataset_structure_description v0.1.1) that value 1 omits entirely."
  },
  {
@@ -136,7 +162,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 505,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three convey identical revocation details, differing only in identifier presence/format and the label wording 'Withdrawal of consent' vs 'Consent withdrawal'."
  },
  {
@@ -146,7 +174,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 302,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state that no content warnings apply\u2014the dataset contains no data that could be offensive, insulting, threatening, or pose a safety risk\u2014differing only in wording and identifiers."
  },
  {
@@ -156,7 +186,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 19,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -166,8 +198,10 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
-  "truncated": true,
-  "reason": "All three credit the dataset to the AI-READI Consortium as organizational creator (multi-institutional, eight sites, same named PIs Aaron Lee with ORCID 0000-0002-7452-1648, Cecilia Lee, Bahmani, Baxter, etc.) and all record the same Washington University in St. Louis vs. University of Washington af"
+  "max_chars": 9612,
+  "truncated": false,
+  "truncated_at_legacy_cap": true,
+  "reason": "All three list the AI-READI Consortium as organizational creator plus the same set of named study principal investigators with identical ORCIDs and affiliations, and all record the same Aaron Lee responsible-party/affiliation discrepancy; the remaining differences (extra affiliation entries, contact"
  },
  {
   "slot": "data_collectors",
@@ -176,7 +210,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 3949,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe the same core AI-READI site research team, but they list different sets of collector entities: value 1 adds a Community Advisory Board and Native Biodata Consortium engagement, value 2 omits both and instead adds a central curation/engineering team, and value 3 mentions the Adviso"
  },
  {
@@ -186,7 +222,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 395,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three agree that no data protection impact analysis was conducted, but value 2 additionally asserts an internal AI-READI review and absence of external audits while value 3 asserts specific safeguards (dissemination system, licence agreement, watermarking), substantive claims absent from the oth"
  },
  {
@@ -196,7 +234,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1555,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three identify the same AI-READI v3.0.0 multimodal T2DM dataset with identical participant count (2280), collection dates, three sites, file count (356,343), size (~3.82 TB), salutogenesis AI/ML purpose, and PHI-free public release; they differ only in level of detail (version history/DOI vs. mo"
  },
  {
@@ -206,7 +246,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 713,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state the data was collected directly from participants at the three sites, that recruitment pools came from EHR/ICD-10 screening within the sites' health systems, and that driving/accident records come from the Department of Licensing; remaining differences (mention of devices/specimens, "
  },
  {
@@ -216,7 +258,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 578,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three cite the licence restrictions, but value 2 additionally asserts specific prohibitions (no clinical treatment decisions; use limited to type 2 diabetes research) and value 3 adds a caution about applying the data to unrepresented populations, substantive claims absent from the other values."
  },
  {
@@ -226,7 +270,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 811,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three list the same three release dates (3 May 2024 v1.0.0, 8 Nov 2024 v2.0.0, 17 Nov 2025 v3.0.0) with consistent supporting detail; the extra DOIs/participant counts are additional context, not contradictions."
  },
  {
@@ -236,7 +282,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 2246,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three agree that the dataset is distributed via FAIRhub (DOI 10.60775/fairhub.3) in DICOM/CSV/JSON/Markdown formats, but value 2 additionally asserts substantive facts absent from the others (yearly dual releases of a public and a more sensitive controlled-access dataset, and per-datatype standa [truncated]"
  },
  {
@@ -246,7 +294,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 18,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -256,7 +306,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1652,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three record the same ethical review fact\u2014AI-READI approved by the University of Washington IRB (STUDY00016228, initial approval 20 December 2022, ROR 00cvxb145) with reliance agreements from UAB and UCSD, annual renewal requirement,  [truncated]"
  },
  {
@@ -266,7 +318,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 429,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three assert the same core fact\u2014the dataset has not yet been used for any tasks and users are encouraged to publish results\u2014with the citation/view counts and dissemination note being non-contradictory extra detail."
  },
  {
@@ -276,7 +330,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 571,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state the same core fact \u2014 there is no mechanism for people outside the project to extend or augment the AI-READI dataset \u2014 with the extra links and blueprint/FAIRhub remarks being supplementary context rather than contradicting or altering that conclusion."
  },
  {
@@ -286,7 +342,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1907,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Values 1 and 3 assert additional substantive resources\u2014peer-reviewed publications (BMJ Open, Nat Metab, Zenodo DOI, NIH RePORTER) with their own licensing restrictions, plus value 3's stability notice\u2014that value 2 omits entirely, so a reader would not draw the same conclusion from each."
  },
  {
@@ -296,8 +354,10 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
-  "truncated": true,
-  "reason": "All three list the same file collections (cardiac_ecg, clinical_data, environment, retinal_flio, retinal_oct, retinal_octa, retinal_photography, wearable/metadata) with the same conforming standards, devices and descriptions; the differences are only added detail (file counts/sizes, URLs, minor subd"
+  "max_chars": 6554,
+  "truncated": false,
+  "truncated_at_legacy_cap": true,
+  "reason": "All three list the same ten file collections (nine datatype directories plus a dataset-level metadata/documentation group) with the same names, conformance standards, devices and content; the differences are only in level of detail (value 3 adds file counts/byte totals, others add URLs or extra moda"
  },
  {
   "slot": "funders",
@@ -306,7 +366,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 2520,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Values 1 and 2 both list NIH (three grants) plus Research to Prevent Blindness, while value 3 additionally asserts in-kind funding/support from Microsoft AI for Good Lab and device manufacturers (Topcon, Optomed, iCare, Zeiss, Heidelberg, Dexcom, Garmin), a substantive set of supporters omitted enti"
  },
  {
@@ -316,7 +378,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1353,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Each version asserts substantive facts absent from the others (e.g., value 2's dropping of Snellen acuity variables in v3.0.0, value 3's commercial/patent statement and device/site diversity limits, value 1's ethics-documentation practice), so a reader would not draw the same conclusions from each."
  },
  {
@@ -326,7 +390,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 2354,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three report the same core facts\u2014human subjects involved, UW IRB STUDY00016228 approved 20 Dec 2022 with UAB and UCSD reliance agreements, HIPAA Safe Harbor de-identification, NIH GDS compliance, adults 40+ with pregnancy/gestational diabetes exclusions and no minors, and planned Native Biodata "
  },
  {
@@ -336,7 +402,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 34,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -346,7 +414,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1729,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three record that written and electronic (REDCap e-consent) informed consent was obtained using the approved UW consent form, covering banking/secondary use with a public deidentified version restricted to type 2 diabetes research plus a controlled-access version, and the same withdrawal policy;"
  },
  {
@@ -356,7 +426,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1624,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three agree on 2280 participant instances with no labels, but values 1 and 2 assert substantive missing-data facts (some participants lack modality data, with reasons) that value 3 omits entirely, while value 3 adds version-specific counts and demographic breakdowns and value 1 adds a sampling/c"
  },
  {
@@ -366,7 +438,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1286,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Values 1 and 3 restrict use to research only (T2DM-related, not for clinical decisions), while value 2 additionally asserts commercial use is permitted under the license and omits the research-only/clinical-use restrictions, a substantive difference."
  },
  {
@@ -376,7 +450,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 936,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three list the same three IP facts\u2014Licensor (University of Washington) retains title and all rights not expressly granted, third-party IP restrictions deferred to the Zenodo license, and no current commercialization/patent plans though the commercial-friendly open license permits future products"
  },
  {
@@ -386,7 +462,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1489,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three report the same de-identification status: no identifiable elements present, PHI removed under HIPAA Safe Harbor (with the FAIRhub 'NoDeIdentification' note), the same removed identifiers (PHI, sex, race/ethnicity, medications), and the same controlled-access items; differences are only in "
  },
  {
@@ -396,7 +474,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 9,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -406,7 +486,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 228,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Values 1 and 2 match (only ordering/duplicate differences), but value 3 omits the keywords 'Data Sharing', 'Exploratory Data Collection', and 'Type 2 Diabetes' entirely, which are substantive descriptors."
  },
  {
@@ -415,9 +497,11 @@
   "shape": "object",
   "exact": false,
   "similarity": null,
-  "equivalent": true,
-  "truncated": true,
-  "reason": "All three describe the same underlying biases\u2014volunteer/selection bias, under-recruitment of Black, Hispanic and Asian participants (including the English-language requirement), absence of Pacific Islander/Native American and rural groups due to urban hospital-based recruitment, and not-yet-balanced"
+  "equivalent": false,
+  "max_chars": 5179,
+  "truncated": false,
+  "truncated_at_legacy_cap": true,
+  "reason": "All three share the same selection/representation/sampling biases, but value 1 uniquely asserts a measurement bias from device and recording-site heterogeneity (with its mitigation) that values 2 and 3 omit entirely, while values 2 and 3 add mitigations (balanced 70/15/15 splits, Native Biodata Cons"
  },
  {
   "slot": "known_limitations",
@@ -426,7 +510,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 3209,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "While the three lists share several limitations (cross-sectional single visit, finite biorepository samples, dropped Snellen variables), each asserts substantive limitations the others omit entirely \u2014 value 1 uniquely cites no unstructured text, undistributed raw data, and incomplete enrollment agai"
  },
  {
@@ -436,7 +522,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 679,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state that no labels or labeling were performed since the dataset is hypothesis-agnostic, no labelers/software/agreement stats exist, and no formal guidelines exist for future label creation; the only difference (human-level performance N/A) is a trivial detail consistent with the others."
  },
  {
@@ -446,7 +534,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 2,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -456,7 +546,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 495,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three name the same governing license (AI-READI custom license v2.0, same DOI); the additional notes about the FAIRhub label and the earlier v1.0 text bundled with the data are supplementary provenance detail rather than a conflicting licensing fact."
  },
  {
@@ -466,7 +558,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 3102,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state the same licensing facts \u2014 AI-READI custom license v2.0 (Zenodo 10.5281/zenodo.17555036, labelled 'Health Data License') for v3.0.0, the earlier University of Washington v1.0 agreement in the bundle with identical grant/restriction/liability terms, disease-specific (type 2 diabetes) "
  },
  {
@@ -476,7 +570,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 995,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three agree the AI-READI team maintains the dataset on FAIRhub/Azure with contact@aireadi.org, but they assign different maintainer roles (academic_institution vs researcher) and each adds substantive claims the others omit (the FAIRhub beta/under-review notice in value 1, the named contact Aaro"
  },
  {
@@ -486,7 +582,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1222,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three list the same missing-data causes (non-participation, device/retrieval failures, data collisions, skipped operator-dependent imaging), the same patterns (whole modalities absent, skipped survey questions), and the same handling (fill from other record parts under site PI guidance, otherwis"
  },
  {
@@ -496,7 +594,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 61,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Both name the same AI-READI flagship type 2 diabetes dataset, differing only in word order."
  },
  {
@@ -506,7 +606,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 891,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Each value asserts substantively different additional uses\u2014value 1 adds the blueprint-as-model claim and biobanked specimen studies, value 2 cites pseudotime manifolds and UAB biospecimen policies, and value 3 instead describes a temporal atlas/disease-trajectory use plus licensing terms absent from"
  },
  {
@@ -516,7 +618,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 29,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -526,7 +630,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1088,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three report the same $200 study-visit stipend funded by the grant, the same travel-cost reimbursement with the $25 unreimbursed threshold, and the same payment timing/non-proration and Year 4 repetition; only trivial wording and a minor procedural note about possible future amount changes diffe"
  },
  {
@@ -536,7 +642,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 2907,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three agree on the core facts (HIPAA Safe Harbor stripping, removal of sex/race/ethnicity/medications, controlled-access tier behind use agreements, watermarking, theoretical re-identification risk, privacy-conscious device choice), but values 1 and 3 additionally assert the FAIRhub  [truncated]"
  },
  {
@@ -546,7 +654,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 2759,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Values 1 and 2 both include a de-identification preprocessing strategy (HIPAA Safe Harbor stripping of PHI plus removal of sex, race/ethnicity and medication data), which value 3 omits entirely while adding other substantive claims (WFDB/NASA ASCII formats, REDCap as processing software), so a reade"
  },
  {
@@ -556,7 +666,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 2085,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Values 1 and 2 list the same three prohibitions (clinical decisions, re-identification, onward transfer), but value 3 asserts an additional substantive restriction\u2014that the public version may only be used for type 2 diabetes research\u2014which the others omit entirely."
  },
  {
@@ -566,7 +678,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 19,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Both identify the same publisher URL, differing only by a trailing slash."
  },
  {
@@ -576,7 +690,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 2289,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three share the core AI/ML-T2DM and standards/blueprint purposes, but value 3 omits the workforce-training internship purpose asserted by values 1 and 2 (and adds a distinct 'pseudotime/downstream AI' purpose), while value 2 omits the balanced, hypothesis-agnostic temporal-atlas purpose stated i"
  },
  {
@@ -586,7 +702,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 2860,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three list the same underlying raw sources (participant/REDCap questionnaire and clinical entry, device native exports in .xml/.csv/.fda/.sdt/.FIT/DICOM, blood/urine lab assays by local CLIA labs and UW NORC, electronic health records, and Department of Licensing driving records) with the same c"
  },
  {
@@ -596,7 +714,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 944,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state the same core fact\u2014raw data is retained by the AI-READI project, not currently shared because it lacks standardized mapping and may contain PHI/PII, with possible inclusion in future controlled-access releases\u2014while values 1 and 3 merely add compatible detail about device-native expo"
  },
  {
@@ -606,7 +726,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1685,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three record the dataset as restricted and HIPAA-compliant (Safe Harbor de-identification), require NIH Genomic Data Sharing Policy security compliance, and state that export control/regulatory questions are answered only by reference to the same Zenodo license with no export regime named; the r"
  },
  {
@@ -616,7 +738,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1430,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three list the same three relations \u2014 prior versions 2.0.0 (8 Nov 2024, 2.01 TB, 165,051 files, 1067 participants, no longer accessible) and 1.0.0 (3 May 2024, 204 pilot participants) as is_new_version_of, plus FAIRhub record 4 mini version as has_part not captured in the bundle \u2014 with only word [truncated]"
  },
  {
@@ -626,7 +750,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 609,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Value 2 uniquely asserts a planned Year-4 follow-up visit for a subgroup (longitudinal arm) while omitting the participant-ID folder/file organization that values 1 and 3 assert, so each states substantive facts absent from the other."
  },
  {
@@ -636,7 +762,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 468,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three agree there are no retention limits, but value 2 omits the statement that raw data is preserved by the AI-READI project for the project's duration while value 3 omits the clause about identifiers/links not being destroyed until records retention requirements end, so each asserts substantiv"
  },
  {
@@ -646,7 +774,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 3392,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe the same two strategies\u2014non-probability, EHR-screened, wave-based stratified recruitment balanced by race/ethnicity, sex and diabetes severity (hence not US-representative), plus a released dataset comprising all enrolled participants with 'N/A' sampling\u2014differing only in suppleme"
  },
  {
@@ -656,7 +786,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 1041,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "Value 1 asserts sensitive elements ARE present (true, for the controlled-access tier) while values 2 and 3 set the flag to false overall, and value 3 additionally asserts that the study team retains identifiable data (name, MRN, DOB, address, etc.) outside the release, a substantive claim absent fro"
  },
  {
@@ -666,7 +798,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1091,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three describe the same 70/15/15 recommended split with identical counts (1576/352/352 of 2280), the same balancing criteria, and the same participants.tsv location; value 3's mention of version 3.0.0 is only added context, not a conflicting fact."
  },
  {
@@ -676,8 +810,10 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
-  "truncated": true,
-  "reason": "Value 1 asserts the dataset does identify subpopulations (subpopulation_elements_present: true) across six distinct groupings, including a data-collection-site subpopulation with site-specific recruitment priorities absent from the others, whereas values 2 and 3 assert a single entry with subpopulat"
+  "max_chars": 4291,
+  "truncated": false,
+  "truncated_at_legacy_cap": true,
+  "reason": "Although all three report the same counts (2280 participants; race/ethnicity, sex, diabetes-status and age figures) and the same controlled-access caveat, value 1 additionally asserts a data-collection-site subpopulation with per-site recruitment priorities and age-eligibility criteria that the othe"
  },
  {
   "slot": "subsets",
@@ -686,7 +822,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 3438,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three agree on the train/validation/test splits and their counts, but value 1 additionally asserts two non-split subsets (publicly accessible and controlled-access releases with their distinct contents) that values 2 and 3 omit entirely."
  },
  {
@@ -696,7 +834,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1376,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three list the same set of intended tasks\u2014pseudotime manifold analysis of T2DM disease trajectories, downstream multimodal AI/ML algorithm development including genetic/racial-ethnic links, and a hypothesis-agnostic design with no predefined labelling task\u2014differing only in grouping, wording, an"
  },
  {
@@ -706,7 +846,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": false,
+  "max_chars": 808,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All agree the dataset is publicly distributed, but each asserts distinct substantive mechanisms omitted by the others \u2014 value 2 uniquely claims biospecimen sharing via a sample repository with Material Transfer/Data Use Agreements, while value 3 uniquely specifies FAIRhub distribution with verified-"
  },
  {
@@ -716,7 +858,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 61,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -726,7 +870,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 10,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -736,7 +882,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 17,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -746,7 +894,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1383,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state the same update policy\u2014no in-place updates, new static versions released roughly annually as more participants enroll, with changes documented in the CHANGELOG at docs.aireadi.org\u2014differing only in how much version-history detail they include."
  },
  {
@@ -756,7 +906,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 469,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three state the same core fact \u2014 there is no repository of known uses beyond general scholarly search/citation indices, while the FAIRhub record shows usage/citation panels \u2014 with the numeric view and citation counts being extra detail rather than contradictory claims."
  },
  {
@@ -765,9 +917,11 @@
   "shape": "object",
   "exact": false,
   "similarity": null,
-  "equivalent": true,
-  "truncated": true,
-  "reason": "Both list the same clinical laboratory variables in the same order with matching data types, units, sample types (EDTA plasma/serum), purposes and the derived LDL and BUN/creatinine ratio; the differences are only level of detail (explicit reference ranges vs. naming the testing lab) and truncation "
+  "equivalent": false,
+  "max_chars": 20335,
+  "truncated": false,
+  "truncated_at_legacy_cap": true,
+  "reason": "Value 2 asserts additional variables absent from value 1 (height, weight, waist and hip circumference, respiratory rate, stress level, physical activity calorie expenditure, device placement/handedness sheet) while value 1 asserts specific numeric reference ranges and MoCA quality caveats absent fro"
  },
  {
   "slot": "version",
@@ -776,7 +930,9 @@
   "exact": true,
   "similarity": 1.0,
   "equivalent": true,
+  "max_chars": 5,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "identical"
  },
  {
@@ -786,7 +942,9 @@
   "exact": false,
   "similarity": null,
   "equivalent": true,
+  "max_chars": 1945,
   "truncated": false,
+  "truncated_at_legacy_cap": false,
   "reason": "All three list the same three versions with identical DOIs, dates, sizes and participant counts, and state the same facts about version 2.0.0 being inaccessible, no in-place updates, and earlier healthsheets remaining published; the only differences are extra incidental detail (documentation dropdow"
  }
 ]
