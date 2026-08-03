@@ -1,0 +1,622 @@
+[
+ {
+  "slot": "acquisition_methods",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 1 asserts no derived content is included (computed cell maps excluded, was_inferred_derived false, no validation), whereas values 2 and 3 assert the release contains derived embeddings/hierarchies and validated CRISPRi findings, a substantive contradiction."
+ },
+ {
+  "slot": "addressing_gaps",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 both list four gaps including a biomedical AI/ML workforce-training gap, which value 3 omits entirely, so value 3 asserts a narrower set of gaps."
+ },
+ {
+  "slot": "citation",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 give the same full dataset citation (authors, title, DOI 10.18130/V3/HIGT4C, V2, 2026) plus the companion article, whereas value 3 only describes attribution requirements and the project article, omitting the actual dataset citation string, DOI, version and year."
+ },
+ {
+  "slot": "cleaning_strategies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three share the \"data currently being QCed\" statement, but value 3 omits the FAIRSCAPE-CLI/client validation-and-packaging mechanism asserted by values 1 and 2 and instead adds a separate strategy (ontology mapping and JSON-Schema data-dictionary characterization) absent from the others, so they"
+ },
+ {
+  "slot": "collection_consents",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Although all three share the ethical-sourcing and MTA claim, value 1 uniquely asserts Dataverse governance facts (no human subjects, de-identified, not FDA regulated) and value 3 uniquely asserts ATCC/HipSci availability plus a Bridge2AI Code of Conduct attestation requirement, so each conveys subst"
+ },
+ {
+  "slot": "collection_mechanisms",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same four collection methods (AP-MS and SEC-MS for protein interactions, Human Protein Atlas antibody immunofluorescence confocal imaging for spatial proteomics, and single-cell CRISPR screens in MDA-MB-468 and KOLF2 cells) with the same experimental particulars; they differ o"
+ },
+ {
+  "slot": "collection_timeframes",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three record the same NIH project period (2022-09-01 to 2026-08-31), the same Dataverse creation/deposit date of 2025-02-27, the same release publication dates spanning 2025-03-03 to 2026-07-15, and the same noted November 2026 maintenance-plan discrepancy; differences are only granularity (DOIs"
+ },
+ {
+  "slot": "confidential_elements",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both state no confidential elements, all files public, and note the same temporary pre-publication embargo on the KOLF2.1J and MDA-MB-468 perturb-seq links in the October 2025 and June 2026 releases."
+ },
+ {
+  "slot": "conforms_to",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state the dataset conforms to RO-Crate packaged via FAIRSCAPE with ARK persistent identifiers and provenance metadata; the extra mentions of JSON-Schema, EVI ontology and RDF-XML serialization are added detail rather than contradictory facts."
+ },
+ {
+  "slot": "creators",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": true,
+  "reason": "All three record the same CM4AI creator set\u2014the same author list with matching ORCIDs and institutional affiliations, with Trey Ideker as PI/corresponding author/point of contact\u2014differing only in structuring (single aggregated entry vs. per-person entries), identifier syntax, and level of incidenta"
+ },
+ {
+  "slot": "data_collectors",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three identify the same data-generating parties\u2014the Lundberg Lab at Stanford (immunofluorescence/spatial proteomics), the Nevan Krogan lab at UCSF (SEC-MS/PPI), and the CM4AI Data Acquisition module\u2014with the only differences being extra detail about deposition (depositor Niestroy / Tools and Sta"
+ },
+ {
+  "slot": "description",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same CM4AI quarterly AI-ready data release programme with identical mission, modalities (AP-MS/SEC-MS, IF imaging, perturb-seq), cell lines (MDA-MB-468, KOLF2.1J), RO-Crate/FAIRSCAPE packaging, LibraData/UVA Dataverse deposition and identical aggregate statistics; the remainin [truncated]"
+ },
+ {
+  "slot": "direct_collection",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both state the data were directly generated by CM4AI's own laboratories from cell lines sourced externally (ATCC MDA-MB-468, HipSci KOLF2.1J); the extra production-location listing in value 1 is supplementary detail, not a contradicting or substantively different fact."
+ },
+ {
+  "slot": "discouraged_uses",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 2 asserts substantive prohibitions on clinical decision-making and commercial use (CC BY-NC-SA) that value 1 omits entirely, while value 1 notes the absence of predicted cell maps not mentioned in value 2."
+ },
+ {
+  "slot": "distribution_dates",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three list the same release series (May 2024 plus the four Beta releases with identical DOIs and publication dates 2025-03-03, 2025-07-01, 2025-10-31, 2026-06-17) and note the same June 17, 2025 vs 2026-06-17 discrepancy; the only differences are placement of the May 2024 entry and an extra vers"
+ },
+ {
+  "slot": "distribution_formats",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 1 additionally asserts distribution via the CM4AI web portal (cm4ai.org) and value 2 omits both the Dataverse metadata export formats (OAI_ORE, DataCite, Croissant, etc.) and the API/large-file download route that values 1 and 3 assert, so the three do not convey the same set of distribution c"
+ },
+ {
+  "slot": "errata",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three share the June 2025 revision erratum, but value 3 asserts an additional distinct erratum (a release-page date discrepancy between June 17, 2025 and 2026-06-17) and value 2 adds a further file-naming-change erratum detail and version info, facts entirely absent from the others."
+ },
+ {
+  "slot": "ethical_reviews",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three record the same ethical review facts\u2014contacts Vardit Ravitsky (Hastings Center) and Jean-Christophe Belisle-Pipon (SFU) listed under Ethical Review in the Dataverse releases, plus the CM4AI Ethics module's Value-Sensitive Design methodology, CM4AI Life Cycle governance framework, and Bridg"
+ },
+ {
+  "slot": "existing_uses",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Each value asserts substantive facts the others omit \u2014 value 1 claims use in 'visible neural network' AI tools, value 2 adds the Clark et al. project publication and 38 CodeFest registrants, and value 3 adds download/citation metrics \u2014 so a reader would not draw the same conclusions from each."
+ },
+ {
+  "slot": "external_resources",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": true,
+  "reason": "The lists assert materially different sets of external resources: value 2 omits the embargoed perturb-seq links (present in 1 and 3) and adds NDEx as a general CM4AI cell-map resource, while value 3 uniquely asserts PRIDE as a future SEC-MS destination plus the CM4AI web portal, FAIRSCAPE and IMP re"
+ },
+ {
+  "slot": "funders",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three record the same funders and awards \u2014 NIH Bridge2AI CM4AI award 1OT2OD032742-01 (core OT2OD032742 / supplement 3OT2OD032742-01S2 with the same RePORTER details), NIH Bridge2AI Bridge Center award 5U54HG012513-02, and the Frederick Thomas Fund of the University of Virginia \u2014 differing only i"
+ },
+ {
+  "slot": "future_use_impacts",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Each value asserts substantive content the others omit \u2014 value 2 centers on aspirational transformative/ethics impacts, value 3 adds a repository-review-notice affecting future availability plus ARK/DOI identifier plans and a November 2026 end date, while value 1 covers only release augmentation, mi"
+ },
+ {
+  "slot": "human_subject_research",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state the same core fact \u2014 the dataset involves no human subjects because it derives from cultured (ethically sourced, de-identified) human cell lines, with Human Subjects: No and FDA Regulated: No \u2014 differing only in extra detail such as named ethics/governance contacts."
+ },
+ {
+  "slot": "id",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "One gives a namespaced short identifier (d4d:CM4AI) while the other gives a web URL, which are different identifier values even if they refer to the same dataset."
+ },
+ {
+  "slot": "instances",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": true,
+  "reason": "Although all three describe the same core modalities (IF images, SEC-MS, perturb-seq, AP-MS), they assert different structured counts (IF images counted as 53,788 in value 1 vs 464 proteins in value 2 vs no count in value 3; SEC-MS 7,000 and a separate TNBC perturb-seq instance of 200 only in value "
+ },
+ {
+  "slot": "intended_uses",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "The listed intended uses are identical, but value 2 additionally asserts that the current release is most suitable for bioinformatics analysis of individual datasets and requires domain expertise\u2014a substantive claim absent from values 1 and 3, which instead only note the quoted heading or the releas"
+ },
+ {
+  "slot": "ip_restrictions",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three convey the same substantive IP facts\u2014UC Regents copyright on the data, Stanford copyright on spatial proteomics raw images, commercial use requiring separate negotiation with UCSD/Stanford/UCSF under Data Access Committee oversight, and UVA-held FAIRSCAPE software under MIT\u2014with difference"
+ },
+ {
+  "slot": "is_deidentified",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state the dataset is de-identified with no identifiable elements because the data come from commercially available human cell lines rather than identifiable human subjects; value 2's added donor attributes of the published cell lines are extra detail that does not contradict or alter that "
+ },
+ {
+  "slot": "keywords",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "The lists are identical except value 2 adds a broad subject category ( [truncated]"
+ },
+ {
+  "slot": "known_biases",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 list only the cell-line representation bias, while value 3 additionally asserts a distinct targeted-panel selection bias (100 chromatin modifiers / 100 metabolic enzymes), a substantive fact absent from the others."
+ },
+ {
+  "slot": "known_limitations",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 2 and 3 assert a substantive limitation absent from value 1 \u2014 that some component datasets are under temporary pre-publication embargo \u2014 so a reader would draw different conclusions about dataset availability."
+ },
+ {
+  "slot": "labeling_strategies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three share the two-pronged (GO/Reactome alignment + LLM naming) annotation core, but value 2 adds that this is implemented as a MuSIC pipeline step (cellmaps_hierarchyeval) and value 3 adds substantively different content \u2014 that computed cell maps are not included in the releases and that Datav"
+ },
+ {
+  "slot": "language",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "license",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both identify the license as Creative Commons Attribution-NonCommercial-ShareAlike 4.0, one as a URL and one as its standard abbreviation."
+ },
+ {
+  "slot": "license_and_use_terms",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree on the core CC BY-NC-SA 4.0 licence, attribution/citation and BSD-3/MIT software terms, but value 2 additionally asserts a Bridge2AI Code of Conduct attestation requirement for data access plus public file access and a general_research_use permission, and omits the point-of-contact r"
+ },
+ {
+  "slot": "machine_annotation_tools",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 2 lists only LLM naming plus Gene Ontology/Reactome alignment, omitting the node2vec, HPA image model, contrastive co-embedding, community detection and FAIRSCAPE tools asserted by values 1 and 3, while value 3 additionally asserts IMP 2.18 integrative modeling and FAIRSCAPE server/ARK details"
+ },
+ {
+  "slot": "maintainers",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree that the CM4AI project team (Thaker/Sembay) and the University of Virginia Dataverse (LibraData) maintain the dataset, but they differ on substantive additional maintainers: values 2 and 3 list a Data Governance Committee contact (Jillian Parker) that value 1 omits entirely, while va"
+ },
+ {
+  "slot": "missing_data_documentation",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three record the same facts\u2014interim releases explicitly incomplete, temporary pre-publication embargoes, incompletely overlapping protein sets across SEC-MS/IF/perturb-seq, computed cell maps and certain IF/AP-MS components pending, handled via quarterly updates through the project's November 20"
+ },
+ {
+  "slot": "name",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both name the same CM4AI dataset, differing only by the descriptive 'Data Releases' suffix rather than identifying a different resource."
+ },
+ {
+  "slot": "other_tasks",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Both mention visible machine learning and the workforce-training internship, but value 2 additionally asserts a distinct task\u2014downstream human genomics applications such as interpreting genetic variants and mutations\u2014which value 1 does not state."
+ },
+ {
+  "slot": "page",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "preprocessing_strategies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": true,
+  "reason": "The values assert substantively different content: value 1 covers only the MuSIC pipeline (including a hierarchy-evaluation step) and lists node2vec/HPA models as software, value 2 omits the hierarchy-evaluation step but adds a FAIRSCAPE packaging strategy with different software entries, and value "
+ },
+ {
+  "slot": "prohibited_uses",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 list the same two prohibitions (clinical use, commercial use without separate licensing), but value 3 adds a third substantive prohibition\u2014applying additional legal or technological restrictions under CC BY-NC-SA 4.0\u2014that the others omit entirely."
+ },
+ {
+  "slot": "publisher",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "purposes",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three list the same core CM4AI purposes\u2014producing ethical, FAIR, AI-ready multimodal cell-architecture maps to enable interpretable genotype-phenotype learning and transformative/ [truncated]"
+ },
+ {
+  "slot": "raw_data_sources",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 2 and 3 both include raw immunofluorescence/confocal image archives distributed within the Dataverse releases as a raw data source, which value 1 omits entirely while listing only external repository links (MassIVE, SRA, Figshare)."
+ },
+ {
+  "slot": "raw_sources",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "The values list different sets of raw sources: value 1 names MassIVE plus raw SRA zips distributed inside the releases (no NCBI BioProject), value 2 names MassIVE plus NCBI BioProject/SRA, and value 3 adds a third source (Figshare), so each asserts external raw-data locations the others omit."
+ },
+ {
+  "slot": "regulatory_restrictions",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "While all three agree on the governance contact, FDA-not-regulated status and the \"under review\" notice, value 3 uniquely asserts a substantive restriction that the laboratory data must not be used in clinical decision-making without regulatory oversight, and value 1 omits the human-subjects/de-iden"
+ },
+ {
+  "slot": "related_datasets",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 both list the same three related publications (U2OS map, perturbation atlas, project preprint), but value 3 instead lists five CM4AI Dataverse data releases as has_part components, asserting entirely different relationships and targets."
+ },
+ {
+  "slot": "relationships",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 largely agree (MuSIC-pipeline integration plus incompletely overlapping protein sets), but value 3 omits the MuSIC integration entirely and instead asserts different facts\u2014quarterly DOI-versioned releases with a named latest/archive list and that computed cell maps are not included\u2014so"
+ },
+ {
+  "slot": "resources",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": true,
+  "reason": "Value 1 lists different resources (DOIs 10.18130/V3/DXWOS5 V1 and the March 2025 release 10.18130/V3/B35XWX with 6 files) whereas values 2 and 3 list the June 2026 release 10.18130/V3/HIGT4C with ten files, and values 2 and 3 also classify the AP-MS/SEC-MS files differently (processed_data vs raw_da"
+ },
+ {
+  "slot": "retention_limit",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state indefinite long-term preservation in the University of Virginia Dataverse backed by committed institutional funds with no stated expiry; the differing supporting details (version-retention behaviour vs. generic Dataverse access warning) are supplementary, not contradictory."
+ },
+ {
+  "slot": "sampling_strategies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same non-random, non-representative targeted sampling: the MDA-MB-468 and KOLF2.1J cell lines (with the same perturbation/differentiation conditions), a panel of 100 chromatin modifiers plus 100 metabolic enzymes extended to genome-scale CRISPRi of 11,739 genes, and the same r [truncated]"
+ },
+ {
+  "slot": "sensitive_elements",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state no sensitive elements and give the same supporting details (non-clinical tissue-culture, de-identified data; Human Subjects: No, De-identified Samples: Yes, FDA Regulated: No), differing only in wording and field naming."
+ },
+ {
+  "slot": "status",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All agree the dataset is Beta/interim, but values 2 and 3 additionally assert that the repository carries an official notice of being 'under review for potential modification in compliance with Administration directives', a substantive status fact absent from value 1 (which instead states quarterly "
+ },
+ {
+  "slot": "subpopulations",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both identify the same two donor-derived cell lines with identical donor characteristics and the same non-representativeness caveat; value 1 merely enumerates the treatment/differentiation conditions that value 2 summarizes as 'differentiated derivatives', which is added detail rather than a contrad"
+ },
+ {
+  "slot": "tasks",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 2 and 3 list the same five tasks (PPI mapping, spatial proteomics, CRISPR perturbation, map integration, AI-readiness packaging), but value 1 omits the protein-protein interaction, spatial proteomics and genetic perturbation tasks entirely and instead asserts a distinct genotype-phenotype lea"
+ },
+ {
+  "slot": "third_party_sharing",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three assert the same core fact \u2014 the data are shared publicly via the UVA Dataverse/LibraData plus deposited or linked in the same external repositories (MassIVE, NCBI BioProject/SRA, Figshare) \u2014 with the remaining differences (licence mention, embargo notes, PRIDE/CFDE plans) being additional "
+ },
+ {
+  "slot": "title",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both name the same CM4AI data release resource;  [truncated]"
+ },
+ {
+  "slot": "updates",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state the same maintenance plan\u2014quarterly data releases with the dataset regularly augmented through the project's end in November 2026\u2014differing only in extra illustrative quotes (e.g., software versioning) that add no contradicting fact."
+ },
+ {
+  "slot": "use_repository",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 3 list only the CM4AI web portal, while value 2 additionally asserts a second repository (the UVA Dataverse/LibraData CM4AI collection with its own DOI) that the others omit entirely."
+ },
+ {
+  "slot": "version_access",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three list the same five releases with identical DOIs and version numbers, the same latest-version DOI, and the same release-versioning model; value 3's extra access notes are additional detail, not contradictions."
+ }
+]

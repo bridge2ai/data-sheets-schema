@@ -1,0 +1,702 @@
+[
+ {
+  "slot": "acquisition_methods",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three list the same acquisition modes\u2014direct in-person clinical measurement, laboratory analysis of collected blood/urine, participant self-report via REDCap questionnaires, 10-day at-home device recording (CGM, activity tracker, environmental sensor), extraction from EHR/administrative driving "
+ },
+ {
+  "slot": "addressing_gaps",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 2 omits the salutogenesis knowledge gap present in values 1 and 3 and instead asserts an additional gap about missing standards/platforms for sharing AI-ready clinical data (Clinical Dataset Structure, FAIRhub) that the others do not mention."
+ },
+ {
+  "slot": "anomalies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 2 uniquely asserts a substantive anomaly (marijuana use not assessed for Alabama participants) absent from the others, and value 1 omits the missing-modality/participant opt-out and device-return/no-stored-results anomalies present in values 2 and 3, so they assert different sets of facts."
+ },
+ {
+  "slot": "cleaning_strategies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three share the same core cleaning steps, but value 2 uniquely asserts an OMOP CDM Data Quality Dashboard (dqd_omop.json, >3,500 checks) and value 1 uniquely asserts a central de-identification/PII review, while value 3 omits post-upload central processing altogether \u2014 substantive facts absent f"
+ },
+ {
+  "slot": "collection_consents",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same consent arrangement \u2014 written informed consent required before any protocol element, optional electronic consent via REDCap with in-person fallback, and the University of Washington form published with other sites under IRB reliance \u2014 differing only in wording, level of d"
+ },
+ {
+  "slot": "collection_mechanisms",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": true,
+  "reason": "All three enumerate the same collection instruments (REDCap, Philips PageWriter TC30 ECG, Dexcom G6 CGM, Garmin Vivosmart 5, LeeLab Anura environmental sensor, the same seven retinal imaging systems, M&S/vision and clinical testing devices), with differences only in grouping, level of detail, and wh [truncated]"
+ },
+ {
+  "slot": "collection_notifications",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same notification method\u2014personalised mailed letters and emails directing participants into an online REDCap enrolment interface with active, participant-aware data collection\u2014differing only in supplementary details (vendor name, follow-up calls, phone alternative) that elabor"
+ },
+ {
+  "slot": "collection_timeframes",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "While all three agree on the core dates (19 July 2023\u20131 May 2025 window, pilot to 30 Nov 2023, formal start 1 Dec 2023, enrolment to 30 Nov 2026), value 2 omits the per-participant timeframe (single 2.5\u20134 hour visit plus 10-day at-home monitoring) asserted by values 1 and 3, and uniquely adds a plan"
+ },
+ {
+  "slot": "conforms_to",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three name CDS v0.1.1, but value 2 additionally asserts conformance to OMOP, DICOM, WFDB, Open mHealth and NASA ASCII standards, a substantive claim absent from the others."
+ },
+ {
+  "slot": "conforms_to_schema",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Each names a different schema resource (a CDS specification doc, a v0.1.1 dataset_structure_description schema, and a v0.1.0 dataset_description schema), asserting different conformance targets and versions."
+ },
+ {
+  "slot": "consent_revocations",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state that participants could withdraw consent at any time while previously shared data remains in the dataset, as communicated in the consent document; the added name field and minor wording differences convey no different fact."
+ },
+ {
+  "slot": "created_by",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "creators",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": true,
+  "reason": "All three identify the AI-READI Consortium as the organizational creator of record (with individuals listed as study principal investigators) and give the same PI roster with matching ORCIDs, affiliations and the same noted University of Washington vs. Washington University in St. Louis discrepancy;"
+ },
+ {
+  "slot": "data_collectors",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 3 match (coordinators/RAs, data managers, retinal imaging technicians, phlebotomists/lab assistants, NIH-funded effort), but value 2 omits the retinal imaging technicians, phlebotomists and compensation details and instead asserts a different set of collectors (local CLIA labs, UW Nutri [truncated]"
+ },
+ {
+  "slot": "description",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same dataset with identical participant count (2,280), sites, collection dates, modalities, balanced recruitment design, salutogenesis aim, and controlled-access handling of sex/race/medication data; the extra details (Bridge2AI affiliation, OMOP mapping, publisher, acronym no"
+ },
+ {
+  "slot": "direct_collection",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 2 and 3 additionally assert that driving/accident records were obtained from a third party (Department of Licensing), a substantive source of data entirely absent from value 1."
+ },
+ {
+  "slot": "distribution_dates",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree on the three version dates and DOIs, but values 2 and 3 assert that version 2.0.0 is no longer accessible and value 2 additionally states a plan of roughly annual future releases\u2014substantive distribution facts entirely absent from value 1 (and the release plan absent from value 3)."
+ },
+ {
+  "slot": "distribution_formats",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three list the same distribution formats (DICOM for imaging, WFDB for ECG, CSV for OMOP clinical/environmental data, JSON for Open mHealth and metadata, Markdown/TSV for documentation), differing only in grouping and the trivial mention of LICENSE.txt plain text and the free-software note."
+ },
+ {
+  "slot": "doi",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "ethical_reviews",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "While all three agree on the UW IRB approval STUDY00016228 and ELSI/Native Biodata Consortium engagement, each asserts substantive facts the others omit entirely \u2014 value 1's claim of no formal external audit plus internal PII review and healthsheet documentation, value 2's 11-member Community Adviso"
+ },
+ {
+  "slot": "external_resources",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "While the three lists share a core set of resources (documentation site, project website, licence deposits, GitHub, Zenodo community, CDS spec, BMJ Open and Nature Metabolism papers, ClinicalTrials.gov, NIH RePORTER, internship), each asserts resources the others omit entirely \u2014 e.g. value 3 alone c"
+ },
+ {
+  "slot": "file_collections",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": true,
+  "reason": "All three list the same nine (value 2 is truncated mid-entry) collections with identical IDs (DOI vs fairhub URL forms of the same resources), identical file counts and identical byte totals, differing only in descriptive detail."
+ },
+ {
+  "slot": "funders",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 3 both list additional in-kind funders (Microsoft AI for Good Lab cloud services and device manufacturers Topcon, Optomed, iCare, Zeiss, Heidelberg, Dexcom, Garmin), whereas value 2 omits these entirely and names only the four monetary funders."
+ },
+ {
+  "slot": "future_use_impacts",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Beyond the shared re-identification risk item, each value asserts substantive content the others omit entirely (value 1: anticipated scientific/AI benefits and the unbalanced-release caveat; value 2: device identity as a distribution-shift variable; value 3: removal of sex/race from the public relea"
+ },
+ {
+  "slot": "human_subject_research",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three assert the dataset comes from the same IRB-approved (UW STUDY00016228, with UAB/UCSD reliance) observational cross-sectional human subjects study registered as NCT06002048 with consent, differing only in which supplementary registry details (enrollment, sites, biospecimens, approval date, "
+ },
+ {
+  "slot": "id",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "informed_consent",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 2 asserts substantive facts absent from value 1 \u2014 consent for future contact/year-4 follow-up and the recorded consent metadata restricting the public dataset to type 2 diabetes research \u2014 while value 1 uniquely adds the caveat that already-shared data remain after withdrawal."
+ },
+ {
+  "slot": "instances",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three define an instance as an individual study participant bundling all modalities, and give the same counts (2,280 in v3.0.0; 204 in v1.0.0; 1,067 in v2.0.0) with no explicit label; the extra modality/format details are elaborations, not contradictions."
+ },
+ {
+  "slot": "intended_uses",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same intended uses\u2014off-the-shelf AI/ML research on type 2 diabetes (public access restricted to T2DM-related research), use as a blueprint/exemplar for future AI-ready dataset projects, and research plus commercial reuse including derived models under the licence\u2014with the pseu"
+ },
+ {
+  "slot": "ip_restrictions",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state the same core fact\u2014title and all IP rights remain solely with the licensor (University of Washington) and its suppliers, unspecified rights are reserved, and third-party IP restrictions are governed by that same licence\u2014with values 2 and 3 merely adding supplementary IRB context that"
+ },
+ {
+  "slot": "is_deidentified",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree on the core de-identification facts (NoDeIdentification flag, HIPAA Safe Harbor stripping of PHI plus sex/race/medications, watermarking, licence, residual risk), but values 1 and 2 assert internal AI-READI review with no formal external audit while value 3 omits this and instead ass"
+ },
+ {
+  "slot": "is_tabular",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "issued",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both denote the same issue date of 17 November 2025, differing only in timestamp formatting precision."
+ },
+ {
+  "slot": "keywords",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 1 includes the keyword \"Salutogenesis\", which is entirely absent from value 2."
+ },
+ {
+  "slot": "known_biases",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "While all three share volunteer bias, under-recruitment of Black men, language exclusion and deliberate balancing, each asserts substantive biases absent from the others (value 1's MoCA measurement bias, value 2's site/geographic confounding and device/operator variation, value 3's non-probability s"
+ },
+ {
+  "slot": "known_limitations",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "While all three share a core set (cross-sectional single visit, withheld sex/race/medication in public release, finite biorepository, dropped Snellen variables), each asserts substantive limitations wholly absent from the others\u2014value 2 uniquely cites unmet balance targets with counts, volunteer/sel"
+ },
+ {
+  "slot": "language",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "license",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both name the same AI-READI custom license v2.0 with the identical DOI; the second merely adds the alternate label used on FAIRhub, which does not contradict the first."
+ },
+ {
+  "slot": "license_and_use_terms",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three identify the same governing licence (AI-READI custom licence v2.0, DOI 10.5281/zenodo.17555036, with v1.0 UW Data License Agreement terms) and the same access conditions; they differ only in level of detail (e.g., mention of CC-BY 4.0 documentation or the $1 liability cap), not in asserted"
+ },
+ {
+  "slot": "maintainers",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three identify the AI-READI team as maintainer and FAIRhub/Azure as host, but values 2 and 3 additionally assert a substantive conflict in the recorded managing organisation/lead sponsor (Washington University in St. Louis vs. University of Washington) and the repository-under-review notice, fac"
+ },
+ {
+  "slot": "missing_data_documentation",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three share the core causes of missingness (declined participation, device loss/late return, item non-response) and the PI-reviewed correction procedure, but value 3 additionally asserts deliberate withholding of sex, race/ethnicity and medications under controlled access and removal of Snellen "
+ },
+ {
+  "slot": "name",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "page",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "participant_compensation",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state the same core facts\u2014a $200 study-visit stipend from the NIH grant paid after data receipt and device return (\u22652 weeks, non-prorated, same in year 4) plus coverage of parking/transit/rideshare travel costs\u2014with differences only in granularity (the $25 cap, prepaid return-shipping mate"
+ },
+ {
+  "slot": "participant_privacy",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same privacy measures\u2014privacy-conscious device selection (no audio/video/GPS/syncing), HIPAA-compliant de-identification with removal of sex, race/ethnicity and medications from the public tier, watermarking and a strict licence to deter re-identification, and operational cont"
+ },
+ {
+  "slot": "preprocessing_strategies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 2 omits two substantive preprocessing steps asserted by the others (NASA ASCII formatting of environmental sensor data and the PHI/HIPAA Safe Harbor removal of sex, race/ethnicity and medication data), and value 3 additionally records a conflicting de-identification account plus DQD details ab"
+ },
+ {
+  "slot": "prohibited_uses",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three list the same core prohibitions \u2014 no clinical decision-making, no re-identification/contact/harm to data subjects, no onward transfer to parties not bound by an identical licence, no dissemination of models without minimising memorisation risk, and public-version use restricted to type 2 d"
+ },
+ {
+  "slot": "publisher",
+  "n_holders": 2,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "purposes",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "While all three share the core purposes (AI-ready T2DM dataset, temporal atlas/pseudotime analysis, blueprint/standards), each asserts substantive purposes the others omit entirely \u2014 value 1 uniquely lists recruiting/training personnel via a year-long internship, value 2 uniquely lists creating a tr"
+ },
+ {
+  "slot": "raw_data_sources",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 3 list Department of Licensing driving/accident records as a raw data source, which value 2 omits entirely, so the enumerated sources differ substantively."
+ },
+ {
+  "slot": "raw_sources",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 both state that raw data are preserved internally but not currently shared, whereas value 3 instead enumerates specific device-level raw file formats and their conversions, asserting entirely different content."
+ },
+ {
+  "slot": "regulatory_restrictions",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three share the licence-based NIH GDS compliance obligations, but value 1 omits the HIPAA/Safe Harbor de-identification constraint and the explicit absence of an export-control regime that values 2 and 3 assert, while value 3 adds a further substantive fact (study not FDA-regulated for drugs or "
+ },
+ {
+  "slot": "related_datasets",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both list the same three related datasets with identical DOIs, relationship types, dates, participant counts and roles; value 2 only adds extra detail (size/file count, full titles) without contradicting value 1."
+ },
+ {
+  "slot": "relationships",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree that instances share the AI-READI project with one visit per participant and a planned year-4 follow-up, but values 2 and 3 additionally assert a concrete within-participant relationship (files across datatype/device directories linked by the participant identifier), which value 1 om"
+ },
+ {
+  "slot": "retention_limit",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree there is no retention limit on participant data, but values 2 and 3 additionally assert a licence-termination deletion obligation (and value 3 further asserts project-duration preservation of raw, unshared pre-standardization data) that is entirely absent from value 1."
+ },
+ {
+  "slot": "sampling_strategies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same sampling approach\u2014non-probability, triple-balanced quota recruitment (4 race/ethnic groups, 4 T2DM severity categories, both sexes, ~1000 each), wave-based recruitment from EHR screening at three sites with monitoring/under- and oversampling, and site-level prioritization [truncated]"
+ },
+ {
+  "slot": "sensitive_elements",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both list the same controlled-access sensitive elements (sex, race/ethnicity, ZIP code, genetic sequencing data, past health records and medications, driving/accident reports) with the same rationale; the only differences are grouping and extra detail (e.g., biospecimen banking, which value 1 also r"
+ },
+ {
+  "slot": "splits",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 3 enumerate the concrete split sizes (1,576/352/352) and detailed race, sex, diabetes and age composition of each split, which value 2 omits entirely, giving only the 70/15/15 proportions and rationale."
+ },
+ {
+  "slot": "status",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both state the dataset is published; value 2 merely elaborates with version and enrollment details that do not contradict the shared core status."
+ },
+ {
+  "slot": "subpopulations",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree on the race/ethnicity, sex and diabetes-status counts, but value 2 omits the age subpopulation (mean 60.8\u00b111.3, 40\u201385 eligibility) that values 1 and 3 assert, and value 3 additionally asserts geographic subpopulations by recruiting site (UAB, UCSD, UW) that the others omit entirely."
+ },
+ {
+  "slot": "subsets",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 1 describes access-tier subsets (public vs controlled-access), while value 2 describes recommended train/validation/test participant splits \u2014 entirely different partitions with no overlapping assertions."
+ },
+ {
+  "slot": "tasks",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three list the same core intended uses\u2014pseudotime manifold trajectory analysis, reconstruction of a T2DM development/reversal (salutogenesis) atlas, and multimodal AI/ML model development on balanced severity data\u2014differing only in grouping and detail (e.g., explicit mention of racial/ethnic coh"
+ },
+ {
+  "slot": "third_party_sharing",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 2 omits the biospecimen/biorepository sharing provision asserted in values 1 and 3, and value 3 omits the model/algorithm distribution allowance asserted in values 1 and 2, so each states substantive facts absent from the others."
+ },
+ {
+  "slot": "title",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "total_file_count",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "total_size_bytes",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "updates",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state the same update policy\u2014static, non-in-place versioned releases roughly annually with changes documented in the CHANGELOG\u2014and the same version history (204 \u2192 1,067 \u2192 2,280 participants, added imaging devices, shift to automated plus custom processing); the extra specifics in values 2  [truncated]"
+ },
+ {
+  "slot": "variables",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": true,
+  "reason": "All three list the same variables in the same order (value 1 gives names only while values 2 and 3 add units, reference ranges and rationale), which is a difference in level of detail rather than conflicting facts."
+ },
+ {
+  "slot": "version",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "version_access",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three report the same three DOI-minted versions with identical dates, per-version documentation via a version selector, the statement that version 2.0.0 is no longer accessible/downloadable, and that older versions are superseded rather than supported; the extra healthsheet URLs and phrasing are"
+ }
+]

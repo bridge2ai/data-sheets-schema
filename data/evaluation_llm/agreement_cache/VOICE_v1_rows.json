@@ -1,0 +1,782 @@
+[
+ {
+  "slot": "acquisition_methods",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three assert the same acquisition profile\u2014direct observation of recordings, participant self-report, clinician verification against diagnostic gold standards, and computational derivation of features/transcripts from raw audio\u2014differing only in how much elaborating detail (tool names, task count"
+ },
+ {
+  "slot": "addressing_gaps",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 both assert a pediatric-data scarcity gap (and value 2 adds a distinct multimodal-linkage gap) that value 3 omits entirely, while value 3 asserts additional ethical/legal governance concerns not present in the others."
+ },
+ {
+  "slot": "annotation_analyses",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Both agree that no inter-annotator agreement is reported because a single labeller was used, but each adds substantive claims absent from the other (clinical gold-standard physician validation, internal missingness audit, and unaudited auto-transcription vs. varying human-level performance and v3.1."
+ },
+ {
+  "slot": "anomalies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "While all three share site/protocol variation, confounding noise, and unaudited automated derivations, value 2 asserts substantive additional anomalies absent from the others (repeated participant rows with varying responses across visits, and the v2.0 spectrogram reprocessing), and value 1 uniquely"
+ },
+ {
+  "slot": "at_risk_populations",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "While all three share the core pediatric assent/consent and site/compensation protections, value 1 uniquely asserts that at-risk groups include participants with mood/psychiatric conditions, and value 2 uniquely asserts substantive additional protections (exclusion without parental consent for open-"
+ },
+ {
+  "slot": "citation",
+  "n_holders": 2,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "The two give different citations entirely \u2014 one is a 2024 Bridge2AI-Voice Consortium v2.0.0 entry plus a Zenodo REDCap citation, the other a 2026 PhysioNet v3.1.0 publication with a different DOI and author list."
+ },
+ {
+  "slot": "cleaning_strategies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Beyond the shared 'no pre-processing' statement and audit protocol, the values assert different substantive facts: value 2 says audio recordings with identifying information/external voices and all sensitive fields were removed and describes annual QC sampling, while value 3 states no instances were"
+ },
+ {
+  "slot": "collection_consents",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 2 and 3 assert substantive additional facts absent from value 1 \u2014 namely that the dataset imposes no non-commercial, geographic, research-type, genetic or method-development restrictions (and value 2 adds re-consent after delays) \u2014 and value 3 also gives a different consent identifier (d4d:vo"
+ },
+ {
+  "slot": "collection_mechanisms",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": true,
+  "reason": "All three describe the same collection mechanisms\u2014the custom Bridge2AI-Voice iOS/Web apps (plus separate enrollment web app) on iPads with an Avid AE-36 microphone/headset, reproschema-ui for the pediatric protocol, and REDCap for clinical/questionnaire capture\u2014differing only in grouping and level o"
+ },
+ {
+  "slot": "collection_notifications",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree that participants were notified via an IRB-approved consent process, but each asserts substantive procedural facts the others omit entirely (value 1's re-consent when delays occur; values 2/3's ~30-minute explanation, teach-back confirmation and voluntariness statement; value 3 omits"
+ },
+ {
+  "slot": "collection_timeframes",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state the same core facts\u201412-month collection per the healthsheet, a four-year phased prospective cohort (Phase 1 completed Nov 2023, Phase 2 ongoing Nov 2024, Phases 3\u20134 to follow), NIH RePORTER project period 2022-09-01 to 2026-11-30, and the separate 5 June\u201328 July 2023 single-site app "
+ },
+ {
+  "slot": "confidential_elements",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 both assert two records including one where confidential_elements_present is true (PII/Certificate of Confidentiality applying to data transferred under the DTUA), whereas value 3 collapses everything into a single record asserting confidential_elements_present: false, contradicting t"
+ },
+ {
+  "slot": "conforms_to",
+  "n_holders": 2,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both state conformance to BIDS version 1.9.0, differing only in spelling out the acronym."
+ },
+ {
+  "slot": "conforms_to_schema",
+  "n_holders": 2,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "One names the data-sheets-schema (w3id.org/bridge2ai/data-sheets-schema) while the other names a different artifact, the Bridge2AI Voice REDCap data dictionary, so they assert conformance to different schemas."
+ },
+ {
+  "slot": "consent_revocations",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same withdrawal policy\u2014withdrawal permitted anytime, data excluded if withdrawal occurs before/during voice collection, irremovable afterward, longitudinal data retained for the open-source database, and an optional no-PHI satisfaction survey\u2014with only differences in identifie"
+ },
+ {
+  "slot": "content_warnings",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 both warn about distressing questionnaire content for mood/depression/anxiety cohorts (and value 2 adds a scope note that free-speech transcripts were removed from the PhysioNet release), whereas value 3 asserts only the free-speech transcription warning and omits these substantive cl"
+ },
+ {
+  "slot": "creators",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": true,
+  "reason": "All three identify the same creators \u2014 the Bridge2AI-Voice Consortium co-led by Yael Bensoussan (USF) and Olivier Elemento (Weill Cornell), with ~50 multidisciplinary experts across the same set of North American institutions and the same module leads/roles; differences are only in ID scheme, orderi"
+ },
+ {
+  "slot": "data_collectors",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three identify the same collectors\u2014site research teams/students and research assistants collecting in clinic, clinicians/physicians providing diagnosis and IRB co-investigator status, hospital staff aiding logistics, and the two acoustic engineers plus three AI data scientists doing quality/ML-r"
+ },
+ {
+  "slot": "data_protection_impacts",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three report the same core fact\u2014that no data protection impact analysis of the dataset's effect on data subjects was conducted\u2014with values 1 and 2 merely adding supplementary detail about an ethical justification memorandum and consortium concerns rather than contradicting anything."
+ },
+ {
+  "slot": "description",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 describe the record as comprising two PhysioNet releases (adult and pediatric) with a stated 10,000-voice goal, while value 3 scopes it to the adult PhysioNet dataset and asserts specifics absent elsewhere (five sites, 833 participants, release v3.1.0 dated 2026-05-01, raw audio via S"
+ },
+ {
+  "slot": "direct_collection",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three assert the same core fact \u2014 data were collected directly from the individuals in the USA and Canada (is_direct: true) \u2014 differing only in which supplementary collection-mechanism details they mention, without contradiction."
+ },
+ {
+  "slot": "discouraged_uses",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same discouraged uses\u2014non-research/non-clinical applications like hiring, insurance pricing, and surveillance risking discrimination\u2014differing only in identifier strings, naming, and minor wording."
+ },
+ {
+  "slot": "distribution_dates",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three list the same release dates (Nov 2024 initial, PhysioNet adult 1.1\u20133.1.0 and pediatric 1.0.0\u20131.1.0 with identical dates); only formatting/grouping differs, and value 2's note about planned semi-annual future releases is a minor forward-looking addition rather than a contradicting fact."
+ },
+ {
+  "slot": "distribution_formats",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree on the four data distribution channels (PhysioNet adult, PhysioNet pediatric, Synapse raw audio, Health Data Nexus), but value 1 additionally asserts a fifth distribution entry for documentation/dashboards sites that values 2 and 3 omit entirely."
+ },
+ {
+  "slot": "errata",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree there is no formal erratum and cite the v2.0.1 authorship correction and v3.1.0 parquet repair, but value 1 uniquely asserts spectrogram reprocessing at v2.0 and value 2 uniquely asserts back-filled validated diagnosis data in v3.1.0, substantive correction events absent from the oth"
+ },
+ {
+  "slot": "ethical_reviews",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": true,
+  "reason": "Values 2 and 3 additionally record a fourth ethical review (the feasibility study approved under USF IRB number 004890, plus details such as the HRP-416 pediatric checklist and, in value 2, a partial HIPAA waiver), which value 1 omits entirely, so the sets of asserted approvals differ."
+ },
+ {
+  "slot": "existing_uses",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 2 and 3 additionally report the Bridge2AI-Voice scholars programme training opportunities, which value 1 omits and even contradicts by asserting the summer school is the only prior use."
+ },
+ {
+  "slot": "extension_mechanism",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three give the same contribution URL and describe the same two mechanisms\u2014publishing derivative datasets on the hosting platform under the same conditions, and GitHub discussion/issues/pull requests for preprocessing code\u2014with only naming detail (Health Data Nexus vs hosting platform) and one ex"
+ },
+ {
+  "slot": "external_resources",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "While all three agree on self-containment, the 'NA' guarantees and the core supporting repositories/licences, they assert materially different additional content: value 1 uniquely lists associated publications with a citation requirement and a controlled-access governance memorandum, value 2 uniquel"
+ },
+ {
+  "slot": "funders",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three identify the same funder (NIH Common Fund Bridge2AI program) and the same core award OT2OD032720 with supplements 01S1 and 01S3, plus identical PI, institution, award amount and project period; the only differences are whether variant/corrupted renderings of the same grant number (e.g., 1O"
+ },
+ {
+  "slot": "future_use_impacts",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 both assert a voice re-identification/misuse risk (with value 2 adding registered-access misuse restrictions), while value 3 omits re-identification entirely and instead asserts different facts about protocol changes and recruitment bias toward groups distrustful of medicine/AI."
+ },
+ {
+  "slot": "human_subject_research",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "While all three agree that human subjects are involved and cite the USF single IRB plus SickKids REB, their regulatory_compliance and special_populations content asserts different substantive facts (value 1 cites informed consent/GCP with no HIPAA, values 2-3 cite HIPAA, Certificate of Confidentiali"
+ },
+ {
+  "slot": "id",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "One gives a project website URL as the identifier while the other gives a PhysioNet DOI, which are distinct identifier values rather than the same fact."
+ },
+ {
+  "slot": "informed_consent",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same consent facts\u2014consent obtained via written, in-app/REDCap electronic, video, and parental permission with child assent; REDCap storage with a five-year retention rule; scope covering voice/clinical data, EHR access for validation, open database sharing and optional recont"
+ },
+ {
+  "slot": "instances",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 3 omits the pediatric cohort entirely (300 participants, 23,533 recordings) that values 1 and 2 assert, and value 1 states a single adult recording count of 61,937 whereas values 2 and 3 explicitly decline to give a single total, plus each adds distinct instance types (data modalities vs. sess"
+ },
+ {
+  "slot": "intended_uses",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state the dataset is intended for research use\u2014developing, pretraining, benchmarking and validating clinical AI/ML models for voice-based diagnosis of vocal, neurological, psychiatric, respiratory and pediatric disorders and voice-biomarker disease screening\u2014by Authorized Researchers under"
+ },
+ {
+  "slot": "ip_restrictions",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three share the core no-third-party-IP-restrictions and no-transfer-of-rights statements, but value 2 omits the name/trademark publicity restriction present in values 1 and 3 while asserting additional substantive terms (recipient may obtain IP on downstream discoveries; no associated fees) abse"
+ },
+ {
+  "slot": "is_deidentified",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state the dataset is de-identified (no identifiable elements) via HIPAA Safe Harbor plus removal of indirect identifiers, sensitive fields and all raw audio, without achieving k-anonymity; the differences (spectrogram/feature exclusions, residual voice-recognition risk) are added elaborati"
+ },
+ {
+  "slot": "is_tabular",
+  "n_holders": 2,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "keywords",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 1 asserts an additional substantive keyword, \"pediatric\", indicating a pediatric focus that is entirely absent from value 2."
+ },
+ {
+  "slot": "known_biases",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": true,
+  "reason": "Values 1 and 3 cover the same four biases (selection/sampling, representation, measurement, single-labeler annotation), but value 2 additionally asserts a substantive language-representation bias (English-only inclusion criteria, Spanish protocols under development) that the others omit entirely."
+ },
+ {
+  "slot": "known_limitations",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": true,
+  "reason": "Beyond the three shared limitations (English-only, non-representative sampling, no raw audio), each value asserts substantive limitations the others omit \u2014 e.g., single-labeler/annotation quality and AI-readiness only in value 1, failure of k-anonymisation only in value 2, and no predefined splits a"
+ },
+ {
+  "slot": "labeling_strategies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same single-annotator clinician gold-standard labeling process using REDCap/Bridge2AI apps, Bridge2AI protocols and ICD-10 codes, with the same per-cohort validation methods; differences are only in level of detail (e.g., psychiatric EHR note, software links, identifier string"
+ },
+ {
+  "slot": "language",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state the dataset language is English; value 2's note about future Spanish protocols concerns forthcoming releases and does not change the current dataset's language."
+ },
+ {
+  "slot": "license",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "license_and_use_terms",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": true,
+  "reason": "While the core licensing regime (Bridge2AI Voice Registered Access License/Agreement, registered vs. controlled access, no fees, IP and DTUA terms) matches, the values assert differing substantive facts: value 1 lists only general_research_use permission plus provider institution (USF), cost reimbur"
+ },
+ {
+  "slot": "machine_annotation_tools",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 3 lists only Whisper transcription while values 1 and 2 assert a whole suite of feature-extraction tools (openSMILE, Praat/parselmouth, torchaudio, sparc, ppgs, b2aiprep, and in value 1 also SenseLab), and values 1 and 3 differ on whether transcripts were removed from the release."
+ },
+ {
+  "slot": "maintainers",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three list the same four maintaining entities with the same roles\u2014the Bridge2AI-Voice consortium as curator/contact, MIT Laboratory for Computational Physiology (PhysioNet) hosting the current adult and pediatric releases, Health Data Nexus/T-CAIREM as hosting platform, and NIH as funder\u2014differi"
+ },
+ {
+  "slot": "missing_data_documentation",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three report the same missingness causes (optional questions, collection irregularities, cohort-specific routing, de-identification removals), the same patterns (rows present only if some data exists, cohort-specific absences, features not derivable from some files), and the same handling (inter"
+ },
+ {
+  "slot": "name",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both name the same dataset; the added word \"Dataset\" is a trivial formatting difference."
+ },
+ {
+  "slot": "other_tasks",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 2 asserts additional tasks (model pretraining/fine-tuning/benchmarking, laryngeal cancer screening, remote monitoring in spasmodic dysphonia) absent from value 1, while value 1 asserts multi-omic integration of audiomics data that value 2 omits."
+ },
+ {
+  "slot": "page",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "One gives a general documentation site URL while the other gives a versioned PhysioNet dataset landing page, which are different locations."
+ },
+ {
+  "slot": "participant_compensation",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state the same compensation facts\u2014$40 under 90 minutes, $80 over 90 minutes, max three sessions/$120 total, electronic gift cards, adults only, and no incentives in the app feasibility study\u2014differing only in wording, identifier format, and minor detail (the 47-participant count)."
+ },
+ {
+  "slot": "participant_privacy",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "While all three share the core de-identification narrative, each asserts substantive facts absent from the others \u2014 value 1 uniquely claims removal of sensitive non-identifying fields (income, mental health, trauma) and 90-day deletion of screening entries and implies all audio is removed, value 2 u"
+ },
+ {
+  "slot": "preprocessing_strategies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": true,
+  "reason": "All three describe the same preprocessing pipeline\u2014mono conversion and 16 kHz resampling with Butterworth filter, the same spectrogram/Mel/MFCC/pitch/sparc/PPG/openSMILE/Praat-Parselmouth/Whisper feature derivations with identical parameters, the same fixed/temporal storage formats, and conversion t"
+ },
+ {
+  "slot": "prohibited_uses",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 both prohibit onward disclosure/redistribution (collaborators must independently apply and sign their own agreement; no release to third parties beyond authorized persons), a substantive prohibition entirely absent from value 3, which also omits the Fort Lauderdale Agreement commitmen"
+ },
+ {
+  "slot": "publisher",
+  "n_holders": 2,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "purposes",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three share the same core purposes (flagship ethically sourced multi-institutional voice database, clinical ML/biomarker gap, standards, infrastructure, ethics, workforce), but value 3 omits entirely the stated enrolment-target facts (10,000 vs 30,000 discrepancy) that values 1 and 2 assert, and"
+ },
+ {
+  "slot": "raw_data_sources",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "The values differ in substance: value 2 lists genomic sequencing and imaging as raw sources (absent from the others), value 3 adds a distinct EHR/DICOM imaging source with modality details, and value 1 covers only audio plus REDCap/ReproSchema records with no imaging or genomic data, so a reader wou"
+ },
+ {
+  "slot": "raw_sources",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Both share the core fact that de-identified raw audio is retained but not public, yet each asserts substantive content the other omits entirely (value 1: removal of recordings with identifying info/unconsented speakers and pediatric v1.1 manual checks; value 2: PhysioNet holding only derived feature"
+ },
+ {
+  "slot": "regulatory_restrictions",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Beyond shared core points (restricted confidentiality, no export controls, Certificate of Confidentiality), each value asserts substantive facts the others omit or contradict \u2014 value 1 specifies credentialed/controlled access tiers and a DACO contact, value 2 adds PhysioNet and Florida-statute terms"
+ },
+ {
+  "slot": "related_datasets",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "The two lists name substantially different related datasets: value 1 asserts a prior Health Data Nexus v1.0 release and a controlled-access Synapse raw audio collection (both absent from value 2), while value 2 asserts a related Bridge2AI-Voice Pediatric PhysioNet dataset with specific counts and ac"
+ },
+ {
+  "slot": "relationships",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree instances are nominally unrelated with possible multiple sessions/rows per participant, but value 2 and 3 additionally assert that records are explicitly linked via participant_id and session_id identifiers (a substantive structural fact absent from value 1), while value 1 and 3 add "
+ },
+ {
+  "slot": "resources",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": true,
+  "reason": "Values 1 and 2 both describe the single PhysioNet v3.1.0 adult dataset resource with its feature/phenotype/metadata collections, whereas value 3 instead enumerates a completely different set of resources (prior releases v1.0, v1.1, v2.0.0, v2.0.1, v3.0.0 with different DOIs, dates and feature counts"
+ },
+ {
+  "slot": "retention_limit",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree on the core limits (indefinite research retention, 10-year identifiable data cap, 5-year minimum for de-identified data/consents, 2-year DTUA destruction), but each asserts substantive items the others omit entirely \u2014 value 1 alone reports the PhysioNet older-version hosting/removal "
+ },
+ {
+  "slot": "sampling_strategies",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three describe the same sampling: a non-probability, non-representative purposive sample of patients (plus controls) recruited from high-volume expert/community clinics across academic institutions in five predetermined disease groups, screened against inclusion/exclusion criteria, with pediatri"
+ },
+ {
+  "slot": "sensitive_elements",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 1 and 2 both state that all raw voice data was removed from the public release due to biometric re-identification risk, a substantive fact entirely absent from value 3, which lists only the participant-attribute sensitivities and field removals."
+ },
+ {
+  "slot": "splits",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "All three agree there are no recommended splits, but values 1 and 3 add that phenotype/questionnaire features support cohort selection while value 2 instead asserts predefined tasks and diagnostic labels (vocal, neurological, psychiatric, respiratory) \u2014 substantive claims absent from the others."
+ },
+ {
+  "slot": "status",
+  "n_holders": 2,
+  "shape": "scalar",
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "identical"
+ },
+ {
+  "slot": "subpopulations",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 2 asserts specific participant counts (833 adults across five sites; 300 pediatric aged 2-18) and pediatric age-band protocols, and value 3 adds eligibility criteria (ages 18-120, healthy volunteers) while collapsing the two subpopulation entries into one and omitting the demographic-skew and "
+ },
+ {
+  "slot": "subsets",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": true,
+  "reason": "Value 1 lists six cohorts including the Pediatric and Controls cohorts, while value 2 lists only four (and is cut off mid-entry), omitting those subsets entirely."
+ },
+ {
+  "slot": "tasks",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 1 asserts there are no predefined train/validation/test splits (absent from value 2) while value 2 asserts a distinct task of clinical screening/diagnosis/monitoring via voice biomarkers (absent from value 1), so the lists assert substantively different sets of facts even though value 3 covers"
+ },
+ {
+  "slot": "third_party_sharing",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state that the dataset is distributed broadly outside the creating entity under registered/controlled access with data transfer and use agreements restricting redistribution; the remaining differences (DOI metadata, de-identification, identifier string) are elaborations of detail rather th"
+ },
+ {
+  "slot": "title",
+  "n_holders": 3,
+  "shape": "scalar",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "Both name the same dataset (Bridge2AI-Voice); the second merely adds a descriptive subtitle without asserting a conflicting fact."
+ },
+ {
+  "slot": "updates",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 1 uniquely asserts that each version has a unique DOI plus version-agnostic latest-version DOIs, and value 2 uniquely asserts expansion to a pediatric cohort with updated inclusion/exclusion criteria \u2014 substantive facts absent from the other values (and the ids differ)."
+ },
+ {
+  "slot": "use_repository",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": true,
+  "truncated": false,
+  "reason": "All three state there is no use-tracking repository (beyond Google Scholar) and that users must cite the same Interspeech 2024 protocol paper, differing only in wording and identifier formatting."
+ },
+ {
+  "slot": "variables",
+  "n_holders": 2,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Value 1 lists two additional variables (sparc_pitch and torchaudio_pitch with their ranges and techniques) that value 2 omits entirely, and value 2 asserts a time-domain downsampling by a factor of two for the spectrogram that value 1 does not state, so the two describe different variable sets and d"
+ },
+ {
+  "slot": "version_access",
+  "n_holders": 3,
+  "shape": "object",
+  "exact": false,
+  "similarity": null,
+  "equivalent": false,
+  "truncated": false,
+  "reason": "Values 2 and 3 assert that adult v1.1 files are no longer available (access removed), while value 1 lists adult v1.1 among the versions available, so a reader would conclude differently about that version's accessibility."
+ }
+]
