@@ -8,11 +8,13 @@ where a miss raises instead of billing.
 import json
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 from data_sheets_schema.agreement import (
     EQUIVALENCE_SYSTEM,
     JUDGE_VALUE_CHARS,
+    LEGACY_JUDGE_VALUE_CHARS,
     Embedder,
     EquivalenceJudge,
     OfflineCacheMiss,
@@ -21,6 +23,7 @@ from data_sheets_schema.agreement import (
     _judge_key,
     _legacy_judge_key,
     _parse_verdict,
+    _sent,
     build_matrix,
     compare_records,
     render,
@@ -111,6 +114,33 @@ class TestJudgeKey(unittest.TestCase):
     def test_order_of_values_does_not_matter(self):
         self.assertEqual(_judge_key("s", ["a", "b"]), _judge_key("s", ["b", "a"]))
 
+    def test_key_tracks_the_cap_so_widening_it_invalidates_the_right_rows(self):
+        """The #244 trap.
+
+        Keyed on the full values, raising the cap would leave the key alone and
+        every verdict reached on truncated evidence would be served again as
+        though it had been reached on the whole of it — the cache would undo
+        the fix silently. Keyed on what was sent, only the affected slots move.
+        """
+        short = ["a", "b"]
+        long_pair = ["x" * 50, "x" * 40 + "y" * 10]
+        with unittest.mock.patch("data_sheets_schema.agreement.JUDGE_VALUE_CHARS", 30):
+            key_short_narrow = _judge_key("s", _sent(short))
+            key_long_narrow = _judge_key("s", _sent(long_pair))
+        with unittest.mock.patch("data_sheets_schema.agreement.JUDGE_VALUE_CHARS", 100):
+            key_short_wide = _judge_key("s", _sent(short))
+            key_long_wide = _judge_key("s", _sent(long_pair))
+        self.assertEqual(key_short_narrow, key_short_wide,
+                         "a slot the cap never touched must stay cached")
+        self.assertNotEqual(key_long_narrow, key_long_wide,
+                            "a slot the cap bit must re-judge")
+
+    def test_values_beyond_the_cap_are_the_only_difference_hidden(self):
+        """Under a narrow cap two values differing only past it look identical."""
+        with unittest.mock.patch("data_sheets_schema.agreement.JUDGE_VALUE_CHARS", 10):
+            self.assertEqual(_sent(["same_text_AAA", "same_text_BBB"]),
+                             ["same_text_", "same_text_"])
+
 
 class FakeJudge:
     """Equivalent iff every value shares a first word."""
@@ -161,6 +191,18 @@ class TestCompareRecords(unittest.TestCase):
         flags = {r.slot: r.truncated for r in rows}
         self.assertEqual(flags, {"a": True, "b": False})
 
+    def test_the_legacy_cap_is_reported_separately(self):
+        """What the 4000-char cap would have hidden, at the current cap.
+
+        Both numbers are needed to say what changed between the published run
+        and this one without re-deriving the corpus.
+        """
+        mid = "x" * (LEGACY_JUDGE_VALUE_CHARS + 1)
+        rows = compare_records({"r1": {"a": mid}, "r2": {"a": mid + "!"}})
+        self.assertFalse(rows[0].truncated)
+        self.assertTrue(rows[0].truncated_at_legacy_cap)
+        self.assertEqual(rows[0].max_chars, LEGACY_JUDGE_VALUE_CHARS + 2)
+
     def test_judge_and_embedder_are_both_consulted(self):
         judge, emb = FakeJudge(), FakeEmbedder()
         rows = compare_records({"r1": {"a": "same thing"}, "r2": {"a": "same other"}},
@@ -204,7 +246,7 @@ class TestJudgeCache(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             path = Path(d) / "c.jsonl"
             j1 = EquivalenceJudge(model="m", cache_path=path)
-            j1._save(_judge_key("slot", ["a", "b"]), "slot", True, "because")
+            j1._save(_judge_key("slot", _sent(["a", "b"])), "slot", True, "because")
             j2 = EquivalenceJudge(model="m", cache_path=path, offline=True)
             self.assertEqual(j2("slot", ["a", "b"]), (True, "because"))
             self.assertEqual(j2.memo_hits, 1)
@@ -218,10 +260,18 @@ class TestJudgeCache(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             path = Path(d) / "c.jsonl"
             EquivalenceJudge(model="m1", cache_path=path)._save(
-                _judge_key("slot", ["a", "b"]), "slot", True, "because")
+                _judge_key("slot", _sent(["a", "b"])), "slot", True, "because")
             other = EquivalenceJudge(model="m2", cache_path=path, offline=True)
             with self.assertRaises(OfflineCacheMiss):
                 other("slot", ["a", "b"])
+
+    def test_the_cache_records_the_cap_it_was_judged_under(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "c.jsonl"
+            EquivalenceJudge(model="m", cache_path=path)._save(
+                _judge_key("s", _sent(["a", "b"])), "s", True, "r")
+            written = json.loads(path.read_text().splitlines()[0])
+            self.assertEqual(written["judge_chars"], JUDGE_VALUE_CHARS)
 
     def test_a_different_rubric_does_not_reuse_the_verdict(self):
         with tempfile.TemporaryDirectory() as d:
@@ -248,6 +298,41 @@ class TestJudgeCache(unittest.TestCase):
                                         "reason": "old"}) + "\n")
             judge = EquivalenceJudge(model="m", cache_path=path, offline=True)
             self.assertEqual(judge("s", ["a", "b"]), (False, "old"))
+            self.assertEqual(judge.legacy_hits, 1)
+
+    def test_a_legacy_verdict_reached_on_truncated_evidence_is_not_reused(self):
+        """The heart of the #244 fix.
+
+        Legacy records are keyed on the *full* values but were judged on the
+        first 4000 characters. Where a value ran past that, the cached answer
+        rests on evidence we no longer accept, and reusing it would leave the
+        published number exactly where it was while appearing to have fixed it.
+        Such a slot must miss the cache and be re-judged.
+        """
+        long_pair = ["x" * 5000, "x" * 5000 + " but actually different"]
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "c.jsonl"
+            path.write_text(json.dumps(
+                {"rubric": _digest(EQUIVALENCE_SYSTEM),
+                 "key": _legacy_judge_key("s", long_pair),
+                 "slot": "s", "equivalent": True,
+                 "reason": "identical for the first 4000 chars"}) + "\n")
+            judge = EquivalenceJudge(model="m", cache_path=path, offline=True)
+            with self.assertRaises(OfflineCacheMiss):
+                judge("s", long_pair)
+            self.assertEqual(judge.legacy_hits, 0)
+
+    def test_a_legacy_verdict_under_the_old_cap_is_still_reused(self):
+        """The other half: don't re-buy 510 verdicts that were never truncated."""
+        short_pair = ["a" * 100, "b" * 100]
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "c.jsonl"
+            path.write_text(json.dumps(
+                {"rubric": _digest(EQUIVALENCE_SYSTEM),
+                 "key": _legacy_judge_key("s", short_pair),
+                 "slot": "s", "equivalent": False, "reason": "old"}) + "\n")
+            judge = EquivalenceJudge(model="m", cache_path=path, offline=True)
+            self.assertEqual(judge("s", short_pair), (False, "old"))
             self.assertEqual(judge.legacy_hits, 1)
 
 
