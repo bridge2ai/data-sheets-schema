@@ -537,8 +537,17 @@ class TestPublishedMatrixReproduces(unittest.TestCase):
         easier to wave away than a red test.
         """
         rows = json.loads((CACHE / "CHORUS_v2_rows.json").read_text())
-        eq = [r["similarity"] for r in rows if r["equivalent"]]
-        df = [r["similarity"] for r in rows if not r["equivalent"]]
+        # `is True` / `is False`, not truthiness: `equivalent` is tri-state and
+        # an unjudged row is None. Splitting on truthiness would file it under
+        # "judged, and they differed" — the #250 bug, which this very test
+        # would otherwise reintroduce while pinning the finding it protects.
+        self.assertTrue(all(r["equivalent"] is not None for r in rows),
+                        "every row must carry a verdict for the means to mean anything")
+        self.assertTrue(all(r["similarity"] is not None for r in rows),
+                        "and a similarity, or the sample is not what it claims")
+        eq = [r["similarity"] for r in rows if r["equivalent"] is True]
+        df = [r["similarity"] for r in rows if r["equivalent"] is False]
+        self.assertEqual(len(eq) + len(df), len(rows), "no row may be dropped")
         self.assertEqual((len(eq), len(df)), (18, 30))
         mean_eq, mean_df = sum(eq) / len(eq), sum(df) / len(df)
         self.assertAlmostEqual(mean_eq, 0.92272, places=4)
