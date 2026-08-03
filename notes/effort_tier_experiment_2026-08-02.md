@@ -6,8 +6,24 @@ disagreement reported in #229 and assumed by #169.
 
 ## Design
 
-Everything held constant except the model route: CHORUS, baseline arm,
-`generic_v2` prompt, three replicates each.
+CHORUS, baseline arm, `generic_v2` prompt, three replicates each.
+
+**Not everything was held constant, and this was missed until review (#239).**
+The `-high` replicates ran on 2026-07-31, *before* #220 merged; at that point
+v2's `{DATE}` placeholder was not substituted, so the literal string `{DATE}`
+reached the model. The bare replicates ran after, and received a real date:
+
+    -high  # Generated: 2026-07-31   <- the model inferred it from {LABEL}
+    bare   # Generated: 2026-08-03   <- substituted by resolve_prompt
+
+Same prompt *file* in both arms (`4780613475ef2a62`), different resolved text.
+The `-high` runs carry no `prompts.resolved` hash at all, because that field did
+not exist until #220 — which is the marker for any arm generated before it.
+
+One header line in ~4,400 characters is unlikely to move slot-level agreement,
+but "unlikely" is not "held constant", and it compounds with the measurement
+problem below: a confounded design on top of a saturated metric establishes
+nothing in either direction.
 
 | arm | model route | label |
 |---|---|---|
@@ -43,7 +59,8 @@ only place it has resolution is 9 scalar slots, where 1 against 2 at n=3 is
 noise.
 
 So this says nothing about whether the effort tier matters. It says the
-instrument cannot answer the question as posed.
+instrument cannot answer the question as posed — and the design would not have
+supported a clean answer even with a working instrument (#239).
 
 ## What this corrects
 
@@ -77,5 +94,11 @@ and n=3 cannot be judged adequate or inadequate.
 ## Cost
 
 Six runs total, three of them new. ~35 minutes. The negative-looking result was
-worth having: it cost little and it caught a measurement problem that three
-open issues were building on.
+worth having: it cost little and it caught a measurement problem that three open
+issues were building on.
+
+Not re-run to remove the prompt confound. The result is already uninformative
+for the metric reason, so three more runs would buy a cleaner version of an
+experiment that still cannot answer the question. When the metric is replaced
+with one that has resolution, re-run with both arms on the current prompt
+resolution.
