@@ -58,10 +58,16 @@ class TestSelect(unittest.TestCase):
         self.tmp.cleanup()
 
     def _run(self, *args, valid=None):
-        """`valid` maps label -> bool; default every replicate validates."""
+        """`valid` maps label -> bool, or label -> (bool, detail).
+
+        `_validates` returns (ok, detail) so the report can name *which* of the
+        two records a run ships failed; "invalid" alone sends the reader to the
+        wrong file (#237).
+        """
         def fake(record):
             label = Path(record).parent.name
-            return True if valid is None else valid.get(label, True)
+            v = True if valid is None else valid.get(label, True)
+            return v if isinstance(v, tuple) else (v, "valid" if v else "invalid")
         with mock.patch("data_sheets_schema.cli.runs._validates", fake):
             return CliRunner().invoke(
                 self.cli, ["select", "--project", "P", "--config", "cfg", *args])
@@ -77,6 +83,16 @@ class TestSelect(unittest.TestCase):
         drops a higher-coverage CM4AI replicate."""
         out = self._run(valid={"cfg_rep2": False})
         self.assertEqual(out.exit_code, 0, out.output)
+        self.assertIn("→ cfg_rep3", out.output)
+
+    def test_an_invalid_core_disqualifies_a_run(self):
+        """A run ships two records and selection marks both. Judging it on the
+        full record alone can bless a run that cannot ship half of itself —
+        CM4AI rep1 in the real corpus is exactly that, and is excluded today
+        only because it loses on coverage (#237)."""
+        out = self._run(valid={"cfg_rep2": (False, "invalid (core)")})
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertIn("invalid (core)", out.output)
         self.assertIn("→ cfg_rep3", out.output)
 
     def test_it_refuses_when_nothing_validates(self):

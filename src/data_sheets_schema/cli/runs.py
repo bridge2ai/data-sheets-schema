@@ -478,17 +478,41 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
                "because it is built from the runs those figures measure.")
 
 
-def _validates(record: Path) -> bool:
-    """Run the validator, rather than trust a status recorded earlier."""
+def _validates_one(record: Path, schema: str, cls: str) -> bool:
     import subprocess
-    schema = "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
     try:
         return subprocess.run(
-            ["poetry", "run", "linkml-validate", "-s", schema, "-C", "Dataset",
+            ["poetry", "run", "linkml-validate", "-s", schema, "-C", cls,
              str(record)], capture_output=True, text=True,
             timeout=300).returncode == 0
     except Exception:                                   # noqa: BLE001
         return False
+
+
+def _validates(record: Path) -> tuple[bool, str]:
+    """Both records a run ships, not just the full one.
+
+    Marking a run canonical marks its core record too, so judging it on the full
+    record alone can bless a run that cannot ship half of itself. CM4AI rep1 in
+    the 2026-07-31 generic-v2 config is exactly that — full valid, core invalid
+    — and it is only excluded today because it loses on coverage (#237).
+
+    Returns (ok, detail) so the report can say *which* record failed; "invalid"
+    alone sends the reader to the wrong file.
+    """
+    full_schema = "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+    core_schema = "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+    core = (record.parent.parent.parent / f"{record.parent.parent.name}_core"
+            / record.parent.name / f"{record.name[:-len('_d4d.yaml')]}_d4d_core.yaml")
+    full_ok = _validates_one(record, full_schema, "Dataset")
+    if not core.exists():
+        return False, "no core record"
+    core_ok = _validates_one(core, core_schema, "CoreDataset")
+    if full_ok and core_ok:
+        return True, "valid"
+    if not full_ok and not core_ok:
+        return False, "invalid (full and core)"
+    return False, f"invalid ({'full' if not full_ok else 'core'})"
 
 
 @runs.command("select")
@@ -539,10 +563,10 @@ def select_cmd(method, project, config, allow_unverified, execute):
     for label in labels:
         record = base_dir / label / f"{project}_d4d.yaml"
         if not record.exists():
-            candidates.append((label, None, "no record", 0, "no record"))
+            candidates.append((label, None, "no record", 0, "no record", "no record"))
             continue
         if not is_complete(method, label, project, CONCAT_DIR):
-            candidates.append((label, record, "incomplete", 0, "incomplete"))
+            candidates.append((label, record, "incomplete", 0, "incomplete", "incomplete"))
             continue
         loaded = _yaml.safe_load(record.read_text(encoding="utf-8"))
         slots = len(loaded) if isinstance(loaded, dict) else 0
@@ -554,20 +578,21 @@ def select_cmd(method, project, config, allow_unverified, execute):
         # current schema — the DataCite alignment admits a value that was
         # rejected when the run was made. Selecting on the stale claim would
         # have excluded a perfectly good record.
-        live = VALID if _validates(record) else INVALID
+        ok, detail = _validates(record)
+        live = VALID if ok else INVALID
         recorded = validation_status(method, label, project, CONCAT_DIR)
-        candidates.append((label, record, live, slots, recorded))
+        candidates.append((label, record, live, slots, recorded, detail))
 
     accept = {VALID} | ({UNVERIFIED} if allow_unverified else set())
     eligible = [c for c in candidates if c[2] in accept]
 
     click.echo(f"{project} — {len(labels)} replicate(s) of {config}")
-    for label, _record, status, slots, recorded in candidates:
+    for label, _record, status, slots, recorded, detail in candidates:
         mark = "  " if status in accept else "✗ "
         drift = (f"  (provenance says {recorded}; the schema has moved since "
                  f"this run)" if recorded != status and
                  recorded in (VALID, INVALID) else "")
-        click.echo(f" {mark}{label:52s} {slots:3d} slots  {status}{drift}")
+        click.echo(f" {mark}{label:52s} {slots:3d} slots  {detail}{drift}")
 
     if not eligible:
         raise click.ClickException(
@@ -604,11 +629,11 @@ def select_cmd(method, project, config, allow_unverified, execute):
             f"record must be attributable.")
     data = _yaml.safe_load(prov_path.read_text(encoding="utf-8")) or {}
     data["canonical"] = {
-        "criterion": "validates against the current schema, then most slots, then lowest label",
+        "criterion": "full and core both validate against the current schema, then most slots, then lowest label",
         "selected_from": [
-            {"label": lab, "slots": n, "validation": st,
+            {"label": lab, "slots": n, "validation": detail,
              "validation_recorded_at_run_time": rec}
-            for lab, _r, st, n, rec in candidates],
+            for lab, _r, st, n, rec, detail in candidates],
         "margin_over_runner_up": margin,
         "selected_by": "d4d runs select",
     }
