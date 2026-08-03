@@ -11,7 +11,8 @@ or more replicates.
 | | the **full** records, not `_core` — on CHORUS the core records share 43 slots, not 48 |
 | slot | a top-level key of the record, held by ≥2 replicates |
 | judge | `google/claude-opus-5-high` via CBORG, rubric `EQUIVALENCE_SYSTEM` |
-| embeddings | `lbl/nomic-embed-text` via CBORG |
+| judge input cap | 100,000 chars/value — above the corpus maximum of 29,024, so nothing is truncated (was 4000; see #244) |
+| embeddings | `lbl/nomic-embed-text` via CBORG, capped at 8000 chars by the model's 8192-token input limit |
 | cache | `data/evaluation_llm/agreement_cache/` |
 
 Rebuild every figure below from the cache, without making a paid call:
@@ -58,7 +59,7 @@ real result rather than an artifact.
 | judged equivalent (n=18) | 0.923 |
 | judged different (n=30) | 0.914 |
 
-**A gap of 0.009.** The measure cannot separate the two classes. Everything
+**A gap of 0.008.** The measure cannot separate the two classes. Everything
 scores ~0.92 because every value is schema-shaped prose about the same dataset,
 so the embedding captures topic rather than assertion — and topic is held
 constant by construction here.
@@ -77,34 +78,56 @@ specific to this population, not the model.
 per slot, not per pair. At that rate the four projects cost roughly 180 judge
 calls per config — affordable for a decision, not for a hot path.
 
-## What the judge did not see
+## What the judge did not see, and what changed when it did
 
-Values are cut to 4000 characters before reaching the judge (8000 for the
-embedder). A cut can only hide a disagreement that lives past it, so a truncated
-slot is biased towards "equivalent".
+The first version of this measurement cut every value to 4000 characters before
+the judge saw it. A cut can only hide a disagreement that lives past it, so a
+truncated slot is biased towards "equivalent" — and the exposure was
+**asymmetric between the two configurations being compared**: 21 affected slots
+in v1 against 9 in v2. Across all eight project-configs, 59 of 1576 rendered
+values (3.7%) exceeded the cap, over 30 of 540 shared slots (5.6%); the longest
+value ran to 29,024 characters, of which the judge saw 14%.
 
-This is live in the matrix below, not hypothetical, and it is **asymmetric
-between the two configurations being compared**:
+The cap is now 100,000 characters and nothing in the corpus reaches it. Those 30
+slots were re-judged on their full text (issue #244).
 
-| | v1 | v2 |
+**Nine verdicts changed, every one of them from "equivalent" to "different".**
+Not one moved the other way. That is the direction truncation predicts — the cut
+was hiding disagreement, exactly as claimed, and never manufacturing it.
+
+| | published (4000-char cap) | corrected (full text) |
 |---|---|---|
-| shared slots with ≥1 truncated value | 21 / 274 | 9 / 266 |
-| of those, judged equivalent | 9 (43%) | 8 (89%) |
+| pooled rate | 270/540 = 50.0% | **261/540 = 48.3%** |
+| mean v1 | 51.1% | 49.6% |
+| mean v2 | 48.1% | 46.7% |
+| **mean delta** | **−3.1** | **−2.9** |
+| sd of per-project deltas | 10.85 | 10.86 |
 
-Across all eight project-configs: 59 of 1576 rendered values (3.7%) exceeded the
-cap, over 30 of 540 shared slots (5.6%); the longest value was 29,024 characters,
-of which the judge saw 14%.
+Per project, the affected cells:
 
-**The conclusion survives it.** Flipping every truncated-and-equivalent verdict
-to "different" — the worst case, assuming the cut hid a real disagreement every
-single time — moves the pooled rates from 51.1% / 48.9% to 47.8% / 45.9%. The
-delta goes from −2.2 to −1.9, which is still a fraction of the ±10.9-point
-between-project spread that the argument below turns on. The bias also runs
-against v2, so correcting it would shrink the reported effect rather than
-rescue it.
+| cell | published | corrected | slots re-judged |
+|---|---|---|---|
+| v1 AI_READI | 62.0% | 58.2% | 6 |
+| v1 VOICE | 39.7% | 37.2% | 9 |
+| v1 CM4AI | 48.4% | 48.4% | 5 (no verdict changed) |
+| v1 CHORUS | 54.5% | 54.5% | 1 (no verdict changed) |
+| v2 AI_READI | 55.7% | 52.9% | 4 |
+| v2 CM4AI | 52.9% | 51.4% | 3 |
+| v2 VOICE | 46.2% | 44.9% | 2 |
+| v2 CHORUS | 37.5% | 37.5% | 0 — unaffected |
 
-`truncated` is now recorded per slot in `{PROJECT}_{v1,v2}_rows.json`. Issue
-#244 tracks removing the cap.
+The CHORUS section above therefore stands unchanged: none of its v2 slots were
+ever truncated, so 18/48 = 37.5% and the embedding table were measured on full
+text all along.
+
+**The conclusion is unchanged**, and the pre-registered bound held: the
+worst-case estimate made before re-judging (delta −1.9, assuming every cut hid a
+real disagreement) bracketed the true value of −2.9 against the published −3.1.
+The correction moved the effect by 0.2 points and the noise not at all.
+
+A caveat this does *not* remove: it was the same judge model, at a cap wide
+enough to see everything, but still the model family that generated the records.
+Fixing what the judge could see does not make it a disinterested reader.
 
 ## What this changes for #169
 
@@ -122,27 +145,27 @@ Judged equivalence, three replicates each, one judge call per shared slot.
 
 | project | v1 (2026-07-28) | v2 (2026-07-31) | delta |
 |---|---|---|---|
-| AI_READI | 62.0% | 55.7% | −6.3 |
+| AI_READI | 58.2% | 52.9% | −5.4 |
 | CHORUS | 54.5% | 37.5% | −17.0 |
-| CM4AI | 48.4% | 52.9% | +4.5 |
-| VOICE | 39.7% | 46.2% | +6.5 |
-| **mean** | **51.2%** | **48.1%** | **−3.1** |
+| CM4AI | 48.4% | 51.4% | +3.0 |
+| VOICE | 37.2% | 44.9% | +7.7 |
+| **mean** | **49.6%** | **46.7%** | **−2.9** |
 
 ## #169 is confirmed, on evidence
 
 | quantity | value |
 |---|---|
-| between-config effect | **−3.1** points |
-| within-config spread across projects | 22.3 (v1), 18.2 (v2) points |
+| between-config effect | **−2.9** points |
+| within-config spread across projects | 21.0 (v1), 15.4 (v2) points |
 | sd of the four per-project deltas | **10.9** points |
-| deltas agreeing in sign | **no** — −6.3, −17.0, +4.5, +6.5 |
+| deltas agreeing in sign | **no** — −5.4, −17.0, +3.0, +7.7 |
 
-The effect is a third of the noise, and the per-project deltas do not agree in
-sign: two projects go up, two go down. With four projects the standard error of
-the mean delta is 10.9/√4 ≈ 5.5, so a 3.1-point difference is not distinguishable
-from zero.
+The effect is roughly a quarter of the noise, and the per-project deltas do not
+agree in sign: two projects go up, two go down. With four projects the standard
+error of the mean delta is 10.9/√4 ≈ 5.4, so a 2.9-point difference is not
+distinguishable from zero.
 
-Detecting an effect this size against this spread would need on the order of 100
+Detecting an effect this size against this spread would need on the order of 110
 projects. There are four. **The design cannot resolve differences in replicate
 agreement between prompt configurations, and no number of replicates fixes that
 — the variance is between projects, not within them.**
@@ -161,25 +184,35 @@ design is underpowered" is true of this quantity and false of that one.
 ## Consequence for the study
 
 Report agreement as a descriptive property of a configuration — roughly half of
-shared slots state the same fact, varying by project from 38% to 62% — and stop
+shared slots state the same fact, varying by project from 37% to 58% — and stop
 treating differences between configurations in it as findings. Where an effect
 must be resolved, use a measure with a larger effect-to-noise ratio; fitness is
 the one already demonstrated to have it.
 
-Cost: 434 judge calls across eight project-configs, cached. Re-running the
-matrix from that cache is free and is exercised by the test suite.
+Cost: 464 judge calls across eight project-configs — 434 for the original matrix
+and 30 to re-judge the truncated slots on their full text. All cached; re-running
+the matrix from that cache is free and is exercised by the test suite.
 
 ## Known limits
 
-Filed rather than fixed here, so they are on the record either way:
+- **#244 — fixed.** The 4000-character cap is gone and the affected slots were
+  re-judged; what it cost is quantified above. Worth recording *how* it nearly
+  survived being fixed: the cache keyed verdicts on the full values rather than
+  on the truncated text actually sent, so raising the cap would have re-served
+  every stale verdict and the correction would have shown a change of exactly
+  zero. The key now hashes what the judge saw.
 
-- **#242** — the cache key for the 434 published verdicts had no separator
+Filed rather than fixed, so they are on the record either way:
+
+- **#242** — the cache key for the 434 original verdicts had no separator
   between the slot name and the values, so distinct inputs could collide. The
-  scheme is fixed going forward; the published records are frozen and read
+  scheme is fixed going forward; the surviving records are frozen and read
   through the legacy index rather than re-bought.
 - **#243** — those same records do not carry the judge model. It is recovered
-  above from the run configuration, not from the cache.
-- **#244** — the 4000-character cap, quantified above.
+  above from the run configuration, not from the cache. The 30 re-judged records
+  do carry it, along with the cap they were judged under.
 - **#247** — `embeddings.jsonl` is 1.4 MB of vectors for a proxy this note
   concludes does not work. Kept, because it is what makes `--offline --embed`
   reproduce the 0.923 / 0.914 table rather than print nulls.
+- **Not filed, but true**: the judge is the same model family that wrote the
+  records. See the provenance section.

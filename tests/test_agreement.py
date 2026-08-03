@@ -371,6 +371,23 @@ class TestPublishedMatrixReproduces(unittest.TestCase):
         self.assertTrue(any(d > 0 for d in deltas) and any(d < 0 for d in deltas),
                         "deltas should not agree in sign")
 
+    def test_nothing_in_the_published_matrix_is_truncated(self):
+        """#244: the cap must not be biting any cell the note reports.
+
+        If a future record grows past 100k this goes red, which is the point —
+        the alternative is a rate quietly measured on partial evidence again.
+        """
+        published = json.loads((CACHE / "matrix.json").read_text())
+        offenders = {k: c["truncated"] for k, c in published.items()
+                     if c.get("truncated")}
+        self.assertEqual(offenders, {})
+
+    def test_every_cell_records_the_cap_and_model_it_was_judged_under(self):
+        published = json.loads((CACHE / "matrix.json").read_text())
+        for key, cell in published.items():
+            self.assertEqual(cell["judge_chars"], JUDGE_VALUE_CHARS, key)
+            self.assertTrue(cell["judge_model"], key)
+
 
 if __name__ == "__main__":
     unittest.main()
