@@ -1,0 +1,434 @@
+[
+ {
+  "slot": "acquisition_methods",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.8963221646636242,
+  "equivalent": false,
+  "reason": "Values 1 and 2 agree (retrospective extraction, SOP-driven site submission, OHNLP tokenization), but value 3 omits the SOP/site-workflow acquisition process entirely and instead asserts distinct modality-specific methods (imaging retrieved from PACS, telemetry from bedside monitors via gateway/middl [truncated]",
+  "_scalar": false
+ },
+ {
+  "slot": "addressing_gaps",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9396823598061742,
+  "equivalent": false,
+  "reason": "While all three share the infrastructure need, missing diverse AI-ready dataset, and holdout-set gaps, each asserts substantive additional gaps the others omit \u2014 value 1 uniquely cites the insufficient legal/regulatory and ethical framework, values 2 and 3 cite the absence of unified multi-modal har",
+  "_scalar": false
+ },
+ {
+  "slot": "cleaning_strategies",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.8697533074720173,
+  "equivalent": false,
+  "reason": "Value 2 lists only characterization reports while values 1 and 3 add further strategies, and those two differ from each other (site status tracking/issue resolution vs. clinical semantic mapping validation), so each asserts substantive cleaning practices the others omit.",
+  "_scalar": false
+ },
+ {
+  "slot": "collection_mechanisms",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9345568802400299,
+  "equivalent": false,
+  "reason": "All three list the same core sources (EHR, PACS, bedside monitors, EEG databases, OHNLP toolkit, chorus-extract-upload), but value 1 additionally asserts a visualization/annotation environment used to label prediction targets, a substantive mechanism absent from values 2 and 3.",
+  "_scalar": false
+ },
+ {
+  "slot": "collection_timeframes",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.8601718806454998,
+  "equivalent": false,
+  "reason": "Value 1 additionally asserts a concrete data-generation period (2022-09-01 to 2026-11-30 under NIH award OT2OD032701) that values 2 and 3 omit entirely, and value 2 also omits the statement that the underlying clinical period is unspecified.",
+  "_scalar": false
+ },
+ {
+  "slot": "confidential_elements",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9011095585993535,
+  "equivalent": false,
+  "reason": "Values 2 and 3 agree (all data types controlled access; full notes kept local with only tokens shared), but value 1 adds a substantive third confidentiality claim\u2014that imaging beyond the 1,000 images released in August 2025 is withheld pending de-identification\u2014which the others omit entirely.",
+  "_scalar": false
+ },
+ {
+  "slot": "conforms_to",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.8711043019422804,
+  "equivalent": false,
+  "reason": "Values 2 and 3 name specific modality standards (OHNLP, DICOM, WFDB/PhysioNet, EDF+/Persyst) while value 1 only asserts OMOP CDM and defers the modality-specific standards to other fields, so it omits substantive facts the others assert.",
+  "_scalar": true
+ },
+ {
+  "slot": "created_by",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.7905947860564654,
+  "equivalent": true,
+  "reason": "All three name the same creator \u2014 the CHoRUS for Equitable AI consortium (60+ members, 20 institutions, centered at Massachusetts General Hospital) \u2014 differing only in level of incidental detail such as the NIH award number or number of data acquisition centers.",
+  "_scalar": true
+ },
+ {
+  "slot": "creators",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9705672601773973,
+  "equivalent": false,
+  "reason": "Values 1 and 2 list the same six individual creators, but value 3 adds a seventh creator entry (the CHoRUS consortium of 60+ members across 20 institutions, 14 data acquisition centers) that the others omit entirely.",
+  "_scalar": false
+ },
+ {
+  "slot": "data_collectors",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9530037398280747,
+  "equivalent": false,
+  "reason": "All three agree on the fourteen data acquisition centers (of 20) and site data managers, but value 1 additionally lists clinical collaborators and project managers, values 1\u20132 list CHoRUS Standards/Data Acquisition/Tooling sub-teams, and value 3 omits these actors entirely, so the sets of stated col",
+  "_scalar": false
+ },
+ {
+  "slot": "description",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9541067471293059,
+  "equivalent": true,
+  "reason": "All three describe the same CHoRUS Bridge2AI critical-care dataset with identical scope, modalities, standards, access model and figures (50,000 released admissions, 1.6B OMOP rows, 7,642 radiology admissions, 23 Tb waveforms, 100,000 anticipated across 9 modalities and 14 hospitals); the extra webi",
+  "_scalar": true
+ },
+ {
+  "slot": "direct_collection",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9098338515282166,
+  "equivalent": true,
+  "reason": "All three state that data were not collected directly from individuals but retrospectively extracted from existing EHR, PACS, bedside monitoring and EEG systems at the 14 contributing hospitals.",
+  "_scalar": false
+ },
+ {
+  "slot": "distribution_formats",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9619578075608292,
+  "equivalent": true,
+  "reason": "All three list the same five distribution formats (OMOP CDM tables, OHNLP tokenized notes, DICOM imaging, WFDB waveforms with extended PhysioNet schema, EDF+/Persyst EEG), differing only in level of incidental detail (controlled access, source systems) without contradiction.",
+  "_scalar": false
+ },
+ {
+  "slot": "existing_uses",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9627046098354691,
+  "equivalent": true,
+  "reason": "All three report the same two uses\u2014training activities and publications per the September 2025 webinar, and the AIM-AHEAD Cohort 2 training program (up to 30 trainees, Nov 2025\u2013Jul 2026) using CHoRUS data for coursework/use-cases/research\u2014differing only in wording and level of detail.",
+  "_scalar": false
+ },
+ {
+  "slot": "extension_mechanism",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9441484367244771,
+  "equivalent": false,
+  "reason": "All three describe the same chorus-ai GitHub-based contribution workflow, but value 2 omits entirely the Chorus_SOP workflow and the Google Form/GoogleScript-to-GitHub-API status-update mechanism asserted by values 1 and 3, and value 3 omits the package status page and central task-management projec",
+  "_scalar": false
+ },
+ {
+  "slot": "external_resources",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9580707307102454,
+  "equivalent": false,
+  "reason": "All three share the core links (chorus4ai.org, chorus-ai GitHub, bridge2ai.org/chorus, NIH RePORTER, AIM-AHEAD webinar), but value 2 additionally enumerates a dozen specific repositories and SOP sites (chorus-mapping, chorus-developer, chorus_waveform, privacy_scan_tool, data_acq_SOP, etc.) that the",
+  "_scalar": false
+ },
+ {
+  "slot": "file_collections",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9366389038508703,
+  "equivalent": false,
+  "reason": "Values 1 and 2 agree in substance, but value 3 omits the quantitative facts asserted by the others (1.6 billion OMOP rows, 23 Tb of waveform data, the conflicting imaging counts) and assigns the 'OMOP schema with extensions' to diagnoses rather than to nursing flowsheets, contradicting them.",
+  "_scalar": false
+ },
+ {
+  "slot": "funders",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9569813420795686,
+  "equivalent": true,
+  "reason": "All three identify the same NIH Common Fund Bridge2AI award with identical project numbers, awardee, amount, and period; the omitted NIH disclaimer in the third is boilerplate rather than a distinct funding fact.",
+  "_scalar": false
+ },
+ {
+  "slot": "future_use_impacts",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.8760267624170027,
+  "equivalent": false,
+  "reason": "Value 1 asserts three specific anticipated risks with mitigations (privacy/re-identification, bias/unrepresentative cohorts, unsafe clinical application with training), value 2 omits risks entirely, and value 3 mentions only privacy/bias risks, so each conveys substantively different information abo",
+  "_scalar": false
+ },
+ {
+  "slot": "human_subject_research",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9270417218690215,
+  "equivalent": true,
+  "reason": "All three describe the same underlying fact\u2014retrospectively collected clinical records of critically ill patients governed by a legal framework and community ethics focus groups\u2014with the differences being only additional detail (patient count, hospital count, controlled access/de-identification, abs",
+  "_scalar": false
+ },
+ {
+  "slot": "id",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.8538728357659,
+  "equivalent": false,
+  "reason": "The two values are different URLs (a dataset-specific page versus the site root), so they do not state the same identifier.",
+  "_scalar": true
+ },
+ {
+  "slot": "instances",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.863033408253857,
+  "equivalent": false,
+  "reason": "All agree that an instance is a hospital admission of an acutely/critically ill patient from ICU/PICU/NICU, but value 2 additionally asserts specific counts (50,000 released, 100,000 anticipated admissions) that the other values omit entirely, and value 3 omits the multimodal content described in va",
+  "_scalar": false
+ },
+ {
+  "slot": "intended_uses",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9630159069132728,
+  "equivalent": true,
+  "reason": "All three list the same core intended uses\u2014building AI/ML models for critical care, external validation via the sequestered holdout test set, AI/ML training through the AIM-AHEAD Bridge2AI program, and downstream/innovative research analytics\u2014differing only in wording and level of elaboration rather",
+  "_scalar": false
+ },
+ {
+  "slot": "is_deidentified",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.8995963681706898,
+  "equivalent": true,
+  "reason": "All three convey the same conclusion \u2014 the data are transformed to limit re-identification, with EHR notes tokenized/kept locally and imaging de-identification still in progress beyond the ~1,000 available images \u2014 differing only in incidental details like the tooling repositories mentioned and the ",
+  "_scalar": false
+ },
+ {
+  "slot": "keywords",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9794324837238998,
+  "equivalent": true,
+  "reason": "All three lists share the same core descriptors (critical care/acute illness, AI/ML, OMOP CDM, EHR, waveforms, EEG, imaging, notes, SDOH, Bridge2AI, multimodal AI-ready data), with only minor wording variants and extra facet tags that don't contradict one another.",
+  "_scalar": false
+ },
+ {
+  "slot": "known_limitations",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9142729134416712,
+  "equivalent": false,
+  "reason": "While all three share the core limitations (notes only as tokens, incomplete imaging/EEG, released size below the 100,000 target), value 1 omits the metadata-still-planned limitation and the repository-under-review notice, value 3 omits the controlled-access restriction and the source inconsistencie",
+  "_scalar": false
+ },
+ {
+  "slot": "labeling_strategies",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.8910478001933755,
+  "equivalent": false,
+  "reason": "Values 1 and 2 both describe two labeling strategies (annotation environment plus semantically-mapped chorus-mapping with clinical validation SOP), while value 3 omits the semantic mapping/clinical validation strategy entirely and instead adds unrelated pipeline capabilities.",
+  "_scalar": false
+ },
+ {
+  "slot": "license_and_use_terms",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9130531770544715,
+  "equivalent": false,
+  "reason": "All three agree on controlled access, the signed licensing agreement, and MIT/Apache-2.0 software licensing, but value 2 omits entirely the substantive '.edu' email requirement and registration/compute-provisioning details, and values 1 and 3 differ on whether the '.edu' rule applies only within the",
+  "_scalar": false
+ },
+ {
+  "slot": "machine_annotation_tools",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.8832116609273156,
+  "equivalent": false,
+  "reason": "Each value lists a different set of tools \u2014 value 1 adds a privacy scan tool and CTP-deid, value 3 adds DeGauss/UF-Geocoding, and value 2 lists only OHNLP \u2014 so they assert different facts about the annotation tooling.",
+  "_scalar": false
+ },
+ {
+  "slot": "maintainers",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9417284970334882,
+  "equivalent": false,
+  "reason": "Values 1 and 2 list the same three individual contacts, but value 3 adds a fourth maintainer entry (the chorus-ai GitHub organization with 28 repositories and package metadata) that the others omit entirely.",
+  "_scalar": false
+ },
+ {
+  "slot": "name",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.7613176002616859,
+  "equivalent": true,
+  "reason": "Both identify the dataset as \"CHoRUS\"; the added word \"Dataset\" is a formatting/wording difference, not a different fact.",
+  "_scalar": true
+ },
+ {
+  "slot": "other_tasks",
+  "n_holders": 2,
+  "exact": false,
+  "similarity": 0.8501655990841197,
+  "equivalent": false,
+  "reason": "Both mention semantic-mapping/tooling development, but value 1 asserts a specific social-determinants-of-health/geospatial research use that value 2 omits, while value 2 asserts generic downstream analytics with clinical collaborators not stated in value 1.",
+  "_scalar": false
+ },
+ {
+  "slot": "page",
+  "n_holders": 3,
+  "exact": true,
+  "similarity": 1.0,
+  "equivalent": true,
+  "reason": "identical",
+  "_scalar": true
+ },
+ {
+  "slot": "participant_privacy",
+  "n_holders": 2,
+  "exact": false,
+  "similarity": 0.944756329311536,
+  "equivalent": true,
+  "reason": "Both describe the same privacy measures\u2014tokenized unstructured text, local retention of notes, re-identification-limiting transformations, controlled access, and patient-focused ethical/legal governance\u2014with value 2 only adding minor detail (cloud enclave, social determinants) that does not contradi",
+  "_scalar": false
+ },
+ {
+  "slot": "preprocessing_strategies",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9252009492591388,
+  "equivalent": false,
+  "reason": "Value 2 omits the DeGauss/UF-Geocoding step of OMOP Location entities present in values 1 and 3, and value 3 adds further distinct steps (contextual/SDOH data elements, chorus-extract-upload site extract creation) absent from the others, so the lists assert different sets of preprocessing operations",
+  "_scalar": false
+ },
+ {
+  "slot": "purposes",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9781235160442643,
+  "equivalent": true,
+  "reason": "All three lists describe the same set of purposes\u2014generating AI/ML-ready critical care data, a publicly available privacy-respecting AI-ready dataset, a diverse high-resolution ethically sourced dataset, a holdout test set for external validation, establishing AI-in-health best practices (Bridge2AI ",
+  "_scalar": false
+ },
+ {
+  "slot": "raw_data_sources",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9728493689217217,
+  "equivalent": false,
+  "reason": "Values 2 and 3 list the same five source systems (structured EHR, unstructured notes, PACS imaging, bedside monitor telemetry, EEG databases), but value 1 additionally asserts a sixth distinct source\u2014external social determinants of health and geographic reference data\u2014which the others omit entirely.",
+  "_scalar": false
+ },
+ {
+  "slot": "sampling_strategies",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9460682976540505,
+  "equivalent": false,
+  "reason": "Value 1 asserts two additional substantive facts\u2014restriction to ICU/PICU/NICU admissions at 14 hospitals and selection of contextual data elements like distance to nearest hospital\u2014that values 2 and 3 omit entirely.",
+  "_scalar": false
+ },
+ {
+  "slot": "sensitive_elements",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9202884755570949,
+  "equivalent": false,
+  "reason": "Values 1 and 2 both list physiological waveform telemetry/EEG (and nursing flowsheet documentation) as sensitive elements, which value 3 omits entirely, and value 3 adds a distinct claim about de-identification still being in process as of August 2025.",
+  "_scalar": false
+ },
+ {
+  "slot": "splits",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.902230969938575,
+  "equivalent": true,
+  "reason": "All three state that the dataset provides a sequestered holdout test set for external validation of models, differing only in detail and wording.",
+  "_scalar": false
+ },
+ {
+  "slot": "status",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.8552132513881338,
+  "equivalent": true,
+  "reason": "All three state the dataset is actively under development with a released controlled-access portion and additional modalities still in progress, plus the same website notice; the extra funding dates and specific modality examples are added detail rather than contradictory facts.",
+  "_scalar": true
+ },
+ {
+  "slot": "subpopulations",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.921892928354275,
+  "equivalent": false,
+  "reason": "Values 2 and 3 list only the three ICU/PICU/NICU subpopulations, while value 1 asserts an additional subpopulation grouping by 14 contributing hospitals with balanced sampling, a substantive fact absent from the others.",
+  "_scalar": false
+ },
+ {
+  "slot": "subsets",
+  "n_holders": 2,
+  "exact": false,
+  "similarity": 0.9408181342322656,
+  "equivalent": false,
+  "reason": "Only the released-dataset subset matches; value 1 lists a holdout test set that value 2 omits entirely, while value 2 lists an anticipated final dataset (100,000 admissions, 9 modalities, 14 hospitals) and an August 2025 snapshot with different counts (14 hospitals, 45,000+ admissions) that value 1  [truncated]",
+  "_scalar": false
+ },
+ {
+  "slot": "tasks",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.957505955885309,
+  "equivalent": false,
+  "reason": "All three share characterization, prediction, treatment-response and external validation, but values 1 and 2 additionally list a data labeling/annotation task (and value 2 a model-building task) that value 3 omits entirely.",
+  "_scalar": false
+ },
+ {
+  "slot": "third_party_sharing",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.8718909415764343,
+  "equivalent": false,
+  "reason": "Although all three agree on controlled external access, each asserts substantive facts the others omit \u2014 values 1 and 3 state a holdout test set is released for external model validation (absent in value 2), value 2 uniquely specifies contact emails, a cloud enclave, and a mandatory \".edu\" address r",
+  "_scalar": false
+ },
+ {
+  "slot": "title",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9359728092413309,
+  "equivalent": true,
+  "reason": "All three name the same CHoRUS dataset, differing only in optional prefixes/suffixes ('Bridge2AI', 'Dataset', alternate name) that do not change the identified dataset.",
+  "_scalar": true
+ },
+ {
+  "slot": "updates",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9544428592050846,
+  "equivalent": false,
+  "reason": "They differ on substantive facts: value 1 dates the work-in-progress to August 2025 and adds a project end date of 2026-11-30 plus a repository review under Administration directives, value 2 dates it September 2025 and states a current release of 50,000 admissions, and only values 2 and 3 describe ",
+  "_scalar": false
+ },
+ {
+  "slot": "was_derived_from",
+  "n_holders": 3,
+  "exact": false,
+  "similarity": 0.9261507162277912,
+  "equivalent": true,
+  "reason": "All three identify the same source systems (EHR, PACS imaging, bedside monitor telemetry gateways/middleware, hospital EEG databases) at the same 14 CHoRUS data acquisition hospitals, differing only in minor descriptive detail.",
+  "_scalar": true
+ }
+]
