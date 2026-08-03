@@ -158,7 +158,18 @@ data/ro-crate_packages/*/crate/
 # Allowlist rather than a pattern per treatment condition: the archive names are
 # upstream's to choose, so anything new in raw/ is ignored until someone decides
 # otherwise. The one zip already tracked is named explicitly.
-data/ro-crate_packages/*/raw/*.zip
+#
+# Every archive extension and any depth, because the next one will not be named
+# like the last one — .tar.gz and raw/images/foo.zip both slipped past a plain
+# raw/*.zip when tested. This still only guards archives under raw/; a general
+# "no large file anywhere" check needs a size threshold, which .gitignore cannot
+# express. See #262.
+data/ro-crate_packages/*/raw/**/*.zip
+data/ro-crate_packages/*/raw/**/*.tar
+data/ro-crate_packages/*/raw/**/*.tar.*
+data/ro-crate_packages/*/raw/**/*.tgz
+data/ro-crate_packages/*/raw/**/*.7z
+data/ro-crate_packages/*/raw/**/*.zip.[0-9][0-9][0-9]
 !data/ro-crate_packages/CM4AI/raw/cm4ai_release_metadata.zip
 
 # Poster/slide artifacts are kept local-only and never committed to this repo.
