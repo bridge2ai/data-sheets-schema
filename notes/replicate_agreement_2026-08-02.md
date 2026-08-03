@@ -243,9 +243,18 @@ Filed rather than fixed, so they are on the record either way:
 - **#243** — those same records do not carry the judge model. It is recovered
   above from the run configuration, not from the cache. The 30 re-judged records
   do carry it, along with the cap they were judged under.
-- **#247** — `embeddings.jsonl` is 1.4 MB of vectors for a proxy this note
-  concludes does not work. Kept, because it is what makes `--offline --embed`
-  reproduce the 0.923 / 0.914 table rather than print nulls.
+- **#247 — kept, and the reasons first given for both keeping and worrying
+  about it were wrong.** The file is 1.4 MB in the working tree but 587 KB
+  packed, which is 0.017% of this repository's 3.25 GiB of objects and does not
+  appear in its fifteen largest blobs. It is also already in history, so
+  deleting it from HEAD would reclaim exactly nothing — only a history rewrite
+  would, which is not a thing to do to a shared `main` over half a megabyte.
+  And it is *not* what makes the negative result reproducible: the 0.923 /
+  0.914 table recomputes from the 24 KB `CHORUS_v2_rows.json`, with no vectors
+  involved. That table is now asserted by the test suite rather than left to be
+  re-derived. What remains real is growth — embedding the whole corpus would be
+  1439 vectors rather than 136, about 14 MB, tracked permanently — so a test
+  bounds the count and makes that a decision instead of a side effect.
 - **#251 — fixed.** Vectors are keyed on the text sent rather than the value it
   came from, mirroring #244, and the client now reads `usage.prompt_tokens` back
   and refuses to build a cosine on a prefix. Nothing was orphaned: no cached

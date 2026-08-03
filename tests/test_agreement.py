@@ -464,7 +464,14 @@ class TestJudgeCache(unittest.TestCase):
             self.assertEqual(judge.legacy_hits, 1)
 
 
-@unittest.skipUnless((CACHE / "matrix.json").exists(), "agreement cache not present")
+#: Every file this class reads. Guarding on one of them and reading three meant
+#: a partial cache errored instead of skipping, so "the cache is not here" and
+#: "the cache is here and wrong" arrived as the same red result (#260).
+CACHE_FILES = ("matrix.json", "CHORUS_v2_rows.json", "embeddings.jsonl")
+
+
+@unittest.skipUnless(all((CACHE / f).exists() for f in CACHE_FILES),
+                     "agreement cache not present")
 class TestPublishedMatrixReproduces(unittest.TestCase):
     """The note's tables must come back out of the committed cache.
 
@@ -522,6 +529,63 @@ class TestPublishedMatrixReproduces(unittest.TestCase):
         for key, cell in published.items():
             self.assertEqual(cell["unjudged"], 0, key)
             self.assertIsNotNone(cell["rate"], key)
+
+    def test_the_embedding_proxy_still_fails_to_discriminate(self):
+        """The negative result, asserted rather than merely reproducible (#247).
+
+        This is the finding that closes off the cheap route: cosine similarity
+        cannot separate slots the judge called equivalent from slots it called
+        different, because every value is schema-shaped prose about the same
+        dataset and the embedding measures topic. Recomputed here from the
+        committed per-slot rows — no vectors needed, which is the point.
+
+        It is pinned because it is the kind of result someone will want to
+        re-litigate when the judge's cost comes up, and a number in a note is
+        easier to wave away than a red test.
+        """
+        rows = json.loads((CACHE / "CHORUS_v2_rows.json").read_text())
+        # `is True` / `is False`, not truthiness: `equivalent` is tri-state and
+        # an unjudged row is None. Splitting on truthiness would file it under
+        # "judged, and they differed" — the #250 bug, which this very test
+        # would otherwise reintroduce while pinning the finding it protects.
+        self.assertTrue(all(r["equivalent"] is not None for r in rows),
+                        "every row must carry a verdict for the means to mean anything")
+        self.assertTrue(all(r["similarity"] is not None for r in rows),
+                        "and a similarity, or the sample is not what it claims")
+        eq = [r["similarity"] for r in rows if r["equivalent"] is True]
+        df = [r["similarity"] for r in rows if r["equivalent"] is False]
+        self.assertEqual(len(eq) + len(df), len(rows), "no row may be dropped")
+        self.assertEqual((len(eq), len(df)), (18, 30))
+        mean_eq, mean_df = sum(eq) / len(eq), sum(df) / len(df)
+        self.assertAlmostEqual(mean_eq, 0.92272, places=4)
+        self.assertAlmostEqual(mean_df, 0.91442, places=4)
+        # abs(), because the claim is that the classes do not *separate*, and
+        # separation is a magnitude. A signed test would pass on mean_eq=0.40
+        # against mean_df=0.92 — the proxy discriminating strongly, merely
+        # inverted — which is the single most interesting result this test
+        # could meet and the one it would otherwise be blind to (#259).
+        self.assertLess(abs(mean_eq - mean_df), 0.01,
+                        "if the gap ever exceeds a point in either direction, "
+                        "the proxy is worth revisiting and this test should be "
+                        "the thing that says so")
+
+    def test_the_tracked_vector_cache_stays_small(self):
+        """#247: growth here is permanent, so it should be a decision.
+
+        Nothing in git can be un-committed — this blob is already in history at
+        587 KB packed, so deleting it from HEAD would reclaim exactly nothing.
+        What *is* still available is refusing to add ten times more of it. The
+        cache holds 136 vectors, one per distinct CHORUS v2 value; embedding
+        the whole corpus would be 1439 vectors, about 14 MB, tracked forever.
+
+        If you meant to do that, raise this bound in the same commit and say
+        why. The number existing is the point; its exact value is not.
+        """
+        path = CACHE / "embeddings.jsonl"
+        vectors = sum(1 for line in path.read_text().splitlines() if line.strip())
+        self.assertLessEqual(vectors, 200,
+                             f"{vectors} vectors tracked; a full-corpus sweep "
+                             "is ~1439 and adds ~14 MB to history permanently")
 
     def test_missing_similarity_is_counted_rather_than_left_to_be_inferred(self):
         """#253 — only CHORUS v2 was ever embedded; the rest must say so."""
