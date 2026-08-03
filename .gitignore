@@ -146,6 +146,21 @@ dmypy.json
 # (ro-crate-preview.html up to 11.8 MB each). Re-extract from raw/*.zip.
 data/ro-crate_packages/*/crate/
 
+# ...but "keep the upstream archive" holds for a 1.1 MB metadata zip and stops
+# holding at 3.19 GB. CM4AI's image archives are gigabytes; committing one would
+# push it to a repository that is 60 MB today, and no later `git rm` would get
+# it back out of history.
+#
+# This is not hypothetical. One such archive was staged and then unstaged, which
+# left a 3.19 GB unreferenced blob in .git/objects — invisible to every ordinary
+# git command, never pushed, and 96% of the local repository.
+#
+# Allowlist rather than a pattern per treatment condition: the archive names are
+# upstream's to choose, so anything new in raw/ is ignored until someone decides
+# otherwise. The one zip already tracked is named explicitly.
+data/ro-crate_packages/*/raw/*.zip
+!data/ro-crate_packages/CM4AI/raw/cm4ai_release_metadata.zip
+
 # Poster/slide artifacts are kept local-only and never committed to this repo.
 data/poster_assets/
 
