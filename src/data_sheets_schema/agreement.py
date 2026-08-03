@@ -21,19 +21,36 @@ So this module measures agreement three ways, cheapest first:
 
 Reporting all three together is the point. Similarity alone is a proxy nobody
 has calibrated; the judge alone is too expensive to run over a corpus. Run
-together on the same slots, the judge calibrates the proxy — and if similarity
-predicts the verdict well, later sweeps can use the free measure and spend calls
-only where it is uncertain.
+together on the same slots, the judge calibrates the proxy.
+
+**That calibration has now been done, and the proxy failed**: 0.923 mean cosine
+on judged-equivalent slots against 0.914 on judged-different ones, a gap of
+0.009 (`notes/replicate_agreement_2026-08-02.md`). Every value here is
+schema-shaped prose about the same dataset, so the embedding measures topic,
+and topic is held constant by construction. The embeddings themselves are fine
+— 0.865 for a paraphrase against 0.564 for unrelated text — the failure is
+specific to this population. `--embed` is therefore off by default: judged
+equivalence has to be paid for, and the cheap route is closed rather than
+untested.
+
+Run it as a driver to rebuild the matrix::
+
+    python -m data_sheets_schema.agreement --offline
+
+`--offline` refuses to make a paid call, so it either reproduces the published
+figures from the cache or fails loudly. Drop it to measure a new configuration.
 """
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import math
 import os
+import sys
 import urllib.request
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +58,15 @@ import yaml
 
 CBORG_EMBEDDINGS = "https://api.cborg.lbl.gov/v1/embeddings"
 EMBED_MODEL = "lbl/nomic-embed-text"
+
+# How much of a value each measure actually sees. Values longer than this are
+# cut, and a cut can only hide a disagreement that lives past the cut — so a
+# truncated slot biases towards "equivalent". `SlotAgreement.truncated` records
+# which rows were measured on partial evidence; see issue #244 for how much of
+# the published matrix that covers (30 of 540 slots) and why the conclusion
+# survives it.
+JUDGE_VALUE_CHARS = 4000
+EMBED_VALUE_CHARS = 8000
 
 EQUIVALENCE_SYSTEM = """\
 You judge whether two or more values placed in the SAME field of a dataset
@@ -86,22 +112,47 @@ class SlotAgreement:
     similarity: float | None = None
     equivalent: bool | None = None
     reason: str = ""
+    scalar: bool = True
+    truncated: bool = False
 
     @property
     def shape(self) -> str:
-        return "scalar" if self.n_holders and self._scalar else "object"
+        """Scalar or object.
 
-    _scalar: bool = True
+        Worth carrying rather than deriving on demand: the scalar/object split
+        is the whole reason byte equality failed. Zero of ~40 object-valued
+        CHORUS slots ever matched, while the scalar ones sometimes did, so a
+        rate reported without this breakdown hides which population it came
+        from.
+        """
+        return "scalar" if self.scalar else "object"
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"slot": self.slot, "n_holders": self.n_holders,
+                "shape": self.shape, "exact": self.exact,
+                "similarity": self.similarity, "equivalent": self.equivalent,
+                "truncated": self.truncated, "reason": self.reason}
+
+
+class OfflineCacheMiss(RuntimeError):
+    """A measurement was requested that is not cached, in offline mode.
+
+    Raised rather than paid for, so that "reproduce the published matrix" and
+    "measure something new" cannot be confused for one another.
+    """
 
 
 class Embedder:
     """Cosine similarity between rendered values, memoised on the text."""
 
-    def __init__(self, model: str = EMBED_MODEL, cache_path: Path | None = None):
+    def __init__(self, model: str = EMBED_MODEL, cache_path: Path | None = None,
+                 offline: bool = False):
         self.model = model
         self.cache_path = Path(cache_path) if cache_path else None
+        self.offline = offline
         self._vecs: dict[str, list[float]] = {}
         self.calls = 0
+        self.offline_misses = 0
         self._load()
 
     def _load(self) -> None:
@@ -126,10 +177,19 @@ class Embedder:
         key = _digest(text)
         if key in self._vecs:
             return self._vecs[key]
-        body = json.dumps({"model": self.model, "input": [text[:8000]]}).encode()
+        if self.offline:
+            raise OfflineCacheMiss(f"no cached embedding for {key}")
+        body = json.dumps({"model": self.model,
+                           "input": [text[:EMBED_VALUE_CHARS]]}).encode()
+        try:
+            token = os.environ["CBORG_API_KEY"]
+        except KeyError:
+            raise RuntimeError(
+                "CBORG_API_KEY is not set; embeddings need it. Use "
+                "offline=True to read only what is already cached.") from None
         req = urllib.request.Request(
             CBORG_EMBEDDINGS, data=body,
-            headers={"Authorization": f"Bearer {os.environ['CBORG_API_KEY']}",
+            headers={"Authorization": f"Bearer {token}",
                      "Content-Type": "application/json"})
         with urllib.request.urlopen(req, timeout=120) as resp:
             vec = json.load(resp)["data"][0]["embedding"]
@@ -155,30 +215,67 @@ class Embedder:
         return sum(sims) / len(sims)
 
 
+def _judge_key(slot: str, distinct: list[str]) -> str:
+    """Unambiguous: the slot and each value are delimited by the encoding.
+
+    Scheme 1 was `slot + "".join(sorted(distinct))`, which had no separator at
+    all, so ("title", ["ab", "c"]) and ("title", ["a", "bc"]) — and even
+    ("titl", ["ex"]) and ("title", ["x"]) — hashed identically and served each
+    other's verdicts (issue #242).
+    """
+    return _digest(json.dumps([slot, sorted(distinct)], ensure_ascii=False))
+
+
+def _legacy_judge_key(slot: str, distinct: list[str]) -> str:
+    return _digest(slot + "".join(sorted(distinct)))
+
+
 class EquivalenceJudge:
     """Does this set of values state the same fact?
 
     One call per slot, not per pair: asking about all holders at once is both
     cheaper and closer to the question — "do the replicates agree here" rather
     than "does rep1 agree with rep2".
+
+    Cached verdicts are scoped to the rubric *and* the judge model. Reusing one
+    model's verdict under another silently mixes two instruments, and this repo
+    routinely varies model and effort tier. Records written before that scoping
+    existed carry no model and are read from a separate legacy index: they are
+    frozen, so keeping them costs nothing and re-running 434 paid calls to
+    restate the same verdicts would buy nothing.
     """
 
     def __init__(self, client=None, model: str | None = None,
-                 max_tokens: int = 16000, cache_path: Path | None = None):
+                 max_tokens: int = 16000, cache_path: Path | None = None,
+                 offline: bool = False):
         self._client, self._model = client, model
         self.max_tokens = max_tokens
         self.cache_path = Path(cache_path) if cache_path else None
+        self.offline = offline
         self._memo: dict[str, tuple[bool, str]] = {}
+        self._legacy: dict[str, tuple[bool, str]] = {}
         self.calls = 0
         self.memo_hits = 0
+        self.legacy_hits = 0
         self._load()
+
+    @property
+    def model(self) -> str:
+        """The judge model, without building a client.
+
+        Needed at load time to scope the cache, and offline mode must not need
+        credentials just to read a file.
+        """
+        if self._model is None:
+            from data_sheets_schema.api_runner import _model_settings
+            self._model = _model_settings()["name"]
+        return self._model
 
     def _resolve(self):
         if self._client is None:
-            from data_sheets_schema.api_runner import _client, _model_settings
+            from data_sheets_schema.api_runner import _client
             self._client = _client()
-            self._model = self._model or _model_settings()["name"]
-        return self._client, self._model
+        return self._client, self.model
 
     def _load(self) -> None:
         if not self.cache_path or not self.cache_path.exists():
@@ -187,8 +284,13 @@ class EquivalenceJudge:
             if not line.strip():
                 continue
             e = json.loads(line)
-            if e.get("rubric") == _digest(EQUIVALENCE_SYSTEM):
-                self._memo[e["key"]] = (e["equivalent"], e.get("reason", ""))
+            if e.get("rubric") != _digest(EQUIVALENCE_SYSTEM):
+                continue
+            verdict = (e["equivalent"], e.get("reason", ""))
+            if "model" not in e:
+                self._legacy[e["key"]] = verdict
+            elif e["model"] == self.model:
+                self._memo[e["key"]] = verdict
 
     def _save(self, key: str, slot: str, ok: bool, reason: str) -> None:
         if not self.cache_path:
@@ -196,7 +298,7 @@ class EquivalenceJudge:
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
         with self.cache_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"rubric": _digest(EQUIVALENCE_SYSTEM),
-                                 "key": key, "slot": slot,
+                                 "model": self.model, "key": key, "slot": slot,
                                  "equivalent": ok, "reason": reason}) + "\n")
 
     def __call__(self, slot: str, values: list[Any]) -> tuple[bool, str]:
@@ -204,14 +306,20 @@ class EquivalenceJudge:
         distinct = list(dict.fromkeys(rendered))
         if len(distinct) < 2:
             return True, "identical"
-        key = _digest(slot + "" + "".join(sorted(distinct)))
+        key = _judge_key(slot, distinct)
         if key in self._memo:
             self.memo_hits += 1
             return self._memo[key]
+        legacy = self._legacy.get(_legacy_judge_key(slot, distinct))
+        if legacy is not None:
+            self.legacy_hits += 1
+            return legacy
+        if self.offline:
+            raise OfflineCacheMiss(f"no cached verdict for slot {slot!r}")
 
         client, model = self._resolve()
         from data_sheets_schema.api_runner import _call_with_retry
-        blocks = "\n\n".join(f"--- value {i + 1} ---\n{t[:4000]}"
+        blocks = "\n\n".join(f"--- value {i + 1} ---\n{t[:JUDGE_VALUE_CHARS]}"
                              for i, t in enumerate(distinct))
         prompt = (f"Field: `{slot}`\n\n{blocks}\n\n"
                   "Do these state the same fact about the dataset?")
@@ -269,11 +377,132 @@ def compare_records(records: dict[str, dict[str, Any]], *,
         row = SlotAgreement(
             slot=slot, n_holders=len(holders),
             exact=len(set(rendered)) == 1,
-            _scalar=all(isinstance(v, (str, int, float, bool, type(None)))
-                        for v in values))
+            scalar=all(isinstance(v, (str, int, float, bool, type(None)))
+                       for v in values),
+            truncated=any(len(t) > JUDGE_VALUE_CHARS for t in rendered))
         if embedder is not None:
-            row.similarity = embedder.similarity(rendered)
+            try:
+                row.similarity = embedder.similarity(rendered)
+            except OfflineCacheMiss:
+                # Offline, similarity is simply unavailable for this slot —
+                # leave it null and count it. Refusing to pay is the point of
+                # offline mode; refusing to report the judgement too would not
+                # be. Only the CHORUS v2 embeddings were ever computed.
+                embedder.offline_misses += 1
         if judge is not None:
             row.equivalent, row.reason = judge(slot, values)
         out.append(row)
     return out
+
+
+# --- driver -----------------------------------------------------------------
+#
+# The published matrix (notes/replicate_agreement_2026-08-02.md) came from these
+# defaults. They are here rather than in the note because a note cannot be run.
+
+DEFAULT_METHOD = "claudecode_agent"
+DEFAULT_CONFIGS = {"v1  (2026-07-28 generic)": "2026-07-28_claude-opus-5-generic",
+                   "v2  (2026-07-31 generic-v2)": "2026-07-31_claude-opus-5-generic-v2"}
+DEFAULT_PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
+DEFAULT_ROOT = Path("data/d4d_concatenated")
+DEFAULT_CACHE = Path("data/evaluation_llm/agreement_cache")
+
+
+def load_replicates(root: Path, method: str, label: str, project: str,
+                    reps: int = 3) -> dict[str, dict[str, Any]]:
+    """The full record per replicate — `{PROJECT}_d4d.yaml`, not `_d4d_core`.
+
+    Which of the two the matrix used is not cosmetic: on CHORUS the full
+    records share 48 slots against the core records' 43, and the published
+    counts are the full ones.
+    """
+    records: dict[str, dict[str, Any]] = {}
+    for rep in range(1, reps + 1):
+        path = root / method / f"{label}_rep{rep}" / f"{project}_d4d.yaml"
+        if path.exists():
+            records[f"rep{rep}"] = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return records
+
+
+def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
+                 configs: dict[str, str] | None = None,
+                 projects: tuple[str, ...] = DEFAULT_PROJECTS,
+                 reps: int = 3, cache_dir: Path = DEFAULT_CACHE,
+                 embed: bool = False, offline: bool = False,
+                 ) -> tuple[dict[str, dict[str, Any]], dict[str, list[SlotAgreement]]]:
+    """The whole matrix, plus the per-slot rows behind every cell."""
+    configs = configs or DEFAULT_CONFIGS
+    embedder = (Embedder(cache_path=cache_dir / "embeddings.jsonl", offline=offline)
+                if embed else None)
+    matrix: dict[str, dict[str, Any]] = {}
+    rows: dict[str, list[SlotAgreement]] = {}
+    for cfg, label in configs.items():
+        for project in projects:
+            records = load_replicates(root, method, label, project, reps)
+            if len(records) < 2:
+                print(f"skip {cfg}|{project}: {len(records)} replicate(s) found",
+                      file=sys.stderr)
+                continue
+            judge = EquivalenceJudge(
+                cache_path=cache_dir / f"{project}_equivalence.jsonl",
+                offline=offline)
+            result = compare_records(records, embedder=embedder, judge=judge)
+            key = f"{cfg}|{project}"
+            rows[key] = result
+            matrix[key] = {
+                "shared": len(result),
+                "equivalent": sum(bool(r.equivalent) for r in result),
+                "exact": sum(r.exact for r in result),
+                "truncated": sum(r.truncated for r in result),
+                "rate": (sum(bool(r.equivalent) for r in result) / len(result)
+                         if result else None),
+                "judge_model": judge.model,
+                "replicates": sorted(records),
+            }
+    return matrix, rows
+
+
+def main(argv: list[str] | None = None) -> int:
+    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    p.add_argument("--root", type=Path, default=DEFAULT_ROOT)
+    p.add_argument("--method", default=DEFAULT_METHOD)
+    p.add_argument("--project", dest="projects", action="append")
+    p.add_argument("--config", dest="configs", action="append", metavar="NAME=LABEL",
+                   help="repeatable; defaults to the two published configs")
+    p.add_argument("--reps", type=int, default=3)
+    p.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE)
+    p.add_argument("--embed", action="store_true",
+                   help="also compute embedding similarity (shown not to "
+                        "discriminate here; off by default)")
+    p.add_argument("--offline", action="store_true",
+                   help="fail instead of making a paid call")
+    p.add_argument("--write", action="store_true",
+                   help="write matrix.json and {PROJECT}_{CONFIG}_rows.json")
+    a = p.parse_args(argv)
+
+    configs = ({c.split("=", 1)[0]: c.split("=", 1)[1] for c in a.configs}
+               if a.configs else None)
+    matrix, rows = build_matrix(
+        root=a.root, method=a.method, configs=configs,
+        projects=tuple(a.projects) if a.projects else DEFAULT_PROJECTS,
+        reps=a.reps, cache_dir=a.cache_dir, embed=a.embed, offline=a.offline)
+
+    for key, cell in sorted(matrix.items()):
+        print(f"{key:38s} {cell['equivalent']:3d}/{cell['shared']:3d} "
+              f"= {cell['rate']:6.1%}  (exact {cell['exact']}, "
+              f"truncated {cell['truncated']})")
+    if a.write:
+        a.cache_dir.mkdir(parents=True, exist_ok=True)
+        (a.cache_dir / "matrix.json").write_text(
+            json.dumps(matrix, indent=1) + "\n", encoding="utf-8")
+        for key, result in rows.items():
+            cfg, project = key.split("|")
+            tag = cfg.split()[0]
+            (a.cache_dir / f"{project}_{tag}_rows.json").write_text(
+                json.dumps([r.as_dict() for r in result], indent=1) + "\n",
+                encoding="utf-8")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,9 +1,35 @@
 # How much do replicates actually agree?
 
 CHORUS, `2026-07-31_claude-opus-5-generic-v2_rep{1,2,3}`, 48 slots held by two
-or more replicates. Reproduce with `src/data_sheets_schema/agreement.py`;
-judgements and embeddings are cached under
-`data/evaluation_llm/agreement_cache/`.
+or more replicates.
+
+## Provenance
+
+| | |
+|---|---|
+| records | `data/d4d_concatenated/claudecode_agent/{LABEL}_rep{1,2,3}/{PROJECT}_d4d.yaml` |
+| | the **full** records, not `_core` — on CHORUS the core records share 43 slots, not 48 |
+| slot | a top-level key of the record, held by ≥2 replicates |
+| judge | `google/claude-opus-5-high` via CBORG, rubric `EQUIVALENCE_SYSTEM` |
+| embeddings | `lbl/nomic-embed-text` via CBORG |
+| cache | `data/evaluation_llm/agreement_cache/` |
+
+Rebuild every figure below from the cache, without making a paid call:
+
+```bash
+python -m data_sheets_schema.agreement --offline --embed --write
+```
+
+`--offline` raises on a cache miss rather than billing, so the command either
+reproduces the published numbers or fails. `tests/test_agreement.py` asserts
+that it does reproduce them.
+
+**The judge is the same model family that generated the records.** That is not
+neutral — a generator is the reader most likely to find its own two phrasings
+equivalent — and no independent judge was run to bound the effect. Read the
+rates as "how consistent does this model consider itself", which is still the
+right quantity for #169's question about resolving power, but is not the same as
+inter-rater agreement against a disinterested reader.
 
 | measure | agreeing slots | rate |
 |---|---|---|
@@ -50,6 +76,35 @@ specific to this population, not the model.
 44 judge calls and 127 embeddings for one project's three replicates. One call
 per slot, not per pair. At that rate the four projects cost roughly 180 judge
 calls per config — affordable for a decision, not for a hot path.
+
+## What the judge did not see
+
+Values are cut to 4000 characters before reaching the judge (8000 for the
+embedder). A cut can only hide a disagreement that lives past it, so a truncated
+slot is biased towards "equivalent".
+
+This is live in the matrix below, not hypothetical, and it is **asymmetric
+between the two configurations being compared**:
+
+| | v1 | v2 |
+|---|---|---|
+| shared slots with ≥1 truncated value | 21 / 274 | 9 / 266 |
+| of those, judged equivalent | 9 (43%) | 8 (89%) |
+
+Across all eight project-configs: 59 of 1576 rendered values (3.7%) exceeded the
+cap, over 30 of 540 shared slots (5.6%); the longest value was 29,024 characters,
+of which the judge saw 14%.
+
+**The conclusion survives it.** Flipping every truncated-and-equivalent verdict
+to "different" — the worst case, assuming the cut hid a real disagreement every
+single time — moves the pooled rates from 51.1% / 48.9% to 47.8% / 45.9%. The
+delta goes from −2.2 to −1.9, which is still a fraction of the ±10.9-point
+between-project spread that the argument below turns on. The bias also runs
+against v2, so correcting it would shrink the reported effect rather than
+rescue it.
+
+`truncated` is now recorded per slot in `{PROJECT}_{v1,v2}_rows.json`. Issue
+#244 tracks removing the cap.
 
 ## What this changes for #169
 
@@ -111,4 +166,20 @@ treating differences between configurations in it as findings. Where an effect
 must be resolved, use a measure with a larger effect-to-noise ratio; fitness is
 the one already demonstrated to have it.
 
-Cost: 434 judge calls across eight project-configs, cached.
+Cost: 434 judge calls across eight project-configs, cached. Re-running the
+matrix from that cache is free and is exercised by the test suite.
+
+## Known limits
+
+Filed rather than fixed here, so they are on the record either way:
+
+- **#242** — the cache key for the 434 published verdicts had no separator
+  between the slot name and the values, so distinct inputs could collide. The
+  scheme is fixed going forward; the published records are frozen and read
+  through the legacy index rather than re-bought.
+- **#243** — those same records do not carry the judge model. It is recovered
+  above from the run configuration, not from the cache.
+- **#244** — the 4000-character cap, quantified above.
+- **#247** — `embeddings.jsonl` is 1.4 MB of vectors for a proxy this note
+  concludes does not work. Kept, because it is what makes `--offline --embed`
+  reproduce the 0.923 / 0.914 table rather than print nulls.
