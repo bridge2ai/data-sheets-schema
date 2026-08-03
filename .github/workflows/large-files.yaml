@@ -1,0 +1,38 @@
+# Stop a large file before it reaches shared history.
+#
+# On the pull request rather than in a pre-commit hook, because the boundary
+# worth defending is what enters the shared repository: a stray large object is
+# recoverable locally, and permanent once pushed. See scripts/check_large_files.py
+# and issue #262.
+---
+name: Check for large files
+
+on: [pull_request]
+
+jobs:
+  large-files:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          # The check diffs against the merge base, which needs real history.
+          # The default shallow clone has none and the check would compare
+          # against nothing.
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      # No dependencies: the script is stdlib and git only, so this job stays
+      # fast and cannot be blocked by an unrelated install failure.
+      - name: Check added and modified files
+        run: |
+          python scripts/check_large_files.py \
+            --base "origin/${{ github.base_ref }}" \
+            --head "${{ github.event.pull_request.head.sha }}"
