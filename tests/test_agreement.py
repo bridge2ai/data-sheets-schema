@@ -464,7 +464,14 @@ class TestJudgeCache(unittest.TestCase):
             self.assertEqual(judge.legacy_hits, 1)
 
 
-@unittest.skipUnless((CACHE / "matrix.json").exists(), "agreement cache not present")
+#: Every file this class reads. Guarding on one of them and reading three meant
+#: a partial cache errored instead of skipping, so "the cache is not here" and
+#: "the cache is here and wrong" arrived as the same red result (#260).
+CACHE_FILES = ("matrix.json", "CHORUS_v2_rows.json", "embeddings.jsonl")
+
+
+@unittest.skipUnless(all((CACHE / f).exists() for f in CACHE_FILES),
+                     "agreement cache not present")
 class TestPublishedMatrixReproduces(unittest.TestCase):
     """The note's tables must come back out of the committed cache.
 
@@ -552,9 +559,15 @@ class TestPublishedMatrixReproduces(unittest.TestCase):
         mean_eq, mean_df = sum(eq) / len(eq), sum(df) / len(df)
         self.assertAlmostEqual(mean_eq, 0.92272, places=4)
         self.assertAlmostEqual(mean_df, 0.91442, places=4)
-        self.assertLess(mean_eq - mean_df, 0.01,
-                        "if the gap ever exceeds a point, the proxy is worth "
-                        "revisiting and this test should be the thing that says so")
+        # abs(), because the claim is that the classes do not *separate*, and
+        # separation is a magnitude. A signed test would pass on mean_eq=0.40
+        # against mean_df=0.92 — the proxy discriminating strongly, merely
+        # inverted — which is the single most interesting result this test
+        # could meet and the one it would otherwise be blind to (#259).
+        self.assertLess(abs(mean_eq - mean_df), 0.01,
+                        "if the gap ever exceeds a point in either direction, "
+                        "the proxy is worth revisiting and this test should be "
+                        "the thing that says so")
 
     def test_the_tracked_vector_cache_stays_small(self):
         """#247: growth here is permanent, so it should be a decision.
