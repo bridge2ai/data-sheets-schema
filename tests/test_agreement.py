@@ -317,6 +317,32 @@ class TestPrefixOnlyEmbedding(unittest.TestCase):
         self.assertIsNone(rows[0].similarity)
         self.assertEqual(emb.prefix_only_skips, 1)
 
+    def test_a_bare_embedder_needs_no_bookkeeping_attributes(self):
+        """#254: the failure path must not demand more than the happy path.
+
+        `embedder` is an injection point. Requiring it to pre-declare counters
+        meant the only code that touched them — the error handlers — raised
+        AttributeError on any object that had not anticipated them.
+        """
+        class Bare:
+            def similarity(self, texts):
+                raise PrefixOnlyEmbedding("kept only the head")
+
+        emb = Bare()
+        rows = compare_records({"r1": {"a": "x"}, "r2": {"a": "y"}}, embedder=emb)
+        self.assertIsNone(rows[0].similarity)
+        self.assertEqual(emb.prefix_only_skips, 1)
+
+    def test_a_bare_embedder_survives_an_offline_miss_too(self):
+        class Bare:
+            def similarity(self, texts):
+                raise OfflineCacheMiss("not cached")
+
+        emb = Bare()
+        rows = compare_records({"r1": {"a": "x"}, "r2": {"a": "y"}}, embedder=emb)
+        self.assertIsNone(rows[0].similarity)
+        self.assertEqual(emb.offline_misses, 1)
+
 
 class TestJudgeCache(unittest.TestCase):
     def test_identical_values_never_reach_the_judge(self):
@@ -496,6 +522,20 @@ class TestPublishedMatrixReproduces(unittest.TestCase):
         for key, cell in published.items():
             self.assertEqual(cell["unjudged"], 0, key)
             self.assertIsNotNone(cell["rate"], key)
+
+    def test_missing_similarity_is_counted_rather_than_left_to_be_inferred(self):
+        """#253 — only CHORUS v2 was ever embedded; the rest must say so."""
+        published = json.loads((CACHE / "matrix.json").read_text())
+        for key, cell in published.items():
+            self.assertIn("similarity_absent", cell)
+        chorus_v2 = next(c for k, c in published.items()
+                         if k.startswith("v2") and k.endswith("CHORUS"))
+        self.assertEqual(chorus_v2["similarity_absent"], 0,
+                         "CHORUS v2 is the one cell with a full similarity column")
+        others = [c["similarity_absent"] for k, c in published.items()
+                  if not (k.startswith("v2") and k.endswith("CHORUS"))]
+        self.assertTrue(all(n > 0 for n in others),
+                        "every other cell is missing similarity and must record it")
 
 
 class TestUnjudgedSlotsAreNotCountedAsDisagreement(unittest.TestCase):

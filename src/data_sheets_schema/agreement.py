@@ -92,6 +92,13 @@ LEGACY_JUDGE_VALUE_CHARS = 4000
 # is roughly 2000 tokens of English prose, just under the ceiling, so ordinary
 # values never reach the server's silent cut in the first place.
 EMBED_VALUE_CHARS = 8000
+
+# Hitting this exactly is inference, not observation: a complete 2048-token
+# value and a cut one report the same `prompt_tokens`, so both are refused
+# (#255). That is the right way round to be wrong — refusing a good vector
+# costs a null, accepting a cut one costs a cosine of 1.0 between values that
+# contradict each other. On this corpus it cannot arise; the 17 values over the
+# ceiling all clear it comfortably.
 EMBED_MAX_TOKENS = 2048
 
 EQUIVALENCE_SYSTEM = """\
@@ -279,8 +286,9 @@ class Embedder:
         self._save(key, vec, tokens, prefix_only)
         if prefix_only:
             raise PrefixOnlyEmbedding(
-                f"endpoint kept only {tokens} tokens of a "
-                f"{len(sent)}-character value; the rest was discarded")
+                f"{len(sent)}-character value came back at the "
+                f"{EMBED_MAX_TOKENS}-token ceiling, so the tail was almost "
+                "certainly discarded; refusing to build a cosine on it")
         return vec
 
     def similarity(self, texts: list[str]) -> float:
@@ -481,6 +489,17 @@ def _parse_verdict(text: str) -> tuple[bool, str]:
     raise ValueError(f"no verdict in response: {text.strip()[:160]!r}")
 
 
+def _bump(obj: Any, name: str) -> None:
+    """Increment a counter on an object we do not own.
+
+    `embedder` is an injection point, so it may be any object with
+    `.similarity()`. Requiring it to pre-declare bookkeeping attributes would
+    mean the failure paths — the ones that only run when something has already
+    gone wrong — demand more of the caller than the happy path does (#254).
+    """
+    setattr(obj, name, getattr(obj, name, 0) + 1)
+
+
 def compare_records(records: dict[str, dict[str, Any]], *,
                     embedder: Embedder | None = None,
                     judge: EquivalenceJudge | None = None,
@@ -508,13 +527,13 @@ def compare_records(records: dict[str, dict[str, Any]], *,
                 # leave it null and count it. Refusing to pay is the point of
                 # offline mode; refusing to report the judgement too would not
                 # be. Only the CHORUS v2 embeddings were ever computed.
-                embedder.offline_misses += 1
+                _bump(embedder, "offline_misses")
             except PrefixOnlyEmbedding:
                 # The endpoint kept only the head of a value here, so any
                 # cosine would describe prefixes rather than values. Null is
                 # the honest entry; the judge's verdict for this slot stands
                 # on its own and is unaffected.
-                embedder.prefix_only_skips += 1
+                _bump(embedder, "prefix_only_skips")
         if judge is not None:
             row.equivalent, row.reason = judge(slot, values)
         out.append(row)
@@ -599,6 +618,11 @@ def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
                                                for r in result),
                 "rate": (n_equiv / len(result)
                          if result and len(judged) == len(result) else None),
+                # A null similarity has three quite different causes — never
+                # asked, not cached offline, or refused as prefix-only — and
+                # an artifact that shows none of them reads as full coverage
+                # when it is not (#253).
+                "similarity_absent": sum(r.similarity is None for r in result),
                 "judge_model": judge.model,
                 "judge_chars": JUDGE_VALUE_CHARS,
                 "replicates": sorted(records),
@@ -641,6 +665,11 @@ def main(argv: list[str] | None = None) -> int:
               f"= {rate}  (exact {cell['exact']}, "
               f"truncated {cell['truncated']}, "
               f"would-have-been {cell['truncated_at_legacy_cap']})")
+    absent = sum(c["similarity_absent"] for c in matrix.values())
+    if a.embed and absent:
+        print(f"similarity absent for {absent} slots "
+              f"(offline or refused as prefix-only); see rows files",
+              file=sys.stderr)
     if a.write:
         a.cache_dir.mkdir(parents=True, exist_ok=True)
         (a.cache_dir / "matrix.json").write_text(
