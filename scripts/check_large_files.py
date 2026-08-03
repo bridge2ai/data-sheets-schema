@@ -44,16 +44,55 @@ def _git(*args: str) -> str:
                           check=True).stdout
 
 
+class BaseRefMissing(RuntimeError):
+    """The branch being merged into is not in this clone."""
+
+
 def changed_files(base: str, head: str = "HEAD") -> list[str]:
     """Paths added or modified between the merge base and `head`.
 
     Merge base rather than the base tip: a long-running branch should be judged
     on what it adds, not on files someone else committed to main meanwhile.
     Deletions are excluded — removing a large file is the fix, not the problem.
+
+    Renames need `--raw` rather than `--diff-filter=AM`. A true rename adds no
+    bytes to history, so skipping it is right; but git *detects* renames by
+    similarity, so deleting `old.zip` and adding a 60%-similar `new.zip` is
+    reported as R and would slip past unweighed even though the destination is
+    a genuinely new blob (#267). Comparing the two blob hashes tells the cases
+    apart: identical means the object already exists, different means it does
+    not.
     """
-    merge_base = _git("merge-base", base, head).strip()
-    out = _git("diff", "--name-only", "--diff-filter=AM", "-z", merge_base, head)
-    return [p for p in out.split("\0") if p]
+    try:
+        merge_base = _git("merge-base", base, head).strip()
+    except subprocess.CalledProcessError:
+        raise BaseRefMissing(base) from None
+
+    out = _git("diff", "--raw", "-z", "--find-renames", merge_base, head)
+    fields = out.split("\0")
+    paths: list[str] = []
+    i = 0
+    while i < len(fields):
+        meta = fields[i]
+        if not meta.startswith(":"):
+            i += 1
+            continue
+        # :<srcmode> <dstmode> <srcsha> <dstsha> <status>
+        parts = meta.split()
+        src_sha, dst_sha, status = parts[2], parts[3], parts[4]
+        code = status[0]
+        if code in ("R", "C"):
+            # Rename/copy: two paths follow, source then destination.
+            dst = fields[i + 2] if i + 2 < len(fields) else None
+            if dst and src_sha != dst_sha:
+                paths.append(dst)
+            i += 3
+            continue
+        dst = fields[i + 1] if i + 1 < len(fields) else None
+        if code in ("A", "M") and dst:
+            paths.append(dst)
+        i += 2
+    return paths
 
 
 def blob_size(path: str, ref: str = "HEAD") -> int:
@@ -94,7 +133,19 @@ def main(argv: list[str] | None = None) -> int:
                    help=f"bytes (default: {MAX_BYTES})")
     a = p.parse_args(argv)
 
-    paths = changed_files(a.base, a.head)
+    try:
+        paths = changed_files(a.base, a.head)
+    except BaseRefMissing as missing:
+        # Fails closed, but say why. Reading a traceback to discover that a ref
+        # was never fetched is a bad way to spend a CI cycle (#266).
+        print(f"base ref {str(missing)!r} not found in this clone.\n"
+              "The check diffs against the merge base, so the base branch has "
+              "to be present:\n"
+              "  - in CI, give actions/checkout `fetch-depth: 0`\n"
+              "  - locally, `git fetch origin <branch>` first",
+              file=sys.stderr)
+        return 1
+
     if not paths:
         print("no files added or modified; nothing to check")
         return 0

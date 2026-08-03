@@ -156,6 +156,68 @@ class TestAgainstARealRepository(unittest.TestCase):
         finally:
             os.chdir(cwd)
 
+    def test_a_true_rename_adds_no_bytes_and_is_ignored(self):
+        """The blob already exists in history; moving it costs nothing (#267).
+
+        The file has to pre-exist on `main` for this to be a rename at all. A
+        file created on the branch and then moved is, relative to the merge
+        base, simply a new file at its final path — and flagging that is right,
+        because its blob is new to history either way.
+        """
+        import os
+        self._git("checkout", "-q", "main")
+        (self.repo / "big.bin").write_text("x" * 9000)
+        self._git("add", "-A")
+        self._git("commit", "-qm", "big.bin lands on main")
+        self._git("checkout", "-q", "feature")
+        self._git("merge", "-q", "main", "-m", "merge")
+        self._git("mv", "big.bin", "moved.bin")
+        self._git("commit", "-qm", "rename")
+        cwd = os.getcwd()
+        os.chdir(self.repo)
+        try:
+            self.assertNotIn("moved.bin", changed_files("main"),
+                             "moving an existing blob adds nothing to history")
+        finally:
+            os.chdir(cwd)
+
+    def test_a_rename_detected_new_blob_is_still_weighed(self):
+        """Similar-but-not-identical is a new object wearing a rename's clothes.
+
+        git reports >50%-similar delete+add as R. The destination is a blob
+        that does not exist in history yet, so it has to be sized.
+        """
+        import os
+        self._commit("orig.bin", "y" * 9000)
+        (self.repo / "orig.bin").unlink()
+        (self.repo / "copy.bin").write_text("y" * 8000 + "DIFFERENT" * 100)
+        self._git("add", "-A")
+        self._git("commit", "-qm", "delete one, add a similar one")
+        cwd = os.getcwd()
+        os.chdir(self.repo)
+        try:
+            self.assertIn("copy.bin", changed_files("main"),
+                          "a rename-detected new blob must not slip past")
+        finally:
+            os.chdir(cwd)
+
+    def test_a_missing_base_ref_fails_closed_with_a_readable_message(self):
+        """#266: exit non-zero, and say what to do about it."""
+        import io
+        import os
+        from contextlib import redirect_stderr
+        cwd = os.getcwd()
+        os.chdir(self.repo)
+        try:
+            err = io.StringIO()
+            with redirect_stderr(err):
+                code = main(["--base", "origin/does-not-exist"])
+            self.assertEqual(code, 1, "must fail closed, never wave the PR through")
+            self.assertIn("not found", err.getvalue())
+            self.assertIn("fetch-depth", err.getvalue())
+        finally:
+            os.chdir(cwd)
+
 
 if __name__ == "__main__":
     unittest.main()
