@@ -6,18 +6,21 @@ where a miss raises instead of billing.
 """
 
 import json
+import os
 import tempfile
 import unittest
 import unittest.mock
 from pathlib import Path
 
 from data_sheets_schema.agreement import (
+    EMBED_MAX_TOKENS,
     EQUIVALENCE_SYSTEM,
     JUDGE_VALUE_CHARS,
     LEGACY_JUDGE_VALUE_CHARS,
     Embedder,
     EquivalenceJudge,
     OfflineCacheMiss,
+    PrefixOnlyEmbedding,
     SlotAgreement,
     _digest,
     _judge_key,
@@ -234,6 +237,85 @@ class TestEmbedderSimilarity(unittest.TestCase):
     def test_offline_miss_raises_rather_than_billing(self):
         with self.assertRaises(OfflineCacheMiss):
             Embedder(cache_path=None, offline=True).similarity(["a", "b"])
+
+    def test_vectors_are_keyed_on_the_text_actually_sent(self):
+        """#251, mirroring #244: the cap must be part of the cache identity."""
+        long_a = "x" * 200
+        long_b = "x" * 190 + "y" * 10
+        with unittest.mock.patch("data_sheets_schema.agreement.EMBED_VALUE_CHARS", 100):
+            k_a, k_b = _digest(long_a[:100]), _digest(long_b[:100])
+        self.assertEqual(k_a, k_b, "identical prefixes collapse under a narrow cap")
+        with unittest.mock.patch("data_sheets_schema.agreement.EMBED_VALUE_CHARS", 500):
+            self.assertNotEqual(_digest(long_a[:500]), _digest(long_b[:500]))
+
+
+class TestPrefixOnlyEmbedding(unittest.TestCase):
+    """The endpoint truncates at 2048 tokens and answers 200 (#251).
+
+    Measured against the live endpoint: a 30,000-character input returns
+    `prompt_tokens: 2048`, and two values differing only past that point come
+    back byte-identical at cosine 1.000000, where the same contradiction scores
+    0.843 when it fits. These tests pin the client's response to that, without
+    calling it.
+    """
+
+    def _embedder_returning(self, tokens):
+        emb = Embedder(cache_path=None)
+        payload = {"data": [{"embedding": [1.0, 0.0]}],
+                   "usage": {"prompt_tokens": tokens}}
+
+        class FakeResp:
+            def __enter__(self_inner):
+                return self_inner
+
+            def __exit__(self_inner, *a):
+                return False
+
+            def read(self_inner):
+                return json.dumps(payload).encode()
+
+        return emb, FakeResp
+
+    def test_a_truncated_vector_refuses_to_be_used(self):
+        emb, resp = self._embedder_returning(EMBED_MAX_TOKENS)
+        with unittest.mock.patch.dict(os.environ, {"CBORG_API_KEY": "x"}), \
+             unittest.mock.patch("urllib.request.urlopen", return_value=resp()), \
+             unittest.mock.patch("json.load",
+                                 lambda f: json.loads(f.read().decode())):
+            with self.assertRaises(PrefixOnlyEmbedding):
+                emb.vector("a very long value")
+
+    def test_a_vector_inside_the_ceiling_is_returned(self):
+        emb, resp = self._embedder_returning(EMBED_MAX_TOKENS - 1)
+        with unittest.mock.patch.dict(os.environ, {"CBORG_API_KEY": "x"}), \
+             unittest.mock.patch("urllib.request.urlopen", return_value=resp()), \
+             unittest.mock.patch("json.load",
+                                 lambda f: json.loads(f.read().decode())):
+            self.assertEqual(emb.vector("short value"), [1.0, 0.0])
+
+    def test_a_cached_prefix_only_vector_still_refuses(self):
+        """The refusal must survive a round trip through the cache file."""
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "e.jsonl"
+            emb = Embedder(cache_path=path)
+            emb._save(_digest("sent"), [1.0, 0.0], EMBED_MAX_TOKENS, True)
+            reloaded = Embedder(cache_path=path, offline=True)
+            with self.assertRaises(PrefixOnlyEmbedding):
+                reloaded.vector("sent")
+
+    def test_compare_records_records_null_rather_than_a_prefix_cosine(self):
+        """A cosine over prefixes must not be filed as a cosine over values."""
+        class PrefixEmbedder:
+            offline_misses = 0
+            prefix_only_skips = 0
+
+            def similarity(self, texts):
+                raise PrefixOnlyEmbedding("kept only the head")
+
+        emb = PrefixEmbedder()
+        rows = compare_records({"r1": {"a": "x"}, "r2": {"a": "y"}}, embedder=emb)
+        self.assertIsNone(rows[0].similarity)
+        self.assertEqual(emb.prefix_only_skips, 1)
 
 
 class TestJudgeCache(unittest.TestCase):

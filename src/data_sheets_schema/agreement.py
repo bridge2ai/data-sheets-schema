@@ -74,11 +74,25 @@ EMBED_MODEL = "lbl/nomic-embed-text"
 JUDGE_VALUE_CHARS = 100_000
 LEGACY_JUDGE_VALUE_CHARS = 4000
 
-# The embedder's cap is a property of the model, not a choice: nomic-embed-text
-# takes 8192 tokens, and 8000 characters is comfortably inside that. Raising it
-# would not buy a better proxy — the proxy was shown not to discriminate at all
-# here (0.923 against 0.914), so the ceiling on its input is not what limits it.
+# The embedding endpoint truncates at 2048 tokens and does not say so. Measured,
+# not read off a datasheet — nomic-embed-text is documented at 8192 tokens, and
+# this endpoint is not that. A 30,000-character input returns HTTP 200 with
+# `prompt_tokens: 2048`, and two values differing only past that point come back
+# byte-identical, cosine 1.000000. The same contradiction scores 0.843 when it
+# fits. So the endpoint will quietly report perfect agreement between two values
+# that contradict each other, if the contradiction is late enough.
+#
+# A character cap cannot prevent this: characters per token vary with the text,
+# so no fixed number is safe for all input. What is reliable is the response
+# itself — `usage.prompt_tokens` hitting the ceiling means the tail was
+# discarded, and that is recorded per vector and refuses to produce a
+# similarity. See `notes/replicate_agreement_2026-08-02.md` and issue #251.
+#
+# 8000 characters remains as a client-side bound, now with an honest reason: it
+# is roughly 2000 tokens of English prose, just under the ceiling, so ordinary
+# values never reach the server's silent cut in the first place.
 EMBED_VALUE_CHARS = 8000
+EMBED_MAX_TOKENS = 2048
 
 EQUIVALENCE_SYSTEM = """\
 You judge whether two or more values placed in the SAME field of a dataset
@@ -172,8 +186,17 @@ class OfflineCacheMiss(RuntimeError):
     """
 
 
+class PrefixOnlyEmbedding(RuntimeError):
+    """The endpoint kept only the start of this value.
+
+    Raised rather than returned because the failure mode is not a degraded
+    number, it is a maximally wrong one: two values agreeing on their prefix and
+    contradicting each other afterwards score exactly 1.0.
+    """
+
+
 class Embedder:
-    """Cosine similarity between rendered values, memoised on the text."""
+    """Cosine similarity between rendered values, memoised on the text sent."""
 
     def __init__(self, model: str = EMBED_MODEL, cache_path: Path | None = None,
                  offline: bool = False):
@@ -181,8 +204,10 @@ class Embedder:
         self.cache_path = Path(cache_path) if cache_path else None
         self.offline = offline
         self._vecs: dict[str, list[float]] = {}
+        self._prefix_only: set[str] = set()
         self.calls = 0
         self.offline_misses = 0
+        self.prefix_only_skips = 0
         self._load()
 
     def _load(self) -> None:
@@ -192,25 +217,44 @@ class Embedder:
             if not line.strip():
                 continue
             e = json.loads(line)
-            if e.get("model") == self.model:
-                self._vecs[e["key"]] = e["vector"]
+            if e.get("model") != self.model:
+                continue
+            self._vecs[e["key"]] = e["vector"]
+            # Records written before the ceiling was known carry no token count.
+            # Treating unknown as "not truncated" is safe here and only here:
+            # every cached vector is a CHORUS v2 value, the longest of which is
+            # 2,876 characters — roughly 719 tokens, a third of the ceiling.
+            if e.get("prefix_only"):
+                self._prefix_only.add(e["key"])
 
-    def _save(self, key: str, vector: list[float]) -> None:
+    def _save(self, key: str, vector: list[float], tokens: int | None,
+              prefix_only: bool) -> None:
         if not self.cache_path:
             return
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
         with self.cache_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"model": self.model, "key": key,
+                                 "chars": EMBED_VALUE_CHARS, "tokens": tokens,
+                                 "prefix_only": prefix_only,
                                  "vector": vector}) + "\n")
 
     def vector(self, text: str) -> list[float]:
-        key = _digest(text)
+        """The vector for `text`, keyed on the text actually sent.
+
+        Keyed on what is sent rather than on the value it came from, for the
+        same reason as the judge (#244): otherwise changing the cap re-serves
+        every vector computed under the old one. Nothing in the current cache
+        moves, because no cached value is anywhere near the cap.
+        """
+        sent = text[:EMBED_VALUE_CHARS]
+        key = _digest(sent)
         if key in self._vecs:
+            if key in self._prefix_only:
+                raise PrefixOnlyEmbedding(f"cached vector for {key} is a prefix")
             return self._vecs[key]
         if self.offline:
             raise OfflineCacheMiss(f"no cached embedding for {key}")
-        body = json.dumps({"model": self.model,
-                           "input": [text[:EMBED_VALUE_CHARS]]}).encode()
+        body = json.dumps({"model": self.model, "input": [sent]}).encode()
         try:
             token = os.environ["CBORG_API_KEY"]
         except KeyError:
@@ -222,14 +266,30 @@ class Embedder:
             headers={"Authorization": f"Bearer {token}",
                      "Content-Type": "application/json"})
         with urllib.request.urlopen(req, timeout=120) as resp:
-            vec = json.load(resp)["data"][0]["embedding"]
+            payload = json.load(resp)
+        vec = payload["data"][0]["embedding"]
+        tokens = (payload.get("usage") or {}).get("prompt_tokens")
+        # The endpoint's own count is the only honest signal that the tail was
+        # dropped: it answers 200 either way and says nothing about the cut.
+        prefix_only = tokens is not None and tokens >= EMBED_MAX_TOKENS
         self.calls += 1
         self._vecs[key] = vec
-        self._save(key, vec)
+        if prefix_only:
+            self._prefix_only.add(key)
+        self._save(key, vec, tokens, prefix_only)
+        if prefix_only:
+            raise PrefixOnlyEmbedding(
+                f"endpoint kept only {tokens} tokens of a "
+                f"{len(sent)}-character value; the rest was discarded")
         return vec
 
     def similarity(self, texts: list[str]) -> float:
-        """Mean pairwise cosine. 1.0 for a single distinct text."""
+        """Mean pairwise cosine. 1.0 for a single distinct text.
+
+        Raises `PrefixOnlyEmbedding` if any input was cut by the endpoint, since
+        the resulting cosine would be a statement about prefixes wearing the
+        costume of a statement about values.
+        """
         distinct = list(dict.fromkeys(texts))
         if len(distinct) < 2:
             return 1.0
@@ -449,6 +509,12 @@ def compare_records(records: dict[str, dict[str, Any]], *,
                 # offline mode; refusing to report the judgement too would not
                 # be. Only the CHORUS v2 embeddings were ever computed.
                 embedder.offline_misses += 1
+            except PrefixOnlyEmbedding:
+                # The endpoint kept only the head of a value here, so any
+                # cosine would describe prefixes rather than values. Null is
+                # the honest entry; the judge's verdict for this slot stands
+                # on its own and is unaffected.
+                embedder.prefix_only_skips += 1
         if judge is not None:
             row.equivalent, row.reason = judge(slot, values)
         out.append(row)

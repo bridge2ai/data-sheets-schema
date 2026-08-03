@@ -72,6 +72,38 @@ Sanity check that the embeddings themselves are fine: on a hand-built pair they
 score 0.865 for a paraphrase against 0.564 for unrelated text. The failure is
 specific to this population, not the model.
 
+### The endpoint also truncates at 2048 tokens, and does not say so
+
+Found while fixing #251, and independent of the topic-collapse result above.
+
+`lbl/nomic-embed-text` through CBORG accepts a 30,000-character input, returns
+**HTTP 200**, and reports `prompt_tokens: 2048`. Everything past that is
+discarded silently. nomic-embed-text is documented at 8192 tokens; this endpoint
+is not that, which is why the number here is measured rather than cited.
+
+The consequence is not a slightly worse number, it is a maximally wrong one:
+
+| | cosine |
+|---|---|
+| two values contradicting each other **past** the ceiling | **1.000000** (byte-identical vectors) |
+| the same contradiction, short enough to fit | 0.843 |
+
+So the endpoint will report perfect agreement between two values that contradict
+each other, provided the contradiction is late enough.
+
+**The published table is unaffected.** The only cell ever embedded is CHORUS v2,
+whose longest value is 2,876 characters — roughly 719 tokens, about a third of
+the ceiling. Verified live: at the 8000-character client cap the endpoint
+returns a genuine vector for the corpus's longest value; raised to 40,000 it
+truncates and the client now refuses.
+
+Across the whole corpus 17 of 1619 values would exceed the ceiling. None are
+cached, because none are in CHORUS v2 — so this is a trap for reviving the
+measure, not a defect in the result reported here. A character cap cannot fix
+it, since characters per token vary with the text; what the client can do is
+read `usage.prompt_tokens` back and refuse to build a cosine on a prefix, which
+is what it now does.
+
 ## Cost
 
 44 judge calls and 127 embeddings for one project's three replicates. One call
@@ -214,5 +246,12 @@ Filed rather than fixed, so they are on the record either way:
 - **#247** — `embeddings.jsonl` is 1.4 MB of vectors for a proxy this note
   concludes does not work. Kept, because it is what makes `--offline --embed`
   reproduce the 0.923 / 0.914 table rather than print nulls.
+- **#251 — fixed.** Vectors are keyed on the text sent rather than the value it
+  came from, mirroring #244, and the client now reads `usage.prompt_tokens` back
+  and refuses to build a cosine on a prefix. Nothing was orphaned: no cached
+  vector was ever truncated, so every key was already the key of what was sent.
+  The reason originally given for deferring this — that fixing it would orphan
+  the cache — was simply wrong, and checking cost less than the sentence
+  asserting it.
 - **Not filed, but true**: the judge is the same model family that wrote the
   records. See the provenance section.
