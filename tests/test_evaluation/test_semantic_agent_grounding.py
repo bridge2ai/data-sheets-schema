@@ -76,19 +76,44 @@ class TestSemanticAgentsGroundProgramInference(unittest.TestCase):
             with self.subTest(agent=name):
                 self.assertIsNone(pattern.search(self._text(name)))
 
+class TestThePremise(unittest.TestCase):
+    """Both halves of it, from the schema rather than from a file path.
+
+    An earlier version read `D4D_Core.yaml` for the absence of `program`. That
+    is the wrong scope — records are evaluated as `Dataset`, which draws from
+    the whole schema, and the fields the prompt *may* use are declared
+    elsewhere: `publisher` and `keywords` in `D4D_Base_import.yaml`, `funders`
+    as an attribute rather than a top-level slot. A `program` slot added to any
+    other module would have left it green (#285).
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        from data_sheets_schema import schema_digest
+        cls.slots = {s.name for s in schema_digest.build("Dataset").slots}
+
     def test_no_program_or_project_slot_exists_to_ground_on(self):
-        """The premise. If the schema ever gains one, this test should fail and
-        the prompts can stop working around its absence."""
-        schema = (Path(__file__).resolve().parents[2] / "src"
-                  / "data_sheets_schema" / "schema" / "D4D_Core.yaml")
-        if not schema.exists():
-            self.skipTest("D4D_Core.yaml not present")
-        text = schema.read_text(encoding="utf-8")
-        for slot in ("\n  program:", "\n  project:"):
-            self.assertNotIn(
-                slot, text,
-                "D4D_Core now declares a program/project slot — the semantic "
-                "agents can ground on it directly and this workaround should go")
+        """If the schema gains one, this fails and the workaround can go."""
+        for name in ("program", "project", "program_of_origin"):
+            with self.subTest(slot=name):
+                self.assertNotIn(
+                    name, self.slots,
+                    f"Dataset now declares `{name}` — the semantic agents can "
+                    "ground on it directly and this workaround should go")
+
+    def test_the_fields_the_prompt_may_use_actually_exist(self):
+        """The other half, and #162 in miniature.
+
+        A test that stops a prompt grounding on nothing should check that what
+        it grounds on is something. `funders` is an attribute, so a naive grep
+        for a top-level slot reports it missing when it is not.
+        """
+        for name in GROUNDING_FIELDS:
+            with self.subTest(slot=name):
+                self.assertIn(
+                    name, self.slots,
+                    f"the prompts tell the agent to infer from `{name}`, which "
+                    "is not a Dataset slot — the same defect as #162")
 
 
 if __name__ == "__main__":
