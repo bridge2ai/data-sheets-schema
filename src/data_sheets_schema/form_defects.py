@@ -102,8 +102,21 @@ class FormFailure:
 
 
 def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
-    """Every cached fitness judgement whose failure class is `form`."""
+    """Every cached fitness judgement whose failure class is `form`.
+
+    Refuses a set spanning more than one fitness rubric or model. Those fields
+    exist on every entry precisely so a judgement is self-describing, and this
+    module's premise is that `FITNESS_SYSTEM` will not be edited *because*
+    editing it invalidates the cache. If it ever is — or the fitness judge runs
+    under a second model — pooling both here would mix two instruments while
+    the sub-type table looked exactly the same (#277).
+
+    Loudly rather than by filtering: a silent skip could halve the corpus and
+    still produce a plausible table.
+    """
     out: list[FormFailure] = []
+    rubrics: set[str] = set()
+    models: set[str] = set()
     for path in sorted(cache_dir.glob("*_fitness.jsonl")):
         project = path.name.replace("_fitness.jsonl", "")
         for line in path.read_text(encoding="utf-8").splitlines():
@@ -112,10 +125,18 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
             entry = json.loads(line)
             if entry.get("failure") != "form":
                 continue
+            rubrics.add(entry.get("rubric", ""))
+            models.add(entry.get("model", ""))
             out.append(FormFailure(
                 project=project, slot=entry["slot"], value=entry["value"],
                 reason=entry.get("reason", ""),
                 fitness=float(entry.get("fitness", 0.0))))
+    for name, seen in (("rubric", rubrics), ("model", models)):
+        if len(seen) > 1:
+            raise ValueError(
+                f"form failures span {len(seen)} fitness {name}s: "
+                f"{sorted(seen)}. These are different instruments and their "
+                "failures cannot be pooled into one sub-type table.")
     return out
 
 

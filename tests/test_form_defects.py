@@ -138,6 +138,41 @@ class TestAgainstTheRealCache(unittest.TestCase):
         self.assertEqual(counts, {"v1": 50, "v2": 56})
         self.assertEqual(len(failures), 106)
 
+    def test_the_real_cache_holds_exactly_one_rubric_and_model(self):
+        """#277 — the premise this module rests on, asserted.
+
+        The whole design is "do not re-judge fitness, classify what is already
+        cached". That is only sound while the cache holds one instrument.
+        """
+        import json
+        rubrics, models = set(), set()
+        for path in JUDGEMENTS.glob("*_fitness.jsonl"):
+            for line in path.read_text().splitlines():
+                if not line.strip():
+                    continue
+                entry = json.loads(line)
+                if entry.get("failure") == "form":
+                    rubrics.add(entry.get("rubric", ""))
+                    models.add(entry.get("model", ""))
+        self.assertEqual(len(rubrics), 1, f"fitness rubrics: {sorted(rubrics)}")
+        self.assertEqual(len(models), 1, f"fitness models: {sorted(models)}")
+
+    def test_a_mixed_cache_is_refused_rather_than_pooled(self):
+        """Loudly, not by filtering — a silent skip could halve the corpus
+        and still produce a plausible table."""
+        import json
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "X_fitness.jsonl"
+            base = {"failure": "form", "slot": "creators", "value": "[]",
+                    "reason": "r", "fitness": 0.5, "model": "m"}
+            path.write_text(
+                json.dumps({**base, "rubric": "a"}) + "\n"
+                + json.dumps({**base, "rubric": "b"}) + "\n")
+            with self.assertRaises(ValueError) as ctx:
+                load_form_failures(Path(d))
+            self.assertIn("rubric", str(ctx.exception))
+
     def test_no_value_reaches_the_truncation_cap(self):
         from data_sheets_schema.form_defects import VALUE_CHARS
         longest = max(len(f.value) for f in load_form_failures(JUDGEMENTS))
