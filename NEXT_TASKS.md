@@ -17,7 +17,14 @@ deleted — `d4d runs restore --execute` reverses it.
 
 **Corpus: partial 23 → 0.**
 
-| level | count |
+The level table below is **as of 2026-07-29** and has not been re-derived; the
+corpus has since grown to 123 runs, so treat the counts as a record of that day
+rather than of today. What still holds, re-checked 2026-08-03:
+`d4d runs archive --unattested` reports *"No unattestable runs found — every run
+in the corpus can be placed."* The property the section is about survived the
+growth even though its arithmetic is stale (#270).
+
+| level (2026-07-29) | count |
 |---|---|
 | live | 49 |
 | attested | 33 |
@@ -55,7 +62,13 @@ enforce a rule that postdates them.
 - A label with no parseable date is **subject** to the rule. Exempting anything
   unparseable is an exemption taken by accident.
 
-Corpus today: 98 runs checked, 0 subject to the requirement, 0 failing.
+Corpus on 2026-08-03: **131 runs checked, 49 subject to the requirement, 0
+failing** (`d4d runs check --strict`, exit 0).
+
+The "0 subject" recorded here on 2026-07-29 was true only because no run had yet
+crossed the 2026-07-30 cutoff — it described a gate that had never fired. Every
+run made since is subject to it and every one satisfies it, which is the
+evidence this section was written to be able to claim.
 
 ---
 
@@ -119,15 +132,29 @@ Small and self-contained.
 
 ---
 
-## 5. Complete the generic arm (#166) — half done
+## 5. Complete the generic arm (#166) — done
 
-`crate_only` **has run** under the generic prompt: three replicates under
-`2026-07-31_claude-opus-5-api-generic_rep{1,2,3}`, in both
-`claudecode_agent_crate_only` and `..._core`.
+Both missing arms ran on 2026-07-31 under
+`2026-07-31_claude-opus-5-api-generic_rep{1,2,3}`:
 
-`de_novo` has not, and there is no `de_novo` method directory at all — so this
-is a first run, not a top-up. Until it exists, generic-vs-tuned comparisons
-still cover fewer arms than the design claims. #166 stays open for that half.
+| arm | method | replicates | projects |
+|---|---|---|---|
+| baseline | `claudecode_agent` | 3 | AI_READI, CHORUS, CM4AI, VOICE |
+| **crate_only** | `claudecode_agent_crate_only` | 3 | CHORUS, CM4AI, VOICE |
+| **de_novo** | `claudecode_agent_crate` | 3 | CHORUS, CM4AI, VOICE |
+| healthsheet_only | `claudecode_agent_healthsheet` | 3 | AI_READI |
+
+#166 asked for `de_novo` and `crate_only` on CHORUS/CM4AI/VOICE at three
+replicates. Both are there with exactly those project sets, so it is complete.
+
+The AI_READI split is the design, not a gap: AI_READI has a healthsheet and no
+crate, so it is covered by `baseline` + `healthsheet_only` while the other three
+get `crate_only` + `de_novo`. Each project gets the arms its input type supports.
+
+⚠️ **`de_novo` is an arm, not a directory name** — its method directory is
+`claudecode_agent_crate`. `ls data/d4d_concatenated/*de_novo*` returns nothing
+and means nothing. Ask `d4d runs list --arm de_novo`. An earlier version of this
+section concluded the arm had never run on exactly that mistake (#269).
 
 ---
 
