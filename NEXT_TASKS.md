@@ -325,13 +325,20 @@ broke nothing; the four-project list in 26 files is prose, not logic.
   - the enum values: `References` normalises to `references` on the write path,
     and `related_to` still fails, which is correct — it names nothing in the
     vocabulary;
-  - the inline object in `target_dataset`: with the pediatric dataset now its
-    own datasheet, VOICE should reference it by DOI, which is a string and
-    validates.
+  - the inline object in `target_dataset`: once the pediatric dataset **is** its
+    own record, VOICE references it by DOI, which is a string and validates.
+    Note the tense — it is a registered project with a bundle, not yet a
+    datasheet, and this bullet is what defers generating it. **Order matters:
+    the pediatric record has to exist before VOICE can point at it.** Generate
+    `VOICE_PEDIATRIC` first, or a regenerated VOICE either inlines the dataset
+    again and fails again, or omits the relationship entirely.
 
   So a v3 run is the first opportunity for VOICE to have a canonical record at
-  all. Until then VOICE has none, and any "canonical record per project" count
-  is three of four.
+  all, and only if the two are generated in that order.
+
+  On canonical counts: there are **none at all** on `main` today — the three
+  marks for AI_READI, CHORUS and CM4AI are in #293, still open. Once that lands
+  it is three of four, and VOICE is the gap.
 - **Whether `VOICE` becomes `VOICE_main` — decided: no.** Attempted and reverted.
   The path moves were clean (567 files, no clashes), but the content rewrite
   broke attestation two ways that no amount of care avoids: record bodies carry
