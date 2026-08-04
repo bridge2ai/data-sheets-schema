@@ -1,4 +1,16 @@
-# Three-way evaluation comparison — 2026-07-22
+# [HISTORICAL] Three-way evaluation comparison — 2026-07-22
+
+> ⚠️ **Historical. These figures score records the study has since excluded.**
+>
+> The inputs were `data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/`
+> and the flat pre-run-label layout. That label was archived as **unattestable**
+> by `d4d runs archive --unattested` — its bundles were first committed after the
+> runs executed, so the bytes those runs consumed cannot be verified. The records
+> survive at `data/ATTIC/d4d_concatenated_archived/claudecode_agent/2026-04-10_sonnet-4.6/`,
+> so every number here remains traceable to its input; none of it describes the
+> current corpus.
+>
+> Do not cite these as current results. See #286.
 
 Same D4D inputs (2026-04-10 Sonnet 4.6 full + core outputs), three generations of
 evaluation, per rubric:

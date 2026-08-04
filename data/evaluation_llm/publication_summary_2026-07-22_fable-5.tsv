@@ -1,3 +1,6 @@
+# HISTORICAL — these rows score the archived 2026-04-10_sonnet-4.6 label, which was set aside as unattestable.
+# The records survive under data/ATTIC/, so the numbers remain traceable; none of them describe the current corpus.
+# rubric20 rows are additionally computed against a maximum of 84 where the rubric defines 88. Do not cite as current. See #286, #275.
 run_date	rubric	project	d4d_variant	method	total_points	max_points	percentage	normalized_percentage
 2026-07-22	rubric10	AI_READI	full	claudecode_agent	46	50	92.00	
 2026-07-22	rubric10	AI_READI	core	claudecode_agent_core	46	50	92.00	

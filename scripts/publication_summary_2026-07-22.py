@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """Deterministic publication summary for the 2026-07-22 D4D eval rerun.
 
+HISTORICAL. The evaluations this reads scored
+`data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/` and the flat
+pre-run-label layout. That label was archived as unattestable, so the summaries
+this produces describe records the study has excluded (#286). Re-pointing it at
+the current corpus means re-running the evaluations, not re-running this.
+
 Reads every *_evaluation.json under
 data/evaluation_llm/{rubric10,rubric20,rubric10_semantic,rubric20_semantic}/concatenated/
 (skipping _archive_* subdirs) and emits:
@@ -168,6 +174,12 @@ def publication_tsv(all_scores):
     return "\n".join("\t".join(r) for r in rows) + "\n"
 
 
+TSV_BANNER = (
+    "# HISTORICAL — these rows score the archived 2026-04-10_sonnet-4.6 label,\n"
+    "# set aside as unattestable. Do not cite as current. See #286.\n"
+)
+
+
 def main():
     all_scores = {r: load_rubric(r) for r in RUBRICS}
 
@@ -181,7 +193,10 @@ def main():
     md_path = EVAL / f"publication_summary_{RUN_DATE}.md"
     tsv_path = EVAL / f"publication_summary_{RUN_DATE}.tsv"
     md_path.write_text(publication_table(all_scores))
-    tsv_path.write_text(publication_tsv(all_scores))
+    # The banner goes in the .tsv as well as the .md. A person opens the
+    # .md and sees it; a script reads the .tsv, and a script is the more
+    # likely consumer of a long-format table (#305).
+    tsv_path.write_text(TSV_BANNER + publication_tsv(all_scores))
     print(f"wrote {md_path}\nwrote {tsv_path}")
 
     print("\n=== Headline table ===")
