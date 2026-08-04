@@ -197,7 +197,12 @@ def validation_status(method: str, label: str, project: str,
         return UNVERIFIED
     try:
         data = yaml.safe_load(rec.read_text(encoding="utf-8")) or {}
-    except Exception:
+    except Exception:                                        # noqa: BLE001
+        return UNVERIFIED
+    # A record that parses but is not a mapping is as unusable as one that does
+    # not parse, and treating it as usable crashed here with a bare
+    # AttributeError from `.get` (#311).
+    if not isinstance(data, dict):
         return UNVERIFIED
     v = data.get("validation")
     if not isinstance(v, dict) or "passed" not in v:
@@ -504,7 +509,18 @@ def _prov(method: str, label: str, project: str,
     import yaml as _yaml
     from data_sheets_schema.provenance import record_path_for
     p = record_path_for(project, method, label, concat_dir)
-    return (_yaml.safe_load(p.read_text(encoding="utf-8")) or {}) if p.exists() else None
+    if not p.exists():
+        return None
+    try:
+        data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    except (_yaml.YAMLError, OSError, UnicodeDecodeError):
+        return None
+    # The annotation said `dict | None` and the code returned whatever YAML
+    # parsed, so a list-shaped record reached callers that call `.get` on it and
+    # crashed with a bare AttributeError pointing at this module rather than at
+    # the file (#311). `check_provenance` already treats a non-mapping as "no
+    # usable record"; this is the same read without the same care.
+    return data if isinstance(data, dict) else None
 
 
 def _verify(entry: dict) -> bool | None:
