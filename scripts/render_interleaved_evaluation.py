@@ -26,6 +26,7 @@ import sys
 from pathlib import Path
 
 import yaml
+from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
 
 
 SEVERITY_COLOR = {
@@ -346,7 +347,7 @@ def render_html(yaml_data: dict, r10: dict, r20: dict, source_paths: dict) -> st
     r20_total = (r20.get("overall_score") or {}).get("total_points") or \
                 (r20.get("summary_scores") or {}).get("total_score")
     r20_max = (r20.get("overall_score") or {}).get("max_points") or \
-              (r20.get("summary_scores") or {}).get("total_max_score") or 84
+              (r20.get("summary_scores") or {}).get("total_max_score") or RUBRIC20_MAX_SCORE
     r20_pct = (r20.get("overall_score") or {}).get("percentage") or \
               (r20.get("summary_scores") or {}).get("overall_percentage")
 

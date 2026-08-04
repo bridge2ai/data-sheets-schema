@@ -16,6 +16,7 @@ To validate evaluations against the schema, run:
 import json
 from pathlib import Path
 from datetime import datetime
+from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
 
 
 def generate_evaluation_html(eval_data, output_path):
@@ -32,7 +33,7 @@ def generate_evaluation_html(eval_data, output_path):
     # Extract overall score
     overall = eval_data.get("overall_score", {})
     total_score = overall.get("total_points", 0)
-    max_score = overall.get("max_points", 84)
+    max_score = overall.get("max_points", RUBRIC20_MAX_SCORE)
     percentage = overall.get("percentage", 0)
 
     # Calculate grade

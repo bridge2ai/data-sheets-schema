@@ -111,6 +111,79 @@ class TestDeclaredMaximumMatchesTheQuestions(unittest.TestCase):
         self.assertIsNotNone(m, "the rubric should declare its total")
         self.assertEqual(int(m.group(1)), computed)
 
+    def test_the_constant_matches_the_questions_too(self):
+        """The third place the total lived, and the one nothing checked.
+
+        `RUBRIC20_MAX_SCORE` said 84 while the questions defined 88. It was
+        exported and imported by nothing, so no test and no caller ever
+        contradicted it — dead and wrong, which is the combination the next
+        person needing a denominator picks up.
+        """
+        from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
+        ev = D4DEvaluator(str(RUBRIC10_PATH), str(RUBRIC20_PATH))
+        qs = ev.rubric20["d4d_evaluation_rubric"]["rubric"]
+        computed = (sum(5 for q in qs if q.get("score_type") != "pass_fail")
+                    + sum(1 for q in qs if q.get("score_type") == "pass_fail"))
+        self.assertEqual(RUBRIC20_MAX_SCORE, computed)
+
+    def test_the_question_count_matches_too(self):
+        from data_sheets_schema.constants import RUBRIC20_MAX_QUESTIONS
+        ev = D4DEvaluator(str(RUBRIC10_PATH), str(RUBRIC20_PATH))
+        qs = ev.rubric20["d4d_evaluation_rubric"]["rubric"]
+        self.assertEqual(RUBRIC20_MAX_QUESTIONS, len(qs))
+
+    def test_no_rubric20_path_hardcodes_a_denominator(self):
+        """A literal denominator is one nothing can keep in sync.
+
+        The total lived in seven places. Fixing the two obvious ones left the
+        LLM path — including the judge's own prompt, which handed the model a
+        `"max_points": 84` template to copy — still reporting out of 84 while
+        the presence path used 88, so the two were never comparable.
+
+        Unrelated 84s exist (an 84-question healthsheet, a percentage), so this
+        matches the shapes a denominator takes rather than the digits.
+        """
+        from pathlib import Path
+        patterns = ("/84", "* 84", ", 84)", "or 84", "= 84", '"max_points": 84')
+        offenders = []
+        for path in (list(Path("scripts").glob("*rubric20*.py"))
+                     + list(Path("scripts").glob("*evaluation*.py"))
+                     + [Path("src/download/prompts/rubric20_system_prompt.md")]):
+            for n, line in enumerate(path.read_text().splitlines(), 1):
+                if line.lstrip().startswith("#"):
+                    continue
+                if any(p in line for p in patterns):
+                    offenders.append(f"{path}:{n}: {line.strip()[:70]}")
+        self.assertEqual(offenders, [])
+
+    def test_the_judge_template_carries_no_literal_category_max(self):
+        """#276: the example is what the model imitates.
+
+        `"category_max": 24` was Structural Completeness's maximum under the
+        old 16-numeric-plus-4-pass/fail decomposition — the arithmetic that
+        produced 84. Removing it from the prose while leaving it in the
+        template is the weaker half of the fix.
+        """
+        from pathlib import Path
+        text = Path("src/download/prompts/rubric20_system_prompt.md").read_text()
+        import re
+        literals = re.findall(r'"category_max"\s*:\s*(\d+)', text)
+        self.assertEqual(literals, [])
+
+    def test_the_summary_table_reads_each_records_own_denominator(self):
+        """#274: 167 committed records were scored against 84.
+
+        A constant printed beside an average of those is confidently wrong
+        where the record's own value is merely stale, and pooling records with
+        different denominators is not meaningful at all.
+        """
+        from pathlib import Path
+        script = Path("scripts/summarize_rubric20_results.py").read_text()
+        self.assertIn("MIXED(", script,
+                      "a set spanning two denominators must say so")
+        self.assertNotIn("{avg_score:.1f}/{RUBRIC20_MAX_SCORE}", script,
+                         "the table must not hardcode a denominator")
+
 
 if __name__ == "__main__":
     unittest.main()

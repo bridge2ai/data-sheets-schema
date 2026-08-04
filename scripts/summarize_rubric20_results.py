@@ -19,6 +19,10 @@ from pathlib import Path
 from typing import List, Dict
 from datetime import datetime
 
+# The denominator lives with the rubric, not as a literal in a report.
+# It was 84 here while the questions defined 88 (#270 thread).
+from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
+
 # Base directory
 BASE_DIR = Path(__file__).parent.parent
 EVAL_DIR = BASE_DIR / "data" / "evaluation_llm" / "rubric20"
@@ -74,7 +78,7 @@ def create_csv_summary(results: List[Dict]):
 
             overall = result.get('overall_score', {})
             total_score = overall.get('total_points', 0)
-            max_score = overall.get('max_points', 84)
+            max_score = overall.get('max_points', RUBRIC20_MAX_SCORE)
             percentage = overall.get('percentage', 0)
 
             # Category scores
@@ -139,7 +143,7 @@ def create_markdown_table(results: List[Dict]):
                 result = table_data[key][0]  # Should only be one per key
                 overall = result.get('overall_score', {})
                 total = overall.get('total_points', 0)
-                max_pts = overall.get('max_points', 84)
+                max_pts = overall.get('max_points', RUBRIC20_MAX_SCORE)
                 pct = overall.get('percentage', 0)
 
                 # Category scores
@@ -178,12 +182,24 @@ def create_markdown_table(results: List[Dict]):
                 avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in results_list) / file_count
                 avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in results_list) / file_count
 
+                # The records carry their own denominator, and 167 committed
+                # rubric20 evaluations were scored against 84 (#275). Printing a
+                # constant beside an average of those is confidently wrong where
+                # printing the record's own value is merely stale. Pooling
+                # records with different denominators is not meaningful at all,
+                # so say so rather than average across them (#274).
+                maxima = {r.get('overall_score', {}).get('max_points',
+                                                         RUBRIC20_MAX_SCORE)
+                          for r in results_list}
+                denom = (str(maxima.pop()) if len(maxima) == 1
+                         else "MIXED(" + "/".join(str(m) for m in sorted(maxima)) + ")")
+
                 avg_cat1 = sum(r.get('categories', {}).get('Structural Completeness', {}).get('category_score', 0) for r in results_list) / file_count
                 avg_cat2 = sum(r.get('categories', {}).get('Metadata Quality & Content', {}).get('category_score', 0) for r in results_list) / file_count
                 avg_cat3 = sum(r.get('categories', {}).get('Technical Documentation', {}).get('category_score', 0) for r in results_list) / file_count
                 avg_cat4 = sum(r.get('categories', {}).get('FAIRness & Accessibility', {}).get('category_score', 0) for r in results_list) / file_count
 
-                md += f"| {project} | {method} | {avg_score:.1f}/84 | {file_count} | {avg_pct:.1f}% | {avg_cat1:.1f} | {avg_cat2:.1f} | {avg_cat3:.1f} | {avg_cat4:.1f} |\n"
+                md += f"| {project} | {method} | {avg_score:.1f}/{denom} | {file_count} | {avg_pct:.1f}% | {avg_cat1:.1f} | {avg_cat2:.1f} | {avg_cat3:.1f} | {avg_cat4:.1f} |\n"
 
     # Top performers
     md += "\n## Top Performing D4Ds (Score >= 80%)\n\n"
@@ -198,7 +214,7 @@ def create_markdown_table(results: List[Dict]):
         method = result.get('method', 'unknown')
         eval_type = result.get('evaluation_type', 'unknown')
         overall = result.get('overall_score', {})
-        score_str = f"{overall.get('total_points', 0)}/{overall.get('max_points', 84)} ({overall.get('percentage', 0):.1f}%)"
+        score_str = f"{overall.get('total_points', 0)}/{overall.get('max_points', RUBRIC20_MAX_SCORE)} ({overall.get('percentage', 0):.1f}%)"
         file_name = Path(result.get('d4d_file', '')).name
 
         md += f"| {project} | {method} | {eval_type} | {score_str} | {file_name} |\n"
@@ -225,10 +241,10 @@ def create_detailed_report(results: List[Dict]):
 
     # Calculate overall statistics
     total_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in results)
-    max_possible = len(results) * 84
+    max_possible = len(results) * RUBRIC20_MAX_SCORE
     avg_percentage = sum(r.get('overall_score', {}).get('percentage', 0) for r in results) / len(results) if results else 0
 
-    report += f"- **Average Score:** {total_score / len(results):.1f}/84 ({avg_percentage:.1f}%)\n"
+    report += f"- **Average Score:** {total_score / len(results):.1f}/{RUBRIC20_MAX_SCORE} ({avg_percentage:.1f}%)\n"
     report += f"- **Best Score:** {max(results, key=lambda x: x.get('overall_score', {}).get('percentage', 0)).get('overall_score', {}).get('percentage', 0):.1f}%\n" if results else ""
     report += f"- **Worst Score:** {min(results, key=lambda x: x.get('overall_score', {}).get('percentage', 0)).get('overall_score', {}).get('percentage', 0):.1f}%\n" if results else ""
 
@@ -242,7 +258,7 @@ def create_detailed_report(results: List[Dict]):
             avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in method_results) / len(method_results)
             report += f"### {method}\n"
             report += f"- Files evaluated: {len(method_results)}\n"
-            report += f"- Average score: {avg_score:.1f}/84 ({avg_pct:.1f}%)\n\n"
+            report += f"- Average score: {avg_score:.1f}/{denom} ({avg_pct:.1f}%)\n\n"
 
     # Project comparison
     report += "\n## Project Comparison\n\n"
@@ -254,7 +270,7 @@ def create_detailed_report(results: List[Dict]):
             avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in project_results) / len(project_results)
             report += f"### {project}\n"
             report += f"- Files evaluated: {len(project_results)}\n"
-            report += f"- Average score: {avg_score:.1f}/84 ({avg_pct:.1f}%)\n\n"
+            report += f"- Average score: {avg_score:.1f}/{denom} ({avg_pct:.1f}%)\n\n"
 
     # Category analysis
     report += "\n## Category Performance\n\n"
