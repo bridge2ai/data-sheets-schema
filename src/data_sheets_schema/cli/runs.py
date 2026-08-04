@@ -1,6 +1,8 @@
 """Run-tracking commands for the D4D CLI."""
 
 import click
+
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -716,6 +718,23 @@ def select_cmd(method, project, config, allow_unverified, execute):
         raise click.ClickException(
             f"{winner[0]} has no provenance record at {prov_path}; a canonical "
             f"record must be attributable.")
+    # One canonical record per project, enforced by clearing rather than by
+    # hoping. `select` used to leave a previous mark in place, so re-selecting
+    # under a new config left the project with two and the resolver had to
+    # refuse (#308). Superseding is what re-selection means.
+    superseded = []
+    for other in sorted(CONCAT_DIR.rglob(f"{project}_provenance.yaml")):
+        if other == prov_path:
+            continue
+        try:
+            prior = _yaml.safe_load(other.read_text(encoding="utf-8")) or {}
+        except Exception:                                    # noqa: BLE001
+            continue
+        if not isinstance(prior, dict) or "canonical" not in prior:
+            continue
+        superseded.append(((prior.get("run") or {}).get("label") or str(other),
+                           other, prior))
+
     data = _yaml.safe_load(prov_path.read_text(encoding="utf-8")) or {}
     data["canonical"] = {
         "criterion": "full and core both validate against the current schema, then most slots, then lowest label",
@@ -726,7 +745,26 @@ def select_cmd(method, project, config, allow_unverified, execute):
         "margin_over_runner_up": margin,
         "selected_by": "d4d runs select",
     }
+    # Named, not merely removed. A mark that vanishes leaves no trace of what
+    # the project used to ship, and "this replaced that" is the fact a reader
+    # of either record wants.
+    if superseded:
+        data["canonical"]["supersedes"] = [lab for lab, _p, _d in superseded]
     ProvenanceRecord(data=data).write(prov_path)
+
+    for label, other, prior in superseded:
+        prior.pop("canonical", None)
+        prior["canonical_superseded_by"] = {
+            "label": winner[0],
+            "at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "by": "d4d runs select",
+        }
+        ProvenanceRecord(data=prior).write(other)
+        click.echo(f"   cleared the prior mark on {label}")
+
     click.echo(f"\nRecorded in {prov_path}")
+    if superseded:
+        click.echo(f"Superseded {len(superseded)} earlier mark(s); each records "
+                   "what replaced it.")
     click.echo("All replicates kept — this marks one, it does not move or "
                "delete anything.")

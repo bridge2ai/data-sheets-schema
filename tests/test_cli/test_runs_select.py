@@ -143,6 +143,54 @@ class TestSelect(unittest.TestCase):
             self.assertTrue((self.method / label / "P_d4d.yaml").exists(),
                             f"{label} disappeared")
 
+    def test_reselecting_clears_the_prior_mark(self):
+        """One canonical record per project, enforced rather than hoped for.
+
+        `select` used to leave a previous mark in place, so re-selecting under
+        a new config left the project with two and the resolver had to refuse
+        (#308). The v3 run re-selects, so this is the next step rather than a
+        hypothetical.
+        """
+        self._run("--execute")                     # cfg_rep2 wins
+        first = yaml.safe_load((self.root / "claudecode_agent_core" /
+                                "cfg_rep2" / "P_provenance.yaml").read_text())
+        self.assertIn("canonical", first)
+
+        # rep2 now invalid, so a different replicate wins the re-selection
+        self._run("--execute", valid={"cfg_rep2": False})
+        second = yaml.safe_load((self.root / "claudecode_agent_core" /
+                                 "cfg_rep3" / "P_provenance.yaml").read_text())
+        self.assertIn("canonical", second)
+
+        cleared = yaml.safe_load((self.root / "claudecode_agent_core" /
+                                  "cfg_rep2" / "P_provenance.yaml").read_text())
+        self.assertNotIn("canonical", cleared,
+                         "the prior mark must not survive a re-selection")
+
+    def test_both_records_state_the_relationship(self):
+        """Named, not merely removed.
+
+        A mark that vanishes leaves no trace of what the project used to ship,
+        and "this replaced that" is the fact a reader of either record wants.
+        """
+        self._run("--execute")
+        self._run("--execute", valid={"cfg_rep2": False})
+
+        winner = yaml.safe_load((self.root / "claudecode_agent_core" /
+                                 "cfg_rep3" / "P_provenance.yaml").read_text())
+        self.assertEqual(winner["canonical"].get("supersedes"), ["cfg_rep2"])
+
+        loser = yaml.safe_load((self.root / "claudecode_agent_core" /
+                                "cfg_rep2" / "P_provenance.yaml").read_text())
+        self.assertEqual(loser["canonical_superseded_by"]["label"], "cfg_rep3")
+        self.assertIn("at", loser["canonical_superseded_by"])
+
+    def test_a_first_selection_supersedes_nothing(self):
+        self._run("--execute")
+        first = yaml.safe_load((self.root / "claudecode_agent_core" /
+                                "cfg_rep2" / "P_provenance.yaml").read_text())
+        self.assertNotIn("supersedes", first["canonical"])
+
     def test_one_replicate_is_not_a_selection(self):
         import shutil
         for label in ("cfg_rep2", "cfg_rep3"):
