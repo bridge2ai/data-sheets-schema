@@ -569,24 +569,6 @@ class TestPublishedMatrixReproduces(unittest.TestCase):
                         "the proxy is worth revisiting and this test should be "
                         "the thing that says so")
 
-    def test_the_tracked_vector_cache_stays_small(self):
-        """#247: growth here is permanent, so it should be a decision.
-
-        Nothing in git can be un-committed — this blob is already in history at
-        587 KB packed, so deleting it from HEAD would reclaim exactly nothing.
-        What *is* still available is refusing to add ten times more of it. The
-        cache holds 136 vectors, one per distinct CHORUS v2 value; embedding
-        the whole corpus would be 1439 vectors, about 14 MB, tracked forever.
-
-        If you meant to do that, raise this bound in the same commit and say
-        why. The number existing is the point; its exact value is not.
-        """
-        path = CACHE / "embeddings.jsonl"
-        vectors = sum(1 for line in path.read_text().splitlines() if line.strip())
-        self.assertLessEqual(vectors, 200,
-                             f"{vectors} vectors tracked; a full-corpus sweep "
-                             "is ~1439 and adds ~14 MB to history permanently")
-
     def test_missing_similarity_is_counted_rather_than_left_to_be_inferred(self):
         """#253 — only CHORUS v2 was ever embedded; the rest must say so."""
         published = json.loads((CACHE / "matrix.json").read_text())
@@ -621,6 +603,74 @@ class TestUnjudgedSlotsAreNotCountedAsDisagreement(unittest.TestCase):
         # The bug: bool() folds the unjudged row into the disagreements.
         self.assertEqual(sum(bool(r.equivalent) for r in rows), 1)
         self.assertEqual(len(rows) - sum(bool(r.equivalent) for r in rows), 2)
+
+
+#: Records allowed in each tracked cache, and why that number.
+#:
+#: Every cache, not just the expensive one. #247 bounded `embeddings.jsonl`
+#: because a vector is 10 KB; #258 pointed out that leaving the other four
+#: unbounded made the guard look like an oversight rather than a judgement.
+#: A verdict is ~395 bytes, so the caches differ in cost per record by 26x —
+#: which is a reason for different *numbers*, not for guarding one and not the
+#: others.
+#:
+#: Raising a bound is fine. Raise it in the same commit as the growth and say
+#: why. The bound existing is the point; its exact value is not.
+CACHE_BUDGET = {
+    # 136 today, one vector per distinct CHORUS v2 value. A full-corpus sweep
+    # is 1439 vectors and ~14 MB, permanently, in one command.
+    "embeddings.jsonl": 200,
+    # 99-154 today. A full re-judge of one project across both configs, plus
+    # the retained legacy-keyed verdicts, lands around 300.
+    "AI_READI_equivalence.jsonl": 400,
+    "CHORUS_equivalence.jsonl": 400,
+    "CM4AI_equivalence.jsonl": 400,
+    "VOICE_equivalence.jsonl": 400,
+}
+
+#: Bytes for the whole directory, which is what actually enters history. Record
+#: counts alone would miss a cache that grew by getting fatter rather than
+#: longer — a larger embedding dimension, or a judge that started returning
+#: paragraphs. 1.78 MB today.
+CACHE_TOTAL_BYTES = 4 * 1024 * 1024
+
+
+@unittest.skipUnless(CACHE.exists(), "agreement cache not present")
+class TestCacheGrowthIsBounded(unittest.TestCase):
+    """These files are committed, so growth in them is permanent (#247, #258).
+
+    Not a style rule. A 3.19 GB archive reached this repository's object store
+    once already, and the only reason it was recoverable is that it never got
+    as far as a commit.
+    """
+
+    def test_every_jsonl_cache_is_within_its_budget(self):
+        for name, budget in CACHE_BUDGET.items():
+            path = CACHE / name
+            if not path.exists():
+                continue
+            n = sum(1 for line in path.read_text().splitlines() if line.strip())
+            self.assertLessEqual(
+                n, budget,
+                f"{name}: {n} records against a budget of {budget}")
+
+    def test_no_jsonl_cache_is_unbudgeted(self):
+        """The gap #258 was actually about.
+
+        A new cache file appearing with no entry here would be unguarded, and
+        nothing would say so — which is how the verdict caches ended up outside
+        the first version of this guard.
+        """
+        found = {p.name for p in CACHE.glob("*.jsonl")}
+        self.assertEqual(found - set(CACHE_BUDGET), set(),
+                         "a tracked cache exists with no budget; add one")
+
+    def test_the_directory_as_a_whole_stays_bounded(self):
+        total = sum(p.stat().st_size for p in CACHE.iterdir() if p.is_file())
+        self.assertLessEqual(
+            total, CACHE_TOTAL_BYTES,
+            f"agreement_cache is {total / 1048576:.2f} MB against a "
+            f"{CACHE_TOTAL_BYTES / 1048576:.0f} MB budget")
 
 
 if __name__ == "__main__":
