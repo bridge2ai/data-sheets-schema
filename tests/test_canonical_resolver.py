@@ -16,7 +16,7 @@ from click.testing import CliRunner
 
 from data_sheets_schema.cli.runs import runs
 from data_sheets_schema.constants import PROJECTS
-from data_sheets_schema.runs import canonical_runs
+from data_sheets_schema.runs import AmbiguousCanonical, canonical_runs
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -96,6 +96,68 @@ class TestTheCommand(unittest.TestCase):
         """Silence would read as "no canonical needed" rather than "none exists"."""
         out = self._run("--project", "VOICE")
         self.assertNotEqual(out.exit_code, 0)
+
+
+class TestAmbiguity(unittest.TestCase):
+    """#308: `select --execute` does not clear a prior mark.
+
+    The plan in NEXT_TASKS §9 re-selects canonical after a v3 run, which leaves
+    every project carrying two marks. Keeping whichever label sorted last would
+    have made the answer a property of the string — and v3 labels sort after v2
+    ones, so it would have been right by accident until a label broke the
+    pattern.
+    """
+
+    def _corpus(self, tmp, labels):
+        import yaml
+        root = Path(tmp)
+        for label in labels:
+            d = root / "m_core" / label
+            d.mkdir(parents=True)
+            (d / "CHORUS_provenance.yaml").write_text(yaml.safe_dump({
+                "run": {"project": "CHORUS", "label": label, "method": "m"},
+                "canonical": {"criterion": "c", "selected_from": [{}, {}, {}]},
+                "outputs": {"full": {"path": f"{label}/f.yaml"},
+                            "core": {"path": f"{label}/c.yaml"}}}))
+        return root
+
+    def test_two_marks_for_one_project_raise(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._corpus(tmp, ["2026-01-01_config-a_rep1",
+                                      "2026-09-09_config-b_rep1"])
+            with self.assertRaises(AmbiguousCanonical) as ctx:
+                canonical_runs(concat_dir=root)
+            self.assertIn("CHORUS", str(ctx.exception))
+            self.assertIn("config-a", str(ctx.exception))
+            self.assertIn("config-b", str(ctx.exception))
+
+    def test_a_config_filter_resolves_the_ambiguity(self):
+        """--config already narrows correctly; it just had to be required."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._corpus(tmp, ["2026-01-01_config-a_rep1",
+                                      "2026-09-09_config-b_rep1"])
+            got = canonical_runs(concat_dir=root, config="2026-09-09")
+            self.assertEqual(got["CHORUS"]["label"], "2026-09-09_config-b_rep1")
+
+    def test_one_mark_does_not_raise(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._corpus(tmp, ["2026-01-01_config-a_rep1"])
+            self.assertEqual(list(canonical_runs(concat_dir=root)), ["CHORUS"])
+
+    def test_the_command_names_the_configurations(self):
+        """The user cannot pass --config without knowing what to pass."""
+        import tempfile
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._corpus(tmp, ["2026-01-01_config-a_rep1",
+                                      "2026-09-09_config-b_rep1"])
+            with mock.patch("data_sheets_schema.runs.CONCAT_DIR", root):
+                out = CliRunner().invoke(runs, ["canonical"])
+        self.assertEqual(out.exit_code, 2)
+        self.assertIn("config-a", out.output)
 
 
 if __name__ == "__main__":

@@ -225,7 +225,11 @@ def validation_status(method: str, label: str, project: str,
     return VALID if v["passed"] else INVALID
 
 
-def canonical_runs(concat_dir: Path = CONCAT_DIR,
+class AmbiguousCanonical(RuntimeError):
+    """A project carries a canonical mark under more than one configuration."""
+
+
+def canonical_runs(concat_dir: Path | None = None,
                    config: str | None = None) -> dict[str, dict]:
     """project -> the run marked canonical for it, and where its records are.
 
@@ -239,7 +243,12 @@ def canonical_runs(concat_dir: Path = CONCAT_DIR,
     case: no replicate validates (#292), so it has no canonical record and any
     count over projects is three of four, not four.
     """
+    # Resolved at call time, not bound as a default. A default argument freezes
+    # CONCAT_DIR at import, which makes the corpus root unpatchable and the
+    # function untestable against a fixture.
+    concat_dir = Path(concat_dir) if concat_dir is not None else CONCAT_DIR
     out: dict[str, dict] = {}
+    seen: dict[str, list[str]] = {}
     for prov in sorted(concat_dir.rglob("*_provenance.yaml")):
         try:
             data = yaml.safe_load(prov.read_text(encoding="utf-8")) or {}
@@ -254,6 +263,7 @@ def canonical_runs(concat_dir: Path = CONCAT_DIR,
         if config and not label.startswith(config):
             continue
         outputs = data.get("outputs") or {}
+        seen.setdefault(project, []).append(label)
         out[project] = {
             "project": project,
             "label": label,
@@ -264,6 +274,17 @@ def canonical_runs(concat_dir: Path = CONCAT_DIR,
             "core": (outputs.get("core") or {}).get("path"),
             "provenance": str(prov),
         }
+    # Refuse rather than pick. `select --execute` does not clear a previous
+    # mark, so re-selecting under a new config leaves a project with two — and
+    # the dict build above would keep whichever label sorted last, which is a
+    # property of the string rather than of anything meaningful (#308).
+    ambiguous = {p: labels for p, labels in seen.items() if len(labels) > 1}
+    if ambiguous:
+        detail = "; ".join(f"{p}: {', '.join(sorted(labels))}"
+                           for p, labels in sorted(ambiguous.items()))
+        raise AmbiguousCanonical(
+            f"more than one canonical record per project ({detail}). "
+            "Pass config= to say which configuration you mean.")
     return dict(sorted(out.items()))
 
 

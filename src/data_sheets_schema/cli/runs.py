@@ -152,14 +152,20 @@ def canonical_cmd(project, config, paths_only, missing):
     replicate validates (#292).
     """
     from data_sheets_schema.constants import PROJECTS
-    from data_sheets_schema.runs import canonical_runs
+    from data_sheets_schema.runs import AmbiguousCanonical, canonical_runs
 
-    found = canonical_runs(config=config)
+    try:
+        found = canonical_runs(config=config)
+    except AmbiguousCanonical as exc:
+        # Naming the configurations, because --config is the answer and the
+        # user cannot pass it without knowing what to pass (#308).
+        click.echo(f"{exc}", err=True)
+        raise SystemExit(2)
     if project:
         found = {k: v for k, v in found.items() if k == project}
 
     if missing:
-        gap = [p for p in PROJECTS if p not in canonical_runs(config=config)]
+        gap = [p for p in PROJECTS if p not in found]
         if project:
             gap = [p for p in gap if p == project]
         for p in gap:
