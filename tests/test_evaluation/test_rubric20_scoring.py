@@ -156,6 +156,34 @@ class TestDeclaredMaximumMatchesTheQuestions(unittest.TestCase):
                     offenders.append(f"{path}:{n}: {line.strip()[:70]}")
         self.assertEqual(offenders, [])
 
+    def test_the_judge_template_carries_no_literal_category_max(self):
+        """#276: the example is what the model imitates.
+
+        `"category_max": 24` was Structural Completeness's maximum under the
+        old 16-numeric-plus-4-pass/fail decomposition — the arithmetic that
+        produced 84. Removing it from the prose while leaving it in the
+        template is the weaker half of the fix.
+        """
+        from pathlib import Path
+        text = Path("src/download/prompts/rubric20_system_prompt.md").read_text()
+        import re
+        literals = re.findall(r'"category_max"\s*:\s*(\d+)', text)
+        self.assertEqual(literals, [])
+
+    def test_the_summary_table_reads_each_records_own_denominator(self):
+        """#274: 167 committed records were scored against 84.
+
+        A constant printed beside an average of those is confidently wrong
+        where the record's own value is merely stale, and pooling records with
+        different denominators is not meaningful at all.
+        """
+        from pathlib import Path
+        script = Path("scripts/summarize_rubric20_results.py").read_text()
+        self.assertIn("MIXED(", script,
+                      "a set spanning two denominators must say so")
+        self.assertNotIn("{avg_score:.1f}/{RUBRIC20_MAX_SCORE}", script,
+                         "the table must not hardcode a denominator")
+
 
 if __name__ == "__main__":
     unittest.main()

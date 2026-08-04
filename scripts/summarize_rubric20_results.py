@@ -182,12 +182,24 @@ def create_markdown_table(results: List[Dict]):
                 avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in results_list) / file_count
                 avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in results_list) / file_count
 
+                # The records carry their own denominator, and 167 committed
+                # rubric20 evaluations were scored against 84 (#275). Printing a
+                # constant beside an average of those is confidently wrong where
+                # printing the record's own value is merely stale. Pooling
+                # records with different denominators is not meaningful at all,
+                # so say so rather than average across them (#274).
+                maxima = {r.get('overall_score', {}).get('max_points',
+                                                         RUBRIC20_MAX_SCORE)
+                          for r in results_list}
+                denom = (str(maxima.pop()) if len(maxima) == 1
+                         else "MIXED(" + "/".join(str(m) for m in sorted(maxima)) + ")")
+
                 avg_cat1 = sum(r.get('categories', {}).get('Structural Completeness', {}).get('category_score', 0) for r in results_list) / file_count
                 avg_cat2 = sum(r.get('categories', {}).get('Metadata Quality & Content', {}).get('category_score', 0) for r in results_list) / file_count
                 avg_cat3 = sum(r.get('categories', {}).get('Technical Documentation', {}).get('category_score', 0) for r in results_list) / file_count
                 avg_cat4 = sum(r.get('categories', {}).get('FAIRness & Accessibility', {}).get('category_score', 0) for r in results_list) / file_count
 
-                md += f"| {project} | {method} | {avg_score:.1f}/{RUBRIC20_MAX_SCORE} | {file_count} | {avg_pct:.1f}% | {avg_cat1:.1f} | {avg_cat2:.1f} | {avg_cat3:.1f} | {avg_cat4:.1f} |\n"
+                md += f"| {project} | {method} | {avg_score:.1f}/{denom} | {file_count} | {avg_pct:.1f}% | {avg_cat1:.1f} | {avg_cat2:.1f} | {avg_cat3:.1f} | {avg_cat4:.1f} |\n"
 
     # Top performers
     md += "\n## Top Performing D4Ds (Score >= 80%)\n\n"
@@ -246,7 +258,7 @@ def create_detailed_report(results: List[Dict]):
             avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in method_results) / len(method_results)
             report += f"### {method}\n"
             report += f"- Files evaluated: {len(method_results)}\n"
-            report += f"- Average score: {avg_score:.1f}/{RUBRIC20_MAX_SCORE} ({avg_pct:.1f}%)\n\n"
+            report += f"- Average score: {avg_score:.1f}/{denom} ({avg_pct:.1f}%)\n\n"
 
     # Project comparison
     report += "\n## Project Comparison\n\n"
@@ -258,7 +270,7 @@ def create_detailed_report(results: List[Dict]):
             avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in project_results) / len(project_results)
             report += f"### {project}\n"
             report += f"- Files evaluated: {len(project_results)}\n"
-            report += f"- Average score: {avg_score:.1f}/{RUBRIC20_MAX_SCORE} ({avg_pct:.1f}%)\n\n"
+            report += f"- Average score: {avg_score:.1f}/{denom} ({avg_pct:.1f}%)\n\n"
 
     # Category analysis
     report += "\n## Category Performance\n\n"

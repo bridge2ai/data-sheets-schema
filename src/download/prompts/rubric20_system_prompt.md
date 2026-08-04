@@ -81,7 +81,7 @@ Return your evaluation as a **JSON object** with this EXACT structure:
         ...
       ],
       "category_score": 23,
-      "category_max": 24
+      "category_max": "<sum of this category's question maxima>"
     },
     ...
   ],
