@@ -412,7 +412,7 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
 
     **`d4d runs select` is the recommended way to get a shippable record, and
     it argues against this command.** Replicates state different facts on
-    47-62% of the slots they share, so a union splices across referents — one
+    47-63% of the slots they share, so a union splices across referents — one
     replicate's participant count beside another's DOI — to gain 1-5 slots.
     That objection is about coherence and this command's case is about
     coverage; both are true, and the two commands existing without naming each
@@ -540,7 +540,7 @@ def _validates(record: Path) -> tuple[bool, str]:
 def select_cmd(method, project, config, allow_unverified, execute):
     """Mark one replicate canonical, keeping all of them.
 
-    Selection, not merging. Replicates state different facts on **47-62% of the
+    Selection, not merging. Replicates state different facts on **47-63% of the
     slots they share** (generic-v2, judged equivalence), for a coverage gain
     from merging of 1-5 slots (#229) — and a spliced record can assert a
     participant count from one referent and a DOI from another. A single
@@ -550,7 +550,7 @@ def select_cmd(method, project, config, allow_unverified, execute):
     over values that are mostly nested objects of free text, and on these same
     runs it still gives 77-98% — but two records describing one collection
     method in different words are not two facts. Judged on whether the values
-    state the same fact, it is 47-62%.
+    state the same fact, it is 47-63%.
 
     The decision survives the correction because it never rested on the
     magnitude. Splicing mixes referents whether half the shared slots differ or

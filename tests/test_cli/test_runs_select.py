@@ -1,6 +1,6 @@
 """`d4d runs select` — pick one replicate, keep them all (#176).
 
-Selection rather than merging. Replicates state different facts on 47-62% of
+Selection rather than merging. Replicates state different facts on 47-63% of
 the slots they share (generic-v2, judged equivalence), for a coverage gain from
 merging of 1-5 slots (#229), and a spliced record can assert a participant count
 from one referent and a DOI from another. One replicate is internally coherent
@@ -181,14 +181,24 @@ class TestTheRationaleMatchesTheMeasurement(unittest.TestCase):
 
     @unittest.skipUnless(CACHE.exists(), "agreement matrix not present")
     def test_the_quoted_range_is_the_measured_one(self):
+        import math
         published = json.loads(self.CACHE.read_text())
-        differ = sorted(round(100 * (1 - c["rate"]))
+        differ = sorted(100 * (1 - c["rate"])
                         for k, c in published.items() if k.startswith("v2"))
-        expected = f"{differ[0]}-{differ[-1]}%"
+        # Floor the low end and ceil the high end so the quoted range provably
+        # contains every project. `round()` put CHORUS's exact 62.5 outside the
+        # range that claimed to span it, because Python rounds half to even
+        # (#283) — no rounding rule should be load-bearing in a figure whose
+        # whole point is that the previous one was wrong.
+        expected = f"{math.floor(differ[0])}-{math.ceil(differ[-1])}%"
         for command in ("select", "merge"):
             with self.subTest(command=command):
-                self.assertIn(expected, self._help(command),
-                              f"help should quote the measured {expected}")
+                self.assertIn(
+                    expected, self._help(command),
+                    f"`d4d runs {command} --help` must quote {expected}, the "
+                    f"measured range (per-project: "
+                    f"{[f'{d:.1f}' for d in differ]}). If the corpus changed, "
+                    f"update the prose in cli/runs.py to match.")
 
     def test_each_command_names_the_other(self):
         """Two commands recommending opposite things must acknowledge it.
