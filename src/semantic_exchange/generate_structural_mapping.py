@@ -631,8 +631,18 @@ def read_sssom_rows(path: Path) -> set:
     import csv
     with path.open(encoding="utf-8") as fh:
         lines = [l for l in fh if not l.startswith("#")]
-    return {(r["subject_id"], r["predicate_id"], r["object_id"])
-            for r in csv.DictReader(lines, delimiter="\t")}
+    reader = csv.DictReader(lines, delimiter="\t")
+    required = ("subject_id", "predicate_id", "object_id")
+    missing = [c for c in required if c not in (reader.fieldnames or [])]
+    if missing:
+        # Naming the file and the column, because the alternative is a bare
+        # KeyError from inside csv and a reader who concludes the code is
+        # broken rather than the input (#296).
+        raise ValueError(
+            f"{path} is not a readable SSSOM mapping: no "
+            f"{', '.join(missing)} column"
+            + (" (no header row at all?)" if not reader.fieldnames else ""))
+    return {tuple(r[c] for c in required) for r in reader}
 
 
 def check_drift(committed: Path, regenerated: Path) -> tuple:
@@ -689,8 +699,20 @@ def main(argv=None):
                 print(f"\n✗ No committed mapping at {committed}")
                 return 1
             lost, gained = check_drift(committed, scratch)
-        if not lost and not gained:
-            print("\n✓ The committed mapping regenerates exactly.")
+
+            # The target writes two artifacts from the same mappings list, so
+            # check both. Today the summary is fresh and the mapping is stale
+            # (#295) — the confusing direction, because the artifact that is
+            # right is the one nobody thinks to distrust.
+            summary = output_dir / "d4d_rocrate_structural_mapping_summary.md"
+            scratch_summary = Path(tmp) / "regenerated_summary.md"
+            generator.export_summary(scratch_summary)
+            summary_drifted = (
+                not summary.exists()
+                or summary.read_text(encoding="utf-8")
+                != scratch_summary.read_text(encoding="utf-8"))
+        if not lost and not gained and not summary_drifted:
+            print("\n✓ The committed mapping and summary regenerate exactly.")
             return 0
         print(f"\n✗ The committed mapping does not regenerate from its inputs.")
         if lost:
@@ -703,6 +725,11 @@ def main(argv=None):
                   "committed file lacks:")
             for s, p_, o in gained:
                 print(f"      {s}  --{p_}->  {o}")
+        if summary_drifted:
+            print("\n  The summary does not regenerate either.")
+        elif lost or gained:
+            print("\n  The summary regenerates exactly, so it describes the "
+                  "generator's output rather than the mapping beside it (#295).")
         print("\n  A mapping nobody can rebuild is a mapping nobody can safely "
               "change (#234).")
         return 1
