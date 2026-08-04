@@ -1,9 +1,9 @@
 """Run-tracking commands for the D4D CLI."""
 
-import click
-
 from datetime import datetime, timezone
 from pathlib import Path
+
+import click
 
 
 @click.group()
@@ -728,9 +728,23 @@ def select_cmd(method, project, config, allow_unverified, execute):
             continue
         try:
             prior = _yaml.safe_load(other.read_text(encoding="utf-8")) or {}
-        except Exception:                                    # noqa: BLE001
-            continue
-        if not isinstance(prior, dict) or "canonical" not in prior:
+        except (_yaml.YAMLError, OSError, UnicodeDecodeError) as exc:
+            # Fail the selection rather than skip. This command's contract is
+            # one canonical record per project, and a file it cannot read is a
+            # file whose mark it cannot clear. Skipping leaves the ambiguity to
+            # surface later in `canonical_runs`, in a different command, with
+            # nothing to connect it back to here (#310).
+            raise click.ClickException(
+                f"{other} could not be read "
+                f"({type(exc).__name__}: {str(exc).splitlines()[0][:80]}), so a "
+                "prior canonical mark there could not be cleared. Fix or remove "
+                "that record before selecting, or the project would end up with "
+                "two.")
+        if not isinstance(prior, dict):
+            raise click.ClickException(
+                f"{other} is not a mapping, so a prior canonical mark there "
+                "could not be cleared.")
+        if "canonical" not in prior:
             continue
         superseded.append(((prior.get("run") or {}).get("label") or str(other),
                            other, prior))

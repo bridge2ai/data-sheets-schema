@@ -191,6 +191,33 @@ class TestSelect(unittest.TestCase):
                                 "cfg_rep2" / "P_provenance.yaml").read_text())
         self.assertNotIn("supersedes", first["canonical"])
 
+    def test_an_unreadable_prior_record_fails_the_selection(self):
+        """#310: a clear that can silently fail to clear guarantees nothing.
+
+        The contract is one canonical record per project. Skipping an
+        unreadable file leaves the ambiguity to surface later in
+        `canonical_runs`, in a different command, with nothing connecting it
+        back to the selection that was meant to resolve it.
+        """
+        self._run("--execute")                       # cfg_rep2 becomes canonical
+        corrupt = (self.root / "claudecode_agent_core" / "cfg_rep2" /
+                   "P_provenance.yaml")
+        corrupt.write_text(corrupt.read_text() + "\nbroken: [unclosed\n",
+                           encoding="utf-8")
+        out = self._run("--execute", valid={"cfg_rep2": False})
+        self.assertNotEqual(out.exit_code, 0)
+        self.assertIn("could not be read", out.output)
+        self.assertIn("two", out.output, "the message should say what goes wrong")
+
+    def test_a_prior_record_that_is_not_a_mapping_also_fails(self):
+        self._run("--execute")
+        bad = (self.root / "claudecode_agent_core" / "cfg_rep2" /
+               "P_provenance.yaml")
+        bad.write_text("- just\n- a\n- list\n", encoding="utf-8")
+        out = self._run("--execute", valid={"cfg_rep2": False})
+        self.assertNotEqual(out.exit_code, 0)
+        self.assertIn("not a mapping", out.output)
+
     def test_one_replicate_is_not_a_selection(self):
         import shutil
         for label in ("cfg_rep2", "cfg_rep3"):
