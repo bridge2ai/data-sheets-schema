@@ -96,5 +96,40 @@ class TestTheBundles(unittest.TestCase):
                 self.assertNotIn(adult, text)
 
 
+@unittest.skipUnless(MANIFEST.exists(), "manifest not present")
+class TestTheBundleRebuildsFromDeclaredInputs(unittest.TestCase):
+    """#302: the bundle was built with an undeclared --input-dir override.
+
+    That is #234 in a different file — a committed artifact its own documented
+    generator cannot reproduce. It matters more here than for a mapping,
+    because a generation run attests this bundle's md5, and an input nobody can
+    regenerate is one nobody can check.
+    """
+
+    def test_the_source_directory_is_declared_in_the_manifest(self):
+        """Beside the selection, not in whatever command someone typed.
+
+        The manifest already says *which* files a project selects; the
+        directory they are selected from belongs in the same place.
+        """
+        projects = yaml.safe_load(MANIFEST.read_text())["projects"]
+        self.assertEqual(projects.get("VOICE_PEDIATRIC_source_dir"),
+                         "data/preprocessed/individual/VOICE")
+
+    def test_a_declared_source_dir_names_a_real_directory(self):
+        projects = yaml.safe_load(MANIFEST.read_text())["projects"]
+        for key, value in projects.items():
+            if key.endswith("_source_dir"):
+                with self.subTest(key=key):
+                    self.assertTrue((REPO / value).is_dir(), value)
+
+    def test_every_declared_source_dir_belongs_to_a_project(self):
+        projects = yaml.safe_load(MANIFEST.read_text())["projects"]
+        for key in projects:
+            if key.endswith("_source_dir"):
+                with self.subTest(key=key):
+                    self.assertIn(key[: -len("_source_dir")], projects)
+
+
 if __name__ == "__main__":
     unittest.main()

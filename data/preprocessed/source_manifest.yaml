@@ -373,6 +373,11 @@ projects:
       url: https://github.com/eipm/bridge2ai-docs/tree/main/docs
       raw_file: github_eipm_bridge2ai-docs_README_row22.md
       processed_file: github_eipm_bridge2ai-docs_README_row22.txt
+  # Selected from VOICE's downloads: the pediatric dataset is documented
+  # inside the same corpus, so it has no download directory of its own.
+  # Declared here rather than passed as a flag, so the bundle rebuilds
+  # from the manifest alone (#302).
+  VOICE_PEDIATRIC_source_dir: data/preprocessed/individual/VOICE
   VOICE_PEDIATRIC:
   - id: physionet_pediatric_1_1_0
     source_type: data resource
