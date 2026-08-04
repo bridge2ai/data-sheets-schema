@@ -735,6 +735,65 @@ _DATETIME = re.compile(
     r"(?:\.\d+)?(?P<zone>Z|[+-]\d{2}:?\d{2})?$")
 
 
+@lru_cache(maxsize=1)
+def _enum_aliases() -> dict[str, str]:
+    """Every declared alias of every permissible value -> that value's text.
+
+    Read from the schema rather than listed here, because the schema is where
+    the aliases are declared and a second copy would be one to keep in step.
+
+    `linkml-validate` matches permissible values on `text` alone, so a record
+    using a name the schema itself declares as an alias fails validation. The
+    enum aligned with DataCite (#223) declares DataCite's own CamelCase
+    spellings as aliases — `IsNewVersionOf`, `HasPart`, `References` — and those
+    are exactly what generation emits, because they are what the vocabulary is
+    called everywhere else.
+    """
+    import yaml as _yaml
+    schema = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
+    if not schema.exists():
+        return {}
+    doc = _yaml.safe_load(schema.read_text(encoding="utf-8"))
+    out: dict[str, str] = {}
+    for enum in (doc.get("enums") or {}).values():
+        for text, pv in (enum.get("permissible_values") or {}).items():
+            for alias in ((pv or {}).get("aliases") or []):
+                out[alias] = text
+            # Case alone is not an alias, but it is a difference with no
+            # content: `References` against `references` is a validation
+            # failure that says nothing about the record.
+            out.setdefault(text.lower(), text)
+            for alias in ((pv or {}).get("aliases") or []):
+                out.setdefault(alias.lower(), text)
+    return out
+
+
+_ENUM_LINE = re.compile(r"^(?P<head>[ \t]*-?[ \t]*[a-z_]+:[ \t]+)"
+                        r"(?P<value>[A-Za-z][A-Za-z_]*)[ \t]*$")
+
+
+def normalise_enum_aliases(text: str) -> str:
+    """Rewrite declared aliases to the permissible value they name.
+
+    Text-level for the same reason as `normalise_temporal`: re-dumping the YAML
+    would drop the `#` provenance header the reader sees first.
+
+    Only bare word-shaped scalars are touched, so prose values are left exactly
+    as written — a value like `is a later release in the same series as` is a
+    real generation failure and normalising it into silence would hide it.
+    """
+    aliases = _enum_aliases()
+    if not aliases:
+        return text
+
+    def fix(m: "re.Match") -> str:
+        value = m.group("value")
+        canonical = aliases.get(value) or aliases.get(value.lower())
+        return f"{m.group('head')}{canonical}" if canonical else m.group(0)
+
+    return "\n".join(_ENUM_LINE.sub(fix, line) for line in text.split("\n"))
+
+
 def normalise_temporal(text: str) -> str:
     """Quote and shape temporal values to the range their slot declares.
 
@@ -1214,7 +1273,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         elif artifact:
             target.parent.mkdir(parents=True, exist_ok=True)
             if artifact in ("full", "core"):
-                body = normalise_temporal(body)
+                body = normalise_enum_aliases(normalise_temporal(body))
             target.write_text(body, encoding="utf-8")
             label = {"full": "Completed full record",
                      "core": "Completed core record",
