@@ -26,9 +26,13 @@ the filename explicitly. `tests/test_evaluation/test_semantic_agent_grounding.py
 now pins that, including the premise — if the schema ever gains a `program`
 slot the test fails and the workaround can go.
 
-**The records predate or straddle the fix.** 8 rubric20 records and 20 rubric10
-records are from before it. The 16 dated 2026-07-22 fall on the same day as the
-commit and cannot be placed either side of it from the data alone.
+**The records predate the fix, except where they don't.** 8 rubric20 records and
+20 rubric10 records are from before it. The 16 dated 2026-07-22 *can* be placed:
+`run_manifest_2026-07-22_fable-5.json` records `git_head` as `0e19e85f`, which is
+the grounding-fix commit itself, so those were produced with the fix in place.
+
+An earlier version of this note said they could not be placed from the data
+alone. The manifest was the data, and it had not been read.
 
 ## Problem 2 — wrong denominator
 
@@ -49,16 +53,42 @@ dated **2025-12-10**, two days later. So the fix did not cover the path that
 produced them, or they were generated from a stale copy. Either way three
 records attribute their scores to a project and a method that do not exist.
 
+## Problem 4 — and it subsumes the other three: the targets are gone
+
+| set | files | target still on disk | target gone |
+|---|---|---|---|
+| `rubric20_semantic` | 24 | **0** | 24 |
+| `rubric10_semantic` | 36 | 9 | 27 |
+
+They point at the `2026-04-10_sonnet-4.6` label — archived as unattestable by
+`d4d runs archive --unattested` — and at flat pre-run-label paths removed when
+outputs moved into dated run directories.
+
+This is not confined to the semantic path. Both published summaries have it
+across all four rubrics: `publication_summary_2026-07-22_fable-5.md`, titled
+"D4D Publication Summary", scored the archived label, and
+`three_way_comparison_2026-07-22.md` says so in its own header. Filed as #286.
+
+The records themselves survive under
+`data/ATTIC/d4d_concatenated_archived/claudecode_agent/2026-04-10_sonnet-4.6/`,
+so the evaluations remain traceable to their inputs. It is a framing problem,
+not data loss.
+
+**It changes what the other three problems are worth.** Correcting a denominator
+on a score of an archived record produces a corrected number about nothing.
+
 ## What follows
 
-**Every recorded semantic evaluation is affected by at least one of the three.**
+**Every recorded semantic evaluation is affected by at least one of the three,
+and all of them by the fourth.**
 Nothing here is recoverable by rescaling: the denominator could be corrected
 arithmetically, but a score produced under an ungrounded prompt is not a score
 of the record, it is a score of the record plus its filename.
 
-So if semantic results appear in the manuscript, **they need re-running** under
-the corrected prompts, against 88, with project names parsed correctly. That is
-60 evaluations across the two rubrics.
+So if semantic results appear in the manuscript, they need **generating against
+the current corpus** — not re-running, because there is nothing to re-run
+against. How many is a scoping decision rather than a count read off disk;
+options and a recommendation are in #287.
 
 The alternative is to drop the semantic path from reported results and say why.
 That is a decision about the paper rather than the code, and it is cheaper.
