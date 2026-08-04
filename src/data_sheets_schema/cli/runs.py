@@ -409,6 +409,15 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
     The merged record is `record_mode: derived`, never `live`: it is not
     something a model produced, and provenance names every contributor by hash
     and states the rule that combined them.
+
+    **`d4d runs select` is the recommended way to get a shippable record, and
+    it argues against this command.** Replicates state different facts on
+    47-62% of the slots they share, so a union splices across referents — one
+    replicate's participant count beside another's DOI — to gain 1-5 slots.
+    That objection is about coherence and this command's case is about
+    coverage; both are true, and the two commands existing without naming each
+    other is how a reader ends up believing whichever help text they opened.
+    Use this when a union is what you want and you can defend the splice.
     """
     import yaml as _yaml
     from data_sheets_schema.merge import union_merge, write_merge
@@ -531,11 +540,23 @@ def _validates(record: Path) -> tuple[bool, str]:
 def select_cmd(method, project, config, allow_unverified, execute):
     """Mark one replicate canonical, keeping all of them.
 
-    Selection, not merging. Merging splices values across replicates that
-    disagree on 77-98% of the slots they share, for a coverage gain of 1-5 slots
-    (#229) — and a spliced record can assert a participant count from one
-    referent and a DOI from another. A single replicate is internally coherent
-    because one generation produced it.
+    Selection, not merging. Replicates state different facts on **47-62% of the
+    slots they share** (generic-v2, judged equivalence), for a coverage gain
+    from merging of 1-5 slots (#229) — and a spliced record can assert a
+    participant count from one referent and a DOI from another. A single
+    replicate is internally coherent because one generation produced it.
+
+    That figure read 77-98% here until #169 was settled. It was byte equality
+    over values that are mostly nested objects of free text, and on these same
+    runs it still gives 77-98% — but two records describing one collection
+    method in different words are not two facts. Judged on whether the values
+    state the same fact, it is 47-62%.
+
+    The decision survives the correction because it never rested on the
+    magnitude. Splicing mixes referents whether half the shared slots differ or
+    nearly all of them, and the coverage it buys is 1-5 slots either way. What
+    the old number did was make the case look stronger than the evidence for
+    it, which is worth not repeating.
 
     The criterion is **validity first, coverage second**. Coverage alone is
     close to arbitrary here: margins across the generic-v2 config are +0, +1,
