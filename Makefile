@@ -366,7 +366,7 @@ SSSOM_URI_COMPREHENSIVE = src/data_sheets_schema/semantic_exchange/d4d_rocrate_s
 SSSOM_COMPREHENSIVE = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_comprehensive.tsv
 SSSOM_STRUCTURAL = data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv
 
-.PHONY: gen-core-schema validate-core lint-core gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural gen-sssom-all clean-sssom
+.PHONY: check-sssom-structural gen-core-schema validate-core lint-core gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural gen-sssom-all clean-sssom
 
 gen-core-schema: $(D4D_CORE_SCHEMA_ALL) ## Generate merged core exchange schema (data_sheets_schema_core_all.yaml)
 
@@ -433,6 +433,9 @@ $(SSSOM_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATION
 		--output $(SSSOM_COMPREHENSIVE)
 
 gen-sssom-structural: $(SSSOM_STRUCTURAL) ## Generate structure-aware D4D ↔ RO-Crate SSSOM mapping
+
+check-sssom-structural: ## Report drift between the committed structural mapping and its generator
+	$(RUN) python $(SSSOM_STRUCTURAL_SCRIPT) --check
 
 $(SSSOM_STRUCTURAL): $(D4D_SCHEMA_ALL) $(ROCRATE_JSON) $(SSSOM_STRUCTURAL_SCRIPT)
 	@echo "Generating structural SSSOM mapping..."

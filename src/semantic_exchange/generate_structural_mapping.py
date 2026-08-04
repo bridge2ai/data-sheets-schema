@@ -621,8 +621,46 @@ class StructuralMappingGenerator:
         print(f"Exported summary to {output_path}")
 
 
-def main():
+def read_sssom_rows(path: Path) -> set:
+    """(subject_id, predicate_id, object_id) for every data row.
+
+    Identity is the triple, not the whole line: confidence and structural notes
+    move for reasons that are not a change of meaning, and a drift check that
+    fires on those is one nobody keeps running.
+    """
+    import csv
+    with path.open(encoding="utf-8") as fh:
+        lines = [l for l in fh if not l.startswith("#")]
+    reader = csv.DictReader(lines, delimiter="\t")
+    required = ("subject_id", "predicate_id", "object_id")
+    missing = [c for c in required if c not in (reader.fieldnames or [])]
+    if missing:
+        # Naming the file and the column, because the alternative is a bare
+        # KeyError from inside csv and a reader who concludes the code is
+        # broken rather than the input (#296).
+        raise ValueError(
+            f"{path} is not a readable SSSOM mapping: no "
+            f"{', '.join(missing)} column"
+            + (" (no header row at all?)" if not reader.fieldnames else ""))
+    return {tuple(r[c] for c in required) for r in reader}
+
+
+def check_drift(committed: Path, regenerated: Path) -> tuple:
+    """Rows the committed file has that regeneration does not, and vice versa."""
+    have, made = read_sssom_rows(committed), read_sssom_rows(regenerated)
+    return sorted(have - made), sorted(made - have)
+
+
+def main(argv=None):
     """Generate schema-structure-aware mappings."""
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--check", action="store_true",
+                    help="Regenerate to a temporary file and report drift "
+                         "against the committed mapping. Writes nothing. "
+                         "Exits non-zero if they differ.")
+    args = ap.parse_args(argv)
+
     # Paths
     base_dir = Path(__file__).parent.parent.parent
     d4d_schema = base_dir / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
@@ -647,13 +685,63 @@ def main():
     mappings = generator.generate_mappings()
     print(f"  Generated {len(mappings)} mappings")
 
+    committed = output_dir / "d4d_rocrate_structural_mapping.sssom.tsv"
+
+    if args.check:
+        # Never write over the committed file while checking it. Regenerating
+        # in place to compare is how a check becomes the thing it was meant to
+        # detect.
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            scratch = Path(tmp) / "regenerated.sssom.tsv"
+            generator.export_sssom(scratch)
+            if not committed.exists():
+                print(f"\n✗ No committed mapping at {committed}")
+                return 1
+            lost, gained = check_drift(committed, scratch)
+
+            # The target writes two artifacts from the same mappings list, so
+            # check both. Today the summary is fresh and the mapping is stale
+            # (#295) — the confusing direction, because the artifact that is
+            # right is the one nobody thinks to distrust.
+            summary = output_dir / "d4d_rocrate_structural_mapping_summary.md"
+            scratch_summary = Path(tmp) / "regenerated_summary.md"
+            generator.export_summary(scratch_summary)
+            summary_drifted = (
+                not summary.exists()
+                or summary.read_text(encoding="utf-8")
+                != scratch_summary.read_text(encoding="utf-8"))
+        if not lost and not gained and not summary_drifted:
+            print("\n✓ The committed mapping and summary regenerate exactly.")
+            return 0
+        print(f"\n✗ The committed mapping does not regenerate from its inputs.")
+        if lost:
+            print(f"\n  {len(lost)} row(s) in the committed file that "
+                  "regeneration does not produce:")
+            for s, p_, o in lost:
+                print(f"      {s}  --{p_}->  {o}")
+        if gained:
+            print(f"\n  {len(gained)} row(s) regeneration produces that the "
+                  "committed file lacks:")
+            for s, p_, o in gained:
+                print(f"      {s}  --{p_}->  {o}")
+        if summary_drifted:
+            print("\n  The summary does not regenerate either.")
+        elif lost or gained:
+            print("\n  The summary regenerates exactly, so it describes the "
+                  "generator's output rather than the mapping beside it (#295).")
+        print("\n  A mapping nobody can rebuild is a mapping nobody can safely "
+              "change (#234).")
+        return 1
+
     # Export
     print("\nExporting mappings...")
-    generator.export_sssom(output_dir / "d4d_rocrate_structural_mapping.sssom.tsv")
+    generator.export_sssom(committed)
     generator.export_summary(output_dir / "d4d_rocrate_structural_mapping_summary.md")
 
     print("\n✓ Schema-structure-aware mapping complete")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
