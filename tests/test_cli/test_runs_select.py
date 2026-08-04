@@ -1,16 +1,24 @@
 """`d4d runs select` — pick one replicate, keep them all (#176).
 
-Selection rather than merging. Merging splices values across replicates that
-disagree on 77-98% of the slots they share, for a coverage gain of 1-5 slots
-(#229), and a spliced record can assert a participant count from one referent
-and a DOI from another. One replicate is internally coherent because one
-generation produced it.
+Selection rather than merging. Replicates state different facts on 47-63% of
+the slots they share (generic-v2, judged equivalence), for a coverage gain from
+merging of 1-5 slots (#229), and a spliced record can assert a participant count
+from one referent and a DOI from another. One replicate is internally coherent
+because one generation produced it.
+
+That figure said 77-98% until #169 was settled — byte equality over nested free
+text, which counts two wordings of one fact as two facts. The decision is
+unchanged: splicing mixes referents at either rate, and the coverage bought is
+1-5 slots either way. The old number only made the case look better supported
+than it was.
 
 Validity first, coverage second — because coverage alone is nearly arbitrary
 here. Across the generic-v2 config the margins are +0, +1, +2 and +1 slots, and
 AI-READI is an outright tie that only validity resolves.
 """
 
+import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -142,6 +150,63 @@ class TestSelect(unittest.TestCase):
         out = self._run()
         self.assertNotEqual(out.exit_code, 0)
         self.assertIn("at least two", out.output)
+
+
+
+class TestTheRationaleMatchesTheMeasurement(unittest.TestCase):
+    """The figure in the help text must be the one that was measured (#176).
+
+    `select` justified itself with "replicates disagree on 77-98% of the slots
+    they share" for months. That was byte equality over nested free text — the
+    measure #169 showed returns the same answer regardless of input. A command
+    whose stated reason rests on a disproved number is worse than one that
+    states no reason, because the number invites belief.
+    """
+
+    CACHE = Path("data/evaluation_llm/agreement_cache/matrix.json")
+
+    def _help(self, command):
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.runs import runs
+        return CliRunner().invoke(runs, [command, "--help"]).output
+
+    def test_the_disproved_figure_is_not_offered_as_the_reason(self):
+        for command in ("select", "merge"):
+            with self.subTest(command=command):
+                text = self._help(command)
+                claim = re.search(r"disagree on 77-98%", text)
+                self.assertIsNone(
+                    claim, "77-98% is byte equality; it cannot be the stated "
+                           "disagreement rate")
+
+    @unittest.skipUnless(CACHE.exists(), "agreement matrix not present")
+    def test_the_quoted_range_is_the_measured_one(self):
+        import math
+        published = json.loads(self.CACHE.read_text())
+        differ = sorted(100 * (1 - c["rate"])
+                        for k, c in published.items() if k.startswith("v2"))
+        # Floor the low end and ceil the high end so the quoted range provably
+        # contains every project. `round()` put CHORUS's exact 62.5 outside the
+        # range that claimed to span it, because Python rounds half to even
+        # (#283) — no rounding rule should be load-bearing in a figure whose
+        # whole point is that the previous one was wrong.
+        expected = f"{math.floor(differ[0])}-{math.ceil(differ[-1])}%"
+        for command in ("select", "merge"):
+            with self.subTest(command=command):
+                self.assertIn(
+                    expected, self._help(command),
+                    f"`d4d runs {command} --help` must quote {expected}, the "
+                    f"measured range (per-project: "
+                    f"{[f'{d:.1f}' for d in differ]}). If the corpus changed, "
+                    f"update the prose in cli/runs.py to match.")
+
+    def test_each_command_names_the_other(self):
+        """Two commands recommending opposite things must acknowledge it.
+
+        Otherwise a reader believes whichever help text they happened to open.
+        """
+        self.assertIn("merging", self._help("select"))
+        self.assertIn("select", self._help("merge"))
 
 
 if __name__ == "__main__":
