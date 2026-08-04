@@ -1,0 +1,163 @@
+# D4D generic-arm generation prompt — v3
+
+**This is v2 plus one uniform decision rule, and nothing else.** The
+substitution fields, outputs, header block, constraints, the four original rules
+and v2's three additions are byte-identical to
+`src/download/prompts/d4d_generic_arm_prompt_v2.md`; a test asserts that the only
+difference is the block marked `ADDED IN v3`.
+
+## Why v3 exists
+
+v2's first rule — one object per distinct entity for a multivalued slot — did
+what it was written to do. Splitting the fitness `form` class into its two
+component defects (`notes/form_defect_split_2026-08-03.md`) measured
+collapsed cardinality falling by more than four fifths, while a second defect
+rose to take its place: objects of the correct cardinality whose declared
+structured fields are empty because the content sits in a free-text
+`description`.
+
+One class covering both defects reported that exchange as a net regression. It
+was not one. But the exchange is real, and a rule that trades one form failure
+for another is not finished.
+
+The companion rule addresses the second defect on the same terms as the first:
+it concerns how the schema is used, states no fact about any dataset, and can
+therefore be said without naming a project.
+
+## Why this addition is generic and not priming
+
+Measured against the taxonomy in `.claude/commands/d4d-full-core.md`:
+
+- it applies identically to every project, naming no project, dataset or input
+  set;
+- it states no target count, no expected density, and no expected relationship
+  to any other arm — it is a decision rule, not an outcome expectation;
+- it concerns the schema, which every arm shares.
+
+## What is NOT in this file, deliberately
+
+The prediction that this rule reduces hollow objects without returning
+collapsed cardinality. Writing it here would instruct the model to produce the
+result the run is meant to test. It lives in
+`notes/generic_v3_analysis_plan.md`, registered before any generation run.
+
+## Relationship to v1 and v2
+
+Neither is superseded and neither may be edited. The 2026-07-28 generic series
+was produced under v1 and the 2026-07-31 generic-v2 series under v2; both remain
+baselines this version is measured against. The comparison that isolates this
+rule is v2 against v3.
+
+## Prompt body
+
+Generate paired full and core D4D records for the {PROJECT} project.
+
+READ FIRST, IN THIS ORDER, AND FOLLOW EXACTLY:
+
+1. `.claude/agents/d4d-provenance-guard.md` — the factual evidence boundary.
+   Enforce it in every phase.
+2. `.claude/commands/d4d-full-core.md` — the four-phase playbook.
+
+Execution mode: four-phase project agent. Phase 1 full generation, Phase 2 core
+generation, Phase 3 source/provenance audit, Phase 4 strict reconciliation.
+Phase 2 must wait for a validated Phase 1 file.
+
+VERSION LABEL — use verbatim in every output path: {LABEL}
+
+ARM: {ARM}
+
+DECLARED INPUT BUNDLE — your only source of dataset facts:
+    {BUNDLE}
+
+Full schema: `src/data_sheets_schema/schema/data_sheets_schema_all.yaml` (class
+`Dataset`)
+Core schema: `src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml`
+(class `CoreDataset`)
+
+OUTPUTS — do not write outside these three:
+
+- Full:   `data/d4d_concatenated/{METHOD}/{LABEL}/{PROJECT}_d4d.yaml`
+- Core:   `data/d4d_concatenated/{METHOD}_core/{LABEL}/{PROJECT}_d4d_core.yaml`
+- Report: `data/d4d_concatenated/{METHOD}_core/{LABEL}/{PROJECT}_reconciliation.md`
+
+HEADER BLOCK — use exactly:
+
+    # D4D Datasheet for {PROJECT} Dataset
+    # Generation Method: schema-grounded agentic, phase 1
+    # Agent runtime: {RUNTIME}
+    # Provider: {PROVIDER}
+    # Model: {MODEL}
+    # Mode: four-phase project agent, generic-v2 prompt
+    # Prompt: src/download/prompts/d4d_generic_arm_prompt_v2.md (identical for all projects)
+    # Arm: {ARM}
+    # Source bundle: {BUNDLE}
+    {MANIFEST_LINE}
+    # Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+    # Prior D4D factual reuse: prohibited
+    # Temperature: 0.0
+    # Generated: {DATE}
+
+The core file uses "phase 2" and the core schema path in the corresponding lines.
+
+AFTER Phase 4, write a LIVE provenance record:
+
+    poetry run d4d provenance record --project {PROJECT} --method {METHOD} --label {LABEL} --input-bundle {BUNDLE}
+
+VALIDATE both files before finishing:
+
+    poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset <full>
+    poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml -C CoreDataset <core>
+
+ABSOLUTE CONSTRAINT — do not read, open, grep, or consult any previously
+generated D4D record, from any arm, any label, or any date. This includes
+everything under `data/d4d_concatenated/` and any `*_crate_d4d.yaml` or
+`*_crate_mapped_d4d.yaml` under `data/ro-crate_packages/`. Your only factual
+inputs are the declared bundle above and the schema files. Prior-D4D reuse is a
+defect under the provenance guard.
+
+UNIFORM DECISION RULES — these apply identically to every project and every arm:
+
+- Populate a slot only where the declared bundle supports it. Prefer omission
+  over inference: an absent slot is a correct answer when the evidence is
+  absent, and a plausible guess is not.
+- Where the declared bundle contains sources that disagree, represent what the
+  evidence states rather than silently selecting one. Do not merge distinct
+  entities into a single claim.
+- `Dataset` admits one referent. Choose the one the declared bundle best
+  supports, state that choice in the reconciliation report, and hold to it
+  consistently across both records.
+- There is no target slot count, no expected density, and no expected
+  relationship to any other arm or project. Apply your own judgment about what
+  the evidence supports.
+
+--- ADDED IN v2 ---
+
+- When a slot's declared range is multivalued, emit one object per distinct
+  entity. Collapsing several entities into a single object — several creators in
+  one Creator, several uses in one intended_use — populates the slot without
+  representing what it declares.
+- Populate a slot with the information the field asks for, not with a pointer to
+  where that information lives, and not with a statement that it is pending or
+  absent. A value recording that documentation exists elsewhere has not answered
+  the field; omit the slot instead.
+- Read the slot's description before populating it. Where the evidence answers a
+  neighbouring field — the access route rather than the distribution formats,
+  the release cadence rather than the future-use impacts — put it in the field it
+  answers, or omit it.
+
+--- END ADDED IN v2 ---
+
+--- ADDED IN v3 ---
+
+- When a slot's declared range is a class, populate the fields that class
+  declares. Placing the content in a free-text field such as `description` while
+  the declared fields — a name, an identifier, dates, affiliations — stay empty
+  produces an object of the correct shape holding none of the structure it
+  exists to carry. Where the evidence answers a declared field, populate that
+  field rather than restating it in prose.
+
+--- END ADDED IN v3 ---
+
+
+RETURN: full slot count, core slot count, whether both validated, and the
+reconciliation outcome. Return data, not prose.

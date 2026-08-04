@@ -54,8 +54,16 @@ GENERIC_PROMPT = PROMPTS / "d4d_generic_arm_prompt.md"
 # edit: v1 produced the 2026-07-28 series and is the baseline v2 is measured
 # against, so editing it in place would silently redefine that baseline.
 GENERIC_PROMPT_V2 = PROMPTS / "d4d_generic_arm_prompt_v2.md"
+# v3 is v2 plus one rule. v2's first rule stopped the model collapsing several
+# entities into one object and left objects of the right cardinality whose
+# declared fields are empty because the content sits in `description`
+# (notes/form_defect_split_2026-08-03.md). A third file for the same reason v2
+# was one: v2 produced the 2026-07-31 series and is the baseline v3 is measured
+# against. The comparison that isolates the companion rule is v2 against v3.
+GENERIC_PROMPT_V3 = PROMPTS / "d4d_generic_arm_prompt_v3.md"
 CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
                      "generic_v2": GENERIC_PROMPT_V2,
+                     "generic_v3": GENERIC_PROMPT_V3,
                      "tuned": GENERIC_PROMPT}
 
 # Which generic base each condition is built on. The generic/tuned comparison
@@ -71,6 +79,7 @@ CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
 CONDITION_AXES = {
     "generic":    {"base": "v1", "tuned": False},
     "generic_v2": {"base": "v2", "tuned": False},
+    "generic_v3": {"base": "v3", "tuned": False},
     "tuned":      {"base": "v1", "tuned": True},
 }
 
