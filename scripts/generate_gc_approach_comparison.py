@@ -8,6 +8,7 @@ import json
 import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
+from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
 
 # Project root
 BASE_DIR = Path(__file__).parent.parent
@@ -64,7 +65,7 @@ def generate_comparison_table():
                 row = [
                     f"{gc} - {method}",
                     f"{r10['total_points']}/50",
-                    f"{r20['total_points']}/84",
+                    f"{r20['total_points']}/{RUBRIC20_MAX_SCORE}",
                     f"{r10['percentage']}%",
                     f"{r20['percentage']}%"
                 ]
@@ -79,12 +80,12 @@ def generate_comparison_table():
             gc_r10_avg = gc_r10_total / gc_count
             gc_r20_avg = gc_r20_total / gc_count
             gc_r10_pct = (gc_r10_avg / 50) * 100
-            gc_r20_pct = (gc_r20_avg / 84) * 100
+            gc_r20_pct = (gc_r20_avg / RUBRIC20_MAX_SCORE) * 100
             
             avg_row = [
                 f"{gc} Average",
                 f"{gc_r10_avg:.1f}/50",
-                f"{gc_r20_avg:.1f}/84",
+                f"{gc_r20_avg:.1f}/{RUBRIC20_MAX_SCORE}",
                 f"{gc_r10_pct:.1f}%",
                 f"{gc_r20_pct:.1f}%"
             ]
@@ -108,12 +109,12 @@ def generate_comparison_table():
             method_r10_avg = method_r10_total / method_count
             method_r20_avg = method_r20_total / method_count
             method_r10_pct = (method_r10_avg / 50) * 100
-            method_r20_pct = (method_r20_avg / 84) * 100
+            method_r20_pct = (method_r20_avg / RUBRIC20_MAX_SCORE) * 100
             
             method_row = [
                 f"Overall - {method}",
                 f"{method_r10_avg:.1f}/50",
-                f"{method_r20_avg:.1f}/84",
+                f"{method_r20_avg:.1f}/{RUBRIC20_MAX_SCORE}",
                 f"{method_r10_pct:.1f}%",
                 f"{method_r20_pct:.1f}%"
             ]
@@ -128,12 +129,12 @@ def generate_comparison_table():
         grand_r10_avg = grand_r10_total / grand_count
         grand_r20_avg = grand_r20_total / grand_count
         grand_r10_pct = (grand_r10_avg / 50) * 100
-        grand_r20_pct = (grand_r20_avg / 84) * 100
+        grand_r20_pct = (grand_r20_avg / RUBRIC20_MAX_SCORE) * 100
         
         grand_row = [
             "Grand Average",
             f"{grand_r10_avg:.1f}/50",
-            f"{grand_r20_avg:.1f}/84",
+            f"{grand_r20_avg:.1f}/{RUBRIC20_MAX_SCORE}",
             f"{grand_r10_pct:.1f}%",
             f"{grand_r20_pct:.1f}%"
         ]

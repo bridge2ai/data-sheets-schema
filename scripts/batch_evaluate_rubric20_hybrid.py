@@ -20,6 +20,7 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
 import hashlib
 import re
+from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
 
 # Base directory
 BASE_DIR = Path(__file__).parent.parent
@@ -703,7 +704,7 @@ def evaluate_d4d_file(file_path: Path, project: str, method: str, eval_type: str
     }
 
     total_score = 0
-    max_total = 84  # 16 numeric questions × 5 + 4 pass/fail × 1
+    max_total = RUBRIC20_MAX_SCORE  # 17 numeric x 5 + 3 pass/fail x 1
 
     # Group by category
     categories = {}
@@ -815,7 +816,7 @@ def main():
             json.dump(result, f, indent=2)
 
         score = result["overall_score"]
-        print(f"   ✅ Score: {score['total_points']}/84 ({score['percentage']}%)")
+        print(f"   ✅ Score: {score['total_points']}/{RUBRIC20_MAX_SCORE} ({score['percentage']}%)")
 
         concat_count += 1
 
@@ -862,7 +863,7 @@ def main():
                 json.dump(result, f, indent=2)
 
             score = result["overall_score"]
-            print(f"   ✅ Score: {score['total_points']}/84 ({score['percentage']}%)")
+            print(f"   ✅ Score: {score['total_points']}/{RUBRIC20_MAX_SCORE} ({score['percentage']}%)")
 
             individual_count += 1
 

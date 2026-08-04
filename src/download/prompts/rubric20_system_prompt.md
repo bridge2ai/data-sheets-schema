@@ -60,8 +60,8 @@ Return your evaluation as a **JSON object** with this EXACT structure:
   },
   "overall_score": {
     "total_points": 72.5,
-    "max_points": 84,
-    "percentage": 86.3
+    "max_points": 88,
+    "percentage": 82.4
   },
   "categories": [
     {
@@ -112,11 +112,21 @@ Return your evaluation as a **JSON object** with this EXACT structure:
 
 ## Scoring Summary
 
-**Maximum Possible Score:** 84 points
-- **Structural Completeness (5 questions):** 24 points max (4 numeric @5 each + 1 pass/fail)
-- **Metadata Quality & Content (5 questions):** 22 points max (4 numeric @5 each + 1 pass/fail)
-- **Technical Documentation (5 questions):** 25 points max (5 numeric @5 each)
-- **FAIRness & Accessibility (5 questions):** 13 points max (3 numeric @5 each + 2 pass/fail)
+**Maximum Possible Score:** 88 points
+- **17 numeric questions** @ 5 points each = 85
+- **3 pass/fail questions** @ 1 point each = 3
+
+This is the total the rubric's own questions define, and it is what the presence
+path scores against. It read 84 here for a long time, decomposed as 16 numeric +
+4 pass/fail — one question counted as pass/fail that the rubric defines as
+numeric — so the LLM path reported every record out of 84 while the presence
+path used 88, and the two were never comparable.
+
+The four category names below are this prompt's grouping. The rubric file does
+not declare categories, so no per-category maximum can be derived from it; each
+category's maximum is whatever its questions sum to. Earlier versions of this
+section stated per-category totals that summed to 84, which is how the wrong
+total survived being read.
 
 ## Key Principles
 
