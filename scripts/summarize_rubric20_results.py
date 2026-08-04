@@ -200,22 +200,33 @@ def create_markdown_table(results: List[Dict]):
                 md += f"| {project} | {method} | {avg_score:.1f}/{denom} | {file_count} | {avg_pct:.1f}% | {avg_cat1:.1f} | {avg_cat2:.1f} | {avg_cat3:.1f} | {avg_cat4:.1f} |\n"
 
     # Top performers
-    md += "\n## Top Performing D4Ds (Score >= 80%)\n\n"
-    md += "| Project | Method | Type | Score | File |\n"
-    md += "|---------|--------|------|-------|------|\n"
+    md += "\n## Top Performing D4Ds (Score >= 80%)\n"
 
-    top_performers = [r for r in results if r.get('overall_score', {}).get('percentage', 0) >= 80]
-    top_performers.sort(key=lambda x: x.get('overall_score', {}).get('percentage', 0), reverse=True)
-
-    for result in top_performers[:20]:  # Top 20
-        project = result.get('project', 'unknown')
-        method = result.get('method', 'unknown')
-        eval_type = result.get('evaluation_type', 'unknown')
-        overall = result.get('overall_score', {})
-        score_str = f"{overall.get('total_points', 0)}/{overall.get('max_points', RUBRIC20_MAX_SCORE)} ({overall.get('percentage', 0):.1f}%)"
-        file_name = Path(result.get('d4d_file', '')).name
-
-        md += f"| {project} | {method} | {eval_type} | {score_str} | {file_name} |\n"
+    # One table per denominator. A >=80% cut and a sort applied across two
+    # maxima rank on the maximum rather than the record: 71/84 is 84.5% and
+    # 71/88 is 80.7%, so identical raw scores separate purely by which
+    # instrument measured them, and the 167 records scored out of 84 win
+    # systematically (#280). A table titled "Top Performing" that is not a
+    # valid ranking is worse than two shorter ones that are.
+    for denom, group in group_by_denominator(results).items():
+        ranked = [r for r in group
+                  if r.get('overall_score', {}).get('percentage', 0) >= 80]
+        ranked.sort(key=lambda x: x.get('overall_score', {}).get('percentage', 0),
+                    reverse=True)
+        if not ranked:
+            continue
+        md += f"\n### Scored out of {denom}\n\n"
+        md += "| Project | Method | Type | Score | File |\n"
+        md += "|---------|--------|------|-------|------|\n"
+        for result in ranked[:20]:  # Top 20 within this denominator
+            project = result.get('project', 'unknown')
+            method = result.get('method', 'unknown')
+            eval_type = result.get('evaluation_type', 'unknown')
+            overall = result.get('overall_score', {})
+            score_str = (f"{overall.get('total_points', 0)}/{denom} "
+                         f"({overall.get('percentage', 0):.1f}%)")
+            file_name = Path(result.get('d4d_file', '')).name
+            md += f"| {project} | {method} | {eval_type} | {score_str} | {file_name} |\n"
 
     # Save markdown
     md_path = EVAL_DIR / "summary_table.md"

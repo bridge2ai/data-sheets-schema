@@ -151,6 +151,47 @@ class TestTheReportGeneratorsActuallyRun(unittest.TestCase):
         written = Path(self._tmp.name) / "summary_table.md"
         self.assertTrue(written.exists())
 
+    def test_top_performers_ranks_within_a_denominator(self):
+        """#280: a >=80% cut and a sort across two maxima rank on the maximum.
+
+        71/84 is 84.5% and 71/88 is 80.7% — identical raw scores separating
+        purely by which instrument measured them, with the 167 older records
+        winning systematically in a table whose purpose is ranking.
+        """
+        import io
+        from contextlib import redirect_stdout
+        both = [_result(71, 84, method="gpt5"),
+                _result(71, 88, method="claudecode_agent")]
+        with redirect_stdout(io.StringIO()):
+            self.mod.create_markdown_table(both)
+        text = (Path(self._tmp.name) / "summary_table.md").read_text()
+        top = text.split("Top Performing")[1]
+        self.assertIn("Scored out of 84", top)
+        self.assertIn("Scored out of 88", top)
+
+
+class TestTheGCComparisonRefuses(unittest.TestCase):
+    """#281: the table compares approaches, so a mixed average compares an
+    approach against a measurement change."""
+
+    def setUp(self):
+        import generate_gc_approach_comparison as mod
+        self.mod = mod
+
+    def test_a_single_denominator_set_is_averaged_normally(self):
+        score, pct = self.mod._r20_cells(
+            [{"overall_score": {"max_points": 88}}], 70.0)
+        self.assertEqual(score, "70.0/88")
+        self.assertEqual(pct, "79.5%")
+
+    def test_a_mixed_set_yields_no_percentage(self):
+        score, pct = self.mod._r20_cells(
+            [{"overall_score": {"max_points": 88}},
+             {"overall_score": {"max_points": 84}}], 70.0)
+        self.assertIn("MIXED", score)
+        self.assertEqual(pct, "n/a (mixed maxima)")
+        self.assertNotIn("%", pct.replace("n/a (mixed maxima)", ""))
+
 
 if __name__ == "__main__":
     unittest.main()

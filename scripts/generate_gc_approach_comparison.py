@@ -9,6 +9,23 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
+from data_sheets_schema.rubric_pooling import MixedDenominators, common_denominator
+
+
+def _r20_cells(records, avg_points):
+    """Score and percentage cells for a set of rubric20 records.
+
+    Refuses rather than dividing by a constant: this table compares Grand
+    Challenge approaches, and if one approach's evaluations predate the
+    denominator correction and another's do not, a pooled average compares an
+    approach against a measurement change (#281). `common_denominator` raises
+    on a mixed set; the cells say so instead of printing a number.
+    """
+    try:
+        denom = common_denominator(records)
+    except MixedDenominators as mixed:
+        return (f"{avg_points:.1f}/MIXED{tuple(mixed.seen)}", "n/a (mixed maxima)")
+    return f"{avg_points:.1f}/{denom}", f"{(avg_points / denom) * 100:.1f}%"
 
 # Project root
 BASE_DIR = Path(__file__).parent.parent
@@ -53,6 +70,7 @@ def generate_comparison_table():
     for gc in GRAND_CHALLENGES:
         gc_r10_total = 0
         gc_r20_total = 0
+        gc_r20_records = []
         gc_count = 0
         
         for method in METHODS:
@@ -65,7 +83,7 @@ def generate_comparison_table():
                 row = [
                     f"{gc} - {method}",
                     f"{r10['total_points']}/50",
-                    f"{r20['total_points']}/{RUBRIC20_MAX_SCORE}",
+                    f"{r20['total_points']}/{r20.get('max_points', RUBRIC20_MAX_SCORE)}",
                     f"{r10['percentage']}%",
                     f"{r20['percentage']}%"
                 ]
@@ -73,6 +91,7 @@ def generate_comparison_table():
                 
                 gc_r10_total += r10['total_points']
                 gc_r20_total += r20['total_points']
+                gc_r20_records.append({'overall_score': r20})
                 gc_count += 1
         
         # GC average row
@@ -80,14 +99,14 @@ def generate_comparison_table():
             gc_r10_avg = gc_r10_total / gc_count
             gc_r20_avg = gc_r20_total / gc_count
             gc_r10_pct = (gc_r10_avg / 50) * 100
-            gc_r20_pct = (gc_r20_avg / RUBRIC20_MAX_SCORE) * 100
+            gc_r20_score_cell, gc_r20_pct_cell = _r20_cells(gc_r20_records, gc_r20_avg)
             
             avg_row = [
                 f"{gc} Average",
                 f"{gc_r10_avg:.1f}/50",
-                f"{gc_r20_avg:.1f}/{RUBRIC20_MAX_SCORE}",
+                gc_r20_score_cell,
                 f"{gc_r10_pct:.1f}%",
-                f"{gc_r20_pct:.1f}%"
+                gc_r20_pct_cell
             ]
             rows.append(avg_row)
             rows.append(["", "", "", "", ""])  # Blank separator
@@ -96,6 +115,7 @@ def generate_comparison_table():
     for method in METHODS:
         method_r10_total = 0
         method_r20_total = 0
+        method_r20_records = []
         method_count = 0
         
         for gc in GRAND_CHALLENGES:
@@ -103,40 +123,42 @@ def generate_comparison_table():
             if key in r10_scores and key in r20_scores:
                 method_r10_total += r10_scores[key]['total_points']
                 method_r20_total += r20_scores[key]['total_points']
+                method_r20_records.append({'overall_score': r20_scores[key]})
                 method_count += 1
         
         if method_count > 0:
             method_r10_avg = method_r10_total / method_count
             method_r20_avg = method_r20_total / method_count
             method_r10_pct = (method_r10_avg / 50) * 100
-            method_r20_pct = (method_r20_avg / RUBRIC20_MAX_SCORE) * 100
+            method_r20_score_cell, method_r20_pct_cell = _r20_cells(method_r20_records, method_r20_avg)
             
             method_row = [
                 f"Overall - {method}",
                 f"{method_r10_avg:.1f}/50",
-                f"{method_r20_avg:.1f}/{RUBRIC20_MAX_SCORE}",
+                method_r20_score_cell,
                 f"{method_r10_pct:.1f}%",
-                f"{method_r20_pct:.1f}%"
+                method_r20_pct_cell
             ]
             rows.append(method_row)
     
     # Grand average
     grand_r10_total = sum(s['total_points'] for s in r10_scores.values())
     grand_r20_total = sum(s['total_points'] for s in r20_scores.values())
+    grand_r20_records = [{'overall_score': s} for s in r20_scores.values()]
     grand_count = len(r10_scores)
     
     if grand_count > 0:
         grand_r10_avg = grand_r10_total / grand_count
         grand_r20_avg = grand_r20_total / grand_count
         grand_r10_pct = (grand_r10_avg / 50) * 100
-        grand_r20_pct = (grand_r20_avg / RUBRIC20_MAX_SCORE) * 100
+        grand_r20_score_cell, grand_r20_pct_cell = _r20_cells(grand_r20_records, grand_r20_avg)
         
         grand_row = [
             "Grand Average",
             f"{grand_r10_avg:.1f}/50",
-            f"{grand_r20_avg:.1f}/{RUBRIC20_MAX_SCORE}",
+            grand_r20_score_cell,
             f"{grand_r10_pct:.1f}%",
-            f"{grand_r20_pct:.1f}%"
+            grand_r20_pct_cell
         ]
         rows.append(grand_row)
     
