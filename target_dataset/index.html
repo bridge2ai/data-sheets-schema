@@ -330,6 +330,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#comments" class="md-nav__link">
+    Comments
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#identifier-and-mapping-information" class="md-nav__link">
     Identifier and Mapping Information
   </a>
@@ -384,7 +391,7 @@
 
 
 <h1 id="slot-target_dataset">Slot: target_dataset</h1>
-<p><em>The dataset that this relationship points to. Can be specified by identifier, URL, or Dataset object.</em></p>
+<p><em>The identifier or URL of the dataset this relationship points to.</em></p>
 <p>URI: <a href="http://purl.org/dc/terms/relation">dcterms:relation</a>
 Alias: target_dataset</p>
 <!-- no inheritance hierarchy -->
@@ -415,6 +422,11 @@ Alias: target_dataset</p>
 <p>Required: True</p>
 </li>
 </ul>
+<h2 id="comments">Comments</h2>
+<ul>
+<li>A reference, not an inline dataset. The description used to promise "identifier, URL, or Dataset object" while the range permitted only the first, and LinkML cannot express the union: its JSON Schema generator always emits a top-level type or $ref from the slot's range, which ANDs with <code>any_of</code>, so whichever branch the range names the other one fails. Verified both ways on VOICE (#297).</li>
+<li>A related dataset with its own DOI, protocol and approval is its own datasheet and is referenced from here by identifier. That is the resolution of #292 for VOICE, whose pediatric companion has all three.</li>
+</ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
@@ -443,8 +455,16 @@ Alias: target_dataset</p>
 <details>
 
 <pre><code class="language-yaml">name: target_dataset
-description: The dataset that this relationship points to. Can be specified by identifier,
-  URL, or Dataset object.
+description: The identifier or URL of the dataset this relationship points to.
+comments:
+- 'A reference, not an inline dataset. The description used to promise &quot;identifier,
+  URL, or Dataset object&quot; while the range permitted only the first, and LinkML cannot
+  express the union: its JSON Schema generator always emits a top-level type or $ref
+  from the slot''s range, which ANDs with `any_of`, so whichever branch the range
+  names the other one fails. Verified both ways on VOICE (#297).'
+- 'A related dataset with its own DOI, protocol and approval is its own datasheet
+  and is referenced from here by identifier. That is the resolution of #292 for VOICE,
+  whose pediatric companion has all three.'
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: dcterms:relation
