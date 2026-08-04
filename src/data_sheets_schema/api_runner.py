@@ -736,59 +736,91 @@ _DATETIME = re.compile(
 
 
 @lru_cache(maxsize=1)
-def _enum_aliases() -> dict[str, str]:
-    """Every declared alias of every permissible value -> that value's text.
+def _enum_aliases() -> dict[str, dict[str, str]]:
+    """slot name -> {alias or casing variant -> permissible value}.
 
-    Read from the schema rather than listed here, because the schema is where
-    the aliases are declared and a second copy would be one to keep in step.
+    Keyed by slot, not global. An earlier version flattened every alias of every
+    enum into one table and applied it to any `key: Value` line, which rewrote
+    `title: References` to `title: references` — a plain string slot corrupted on
+    the write path by the pass meant to be fixing validity (#299). Only slots the
+    schema gives an enum range are eligible, so `title`, `name` and `description`
+    are not reachable at all.
+
+    Read from the schema rather than listed here, because the schema is where the
+    aliases are declared and a second copy would be one to keep in step.
 
     `linkml-validate` matches permissible values on `text` alone, so a record
     using a name the schema itself declares as an alias fails validation. The
     enum aligned with DataCite (#223) declares DataCite's own CamelCase
-    spellings as aliases — `IsNewVersionOf`, `HasPart`, `References` — and those
-    are exactly what generation emits, because they are what the vocabulary is
-    called everywhere else.
+    spellings — `IsNewVersionOf`, `HasPart`, `References` — and those are what
+    generation emits, because they are what the vocabulary is called elsewhere.
     """
     import yaml as _yaml
     schema = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
     if not schema.exists():
         return {}
     doc = _yaml.safe_load(schema.read_text(encoding="utf-8"))
-    out: dict[str, str] = {}
-    for enum in (doc.get("enums") or {}).values():
-        for text, pv in (enum.get("permissible_values") or {}).items():
+    enums = doc.get("enums") or {}
+
+    def table_for(enum_name: str) -> dict[str, str]:
+        out: dict[str, str] = {}
+        for text, pv in (enums[enum_name].get("permissible_values") or {}).items():
             for alias in ((pv or {}).get("aliases") or []):
                 out[alias] = text
+                out.setdefault(alias.lower(), text)
             # Case alone is not an alias, but it is a difference with no
             # content: `References` against `references` is a validation
             # failure that says nothing about the record.
             out.setdefault(text.lower(), text)
-            for alias in ((pv or {}).get("aliases") or []):
-                out.setdefault(alias.lower(), text)
-    return out
+        return out
+
+    by_slot: dict[str, dict[str, str]] = {}
+    conflicted: set[str] = set()
+    for cls in (doc.get("classes") or {}).values():
+        for slot, spec in (cls.get("attributes") or {}).items():
+            enum_name = spec.get("range")
+            if enum_name not in enums:
+                continue
+            table = table_for(enum_name)
+            if slot in by_slot and by_slot[slot] != table:
+                # The same slot name ranged on different enums in different
+                # classes. Text alone cannot say which class a line sits in, so
+                # rewriting either way would be a guess.
+                conflicted.add(slot)
+                continue
+            by_slot[slot] = table
+    for slot in conflicted:
+        by_slot.pop(slot, None)
+    return by_slot
 
 
-_ENUM_LINE = re.compile(r"^(?P<head>[ \t]*-?[ \t]*[a-z_]+:[ \t]+)"
-                        r"(?P<value>[A-Za-z][A-Za-z_]*)[ \t]*$")
+#: Values may carry digits — `BZ2`, `Big5`, `GB2312` are all permissible values,
+#: and a letters-only pattern silently skipped 41 of them.
+_ENUM_LINE = re.compile(r"^(?P<head>[ \t]*-?[ \t]*(?P<slot>[a-z_]+):[ \t]+)"
+                        r"(?P<value>[A-Za-z][A-Za-z0-9_./+-]*)[ \t]*$")
 
 
 def normalise_enum_aliases(text: str) -> str:
-    """Rewrite declared aliases to the permissible value they name.
+    """Rewrite a declared alias to the permissible value it names.
 
     Text-level for the same reason as `normalise_temporal`: re-dumping the YAML
     would drop the `#` provenance header the reader sees first.
 
-    Only bare word-shaped scalars are touched, so prose values are left exactly
-    as written — a value like `is a later release in the same series as` is a
-    real generation failure and normalising it into silence would hide it.
+    Only bare word-shaped scalars in enum-ranged slots are touched, so prose is
+    left exactly as written — a value like `is a later release in the same
+    series as` is a real generation failure and normalising it into silence
+    would hide it.
     """
-    aliases = _enum_aliases()
-    if not aliases:
+    by_slot = _enum_aliases()
+    if not by_slot:
         return text
 
     def fix(m: "re.Match") -> str:
+        table = by_slot.get(m.group("slot"))
+        if not table:
+            return m.group(0)
         value = m.group("value")
-        canonical = aliases.get(value) or aliases.get(value.lower())
+        canonical = table.get(value) or table.get(value.lower())
         return f"{m.group('head')}{canonical}" if canonical else m.group(0)
 
     return "\n".join(_ENUM_LINE.sub(fix, line) for line in text.split("\n"))

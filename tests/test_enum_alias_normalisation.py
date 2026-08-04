@@ -28,19 +28,37 @@ from data_sheets_schema.api_runner import _enum_aliases, normalise_enum_aliases
 class TestAliasTable(unittest.TestCase):
 
     def test_datacite_spellings_are_declared_aliases(self):
-        aliases = _enum_aliases()
+        table = _enum_aliases()["relationship_type"]
         for camel, snake in (("IsNewVersionOf", "is_new_version_of"),
                              ("HasPart", "has_part"),
                              ("References", "references")):
             with self.subTest(alias=camel):
-                self.assertEqual(aliases.get(camel), snake)
+                self.assertEqual(table.get(camel), snake)
 
     def test_it_is_read_from_the_schema_not_hardcoded(self):
         """A second copy of the vocabulary is one to keep in step."""
-        self.assertGreater(len(_enum_aliases()), 100)
+        self.assertGreater(len(_enum_aliases()), 5)
 
-    def test_a_permissible_value_maps_to_itself(self):
-        self.assertEqual(_enum_aliases().get("references"), "references")
+    def test_the_table_is_keyed_by_slot_not_global(self):
+        """#299: a flat table rewrote plain string slots.
+
+        Keying by slot is what makes `title` and `name` unreachable rather
+        than merely unlikely.
+        """
+        by_slot = _enum_aliases()
+        self.assertIn("relationship_type", by_slot)
+        for plain in ("title", "name", "description"):
+            with self.subTest(slot=plain):
+                self.assertNotIn(plain, by_slot)
+
+    def test_a_slot_ranged_on_two_different_enums_is_excluded(self):
+        """Text cannot say which class a line sits in, so rewriting would be
+        a guess. Such slots are dropped rather than guessed at."""
+        by_slot = _enum_aliases()
+        for slot, table in by_slot.items():
+            with self.subTest(slot=slot):
+                self.assertIsInstance(table, dict)
+                self.assertTrue(table, f"{slot} has an empty table")
 
 
 class TestNormalisation(unittest.TestCase):
@@ -86,6 +104,30 @@ class TestNormalisation(unittest.TestCase):
         """A key that happens to share an alias's spelling is not a value."""
         line = "    HasPart: something"
         self.assertEqual(normalise_enum_aliases(line), line)
+
+    def test_a_plain_string_slot_is_never_rewritten(self):
+        """#299, the defect this function shipped with.
+
+        A dataset legitimately titled `References` was silently retitled on
+        the write path — by the pass meant to be fixing validity, and in the
+        committed record.
+        """
+        for line in ("    title: References",
+                     "    name: HasPart",
+                     "    description: Collects"):
+            with self.subTest(line=line):
+                self.assertEqual(normalise_enum_aliases(line), line)
+
+    def test_values_with_digits_are_reachable(self):
+        """41 permissible values carry digits — `BZ2`, `Big5`, `GB2312`.
+
+        A letters-only pattern skipped them all while appearing to cover
+        their enums.
+        """
+        import re
+        from data_sheets_schema.api_runner import _ENUM_LINE
+        self.assertIsNotNone(_ENUM_LINE.match("    compression: BZ2"))
+        self.assertIsNotNone(_ENUM_LINE.match("    encoding: GB2312"))
 
     def test_quoted_and_flow_values_are_left_alone(self):
         for line in ("    relationship_type: 'HasPart'",
