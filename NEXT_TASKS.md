@@ -309,7 +309,29 @@ broke nothing; the four-project list in 26 files is prose, not logic.
 
   The VOICE bundle is byte-identical (md5 `e637eb75`, what 49 runs attest), and
   a test pins it.
-- **A generation run.** Twelve phases for one project, paid.
+- **A generation run — deferred to v3, by decision.** Running under v2 now would
+  mean running again when v3 lands, so `VOICE_PEDIATRIC` is generated with
+  whichever config the v2-vs-v3 comparison settles on. v3 is drafted, wired and
+  tested (#272) but unrun.
+
+  `VOICE_PEDIATRIC` cannot join that comparison itself — it has no v1 or v2
+  baseline, so it is generated once under the winning config rather than as a
+  third arm.
+
+  **Regenerate VOICE in the same run.** Its three 2026-07-31 replicates are the
+  reason no VOICE record is canonical (#292), and both causes are now addressed
+  for future runs but not for those records:
+
+  - the enum values: `References` normalises to `references` on the write path,
+    and `related_to` still fails, which is correct — it names nothing in the
+    vocabulary;
+  - the inline object in `target_dataset`: with the pediatric dataset now its
+    own datasheet, VOICE should reference it by DOI, which is a string and
+    validates.
+
+  So a v3 run is the first opportunity for VOICE to have a canonical record at
+  all. Until then VOICE has none, and any "canonical record per project" count
+  is three of four.
 - **Whether `VOICE` becomes `VOICE_main` — decided: no.** Attempted and reverted.
   The path moves were clean (567 files, no clashes), but the content rewrite
   broke attestation two ways that no amount of care avoids: record bodies carry
