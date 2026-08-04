@@ -174,6 +174,12 @@ def publication_tsv(all_scores):
     return "\n".join("\t".join(r) for r in rows) + "\n"
 
 
+TSV_BANNER = (
+    "# HISTORICAL — these rows score the archived 2026-04-10_sonnet-4.6 label,\n"
+    "# set aside as unattestable. Do not cite as current. See #286.\n"
+)
+
+
 def main():
     all_scores = {r: load_rubric(r) for r in RUBRICS}
 
@@ -187,7 +193,10 @@ def main():
     md_path = EVAL / f"publication_summary_{RUN_DATE}.md"
     tsv_path = EVAL / f"publication_summary_{RUN_DATE}.tsv"
     md_path.write_text(publication_table(all_scores))
-    tsv_path.write_text(publication_tsv(all_scores))
+    # The banner goes in the .tsv as well as the .md. A person opens the
+    # .md and sees it; a script reads the .tsv, and a script is the more
+    # likely consumer of a long-format table (#305).
+    tsv_path.write_text(TSV_BANNER + publication_tsv(all_scores))
     print(f"wrote {md_path}\nwrote {tsv_path}")
 
     print("\n=== Headline table ===")
