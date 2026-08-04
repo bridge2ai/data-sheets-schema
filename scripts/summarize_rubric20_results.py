@@ -22,6 +22,8 @@ from datetime import datetime
 # The denominator lives with the rubric, not as a literal in a report.
 # It was 84 here while the questions defined 88 (#270 thread).
 from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
+from data_sheets_schema.rubric_pooling import (
+    denominator_label, group_by_denominator, pooling_warning)
 
 # Base directory
 BASE_DIR = Path(__file__).parent.parent
@@ -188,11 +190,7 @@ def create_markdown_table(results: List[Dict]):
                 # printing the record's own value is merely stale. Pooling
                 # records with different denominators is not meaningful at all,
                 # so say so rather than average across them (#274).
-                maxima = {r.get('overall_score', {}).get('max_points',
-                                                         RUBRIC20_MAX_SCORE)
-                          for r in results_list}
-                denom = (str(maxima.pop()) if len(maxima) == 1
-                         else "MIXED(" + "/".join(str(m) for m in sorted(maxima)) + ")")
+                denom = denominator_label(results_list)
 
                 avg_cat1 = sum(r.get('categories', {}).get('Structural Completeness', {}).get('category_score', 0) for r in results_list) / file_count
                 avg_cat2 = sum(r.get('categories', {}).get('Metadata Quality & Content', {}).get('category_score', 0) for r in results_list) / file_count
@@ -202,22 +200,33 @@ def create_markdown_table(results: List[Dict]):
                 md += f"| {project} | {method} | {avg_score:.1f}/{denom} | {file_count} | {avg_pct:.1f}% | {avg_cat1:.1f} | {avg_cat2:.1f} | {avg_cat3:.1f} | {avg_cat4:.1f} |\n"
 
     # Top performers
-    md += "\n## Top Performing D4Ds (Score >= 80%)\n\n"
-    md += "| Project | Method | Type | Score | File |\n"
-    md += "|---------|--------|------|-------|------|\n"
+    md += "\n## Top Performing D4Ds (Score >= 80%)\n"
 
-    top_performers = [r for r in results if r.get('overall_score', {}).get('percentage', 0) >= 80]
-    top_performers.sort(key=lambda x: x.get('overall_score', {}).get('percentage', 0), reverse=True)
-
-    for result in top_performers[:20]:  # Top 20
-        project = result.get('project', 'unknown')
-        method = result.get('method', 'unknown')
-        eval_type = result.get('evaluation_type', 'unknown')
-        overall = result.get('overall_score', {})
-        score_str = f"{overall.get('total_points', 0)}/{overall.get('max_points', RUBRIC20_MAX_SCORE)} ({overall.get('percentage', 0):.1f}%)"
-        file_name = Path(result.get('d4d_file', '')).name
-
-        md += f"| {project} | {method} | {eval_type} | {score_str} | {file_name} |\n"
+    # One table per denominator. A >=80% cut and a sort applied across two
+    # maxima rank on the maximum rather than the record: 71/84 is 84.5% and
+    # 71/88 is 80.7%, so identical raw scores separate purely by which
+    # instrument measured them, and the 167 records scored out of 84 win
+    # systematically (#280). A table titled "Top Performing" that is not a
+    # valid ranking is worse than two shorter ones that are.
+    for denom, group in group_by_denominator(results).items():
+        ranked = [r for r in group
+                  if r.get('overall_score', {}).get('percentage', 0) >= 80]
+        ranked.sort(key=lambda x: x.get('overall_score', {}).get('percentage', 0),
+                    reverse=True)
+        if not ranked:
+            continue
+        md += f"\n### Scored out of {denom}\n\n"
+        md += "| Project | Method | Type | Score | File |\n"
+        md += "|---------|--------|------|-------|------|\n"
+        for result in ranked[:20]:  # Top 20 within this denominator
+            project = result.get('project', 'unknown')
+            method = result.get('method', 'unknown')
+            eval_type = result.get('evaluation_type', 'unknown')
+            overall = result.get('overall_score', {})
+            score_str = (f"{overall.get('total_points', 0)}/{denom} "
+                         f"({overall.get('percentage', 0):.1f}%)")
+            file_name = Path(result.get('d4d_file', '')).name
+            md += f"| {project} | {method} | {eval_type} | {score_str} | {file_name} |\n"
 
     # Save markdown
     md_path = EVAL_DIR / "summary_table.md"
@@ -239,14 +248,21 @@ def create_detailed_report(results: List[Dict]):
 
 """
 
-    # Calculate overall statistics
-    total_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in results)
-    max_possible = len(results) * RUBRIC20_MAX_SCORE
-    avg_percentage = sum(r.get('overall_score', {}).get('percentage', 0) for r in results) / len(results) if results else 0
-
-    report += f"- **Average Score:** {total_score / len(results):.1f}/{RUBRIC20_MAX_SCORE} ({avg_percentage:.1f}%)\n"
-    report += f"- **Best Score:** {max(results, key=lambda x: x.get('overall_score', {}).get('percentage', 0)).get('overall_score', {}).get('percentage', 0):.1f}%\n" if results else ""
-    report += f"- **Worst Score:** {min(results, key=lambda x: x.get('overall_score', {}).get('percentage', 0)).get('overall_score', {}).get('percentage', 0):.1f}%\n" if results else ""
+    # One block per denominator, never one number across both (#275). A mean of
+    # 84-scored and 88-scored records lands somewhere plausible and reads as a
+    # result, which is exactly the failure worth refusing.
+    report += pooling_warning(results)
+    for denom, group in group_by_denominator(results).items():
+        if not group:
+            continue
+        total_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group)
+        avg_percentage = sum(r.get('overall_score', {}).get('percentage', 0) for r in group) / len(group)
+        best = max(group, key=lambda x: x.get('overall_score', {}).get('percentage', 0))
+        worst = min(group, key=lambda x: x.get('overall_score', {}).get('percentage', 0))
+        report += f"### Scored out of {denom} ({len(group)} evaluation(s))\n\n"
+        report += f"- **Average Score:** {total_score / len(group):.1f}/{denom} ({avg_percentage:.1f}%)\n"
+        report += f"- **Best Score:** {best.get('overall_score', {}).get('percentage', 0):.1f}%\n"
+        report += f"- **Worst Score:** {worst.get('overall_score', {}).get('percentage', 0):.1f}%\n\n"
 
     # Method comparison
     report += "\n## Method Comparison\n\n"
@@ -254,11 +270,16 @@ def create_detailed_report(results: List[Dict]):
     for method in ['curated', 'gpt5', 'claudecode', 'claudecode_agent', 'claudecode_assistant']:
         method_results = [r for r in results if r.get('method') == method]
         if method_results:
-            avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in method_results) / len(method_results)
-            avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in method_results) / len(method_results)
             report += f"### {method}\n"
             report += f"- Files evaluated: {len(method_results)}\n"
-            report += f"- Average score: {avg_score:.1f}/{denom} ({avg_pct:.1f}%)\n\n"
+            # One line per denominator. Averaging a method across two maxima
+            # would rank it against itself measured two different ways (#275).
+            for denom, group in group_by_denominator(method_results).items():
+                avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group) / len(group)
+                avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in group) / len(group)
+                report += (f"- Average score: {avg_score:.1f}/{denom} "
+                           f"({avg_pct:.1f}%) over {len(group)} evaluation(s)\n")
+            report += "\n"
 
     # Project comparison
     report += "\n## Project Comparison\n\n"
@@ -266,11 +287,16 @@ def create_detailed_report(results: List[Dict]):
     for project in ['AI_READI', 'CHORUS', 'CM4AI', 'VOICE']:
         project_results = [r for r in results if r.get('project') == project]
         if project_results:
-            avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in project_results) / len(project_results)
-            avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in project_results) / len(project_results)
             report += f"### {project}\n"
             report += f"- Files evaluated: {len(project_results)}\n"
-            report += f"- Average score: {avg_score:.1f}/{denom} ({avg_pct:.1f}%)\n\n"
+            # One line per denominator. Averaging a method across two maxima
+            # would rank it against itself measured two different ways (#275).
+            for denom, group in group_by_denominator(project_results).items():
+                avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group) / len(group)
+                avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in group) / len(group)
+                report += (f"- Average score: {avg_score:.1f}/{denom} "
+                           f"({avg_pct:.1f}%) over {len(group)} evaluation(s)\n")
+            report += "\n"
 
     # Category analysis
     report += "\n## Category Performance\n\n"
