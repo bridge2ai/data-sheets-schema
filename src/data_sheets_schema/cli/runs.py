@@ -130,6 +130,68 @@ def restore(labels, projects, execute):
         click.echo("\nDry run. Re-run with --execute.")
 
 
+@runs.command("canonical")
+@click.option("--project", default=None, help="Report one project only.")
+@click.option("--config", default=None,
+              help="Only runs whose label starts with this, e.g. "
+                   "2026-07-31_claude-opus-5-generic-v2.")
+@click.option("--paths-only", is_flag=True,
+              help="Print record paths and nothing else, for piping.")
+@click.option("--missing", is_flag=True,
+              help="List projects that have no canonical record instead.")
+def canonical_cmd(project, config, paths_only, missing):
+    """Which record is the datasheet, per project.
+
+    `select` marks a replicate canonical and nothing read the mark (#306), so
+    the question it answers was answerable only by someone who knew to open
+    provenance. This reads it.
+
+    A project with no eligible replicate is absent rather than guessed at, and
+    `--missing` names those — the count that matters for scoping an evaluation
+    is how many projects *have* one, which is three of four while no VOICE
+    replicate validates (#292).
+    """
+    from data_sheets_schema.constants import PROJECTS
+    from data_sheets_schema.runs import canonical_runs
+
+    found = canonical_runs(config=config)
+    if project:
+        found = {k: v for k, v in found.items() if k == project}
+
+    if missing:
+        gap = [p for p in PROJECTS if p not in canonical_runs(config=config)]
+        if project:
+            gap = [p for p in gap if p == project]
+        for p in gap:
+            click.echo(p)
+        if not gap:
+            click.echo("Every project has a canonical record.", err=True)
+        return
+
+    if not found:
+        click.echo("No canonical record found. Run `d4d runs select --execute`.",
+                   err=True)
+        raise SystemExit(1)
+
+    if paths_only:
+        for entry in found.values():
+            for key in ("full", "core"):
+                if entry.get(key):
+                    click.echo(entry[key])
+        return
+
+    for name, entry in found.items():
+        click.echo(f"{name}")
+        click.echo(f"   label     {entry['label']}")
+        click.echo(f"   full      {entry['full']}")
+        click.echo(f"   core      {entry['core']}")
+        click.echo(f"   chosen    from {entry['candidates']} candidates — "
+                   f"{entry['criterion']}")
+    gap = [p for p in PROJECTS if p not in found and not project]
+    if gap:
+        click.echo(f"\nNo canonical record: {', '.join(gap)}", err=True)
+
+
 @runs.command("check")
 @click.option("--method", default=None)
 @click.option("--label", default=None)

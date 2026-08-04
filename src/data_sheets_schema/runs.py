@@ -225,6 +225,48 @@ def validation_status(method: str, label: str, project: str,
     return VALID if v["passed"] else INVALID
 
 
+def canonical_runs(concat_dir: Path = CONCAT_DIR,
+                   config: str | None = None) -> dict[str, dict]:
+    """project -> the run marked canonical for it, and where its records are.
+
+    `d4d runs select` writes a `canonical` block and nothing read it (#306). A
+    mark with no reader answers "which record *is* the CHORUS datasheet" only
+    for someone who already knows to go looking in provenance, which is not an
+    answer a pipeline can use — and #287's scoping needs to *enumerate* the
+    canonical set before it can be evaluated.
+
+    A project with no eligible replicate is simply absent. VOICE is the live
+    case: no replicate validates (#292), so it has no canonical record and any
+    count over projects is three of four, not four.
+    """
+    out: dict[str, dict] = {}
+    for prov in sorted(concat_dir.rglob("*_provenance.yaml")):
+        try:
+            data = yaml.safe_load(prov.read_text(encoding="utf-8")) or {}
+        except (yaml.YAMLError, OSError, UnicodeDecodeError):
+            continue
+        if not isinstance(data, dict) or "canonical" not in data:
+            continue
+        run = data.get("run") or {}
+        project, label = run.get("project"), run.get("label")
+        if not project or not label:
+            continue
+        if config and not label.startswith(config):
+            continue
+        outputs = data.get("outputs") or {}
+        out[project] = {
+            "project": project,
+            "label": label,
+            "method": run.get("method"),
+            "criterion": (data["canonical"] or {}).get("criterion"),
+            "candidates": len((data["canonical"] or {}).get("selected_from") or []),
+            "full": (outputs.get("full") or {}).get("path"),
+            "core": (outputs.get("core") or {}).get("path"),
+            "provenance": str(prov),
+        }
+    return dict(sorted(out.items()))
+
+
 def record_mode(method: str, label: str, project: str,
                 concat_dir: Path = CONCAT_DIR) -> str:
     """`live`, `reconstructed`, or `none` — how a run's provenance was obtained.
