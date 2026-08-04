@@ -22,6 +22,8 @@ from datetime import datetime
 # The denominator lives with the rubric, not as a literal in a report.
 # It was 84 here while the questions defined 88 (#270 thread).
 from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
+from data_sheets_schema.rubric_pooling import (
+    denominator_label, group_by_denominator, pooling_warning)
 
 # Base directory
 BASE_DIR = Path(__file__).parent.parent
@@ -188,11 +190,7 @@ def create_markdown_table(results: List[Dict]):
                 # printing the record's own value is merely stale. Pooling
                 # records with different denominators is not meaningful at all,
                 # so say so rather than average across them (#274).
-                maxima = {r.get('overall_score', {}).get('max_points',
-                                                         RUBRIC20_MAX_SCORE)
-                          for r in results_list}
-                denom = (str(maxima.pop()) if len(maxima) == 1
-                         else "MIXED(" + "/".join(str(m) for m in sorted(maxima)) + ")")
+                denom = denominator_label(results_list)
 
                 avg_cat1 = sum(r.get('categories', {}).get('Structural Completeness', {}).get('category_score', 0) for r in results_list) / file_count
                 avg_cat2 = sum(r.get('categories', {}).get('Metadata Quality & Content', {}).get('category_score', 0) for r in results_list) / file_count
@@ -239,14 +237,21 @@ def create_detailed_report(results: List[Dict]):
 
 """
 
-    # Calculate overall statistics
-    total_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in results)
-    max_possible = len(results) * RUBRIC20_MAX_SCORE
-    avg_percentage = sum(r.get('overall_score', {}).get('percentage', 0) for r in results) / len(results) if results else 0
-
-    report += f"- **Average Score:** {total_score / len(results):.1f}/{RUBRIC20_MAX_SCORE} ({avg_percentage:.1f}%)\n"
-    report += f"- **Best Score:** {max(results, key=lambda x: x.get('overall_score', {}).get('percentage', 0)).get('overall_score', {}).get('percentage', 0):.1f}%\n" if results else ""
-    report += f"- **Worst Score:** {min(results, key=lambda x: x.get('overall_score', {}).get('percentage', 0)).get('overall_score', {}).get('percentage', 0):.1f}%\n" if results else ""
+    # One block per denominator, never one number across both (#275). A mean of
+    # 84-scored and 88-scored records lands somewhere plausible and reads as a
+    # result, which is exactly the failure worth refusing.
+    report += pooling_warning(results)
+    for denom, group in group_by_denominator(results).items():
+        if not group:
+            continue
+        total_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group)
+        avg_percentage = sum(r.get('overall_score', {}).get('percentage', 0) for r in group) / len(group)
+        best = max(group, key=lambda x: x.get('overall_score', {}).get('percentage', 0))
+        worst = min(group, key=lambda x: x.get('overall_score', {}).get('percentage', 0))
+        report += f"### Scored out of {denom} ({len(group)} evaluation(s))\n\n"
+        report += f"- **Average Score:** {total_score / len(group):.1f}/{denom} ({avg_percentage:.1f}%)\n"
+        report += f"- **Best Score:** {best.get('overall_score', {}).get('percentage', 0):.1f}%\n"
+        report += f"- **Worst Score:** {worst.get('overall_score', {}).get('percentage', 0):.1f}%\n\n"
 
     # Method comparison
     report += "\n## Method Comparison\n\n"
@@ -254,11 +259,16 @@ def create_detailed_report(results: List[Dict]):
     for method in ['curated', 'gpt5', 'claudecode', 'claudecode_agent', 'claudecode_assistant']:
         method_results = [r for r in results if r.get('method') == method]
         if method_results:
-            avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in method_results) / len(method_results)
-            avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in method_results) / len(method_results)
             report += f"### {method}\n"
             report += f"- Files evaluated: {len(method_results)}\n"
-            report += f"- Average score: {avg_score:.1f}/{denom} ({avg_pct:.1f}%)\n\n"
+            # One line per denominator. Averaging a method across two maxima
+            # would rank it against itself measured two different ways (#275).
+            for denom, group in group_by_denominator(method_results).items():
+                avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group) / len(group)
+                avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in group) / len(group)
+                report += (f"- Average score: {avg_score:.1f}/{denom} "
+                           f"({avg_pct:.1f}%) over {len(group)} evaluation(s)\n")
+            report += "\n"
 
     # Project comparison
     report += "\n## Project Comparison\n\n"
@@ -266,11 +276,16 @@ def create_detailed_report(results: List[Dict]):
     for project in ['AI_READI', 'CHORUS', 'CM4AI', 'VOICE']:
         project_results = [r for r in results if r.get('project') == project]
         if project_results:
-            avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in project_results) / len(project_results)
-            avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in project_results) / len(project_results)
             report += f"### {project}\n"
             report += f"- Files evaluated: {len(project_results)}\n"
-            report += f"- Average score: {avg_score:.1f}/{denom} ({avg_pct:.1f}%)\n\n"
+            # One line per denominator. Averaging a method across two maxima
+            # would rank it against itself measured two different ways (#275).
+            for denom, group in group_by_denominator(project_results).items():
+                avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group) / len(group)
+                avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in group) / len(group)
+                report += (f"- Average score: {avg_score:.1f}/{denom} "
+                           f"({avg_pct:.1f}%) over {len(group)} evaluation(s)\n")
+            report += "\n"
 
     # Category analysis
     report += "\n## Category Performance\n\n"

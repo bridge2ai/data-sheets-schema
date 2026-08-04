@@ -173,16 +173,20 @@ class TestDeclaredMaximumMatchesTheQuestions(unittest.TestCase):
     def test_the_summary_table_reads_each_records_own_denominator(self):
         """#274: 167 committed records were scored against 84.
 
-        A constant printed beside an average of those is confidently wrong
-        where the record's own value is merely stale, and pooling records with
-        different denominators is not meaningful at all.
+        This asserted on the script's source text, which is how #278 shipped —
+        a grep cannot see an unbound name. The behaviour is now covered by
+        `test_rubric_pooling.py`, which runs the report generators; what is
+        left here is the one thing a source check is actually good for.
         """
         from pathlib import Path
         script = Path("scripts/summarize_rubric20_results.py").read_text()
-        self.assertIn("MIXED(", script,
-                      "a set spanning two denominators must say so")
         self.assertNotIn("{avg_score:.1f}/{RUBRIC20_MAX_SCORE}", script,
                          "the table must not hardcode a denominator")
+        from data_sheets_schema.rubric_pooling import denominator_label
+        self.assertEqual(
+            denominator_label([{"overall_score": {"max_points": 84}},
+                               {"overall_score": {"max_points": 88}}]),
+            "MIXED(84/88)")
 
 
 if __name__ == "__main__":
