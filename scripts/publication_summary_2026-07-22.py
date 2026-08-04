@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """Deterministic publication summary for the 2026-07-22 D4D eval rerun.
 
+HISTORICAL. The evaluations this reads scored
+`data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/` and the flat
+pre-run-label layout. That label was archived as unattestable, so the summaries
+this produces describe records the study has excluded (#286). Re-pointing it at
+the current corpus means re-running the evaluations, not re-running this.
+
 Reads every *_evaluation.json under
 data/evaluation_llm/{rubric10,rubric20,rubric10_semantic,rubric20_semantic}/concatenated/
 (skipping _archive_* subdirs) and emits:

@@ -1,4 +1,16 @@
-# D4D Publication Summary — Exemplar Run 2026-07-22 (claude-fable-5)
+# [HISTORICAL] D4D Publication Summary — Exemplar Run 2026-07-22 (claude-fable-5)
+
+> ⚠️ **Historical. These figures score records the study has since excluded.**
+>
+> The inputs were `data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/`
+> and the flat pre-run-label layout. That label was archived as **unattestable**
+> by `d4d runs archive --unattested` — its bundles were first committed after the
+> runs executed, so the bytes those runs consumed cannot be verified. The records
+> survive at `data/ATTIC/d4d_concatenated_archived/claudecode_agent/2026-04-10_sonnet-4.6/`,
+> so every number here remains traceable to its input; none of it describes the
+> current corpus.
+>
+> Do not cite these as current results. See #286.
 
 Final claudecode_agent scores across the four rubrics for both full D4D and
 D4D-core outputs, per Grand Challenge project. All 32 evaluations produced by
