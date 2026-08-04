@@ -5,6 +5,8 @@ Commands for downloading and preprocessing data sources.
 
 import click
 import sys
+
+import yaml
 from pathlib import Path
 from data_sheets_schema.constants import PROJECTS
 from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
@@ -134,7 +136,20 @@ def concatenate(project, input_dir, output_file, manifest):
     setup_repo_imports()
     from src.download.concatenate_documents import main as concat_main
 
-    input_path = Path(input_dir) / project
+    # A project may select from another project's downloads. VOICE_PEDIATRIC
+    # is documented inside VOICE's corpus and has no directory of its own, and
+    # the override used to build its bundle lived only in the command someone
+    # happened to type (#302). Declared in the manifest, it rebuilds from the
+    # manifest.
+    if str(input_dir) == 'data/preprocessed/individual':
+        try:
+            declared = (yaml.safe_load(Path(manifest).read_text(encoding="utf-8"))
+                        or {}).get("projects", {}).get(f"{project}_source_dir")
+        except (OSError, yaml.YAMLError):
+            declared = None
+        input_path = Path(declared) if declared else Path(input_dir) / project
+    else:
+        input_path = Path(input_dir) / project
     if not input_path.exists():
         click.echo(f"❌ Error: Input directory not found: {input_path}", err=True)
         sys.exit(1)
