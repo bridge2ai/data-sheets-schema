@@ -373,3 +373,45 @@ projects:
       url: https://github.com/eipm/bridge2ai-docs/tree/main/docs
       raw_file: github_eipm_bridge2ai-docs_README_row22.md
       processed_file: github_eipm_bridge2ai-docs_README_row22.txt
+  VOICE_PEDIATRIC:
+  - id: physionet_pediatric_1_1_0
+    source_type: data resource
+    url: https://physionet.org/content/b2ai-voice-pediatric/1.1.0/
+    raw_file: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.html
+    processed_file: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt
+    captured_at: '2026-07-24'
+    curation_note: Current Bridge2AI-Voice pediatric release, published 2026-05-01, 300 participants aged
+      2-18, 23,533 derived recordings, credentialed access. This is a separate PhysioNet project from the
+      adult b2ai-voice dataset, not a version of it; the two releases are distinct cohorts collected under
+      a separate pediatric protocol, with pediatric participants recruited at the Hospital for Sick Children
+      (SickKids). Raw pediatric audio is distributed via Synapse (syn73617068) rather than PhysioNet. Added
+      because the current VOICE documentation advertises pediatric v1.1.0 alongside adult v3.1.0 while the
+      input sheet lists no pediatric source at all. Pediatric v1.0.0 exists upstream but is superseded and
+      was not captured.
+    verification_url: https://physionet.org/content/b2ai-voice-pediatric/
+  - id: irb_protocol
+    source_type: IRB
+    url: https://docs.google.com/document/d/1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN/edit
+    raw_file: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.docx
+    processed_file: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
+  - id: project_documentation
+    source_type: documentation
+    url: https://docs.b2ai-voice.org/
+    raw_file: docs_b2ai-voice_org_row10.html
+    processed_file: docs_b2ai-voice_org_row10.txt
+  - id: nih_reporter_project
+    source_type: NIH project page
+    url: https://reporter.nih.gov/project-details/11376382
+    raw_file: reporter_nih_gov_project-details-11376382_row7.txt
+    processed_file: reporter_nih_gov_project-details-11376382_row7.txt
+    minimum_characters: 1000
+  - id: data_transfer_use_agreement
+    source_type: DUA
+    url: https://drive.google.com/file/d/1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA/view?usp=sharing
+    raw_file: gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.pdf
+    processed_file: gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt
+  - id: documentation_repository
+    source_type: documentation
+    url: https://github.com/eipm/bridge2ai-docs/tree/main/docs
+    raw_file: github_eipm_bridge2ai-docs_README_row22.md
+    processed_file: github_eipm_bridge2ai-docs_README_row22.txt

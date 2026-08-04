@@ -296,17 +296,31 @@ broke nothing; the four-project list in 26 files is prose, not logic.
 
 **Not done, and each needs a decision:**
 
-- **A bundle and manifest line.** Both datasets are documented in the same VOICE
-  corpus, so they share a bundle and must be distinguished by `{MANIFEST_LINE}`,
-  which is already a substitution field. Scoping via the manifest keeps the
-  frozen prompt bodies untouched — the four-project list lives in the preamble,
-  not the body, so no existing arm's resolved text changes.
+- **A scoped bundle — done.** `{MANIFEST_LINE}` was the wrong mechanism and the
+  claim here was wrong: it is substituted into the *output record's* header
+  block as a provenance comment, not into the instruction. The frozen body says
+  "DECLARED INPUT BUNDLE — your only source of dataset facts: {BUNDLE}", so the
+  bundle is the scope. `VOICE_PEDIATRIC` now has a manifest selection of six
+  sources — the pediatric PhysioNet record plus the programme documents that
+  cover it — and its own 204 KB bundle. The three adult version pages and the
+  two adult-cohort papers are excluded: they carry no pediatric content, and
+  including them would import adult facts into a pediatric datasheet, which is
+  the failure the fitness axis calls `target`.
+
+  The VOICE bundle is byte-identical (md5 `e637eb75`, what 49 runs attest), and
+  a test pins it.
 - **A generation run.** Twelve phases for one project, paid.
-- **Whether `VOICE` becomes `VOICE_main`.** Not done: 198 of the ~580 affected
-  paths are archived records, archived because their provenance could not be
-  verified, and rewriting their project field is the opposite of what archiving
-  them was for. Renaming only the live corpus splits the series instead. The
-  live-only migration is available if the asymmetry matters more than the split.
+- **Whether `VOICE` becomes `VOICE_main` — decided: no.** Attempted and reverted.
+  The path moves were clean (567 files, no clashes), but the content rewrite
+  broke attestation two ways that no amount of care avoids: record bodies carry
+  `VOICE` in titles and prose and their byte counts are recorded in provenance,
+  so rewriting them failed 33 runs outright; and `source_manifest.yaml` is keyed
+  by project and its md5 is recorded by **115 runs**, so renaming the project
+  necessarily changes a file those runs attest.
+
+  Renaming would convert attested runs into reconstructed ones — the same
+  property that got the 2026-04-10 series archived. `VOICE` therefore keeps its
+  identifier and `VOICE_PEDIATRIC` carries the distinction.
 
 **Consequence for #169.** The power argument counts four projects. These two
 share a source corpus, so they are not two independent samples, and
