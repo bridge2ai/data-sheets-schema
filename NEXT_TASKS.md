@@ -283,6 +283,38 @@ a budget on every tracked cache under `agreement_cache/`.
 
 ---
 
+## 9. Split VOICE into two datasets — registered, not generated
+
+`VOICE_PEDIATRIC` is a project as of #298. The companion pediatric dataset has
+its own DOI (10.13026/h995-bt35), protocol and Research Ethics Board approval,
+and was being represented as a nested object inside VOICE's `related_datasets` —
+which is why no VOICE replicate validated (#292).
+
+**Done:** the registry, the shared-corpus declaration, and the schema correction
+that made the nested form wrong rather than ambiguous. Adding the fifth project
+broke nothing; the four-project list in 26 files is prose, not logic.
+
+**Not done, and each needs a decision:**
+
+- **A bundle and manifest line.** Both datasets are documented in the same VOICE
+  corpus, so they share a bundle and must be distinguished by `{MANIFEST_LINE}`,
+  which is already a substitution field. Scoping via the manifest keeps the
+  frozen prompt bodies untouched — the four-project list lives in the preamble,
+  not the body, so no existing arm's resolved text changes.
+- **A generation run.** Twelve phases for one project, paid.
+- **Whether `VOICE` becomes `VOICE_main`.** Not done: 198 of the ~580 affected
+  paths are archived records, archived because their provenance could not be
+  verified, and rewriting their project field is the opposite of what archiving
+  them was for. Renaming only the live corpus splits the series instead. The
+  live-only migration is available if the asymmetry matters more than the split.
+
+**Consequence for #169.** The power argument counts four projects. These two
+share a source corpus, so they are not two independent samples, and
+`SHARED_CORPUS_GROUPS` records that for any analysis that would otherwise
+count them as such.
+
+---
+
 ## Standing constraints
 
 - **No gold standard exists.** `curated` was generated through a ChatGPT chat
