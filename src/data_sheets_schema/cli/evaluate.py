@@ -179,7 +179,11 @@ def llm(file, project, method, rubric, output_dir):
               help="Restrict to one run config (label prefix).")
 @click.option("--paths-only", is_flag=True,
               help="One record path per line, for piping into a sweep.")
-def plan_cmd(config, paths_only):
+@click.option("--all-replicates", is_flag=True,
+              help="Every replicate of the canonical config, not one record "
+                   "per project (#287). Buys a within-config variance estimate "
+                   "at ~3x the cost; does not rescue between-config power.")
+def plan_cmd(config, paths_only, all_replicates):
     """What a semantic evaluation sweep would cover, derived from the canonical set.
 
     The count has been stated four times and been wrong three of them (#315),
@@ -192,7 +196,8 @@ def plan_cmd(config, paths_only):
                                                     summarise)
     from data_sheets_schema.runs import AmbiguousCanonical
     try:
-        evaluations = plan(config=config)
+        evaluations = plan(config=config,
+                           all_replicates=all_replicates)
     except NothingSelected as exc:
         raise click.ClickException(str(exc))
     except AmbiguousCanonical as exc:
@@ -209,7 +214,52 @@ def plan_cmd(config, paths_only):
         return
 
     for evaluation in evaluations:
-        click.echo(f"{evaluation.label}\t{evaluation.path}")
+        click.echo(f"{evaluation.name}\t{evaluation.path}")
     click.echo("")
     click.echo(summarise(evaluations))
+
+
+@evaluate.command("related-datasets")
+@click.argument("records", nargs=-1, type=click.Path(exists=True))
+@click.option("--project", default=None,
+              help="Limit to one project when reading the canonical set.")
+def related_datasets_cmd(records, project):
+    """Classify `related_datasets` defects by mode (#292).
+
+    All three VOICE replicates fail this slot, each differently, and
+    `linkml-validate` reports them as three unrelated errors. The rerun's answer
+    differs per mode: an aliased type recurring means the write-path normaliser
+    did not run, an unknown type means the model reached for a word the DataCite
+    vocabulary lacks, and an inline target under generic-v4 means that rule did
+    not work.
+
+    With no arguments, reads the canonical set.
+    """
+    import yaml
+
+    from data_sheets_schema.related_datasets import inspect, summarise
+
+    paths = [Path(r) for r in records]
+    if not paths:
+        from data_sheets_schema.evaluation_plan import NothingSelected, plan
+        from data_sheets_schema.runs import AmbiguousCanonical
+        try:
+            paths = list(dict.fromkeys(
+                e.path for e in plan() if project in (None, e.project)))
+        except (NothingSelected, AmbiguousCanonical) as exc:
+            raise click.ClickException(str(exc))
+
+    total = 0
+    for path in paths:
+        record = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        defects = inspect(record)
+        total += len(defects)
+        if defects:
+            click.echo(f"{path}")
+            for defect in defects:
+                click.echo(f"  [{defect.index}] {defect.mode}: {defect.detail}")
+    click.echo("")
+    click.echo(f"{total} defect(s) across {len(paths)} record(s)")
+    if total:
+        raise SystemExit(1)
 

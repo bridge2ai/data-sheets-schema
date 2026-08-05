@@ -28,6 +28,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 #: The semantic rubrics an evaluation sweep runs. Both apply to every record;
 #: rubric10 and rubric20 measure different things and neither subsumes the other.
@@ -67,23 +68,62 @@ class Evaluation:
     variant: str
     rubric: str
     path: Path
+    #: Run label, set only when the plan spans replicates — with one record per
+    #: project the label is implied by the canonical mark.
+    label: str | None = None
 
     @property
-    def label(self) -> str:
-        return f"{self.project}/{self.variant}/{self.rubric}"
+    def name(self) -> str:
+        stem = f"{self.project}/{self.variant}/{self.rubric}"
+        return f"{stem}@{self.label}" if self.label else stem
+
+
+def replicates_of(canonical: dict[str, Any]) -> list[dict[str, Any]]:
+    """Every replicate sharing a canonical run's config, including it.
+
+    The `_repN` suffix is the only thing separating replicates of one
+    configuration, so the config is the label with that suffix removed.
+    """
+    label = str(canonical.get("label") or "")
+    stem = label.rsplit("_rep", 1)[0] if "_rep" in label else label
+    out = []
+    for variant in VARIANTS:
+        path = canonical.get(variant)
+        if not path:
+            continue
+        path = Path(path)
+        parent = path.parent.parent
+        if not parent.exists():
+            continue
+        for sibling in sorted(parent.glob(f"{stem}_rep*")):
+            candidate = sibling / path.name
+            if candidate.exists():
+                out.append({"label": sibling.name, variant: str(candidate),
+                            "project": canonical.get("project")})
+    return out
 
 
 def plan(concat_dir: Path | None = None, config: str | None = None,
-         rubrics: tuple[str, ...] = SEMANTIC_RUBRICS) -> list[Evaluation]:
+         rubrics: tuple[str, ...] = SEMANTIC_RUBRICS,
+         all_replicates: bool = False) -> list[Evaluation]:
     """Every evaluation the canonical set implies, in a stable order.
 
     Reads the canonical marks rather than any project list: a project without a
     canonical record contributes nothing, which is the whole reason the count
     cannot be stated in advance.
+
+    `all_replicates` widens the plan from one record per project to every
+    replicate of the canonical configuration — #287's other coverage option.
+    It buys a within-config variance estimate at roughly three times the cost,
+    and does **not** buy a between-config comparison: #169 established that four
+    projects cannot resolve differences near the noise floor, so replicate
+    spread does not rescue that.
     """
     from data_sheets_schema.runs import canonical_runs
 
     found = canonical_runs(concat_dir=concat_dir, config=config)
+    if all_replicates:
+        return _replicate_plan(found, rubrics, concat_dir)
     out: list[Evaluation] = []
     for project in sorted(found):
         record = found[project]
@@ -104,6 +144,24 @@ def plan(concat_dir: Path | None = None, config: str | None = None,
     return out
 
 
+def _replicate_plan(found: dict[str, dict], rubrics: tuple[str, ...],
+                    concat_dir: Path | None) -> list[Evaluation]:
+    out: list[Evaluation] = []
+    for project in sorted(found):
+        for sibling in replicates_of(found[project]):
+            for variant in VARIANTS:
+                path = sibling.get(variant)
+                if not path:
+                    continue
+                for rubric in rubrics:
+                    out.append(Evaluation(project=project, variant=variant,
+                                          rubric=rubric, path=Path(path),
+                                          label=sibling.get("label")))
+    if not out:
+        raise NothingSelected(concat_dir)
+    return out
+
+
 def summarise(evaluations: list[Evaluation]) -> str:
     """A line stating how the count was arrived at, not just the count.
 
@@ -113,6 +171,12 @@ def summarise(evaluations: list[Evaluation]) -> str:
     projects = sorted({e.project for e in evaluations})
     variants = sorted({e.variant for e in evaluations})
     rubrics = sorted({e.rubric for e in evaluations})
+    labels = sorted({e.label for e in evaluations if e.label})
+    # The replicate factor has to appear or the derivation multiplies to the
+    # wrong number — which is the failure this function exists to prevent, so
+    # printing a product that does not equal the total would be worse here than
+    # printing no product at all.
+    replicates = (f" x {len(labels)} replicates" if len(labels) > 1 else "")
     return (f"{len(evaluations)} evaluations = {len(projects)} projects "
             f"({', '.join(projects)}) x {len(variants)} variants "
-            f"({', '.join(variants)}) x {len(rubrics)} rubrics")
+            f"({', '.join(variants)}) x {len(rubrics)} rubrics{replicates}")

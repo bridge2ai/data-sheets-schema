@@ -125,10 +125,76 @@ class TestThePlanFollowsTheMarks(unittest.TestCase):
     def test_the_order_is_stable(self):
         with TemporaryDirectory() as tmp:
             root = _corpus(Path(tmp), ["CM4AI", "AI_READI"])
-            first = [e.label for e in plan(concat_dir=root)]
-            second = [e.label for e in plan(concat_dir=root)]
+            first = [e.name for e in plan(concat_dir=root)]
+            second = [e.name for e in plan(concat_dir=root)]
         self.assertEqual(first, second)
         self.assertEqual(first, sorted(first, key=lambda s: s.split("/")[0]))
+
+
+class TestReplicateCoverage(unittest.TestCase):
+    """#287's other option: every replicate of the canonical config.
+
+    Buys a within-config variance estimate at ~3x the cost. It does not buy a
+    between-config comparison — #169 established four projects cannot resolve
+    differences near the noise floor, and more replicates of the same four
+    projects does not change that.
+    """
+
+    def _corpus_with_replicates(self, root, project="CHORUS", reps=3):
+        config = "2026-08-05_cfg"
+        for rep in range(1, reps + 1):
+            label = f"{config}_rep{rep}"
+            for variant in VARIANTS:
+                sub = ("claudecode_agent" if variant == "full"
+                       else "claudecode_agent_core")
+                suffix = "_d4d.yaml" if variant == "full" else "_d4d_core.yaml"
+                path = root / sub / label / f"{project}{suffix}"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("id: x\n")
+        # Only rep1 is marked canonical; the others are its siblings.
+        _corpus(root, [project], config=config)
+        return root
+
+    def test_it_covers_every_replicate_not_just_the_marked_one(self):
+        with TemporaryDirectory() as tmp:
+            root = self._corpus_with_replicates(Path(tmp))
+            canonical = plan(concat_dir=root)
+            widened = plan(concat_dir=root, all_replicates=True)
+        self.assertEqual(len(widened), 3 * len(canonical))
+
+    def test_each_evaluation_names_its_replicate(self):
+        """Without the label the widened plan has three indistinguishable
+        entries per record, and a sweep cannot tell their results apart."""
+        with TemporaryDirectory() as tmp:
+            root = self._corpus_with_replicates(Path(tmp))
+            widened = plan(concat_dir=root, all_replicates=True)
+        labels = {e.label for e in widened}
+        self.assertEqual(len(labels), 3)
+        self.assertTrue(all(e.label in e.name for e in widened))
+
+    def test_the_canonical_plan_carries_no_label(self):
+        """One record per project — the label is implied by the mark."""
+        with TemporaryDirectory() as tmp:
+            root = self._corpus_with_replicates(Path(tmp))
+            for evaluation in plan(concat_dir=root):
+                self.assertIsNone(evaluation.label)
+
+    def test_the_summary_product_matches_the_total(self):
+        """The derivation must multiply to the number beside it, or it is worse
+        than no derivation at all."""
+        import re
+        with TemporaryDirectory() as tmp:
+            root = self._corpus_with_replicates(Path(tmp))
+            for widen in (False, True):
+                got = plan(concat_dir=root, all_replicates=widen)
+                line = summarise(got)
+                factors = [int(n) for n in re.findall(
+                    r"(\d+) (?:projects|variants|rubrics|replicates)", line)]
+                product = 1
+                for factor in factors:
+                    product *= factor
+                with self.subTest(all_replicates=widen):
+                    self.assertEqual(product, len(got), line)
 
 
 class TestNothingSelected(unittest.TestCase):
