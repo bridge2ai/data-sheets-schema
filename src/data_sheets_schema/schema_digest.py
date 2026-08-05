@@ -41,6 +41,21 @@ DESCRIPTION_CHARS = 300
 # vocabulary costs 38 bytes more than the clipped one, in a cached prefix.
 MAX_ENUM_VALUES = 60
 
+# Attribute names every class inherits. Listing them on all 66 nested classes
+# would be 264 tokens saying nothing — the model already reaches for
+# `description`, which is the problem this listing exists to solve.
+UNIVERSAL_ATTRIBUTES = frozenset({"id", "name", "description", "used_software"})
+
+# Optional attributes listed per nested class before truncating.
+MAX_OPTIONAL_SHOWN = 24
+
+# Above this overlap with the top-level slot listing, a nested class is
+# described by reference instead of enumerated. Exactly three classes qualify —
+# `Dataset` (100%), `DataSubset` (98%) and `FileCollection` (85%) — and they are
+# the three large enough to be truncated, so listing the alphabetically-first 24
+# would spend the tokens on a redundant and arbitrary slice.
+MIRRORS_TOP_LEVEL = 0.8
+
 
 @dataclass
 class SlotDigest:
@@ -205,9 +220,37 @@ def render(digest: ClassDigest) -> str:
             "object, or the record fails validation.",
             "",
         ]
+        top_level = {s.name for s in digest.slots}
         for n in digest.nested:
             req = ", ".join(f"`{k}`" for k in n.required) if n.required else "none"
             lines.append(f"- **{n.name}** — required: {req}")
+            # `optional` was collected from the first version and never
+            # rendered, so the digest said which nested keys were *mandatory*
+            # and never which were *available*. 54 of 66 classes rendered as a
+            # bare "required: none", and 367 attributes were named nowhere.
+            #
+            # Measured on the 25 current records: not one populates
+            # `regulatory_restrictions.confidentiality_level`,
+            # `.hipaa_compliant`, `.other_compliance` or
+            # `.governance_committee_contact`. Every record instead writes prose
+            # into that object's `description`, and the prose *contains the
+            # answers* — "FDA Regulated: No", "De-identified Samples: Yes". The
+            # model had the facts and no structured place it had been told
+            # about. Q9 of rubric20 is capped at 3/5 on every record as a direct
+            # result.
+            optional = [k for k in n.optional if k not in UNIVERSAL_ATTRIBUTES]
+            if optional:
+                own = [k for k in optional if k not in top_level]
+                mirrors = 1 - len(own) / len(optional) >= MIRRORS_TOP_LEVEL
+                if mirrors:
+                    extra = (" plus " + ", ".join(f"`{k}`" for k in own)) if own else ""
+                    lines.append("    - also accepts the same slots as the "
+                                 f"top-level listing above{extra}")
+                else:
+                    shown = ", ".join(f"`{k}`" for k in optional[:MAX_OPTIONAL_SHOWN])
+                    over = len(optional) - MAX_OPTIONAL_SHOWN
+                    tail = f" (+{over} more)" if over > 0 else ""
+                    lines.append(f"    - also accepts: {shown}{tail}")
             # A controlled vocabulary on a nested slot has to be shown here or
             # nowhere: the top-level listing never reaches it.
             for slot_name, values in sorted(n.enums.items()):
