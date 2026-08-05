@@ -92,6 +92,10 @@ def _rubric():
         "d4d_evaluation_rubric"]["rubric"]
 
 
+def _question(number):
+    return next(q for q in _rubric() if q["id"] == number)
+
+
 def _hybrid():
     spec = importlib.util.spec_from_file_location("rubric20_hybrid", HYBRID)
     module = importlib.util.module_from_spec(spec)
@@ -151,6 +155,40 @@ class TestTheRubricResolves(unittest.TestCase):
             with self.subTest(question=question["id"]):
                 self.assertTrue(question.get("field"),
                                 "a question with no fields cannot be scored")
+
+
+class TestFieldsMatchWhatTheQuestionMeasures(unittest.TestCase):
+    """Resolution is necessary and not sufficient.
+
+    One dead name does not have one replacement. `format` in Q4 — a count of
+    file *types*, scored "1 type / 2-3 / >3" — is not `format` in Q10, which is
+    about schema conformance. Remapping both to the same thing gave Q4 a schema
+    URL and two byte-size fields: every path resolved, every existing test
+    passed, and the question no longer measured what its own `method:` and
+    scoring bands say it measures.
+
+    Caught in review of the change that caused it. These two questions are the
+    pair most easily conflated, so they are pinned by concept rather than by a
+    literal list — a scorer may add fields, but not swap which of the two it is.
+    """
+
+    SIZE = {"total_size_bytes", "file_collections.total_bytes"}
+    ENUMERATION = {"distribution_formats", "file_collections", "total_file_count"}
+
+    def test_the_type_variety_question_does_not_score_sizes(self):
+        """Q4 counts types; a byte total says nothing about how many."""
+        fields = set(_question(4)["field"])
+        self.assertEqual(fields & self.SIZE, set())
+        self.assertTrue(fields & self.ENUMERATION)
+
+    def test_the_file_size_question_does_score_sizes(self):
+        """The complement, so the rule above cannot be satisfied by emptying
+        both lists."""
+        self.assertTrue(set(_question(5)["field"]) & self.SIZE)
+
+    def test_the_interoperability_question_scores_schema_conformance(self):
+        """Q10 is where `conforms_to_schema` belongs."""
+        self.assertIn("conforms_to_schema", _question(10)["field"])
 
 
 @unittest.skipUnless(HYBRID.exists(), "hybrid scorer not present")

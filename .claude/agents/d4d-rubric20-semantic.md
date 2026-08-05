@@ -161,7 +161,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 4: File Enumeration and Type Variety
 **Description:** Number of distribution formats and file type diversity.
 
-**Fields:** `distribution_formats`, `conforms_to_schema`, `total_size_bytes`, `file_collections.total_bytes`
+**Fields:** `distribution_formats`, `file_collections`, `total_file_count`
 
 **Scoring (numeric 0-5):**
 - **0:** 1 file type only

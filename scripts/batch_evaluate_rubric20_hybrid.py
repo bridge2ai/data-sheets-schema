@@ -68,7 +68,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Structural Completeness",
         "name": "File Enumeration and Type Variety",
         "description": "Number of distribution formats and file type diversity",
-        "fields": ["distribution_formats", "conforms_to_schema", "total_size_bytes", "file_collections.total_bytes", "file_collections", "total_file_count", "subsets"],
+        "fields": ["distribution_formats", "file_collections", "total_file_count", "subsets"],
         "score_type": "numeric",
         "max_score": 5
     },

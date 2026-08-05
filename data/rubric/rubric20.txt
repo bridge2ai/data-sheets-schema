@@ -210,8 +210,7 @@ d4d_evaluation_rubric:
         datasets integrated on participant_id/sample_id, OR (2) single dataset with multiple data
         types. Check for: unified participant/sample identifiers across modalities. Multimodality
         is evaluated separately from AI/ML readiness (Q10).
-      field: ["distribution_formats", "conforms_to_schema", "total_size_bytes",
-              "file_collections.total_bytes"]
+      field: ["distribution_formats", "file_collections", "total_file_count"]
       method: "Count total formats and unique media types."
       score_type: numeric
       scoring:

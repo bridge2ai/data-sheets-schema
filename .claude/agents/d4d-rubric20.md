@@ -99,7 +99,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 4: File Enumeration and Type Variety
 **Description:** Number of files and file type diversity in distribution_formats or files.listing.
 
-**Fields:** `file_collections`, `total_file_count`, `distribution_formats`, `conforms_to_schema`, `total_size_bytes`, `file_collections.total_bytes`
+**Fields:** `file_collections`, `total_file_count`, `distribution_formats`
 
 **Scoring (numeric 0-5):**
 - **0:** 1 file type only
