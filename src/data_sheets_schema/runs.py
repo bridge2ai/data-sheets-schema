@@ -839,13 +839,34 @@ def condition_of(method: str, label: str, project: str,
     data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
     paths = ((data.get("prompts") or {}).get("files")
              or (data.get("prompts") or {}).get("paths") or [])
-    joined = " ".join(str(x) for x in paths)
-    if "d4d_generic_arm_prompt_v2.md" in joined:
-        return "generic_v2"
-    if "d4d_tuned_arm_prompt.md" in joined:
+    # Entries are mappings — `{"path": ..., "sha256": ...}` — not bare strings.
+    # Stringifying the mapping happens to contain the path, which is why the
+    # previous version worked, but it also drags every other value into the
+    # match. Read the field.
+    joined = " ".join(x.get("path", "") if isinstance(x, dict) else str(x)
+                      for x in paths)
+
+    # Derived from the registry rather than restated. A hardcoded chain knew
+    # only v1, v2 and tuned, so every v3 and v4 run fell through it and returned
+    # None — silently, and on the rerun path (#340). `cli/api.py` carries the
+    # same lesson from when the condition list was written out three times and
+    # left `generic_v2` unreachable.
+    from data_sheets_schema.api_runner import CONDITION_PROMPTS, TUNED_PROMPT
+
+    # `tuned` shares v1's generic file and is identified by its own block
+    # appearing alongside, so it has to be tested before the generic bases.
+    if TUNED_PROMPT.name in joined:
         return "tuned"
-    if "d4d_generic_arm_prompt.md" in joined:
-        return "generic"
+
+    # Longest filename first: `d4d_generic_arm_prompt.md` is not a substring of
+    # `..._v2.md`, but ordering by length keeps that true if a future version is
+    # ever named in a way that makes it one.
+    for condition, path in sorted(CONDITION_PROMPTS.items(),
+                                  key=lambda kv: -len(kv[1].name)):
+        if condition == "tuned":
+            continue
+        if path.name in joined:
+            return condition
     return None
 
 

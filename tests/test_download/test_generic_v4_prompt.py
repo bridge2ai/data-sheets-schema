@@ -170,5 +170,75 @@ class TestTheConditionIsWiredComparably(unittest.TestCase):
         self.assertIn("generic_v4", _CONDITIONS)
 
 
+@unittest.skipUnless(GENERIC_PROMPT_V4.exists(), "v4 prompt not present")
+class TestConditionIsRecoverableFromProvenance(unittest.TestCase):
+    """`condition_of` returned None for every v3 and v4 run (#340).
+
+    Its hardcoded chain knew v1, v2 and tuned. `d4d_generic_arm_prompt_v3.md`
+    does not contain `d4d_generic_arm_prompt.md` as a substring — the `_v3` sits
+    between `prompt` and `.md` — so a v3 run fell through every branch and the
+    function reported nothing, silently, on the path the rerun takes.
+    """
+
+    def _infer(self, *prompt_paths):
+        import tempfile
+
+        import yaml
+
+        from data_sheets_schema.runs import condition_of
+        with tempfile.TemporaryDirectory() as tmp:
+            # `record_path_for` appends `_core` to the method, which is where
+            # provenance is written for both arms.
+            root = Path(tmp) / "claudecode_agent_core" / "LBL"
+            root.mkdir(parents=True)
+            # Entries are mappings in real provenance, not bare strings.
+            (root / "CHORUS_provenance.yaml").write_text(yaml.safe_dump(
+                {"prompts": {"files": [{"path": p, "sha256": "x"}
+                                       for p in prompt_paths]}}))
+            return condition_of("claudecode_agent", "LBL", "CHORUS",
+                                concat_dir=Path(tmp))
+
+    def test_every_registered_condition_is_recoverable(self):
+        for condition, path in CONDITION_PROMPTS.items():
+            if condition == "tuned":
+                continue
+            with self.subTest(condition=condition):
+                self.assertEqual(self._infer(f"src/download/prompts/{path.name}"),
+                                 condition)
+
+    def test_the_tuned_arm_is_still_distinguished_from_its_generic_base(self):
+        """It shares v1's file, so testing the generic bases first would report
+        it as `generic`."""
+        self.assertEqual(
+            self._infer("src/download/prompts/d4d_generic_arm_prompt.md",
+                        "src/download/prompts/d4d_tuned_arm_prompt.md"),
+            "tuned")
+
+    def test_the_more_specific_version_wins_when_several_are_listed(self):
+        """Provenance may name more than one prompt — `tuned` already does.
+
+        Iterating the registry in an arbitrary order would return whichever
+        matched first, so a run listing both the v1 base and v4 could be
+        reported as `generic`. That failure is silent and wrong in the same way
+        #340 was, which is why the registry is walked longest-name-first rather
+        than in dict order.
+
+        No provenance on disk lists two generic prompts today; this is the case
+        the ordering exists for, exercised rather than assumed.
+        """
+        self.assertEqual(
+            self._infer("src/download/prompts/d4d_generic_arm_prompt.md",
+                        "src/download/prompts/d4d_generic_arm_prompt_v4.md"),
+            "generic_v4")
+
+    def test_an_unrecognised_prompt_still_returns_none(self):
+        self.assertIsNone(self._infer("src/download/prompts/something_else.md"))
+
+    def test_no_condition_is_reported_for_a_run_without_provenance(self):
+        from data_sheets_schema.runs import condition_of
+        self.assertIsNone(condition_of("claudecode_agent", "no-such-label",
+                                       "CHORUS", concat_dir=Path("/nonexistent")))
+
+
 if __name__ == "__main__":
     unittest.main()
