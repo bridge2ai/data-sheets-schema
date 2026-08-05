@@ -23,6 +23,11 @@ import re
 from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
 
 #: `BiasTypeEnum` permissible values, for Q20's taxonomy check.
+#:
+#: Restated rather than read via SchemaView, which would put a merged-schema
+#: load in the import path of a batch script. `test_the_taxonomy_matches_the
+#: _schema` pins it to `BiasTypeEnum`, so a value added to the schema fails a
+#: test instead of quietly costing records two points (#317).
 BIAS_TYPE_ENUM = frozenset({
     'selection_bias', 'measurement_bias', 'historical_bias', 'representation_bias',
     'aggregation_bias', 'algorithmic_bias', 'sampling_bias', 'annotation_bias',
@@ -683,19 +688,25 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
             biases = [biases]
         typed = [b for b in biases
                  if isinstance(b, dict) and b.get('bias_type') in BIAS_TYPE_ENUM]
-        fairness = [b for b in biases
-                    if isinstance(b, dict)
-                    and (b.get('mitigation_strategy') or b.get('affected_subsets'))]
+        # Fairness is required *of the categorised biases*, not merely somewhere
+        # in the record: computing the two independently let one bias supply the
+        # taxonomy and a different one supply the mitigation (#318).
+        analysed = [b for b in typed
+                    if b.get('mitigation_strategy') or b.get('affected_subsets')]
 
-        if typed and fairness:
+        # "Comprehensive" is read as every documented bias categorised. A
+        # majority rule would let a record with nine untyped biases and one
+        # typed one take the top band, which is the 3 case by any reading.
+        if biases and len(typed) == len(biases) and analysed:
             score = 5
-            quality_note = (f"{len(typed)}/{len(biases)} biases categorised against "
-                            f"BiasTypeEnum, {len(fairness)} with mitigation or affected "
-                            "subsets")
+            quality_note = (f"all {len(typed)} biases categorised against "
+                            f"BiasTypeEnum, {len(analysed)} with mitigation or "
+                            "affected subsets")
         elif biases:
             score = 3
-            quality_note = (f"{len(biases)} bias(es) documented without taxonomy "
-                            "categorisation or fairness analysis")
+            quality_note = (f"{len(typed)}/{len(biases)} bias(es) categorised against "
+                            "BiasTypeEnum; comprehensive categorisation with fairness "
+                            "analysis not evidenced")
         else:
             score = 0
             quality_note = "No bias documentation"

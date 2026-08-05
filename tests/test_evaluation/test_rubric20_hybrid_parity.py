@@ -187,6 +187,41 @@ class TestBiasDocumentationScoring(unittest.TestCase):
             {"known_biases": [{"bias_type": "vibes_bias",
                                "mitigation_strategy": "none"}]}), 3)
 
+    def test_one_typed_bias_among_many_is_not_comprehensive(self):
+        """#318. Band 5 is "Comprehensive bias categorization"; nine untyped
+        biases beside one typed one is the 3 band by any reading."""
+        self.assertEqual(self._score({"known_biases":
+            [{"bias_type": "selection_bias", "mitigation_strategy": "x"}]
+            + [{"bias_description": f"bias {i}"} for i in range(9)]}), 3)
+
+    def test_the_taxonomy_and_the_fairness_analysis_must_meet(self):
+        """#318. Computing the two lists independently let one bias supply the
+        `bias_type` and an entirely different one supply the mitigation."""
+        self.assertEqual(self._score({"known_biases": [
+            {"bias_type": "selection_bias", "bias_description": "urban clinics"},
+            {"bias_description": "unrelated", "mitigation_strategy": "something"}]}), 3)
+
+    def test_every_bias_typed_with_one_analysed_scores_five(self):
+        """The complement: the rule must remain satisfiable."""
+        self.assertEqual(self._score({"known_biases": [
+            {"bias_type": "selection_bias", "mitigation_strategy": "oversample rural"},
+            {"bias_type": "measurement_bias", "bias_description": "device variance"}]}), 5)
+
+    def test_the_taxonomy_matches_the_schema(self):
+        """#317. The script restates `BiasTypeEnum` rather than loading the
+        merged schema in a batch script's import path, so this is what keeps the
+        two in step.
+
+        Drift is silent otherwise: a record categorising a bias with a value the
+        schema added scores 3 where the rubric says 5, and is penalised for
+        using the vocabulary the schema told it to use.
+        """
+        from linkml_runtime.utils.schemaview import SchemaView
+        schema = REPO / "src" / "data_sheets_schema" / "schema" / "data_sheets_schema_all.yaml"
+        declared = {str(v) for v in
+                    SchemaView(str(schema)).get_enum("BiasTypeEnum").permissible_values}
+        self.assertEqual(set(self.module.BIAS_TYPE_ENUM), declared)
+
 
 if __name__ == "__main__":
     unittest.main()

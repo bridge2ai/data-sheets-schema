@@ -32,7 +32,8 @@ from pathlib import Path
 
 import yaml
 
-from data_sheets_schema.constants.evaluation import RUBRIC20_PATH
+from data_sheets_schema.constants.evaluation import (RUBRIC10_PATH,
+                                                     RUBRIC20_PATH)
 
 REPO = Path(__file__).resolve().parents[2]
 AGENTS = {
@@ -44,15 +45,25 @@ OUTPUT_FORMAT = REPO / "src" / "download" / "prompts" / "rubric20_output_format.
 SUMMARY_SCHEMA = (REPO / "src" / "data_sheets_schema" / "schema"
                   / "D4D_Evaluation_Summary.yaml")
 
-#: Where a maximum is *asserted* rather than merely occurring as a digit.
+#: Where the *whole-rubric* maximum is stated, and nowhere else.
 #:
-#: `[:*\s]+` rather than `[:\s]+`: the headline site is written
-#: `**Maximum Possible Score:** 88 points`, and a separator class that does not
-#: admit the bold markers skips the one place a reader looks first. A mutation
-#: check caught exactly that — reverting it to 84 left every test green.
+#: Two rounds of mutation testing shaped this:
+#:
+#: 1. `[:*\s]+` rather than `[:\s]+` — the headline site is written
+#:    `**Maximum Possible Score:** 88 points`, and a separator class that does
+#:    not admit the bold markers skips the one place a reader looks first.
+#: 2. `max\b` as well as `maximum` — `D4D_Evaluation_Summary.yaml` writes
+#:    `max 88 points`.
+#:
+#: Every match must *equal* the computed maximum, which is why per-category and
+#: N/A-adjusted figures must not match: `adjusted_max_points` is legitimately
+#: 83, and `max_score:` under `category_performance` is legitimately 21. The
+#: lookbehind keeps `adjusted_max_points` out, and the two-space anchor admits
+#: only the `max_score:` directly under `overall_performance`.
 STATED_MAXIMUM = re.compile(
-    r"""(?:maximum(?:\s+possible)?(?:\s+score)?[:*\s]+|"max_points":\s*|
-         "adjusted_max_points":\s*|max_score:\s*|max_points:\s*)(\d+)""",
+    r"""(?:max(?:imum)?(?:\s+possible)?(?:\s+score)?[:*\s]+
+        |(?<![\w])max_points"?:\s*
+        |(?m:^\ \ max_score:\s*))(\d+)""",
     re.I | re.X)
 
 
@@ -140,15 +151,20 @@ class TestDenominatorParity(unittest.TestCase):
         self.assertEqual(_maximum(), 88)
 
     def test_no_agent_states_a_maximum_other_than_the_computed_one(self):
-        """Matches where a maximum is asserted, so an incidental `84` inside a
-        participant count or a UUID cannot mask or fake a failure."""
+        """Equality, not `!= 84`.
+
+        An earlier version rejected 84 specifically and accepted anything else,
+        so any *other* wrong total passed. Matching only where the whole-rubric
+        maximum is stated is what makes equality safe to demand — an incidental
+        84 in a participant count or a UUID is not a match at all.
+        """
         for name, path in AGENTS.items():
             for stated in STATED_MAXIMUM.findall(path.read_text(encoding="utf-8")):
                 with self.subTest(agent=name, stated=stated):
-                    self.assertNotEqual(int(stated), 84,
-                                        "the superseded 84-point maximum")
+                    self.assertEqual(int(stated), _maximum())
 
     def test_each_agent_states_the_computed_maximum(self):
+        """The complement — equality above is vacuous if nothing matches."""
         for name, path in AGENTS.items():
             stated = {int(n) for n in
                       STATED_MAXIMUM.findall(path.read_text(encoding="utf-8"))}
@@ -184,10 +200,18 @@ class TestDenominatorParity(unittest.TestCase):
 
     @unittest.skipUnless(SUMMARY_SCHEMA.exists(), "summary schema not present")
     def test_the_evaluation_summary_schema_agrees(self):
-        for line in SUMMARY_SCHEMA.read_text().splitlines():
-            if "rubric20" in line.lower():
-                with self.subTest(line=line.strip()[:60]):
-                    self.assertNotIn("84", line)
+        """Read as YAML, not filtered line by line (#322).
+
+        The maximum lives on the `description:` line and `rubric20:` is the key
+        above it, so a line filter never sees the two together — a mutation
+        check found exactly that, with `max 84 points` passing.
+        """
+        enum = yaml.safe_load(SUMMARY_SCHEMA.read_text())["enums"]["RubricTypeEnum"]
+        described = enum["permissible_values"]["rubric20"]["description"]
+        stated = [int(n) for n in STATED_MAXIMUM.findall(described)]
+        self.assertTrue(stated, f"no maximum stated in {described!r}")
+        for one in stated:
+            self.assertEqual(one, _maximum())
 
 
 @unittest.skipUnless(OUTPUT_FORMAT.exists(), "output format not present")
@@ -231,6 +255,64 @@ class TestTheWorkedExample(unittest.TestCase):
         self.assertEqual(overall["max_points"], _maximum())
         self.assertAlmostEqual(overall["percentage"],
                                round(total / _maximum() * 100, 1), places=1)
+
+
+RUBRIC10_AGENTS = {
+    "rubric10": REPO / ".claude" / "agents" / "d4d-rubric10.md",
+    "rubric10-semantic": REPO / ".claude" / "agents" / "d4d-rubric10-semantic.md",
+}
+
+
+def _elements():
+    return yaml.safe_load(Path(RUBRIC10_PATH).read_text())[
+        "d4d_complex_proxy_rubric"]["rubric"]
+
+
+class TestRubric10Parity(unittest.TestCase):
+    """The same comparison for the other rubric (#321).
+
+    rubric10 is clean today — both agents name the rubric's ten elements and
+    state its 50 points. That is the argument for the test rather than against
+    it: rubric20 was clean once too, and what let it rot was that nothing
+    compared the scorers to the rubric. Six of the planned rerun's semantic
+    evaluations are rubric10.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.canon = _elements()
+        cls.headings = {}
+        for name, path in RUBRIC10_AGENTS.items():
+            cls.headings[name] = {
+                int(n): title.strip() for n, title in
+                re.findall(r"^#+ Element (\d+): (.+)$",
+                           path.read_text(encoding="utf-8"), re.M)}
+
+    def test_the_rubric_defines_ten_elements_of_five_sub_elements(self):
+        """The premise. If the rubric ever stops being 10x5 the maximum below
+        is no longer 50 and this fails rather than silently passing."""
+        self.assertEqual(len(self.canon), 10)
+        for i, element in enumerate(self.canon, 1):
+            with self.subTest(element=i):
+                self.assertEqual(len(element.get("sub_elements") or []), 5)
+
+    def test_each_agent_names_every_element(self):
+        for name in RUBRIC10_AGENTS:
+            for i, element in enumerate(self.canon, 1):
+                with self.subTest(agent=name, element=i):
+                    self.assertEqual(self.headings[name].get(i, "").lower(),
+                                     (element.get("name") or "").strip().lower())
+
+    def test_each_agent_states_the_computed_maximum_and_no_other(self):
+        computed = sum(len(e.get("sub_elements") or []) for e in self.canon)
+        self.assertEqual(computed, 50)
+        for name, path in RUBRIC10_AGENTS.items():
+            stated = [int(n) for n in
+                      STATED_MAXIMUM.findall(path.read_text(encoding="utf-8"))]
+            with self.subTest(agent=name):
+                self.assertIn(computed, stated)
+                for one in stated:
+                    self.assertEqual(one, computed)
 
 
 if __name__ == "__main__":
