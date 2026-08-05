@@ -172,3 +172,44 @@ def llm(file, project, method, rubric, output_dir):
         sys.exit(1)
     finally:
         sys.argv = old_argv
+
+
+@evaluate.command("plan")
+@click.option("--config", default=None,
+              help="Restrict to one run config (label prefix).")
+@click.option("--paths-only", is_flag=True,
+              help="One record path per line, for piping into a sweep.")
+def plan_cmd(config, paths_only):
+    """What a semantic evaluation sweep would cover, derived from the canonical set.
+
+    The count has been stated four times and been wrong three of them (#315),
+    because it depends on how many projects end up with a canonical record —
+    which is not known until `d4d runs select --execute` has run. This derives
+    it rather than restating it, and prints the derivation alongside the number
+    so a bare count is harder to quote onward.
+    """
+    from data_sheets_schema.evaluation_plan import (NothingSelected, plan,
+                                                    summarise)
+    from data_sheets_schema.runs import AmbiguousCanonical
+    try:
+        evaluations = plan(config=config)
+    except NothingSelected as exc:
+        raise click.ClickException(str(exc))
+    except AmbiguousCanonical as exc:
+        # The state the rerun creates: marks under both the old and the new
+        # config until re-selection settles. `plan` is right to propagate rather
+        # than choose one (#308); rendering it is this boundary's job (#342).
+        raise click.ClickException(
+            f"{exc} Pass --config to say which configuration you mean, or "
+            "re-run `d4d runs select --execute` to settle the mark.")
+
+    if paths_only:
+        for path in dict.fromkeys(str(e.path) for e in evaluations):
+            click.echo(path)
+        return
+
+    for evaluation in evaluations:
+        click.echo(f"{evaluation.label}\t{evaluation.path}")
+    click.echo("")
+    click.echo(summarise(evaluations))
+
