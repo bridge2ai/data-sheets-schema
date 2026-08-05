@@ -31,23 +31,43 @@ def load_evaluation(eval_path: Path) -> Dict:
         return json.load(f)
 
 
-def validate_evaluation(eval_data: Dict, schema: Dict) -> Tuple[bool, List[str]]:
-    """
-    Validate evaluation data against schema.
+#: Top-level keys of the shape that preceded the current agent contract.
+#: rubric10 evaluations recorded before 2026 report `summary_scores` and
+#: `element_scores`; the agents have instructed `overall_score` and `elements`
+#: since. Such a record is not wrong, it is a different vintage — reporting it
+#: as invalid buries the records that really are.
+SUPERSEDED_SHAPE_KEYS = ("summary_scores", "element_scores")
 
-    Returns:
-        (is_valid, errors): Tuple of validation status and error messages
+
+def classify(eval_data: Dict, schema: Dict) -> Tuple[str, List[str]]:
+    """Validate, distinguishing a superseded shape from a wrong value.
+
+    Returns `("valid" | "superseded" | "invalid", errors)`.
+
+    The distinction is the point. All 28 recorded evaluations failed before the
+    schemas were brought up to the agents (#323), and "Invalid: 28" said nothing
+    about which were merely old. Of the 20 that still fail, 12 predate the
+    contract and 8 report `max_points: 84` — a maximum the rubric has never had
+    (#314). Only the second kind is a defect in a record.
     """
     errors = []
     try:
         validate(instance=eval_data, schema=schema)
-        return True, []
+        return "valid", []
     except ValidationError as e:
         errors.append(f"Validation error: {e.message}")
         errors.append(f"  Path: {' -> '.join(str(p) for p in e.path)}")
         if e.schema_path:
             errors.append(f"  Schema path: {' -> '.join(str(p) for p in e.schema_path)}")
-        return False, errors
+        if any(k in eval_data for k in SUPERSEDED_SHAPE_KEYS):
+            return "superseded", errors
+        return "invalid", errors
+
+
+def validate_evaluation(eval_data: Dict, schema: Dict) -> Tuple[bool, List[str]]:
+    """Back-compatible wrapper: superseded records are not valid."""
+    status, errors = classify(eval_data, schema)
+    return status == "valid", errors
 
 
 def main():
@@ -80,6 +100,7 @@ def main():
     # Validate each file
     valid_count = 0
     invalid_count = 0
+    superseded_count = 0
 
     for eval_file in sorted(eval_files):
         print(f"Validating: {eval_file.name}")
@@ -99,11 +120,15 @@ def main():
             continue
 
         # Validate
-        is_valid, errors = validate_evaluation(eval_data, schemas[rubric])
+        status, errors = classify(eval_data, schemas[rubric])
 
-        if is_valid:
+        if status == "valid":
             print(f"  ✅ Valid")
             valid_count += 1
+        elif status == "superseded":
+            print(f"  🕐 Superseded shape (pre-2026 rubric10 output):")
+            print(f"     {errors[0]}")
+            superseded_count += 1
         else:
             print(f"  ❌ Invalid:")
             for error in errors:
@@ -115,11 +140,14 @@ def main():
     # Summary
     print("=" * 60)
     print(f"SUMMARY:")
-    print(f"  ✅ Valid:   {valid_count}")
-    print(f"  ❌ Invalid: {invalid_count}")
-    print(f"  📊 Total:   {valid_count + invalid_count}")
+    print(f"  ✅ Valid:      {valid_count}")
+    print(f"  🕐 Superseded: {superseded_count}")
+    print(f"  ❌ Invalid:    {invalid_count}")
+    print(f"  📊 Total:      {valid_count + superseded_count + invalid_count}")
     print("=" * 60)
 
+    # Superseded records do not fail the run: they are historical output of a
+    # contract that no longer applies, and nothing can be done to them.
     return 0 if invalid_count == 0 else 1
 
 
