@@ -472,7 +472,7 @@ enums:
       rubric10:
         description: 10-element hierarchical rubric (50 sub-elements, max 50 points)
       rubric20:
-        description: 20-question detailed rubric (4 categories, max 84 points)
+        description: 20-question detailed rubric (4 categories, max 88 points)
 
   GenerationMethodEnum:
     description: D4D generation methods.

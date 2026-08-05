@@ -64,7 +64,7 @@
         },
         "max_points": {
           "type": "number",
-          "const": 84,
+          "const": 88,
           "description": "Maximum possible points (20 questions × average 4.2 points)"
         },
         "percentage": {
