@@ -48,9 +48,14 @@ class NothingSelected(RuntimeError):
     """
 
     def __init__(self, concat_dir: Path | None):
+        # The location is built outside the f-string: a multi-line expression
+        # inside a replacement field is PEP 701, valid on 3.12+ and a
+        # SyntaxError on the 3.10 and 3.11 this project still supports. It
+        # parsed fine locally on 3.13 and broke all three CI matrix entries.
+        where = concat_dir or "the default concatenated directory"
         super().__init__(
-            f"no canonical record found under {concat_dir or 'the default '
-            'concatenated directory'}. Run `d4d runs select --execute` first; "
+            f"no canonical record found under {where}. "
+            "Run `d4d runs select --execute` first; "
             "`d4d runs canonical --missing` names the projects without one.")
 
 
