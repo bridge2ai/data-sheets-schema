@@ -145,6 +145,76 @@ class TestNestedText(unittest.TestCase):
         self.assertEqual(measured.checkable_items, 1)
 
 
+class TestMintedIdentifiers(unittest.TestCase):
+    """A record's own `id` cannot be in the source (#335).
+
+    Counting it as an anchor that was not found measures identifier style rather
+    than fidelity, and penalises whichever arm gives things stable identifiers.
+    """
+
+    def test_an_id_is_not_an_anchor(self):
+        measured = measure_slot("creators", [
+            {"id": "CM4AI_creator_release_authors",
+             "description": "A researcher with no identifier given"},
+        ], source="nothing here matches")
+        self.assertEqual(measured.anchors, 0)
+        self.assertEqual(measured.checkable_items, 0)
+
+    def test_excluding_the_id_does_not_hide_a_real_anchor_beside_it(self):
+        """Only the `id` key is dropped, not the item."""
+        measured = measure_slot("creators", [
+            {"id": "aireadi:creator_lee", "description": "ORCID 0000-0002-7452-1648"},
+        ], source="orcid 0000-0002-7452-1648")
+        self.assertEqual(measured.anchors, 1)
+        self.assertEqual(measured.grounding, 1.0)
+
+    def test_a_minted_id_nested_deeper_is_also_excluded(self):
+        measured = measure_slot("file_collections", [
+            {"title": "imaging", "conforms_to": {"id": "local:spec-9000"}},
+        ], source="")
+        self.assertEqual(measured.anchors, 0)
+
+
+class TestUrlAnchorsAreSeparable(unittest.TestCase):
+    """The arms differ on URL enrichment, not on fidelity (#336).
+
+    A record supplying `https://www.emory.edu/` for a source that says "Emory
+    University" is contributing world knowledge; substring matching scores that
+    identically to an invented link. Splitting the counts makes the confound
+    visible rather than burying it in one rate.
+    """
+
+    def test_urls_are_counted_separately_and_also_in_the_total(self):
+        measured = measure_slot("creators", [
+            {"description": "Emory, https://www.emory.edu/, ORCID 0000-0002-7452-1648"},
+        ], source="orcid 0000-0002-7452-1648")
+        self.assertEqual(measured.anchors, 2)
+        self.assertEqual(measured.url_anchors, 1)
+        self.assertEqual(measured.url_anchors_found, 0)
+        self.assertEqual(measured.identifier_anchors, 1)
+        self.assertEqual(measured.identifier_anchors_found, 1)
+
+    def test_a_found_url_counts_as_found_in_both_places(self):
+        measured = measure_slot("external_resources", [
+            {"description": "see https://physionet.org/content/b2ai-voice/"},
+        ], source="hosted at https://physionet.org/content/b2ai-voice/")
+        self.assertEqual(measured.url_anchors, 1)
+        self.assertEqual(measured.url_anchors_found, 1)
+        self.assertEqual(measured.anchors_found, 1)
+
+    def test_the_split_is_exhaustive(self):
+        """Identifier and URL counts must partition the totals, or a reader
+        subtracting one from the other gets a number that means nothing."""
+        measured = measure_slot("creators", [
+            {"description": "https://a.example/x and 10.1234/y and OT2OD032742"},
+        ], source="10.1234/y")
+        self.assertEqual(measured.identifier_anchors + measured.url_anchors,
+                         measured.anchors)
+        self.assertEqual(
+            measured.identifier_anchors_found + measured.url_anchors_found,
+            measured.anchors_found)
+
+
 class TestMeasure(unittest.TestCase):
 
     def test_it_finds_the_list_valued_slots(self):

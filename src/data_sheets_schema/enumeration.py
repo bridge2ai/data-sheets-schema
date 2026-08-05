@@ -84,6 +84,16 @@ class NothingCheckable(ValueError):
             "grounding is unmeasured rather than zero. Read `coverage` first.")
 
 
+#: Keys excluded from anchor extraction.
+#:
+#: A record mints its own `id` — `CM4AI_creator_release_authors`,
+#: `aireadi:variable_ntprobnp` — and by construction it cannot appear in a source
+#: document. Counting it as an anchor that was not found measures identifier
+#: style rather than fidelity, and penalises whichever arm gives things stable
+#: identifiers (#335).
+MINTED_KEYS = frozenset({"id"})
+
+
 @dataclass(frozen=True)
 class SlotEnumeration:
     """One list-valued slot's depth, and how much of it could be checked."""
@@ -93,6 +103,22 @@ class SlotEnumeration:
     checkable_items: int
     anchors: int
     anchors_found: int
+    #: Anchors that are URLs, split out because the arms differ on URL
+    #: enrichment rather than on fidelity (#336). A record naming
+    #: `https://www.emory.edu/` for a source that says "Emory University" is
+    #: supplying world knowledge, and substring matching scores that the same as
+    #: an invented link.
+    url_anchors: int = 0
+    url_anchors_found: int = 0
+
+    @property
+    def identifier_anchors(self) -> int:
+        """Anchors excluding URLs: DOIs, ORCIDs, RRIDs, grant numbers."""
+        return self.anchors - self.url_anchors
+
+    @property
+    def identifier_anchors_found(self) -> int:
+        return self.anchors_found - self.url_anchors_found
 
     @property
     def coverage(self) -> float:
@@ -125,13 +151,14 @@ def anchors_in(text: str) -> set[str]:
 
 
 def _text_of(item: Any) -> str:
-    """Every scalar in an item, at any depth.
+    """Every scalar in an item, at any depth, except its minted identifiers.
 
     Nested rather than top-level only: `creators` puts the ORCID inside
     `description`, and `file_collections` puts identifiers a level further down.
     """
     if isinstance(item, dict):
-        return " ".join(_text_of(v) for v in item.values())
+        return " ".join(_text_of(v) for k, v in item.items()
+                        if k not in MINTED_KEYS)
     if isinstance(item, list):
         return " ".join(_text_of(v) for v in item)
     return str(item) if isinstance(item, (str, int, float)) else ""
@@ -140,15 +167,21 @@ def _text_of(item: Any) -> str:
 def measure_slot(slot: str, value: Any, source: str) -> SlotEnumeration:
     """Depth and checkability of one slot against a lowercased source bundle."""
     items = value if isinstance(value, list) else ([] if value is None else [value])
-    checkable = anchors = found = 0
+    checkable = anchors = found = urls = urls_found = 0
     for item in items:
         item_anchors = anchors_in(_text_of(item))
         if item_anchors:
             checkable += 1
-        anchors += len(item_anchors)
-        found += sum(1 for a in item_anchors if a.lower() in source)
+        for anchor in item_anchors:
+            present = anchor.lower() in source
+            anchors += 1
+            found += present
+            if anchor.startswith(("http://", "https://")):
+                urls += 1
+                urls_found += present
     return SlotEnumeration(slot=slot, items=len(items), checkable_items=checkable,
-                           anchors=anchors, anchors_found=found)
+                           anchors=anchors, anchors_found=found,
+                           url_anchors=urls, url_anchors_found=urls_found)
 
 
 def measure(record: dict[str, Any], source: str,
