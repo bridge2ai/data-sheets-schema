@@ -160,9 +160,9 @@ d4d_evaluation_rubric:
       description: >
         Proportion of mandatory schema fields populated including core identification,
         hierarchical structure, governance, and composition metadata.
-      field: ["id", "title", "description", "keywords", "license_and_use_terms",
-              "doi", "page", "creators", "purposes", "instances", "resources",
-              "parent_datasets", "variables", "confidentiality_level"]
+      field: ["id", "title", "description", "keywords", "license_and_use_terms", "doi",
+              "page", "creators", "purposes", "instances", "resources", "parent_datasets",
+              "variables", "regulatory_restrictions.confidentiality_level"]
       method: "Count non-empty required fields; score by proportion filled."
       score_type: numeric
       scoring:
@@ -210,7 +210,7 @@ d4d_evaluation_rubric:
         datasets integrated on participant_id/sample_id, OR (2) single dataset with multiple data
         types. Check for: unified participant/sample identifiers across modalities. Multimodality
         is evaluated separately from AI/ML readiness (Q10).
-      field: ["distribution_formats", "format", "media_type", "bytes"]
+      field: ["distribution_formats", "file_collections", "total_file_count"]
       method: "Count total formats and unique media types."
       score_type: numeric
       scoring:
@@ -222,7 +222,9 @@ d4d_evaluation_rubric:
     - id: 5
       name: "Data File Size Availability"
       description: "Presence of file size or dimensional metadata (bytes, instance counts, data splits)."
-      field: ["bytes", "instances", "is_data_split", "is_subpopulation"]
+      field: ["total_size_bytes", "file_collections.total_bytes", "instances",
+              "subsets.is_data_split", "splits", "subsets.is_subpopulation",
+              "subpopulations"]
       method: "Detect numeric values for file size or instance counts."
       score_type: pass_fail
       scoring:
@@ -241,7 +243,7 @@ d4d_evaluation_rubric:
 
         Note: Dataset identification should include both persistent identifiers AND hosting
         platform information (e.g., PhysioNet, Dataverse, Zenodo, institutional repositories).
-      field: ["doi", "rrid", "id", "page", "publisher"]
+      field: ["doi", "id", "page", "publisher"]
       method: "Check for non-null DOI or equivalent identifier AND publisher/platform."
       score_type: pass_fail
       scoring:
@@ -271,8 +273,9 @@ d4d_evaluation_rubric:
         physical activity data (step counts), retinal images, genetic data, location data, biometric
         identifiers, and other individually identifiable health information requiring special protections.
       field: ["ethical_reviews", "human_subject_research", "is_deidentified",
-              "participant_privacy", "participant_compensation", "vulnerable_populations",
-              "informed_consent", "data_protection_impacts", "reidentification_risk"]
+              "participant_privacy", "participant_compensation", "at_risk_populations",
+              "informed_consent", "data_protection_impacts",
+              "participant_privacy.reidentification_risk"]
       score_type: numeric
       scoring:
         0: "No ethics fields present"
@@ -293,7 +296,10 @@ d4d_evaluation_rubric:
         or openly accessible with DUA (requires signed agreement). Access tiers: (1) No authentication,
         (2) Registration required, (3) DUA required, (4) IRB/committee approval required.
       field: ["license_and_use_terms", "ip_restrictions", "regulatory_restrictions",
-              "confidentiality_level", "hipaa_compliant", "other_compliance", "governance_committee_contact"]
+              "regulatory_restrictions.confidentiality_level",
+              "regulatory_restrictions.hipaa_compliant",
+              "regulatory_restrictions.other_compliance",
+              "regulatory_restrictions.governance_committee_contact"]
       score_type: numeric
       scoring:
         0: "No license or access info"
@@ -318,7 +324,8 @@ d4d_evaluation_rubric:
 
         Dataset integration capability: Check for common identifiers for cross-dataset linking,
         standardized formats for data harmonization, and documented integration procedures.
-      field: ["format", "encoding", "conforms_to", "conforms_to_schema", "external_resources", "related_datasets"]
+      field: ["distribution_formats", "conforms_to_schema", "file_collections.compression",
+              "conforms_to", "external_resources", "related_datasets"]
       score_type: numeric
       scoring:
         0: "Non-standard or unspecified format"
@@ -342,7 +349,7 @@ d4d_evaluation_rubric:
         relationships. Both formats are acceptable. Some datasets (e.g., CM4AI) describe preprocessing in
         provenance graphs rather than text.
       field: ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies",
-              "software_and_tools", "annotation_analyses", "machine_annotation_tools", "imputation_protocols"]
+              "machine_annotation_tools", "annotation_analyses", "imputation_protocols"]
       score_type: numeric
       scoring:
         0: "No software tools documented"
@@ -377,7 +384,8 @@ d4d_evaluation_rubric:
         (2) long-term governance plan, (3) domain-appropriate repository (e.g., PhysioNet for biomedical
         data), (4) institutional commitment or preservation funding. Sustainable datasets have clear
         maintenance plans beyond initial publication.
-      field: ["version", "version_access", "errata", "updates", "release_notes", "maintainers", "doi", "publisher"]
+      field: ["version", "version_access", "errata", "updates", "maintainers", "doi",
+              "publisher"]
       score_type: numeric
       scoring:
         0: "Single version only, no sustainability plan"
@@ -409,7 +417,8 @@ d4d_evaluation_rubric:
       description: >
         Indicates inclusion of human subjects with demographic diversity, subpopulation details,
         vulnerable population protections, and missing data documentation.
-      field: ["subpopulations", "instances", "vulnerable_populations", "is_subpopulation", "missing_data_documentation"]
+      field: ["subpopulations", "instances", "at_risk_populations",
+              "subsets.is_subpopulation", "missing_data_documentation"]
       score_type: numeric
       scoring:
         0: "No human subject information"
@@ -456,7 +465,8 @@ d4d_evaluation_rubric:
         License is clearly defined with explicit use guidance including intended uses,
         prohibited uses, discouraged uses, AND comprehensive social impact analysis with risk
         identification and mitigation strategies (CROISSANT RAI aligned).
-      field: ["license_and_use_terms", "intended_uses", "prohibited_uses", "discouraged_uses", "future_use_impacts"]
+      field: ["license_and_use_terms", "intended_uses", "prohibited_uses",
+              "discouraged_uses", "future_use_impacts"]
       score_type: numeric
       scoring:
         0: "No license or use guidance"
@@ -482,7 +492,8 @@ d4d_evaluation_rubric:
         Provenance may be represented as text OR as W3C PROV-O graphs. Both formats are acceptable
         if they provide complete lineage information.
       field: ["version_access", "errata", "updates", "was_derived_from", "parent_datasets",
-              "missing_data_documentation", "is_data_split", "raw_data_sources"]
+              "missing_data_documentation", "subsets.is_data_split", "splits",
+              "raw_data_sources"]
       score_type: numeric
       scoring:
         0: "No provenance metadata"

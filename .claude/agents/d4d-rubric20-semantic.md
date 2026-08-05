@@ -119,7 +119,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 1: Field Completeness
 **Description:** Proportion of mandatory schema fields populated (id, title, description, keywords, license).
 
-**Fields:** `id`, `title`, `description`, `keywords`, `license_and_use_terms`
+**Fields:** `id`, `title`, `description`, `keywords`, `license_and_use_terms`, `doi`, `page`, `creators`, `purposes`, `instances`, `resources`, `parent_datasets`, `variables`, `regulatory_restrictions.confidentiality_level`
 
 **Scoring (numeric 0-5):**
 - **0:** ≤40% fields populated
@@ -161,7 +161,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 4: File Enumeration and Type Variety
 **Description:** Number of distribution formats and file type diversity.
 
-**Fields:** `distribution_formats`, `format`, `media_type`
+**Fields:** `distribution_formats`, `file_collections`, `total_file_count`
 
 **Scoring (numeric 0-5):**
 - **0:** 1 file type only
@@ -175,7 +175,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 5: Data File Size Availability
 **Description:** Presence of file size or instance count metadata.
 
-**Fields:** `bytes`, `instances`
+**Fields:** `total_size_bytes`, `file_collections.total_bytes`, `instances`, `subsets.is_data_split`, `splits`, `subsets.is_subpopulation`, `subpopulations`
 
 **Scoring (pass/fail):**
 - **Pass:** Numeric file size or instance count found
@@ -190,7 +190,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 6: Dataset Identification Metadata
 **Description:** Presence of unique identifiers such as DOI, RRID, or persistent URLs.
 
-**Fields:** `doi`, `rrid`, `page`
+**Fields:** `doi`, `page`, `id`, `publisher`
 
 **Scoring (pass/fail):**
 - **Pass:** At least one persistent ID found
@@ -233,7 +233,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 9: Access Requirements and Governance Documentation
 **Description:** Whether access policy, license, IP restrictions, regulatory restrictions, and confidentiality level are clearly defined.
 
-**Fields:** `license_and_use_terms`, `ip_restrictions`, `regulatory_restrictions`, `confidentiality_level`, `data_protection_impacts`, `regulatory_restrictions.governance_committee_contact`
+**Fields:** `license_and_use_terms`, `ip_restrictions`, `regulatory_restrictions`, `regulatory_restrictions.confidentiality_level`, `data_protection_impacts`, `regulatory_restrictions.governance_committee_contact`, `regulatory_restrictions.hipaa_compliant`, `regulatory_restrictions.other_compliance`
 
 **Scoring (numeric 0-5):**
 - **0:** No license or access info
@@ -249,7 +249,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 10: Interoperability, Standardization, and Cross-Platform Integration
 **Description:** Presence of standard formats, ontologies, schema conformance (e.g., Parquet, TSV, LinkML), cross-platform dataset linkages with typed relationships, AND dataset integration capability. Note: Evaluation aligned with Bridge2AI AI/ML readiness characterization criteria (FAIRness, semantic/statistical characterization, governance, quality, pre-model XAI, ethics, computability). Reference: https://www.biorxiv.org/content/10.1101/2024.12.18.629172v1 and Bridge2AI AI-readiness scorecard tool. All Bridge2AI datasets are designed for AI/ML use. This question evaluates HOW WELL the dataset supports AI/ML (interoperability, standardization), not WHETHER it supports AI/ML. Dataset integration capability: Check for common identifiers for cross-dataset linking, standardized formats for data harmonization, and documented integration procedures.
 
-**Fields:** `format`, `encoding`, `conforms_to`, `conforms_to_schema`, `external_resources`, `related_datasets`
+**Fields:** `distribution_formats`, `conforms_to_schema`, `file_collections.compression`, `conforms_to`, `external_resources`, `related_datasets`
 
 **Scoring (numeric 0-5):**
 - **0:** Non-standard or unspecified format
@@ -267,7 +267,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 11: Tool and Software Transparency
 **Description:** Mentions of preprocessing, cleaning, and labeling strategies with software tools used in data preparation, including annotation quality, imputation, and missing data documentation.
 
-**Fields:** `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `software_and_tools`, `annotation_analyses`, `machine_annotation_tools`, `imputation_protocols`, `missing_data_documentation`
+**Fields:** `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `machine_annotation_tools`, `annotation_analyses`, `imputation_protocols`, `missing_data_documentation`
 
 **Scoring (numeric 0-5):**
 - **0:** No software tools documented
@@ -299,7 +299,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 13: Version History, Maintenance, and Sustainability
 **Description:** Presence of version information, version access methods, errata, update plans, release notes with dates, AND data sustainability indicators (persistent identifiers, long-term governance plan, domain-appropriate repository, institutional commitment documentation). Note: Data sustainability evaluation checks for: (1) persistent identifiers (DOI, ARK, Handle), (2) long-term governance plan, (3) domain-appropriate repository (e.g., PhysioNet for biomedical data), (4) institutional commitment or preservation funding. Sustainable datasets have clear maintenance plans beyond initial publication.
 
-**Fields:** `version`, `version_access`, `errata`, `updates`, `release_notes`, `maintainers`, `doi`, `publisher`
+**Fields:** `version`, `version_access`, `errata`, `updates`, `maintainers`, `doi`, `publisher`
 
 **Scoring (numeric 0-5):**
 - **0:** Single version only, no sustainability plan
@@ -315,7 +315,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 14: Associated Publications
 **Description:** Presence of formal citations or external resources with DOI-linked references.
 
-**Fields:** `citation`, `external_resources`
+**Fields:** `citation`, `external_resources`, `doi`
 
 **Scoring (numeric 0-5):**
 - **0:** No publications cited
@@ -331,7 +331,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 15: Human Subject Representation
 **Description:** Inclusion of human subjects, demographic diversity, or subgroup details.
 
-**Fields:** `instances`, `subpopulations`, `DataSubset.is_data_split`, `DataSubset.is_subpopulation`
+**Fields:** `instances`, `subpopulations`, `subsets.is_data_split`, `subsets.is_subpopulation`, `at_risk_populations`, `missing_data_documentation`
 
 **Scoring (numeric 0-5):**
 - **0:** No human subject information
@@ -349,7 +349,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 16: Findability (Persistent Links)
 **Description:** Dataset includes persistent URLs for access and documentation.
 
-**Fields:** `page`, `download_url`, `external_resources`
+**Fields:** `page`, `download_url`, `external_resources`, `doi`, `id`
 
 **Scoring (pass/fail):**
 - **Pass:** At least one working external URL present
@@ -362,7 +362,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 17: Accessibility (Access Mechanism)
 **Description:** Describes how users can obtain the dataset (download, DUA, login).
 
-**Fields:** `distribution_formats`, `license_and_use_terms`
+**Fields:** `distribution_formats`, `license_and_use_terms`, `download_url`
 
 **Scoring (numeric 0-5):**
 - **0:** Unclear access method
@@ -392,7 +392,7 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 19: Data Integrity, Provenance Graph, and Quality
 **Description:** Presence of version access, errata, update plans, source derivation, parent dataset linkages, missing data documentation, data split indicators, AND provenance graph representation. Note: Provenance is a transparent graph of origins and processing of data (W3C PROV-O standard: https://www.w3.org/TR/prov-o/), NOT just version changes. Evaluation checks for: (1) Entity-activity-agent relationships, (2) Processing lineage, (3) Derivation paths. Scoring distinction: - Version history alone (version numbers, errata, updates) = 3 points - Full provenance graph (W3C PROV-O with entity-activity-agent relationships, processing lineage, derivation paths) = 5 points Provenance may be represented as text OR as W3C PROV-O graphs. Both formats are acceptable if they provide complete lineage information.
 
-**Fields:** `version_access`, `errata`, `updates`, `was_derived_from`, `parent_datasets`, `missing_data_documentation`, `is_data_split`, `raw_data_sources`
+**Fields:** `version_access`, `errata`, `updates`, `was_derived_from`, `parent_datasets`, `missing_data_documentation`, `subsets.is_data_split`, `splits`, `raw_data_sources`
 
 **Scoring (numeric 0-5):**
 - **0:** No provenance metadata
