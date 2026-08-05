@@ -44,7 +44,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Structural Completeness",
         "name": "Field Completeness",
         "description": "Proportion of mandatory schema fields populated including hierarchical structure and governance",
-        "fields": ["id", "title", "description", "keywords", "license_and_use_terms", "doi", "page", "creators", "purposes", "instances", "resources", "parent_datasets", "variables", "confidentiality_level"],
+        "fields": ["id", "title", "description", "keywords", "license_and_use_terms", "doi", "page", "creators", "purposes", "instances", "resources", "parent_datasets", "variables", "regulatory_restrictions.confidentiality_level"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -52,7 +52,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Structural Completeness",
         "name": "Entry Length Adequacy",
         "description": "Narrative fields have meaningful content length",
-        "fields": ["description", "motivation", "purposes"],
+        "fields": ["description", "purposes", "addressing_gaps"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -68,7 +68,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Structural Completeness",
         "name": "File Enumeration and Type Variety",
         "description": "Number of distribution formats and file type diversity",
-        "fields": ["distribution_formats", "format", "media_type", "bytes", "files", "subsets"],
+        "fields": ["distribution_formats", "conforms_to_schema", "total_size_bytes", "file_collections.total_bytes", "file_collections", "total_file_count", "subsets"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -76,7 +76,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Structural Completeness",
         "name": "Data File Size Availability",
         "description": "Presence of file size or dimensional metadata (bytes, instance counts)",
-        "fields": ["bytes", "instances", "files", "data_characteristics", "subsets"],
+        "fields": ["total_size_bytes", "file_collections.total_bytes", "instances", "file_collections", "total_file_count", "subsets", "subsets.is_data_split", "splits", "subsets.is_subpopulation", "subpopulations"],
         "score_type": "pass_fail",
         "max_score": 1
     },
@@ -86,7 +86,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Metadata Quality & Content",
         "name": "Dataset Identification Metadata",
         "description": "Presence of unique identifiers (DOI, RRID, URLs)",
-        "fields": ["doi", "rrid", "page", "id"],
+        "fields": ["doi", "page", "id", "publisher"],
         "score_type": "pass_fail",
         "max_score": 1
     },
@@ -94,7 +94,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Metadata Quality & Content",
         "name": "Funding and Acknowledgements Completeness",
         "description": "Funding sources, grants, sponsors, and creator affiliations",
-        "fields": ["funders", "creators", "funding_and_acknowledgements"],
+        "fields": ["funders", "creators"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -102,7 +102,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Metadata Quality & Content",
         "name": "Ethical and Privacy Declarations",
         "description": "Comprehensive ethics: IRB, deidentification, privacy, consent, compensation, vulnerable populations",
-        "fields": ["ethical_reviews", "human_subject_research", "is_deidentified", "participant_privacy", "participant_compensation", "vulnerable_populations", "informed_consent", "deidentification_and_privacy", "ethics"],
+        "fields": ["ethical_reviews", "human_subject_research", "is_deidentified", "participant_privacy", "participant_compensation", "at_risk_populations", "informed_consent", "data_protection_impacts", "participant_privacy.reidentification_risk"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -110,7 +110,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Metadata Quality & Content",
         "name": "Access Requirements and Governance Documentation",
         "description": "Access policy, license, IP restrictions, regulatory restrictions, confidentiality level",
-        "fields": ["license_and_use_terms", "ip_restrictions", "regulatory_restrictions", "confidentiality_level", "access_and_licensing"],
+        "fields": ["license_and_use_terms", "ip_restrictions", "regulatory_restrictions", "regulatory_restrictions.confidentiality_level", "regulatory_restrictions.hipaa_compliant", "regulatory_restrictions.other_compliance", "regulatory_restrictions.governance_committee_contact"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -118,7 +118,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Metadata Quality & Content",
         "name": "Interoperability, Standardization, and Cross-Platform Integration",
         "description": "Standard formats, encoding, ontologies, schema conformance, and cross-dataset integration capability",
-        "fields": ["format", "encoding", "conforms_to", "conforms_to_schema", "distribution_formats", "data_characteristics.data_formats", "external_resources", "related_datasets"],
+        "fields": ["distribution_formats", "conforms_to_schema", "file_collections.compression", "conforms_to", "external_resources", "related_datasets"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -128,7 +128,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Technical Documentation",
         "name": "Tool and Software Transparency",
         "description": "Preprocessing, cleaning, labeling strategies with software tools",
-        "fields": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies", "software_and_tools"],
+        "fields": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies", "machine_annotation_tools", "annotation_analyses", "imputation_protocols"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -136,7 +136,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Technical Documentation",
         "name": "Collection Protocol Clarity",
         "description": "Collection mechanisms, acquisition methods, data collectors, timeframes",
-        "fields": ["acquisition_methods", "collection_mechanisms", "data_collectors", "collection_timeframes", "collection_process", "sampling_strategies"],
+        "fields": ["acquisition_methods", "collection_mechanisms", "data_collectors", "collection_timeframes", "sampling_strategies", "raw_data_sources"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -144,7 +144,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Technical Documentation",
         "name": "Version History, Maintenance, and Sustainability",
         "description": "Version info, version access, errata, update plans, release notes, and sustainability indicators (persistent ID, repository, institutional commitment)",
-        "fields": ["version", "version_access", "errata", "updates", "release_notes", "versions_available_on_platform", "maintainers", "doi", "publisher"],
+        "fields": ["version", "version_access", "errata", "updates", "maintainers", "doi", "publisher"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -152,7 +152,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Technical Documentation",
         "name": "Associated Publications",
         "description": "Citations or DOI-linked references",
-        "fields": ["citation", "external_resources", "citations", "references"],
+        "fields": ["citation", "external_resources", "doi"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -160,7 +160,7 @@ RUBRIC20_QUESTIONS = {
         "category": "Technical Documentation",
         "name": "Human Subject Representation",
         "description": "Demographics, subpopulations, vulnerable population protections",
-        "fields": ["subpopulations", "instances", "vulnerable_populations", "composition.population"],
+        "fields": ["subpopulations", "instances", "at_risk_populations", "subsets.is_subpopulation", "missing_data_documentation"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -178,7 +178,7 @@ RUBRIC20_QUESTIONS = {
         "category": "FAIRness & Accessibility",
         "name": "Accessibility (Access Mechanism)",
         "description": "Download URL, distribution formats, access policy",
-        "fields": ["download_url", "distribution_formats", "license_and_use_terms", "access_and_licensing"],
+        "fields": ["download_url", "distribution_formats", "license_and_use_terms"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -194,7 +194,7 @@ RUBRIC20_QUESTIONS = {
         "category": "FAIRness & Accessibility",
         "name": "Data Integrity, Provenance Graph, and Quality",
         "description": "Version access, errata, updates, source derivation, parent datasets, missing data documentation, and provenance graph representation",
-        "fields": ["version_access", "errata", "updates", "was_derived_from", "parent_datasets", "release_notes", "missing_data_documentation", "is_data_split", "raw_data_sources"],
+        "fields": ["version_access", "errata", "updates", "was_derived_from", "parent_datasets", "missing_data_documentation", "subsets.is_data_split", "splits", "raw_data_sources"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -377,8 +377,14 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
 
     # Q5: Data File Size Availability (pass/fail)
     elif question_id == 5:
-        # Look for numeric dimensions or file sizes
-        combined = str(data.get('subsets', '')) + str(data.get('data_characteristics', ''))
+        # Look for numeric dimensions or file sizes.
+        #
+        # `data_characteristics` has never been a slot of Dataset, and `subsets`
+        # alone carries no numbers, so this scored 0 on every one of the 25
+        # current records — the point was unreachable rather than unearned.
+        combined = ' '.join(str(data.get(k, '')) for k in
+                            ('total_size_bytes', 'total_file_count', 'file_collections',
+                             'instances', 'subsets', 'splits'))
         # Pattern: NxM dimensions, file sizes, sampling rates
         has_dimensions = bool(re.search(r'\d+\s*[x×]\s*\d+|\d+\s*[kKmMgG][bB]|\d+\s*kHz', combined))
 
@@ -392,7 +398,9 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
     # Q6: Dataset Identification Metadata (pass/fail)
     elif question_id == 6:
         has_doi = 'doi.org' in str(data.get('doi', '')) or 'doi.org' in str(data.get('id', ''))
-        has_rrid = 'RRID:' in str(data.get('rrid', ''))
+        # `rrid` is not a slot anywhere in the schema, so the old RRID test
+        # could never fire. An RRID, when present, is written into `id`.
+        has_rrid = 'RRID:' in str(data.get('id', ''))
         has_page = bool(data.get('page'))
 
         if has_doi or has_rrid or has_page:
@@ -404,22 +412,18 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
 
     # Q7: Funding and Acknowledgements Completeness
     elif question_id == 7:
-        funders = data.get('funders', [])
-        funding = get_nested_value(data, 'funding_and_acknowledgements.funding')
+        # `funding_and_acknowledgements` is not a slot of Dataset; the branch
+        # reading it was unreachable. `funders` and `creators` are where this
+        # lives now.
+        funders = data.get('funders') or []
+        if isinstance(funders, dict):
+            funders = [funders]
+        funder_str = str(funders) + str(data.get('creators') or '')
 
-        has_agency = False
-        has_award = False
-        has_acknowledgements = False
-
-        if funders and isinstance(funders, list):
-            funder_str = str(funders)
-            has_agency = any(keyword in funder_str for keyword in ['NIH', 'NSF', 'National', 'Fund'])
-            has_award = bool(re.search(r'\d[A-Z0-9]{7,}', funder_str))
-            has_acknowledgements = len(funders) > 0
-        elif funding:
-            has_agency = bool(get_nested_value(data, 'funding_and_acknowledgements.funding.agency'))
-            has_award = bool(get_nested_value(data, 'funding_and_acknowledgements.funding.award_number'))
-            has_acknowledgements = bool(get_nested_value(data, 'funding_and_acknowledgements.acknowledgements'))
+        has_agency = bool(funders) and any(
+            k in funder_str for k in ['NIH', 'NSF', 'National', 'Fund', 'Institute'])
+        has_award = bool(re.search(r'\d[A-Z0-9]{7,}', funder_str))
+        has_acknowledgements = bool(funders)
 
         if has_agency and has_award and has_acknowledgements:
             score = 5
@@ -436,10 +440,18 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
 
     # Q8: Ethical and Privacy Declarations
     elif question_id == 8:
-        has_irb = bool(get_nested_value(data, 'ethics.irb_approval') or data.get('ethical_reviews'))
-        has_deident = bool(get_nested_value(data, 'deidentification_and_privacy.approach') or data.get('is_deidentified'))
-        has_consent = bool(get_nested_value(data, 'collection_process.consent') or data.get('informed_consent'))
-        has_ethical = bool(get_nested_value(data, 'ethics.ethical_position') or 'ethic' in str(data.get('purposes', '')).lower())
+        # `ethics`, `deidentification_and_privacy` and `collection_process` are
+        # not slots of Dataset. Each was the dead half of an `or` except
+        # `ethics.ethical_position`, which left `has_ethical` resting on the
+        # word "ethic" appearing in `purposes`.
+        has_irb = bool(get_nested_value(data, 'human_subject_research.irb_approval')
+                       or data.get('ethical_reviews'))
+        has_deident = bool(get_nested_value(data, 'is_deidentified.method')
+                           or data.get('is_deidentified'))
+        has_consent = bool(data.get('informed_consent') or data.get('collection_consents'))
+        has_ethical = bool(data.get('data_protection_impacts')
+                           or data.get('participant_privacy')
+                           or data.get('sensitive_elements'))
 
         ethics_count = sum([has_irb, has_deident, has_consent, has_ethical])
 
@@ -458,9 +470,19 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
         license_terms = data.get('license_and_use_terms', {})
         has_license = bool(license_terms)
         has_dua = 'DUA' in str(license_terms) or 'Data Use Agreement' in str(license_terms)
-        has_policy = bool(get_nested_value(data, 'access_and_licensing.access_policy'))
+        # `access_and_licensing` is not a slot of Dataset, so `has_policy` was
+        # always False and band 5 was unreachable: all 25 current records
+        # scored exactly 3. The rubric's band 5 asks for compliance,
+        # confidentiality classification and a governance contact, which live
+        # under `regulatory_restrictions`.
+        reg = data.get('regulatory_restrictions') or {}
+        has_policy = bool(data.get('ip_restrictions') or reg)
+        has_governance = bool(
+            isinstance(reg, dict)
+            and (reg.get('confidentiality_level') or reg.get('governance_committee_contact')
+                 or reg.get('hipaa_compliant') or reg.get('other_compliance')))
 
-        if has_license and has_dua and has_policy:
+        if has_license and has_dua and has_policy and has_governance:
             score = 5
             quality_note = "License + DUA + access policy"
         elif has_license:
@@ -472,12 +494,17 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
 
     # Q10: Interoperability and Standardization
     elif question_id == 10:
-        has_formats = bool(get_nested_value(data, 'data_characteristics.data_formats') or data.get('distribution_formats'))
-        has_schema = bool(data.get('conforms_to'))
+        # `formats_str = str(has_formats)` stringified a *bool*, so no format
+        # name was ever found in "True" and this scored 0 on all 25 current
+        # records whatever they contained. The formats themselves are what has
+        # to be searched.
+        formats = data.get('distribution_formats') or []
+        has_schema = bool(data.get('conforms_to') or data.get('conforms_to_schema'))
 
-        standard_formats = ['Parquet', 'TSV', 'CSV', 'JSON', 'HDF5', 'DICOM']
-        formats_str = str(has_formats)
-        has_standard = any(fmt in formats_str for fmt in standard_formats)
+        standard_formats = ['Parquet', 'TSV', 'CSV', 'JSON', 'HDF5', 'DICOM',
+                            'NIfTI', 'Zarr', 'Parquet', 'BIDS', 'OMOP', 'FHIR']
+        formats_str = str(formats) + str(data.get('file_collections') or '')
+        has_standard = any(fmt.lower() in formats_str.lower() for fmt in standard_formats)
 
         if has_standard and has_schema:
             score = 5
@@ -491,10 +518,12 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
 
     # Q11: Tool and Software Transparency
     elif question_id == 11:
-        software = data.get('software_and_tools', {})
-        preprocessing = data.get('preprocessing_strategies', [])
-
-        tool_mentions = str(software) + str(preprocessing)
+        # `software_and_tools` is not a slot of Dataset. Tool names appear in
+        # the annotation, preprocessing, cleaning and labeling strategies.
+        tool_mentions = ' '.join(str(data.get(k) or '') for k in
+                                 ('machine_annotation_tools', 'preprocessing_strategies',
+                                  'cleaning_strategies', 'labeling_strategies',
+                                  'annotation_analyses', 'imputation_protocols'))
         # Count tool names
         tools = re.findall(r'\b(openSMILE|Parselmouth|Whisper|Praat|UMAP|Python|R|MATLAB|TensorFlow|PyTorch)\b', tool_mentions, re.I)
 
@@ -510,13 +539,12 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
 
     # Q12: Collection Protocol Clarity
     elif question_id == 12:
-        collection = data.get('collection_process', {})
-        acquisition = data.get('acquisition_methods', [])
-        sampling = data.get('sampling_strategies', [])
-
-        has_setting = bool(get_nested_value(data, 'collection_process.setting') or data.get('data_collectors'))
-        has_method = bool(get_nested_value(data, 'collection_process.data_capture') or acquisition)
-        has_sampling = bool(sampling)
+        # `collection_process` is not a slot of Dataset; both reads of it were
+        # the dead half of an `or`. `collection_mechanisms` and
+        # `collection_timeframes` are the parts that had no live equivalent.
+        has_setting = bool(data.get('data_collectors') or data.get('collection_mechanisms'))
+        has_method = bool(data.get('acquisition_methods'))
+        has_sampling = bool(data.get('sampling_strategies') or data.get('collection_timeframes'))
 
         detail_count = sum([has_setting, has_method, has_sampling])
 
@@ -534,7 +562,8 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
     elif question_id == 13:
         updates = data.get('updates', {})
         version_access = data.get('version_access', {})
-        release_notes = data.get('release_notes', {})
+        # `release_notes` is not a slot of Dataset; `errata` is.
+        release_notes = data.get('errata') or {}
 
         # Count version mentions
         version_text = str(updates) + str(version_access) + str(release_notes)
@@ -552,9 +581,9 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
 
     # Q14: Associated Publications
     elif question_id == 14:
-        references = data.get('references', [])
+        references = data.get('external_resources', [])
         external = data.get('external_resources', [])
-        citations = data.get('citations', [])
+        citations = data.get('citation', [])
 
         # Count DOIs
         ref_text = str(references) + str(external) + str(citations)
@@ -572,13 +601,15 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
 
     # Q15: Human Subject Representation
     elif question_id == 15:
-        population = get_nested_value(data, 'composition.population')
-        subpops = data.get('subpopulations', [])
-        instances = data.get('instances', [])
+        # `composition` is not a slot of Dataset, so `population` was always
+        # None — which also kept `subpopulations` out of `combined`, leaving
+        # the count and diversity tests reading `instances` alone.
+        subpops = data.get('subpopulations') or []
+        instances = data.get('instances') or []
+        at_risk = data.get('at_risk_populations') or []
 
-        has_demographics = bool(population) or bool(subpops)
-        # Look for participant counts
-        combined = str(instances) + str(population)
+        has_demographics = bool(subpops) or bool(at_risk)
+        combined = str(instances) + str(subpops) + str(at_risk)
         has_counts = bool(re.search(r'\d+\s+(?:participants?|subjects?|samples?)', combined, re.I))
         # Look for diversity mentions
         has_diversity = bool(re.search(r'(?:demographic|diversity|inclusion|exclusion|criteria)', combined, re.I))
@@ -597,7 +628,7 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
 
     # Q16: Findability (pass/fail)
     elif question_id == 16:
-        has_links = bool(data.get('page') or data.get('download_url') or data.get('external_resources'))
+        has_links = bool(data.get('page') or data.get('page') or data.get('external_resources'))
 
         if has_links:
             score = 1
@@ -609,7 +640,7 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
     # Q17: Accessibility (Access Mechanism)
     elif question_id == 17:
         dist_formats = data.get('distribution_formats', [])
-        access = data.get('access_and_licensing', {})
+        access = data.get('regulatory_restrictions', {})
         license_terms = data.get('license_and_use_terms', {})
 
         has_platform = bool(re.search(r'(?:PhysioNet|Dataverse|FAIRhub|Zenodo)', str(dist_formats) + str(access), re.I))
@@ -656,7 +687,8 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
     elif question_id == 19:
         updates = data.get('updates', {})
         version_access = data.get('version_access', {})
-        release_notes = data.get('release_notes', {})
+        # `release_notes` is not a slot of Dataset; `errata` is.
+        release_notes = data.get('errata') or {}
 
         has_changes = bool(updates or release_notes)
         # Look for timestamps

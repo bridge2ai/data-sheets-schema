@@ -57,7 +57,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 1: Field Completeness
 **Description:** Proportion of mandatory schema fields populated (id, title, description, keywords, license).
 
-**Fields:** `id`, `title`, `description`, `keywords`, `license_and_use_terms`
+**Fields:** `id`, `title`, `description`, `keywords`, `license_and_use_terms`, `doi`, `page`, `creators`, `purposes`, `instances`, `resources`, `parent_datasets`, `variables`, `regulatory_restrictions.confidentiality_level`
 
 **Scoring (numeric 0-5):**
 - **0:** ≤40% fields populated
@@ -71,7 +71,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 2: Entry Length Adequacy
 **Description:** Whether narrative fields (description, motivation) have meaningful content length.
 
-**Fields:** `description`, `motivation`
+**Fields:** `description`, `purposes`, `addressing_gaps`
 
 **Scoring (numeric 0-5):**
 - **0:** <50 chars
@@ -99,7 +99,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 4: File Enumeration and Type Variety
 **Description:** Number of files and file type diversity in distribution_formats or files.listing.
 
-**Fields:** `files`, `distribution_formats`
+**Fields:** `file_collections`, `total_file_count`, `distribution_formats`, `conforms_to_schema`, `total_size_bytes`, `file_collections.total_bytes`
 
 **Scoring (numeric 0-5):**
 - **0:** 1 file type only
@@ -113,7 +113,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 5: Data File Size Availability
 **Description:** Presence of file size or dimensional metadata (e.g., 513×N spectrogram).
 
-**Fields:** `files`, `data_characteristics`
+**Fields:** `file_collections`, `total_file_count`, `total_size_bytes`, `file_collections.total_bytes`, `instances`, `subsets.is_data_split`, `splits`, `subsets.is_subpopulation`, `subpopulations`
 
 **Scoring (pass/fail):**
 - **Pass:** Numeric file size or dimension info found
@@ -128,7 +128,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 6: Dataset Identification Metadata
 **Description:** Presence of unique identifiers such as DOI, RRID, or persistent URLs.
 
-**Fields:** `doi`, `rrid`, `page`
+**Fields:** `doi`, `page`, `id`, `publisher`
 
 **Scoring (pass/fail):**
 - **Pass:** At least one persistent ID found
@@ -141,7 +141,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 7: Funding and Acknowledgements Completeness
 **Description:** Presence of funding sources, grants, or institutional sponsors.
 
-**Fields:** `funding_and_acknowledgements`, `funding`
+**Fields:** `funders`, `creators`
 
 **Scoring (numeric 0-5):**
 - **0:** No funding data
@@ -155,7 +155,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 8: Ethical and Privacy Declarations
 **Description:** Presence of deidentification methods, IRB approvals, or ethical sourcing notes.
 
-**Fields:** `deidentification_and_privacy`, `ethics`
+**Fields:** `is_deidentified`, `participant_privacy`, `ethical_reviews`, `human_subject_research`, `participant_compensation`, `at_risk_populations`, `informed_consent`, `data_protection_impacts`, `participant_privacy.reidentification_risk`
 
 **Scoring (numeric 0-5):**
 - **0:** No ethics fields present
@@ -171,7 +171,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 9: Access Requirements and Governance Documentation
 **Description:** Determines if access policy, license, IP restrictions, regulatory restrictions, confidentiality level, multi-jurisdiction compliance, and governance contacts are clearly defined. Note: In Bridge2AI, license types include: (1) CM4AI uses CC-BY-NC-SA (permissive license), (2) AI-READi, CHORUS, VOICE use Data Use Agreements (controlled access). Avoid misleading terms like "Open" or "Public" — instead use: permissive license (e.g., CC-BY, CC-BY-NC-SA) or openly accessible with DUA (requires signed agreement). Access tiers: (1) No authentication, (2) Registration required, (3) DUA required, (4) IRB/committee approval required.
 
-**Fields:** `license_and_use_terms`, `ip_restrictions`, `regulatory_restrictions`, `confidentiality_level`, `hipaa_compliant`, `other_compliance`, `governance_committee_contact`
+**Fields:** `license_and_use_terms`, `ip_restrictions`, `regulatory_restrictions`, `regulatory_restrictions.confidentiality_level`, `regulatory_restrictions.hipaa_compliant`, `regulatory_restrictions.other_compliance`, `regulatory_restrictions.governance_committee_contact`
 
 **Scoring (numeric 0-5):**
 - **0:** No license or access info
@@ -187,7 +187,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 10: Interoperability, Standardization, and Cross-Platform Integration
 **Description:** Presence of standard formats, ontologies, schema conformance (e.g., Parquet, TSV, LinkML), cross-platform dataset linkages with typed relationships, AND dataset integration capability. Note: Evaluation aligned with Bridge2AI AI/ML readiness characterization criteria (FAIRness, semantic/statistical characterization, governance, quality, pre-model XAI, ethics, computability). Reference: https://www.biorxiv.org/content/10.1101/2024.12.18.629172v1 and Bridge2AI AI-readiness scorecard tool. All Bridge2AI datasets are designed for AI/ML use. This question evaluates HOW WELL the dataset supports AI/ML (interoperability, standardization), not WHETHER it supports AI/ML. Dataset integration capability: Check for common identifiers for cross-dataset linking, standardized formats for data harmonization, and documented integration procedures.
 
-**Fields:** `format`, `encoding`, `conforms_to`, `conforms_to_schema`, `external_resources`, `related_datasets`
+**Fields:** `distribution_formats`, `conforms_to_schema`, `file_collections.compression`, `conforms_to`, `external_resources`, `related_datasets`
 
 **Scoring (numeric 0-5):**
 - **0:** Non-standard or unspecified format
@@ -205,7 +205,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 11: Tool and Software Transparency
 **Description:** Mentions of preprocessing libraries or tools used in data preparation.
 
-**Fields:** `software_and_tools`
+**Fields:** `machine_annotation_tools`, `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `annotation_analyses`, `imputation_protocols`
 
 **Scoring (numeric 0-5):**
 - **0:** No software tools documented
@@ -221,7 +221,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 12: Collection Protocol Clarity
 **Description:** Description completeness of participant recruitment and data acquisition.
 
-**Fields:** `collection_process`
+**Fields:** `collection_mechanisms`, `acquisition_methods`, `data_collectors`, `collection_timeframes`, `raw_data_sources`
 
 **Scoring (numeric 0-5):**
 - **0:** No collection description
@@ -237,7 +237,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 13: Version History, Maintenance, and Sustainability
 **Description:** Presence of version information, version access methods, errata, update plans, release notes with dates, AND data sustainability indicators (persistent identifiers, long-term governance plan, domain-appropriate repository, institutional commitment documentation). Note: Data sustainability evaluation checks for: (1) persistent identifiers (DOI, ARK, Handle), (2) long-term governance plan, (3) domain-appropriate repository (e.g., PhysioNet for biomedical data), (4) institutional commitment or preservation funding. Sustainable datasets have clear maintenance plans beyond initial publication.
 
-**Fields:** `version`, `version_access`, `errata`, `updates`, `release_notes`, `maintainers`, `doi`, `publisher`
+**Fields:** `version`, `version_access`, `errata`, `updates`, `maintainers`, `doi`, `publisher`
 
 **Scoring (numeric 0-5):**
 - **0:** Single version only, no sustainability plan
@@ -253,7 +253,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 14: Associated Publications
 **Description:** Presence of formal citations or DOI-linked references.
 
-**Fields:** `citations`, `references`
+**Fields:** `citation`, `external_resources`, `doi`
 
 **Scoring (numeric 0-5):**
 - **0:** No publications cited
@@ -269,7 +269,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 15: Human Subject Representation
 **Description:** Inclusion of human subjects, demographic diversity, or subgroup details.
 
-**Fields:** `composition.population`, `subpopulations`
+**Fields:** `instances`, `subpopulations`, `at_risk_populations`, `subsets.is_subpopulation`, `missing_data_documentation`
 
 **Scoring (numeric 0-5):**
 - **0:** No human subject information
@@ -287,7 +287,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 16: Findability (Persistent Links)
 **Description:** Dataset includes persistent URLs for access and documentation.
 
-**Fields:** `page`, `download_url`, `external_resources`
+**Fields:** `page`, `download_url`, `external_resources`, `doi`, `id`
 
 **Scoring (pass/fail):**
 - **Pass:** At least one working external URL present
@@ -300,7 +300,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 17: Accessibility (Access Mechanism)
 **Description:** Describes how users can obtain the dataset (download, DUA, login).
 
-**Fields:** `distribution_formats`, `access_and_licensing`
+**Fields:** `distribution_formats`, `license_and_use_terms`, `download_url`
 
 **Scoring (numeric 0-5):**
 - **0:** Unclear access method
@@ -330,7 +330,7 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 #### Question 19: Data Integrity, Provenance Graph, and Quality
 **Description:** Presence of version access, errata, update plans, source derivation, parent dataset linkages, missing data documentation, data split indicators, AND provenance graph representation. Note: Provenance is a transparent graph of origins and processing of data (W3C PROV-O standard: https://www.w3.org/TR/prov-o/), NOT just version changes. Evaluation checks for: (1) Entity-activity-agent relationships, (2) Processing lineage, (3) Derivation paths. Provenance may be represented as text OR as W3C PROV-O graphs. Both formats are acceptable if they provide complete lineage information.
 
-**Fields:** `version_access`, `errata`, `updates`, `was_derived_from`, `parent_datasets`, `missing_data_documentation`, `is_data_split`, `raw_data_sources`
+**Fields:** `version_access`, `errata`, `updates`, `was_derived_from`, `parent_datasets`, `missing_data_documentation`, `subsets.is_data_split`, `splits`, `raw_data_sources`
 
 **Scoring (numeric 0-5):**
 - **0:** No provenance metadata
