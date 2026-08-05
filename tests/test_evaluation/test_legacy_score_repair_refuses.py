@@ -180,5 +180,37 @@ class TestTheLiveCorpus(unittest.TestCase):
             "every record in the current shape must be refused, and no other")
 
 
+@unittest.skipUnless(SCRIPT.exists(), "repair script not present")
+class TestTheExitCode(unittest.TestCase):
+    """A caller has to be able to see the refusal.
+
+    `main()` returned 0 unconditionally, so a directory in which every record
+    was refused reported success having done nothing — the same silence the
+    guard exists to break.
+    """
+
+    def _run(self, records):
+        import subprocess
+        import sys
+        with tempfile.TemporaryDirectory() as tmp:
+            for name, record in records.items():
+                (Path(tmp) / name).write_text(json.dumps(record))
+            return subprocess.run(
+                [sys.executable, str(SCRIPT), "--dry-run", "--input-dir", tmp],
+                capture_output=True, text=True, cwd=REPO)
+
+    def test_all_refused_exits_nonzero(self):
+        result = self._run({"AI_READI_claudecode_agent_evaluation.json":
+                            _current_record()})
+        self.assertNotEqual(result.returncode, 0, result.stdout[-400:])
+        self.assertIn("Refused", result.stdout)
+
+    def test_a_repairable_directory_still_exits_zero(self):
+        """The guard must not turn the tool into one that always fails."""
+        result = self._run({"AI_READI_claudecode_agent_evaluation.json":
+                            _legacy_record()})
+        self.assertEqual(result.returncode, 0, result.stdout[-400:])
+
+
 if __name__ == "__main__":
     unittest.main()

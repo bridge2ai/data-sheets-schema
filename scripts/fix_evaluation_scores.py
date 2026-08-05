@@ -361,7 +361,14 @@ def main():
     elif "rubric20" in str(eval_dir):
         rubric_type = "rubric20-semantic"
 
-    print(f"Found {len(eval_files)} evaluation files in {eval_dir.relative_to(Path.cwd())}")
+    # `relative_to` raises when the directory is outside the working tree, so
+    # `--input-dir /tmp/...` crashed before doing anything. Pre-existing; found
+    # by a test that ran the CLI from a temp directory.
+    try:
+        shown = eval_dir.relative_to(Path.cwd())
+    except ValueError:
+        shown = eval_dir
+    print(f"Found {len(eval_files)} evaluation files in {shown}")
     print(f"Rubric type: {rubric_type}")
     if args.dry_run:
         print("\n*** DRY RUN MODE - No files will be modified ***\n")
@@ -409,6 +416,13 @@ def main():
 
     if args.dry_run and fixed_count > 0:
         print("\nRun without --dry-run to apply fixes")
+
+    if refused_count and not fixed_count:
+        # Everything in this directory is newer than the tool. Exiting 0 would
+        # tell a caller the repair succeeded when nothing was repairable, which
+        # is the same silence the guard exists to break (#328).
+        print("\nNothing repairable here: every record postdates this tool.")
+        return 1
 
     return 0
 
