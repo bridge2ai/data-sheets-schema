@@ -190,10 +190,18 @@ def plan_cmd(config, paths_only):
     """
     from data_sheets_schema.evaluation_plan import (NothingSelected, plan,
                                                     summarise)
+    from data_sheets_schema.runs import AmbiguousCanonical
     try:
         evaluations = plan(config=config)
     except NothingSelected as exc:
         raise click.ClickException(str(exc))
+    except AmbiguousCanonical as exc:
+        # The state the rerun creates: marks under both the old and the new
+        # config until re-selection settles. `plan` is right to propagate rather
+        # than choose one (#308); rendering it is this boundary's job (#342).
+        raise click.ClickException(
+            f"{exc} Pass --config to say which configuration you mean, or "
+            "re-run `d4d runs select --execute` to settle the mark.")
 
     if paths_only:
         for path in dict.fromkeys(str(e.path) for e in evaluations):

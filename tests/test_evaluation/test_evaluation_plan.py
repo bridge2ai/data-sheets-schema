@@ -163,6 +163,47 @@ class TestSummarise(unittest.TestCase):
         self.assertIn("2 rubrics", line)
 
 
+class TestTheCliRendersFailures(unittest.TestCase):
+    """Every way this can fail must arrive as a message, not a traceback.
+
+    `AmbiguousCanonical` is the state the rerun creates — marks under the old
+    and new config until re-selection settles — and it reached the user as a
+    bare traceback with no mention of `--config` (#342).
+    """
+
+    def _invoke(self, side_effect=None, return_value=None):
+        from unittest.mock import patch
+
+        from click.testing import CliRunner
+
+        from data_sheets_schema.cli.evaluate import evaluate
+        kwargs = ({"side_effect": side_effect} if side_effect
+                  else {"return_value": return_value})
+        with patch("data_sheets_schema.runs.canonical_runs", **kwargs):
+            return CliRunner().invoke(evaluate, ["plan"])
+
+    def test_two_marks_are_reported_with_the_remedy(self):
+        from data_sheets_schema.runs import AmbiguousCanonical
+        result = self._invoke(
+            side_effect=AmbiguousCanonical("CHORUS: v2_rep1, v3_rep1"))
+        self.assertIsNone(result.exception if result.exit_code == 0 else None)
+        self.assertNotIsInstance(result.exception, AmbiguousCanonical)
+        self.assertIn("--config", result.output)
+        self.assertIn("CHORUS", result.output)
+
+    def test_nothing_selected_is_reported_with_the_remedy(self):
+        result = self._invoke(return_value={})
+        self.assertNotEqual(result.exit_code, 0)
+        self.assertIn("d4d runs select --execute", result.output)
+
+    def test_a_resolvable_corpus_exits_zero(self):
+        """The guard must not turn every invocation into an error."""
+        result = self._invoke(return_value={
+            "CHORUS": {"full": "c.yaml", "core": "cc.yaml"}})
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIn("evaluations =", result.output)
+
+
 class TestTheLiveCorpus(unittest.TestCase):
     """Properties of the real plan — deliberately not its size."""
 
