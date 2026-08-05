@@ -144,11 +144,37 @@ def plan(concat_dir: Path | None = None, config: str | None = None,
     return out
 
 
+#: Replicates excluded by the most recent `plan(all_replicates=True)`, as
+#: `(project, label, status)`. Reported rather than dropped silently: the count
+#: falling from 18 to 15 with no explanation is its own defect (#344).
+LAST_EXCLUDED: list[tuple[str, str, str]] = []
+
+
 def _replicate_plan(found: dict[str, dict], rubrics: tuple[str, ...],
                     concat_dir: Path | None) -> list[Evaluation]:
+    from data_sheets_schema.runs import VALID, validation_status
+
+    LAST_EXCLUDED.clear()
     out: list[Evaluation] = []
     for project in sorted(found):
+        method = found[project].get("method") or "claudecode_agent"
         for sibling in replicates_of(found[project]):
+            # The canonical mark exists *because* that replicate validates —
+            # the selection criterion is "full and core both validate", and
+            # siblings inherit none of it. Three of the 18 records this
+            # enumerated on the 2026-07-31 corpus were invalid, and scoring
+            # those would measure validation failure as quality variance, which
+            # is the opposite of what a within-config estimate is for (#344).
+            label = sibling.get("label") or ""
+            try:
+                status = validation_status(method, label, project)
+            except Exception:
+                status = "unverified"
+            if status != VALID:
+                entry = (project, label, status)
+                if entry not in LAST_EXCLUDED:
+                    LAST_EXCLUDED.append(entry)
+                continue
             for variant in VARIANTS:
                 path = sibling.get(variant)
                 if not path:
@@ -176,7 +202,32 @@ def summarise(evaluations: list[Evaluation]) -> str:
     # wrong number — which is the failure this function exists to prevent, so
     # printing a product that does not equal the total would be worse here than
     # printing no product at all.
-    replicates = (f" x {len(labels)} replicates" if len(labels) > 1 else "")
-    return (f"{len(evaluations)} evaluations = {len(projects)} projects "
-            f"({', '.join(projects)}) x {len(variants)} variants "
-            f"({', '.join(variants)}) x {len(rubrics)} rubrics{replicates}")
+    factors = [len(projects), len(variants), len(rubrics)]
+    if len(labels) > 1:
+        factors.append(len(labels))
+    product = 1
+    for factor in factors:
+        product *= factor
+
+    if product == len(evaluations):
+        replicates = (f" x {len(labels)} replicates" if len(labels) > 1 else "")
+        line = (f"{len(evaluations)} evaluations = {len(projects)} projects "
+                f"({', '.join(projects)}) x {len(variants)} variants "
+                f"({', '.join(variants)}) x {len(rubrics)} rubrics{replicates}")
+    else:
+        # An exclusion makes the plan a ragged set rather than a product, and a
+        # factorisation that multiplies to something other than the total is
+        # exactly the defect this function exists to prevent — worse than no
+        # factorisation, because it reads as a check that passed.
+        records = len({str(e.path) for e in evaluations})
+        line = (f"{len(evaluations)} evaluations over {records} records "
+                f"({len(projects)} projects: {', '.join(projects)}; "
+                f"{len(variants)} variants; {len(rubrics)} rubrics) — not a "
+                f"product, see the exclusions below")
+    if LAST_EXCLUDED:
+        # Named, not just counted: "3 excluded" invites the reader to assume
+        # they were the same kind of thing.
+        detail = "; ".join(f"{p} {l} ({s})" for p, l, s in LAST_EXCLUDED)
+        line += (f"\n{len(LAST_EXCLUDED)} replicate(s) excluded as not "
+                 f"validating: {detail}")
+    return line

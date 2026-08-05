@@ -11,9 +11,23 @@ d4d evaluate plan                    # one record per project
 d4d evaluate plan --all-replicates   # every replicate of the canonical config
 ```
 
-Today that is 12 against 36. Neither number is written anywhere — both are
+Today that is 12 against 20. Neither number is written anywhere — both are
 derived from the canonical marks (#315), and both move on their own as projects
-gain records. After a successful five-project rerun they become 20 and 60.
+gain records.
+
+The widened figure is 20 rather than 36 because **four of the nine replicates do
+not validate** and are excluded (#344):
+
+    AI_READI rep2, rep3    invalid
+    CM4AI    rep1, rep3    invalid
+
+The canonical mark exists because that replicate validates — the selection
+criterion is "full and core both validate against the current schema" — and
+siblings inherit none of it. Scoring an invalid record and pooling it into a
+variance estimate would measure validation failure as quality variance, which is
+the opposite of what the estimate is for.
+
+That also sharpens the cost comparison below: the widened run is 1.7x, not 3x.
 
 ## Recommendation: canonical-only
 

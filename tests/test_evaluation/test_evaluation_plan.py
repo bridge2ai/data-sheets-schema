@@ -141,6 +141,13 @@ class TestReplicateCoverage(unittest.TestCase):
     """
 
     def _corpus_with_replicates(self, root, project="CHORUS", reps=3):
+        """rep1 marked canonical; rep2 and rep3 are unmarked siblings.
+
+        `validation_status` is patched in each test rather than faked in
+        provenance: it re-hashes the artifacts a verdict was reached on, so a
+        fixture claiming `passed` would have to reproduce that too, and the
+        gate under test here is the plan's, not the verdict's.
+        """
         config = "2026-08-05_cfg"
         for rep in range(1, reps + 1):
             label = f"{config}_rep{rep}"
@@ -151,27 +158,32 @@ class TestReplicateCoverage(unittest.TestCase):
                 path = root / sub / label / f"{project}{suffix}"
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text("id: x\n")
-        # Only rep1 is marked canonical; the others are its siblings.
         _corpus(root, [project], config=config)
         return root
+
+    @staticmethod
+    def _all_valid():
+        from unittest.mock import patch
+        return patch("data_sheets_schema.runs.validation_status",
+                     return_value="valid")
 
     def test_it_covers_every_replicate_not_just_the_marked_one(self):
         with TemporaryDirectory() as tmp:
             root = self._corpus_with_replicates(Path(tmp))
-            canonical = plan(concat_dir=root)
-            widened = plan(concat_dir=root, all_replicates=True)
+            with self._all_valid():
+                canonical = plan(concat_dir=root)
+                widened = plan(concat_dir=root, all_replicates=True)
         self.assertEqual(len(widened), 3 * len(canonical))
-
     def test_each_evaluation_names_its_replicate(self):
         """Without the label the widened plan has three indistinguishable
         entries per record, and a sweep cannot tell their results apart."""
         with TemporaryDirectory() as tmp:
             root = self._corpus_with_replicates(Path(tmp))
-            widened = plan(concat_dir=root, all_replicates=True)
+            with self._all_valid():
+                widened = plan(concat_dir=root, all_replicates=True)
         labels = {e.label for e in widened}
         self.assertEqual(len(labels), 3)
         self.assertTrue(all(e.label in e.name for e in widened))
-
     def test_the_canonical_plan_carries_no_label(self):
         """One record per project — the label is implied by the mark."""
         with TemporaryDirectory() as tmp:
@@ -186,8 +198,11 @@ class TestReplicateCoverage(unittest.TestCase):
         with TemporaryDirectory() as tmp:
             root = self._corpus_with_replicates(Path(tmp))
             for widen in (False, True):
-                got = plan(concat_dir=root, all_replicates=widen)
+                with self._all_valid():
+                    got = plan(concat_dir=root, all_replicates=widen)
                 line = summarise(got)
+                if "not a product" in line:
+                    continue
                 factors = [int(n) for n in re.findall(
                     r"(\d+) (?:projects|variants|rubrics|replicates)", line)]
                 product = 1
@@ -195,6 +210,78 @@ class TestReplicateCoverage(unittest.TestCase):
                     product *= factor
                 with self.subTest(all_replicates=widen):
                     self.assertEqual(product, len(got), line)
+
+    def test_an_uneven_exclusion_stops_the_summary_claiming_a_product(self):
+        """Gating on validity can make the plan ragged (#344), and a
+        factorisation multiplying to something other than the total reads as a
+        check that passed.
+
+        Excluding the *same* replicate from every project leaves an even grid
+        and stays a legitimate product — my first version of this test asserted
+        raggedness there and was wrong. Raggedness needs an **uneven**
+        exclusion: two projects keeping different numbers of replicates.
+        """
+        from unittest.mock import patch
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._corpus_with_replicates(root, project="CHORUS")
+            self._corpus_with_replicates(root, project="CM4AI")
+            # CHORUS keeps all three; CM4AI keeps only rep1.
+            def status(method, label, project):
+                if project == "CM4AI" and not label.endswith("rep1"):
+                    return "invalid"
+                return "valid"
+            with patch("data_sheets_schema.runs.validation_status",
+                       side_effect=status):
+                got = plan(concat_dir=root, all_replicates=True)
+                line = summarise(got)
+        self.assertIn("not a product", line)
+        self.assertIn("excluded as not validating", line)
+        self.assertIn("CM4AI", line)
+
+    def test_an_even_exclusion_is_still_reported_as_a_product(self):
+        """The complement: dropping rep2 and rep3 everywhere leaves a grid, so
+        the factorisation is honest and should still be printed."""
+        from unittest.mock import patch
+        with TemporaryDirectory() as tmp:
+            root = self._corpus_with_replicates(Path(tmp))
+            with patch("data_sheets_schema.runs.validation_status",
+                       side_effect=lambda m, l, p: (
+                           "valid" if l.endswith("rep1") else "invalid")):
+                line = summarise(plan(concat_dir=root, all_replicates=True))
+        self.assertNotIn("not a product", line)
+        self.assertIn("excluded as not validating", line)
+        # Named, not merely counted. "2 excluded" invites the reader to assume
+        # they were the same kind of thing, and which replicate was dropped is
+        # what makes the exclusion checkable.
+        self.assertIn("rep2", line)
+        self.assertIn("rep3", line)
+        self.assertIn("(invalid)", line)
+
+    def test_only_validating_replicates_are_evaluated(self):
+        """A record that fails validation would be scored by an LLM judge and
+        pooled into a variance estimate, measuring validation failure as quality
+        variance (#344)."""
+        from unittest.mock import patch
+        with TemporaryDirectory() as tmp:
+            root = self._corpus_with_replicates(Path(tmp))
+            with patch("data_sheets_schema.runs.validation_status",
+                       side_effect=lambda m, l, p: (
+                           "valid" if l.endswith("rep1") else "invalid")):
+                got = plan(concat_dir=root, all_replicates=True)
+        self.assertEqual({e.label for e in got},
+                         {"2026-08-05_cfg_rep1"})
+
+    def test_an_unverified_replicate_is_excluded_too(self):
+        """Absence of evidence is not validity — the same reasoning
+        `validation_status` itself carries."""
+        from unittest.mock import patch
+        with TemporaryDirectory() as tmp:
+            root = self._corpus_with_replicates(Path(tmp))
+            with patch("data_sheets_schema.runs.validation_status",
+                       return_value="unverified"):
+                with self.assertRaises(NothingSelected):
+                    plan(concat_dir=root, all_replicates=True)
 
 
 class TestNothingSelected(unittest.TestCase):
