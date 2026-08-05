@@ -24,6 +24,46 @@ from typing import Dict, List, Tuple, Optional
 import argparse
 
 
+class CurrentShapeRecord(ValueError):
+    """This tool predates the N/A convention and would corrupt such a record."""
+
+    def __init__(self, path: Path, marker: str):
+        super().__init__(
+            f"{path.name} is in the current shape (`overall_score.{marker}`) and "
+            "this script predates it. Re-running the evaluation is the way to "
+            "correct such a record; see #328.")
+
+
+#: Keys the N/A convention added to `overall_score`. Their presence is what
+#: separates a record this tool can repair from one it would damage.
+CURRENT_SHAPE_MARKERS = ("normalized_percentage", "adjusted_max_points",
+                         "excluded_max_points")
+
+
+def refuse_current_shape(eval_data: Dict, eval_path: Path) -> None:
+    """Refuse a record written after the N/A convention (#328).
+
+    This script recomputes a percentage as `total / max` and writes it to
+    `overall_score.percentage`. Both halves are wrong for a current record:
+
+    - the reported figure is `normalized_percentage`, computed over
+      `adjusted_max_points` — the maximum *after* excluding non-applicable
+      items — so `total / max_points` is a different number whenever anything
+      is excluded; and
+    - `percentage` is not declared by either semantic schema (#323), so writing
+      it turns a conformant record into a non-conformant one.
+
+    Everything this tool could still legitimately repair — the 12 superseded
+    and 8 invalid records — is being regenerated, so migrating it to the N/A
+    vocabulary would be work spent on a corpus about to be replaced. Refusing
+    is the whole remaining fix.
+    """
+    overall = eval_data.get("overall_score") or {}
+    for marker in CURRENT_SHAPE_MARKERS:
+        if marker in overall:
+            raise CurrentShapeRecord(eval_path, marker)
+
+
 def calculate_rubric20_score(eval_data: Dict) -> Tuple[float, float]:
     """
     Calculate total score from rubric20 categories/questions.
@@ -101,6 +141,9 @@ def fix_evaluation_scores(eval_path: Path, dry_run: bool = False) -> Tuple[bool,
     # Load evaluation
     with open(eval_path, 'r') as f:
         eval_data = json.load(f)
+
+    # Before anything else: this tool predates the N/A convention (#328).
+    refuse_current_shape(eval_data, eval_path)
 
     # Detect rubric type
     rubric_type = detect_rubric_type(eval_data, eval_path)
@@ -318,7 +361,14 @@ def main():
     elif "rubric20" in str(eval_dir):
         rubric_type = "rubric20-semantic"
 
-    print(f"Found {len(eval_files)} evaluation files in {eval_dir.relative_to(Path.cwd())}")
+    # `relative_to` raises when the directory is outside the working tree, so
+    # `--input-dir /tmp/...` crashed before doing anything. Pre-existing; found
+    # by a test that ran the CLI from a temp directory.
+    try:
+        shown = eval_dir.relative_to(Path.cwd())
+    except ValueError:
+        shown = eval_dir
+    print(f"Found {len(eval_files)} evaluation files in {shown}")
     print(f"Rubric type: {rubric_type}")
     if args.dry_run:
         print("\n*** DRY RUN MODE - No files will be modified ***\n")
@@ -327,6 +377,7 @@ def main():
     # Process each file
     fixed_count = 0
     skipped_count = 0
+    refused_count = 0
 
     for eval_file in sorted(eval_files):
         print(f"Processing: {eval_file.name}")
@@ -339,6 +390,12 @@ def main():
                 fixed_count += 1
             else:
                 skipped_count += 1
+
+        except CurrentShapeRecord as e:
+            # Not an error: the record is newer than this tool (#328). A
+            # traceback here would read as a fault in the corpus.
+            print(f"  🚫 Refused: {e}")
+            refused_count += 1
 
         except Exception as e:
             print(f"  ERROR: {e}")
@@ -353,11 +410,19 @@ def main():
     print("SUMMARY:")
     print(f"  ✅ Fixed:   {fixed_count}")
     print(f"  ⏭️  Skipped: {skipped_count}")
-    print(f"  📊 Total:   {fixed_count + skipped_count}")
+    print(f"  🚫 Refused: {refused_count}   (newer than this tool — re-run the evaluation)")
+    print(f"  📊 Total:   {fixed_count + skipped_count + refused_count}")
     print("=" * 60)
 
     if args.dry_run and fixed_count > 0:
         print("\nRun without --dry-run to apply fixes")
+
+    if refused_count and not fixed_count:
+        # Everything in this directory is newer than the tool. Exiting 0 would
+        # tell a caller the repair succeeded when nothing was repairable, which
+        # is the same silence the guard exists to break (#328).
+        print("\nNothing repairable here: every record postdates this tool.")
+        return 1
 
     return 0
 
