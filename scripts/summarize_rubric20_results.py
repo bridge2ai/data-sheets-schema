@@ -23,7 +23,8 @@ from datetime import datetime
 # It was 84 here while the questions defined 88 (#270 thread).
 from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
 from data_sheets_schema.rubric_pooling import (
-    denominator_label, group_by_denominator, pooling_warning)
+    denominator_label, group_by_denominator, pooling_warning,
+    reported_percentage)
 
 # Base directory
 BASE_DIR = Path(__file__).parent.parent
@@ -81,7 +82,7 @@ def create_csv_summary(results: List[Dict]):
             overall = result.get('overall_score', {})
             total_score = overall.get('total_points', 0)
             max_score = overall.get('max_points', RUBRIC20_MAX_SCORE)
-            percentage = overall.get('percentage', 0)
+            percentage = reported_percentage({'overall_score': overall})
 
             # Category scores
             categories = result.get('categories', {})
@@ -146,7 +147,7 @@ def create_markdown_table(results: List[Dict]):
                 overall = result.get('overall_score', {})
                 total = overall.get('total_points', 0)
                 max_pts = overall.get('max_points', RUBRIC20_MAX_SCORE)
-                pct = overall.get('percentage', 0)
+                pct = reported_percentage({'overall_score': overall})
 
                 # Category scores
                 categories = result.get('categories', {})
@@ -182,7 +183,7 @@ def create_markdown_table(results: List[Dict]):
                 file_count = len(results_list)
 
                 avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in results_list) / file_count
-                avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in results_list) / file_count
+                avg_pct = sum(reported_percentage(r) for r in results_list) / file_count
 
                 # The records carry their own denominator, and 167 committed
                 # rubric20 evaluations were scored against 84 (#275). Printing a
@@ -210,8 +211,8 @@ def create_markdown_table(results: List[Dict]):
     # valid ranking is worse than two shorter ones that are.
     for denom, group in group_by_denominator(results).items():
         ranked = [r for r in group
-                  if r.get('overall_score', {}).get('percentage', 0) >= 80]
-        ranked.sort(key=lambda x: x.get('overall_score', {}).get('percentage', 0),
+                  if reported_percentage(r) >= 80]
+        ranked.sort(key=lambda x: reported_percentage(x),
                     reverse=True)
         if not ranked:
             continue
@@ -224,7 +225,7 @@ def create_markdown_table(results: List[Dict]):
             eval_type = result.get('evaluation_type', 'unknown')
             overall = result.get('overall_score', {})
             score_str = (f"{overall.get('total_points', 0)}/{denom} "
-                         f"({overall.get('percentage', 0):.1f}%)")
+                         f"({reported_percentage({'overall_score': overall}):.1f}%)")
             file_name = Path(result.get('d4d_file', '')).name
             md += f"| {project} | {method} | {eval_type} | {score_str} | {file_name} |\n"
 
@@ -256,13 +257,13 @@ def create_detailed_report(results: List[Dict]):
         if not group:
             continue
         total_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group)
-        avg_percentage = sum(r.get('overall_score', {}).get('percentage', 0) for r in group) / len(group)
-        best = max(group, key=lambda x: x.get('overall_score', {}).get('percentage', 0))
-        worst = min(group, key=lambda x: x.get('overall_score', {}).get('percentage', 0))
+        avg_percentage = sum(reported_percentage(r) for r in group) / len(group)
+        best = max(group, key=lambda x: reported_percentage(x))
+        worst = min(group, key=lambda x: reported_percentage(x))
         report += f"### Scored out of {denom} ({len(group)} evaluation(s))\n\n"
         report += f"- **Average Score:** {total_score / len(group):.1f}/{denom} ({avg_percentage:.1f}%)\n"
-        report += f"- **Best Score:** {best.get('overall_score', {}).get('percentage', 0):.1f}%\n"
-        report += f"- **Worst Score:** {worst.get('overall_score', {}).get('percentage', 0):.1f}%\n\n"
+        report += f"- **Best Score:** {reported_percentage(best):.1f}%\n"
+        report += f"- **Worst Score:** {reported_percentage(worst):.1f}%\n\n"
 
     # Method comparison
     report += "\n## Method Comparison\n\n"
@@ -276,7 +277,7 @@ def create_detailed_report(results: List[Dict]):
             # would rank it against itself measured two different ways (#275).
             for denom, group in group_by_denominator(method_results).items():
                 avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group) / len(group)
-                avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in group) / len(group)
+                avg_pct = sum(reported_percentage(r) for r in group) / len(group)
                 report += (f"- Average score: {avg_score:.1f}/{denom} "
                            f"({avg_pct:.1f}%) over {len(group)} evaluation(s)\n")
             report += "\n"
@@ -293,7 +294,7 @@ def create_detailed_report(results: List[Dict]):
             # would rank it against itself measured two different ways (#275).
             for denom, group in group_by_denominator(project_results).items():
                 avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group) / len(group)
-                avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in group) / len(group)
+                avg_pct = sum(reported_percentage(r) for r in group) / len(group)
                 report += (f"- Average score: {avg_score:.1f}/{denom} "
                            f"({avg_pct:.1f}%) over {len(group)} evaluation(s)\n")
             report += "\n"

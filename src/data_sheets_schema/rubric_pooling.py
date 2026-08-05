@@ -45,6 +45,36 @@ def denominator_of(result: dict[str, Any],
     return (result.get("overall_score") or {}).get("max_points") or default
 
 
+class MissingPercentage(KeyError):
+    """A record reports no percentage under any recognised key."""
+
+    def __init__(self, keys: Iterable[str]):
+        self.keys = sorted(keys)
+        super().__init__(
+            f"no percentage in overall_score (keys: {self.keys}). Expected "
+            f"`normalized_percentage`, or `percentage` on a pre-2026 record.")
+
+
+def reported_percentage(result: dict[str, Any]) -> float:
+    """The percentage a record reports, refusing when it reports none.
+
+    Every consumer read `overall_score.get("percentage", 0)`. The N/A
+    convention renamed that key to `normalized_percentage` — total over the
+    denominator *after* excluding non-applicable items — and the default of `0`
+    turned the absence into a score. Measured across the current corpus: **16 of
+    16 current-shape records reported 0.0%** through the summarisers and the
+    HTML renderer, while their real scores ran 72-99%. Every one was graded F.
+
+    A missing percentage raises. `0` is a real score a record can earn, so it
+    cannot double as "absent" — that conflation is the whole defect.
+    """
+    overall = result.get("overall_score") or {}
+    for key in ("normalized_percentage", "percentage"):
+        if overall.get(key) is not None:
+            return float(overall[key])
+    raise MissingPercentage(overall.keys())
+
+
 def denominators(results: Iterable[dict[str, Any]],
                  default: int = RUBRIC20_MAX_SCORE) -> set[int]:
     return {denominator_of(r, default) for r in results}

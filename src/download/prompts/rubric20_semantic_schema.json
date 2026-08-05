@@ -4,7 +4,18 @@
   "title": "Rubric20-Semantic Evaluation Schema",
   "description": "Schema for D4D evaluation results using the Rubric20-Semantic framework with semantic validation",
   "type": "object",
-  "required": ["rubric", "version", "d4d_file", "project", "method", "evaluation_timestamp", "model", "overall_score", "categories", "semantic_analysis"],
+  "required": [
+    "rubric",
+    "version",
+    "d4d_file",
+    "project",
+    "method",
+    "evaluation_timestamp",
+    "model",
+    "overall_score",
+    "categories",
+    "semantic_analysis"
+  ],
   "properties": {
     "rubric": {
       "type": "string",
@@ -26,7 +37,23 @@
     },
     "method": {
       "type": "string",
-      "description": "Generation method (claudecode_agent, claudecode_assistant, gpt5, curated)"
+      "enum": [
+        "curated",
+        "gpt5",
+        "claudecode",
+        "claudecode_agent",
+        "claudecode_agent_core",
+        "claudecode_assistant",
+        "rocrate_mapped",
+        "rocrate_static_map",
+        "claudecode_agent_crate",
+        "claudecode_agent_crate_core",
+        "claudecode_agent_healthsheet",
+        "claudecode_agent_healthsheet_core",
+        "claudecode_agent_crate_only",
+        "claudecode_agent_crate_only_core"
+      ],
+      "description": "Generation method. Mirrors data_sheets_schema.constants.METHODS; pinned by tests/test_evaluation/test_semantic_evaluation_contract.py"
     },
     "evaluation_timestamp": {
       "type": "string",
@@ -35,7 +62,11 @@
     },
     "model": {
       "type": "object",
-      "required": ["name", "temperature", "evaluation_type"],
+      "required": [
+        "name",
+        "temperature",
+        "evaluation_type"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -55,23 +86,45 @@
     },
     "overall_score": {
       "type": "object",
-      "required": ["total_points", "max_points", "percentage"],
+      "required": [
+        "total_points",
+        "max_points",
+        "excluded_max_points",
+        "adjusted_max_points",
+        "normalized_percentage",
+        "questions_not_applicable"
+      ],
       "properties": {
         "total_points": {
           "type": "number",
           "minimum": 0,
-          "description": "Total points earned"
+          "description": "Points earned across applicable items"
         },
         "max_points": {
           "type": "number",
           "const": 88,
-          "description": "Maximum possible points (20 questions × average 4.2 points)"
+          "description": "Maximum before N/A exclusions"
         },
-        "percentage": {
+        "excluded_max_points": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Sum of max_score over items marked applicable: false"
+        },
+        "adjusted_max_points": {
+          "type": "number",
+          "minimum": 0,
+          "description": "max_points minus excluded_max_points"
+        },
+        "normalized_percentage": {
           "type": "number",
           "minimum": 0,
           "maximum": 100,
-          "description": "Percentage score"
+          "description": "total_points / adjusted_max_points x 100. The only percentage reported: comparable across records regardless of how many items are excluded."
+        },
+        "questions_not_applicable": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of questions marked applicable: false"
         }
       }
     },
@@ -82,7 +135,10 @@
       "description": "Four evaluation categories",
       "items": {
         "type": "object",
-        "required": ["name", "questions"],
+        "required": [
+          "name",
+          "questions"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -94,7 +150,17 @@
             "description": "Questions in this category",
             "items": {
               "type": "object",
-              "required": ["id", "name", "description", "score_type", "score", "max_score", "score_label", "evidence", "quality_note"],
+              "required": [
+                "id",
+                "name",
+                "description",
+                "score_type",
+                "score",
+                "max_score",
+                "score_label",
+                "evidence",
+                "quality_note"
+              ],
               "properties": {
                 "id": {
                   "type": "integer",
@@ -112,13 +178,18 @@
                 },
                 "score_type": {
                   "type": "string",
-                  "enum": ["numeric", "pass_fail"],
+                  "enum": [
+                    "numeric",
+                    "pass_fail"
+                  ],
                   "description": "Scoring type"
                 },
                 "score": {
-                  "type": "number",
-                  "minimum": 0,
-                  "description": "Points awarded"
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "Points awarded. null when applicable is false — distinct from 0, which means scored and earned nothing."
                 },
                 "max_score": {
                   "type": "number",
@@ -141,6 +212,21 @@
                 "semantic_analysis": {
                   "type": "string",
                   "description": "Semantic validation notes (optional)"
+                },
+                "applicable": {
+                  "type": [
+                    "boolean",
+                    "string"
+                  ],
+                  "description": "Whether the question's 'Applies to' condition is met"
+                },
+                "applicability_status": {
+                  "type": "string",
+                  "description": "always_applicable | applicable | not_applicable"
+                },
+                "applicability_evidence": {
+                  "type": "string",
+                  "description": "Fields belonging to a different question that evidence the applicability decision (the anti-circular rule)"
                 }
               }
             }
@@ -150,23 +236,37 @@
     },
     "semantic_analysis": {
       "type": "object",
-      "required": ["issues_detected", "semantic_insights", "consistency_checks", "correctness_validations"],
+      "required": [
+        "issues_detected",
+        "semantic_insights",
+        "consistency_checks",
+        "correctness_validations"
+      ],
       "properties": {
         "issues_detected": {
           "type": "array",
           "description": "Semantic issues found during evaluation",
           "items": {
             "type": "object",
-            "required": ["type", "severity", "description", "fields_involved", "recommendation"],
+            "required": [
+              "type",
+              "severity",
+              "description",
+              "fields_involved",
+              "recommendation"
+            ],
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["correctness", "consistency", "completeness", "semantic_understanding"],
-                "description": "Issue type"
+                "description": "Issue type (e.g. correctness, consistency, completeness, content_accuracy, semantic_understanding)"
               },
               "severity": {
                 "type": "string",
-                "enum": ["low", "medium", "high"],
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ],
                 "description": "Issue severity"
               },
               "description": {
@@ -175,7 +275,9 @@
               },
               "fields_involved": {
                 "type": "array",
-                "items": {"type": "string"},
+                "items": {
+                  "type": "string"
+                },
                 "description": "D4D fields involved"
               },
               "recommendation": {
@@ -187,12 +289,18 @@
         },
         "semantic_insights": {
           "type": "array",
-          "items": {"type": "string"},
+          "items": {
+            "type": "string"
+          },
           "description": "Positive semantic observations"
         },
         "consistency_checks": {
           "type": "object",
-          "required": ["passed", "failed", "warnings"],
+          "required": [
+            "passed",
+            "failed",
+            "warnings"
+          ],
           "properties": {
             "passed": {
               "type": "integer",
@@ -245,17 +353,23 @@
       "properties": {
         "strengths": {
           "type": "array",
-          "items": {"type": "string"},
+          "items": {
+            "type": "string"
+          },
           "description": "Overall strengths"
         },
         "weaknesses": {
           "type": "array",
-          "items": {"type": "string"},
+          "items": {
+            "type": "string"
+          },
           "description": "Overall weaknesses"
         },
         "recommendations": {
           "type": "array",
-          "items": {"type": "string"},
+          "items": {
+            "type": "string"
+          },
           "description": "Recommendations for improvement"
         }
       }
