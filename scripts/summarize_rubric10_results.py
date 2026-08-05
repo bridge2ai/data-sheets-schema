@@ -18,6 +18,7 @@ import csv
 from pathlib import Path
 from typing import List, Dict
 from datetime import datetime
+from data_sheets_schema.rubric_pooling import reported_percentage
 
 # Base directory
 BASE_DIR = Path(__file__).parent.parent
@@ -74,7 +75,7 @@ def create_csv_summary(results: List[Dict]):
             overall = result.get('overall_score', {})
             total_score = overall.get('total_points', 0)
             max_score = overall.get('max_points', 50)
-            percentage = overall.get('percentage', 0)
+            percentage = reported_percentage({'overall_score': overall})
 
             # Count elements passing (score >= 3/5)
             elements = result.get('elements', [])
@@ -134,7 +135,7 @@ def create_markdown_table(results: List[Dict]):
                 overall = result.get('overall_score', {})
                 total = overall.get('total_points', 0)
                 max_pts = overall.get('max_points', 50)
-                pct = overall.get('percentage', 0)
+                pct = reported_percentage({'overall_score': overall})
 
                 elements = result.get('elements', [])
                 elements_passing = sum(1 for el in elements if el.get('element_score', 0) >= 3)
@@ -161,7 +162,7 @@ def create_markdown_table(results: List[Dict]):
                 file_count = len(results_list)
 
                 avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in results_list) / file_count
-                avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in results_list) / file_count
+                avg_pct = sum(reported_percentage(r) for r in results_list) / file_count
 
                 avg_passing = sum(
                     sum(1 for el in r.get('elements', []) if el.get('element_score', 0) >= 3)
@@ -175,15 +176,15 @@ def create_markdown_table(results: List[Dict]):
     md += "| Project | Method | Type | Score | File |\n"
     md += "|---------|--------|------|-------|------|\n"
 
-    top_performers = [r for r in results if r.get('overall_score', {}).get('percentage', 0) >= 80]
-    top_performers.sort(key=lambda x: x.get('overall_score', {}).get('percentage', 0), reverse=True)
+    top_performers = [r for r in results if reported_percentage(r) >= 80]
+    top_performers.sort(key=lambda x: reported_percentage(x), reverse=True)
 
     for result in top_performers[:20]:  # Top 20
         project = result.get('project', 'unknown')
         method = result.get('method', 'unknown')
         eval_type = result.get('evaluation_type', 'unknown')
         overall = result.get('overall_score', {})
-        score_str = f"{overall.get('total_points', 0)}/{overall.get('max_points', 50)} ({overall.get('percentage', 0):.1f}%)"
+        score_str = f"{overall.get('total_points', 0)}/{overall.get('max_points', 50)} ({reported_percentage({'overall_score': overall}):.1f}%)"
         file_name = Path(result.get('d4d_file', '')).name
 
         md += f"| {project} | {method} | {eval_type} | {score_str} | {file_name} |\n"
@@ -211,11 +212,11 @@ def create_detailed_report(results: List[Dict]):
     # Calculate overall statistics
     total_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in results)
     max_possible = len(results) * 50
-    avg_percentage = sum(r.get('overall_score', {}).get('percentage', 0) for r in results) / len(results) if results else 0
+    avg_percentage = sum(reported_percentage(r) for r in results) / len(results) if results else 0
 
     report += f"- **Average Score:** {total_score / len(results):.1f}/50 ({avg_percentage:.1f}%)\n"
-    report += f"- **Best Score:** {max(results, key=lambda x: x.get('overall_score', {}).get('percentage', 0)).get('overall_score', {}).get('percentage', 0):.1f}%\n" if results else ""
-    report += f"- **Worst Score:** {min(results, key=lambda x: x.get('overall_score', {}).get('percentage', 0)).get('overall_score', {}).get('percentage', 0):.1f}%\n" if results else ""
+    report += f"- **Best Score:** {reported_percentage(max(results, key=reported_percentage)):.1f}%\n" if results else ""
+    report += f"- **Worst Score:** {reported_percentage(min(results, key=reported_percentage)):.1f}%\n" if results else ""
 
     # Method comparison
     report += "\n## Method Comparison\n\n"
@@ -224,7 +225,7 @@ def create_detailed_report(results: List[Dict]):
         method_results = [r for r in results if r.get('method') == method]
         if method_results:
             avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in method_results) / len(method_results)
-            avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in method_results) / len(method_results)
+            avg_pct = sum(reported_percentage(r) for r in method_results) / len(method_results)
             report += f"### {method}\n"
             report += f"- Files evaluated: {len(method_results)}\n"
             report += f"- Average score: {avg_score:.1f}/50 ({avg_pct:.1f}%)\n\n"
@@ -236,7 +237,7 @@ def create_detailed_report(results: List[Dict]):
         project_results = [r for r in results if r.get('project') == project]
         if project_results:
             avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in project_results) / len(project_results)
-            avg_pct = sum(r.get('overall_score', {}).get('percentage', 0) for r in project_results) / len(project_results)
+            avg_pct = sum(reported_percentage(r) for r in project_results) / len(project_results)
             report += f"### {project}\n"
             report += f"- Files evaluated: {len(project_results)}\n"
             report += f"- Average score: {avg_score:.1f}/50 ({avg_pct:.1f}%)\n\n"

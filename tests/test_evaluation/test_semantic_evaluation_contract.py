@@ -306,5 +306,79 @@ class TestTheValidatorClassifies(unittest.TestCase):
         self.assertEqual(status, "invalid")
 
 
+class TestTheReportedPercentage(unittest.TestCase):
+    """Every consumer read `overall_score.get("percentage", 0)`.
+
+    The N/A convention renamed that key to `normalized_percentage`, and the
+    default of `0` turned the absence into a score. Measured across the corpus:
+    **16 of 16 current-shape records reported 0.0%** through both summarisers
+    and both HTML renderers, while their real scores ran 72-99%. The rubric20
+    renderer grades on that number, so every current record was graded F.
+
+    Silent, because `0` is a plausible reading. That is exactly why it cannot
+    double as "absent".
+    """
+
+    def test_the_current_key_is_read(self):
+        from data_sheets_schema.rubric_pooling import reported_percentage
+        self.assertEqual(reported_percentage(_rubric20_record()), 100.0)
+
+    def test_a_pre_2026_record_is_still_readable(self):
+        from data_sheets_schema.rubric_pooling import reported_percentage
+        self.assertEqual(
+            reported_percentage({"overall_score": {"percentage": 61.0}}), 61.0)
+
+    def test_zero_is_a_score_not_an_absence(self):
+        """The distinction the default destroyed."""
+        from data_sheets_schema.rubric_pooling import reported_percentage
+        self.assertEqual(
+            reported_percentage({"overall_score": {"normalized_percentage": 0}}), 0.0)
+
+    def test_a_record_with_no_percentage_raises(self):
+        from data_sheets_schema.rubric_pooling import (MissingPercentage,
+                                                       reported_percentage)
+        with self.assertRaises(MissingPercentage):
+            reported_percentage({"overall_score": {"total_points": 40}})
+
+    def test_every_recorded_current_shape_record_reads_back_nonzero(self):
+        """The measurement, as a test: before the fix this was 0.0 for all 16."""
+        import glob
+        from data_sheets_schema.rubric_pooling import reported_percentage
+        seen = 0
+        for path in glob.glob(str(REPO / "data" / "evaluation_llm" /
+                                  "*_semantic" / "concatenated" / "*.json")):
+            record = json.loads(Path(path).read_text())
+            if "overall_score" not in record:
+                continue  # pre-contract shape, covered by the validator
+            seen += 1
+            with self.subTest(record=Path(path).name):
+                self.assertGreater(reported_percentage(record), 0.0)
+        self.assertGreaterEqual(seen, 8, "no current-shape records found to check")
+
+    def test_no_consumer_defaults_a_missing_percentage_to_zero(self):
+        """The reader is only a fix if the callers use it.
+
+        Source-level, deliberately: the defect is the *absence* of a call, and
+        running each script needs a corpus and writes reports.
+        """
+        import re
+        # Only the overall-score read. Element-level percentages are a
+        # different structure with their own denominator, and matching them
+        # would make this test fail for something it is not about.
+        pattern = re.compile(
+            r"""overall_score["'],\s*\{\}\)\.get\(['"]percentage['"],\s*0\)"""
+            r"""|\boverall\.get\(['"]percentage['"],\s*0\)""")
+        for name in ("summarize_rubric10_results.py",
+                     "summarize_rubric20_results.py",
+                     "render_evaluation_html_rubric10_semantic.py",
+                     "render_evaluation_html_rubric20_semantic.py"):
+            path = REPO / "scripts" / name
+            if not path.exists():
+                continue
+            with self.subTest(script=name):
+                self.assertIsNone(pattern.search(path.read_text()),
+                                  f"{name} still defaults a missing percentage to 0")
+
+
 if __name__ == "__main__":
     unittest.main()

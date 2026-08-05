@@ -5,6 +5,7 @@ Render rubric10-semantic evaluation JSON files to HTML
 import json
 from pathlib import Path
 from datetime import datetime
+from data_sheets_schema.rubric_pooling import reported_percentage
 
 
 def generate_evaluation_html(eval_data, output_path):
@@ -22,7 +23,7 @@ def generate_evaluation_html(eval_data, output_path):
     summary = eval_data.get("summary_scores") or {
         "total_score": eval_data.get("overall_score", {}).get("total_points", 0),
         "total_max_score": eval_data.get("overall_score", {}).get("max_points", 50),
-        "overall_percentage": eval_data.get("overall_score", {}).get("percentage", 0),
+        "overall_percentage": reported_percentage(eval_data),
     }
     semantic = eval_data.get("semantic_analysis", {})
     assessment = eval_data.get("assessment", {})
