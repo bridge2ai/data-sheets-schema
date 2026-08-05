@@ -22,6 +22,18 @@ import hashlib
 import re
 from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
 
+#: `BiasTypeEnum` permissible values, for Q20's taxonomy check.
+#:
+#: Restated rather than read via SchemaView, which would put a merged-schema
+#: load in the import path of a batch script. `test_the_taxonomy_matches_the
+#: _schema` pins it to `BiasTypeEnum`, so a value added to the schema fails a
+#: test instead of quietly costing records two points (#317).
+BIAS_TYPE_ENUM = frozenset({
+    'selection_bias', 'measurement_bias', 'historical_bias', 'representation_bias',
+    'aggregation_bias', 'algorithmic_bias', 'sampling_bias', 'annotation_bias',
+    'confirmation_bias',
+})
+
 # Base directory
 BASE_DIR = Path(__file__).parent.parent
 
@@ -104,9 +116,9 @@ RUBRIC20_QUESTIONS = {
     },
     10: {
         "category": "Metadata Quality & Content",
-        "name": "Interoperability and Standardization",
-        "description": "Standard formats, encoding, ontologies, schema conformance",
-        "fields": ["format", "encoding", "conforms_to", "conforms_to_schema", "distribution_formats", "data_characteristics.data_formats"],
+        "name": "Interoperability, Standardization, and Cross-Platform Integration",
+        "description": "Standard formats, encoding, ontologies, schema conformance, and cross-dataset integration capability",
+        "fields": ["format", "encoding", "conforms_to", "conforms_to_schema", "distribution_formats", "data_characteristics.data_formats", "external_resources", "related_datasets"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -130,9 +142,9 @@ RUBRIC20_QUESTIONS = {
     },
     13: {
         "category": "Technical Documentation",
-        "name": "Version History Documentation",
-        "description": "Version info, version access, errata, update plans, release notes",
-        "fields": ["version", "version_access", "errata", "updates", "release_notes", "versions_available_on_platform"],
+        "name": "Version History, Maintenance, and Sustainability",
+        "description": "Version info, version access, errata, update plans, release notes, and sustainability indicators (persistent ID, repository, institutional commitment)",
+        "fields": ["version", "version_access", "errata", "updates", "release_notes", "versions_available_on_platform", "maintainers", "doi", "publisher"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -172,29 +184,51 @@ RUBRIC20_QUESTIONS = {
     },
     18: {
         "category": "FAIRness & Accessibility",
-        "name": "Reusability (License and Use Guidance)",
-        "description": "License with explicit use guidance (intended/prohibited/discouraged)",
-        "fields": ["license_and_use_terms", "intended_uses", "prohibited_uses", "discouraged_uses"],
+        "name": "Reusability, Use Guidance, and Social Impact",
+        "description": "License with explicit use guidance (intended/prohibited/discouraged) and social impact analysis with mitigation strategies",
+        "fields": ["license_and_use_terms", "intended_uses", "prohibited_uses", "discouraged_uses", "future_use_impacts"],
         "score_type": "numeric",
         "max_score": 5
     },
     19: {
         "category": "FAIRness & Accessibility",
-        "name": "Data Integrity and Provenance",
-        "description": "Version access, errata, updates, source derivation, parent datasets",
-        "fields": ["version_access", "errata", "updates", "was_derived_from", "parent_datasets", "release_notes"],
+        "name": "Data Integrity, Provenance Graph, and Quality",
+        "description": "Version access, errata, updates, source derivation, parent datasets, missing data documentation, and provenance graph representation",
+        "fields": ["version_access", "errata", "updates", "was_derived_from", "parent_datasets", "release_notes", "missing_data_documentation", "is_data_split", "raw_data_sources"],
         "score_type": "numeric",
         "max_score": 5
     },
     20: {
         "category": "FAIRness & Accessibility",
-        "name": "Interlinking Across Platforms and Datasets",
-        "description": "External resources and dataset relationships (typed relationships, hierarchical linkages)",
-        "fields": ["external_resources", "related_datasets", "parent_datasets", "resources", "project_website", "same_as"],
-        "score_type": "pass_fail",
-        "max_score": 1
+        "name": "Bias Documentation and Responsible AI Alignment",
+        "description": "Known biases categorised against a standard taxonomy (BiasTypeEnum, AIO) with fairness analysis, CROISSANT RAI aligned",
+        "fields": ["known_biases", "future_use_impacts"],
+        "score_type": "numeric",
+        "max_score": 5
     }
 }
+
+
+def derived_maximum() -> int:
+    """The largest score the question table can actually award.
+
+    Derived rather than imported. `max_total = RUBRIC20_MAX_SCORE` was the
+    defect: #275 corrected the constant to 88 while this table still summed to
+    84, so a record scoring every available point was reported as 95.5% and no
+    percentage could reach 100. Deriving it makes the two disagree loudly
+    instead of quietly.
+    """
+    total = sum(spec["max_score"] for spec in RUBRIC20_QUESTIONS.values())
+    if total != RUBRIC20_MAX_SCORE:
+        raise ValueError(
+            f"rubric20 question table sums to {total}, but RUBRIC20_MAX_SCORE is "
+            f"{RUBRIC20_MAX_SCORE} — the table has drifted from "
+            f"data/rubric/rubric20.txt")
+    return total
+
+
+# Fail at import rather than partway through a batch.
+derived_maximum()
 
 
 def get_nested_value(data: Dict, path: str) -> Optional[Any]:
@@ -642,21 +676,40 @@ def evaluate_question(data: Dict, question_id: int) -> Tuple[int, str, str]:
             score = 0
             quality_note = "No provenance metadata"
 
-    # Q20: Interlinking Across Platforms (pass/fail)
+    # Q20: Bias Documentation and Responsible AI Alignment (numeric)
+    #
+    # The taxonomy check is what separates 3 from 5, so it reads `bias_type`
+    # structurally rather than grepping the record for the word "bias": prose
+    # that happens to say "selection bias" is the 3-point case, and a populated
+    # `bias_type` against BiasTypeEnum is the 5-point one.
     elif question_id == 20:
-        external = data.get('external_resources', [])
-        same_as = data.get('same_as', [])
+        biases = data.get('known_biases') or []
+        if isinstance(biases, dict):
+            biases = [biases]
+        typed = [b for b in biases
+                 if isinstance(b, dict) and b.get('bias_type') in BIAS_TYPE_ENUM]
+        # Fairness is required *of the categorised biases*, not merely somewhere
+        # in the record: computing the two independently let one bias supply the
+        # taxonomy and a different one supply the mitigation (#318).
+        analysed = [b for b in typed
+                    if b.get('mitigation_strategy') or b.get('affected_subsets')]
 
-        # Look for multiple platform mentions
-        platform_text = str(external) + str(same_as) + str(data.get('page', ''))
-        platforms = set(re.findall(r'\b(PhysioNet|Dataverse|FAIRhub|Zenodo|doi\.org|github\.com)\b', platform_text, re.I))
-
-        if len(platforms) >= 2:
-            score = 1
-            quality_note = f"Pass: Cross-platform links ({', '.join(platforms)})"
+        # "Comprehensive" is read as every documented bias categorised. A
+        # majority rule would let a record with nine untyped biases and one
+        # typed one take the top band, which is the 3 case by any reading.
+        if biases and len(typed) == len(biases) and analysed:
+            score = 5
+            quality_note = (f"all {len(typed)} biases categorised against "
+                            f"BiasTypeEnum, {len(analysed)} with mitigation or "
+                            "affected subsets")
+        elif biases:
+            score = 3
+            quality_note = (f"{len(typed)}/{len(biases)} bias(es) categorised against "
+                            "BiasTypeEnum; comprehensive categorisation with fairness "
+                            "analysis not evidenced")
         else:
             score = 0
-            quality_note = "Fail: No cross-platform linkages"
+            quality_note = "No bias documentation"
 
     # Default: presence = full score
     else:
@@ -704,7 +757,7 @@ def evaluate_d4d_file(file_path: Path, project: str, method: str, eval_type: str
     }
 
     total_score = 0
-    max_total = RUBRIC20_MAX_SCORE  # 17 numeric x 5 + 3 pass/fail x 1
+    max_total = derived_maximum()
 
     # Group by category
     categories = {}

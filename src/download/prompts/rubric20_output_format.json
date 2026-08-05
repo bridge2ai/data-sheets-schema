@@ -11,9 +11,9 @@
     "evaluation_type": "llm_as_judge"
   },
   "overall_score": {
-    "total_points": 72.5,
-    "max_points": 84,
-    "percentage": 86.3
+    "total_points": 62,
+    "max_points": 88,
+    "percentage": 70.5
   },
   "categories": [
     {
@@ -116,19 +116,19 @@
         },
         {
           "id": 9,
-          "name": "Access Requirements Documentation",
-          "description": "Determines if access policy and license are clearly defined (open, registered, restricted).",
+          "name": "Access Requirements and Governance Documentation",
+          "description": "Determines if access policy, license, IP restrictions, regulatory restrictions, confidentiality level, multi-jurisdiction compliance, and governance contacts are clearly defined.",
           "score_type": "numeric",
-          "score": 5,
+          "score": 3,
           "max_score": 5,
-          "score_label": "License + Data Use Agreement + platform access description",
+          "score_label": "License + basic restrictions",
           "evidence": "license_and_use_terms: Bridge2AI Voice Registered Access License with DUA requirement, access via PhysioNet",
-          "quality_note": "Clear license, DUA requirement, and platform access path fully documented"
+          "quality_note": "License and DUA requirement documented, but no confidentiality classification and no governance committee contact"
         },
         {
           "id": 10,
-          "name": "Interoperability and Standardization",
-          "description": "Presence of standard formats, ontologies, or schema conformance (e.g., Parquet, TSV, LinkML).",
+          "name": "Interoperability, Standardization, and Cross-Platform Integration",
+          "description": "Presence of standard formats, ontologies, schema conformance (e.g., Parquet, TSV, LinkML), cross-platform dataset linkages with typed relationships, and dataset integration capability.",
           "score_type": "numeric",
           "score": 3,
           "max_score": 5,
@@ -137,8 +137,8 @@
           "quality_note": "Standard formats used but no explicit schema/ontology conformance (conforms_to) field"
         }
       ],
-      "category_score": 14,
-      "category_max": 17
+      "category_score": 12,
+      "category_max": 21
     },
     {
       "name": "Technical Documentation",
@@ -167,14 +167,14 @@
         },
         {
           "id": 13,
-          "name": "Version History Documentation",
-          "description": "Presence of multiple version records and associated dates.",
+          "name": "Version History, Maintenance, and Sustainability",
+          "description": "Presence of version information, version access methods, errata, update plans, release notes with dates, and data sustainability indicators (persistent identifiers, long-term governance plan, domain-appropriate repository, institutional commitment).",
           "score_type": "numeric",
-          "score": 5,
+          "score": 3,
           "max_score": 5,
-          "score_label": "≥2 versions with change summaries and release dates",
+          "score_label": "Version number + basic access info + persistent ID",
           "evidence": "version_access: v1.0, v1.1 (2025-01-17), v2.0.0 (2025-04-16), v2.0.1 (2025-08-18) with release notes",
-          "quality_note": "4 versions documented with release dates and change summaries (e.g., v1.1 added MFCCs)"
+          "quality_note": "4 versions documented with release dates and a PhysioNet DOI, but no long-term governance plan or institutional preservation commitment"
         },
         {
           "id": 14,
@@ -199,7 +199,7 @@
           "quality_note": "Comprehensive participant demographics with clear subpopulation breakdown and condition groups"
         }
       ],
-      "category_score": 16,
+      "category_score": 14,
       "category_max": 25
     },
     {
@@ -229,40 +229,40 @@
         },
         {
           "id": 18,
-          "name": "Reusability (License Clarity)",
-          "description": "License is clearly defined and permits identifiable reuse cases.",
+          "name": "Reusability, Use Guidance, and Social Impact",
+          "description": "License is clearly defined with explicit use guidance including intended, prohibited and discouraged uses, and comprehensive social impact analysis with risk identification and mitigation strategies (CROISSANT RAI aligned).",
           "score_type": "numeric",
-          "score": 5,
+          "score": 3,
           "max_score": 5,
-          "score_label": "License explicitly defines reuse terms",
+          "score_label": "License + basic use guidance",
           "evidence": "license_and_use_terms: Bridge2AI Voice Registered Access License with explicit terms for research data sharing",
-          "quality_note": "License clearly defined with specific reuse terms for research purposes"
+          "quality_note": "License defines reuse terms, but no prohibited/discouraged uses and no social impact analysis"
         },
         {
           "id": 19,
-          "name": "Data Integrity and Provenance",
-          "description": "Presence of change logs or provenance tracking (e.g., versioned documentation).",
+          "name": "Data Integrity, Provenance Graph, and Quality",
+          "description": "Presence of version access, errata, update plans, source derivation, parent dataset linkages, missing data documentation, data split indicators, and provenance graph representation (W3C PROV-O).",
           "score_type": "numeric",
-          "score": 5,
+          "score": 3,
           "max_score": 5,
-          "score_label": "Structured version control with timestamps",
+          "score_label": "Version history (version numbers, errata, updates) but no full provenance graph",
           "evidence": "updates.update_details: v1.1 released 2025-01-17, v2.0.0 released 2025-04-16, v2.0.1 released 2025-08-18 with specific dates and changes",
-          "quality_note": "Well-structured version control with timestamps and change descriptions"
+          "quality_note": "Release dates and change descriptions present; no entity-activity-agent relationships, processing lineage or derivation paths"
         },
         {
           "id": 20,
-          "name": "Interlinking Across Platforms",
-          "description": "Metadata connects dataset records across multiple platforms (e.g., FAIRhub + PhysioNet).",
-          "score_type": "pass_fail",
-          "score": 0,
-          "max_score": 1,
-          "score_label": "Fail",
-          "evidence": "No external_resources with cross-platform links found",
-          "quality_note": "Missing links to related platforms (GitHub, FAIRhub, Bridge2AI portal)"
+          "name": "Bias Documentation and Responsible AI Alignment",
+          "description": "Metadata documents known biases using standardized taxonomies (BiasTypeEnum, AIO) aligned with CROISSANT RAI standards, and includes fairness analysis.",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Basic bias identification without taxonomy",
+          "evidence": "known_biases: recruitment concentrated at five specialty clinics may over-represent treatment-seeking patients",
+          "quality_note": "Selection bias named in prose but not categorised against BiasTypeEnum or AIO, and no fairness analysis"
         }
       ],
-      "category_score": 16,
-      "category_max": 17
+      "category_score": 15,
+      "category_max": 21
     }
   ],
   "assessment": {
@@ -270,7 +270,7 @@
       "Excellent structural completeness with all mandatory fields populated and comprehensive descriptions (>200 chars)",
       "Strong ethical documentation including IRB approval, HIPAA Safe Harbor deidentification, and informed consent procedures",
       "Clear FAIR compliance with DOI, persistent URLs, registered access mechanism, and well-defined license terms",
-      "Comprehensive version history with 4 documented releases (v1.0 through v2.0.1) including dates and change notes",
+      "Version history with 4 documented releases (v1.0 through v2.0.1) including dates and change notes",
       "Detailed human subject representation with 306 participants across 4 condition groups and demographic details"
     ],
     "weaknesses": [
@@ -278,14 +278,15 @@
       "No associated publication DOIs or formal citations in references field",
       "Limited interoperability documentation (no explicit schema conformance or conforms_to field)",
       "Preprocessing tools listed without version numbers or repository links",
-      "No cross-platform interlinking to related resources (GitHub, FAIRhub, Bridge2AI portal)"
+      "No governance committee contact or confidentiality classification alongside the license",
+      "Bias documentation is prose only: no BiasTypeEnum/AIO categorisation and no fairness analysis"
     ],
     "recommendations": [
       "Add funding_and_acknowledgements.funding with NIH Bridge2AI grant information (agency, award number, acknowledgements)",
       "Include references section with DOIs to related publications and dataset papers",
       "Add conforms_to field specifying schema conformance (e.g., LinkML D4D schema, schema.org Dataset)",
       "Document software_and_tools with version numbers and GitHub repository links (openSMILE 3.0, Whisper large-v3, etc.)",
-      "Add external_resources with cross-platform links (Bridge2AI portal, project GitHub, related datasets)"
+      "Categorise known_biases against BiasTypeEnum/AIO and add a fairness analysis with mitigation strategies"
     ]
   },
   "metadata": {

@@ -168,33 +168,33 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 
 ---
 
-#### Question 9: Access Requirements Documentation
-**Description:** Whether access policy and license are clearly defined (open, registered, restricted).
+#### Question 9: Access Requirements and Governance Documentation
+**Description:** Determines if access policy, license, IP restrictions, regulatory restrictions, confidentiality level, multi-jurisdiction compliance, and governance contacts are clearly defined. Note: In Bridge2AI, license types include: (1) CM4AI uses CC-BY-NC-SA (permissive license), (2) AI-READi, CHORUS, VOICE use Data Use Agreements (controlled access). Avoid misleading terms like "Open" or "Public" — instead use: permissive license (e.g., CC-BY, CC-BY-NC-SA) or openly accessible with DUA (requires signed agreement). Access tiers: (1) No authentication, (2) Registration required, (3) DUA required, (4) IRB/committee approval required.
 
-**Fields:** `access_and_licensing`, `license_and_use_terms`
+**Fields:** `license_and_use_terms`, `ip_restrictions`, `regulatory_restrictions`, `confidentiality_level`, `hipaa_compliant`, `other_compliance`, `governance_committee_contact`
 
 **Scoring (numeric 0-5):**
-- **0:** No license info
-- **3:** License type only
-- **5:** License + Data Use Agreement + platform access description
+- **0:** No license or access info
+- **3:** License + basic restrictions
+- **5:** License + multi-jurisdiction compliance + confidentiality classification + governance contact
 
-**Assessment:** Evaluate clarity and completeness of access documentation.
+**Assessment:** Evaluate clarity and completeness of access and governance documentation.
 
 **Applies to:** Bridge2AI-Voice, Dataverse
 
 ---
 
-#### Question 10: Interoperability and Standardization
-**Description:** Presence of standard formats, ontologies, or schema conformance.
+#### Question 10: Interoperability, Standardization, and Cross-Platform Integration
+**Description:** Presence of standard formats, ontologies, schema conformance (e.g., Parquet, TSV, LinkML), cross-platform dataset linkages with typed relationships, AND dataset integration capability. Note: Evaluation aligned with Bridge2AI AI/ML readiness characterization criteria (FAIRness, semantic/statistical characterization, governance, quality, pre-model XAI, ethics, computability). Reference: https://www.biorxiv.org/content/10.1101/2024.12.18.629172v1 and Bridge2AI AI-readiness scorecard tool. All Bridge2AI datasets are designed for AI/ML use. This question evaluates HOW WELL the dataset supports AI/ML (interoperability, standardization), not WHETHER it supports AI/ML. Dataset integration capability: Check for common identifiers for cross-dataset linking, standardized formats for data harmonization, and documented integration procedures.
 
-**Fields:** `data_characteristics.data_formats`, `conforms_to`
+**Fields:** `format`, `encoding`, `conforms_to`, `conforms_to_schema`, `external_resources`, `related_datasets`
 
 **Scoring (numeric 0-5):**
 - **0:** Non-standard or unspecified format
 - **3:** Standard format but no schema reference
-- **5:** Standard formats + schema/ontology compliance
+- **5:** Standard formats + schema/ontology compliance + integration capability
 
-**Assessment:** Check for standard formats (Parquet, TSV, OMOP, FHIR, DICOM) and schema references.
+**Assessment:** Check for standard formats (Parquet, TSV, OMOP, FHIR, DICOM), encoding, schema references, and cross-dataset linkages.
 
 **Applies to:** Bridge2AI-Voice, Health Nexus
 
@@ -234,17 +234,17 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 
 ---
 
-#### Question 13: Version History Documentation
-**Description:** Presence of multiple version records and associated dates.
+#### Question 13: Version History, Maintenance, and Sustainability
+**Description:** Presence of version information, version access methods, errata, update plans, release notes with dates, AND data sustainability indicators (persistent identifiers, long-term governance plan, domain-appropriate repository, institutional commitment documentation). Note: Data sustainability evaluation checks for: (1) persistent identifiers (DOI, ARK, Handle), (2) long-term governance plan, (3) domain-appropriate repository (e.g., PhysioNet for biomedical data), (4) institutional commitment or preservation funding. Sustainable datasets have clear maintenance plans beyond initial publication.
 
-**Fields:** `release_notes`, `versions_available_on_platform`
+**Fields:** `version`, `version_access`, `errata`, `updates`, `release_notes`, `maintainers`, `doi`, `publisher`
 
 **Scoring (numeric 0-5):**
-- **0:** Single version only
-- **3:** Two versions listed without detail
-- **5:** ≥2 versions with change summaries and release dates
+- **0:** Single version only, no sustainability plan
+- **3:** Version number + basic access info + persistent ID
+- **5:** Comprehensive versioning + full sustainability documentation (governance + repository + commitment)
 
-**Assessment:** Count versions and evaluate quality of change documentation.
+**Assessment:** Evaluate version tracking infrastructure together with the maintenance and preservation commitments behind it.
 
 **Applies to:** Bridge2AI-Voice, Dataverse
 
@@ -313,46 +313,47 @@ Read the provided D4D YAML file and perform a **quality-based assessment** acros
 
 ---
 
-#### Question 18: Reusability (License Clarity)
-**Description:** License is clearly defined and permits identifiable reuse cases.
+#### Question 18: Reusability, Use Guidance, and Social Impact
+**Description:** License is clearly defined with explicit use guidance including intended uses, prohibited uses, discouraged uses, AND comprehensive social impact analysis with risk identification and mitigation strategies (CROISSANT RAI aligned).
 
-**Fields:** `license_and_use_terms`
+**Fields:** `license_and_use_terms`, `intended_uses`, `prohibited_uses`, `discouraged_uses`, `future_use_impacts`
 
 **Scoring (numeric 0-5):**
-- **0:** No license
-- **3:** License present but unclear reuse conditions
-- **5:** License explicitly defines reuse terms
+- **0:** No license or use guidance
+- **3:** License + basic use guidance
+- **5:** License + comprehensive use guidance + social impact analysis with mitigation strategies
 
-**Assessment:** Check license clarity and reuse permissions.
+**Assessment:** Check license clarity, the explicit use guidance around it, and the social impact analysis.
 
 ---
 
-#### Question 19: Data Integrity and Provenance
-**Description:** Presence of change logs or provenance tracking.
+#### Question 19: Data Integrity, Provenance Graph, and Quality
+**Description:** Presence of version access, errata, update plans, source derivation, parent dataset linkages, missing data documentation, data split indicators, AND provenance graph representation. Note: Provenance is a transparent graph of origins and processing of data (W3C PROV-O standard: https://www.w3.org/TR/prov-o/), NOT just version changes. Evaluation checks for: (1) Entity-activity-agent relationships, (2) Processing lineage, (3) Derivation paths. Provenance may be represented as text OR as W3C PROV-O graphs. Both formats are acceptable if they provide complete lineage information.
 
-**Fields:** `updates`, `version_access`
+**Fields:** `version_access`, `errata`, `updates`, `was_derived_from`, `parent_datasets`, `missing_data_documentation`, `is_data_split`, `raw_data_sources`
 
 **Scoring (numeric 0-5):**
 - **0:** No provenance metadata
-- **3:** Change notes only
-- **5:** Structured version control with timestamps
+- **3:** Version history (version numbers, errata, updates) but no full provenance graph
+- **5:** Full provenance graph with entity-activity-agent relationships, processing lineage, and derivation paths
 
-**Assessment:** Evaluate provenance documentation quality.
+**Assessment:** Evaluate provenance documentation quality, distinguishing version history from a complete lineage graph.
 
 ---
 
-#### Question 20: Interlinking Across Platforms
-**Description:** Metadata connects dataset records across multiple platforms.
+#### Question 20: Bias Documentation and Responsible AI Alignment
+**Description:** Metadata documents known biases using standardized taxonomies (BiasTypeEnum, AIO) aligned with CROISSANT RAI standards, and includes fairness analysis. Assesses whether biases are categorized systematically (e.g., selection_bias, measurement_bias, algorithmic_bias, ecological_fallacy) with mappings to AI Ontology (AIO).
 
-**Fields:** `external_resources`, `project_website`
+**Fields:** `known_biases`, `future_use_impacts`
 
-**Scoring (pass/fail):**
-- **Pass:** Cross-platform links verified
-- **Fail:** No external linkages found
+**Scoring (numeric 0-5):**
+- **0:** No bias documentation
+- **3:** Basic bias identification without taxonomy
+- **5:** Comprehensive bias categorization using standard taxonomy (AIO/CROISSANT RAI) + fairness analysis
 
-**Assessment:** Look for links to related platforms (FAIRhub, PhysioNet, GitHub).
+**Assessment:** Check whether biases are named, categorised against a standard taxonomy, and paired with fairness analysis.
 
-**Applies to:** Health Nexus, PhysioNet, FAIRhub
+**Applies to:** Bridge2AI-Voice, AI-READI, CM4AI, CHORUS
 
 ---
 
@@ -375,8 +376,8 @@ Return your evaluation as a **JSON object** with this EXACT structure:
   },
   "overall_score": {
     "total_points": 72.5,
-    "max_points": 84,
-    "percentage": 86.3
+    "max_points": 88,
+    "percentage": 82.4
   },
   "categories": [
     {
@@ -405,23 +406,23 @@ Return your evaluation as a **JSON object** with this EXACT structure:
         },
         ... (remaining questions 3-5)
       ],
-      "category_score": 23,
-      "category_max": 24
+      "category_score": 19,
+      "category_max": 21
     },
     {
       "name": "Metadata Quality & Content",
       "questions": [
         ... (questions 6-10)
       ],
-      "category_score": 18,
-      "category_max": 22
+      "category_score": 17,
+      "category_max": 21
     },
     {
       "name": "Technical Documentation",
       "questions": [
         ... (questions 11-15)
       ],
-      "category_score": 19,
+      "category_score": 17,
       "category_max": 25
     },
     {
@@ -429,8 +430,8 @@ Return your evaluation as a **JSON object** with this EXACT structure:
       "questions": [
         ... (questions 16-20)
       ],
-      "category_score": 12.5,
-      "category_max": 13
+      "category_score": 19.5,
+      "category_max": 21
     }
   ],
   "assessment": {
@@ -476,14 +477,14 @@ When evaluating **multiple D4D files** (batch mode), generate a comprehensive su
 ```yaml
 id: rubric20_evaluation_<timestamp>
 rubric_type: rubric20
-rubric_description: "20-question detailed rubric with 4 categories (Structural Completeness, Metadata Quality, Technical Documentation, FAIRness), 0-5 scoring scale + pass/fail, maximum 84 points"
+rubric_description: "20-question detailed rubric with 4 categories (Structural Completeness, Metadata Quality, Technical Documentation, FAIRness), 0-5 scoring scale + pass/fail, maximum 88 points"
 total_files_evaluated: 8
 evaluation_date: "<ISO 8601 date>"
 
 overall_performance:
   average_score: 52.3
-  max_score: 84
-  average_percentage: 62.3
+  max_score: 88
+  average_percentage: 59.4
   best_score: 68.0
   worst_score: 38.5
   best_performer:
@@ -491,49 +492,49 @@ overall_performance:
     method: claudecode_agent
     project: AI_READI
     score: 68.0
-    percentage: 81.0
+    percentage: 77.3
   worst_performer:
     file: CHORUS_d4d.yaml
     method: gpt5
     project: CHORUS
     score: 38.5
-    percentage: 45.8
+    percentage: 43.8
 
 method_comparison:
   - method: claudecode_agent
     file_count: 4
     average_score: 56.2
-    average_percentage: 66.9
+    average_percentage: 63.9
     rank: 1
   - method: claudecode_assistant
     file_count: 4
     average_score: 48.4
-    average_percentage: 57.6
+    average_percentage: 55.0
     rank: 2
 
 project_comparison:
   - project: AI_READI
     file_count: 2
     average_score: 61.5
-    average_percentage: 73.2
+    average_percentage: 69.9
     rank: 1
   - project: CM4AI
     file_count: 2
     average_score: 54.8
-    average_percentage: 65.2
+    average_percentage: 62.3
     rank: 2
 
 category_performance:
   - category_id: "1"
     category_name: "Structural Completeness and Core Metadata"
     average_score: 15.8
-    max_score: 24
-    average_percentage: 65.8
+    max_score: 21
+    average_percentage: 75.2
   - category_id: "2"
     category_name: "Metadata Quality and Detail"
     average_score: 14.2
-    max_score: 22
-    average_percentage: 64.5
+    max_score: 21
+    average_percentage: 67.6
   - category_id: "3"
     category_name: "Technical Documentation and Reproducibility"
     average_score: 12.5
@@ -542,8 +543,8 @@ category_performance:
   - category_id: "4"
     category_name: "FAIRness and Accessibility"
     average_score: 9.8
-    max_score: 13
-    average_percentage: 75.4
+    max_score: 21
+    average_percentage: 46.7
 
 common_strengths:
   - description: "Strong structural completeness (≥90% fields populated)"
@@ -589,11 +590,11 @@ key_insights:
 
 ## Scoring Summary
 
-**Maximum Possible Score:** 84 points
-- **Structural Completeness (5 questions):** 24 points max (4 numeric @5 each + 1 pass/fail)
-- **Metadata Quality & Content (5 questions):** 22 points max (4 numeric @5 each + 1 pass/fail)
-- **Technical Documentation (5 questions):** 25 points max (5 numeric @5 each)
-- **FAIRness & Accessibility (5 questions):** 13 points max (3 numeric @5 each + 2 pass/fail)
+**Maximum Possible Score:** 88 points — 17 numeric questions @5 each + 3 pass/fail @1 each.
+- **Structural Completeness (Q1-5):** 21 points max (4 numeric @5 each + Q5 pass/fail)
+- **Metadata Quality & Content (Q6-10):** 21 points max (4 numeric @5 each + Q6 pass/fail)
+- **Technical Documentation (Q11-15):** 25 points max (5 numeric @5 each)
+- **FAIRness & Accessibility (Q16-20):** 21 points max (4 numeric @5 each + Q16 pass/fail)
 
 ## Key Principles
 
