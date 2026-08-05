@@ -325,16 +325,35 @@ broke nothing; the four-project list in 26 files is prose, not logic.
   - the enum values: `References` normalises to `references` on the write path,
     and `related_to` still fails, which is correct — it names nothing in the
     vocabulary;
-  - the inline object in `target_dataset`: once the pediatric dataset **is** its
-    own record, VOICE references it by DOI, which is a string and validates.
-    Note the tense — it is a registered project with a bundle, not yet a
-    datasheet, and this bullet is what defers generating it. **Order matters:
-    the pediatric record has to exist before VOICE can point at it.** Generate
-    `VOICE_PEDIATRIC` first, or a regenerated VOICE either inlines the dataset
-    again and fails again, or omits the relationship entirely.
+  - the inline object in `target_dataset`: the slot is `range: string` with
+    `slot_uri: dcterms:relation` — an **identifier**, not a pointer to a record
+    we hold. rep2 and rep3 already put a URL there and that slot passed; they
+    failed on `relationship_type` alone. The pediatric DOI appears 11 times in
+    VOICE's own bundle, so VOICE can reference it whether or not a pediatric
+    datasheet exists.
 
-  So a v3 run is the first opportunity for VOICE to have a canonical record at
-  all, and only if the two are generated in that order.
+  **There is no ordering constraint.** An earlier version of this section said
+  the pediatric record had to exist before VOICE could point at it. That was
+  wrong, and it conflated two things: referencing a dataset by identifier, which
+  needs only the DOI in the input documents, and referencing a D4D record we
+  produced, which is not what this slot holds. VOICE and `VOICE_PEDIATRIC` can
+  be generated in either order, or independently.
+
+  The fork stands on its own reasoning — a dataset with its own DOI, protocol
+  and ethics approval is its own datasheet (#292) — not on VOICE needing it.
+
+  So the **next run of any configuration** is the first chance for VOICE to have
+  a canonical record — the enum normaliser is on the write path and the slot
+  description is in the schema, so neither is tied to v3. v3 is what is planned,
+  not what is required.
+
+  A chance, not a guarantee. Of the three failures, casing is fixed on the write
+  path and the inline object should not recur now the description no longer
+  promises "or Dataset object" — but **`related_to` names nothing in the
+  vocabulary and nothing stops the generator emitting it again**. Correcting
+  rep2's `related_to` to a permitted value makes that record validate
+  completely, so the enum is the whole remaining blocker, and it is the one a
+  re-run is not guaranteed to avoid (#313).
 
   On canonical counts: there are **none at all** on `main` today — the three
   marks for AI_READI, CHORUS and CM4AI are in #293, still open. Once that lands
