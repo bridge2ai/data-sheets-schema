@@ -1,28 +1,31 @@
-# D4D generic-arm generation prompt — v3
+# D4D generic-arm generation prompt — v4
 
-**This is v2 plus one uniform decision rule, and nothing else.** The
+**This is v3 plus one uniform decision rule, and nothing else.** The
 substitution fields, outputs, header block, constraints, the four original rules
-and v2's three additions are byte-identical to
-`src/download/prompts/d4d_generic_arm_prompt_v2.md`; a test asserts that the only
-difference is the block marked `ADDED IN v3`.
+and the v2 and v3 additions are byte-identical to
+`src/download/prompts/d4d_generic_arm_prompt_v3.md` apart from the version stamp;
+a test asserts that the only difference is the block marked `ADDED IN v4`.
 
-## Why v3 exists
+## Why v4 exists
 
-v2's first rule — one object per distinct entity for a multivalued slot — did
-what it was written to do. Splitting the fitness `form` class into its two
-component defects (`notes/form_defect_split_2026-08-03.md`) measured
-collapsed cardinality falling by more than four fifths, while a second defect
-rose to take its place: objects of the correct cardinality whose declared
-structured fields are empty because the content sits in a free-text
-`description`.
+v3 addressed hollow objects: a class-ranged slot whose declared fields sit empty
+while the content is restated in a free-text `description`. That rule tells the
+model to populate declared structure wherever it can.
 
-One class covering both defects reported that exchange as a net regression. It
-was not one. But the exchange is real, and a rule that trades one form failure
-for another is not finished.
+It says nothing about where structure does *not* belong. `target_dataset` is
+declared `range: string` and takes an identifier, and #297 established that
+LinkML cannot express a string-or-inline-object range, so the schema cannot
+refuse an object there — only validation can, after the fact.
 
-The companion rule addresses the second defect on the same terms as the first:
-it concerns how the schema is used, states no fact about any dataset, and can
-therefore be said without naming a project.
+All three 2026-07-31 VOICE replicates fail validation on `related_datasets`
+(#292), and one fails precisely this way: an inline `Dataset` object placed in
+`target_dataset`. `related_datasets` is class-ranged, so a model applying v3's
+rule energetically has an obvious next step — populate the related dataset
+properly, into the slot that names it.
+
+v4 is therefore the companion v3 needs rather than a correction of it. The two
+rules together say: populate declared structure where it is declared, and refer
+by identifier where it is not.
 
 ## Why this addition is generic and not priming
 
@@ -36,17 +39,15 @@ Measured against the taxonomy in `.claude/commands/d4d-full-core.md`:
 
 ## What is NOT in this file, deliberately
 
-The prediction that this rule reduces hollow objects without returning
-collapsed cardinality. Writing it here would instruct the model to produce the
-result the run is meant to test. It lives in
-`notes/generic_v3_analysis_plan.md`, registered before any generation run.
+The prediction that this rule eliminates the inline-object failure without
+suppressing legitimate object population. Writing it here would instruct the
+model to produce the result the run is meant to test. It lives in
+`notes/generic_v4_analysis_plan.md`, registered before any generation run.
 
-## Relationship to v1 and v2
+## Relationship to earlier versions
 
-Neither is superseded and neither may be edited. The 2026-07-28 generic series
-was produced under v1 and the 2026-07-31 generic-v2 series under v2; both remain
-baselines this version is measured against. The comparison that isolates this
-rule is v2 against v3.
+None is superseded and none may be edited once run. The comparison that isolates
+this rule is v3 against v4.
 
 ## Prompt body
 
@@ -87,8 +88,8 @@ HEADER BLOCK — use exactly:
     # Agent runtime: {RUNTIME}
     # Provider: {PROVIDER}
     # Model: {MODEL}
-    # Mode: four-phase project agent, generic-v3 prompt
-    # Prompt: src/download/prompts/d4d_generic_arm_prompt_v3.md (identical for all projects)
+    # Mode: four-phase project agent, generic-v4 prompt
+    # Prompt: src/download/prompts/d4d_generic_arm_prompt_v4.md (identical for all projects)
     # Arm: {ARM}
     # Source bundle: {BUNDLE}
     {MANIFEST_LINE}
@@ -157,6 +158,14 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   field rather than restating it in prose.
 
 --- END ADDED IN v3 ---
+--- ADDED IN v4 ---
+
+- Where a slot's declared range is a scalar, populate it with the identifier of
+  the thing it refers to, not with the thing itself. An object placed in a
+  string-ranged slot fails validation and loses the reference it was meant to
+  record, even where that thing is richly described elsewhere in the record.
+
+--- END ADDED IN v4 ---
 
 
 RETURN: full slot count, core slot count, whether both validated, and the
