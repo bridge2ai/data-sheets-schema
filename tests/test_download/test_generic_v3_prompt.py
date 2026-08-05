@@ -35,13 +35,33 @@ def _norm(text):
 
 class TestV3IsV2PlusTheAddedBlock(unittest.TestCase):
 
+    #: The two header lines that name the version. They *must* differ between
+    #: v2 and v3 — identical stamps were the defect in #337, which would have
+    #: had every v3 record claim to be a v2 record. Normalised out of the
+    #: body comparison below and asserted separately.
+    VERSION_STAMP = re.compile(r"#\s*(?:Mode|Prompt):[^\n]*")
+
     def test_body_differs_from_v2_only_by_the_marked_block(self):
+        """Everything outside the marked block and the version stamp must be
+        identical, so the v2-against-v3 delta is the added rule and nothing
+        else."""
         v2 = prompt_body(GENERIC_PROMPT_V2)
         v3 = prompt_body(GENERIC_PROMPT_V3)
         stripped = (v3.split(MARK_START, 1)[0]
                     + v3.split(MARK_END, 1)[1]).strip()
-        self.assertEqual(_norm(stripped), _norm(v2),
-                         "v3 must be v2 plus the marked block and nothing else")
+        self.assertEqual(_norm(self.VERSION_STAMP.sub("", stripped)),
+                         _norm(self.VERSION_STAMP.sub("", v2)),
+                         "v3 must be v2 plus the marked block, the version "
+                         "stamp, and nothing else")
+
+    def test_the_version_stamp_does_differ(self):
+        """The complement, and the whole of #337: normalising the stamp out
+        above would otherwise let v3 go on claiming to be v2."""
+        v3 = prompt_body(GENERIC_PROMPT_V3)
+        self.assertIn("generic-v3 prompt", v3)
+        self.assertIn("d4d_generic_arm_prompt_v3.md", v3)
+        self.assertNotIn("generic-v2 prompt", v3)
+        self.assertNotIn("d4d_generic_arm_prompt_v2.md", v3)
 
     def test_v2s_three_rules_survive_intact(self):
         """The companion supplements rule 1; it does not replace it.

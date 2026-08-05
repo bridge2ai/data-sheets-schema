@@ -61,9 +61,15 @@ GENERIC_PROMPT_V2 = PROMPTS / "d4d_generic_arm_prompt_v2.md"
 # was one: v2 produced the 2026-07-31 series and is the baseline v3 is measured
 # against. The comparison that isolates the companion rule is v2 against v3.
 GENERIC_PROMPT_V3 = PROMPTS / "d4d_generic_arm_prompt_v3.md"
+# v4 carries the scalar-range companion to v3's class-range rule. It is a
+# separate version rather than a second rule inside v3 because v3's value is
+# isolating one change, and `notes/generic_v3_analysis_plan.md` was registered
+# before any run naming that one rule (#338).
+GENERIC_PROMPT_V4 = PROMPTS / "d4d_generic_arm_prompt_v4.md"
 CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
                      "generic_v2": GENERIC_PROMPT_V2,
                      "generic_v3": GENERIC_PROMPT_V3,
+                     "generic_v4": GENERIC_PROMPT_V4,
                      "tuned": GENERIC_PROMPT}
 
 # Which generic base each condition is built on. The generic/tuned comparison
@@ -80,6 +86,7 @@ CONDITION_AXES = {
     "generic":    {"base": "v1", "tuned": False},
     "generic_v2": {"base": "v2", "tuned": False},
     "generic_v3": {"base": "v3", "tuned": False},
+    "generic_v4": {"base": "v4", "tuned": False},
     "tuned":      {"base": "v1", "tuned": True},
 }
 
@@ -92,16 +99,37 @@ def condition_delta(a: str, b: str) -> list[str]:
     return [k for k in ("base", "tuned") if ax[k] != bx[k]]
 
 
+def _base_step(base: str) -> int:
+    """`v3` -> 3. Bases are an ordered series, each adding one rule."""
+    try:
+        return int(base.lstrip("v"))
+    except ValueError:
+        return -1
+
+
 def comparable_conditions(a: str, b: str) -> bool:
     """True when a difference between the two is attributable to one change.
 
     `generic` vs `generic_v2` differs only in base — that is the v2 experiment.
     `generic` vs `tuned` differs only in tuning — that is the study's main
     comparison. `generic_v2` vs `tuned` differs in **both**, so a difference
-    between them measures the three added decision rules and the tuned block
-    together while appearing to measure only tuning.
+    between them measures the added decision rules and the tuned block together
+    while appearing to measure only tuning.
+
+    Differing on the base axis is not sufficient once there are more than two
+    bases. Each version adds exactly one rule to the one before, so `v2` against
+    `v4` spans **two** additions while `condition_delta` reports the single axis
+    `base` — one axis, two changes. Adjacency is what makes the delta
+    attributable, and v4's arrival is what made that distinction load-bearing
+    (it was already latent for v1 against v3).
     """
-    return len(condition_delta(a, b)) == 1
+    delta = condition_delta(a, b)
+    if len(delta) != 1:
+        return False
+    if delta == ["base"]:
+        steps = [_base_step(CONDITION_AXES[c]["base"]) for c in (a, b)]
+        return -1 not in steps and abs(steps[0] - steps[1]) == 1
+    return True
 
 
 def confounded_note(a: str, b: str) -> str | None:
