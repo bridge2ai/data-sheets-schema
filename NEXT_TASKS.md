@@ -342,9 +342,18 @@ broke nothing; the four-project list in 26 files is prose, not logic.
   The fork stands on its own reasoning — a dataset with its own DOI, protocol
   and ethics approval is its own datasheet (#292) — not on VOICE needing it.
 
-  So a v3 run is the first opportunity for VOICE to have a canonical record,
-  because it is the first run under the corrected enum handling and the
-  clarified slot description.
+  So the **next run of any configuration** is the first chance for VOICE to have
+  a canonical record — the enum normaliser is on the write path and the slot
+  description is in the schema, so neither is tied to v3. v3 is what is planned,
+  not what is required.
+
+  A chance, not a guarantee. Of the three failures, casing is fixed on the write
+  path and the inline object should not recur now the description no longer
+  promises "or Dataset object" — but **`related_to` names nothing in the
+  vocabulary and nothing stops the generator emitting it again**. Correcting
+  rep2's `related_to` to a permitted value makes that record validate
+  completely, so the enum is the whole remaining blocker, and it is the one a
+  re-run is not guaranteed to avoid (#313).
 
   On canonical counts: there are **none at all** on `main` today — the three
   marks for AI_READI, CHORUS and CM4AI are in #293, still open. Once that lands
