@@ -156,6 +156,31 @@ class TestRunTelemetry(unittest.TestCase):
         self.assertEqual(got[0]["artifact"], "core")
         self.assertEqual(got[0]["evaluation_type"], "presence")
 
+    def test_hollow_counting_is_maximal_and_keeps_falsy_values(self):
+        from data_sheets_schema.run_telemetry import count_hollows
+        record = {
+            "a": "text",
+            "b": None,                          # hollow
+            "c": {"x": None, "y": "", "z": []},  # one hollow object, not 3
+            "d": [{"name": "real"}, {"name": "  "}],  # one hollow member
+            "e": 0,                             # a value, not a hollow
+            "f": False,                         # a value, not a hollow
+            "g": ["", None],                    # hollow list, counts once
+        }
+        self.assertEqual(count_hollows(record), 4)
+        self.assertEqual(count_hollows({"a": 1}), 0)
+        self.assertEqual(count_hollows({}), 1)
+
+    def test_record_stats_report_nested_hollows(self):
+        (self.run_dir.parent.parent / "claudecode_agent" /
+         "2026-08-05_test_rep1" / "CHORUS_d4d.yaml").write_text(
+            "id: x\nok: v\nempty: null\nobj:\n  a: null\n  b: ''\n")
+        t = run_telemetry(self.run_dir, "CHORUS")
+        full = next(s for s in t["records"] if s["artifact"] == "full")
+        self.assertEqual(full["root_slot_count"], 4)
+        self.assertEqual(full["populated_root_slot_count"], 2)
+        self.assertEqual(full["hollow_value_count"], 2)
+
     def test_findings_pass_through_to_the_report(self):
         finding = {"topic": "test", "kind": "observation",
                    "claim": "the fixture ran", "evidence": "this test"}
