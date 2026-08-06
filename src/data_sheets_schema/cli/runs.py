@@ -18,9 +18,12 @@ def runs():
 @click.option("--method", default="claudecode_agent", show_default=True)
 @click.option("-o", "--output", type=click.Path(), default=None,
               help="output path; defaults to data/run_telemetry/{label_prefix}.yaml")
+@click.option("--findings", "findings_path", type=click.Path(exists=True),
+              default=None,
+              help="authored findings YAML (list of Finding objects) to merge")
 @click.option("--validate", "do_validate", is_flag=True,
               help="linkml-validate the report against the telemetry schema")
-def telemetry_cmd(label_prefix, method, output, do_validate):
+def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
     """Collect per-phase process telemetry into a schema-backed report.
 
     Harvests provenance api_usage, the reasoning log, repair rounds,
@@ -30,9 +33,11 @@ def telemetry_cmd(label_prefix, method, output, do_validate):
     import subprocess
     import yaml as _yaml
 
-    from data_sheets_schema.run_telemetry import SCHEMA_PATH, collect_report
+    from data_sheets_schema.run_telemetry import (
+        SCHEMA_PATH, collect_report, load_findings)
 
-    report = collect_report(label_prefix, method=method)
+    findings = load_findings(Path(findings_path)) if findings_path else None
+    report = collect_report(label_prefix, method=method, findings=findings)
     if not report["runs"]:
         raise click.ClickException(
             f"no runs with provenance found for prefix {label_prefix!r} "

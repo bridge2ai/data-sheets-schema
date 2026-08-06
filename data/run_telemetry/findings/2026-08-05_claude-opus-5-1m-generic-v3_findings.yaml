@@ -1,0 +1,79 @@
+# Authored findings for the 1m-generic-v3 sweep report.
+# Merged into the report via: d4d runs telemetry --findings <this file>.
+# Each finding declares how much judgement it carries (kind).
+
+- topic: reasoning on the unprefixed route
+  kind: observation
+  claim: >-
+    The unprefixed claude-opus-5 route emits thinking: every phase returns a
+    signed thinking block whose text CBORG strips, exactly as on the -high
+    route (reasoning_present true, reasoning_available false).
+  evidence: >-
+    CHORUS full phase ~17.4k reasoning-token estimate; AI_READI full phase
+    ~50.1k; blocks recorded in *_reasoning.jsonl for both runs.
+  relates_to: ["#347"]
+
+- topic: reasoning effort vs the -high route
+  kind: comparison
+  claim: >-
+    The bare route thinks at least as hard as -high on the same workload:
+    AI_READI full-phase reasoning estimate was 50.1k tokens against 35.7k,
+    39.9k and 48.7k across the three -high samples of the same day.
+  evidence: >-
+    data/run_telemetry/2026-08-05_claude-opus-5-generic-v3.yaml (superseded
+    -high label) vs this report's AI_READI full phase.
+  relates_to: ["#347"]
+
+- topic: repair convergence
+  kind: observation
+  claim: >-
+    Validator-driven repair converged both projects to valid records.
+    CHORUS: full 80 -> 9 -> 0, core 76 -> 9 -> 4 -> 0 findings across two
+    resumed invocations. AI_READI: full 165 -> 27 -> 22 -> 21 findings, hit
+    the 4-round ceiling, then 21 -> 0 on the next invocation; core
+    121 -> 28 -> 23 -> 0 within the first.
+  evidence: >-
+    Repair logs in both provenance records and *_reasoning.jsonl; issue #364
+    documents the ceiling change the AI_READI trajectory motivated.
+  relates_to: ["#361", "#364", "#365"]
+
+- topic: residual validation failures are schema traps
+  kind: interpretation
+  claim: >-
+    Every slot that resisted repair longest is a schema-design trap rather
+    than model noise: Creator.affiliations requires an Organization with a
+    required id, so a bare organisation name can never validate;
+    principal_investigator is a string with a boolean-shaped name; and rep2
+    surfaced a third trap, human_subject_research/special_populations
+    holding prose where the schema requires an array. The trap inventory is
+    growing with replicates and is not limited to the two slots #360 names.
+  evidence: >-
+    rep1 residuals were four affiliation strings; rep2's single residual is
+    special_populations; the -high runs failed on the same class.
+  relates_to: ["#360", "#297"]
+
+- topic: repair does not invent facts
+  kind: interpretation
+  claim: >-
+    Spot-checks show repair choosing evidence-preserving shapes rather than
+    fabricating data: affiliations became Organization objects reusing the
+    name (CHORUS) or a FAIRhub fragment URI already grounded in the bundle
+    (AI_READI); principal_investigator became the PI's name where the bundle
+    supplies one.
+  evidence: >-
+    creators[0] in both projects' final full records; compare the
+    intermediate snapshots once #370-era runs exist.
+  relates_to: ["#361", "#360"]
+
+- topic: presence and LLM-judge sections are empty
+  kind: observation
+  claim: >-
+    The presence_evaluations and llm_judge_evaluations sections of this
+    report are empty because the published evaluation outputs are keyed by
+    label-less legacy paths with 2026-04-10 timestamps — they score the
+    archived baseline, not these runs. The sections fill when the evaluators
+    are re-run against this label's files.
+  evidence: >-
+    data/evaluation/scores.json file_path values lack label directories;
+    issue #286 documents the stale-baseline problem.
+  relates_to: ["#286"]

@@ -1,7 +1,7 @@
 label: 2026-08-05_claude-opus-5-1m-generic-v3
 method: claudecode_agent
-generated_at: '2026-08-06T05:54:03+00:00'
-schema_version: 1.0.0
+generated_at: '2026-08-06T07:02:48+00:00'
+schema_version: 1.1.0
 runs:
 - project: AI_READI
   label: 2026-08-05_claude-opus-5-1m-generic-v3_rep1
@@ -209,6 +209,26 @@ runs:
   arm: baseline
   finished_at: '2026-08-06T04:14:51+00:00'
   validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-1m-generic-v3_rep1/AI_READI_d4d.yaml
+    sha256: 3b21520a912f6e92bafa7fc665668c2cf27b6680296e6d4fec4383d23bf437d0
+    bytes: 95446
+    lines: 1701
+    root_slot_count: 70
+    populated_root_slot_count: 70
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/AI_READI_d4d_core.yaml
+    sha256: c3f7c4944b0278dd1765607d8797396e485f5e5d031644979f38892d7f7ddfbf
+    bytes: 77002
+    lines: 1305
+    root_slot_count: 58
+    populated_root_slot_count: 58
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/AI_READI_reconciliation.md
+    sha256: aa7a377ddd75f06cef8dd96c3898ba9cf57f2ace171c94047569c7599bbd92ea
+    bytes: 27194
+    lines: 300
   total_input_tokens: 626040
   total_output_tokens: 444955
   total_cache_read_tokens: 483517
@@ -371,6 +391,26 @@ runs:
   arm: baseline
   finished_at: '2026-08-06T02:57:34+00:00'
   validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-1m-generic-v3_rep1/CHORUS_d4d.yaml
+    sha256: 9cd8c856acee367e2b9ca2541c306680ce20d2fe47a142f74343b4790e5ec5da
+    bytes: 37501
+    lines: 763
+    root_slot_count: 53
+    populated_root_slot_count: 53
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/CHORUS_d4d_core.yaml
+    sha256: 810488e1961311245c7f4df3fc4567149f5c79b42837d6a9dadfa5efb55ccfcc
+    bytes: 36118
+    lines: 718
+    root_slot_count: 48
+    populated_root_slot_count: 48
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/CHORUS_reconciliation.md
+    sha256: a77bfccba9fe1dfeef0c41b0d9efe3825f3369996dd5c99dd74a7b3fbea49b02
+    bytes: 15451
+    lines: 122
   total_input_tokens: 191298
   total_output_tokens: 158380
   total_cache_read_tokens: 66523
@@ -382,3 +422,372 @@ runs:
     round: 1
     outcome: applied
     findings: 6
+- project: AI_READI
+  label: 2026-08-05_claude-opus-5-1m-generic-v3_rep2
+  validation_state: invalid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      input_tokens: 2215
+      output_tokens: 56259
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 36421
+      visible_text_chars: 79353
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      input_tokens: 29045
+      output_tokens: 22098
+      cache_read_tokens: 0
+      cache_write_tokens: 149662
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5718
+      visible_text_chars: 65520
+      reasoning_present: false
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      input_tokens: 51253
+      output_tokens: 6495
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1817
+      visible_text_chars: 18715
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      input_tokens: 35579
+      output_tokens: 34047
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 13977
+      visible_text_chars: 80280
+      reasoning_present: true
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      input_tokens: 58065
+      output_tokens: 26147
+      cache_read_tokens: 0
+      cache_write_tokens: 149662
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 9599
+      visible_text_chars: 66194
+      reasoning_present: true
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      input_tokens: 8722
+      output_tokens: 10858
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5805
+      visible_text_chars: 20214
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-06T06:22:37+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      input_tokens: 54992
+      output_tokens: 33994
+      cache_read_tokens: 0
+      cache_write_tokens: 10512
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 13545
+      visible_text_chars: 81799
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      input_tokens: 29115
+      output_tokens: 28684
+      cache_read_tokens: 0
+      cache_write_tokens: 10512
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8184
+      visible_text_chars: 82001
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 3
+      input_tokens: 27848
+      output_tokens: 27614
+      cache_read_tokens: 10512
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7109
+      visible_text_chars: 82021
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-06T06:36:42+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      input_tokens: 44775
+      output_tokens: 26424
+      cache_read_tokens: 0
+      cache_write_tokens: 7517
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 9447
+      visible_text_chars: 67909
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      input_tokens: 27075
+      output_tokens: 24558
+      cache_read_tokens: 7517
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7625
+      visible_text_chars: 67735
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 3
+      input_tokens: 25547
+      output_tokens: 24460
+      cache_read_tokens: 7517
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7247
+      visible_text_chars: 68853
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 4
+      input_tokens: 23335
+      output_tokens: 23110
+      cache_read_tokens: 7517
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5893
+      visible_text_chars: 68869
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-06T06:52:17+00:00'
+  replicate: 2
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-06T06:22:38+00:00'
+  validation_problem_count: 1
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-1m-generic-v3_rep2/AI_READI_d4d.yaml
+    sha256: 12d7427c1ce953ebc4283b95331c10bdb743d0db6a6512df6a07f5a2151894cf
+    bytes: 82075
+    lines: 1476
+    root_slot_count: 76
+    populated_root_slot_count: 76
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep2/AI_READI_d4d_core.yaml
+    sha256: 1a8db435e1636240011ac7ea8ec00df6fcb4d37a03cc191e9974e2636197efb6
+    bytes: 68901
+    lines: 1254
+    root_slot_count: 62
+    populated_root_slot_count: 62
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep2/AI_READI_reconciliation.md
+    sha256: d1dbe5302d26a0d60b2cc419d955c1259dc8355d45bb68b885670652ae535505
+    bytes: 20317
+    lines: 234
+  total_input_tokens: 417566
+  total_output_tokens: 344748
+  total_cache_read_tokens: 33063
+  total_cache_write_tokens: 938493
+  total_reasoning_tokens_estimate: 132387
+  approx_cost_usd: 16.59
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 169
+  - artifact: full
+    round: 2
+    outcome: applied
+    findings: 8
+  - artifact: full
+    round: 3
+    outcome: applied
+    findings: 1
+  - artifact: full
+    round: 4
+    outcome: 'not converging: 1 -> 1 findings; stopped'
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 129
+  - artifact: core
+    round: 2
+    outcome: applied
+    findings: 31
+  - artifact: core
+    round: 3
+    outcome: applied
+    findings: 24
+  - artifact: core
+    round: 4
+    outcome: applied
+    findings: 1
+comparisons:
+- metric: full_phase_output_tokens
+  unit: tokens
+  values:
+  - subject: AI_READI rep1
+    value: 74274.0
+  - subject: CHORUS rep1
+    value: 26564.0
+  - subject: AI_READI rep2
+    value: 56259.0
+- metric: full_phase_reasoning_tokens_estimate
+  unit: tokens
+  values:
+  - subject: AI_READI rep1
+    value: 50130.0
+  - subject: CHORUS rep1
+    value: 17434.0
+  - subject: AI_READI rep2
+    value: 36421.0
+- metric: total_output_tokens
+  unit: tokens
+  values:
+  - subject: AI_READI rep1
+    value: 444955.0
+  - subject: CHORUS rep1
+    value: 158380.0
+  - subject: AI_READI rep2
+    value: 344748.0
+- metric: approx_cost_usd
+  unit: USD
+  values:
+  - subject: AI_READI rep1
+    value: 19.54
+  - subject: CHORUS rep1
+    value: 5.68
+  - subject: AI_READI rep2
+    value: 16.59
+- metric: repair_call_count
+  unit: calls
+  values:
+  - subject: AI_READI rep1
+    value: 8.0
+  - subject: CHORUS rep1
+    value: 5.0
+  - subject: AI_READI rep2
+    value: 7.0
+- metric: full_root_slot_count
+  unit: slots
+  values:
+  - subject: AI_READI rep1
+    value: 70.0
+  - subject: CHORUS rep1
+    value: 53.0
+  - subject: AI_READI rep2
+    value: 76.0
+- metric: core_root_slot_count
+  unit: slots
+  values:
+  - subject: AI_READI rep1
+    value: 58.0
+  - subject: CHORUS rep1
+    value: 48.0
+  - subject: AI_READI rep2
+    value: 62.0
+- metric: validation_problem_count
+  unit: artifacts
+  values:
+  - subject: AI_READI rep1
+    value: 0.0
+  - subject: CHORUS rep1
+    value: 0.0
+  - subject: AI_READI rep2
+    value: 1.0
+findings:
+- topic: reasoning on the unprefixed route
+  kind: observation
+  claim: 'The unprefixed claude-opus-5 route emits thinking: every phase returns a
+    signed thinking block whose text CBORG strips, exactly as on the -high route (reasoning_present
+    true, reasoning_available false).'
+  evidence: CHORUS full phase ~17.4k reasoning-token estimate; AI_READI full phase
+    ~50.1k; blocks recorded in *_reasoning.jsonl for both runs.
+  relates_to:
+  - '#347'
+- topic: reasoning effort vs the -high route
+  kind: comparison
+  claim: 'The bare route thinks at least as hard as -high on the same workload: AI_READI
+    full-phase reasoning estimate was 50.1k tokens against 35.7k, 39.9k and 48.7k
+    across the three -high samples of the same day.'
+  evidence: data/run_telemetry/2026-08-05_claude-opus-5-generic-v3.yaml (superseded
+    -high label) vs this report's AI_READI full phase.
+  relates_to:
+  - '#347'
+- topic: repair convergence
+  kind: observation
+  claim: 'Validator-driven repair converged both projects to valid records. CHORUS:
+    full 80 -> 9 -> 0, core 76 -> 9 -> 4 -> 0 findings across two resumed invocations.
+    AI_READI: full 165 -> 27 -> 22 -> 21 findings, hit the 4-round ceiling, then 21
+    -> 0 on the next invocation; core 121 -> 28 -> 23 -> 0 within the first.'
+  evidence: 'Repair logs in both provenance records and *_reasoning.jsonl; issue #364
+    documents the ceiling change the AI_READI trajectory motivated.'
+  relates_to:
+  - '#361'
+  - '#364'
+  - '#365'
+- topic: residual validation failures are schema traps
+  kind: interpretation
+  claim: 'Every slot that resisted repair longest is a schema-design trap rather than
+    model noise: Creator.affiliations requires an Organization with a required id,
+    so a bare organisation name can never validate; principal_investigator is a string
+    with a boolean-shaped name; and rep2 surfaced a third trap, human_subject_research/special_populations
+    holding prose where the schema requires an array. The trap inventory is growing
+    with replicates and is not limited to the two slots #360 names.'
+  evidence: rep1 residuals were four affiliation strings; rep2's single residual is
+    special_populations; the -high runs failed on the same class.
+  relates_to:
+  - '#360'
+  - '#297'
+- topic: repair does not invent facts
+  kind: interpretation
+  claim: 'Spot-checks show repair choosing evidence-preserving shapes rather than
+    fabricating data: affiliations became Organization objects reusing the name (CHORUS)
+    or a FAIRhub fragment URI already grounded in the bundle (AI_READI); principal_investigator
+    became the PI''s name where the bundle supplies one.'
+  evidence: 'creators[0] in both projects'' final full records; compare the intermediate
+    snapshots once #370-era runs exist.'
+  relates_to:
+  - '#361'
+  - '#360'
+- topic: presence and LLM-judge sections are empty
+  kind: observation
+  claim: The presence_evaluations and llm_judge_evaluations sections of this report
+    are empty because the published evaluation outputs are keyed by label-less legacy
+    paths with 2026-04-10 timestamps — they score the archived baseline, not these
+    runs. The sections fill when the evaluators are re-run against this label's files.
+  evidence: 'data/evaluation/scores.json file_path values lack label directories;
+    issue #286 documents the stale-baseline problem.'
+  relates_to:
+  - '#286'
