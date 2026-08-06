@@ -154,6 +154,17 @@ class TestPhaseAssembly(unittest.TestCase):
             self.assertEqual(req.messages[0]["content"][-1]["text"],
                              PHASE_INSTRUCTIONS[ph], ph)
 
+    def test_audit_and_reconcile_demand_schema_shape_conformance(self):
+        # #356: the AI-READI v3 audit saw evidence problems but no phase saw
+        # shape problems, and reconciliation introduced one while repairing an
+        # audited omission. The audit must ask for shape findings, and both
+        # reconcile phases must be told a repair may not break shape.
+        self.assertIn("shape", PHASE_INSTRUCTIONS["audit"])
+        self.assertIn("schema digest", PHASE_INSTRUCTIONS["audit"])
+        for ph in ("reconcile_full", "reconcile_core"):
+            self.assertIn("conform to the schema digest",
+                          PHASE_INSTRUCTIONS[ph], ph)
+
     def test_carry_instructions_say_above_not_below(self):
         # The instruction follows the carry, so any instruction describing a
         # carried artifact's position must say "above". "Below" would point at

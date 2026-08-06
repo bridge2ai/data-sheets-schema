@@ -399,16 +399,25 @@ PHASE_INSTRUCTIONS = {
         "evidence boundary. Report, as a JSON object with keys `findings` (a "
         "list of {severity, record, slot, issue}) and `summary`: any slot whose "
         "value the bundle does not support, any omission the bundle clearly "
-        "supports, and any internal inconsistency. Output only JSON."),
+        "supports, any internal inconsistency, and any value whose shape does "
+        "not conform to the schema digest supplied above — prose where the "
+        "schema requires a list, enum values the schema does not define, or "
+        "source commentary embedded inside a name, identifier or affiliation "
+        "value. Output only JSON."),
     "reconcile_full": (
         "Phase 4a. Apply the audit findings that concern the FULL record and "
         "emit the corrected full record in its entirety, header block included. "
-        "If no finding requires a change, emit it unchanged. Output only YAML."),
+        "Every value you write or change must conform to the schema digest "
+        "supplied above — a repair that fixes evidence but breaks shape is "
+        "still a defect. If no finding requires a change, emit it unchanged. "
+        "Output only YAML."),
     "reconcile_core": (
         "Phase 4b. Apply the audit findings that concern the CORE record and "
         "emit the corrected core record in its entirety, header block included. "
         "It must remain consistent with the reconciled full record supplied "
-        "above and assert nothing the full record does not support. If no "
+        "above and assert nothing the full record does not support. Every "
+        "value you write or change must conform to the schema digest supplied "
+        "above. If no "
         "finding requires a change, emit it unchanged. Output only YAML."),
     "report": (
         "Phase 4c. Write the reconciliation report as Markdown: what the audit "
