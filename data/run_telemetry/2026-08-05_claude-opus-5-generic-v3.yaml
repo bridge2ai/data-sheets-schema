@@ -1,0 +1,245 @@
+label: 2026-08-05_claude-opus-5-generic-v3
+method: claudecode_agent
+generated_at: '2026-08-06T05:56:37+00:00'
+schema_version: 1.0.0
+runs:
+- project: AI_READI
+  label: 2026-08-05_claude-opus-5-generic-v3_rep1
+  validation_state: invalid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      input_tokens: 2204
+      output_tokens: 64000
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 64000
+      stop_reason: max_tokens
+      reasoning_tokens_estimate: 39877
+      visible_text_chars: 96495
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      input_tokens: 2204
+      output_tokens: 64000
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 64000
+      stop_reason: max_tokens
+      reasoning_tokens_estimate: 48659
+      visible_text_chars: 61367
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 3
+      input_tokens: 2204
+      output_tokens: 56030
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 64000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 37135
+      visible_text_chars: 75583
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      input_tokens: 26926
+      output_tokens: 19248
+      cache_read_tokens: 0
+      cache_write_tokens: 149662
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4387
+      visible_text_chars: 59445
+      reasoning_present: false
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      input_tokens: 46212
+      output_tokens: 10270
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2752
+      visible_text_chars: 30074
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      input_tokens: 37192
+      output_tokens: 39648
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 64000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 17752
+      visible_text_chars: 87586
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-06T00:59:54+00:00'
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      input_tokens: 60886
+      output_tokens: 22167
+      cache_read_tokens: 0
+      cache_write_tokens: 149662
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6984
+      visible_text_chars: 60734
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-06T01:03:29+00:00'
+  - phase: report
+    attempts:
+    - attempt: 1
+      input_tokens: 12486
+      output_tokens: 12000
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 12000
+      stop_reason: max_tokens
+      reasoning_tokens_estimate: 6631
+      visible_text_chars: 21478
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      input_tokens: 12486
+      output_tokens: 12000
+      cache_read_tokens: 152657
+      cache_write_tokens: 0
+      max_tokens: 12000
+      stop_reason: max_tokens
+      reasoning_tokens_estimate: 6841
+      visible_text_chars: 20636
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 3
+      input_tokens: 12486
+      output_tokens: 10482
+      cache_read_tokens: 152657
+      cache_write_tokens: 0
+      max_tokens: 12000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 3795
+      visible_text_chars: 26748
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-06T01:10:58+00:00'
+  replicate: 1
+  model: google/claude-opus-5-high
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-06T01:10:58+00:00'
+  validation_problem_count: 2
+  total_input_tokens: 215286
+  total_output_tokens: 309845
+  total_cache_read_tokens: 305314
+  total_cache_write_tokens: 1215266
+  total_reasoning_tokens_estimate: 174813
+  approx_cost_usd: 16.57
+- project: CHORUS
+  label: 2026-08-05_claude-opus-5-generic-v3_rep1
+  validation_state: invalid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      input_tokens: 2204
+      output_tokens: 30773
+      cache_read_tokens: 0
+      cache_write_tokens: 24247
+      max_tokens: 64000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 21448
+      visible_text_chars: 37302
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      input_tokens: 14989
+      output_tokens: 12596
+      cache_read_tokens: 0
+      cache_write_tokens: 21252
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 3443
+      visible_text_chars: 36613
+      reasoning_present: false
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      input_tokens: 27611
+      output_tokens: 11082
+      cache_read_tokens: 0
+      cache_write_tokens: 24247
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8498
+      visible_text_chars: 10337
+      reasoning_present: true
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      input_tokens: 18528
+      output_tokens: 15017
+      cache_read_tokens: 24247
+      cache_write_tokens: 0
+      max_tokens: 64000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6033
+      visible_text_chars: 35937
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-05T20:16:20+00:00'
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      input_tokens: 30707
+      output_tokens: 13875
+      cache_read_tokens: 0
+      cache_write_tokens: 21252
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5268
+      visible_text_chars: 34431
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-05T20:18:29+00:00'
+  - phase: report
+    attempts:
+    - attempt: 1
+      input_tokens: 5759
+      output_tokens: 7532
+      cache_read_tokens: 24247
+      cache_write_tokens: 0
+      max_tokens: 12000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4065
+      visible_text_chars: 13871
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-05T20:20:04+00:00'
+  replicate: 1
+  model: google/claude-opus-5-high
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-05T20:20:04+00:00'
+  validation_problem_count: 2
+  total_input_tokens: 99798
+  total_output_tokens: 90875
+  total_cache_read_tokens: 48494
+  total_cache_write_tokens: 90998
+  total_reasoning_tokens_estimate: 48755
+  approx_cost_usd: 3.36
