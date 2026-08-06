@@ -1439,11 +1439,17 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # this invocation makes. Every billed call stays on the record. Gated on
     # the progress file too: without resume state this is a from-scratch
     # regeneration, and a dead run's accounting does not belong on it.
+    prior_repair: list[dict[str, Any]] = []
     if spec.provenance_path.exists() and _progress_path(spec).exists():
         try:
             prior = yaml.safe_load(
                 spec.provenance_path.read_text(encoding="utf-8")) or {}
             usage.extend(prior.get("api_usage") or [])
+            # The repair log is seeded for the same reason as usage (#366):
+            # AI-READI rep1's record showed one repair round where eight had
+            # run, because the second invocation overwrote the convergence
+            # story its predecessor recorded.
+            prior_repair = list(prior.get("repair") or [])
         except yaml.YAMLError:
             pass
 
@@ -1700,10 +1706,12 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # cheaper than discarding the run. Hashing happens in
         # validation_block() below, *after* repair — integrity pins the final
         # bytes, never an intermediate state.
-        rec.data["repair"] = _repair_invalid(spec, client, settings, usage)
+        rec.data["repair"] = (prior_repair
+                              + _repair_invalid(spec, client, settings,
+                                                usage)) or None
         problems = validate_outputs(spec)
     else:
-        rec.data["repair"] = None
+        rec.data["repair"] = prior_repair or None
     rec.data["validation"] = validation_block(spec, problems)
     rec.data["intermediates"] = _intermediates_block(spec)
 
