@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-08-06T12:01:30
+# Generation date: 2026-08-06T15:34:49
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -149,6 +149,7 @@ class NamedThing(YAMLRoot):
     id: Union[str, NamedThingId] = None
     name: Optional[str] = None
     description: Optional[str] = None
+    notes: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -161,6 +162,9 @@ class NamedThing(YAMLRoot):
 
         if self.description is not None and not isinstance(self.description, str):
             self.description = str(self.description)
+
+        if self.notes is not None and not isinstance(self.notes, str):
+            self.notes = str(self.notes)
 
         super().__post_init__(**kwargs)
 
@@ -180,6 +184,7 @@ class Organization(YAMLRoot):
     id: Optional[Union[str, URIorCURIE]] = None
     name: Optional[str] = None
     description: Optional[str] = None
+    notes: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self.id is not None and not isinstance(self.id, URIorCURIE):
@@ -190,6 +195,9 @@ class Organization(YAMLRoot):
 
         if self.description is not None and not isinstance(self.description, str):
             self.description = str(self.description)
+
+        if self.notes is not None and not isinstance(self.notes, str):
+            self.notes = str(self.notes)
 
         super().__post_init__(**kwargs)
 
@@ -209,6 +217,7 @@ class DatasetProperty(YAMLRoot):
     id: Optional[Union[str, URIorCURIE]] = None
     name: Optional[str] = None
     description: Optional[str] = None
+    notes: Optional[str] = None
     used_software: Optional[Union[dict[Union[str, SoftwareId], Union[dict, "Software"]], list[Union[dict, "Software"]]]] = empty_dict()
 
     def __post_init__(self, *_: str, **kwargs: Any):
@@ -220,6 +229,9 @@ class DatasetProperty(YAMLRoot):
 
         if self.description is not None and not isinstance(self.description, str):
             self.description = str(self.description)
+
+        if self.notes is not None and not isinstance(self.notes, str):
+            self.notes = str(self.notes)
 
         self._normalize_inlined_as_list(slot_name="used_software", slot_type=Software, key_name="id", keyed=True)
 
@@ -1006,6 +1018,7 @@ class Grant(YAMLRoot):
     id: Optional[Union[str, URIorCURIE]] = None
     name: Optional[str] = None
     description: Optional[str] = None
+    notes: Optional[str] = None
     grant_number: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
@@ -1017,6 +1030,9 @@ class Grant(YAMLRoot):
 
         if self.description is not None and not isinstance(self.description, str):
             self.description = str(self.description)
+
+        if self.notes is not None and not isinstance(self.notes, str):
+            self.notes = str(self.notes)
 
         if self.grant_number is not None and not isinstance(self.grant_number, str):
             self.grant_number = str(self.grant_number)
@@ -4243,6 +4259,9 @@ slots.namedThing__name = Slot(uri=SCHEMA.name, name="namedThing__name", curie=SC
 slots.namedThing__description = Slot(uri=SCHEMA.description, name="namedThing__description", curie=SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.namedThing__description, domain=None, range=Optional[str])
 
+slots.namedThing__notes = Slot(uri=SCHEMA.comment, name="namedThing__notes", curie=SCHEMA.curie('comment'),
+                   model_uri=DATA_SHEETS_SCHEMA.namedThing__notes, domain=None, range=Optional[str])
+
 slots.organization__id = Slot(uri=SCHEMA.identifier, name="organization__id", curie=SCHEMA.curie('identifier'),
                    model_uri=DATA_SHEETS_SCHEMA.organization__id, domain=None, range=Optional[Union[str, URIorCURIE]])
 
@@ -4252,6 +4271,9 @@ slots.organization__name = Slot(uri=SCHEMA.name, name="organization__name", curi
 slots.organization__description = Slot(uri=SCHEMA.description, name="organization__description", curie=SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.organization__description, domain=None, range=Optional[str])
 
+slots.organization__notes = Slot(uri=SCHEMA.comment, name="organization__notes", curie=SCHEMA.curie('comment'),
+                   model_uri=DATA_SHEETS_SCHEMA.organization__notes, domain=None, range=Optional[str])
+
 slots.datasetProperty__id = Slot(uri=SCHEMA.identifier, name="datasetProperty__id", curie=SCHEMA.curie('identifier'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetProperty__id, domain=None, range=Optional[Union[str, URIorCURIE]])
 
@@ -4260,6 +4282,9 @@ slots.datasetProperty__name = Slot(uri=SCHEMA.name, name="datasetProperty__name"
 
 slots.datasetProperty__description = Slot(uri=SCHEMA.description, name="datasetProperty__description", curie=SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetProperty__description, domain=None, range=Optional[str])
+
+slots.datasetProperty__notes = Slot(uri=SCHEMA.comment, name="datasetProperty__notes", curie=SCHEMA.curie('comment'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetProperty__notes, domain=None, range=Optional[str])
 
 slots.datasetProperty__used_software = Slot(uri=D4D.usedSoftware, name="datasetProperty__used_software", curie=D4D.curie('usedSoftware'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetProperty__used_software, domain=None, range=Optional[Union[dict[Union[str, SoftwareId], Union[dict, Software]], list[Union[dict, Software]]]])
@@ -4330,6 +4355,9 @@ slots.grant__name = Slot(uri=SCHEMA.name, name="grant__name", curie=SCHEMA.curie
 
 slots.grant__description = Slot(uri=SCHEMA.description, name="grant__description", curie=SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.grant__description, domain=None, range=Optional[str])
+
+slots.grant__notes = Slot(uri=SCHEMA.comment, name="grant__notes", curie=SCHEMA.curie('comment'),
+                   model_uri=DATA_SHEETS_SCHEMA.grant__notes, domain=None, range=Optional[str])
 
 slots.grant__grant_number = Slot(uri=D4D.grantIdentifier, name="grant__grant_number", curie=D4D.curie('grantIdentifier'),
                    model_uri=DATA_SHEETS_SCHEMA.grant__grant_number, domain=None, range=Optional[str])

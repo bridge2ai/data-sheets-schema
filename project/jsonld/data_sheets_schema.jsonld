@@ -4068,6 +4068,22 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "namedThing__notes",
+      "description": "Content from the source material that belongs to this entity but fits no dedicated slot. Use this rather than inventing keys the schema does not declare (#380).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/comment"
+      ],
+      "slot_uri": "http://schema.org/comment",
+      "alias": "notes",
+      "owner": "NamedThing",
+      "domain_of": [
+        "NamedThing"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "organization__id",
       "annotations": [
         {
@@ -4131,6 +4147,22 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "organization__notes",
+      "description": "Content about the organization that fits no dedicated slot; never invent keys (#380).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/comment"
+      ],
+      "slot_uri": "http://schema.org/comment",
+      "alias": "notes",
+      "owner": "Organization",
+      "domain_of": [
+        "Organization"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "datasetProperty__id",
       "annotations": [
         {
@@ -4178,6 +4210,22 @@
       ],
       "slot_uri": "http://schema.org/description",
       "alias": "description",
+      "owner": "DatasetProperty",
+      "domain_of": [
+        "DatasetProperty"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "datasetProperty__notes",
+      "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/comment"
+      ],
+      "slot_uri": "http://schema.org/comment",
+      "alias": "notes",
       "owner": "DatasetProperty",
       "domain_of": [
         "DatasetProperty"
@@ -4623,6 +4671,22 @@
       ],
       "slot_uri": "http://schema.org/description",
       "alias": "description",
+      "owner": "Grant",
+      "domain_of": [
+        "Grant"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "grant__notes",
+      "description": "Content about the grant that fits no dedicated slot; never invent keys (#380).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
+      "mappings": [
+        "http://schema.org/comment"
+      ],
+      "slot_uri": "http://schema.org/comment",
+      "alias": "notes",
       "owner": "Grant",
       "domain_of": [
         "Grant"
@@ -8460,6 +8524,7 @@
         "namedThing__id",
         "namedThing__name",
         "namedThing__description",
+        "namedThing__notes",
         "compression",
         "conforms_to",
         "conforms_to_class",
@@ -8508,6 +8573,7 @@
         "namedThing__id",
         "namedThing__name",
         "namedThing__description",
+        "namedThing__notes",
         "compression",
         "conforms_to",
         "conforms_to_class",
@@ -9244,6 +9310,7 @@
         "namedThing__id",
         "namedThing__name",
         "namedThing__description",
+        "namedThing__notes",
         "compression",
         "conforms_to",
         "conforms_to_class",
@@ -9367,7 +9434,8 @@
       "slots": [
         "namedThing__id",
         "namedThing__name",
-        "namedThing__description"
+        "namedThing__description",
+        "namedThing__notes"
       ],
       "slot_usage": {},
       "attributes": [
@@ -9413,6 +9481,13 @@
           "slot_uri": "schema:description",
           "range": "string",
           "@type": "SlotDefinition"
+        },
+        {
+          "name": "notes",
+          "description": "Content from the source material that belongs to this entity but fits no dedicated slot. Use this rather than inventing keys the schema does not declare (#380).",
+          "slot_uri": "schema:comment",
+          "range": "string",
+          "@type": "SlotDefinition"
         }
       ],
       "class_uri": "http://schema.org/Thing",
@@ -9429,7 +9504,8 @@
       "slots": [
         "organization__id",
         "organization__name",
-        "organization__description"
+        "organization__description",
+        "organization__notes"
       ],
       "slot_usage": {},
       "attributes": [
@@ -9468,6 +9544,13 @@
           "slot_uri": "schema:description",
           "range": "string",
           "@type": "SlotDefinition"
+        },
+        {
+          "name": "notes",
+          "description": "Content about the organization that fits no dedicated slot; never invent keys (#380).",
+          "slot_uri": "schema:comment",
+          "range": "string",
+          "@type": "SlotDefinition"
         }
       ],
       "class_uri": "http://schema.org/Organization",
@@ -9482,6 +9565,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software"
       ],
       "slot_usage": {},
@@ -9515,6 +9599,13 @@
           "@type": "SlotDefinition"
         },
         {
+          "name": "notes",
+          "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+          "slot_uri": "schema:comment",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
           "name": "used_software",
           "description": "What software was used as part of this dataset property?",
           "slot_uri": "d4d:usedSoftware",
@@ -9543,6 +9634,7 @@
         "namedThing__id",
         "namedThing__name",
         "namedThing__description",
+        "namedThing__notes",
         "software__version",
         "software__license",
         "software__url"
@@ -9608,6 +9700,7 @@
         "namedThing__id",
         "namedThing__name",
         "namedThing__description",
+        "namedThing__notes",
         "person__affiliation",
         "person__email",
         "person__orcid"
@@ -9671,6 +9764,7 @@
         "namedThing__id",
         "namedThing__name",
         "namedThing__description",
+        "namedThing__notes",
         "compression",
         "conforms_to",
         "conforms_to_class",
@@ -9749,6 +9843,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "purpose__response"
       ],
@@ -9785,6 +9880,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "task__response"
       ],
@@ -9821,6 +9917,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "addressingGap__response"
       ],
@@ -9857,6 +9954,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "creator__principal_investigator",
         "creator__affiliations",
@@ -9909,6 +10007,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "fundingMechanism__grantor",
         "fundingMechanism__grants"
@@ -9947,7 +10046,8 @@
       "slots": [
         "organization__id",
         "organization__name",
-        "organization__description"
+        "organization__description",
+        "organization__notes"
       ],
       "slot_usage": {},
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#Grantor",
@@ -9962,6 +10062,7 @@
         "grant__id",
         "grant__name",
         "grant__description",
+        "grant__notes",
         "grant__grant_number"
       ],
       "slot_usage": {},
@@ -9985,6 +10086,13 @@
           "name": "description",
           "description": "A human-readable description of the grant.",
           "slot_uri": "schema:description",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "notes",
+          "description": "Content about the grant that fits no dedicated slot; never invent keys (#380).",
+          "slot_uri": "schema:comment",
           "range": "string",
           "@type": "SlotDefinition"
         },
@@ -10019,6 +10127,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "instance__data_topic",
         "instance__instance_type",
@@ -10129,6 +10238,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "samplingStrategy__is_sample",
         "samplingStrategy__is_random",
@@ -10236,6 +10346,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "missingInfo__missing",
         "missingInfo__why_missing"
@@ -10292,6 +10403,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "relationships__relationship_details"
       ],
@@ -10325,6 +10437,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "splits__split_details"
       ],
@@ -10358,6 +10471,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "dataAnomaly__anomaly_details"
       ],
@@ -10397,6 +10511,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "datasetBias__bias_type",
         "datasetBias__bias_description",
@@ -10472,6 +10587,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "datasetLimitation__limitation_type",
         "datasetLimitation__limitation_description",
@@ -10543,6 +10659,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "ExternalResource_external_resources",
         "externalResource__future_guarantees",
@@ -10593,6 +10710,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "confidentiality__confidential_elements_present",
         "confidentiality__confidentiality_details"
@@ -10634,6 +10752,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "contentWarning__content_warnings_present",
         "contentWarning__warnings"
@@ -10676,6 +10795,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "subpopulation__subpopulation_elements_present",
         "subpopulation__identification",
@@ -10731,6 +10851,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "deidentification__identifiable_elements_present",
         "deidentification__method",
@@ -10791,6 +10912,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "sensitiveElement__sensitive_elements_present",
         "sensitiveElement__sensitivity_details"
@@ -10831,6 +10953,7 @@
       "slots": [
         "datasetProperty__id",
         "datasetProperty__name",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "datasetRelationship__target_dataset",
         "datasetRelationship__relationship_type",
@@ -10878,6 +11001,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "instanceAcquisition__was_directly_observed",
         "instanceAcquisition__was_reported_by_subjects",
@@ -10946,6 +11070,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "collectionMechanism__mechanism_details"
       ],
@@ -10979,6 +11104,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "dataCollector__role",
         "dataCollector__collector_details"
@@ -11030,6 +11156,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "collectionTimeframe__start_date",
         "collectionTimeframe__end_date",
@@ -11093,6 +11220,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "directCollection__is_direct",
         "directCollection__collection_details"
@@ -11137,6 +11265,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "missingDataDocumentation__missing_data_patterns",
         "missingDataDocumentation__missing_data_causes",
@@ -11203,6 +11332,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "rawDataSource__source_description",
         "rawDataSource__source_type",
@@ -11288,6 +11418,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "preprocessingStrategy__preprocessing_details"
       ],
@@ -11324,6 +11455,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "cleaningStrategy__cleaning_details"
       ],
@@ -11357,6 +11489,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "labelingStrategy__data_annotation_platform",
         "labelingStrategy__data_annotation_protocol",
@@ -11461,6 +11594,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "rawData__access_url",
         "rawData__raw_data_details"
@@ -11505,6 +11639,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "imputationProtocol__imputation_method",
         "imputationProtocol__imputed_fields",
@@ -11582,6 +11717,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "annotationAnalysis__inter_annotator_agreement_score",
         "annotationAnalysis__agreement_metric",
@@ -11652,6 +11788,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "machineAnnotationTools__tools",
         "machineAnnotationTools__tool_descriptions",
@@ -11714,6 +11851,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "existingUse__examples"
       ],
@@ -11748,6 +11886,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "useRepository__repository_url",
         "useRepository__repository_details"
@@ -11789,6 +11928,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "otherTask__task_details"
       ],
@@ -11825,6 +11965,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "futureUseImpact__impact_details"
       ],
@@ -11858,6 +11999,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "discouragedUse__discouragement_details"
       ],
@@ -11894,6 +12036,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "intendedUse__examples",
         "intendedUse__usage_notes",
@@ -11956,6 +12099,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "prohibitedUse__prohibition_reason"
       ],
@@ -11989,6 +12133,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "thirdPartySharing__is_shared"
       ],
@@ -12015,6 +12160,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "distributionFormat__access_urls"
       ],
@@ -12049,6 +12195,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "distributionDate__release_dates"
       ],
@@ -12083,6 +12230,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "maintainer__role",
         "maintainer__maintainer_details"
@@ -12124,6 +12272,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "erratum__erratum_url",
         "erratum__erratum_details"
@@ -12176,6 +12325,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "updatePlan__frequency",
         "updatePlan__update_details"
@@ -12224,6 +12374,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "retentionLimits__retention_period",
         "retentionLimits__retention_details"
@@ -12272,6 +12423,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "versionAccess__latest_version_doi",
         "versionAccess__versions_available",
@@ -12329,6 +12481,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "extensionMechanism__contribution_url",
         "extensionMechanism__extension_details"
@@ -12377,6 +12530,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "ethicalReview__contact_person",
         "ethicalReview__reviewing_organization",
@@ -12432,6 +12586,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "dataProtectionImpact__impact_details"
       ],
@@ -12465,6 +12620,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "collectionNotification__notification_details"
       ],
@@ -12498,6 +12654,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "collectionConsent__consent_details"
       ],
@@ -12531,6 +12688,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "consentRevocation__revocation_details"
       ],
@@ -12564,6 +12722,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "humanSubjectResearch__involves_human_subjects",
         "humanSubjectResearch__irb_approval",
@@ -12639,6 +12798,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "informedConsent__consent_obtained",
         "informedConsent__consent_type",
@@ -12711,6 +12871,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "participantPrivacy__anonymization_method",
         "participantPrivacy__reidentification_risk",
@@ -12776,6 +12937,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "humanSubjectCompensation__compensation_provided",
         "humanSubjectCompensation__compensation_type",
@@ -12840,6 +13002,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "atRiskPopulations__at_risk_groups_included",
         "atRiskPopulations__special_protections",
@@ -12900,6 +13063,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "licenseAndUseTerms__license_terms",
         "licenseAndUseTerms__data_use_permission",
@@ -12967,6 +13131,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "iPRestrictions__restrictions"
       ],
@@ -13005,6 +13170,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "exportControlRegulatoryRestrictions__regulatory_restrictions",
         "exportControlRegulatoryRestrictions__hipaa_compliant",
@@ -13092,6 +13258,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__description",
+        "datasetProperty__notes",
         "datasetProperty__used_software",
         "variableMetadata__variable_name",
         "variableMetadata__data_type",
@@ -13314,6 +13481,7 @@
         "namedThing__id",
         "namedThing__name",
         "namedThing__description",
+        "namedThing__notes",
         "conforms_to",
         "conforms_to_class",
         "conforms_to_schema",
@@ -13382,6 +13550,7 @@
         "namedThing__id",
         "namedThing__name",
         "namedThing__description",
+        "namedThing__notes",
         "conforms_to",
         "conforms_to_class",
         "conforms_to_schema",
@@ -13457,9 +13626,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-08-06T11:46:39",
+  "source_file_date": "2026-08-06T12:37:37",
   "source_file_size": 32488,
-  "generation_date": "2026-08-06T12:01:28",
+  "generation_date": "2026-08-06T15:34:46",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
