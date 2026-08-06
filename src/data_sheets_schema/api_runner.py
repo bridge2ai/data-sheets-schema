@@ -1163,6 +1163,9 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 break
             req = build_repair(artifact, path.read_text(encoding="utf-8"),
                                errors)
+            attempt_started = datetime.now(timezone.utc).isoformat(
+                timespec="seconds")
+            attempt_t0 = time.monotonic()
             try:
                 resp = _call_with_retry(
                     client, model=settings["name"],
@@ -1184,6 +1187,8 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                               "attempt": rnd, **cap.to_dict()})
             usage.append({
                 "phase": ph, "attempt": rnd,
+                "started_at": attempt_started,
+                "seconds": round(time.monotonic() - attempt_t0, 3),
                 "input_tokens": getattr(resp.usage, "input_tokens", None),
                 "output_tokens": getattr(resp.usage, "output_tokens", None),
                 "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
@@ -1490,6 +1495,12 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # the body is retried here, on the same budget, and only a phase that
         # fails every attempt takes the run down with it.
         for attempt in range(1, MAX_ATTEMPTS + 1):
+            # Stamped per attempt so telemetry can reconstruct wall time; file
+            # mtimes only date the artifact a phase wrote, not the attempts
+            # that failed on the way there.
+            attempt_started = datetime.now(timezone.utc).isoformat(
+                timespec="seconds")
+            attempt_t0 = time.monotonic()
             resp = _call_with_retry(
                 client,
                 model=settings["name"],
@@ -1513,6 +1524,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             usage.append({
                 "phase": ph,
                 "attempt": attempt,
+                "started_at": attempt_started,
+                "seconds": round(time.monotonic() - attempt_t0, 3),
                 "input_tokens": getattr(resp.usage, "input_tokens", None),
                 "output_tokens": getattr(resp.usage, "output_tokens", None),
                 "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
