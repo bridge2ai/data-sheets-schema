@@ -6,7 +6,7 @@
     "https://bridge2ai.github.io/data-sheets-schema"
   ],
   "id": "https://w3id.org/bridge2ai/data-sheets-schema",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "imports": [
     "linkml:types",
     "D4D_Base_import",
@@ -4068,6 +4068,69 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "organization__id",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://ror.org/01yc7t268",
+          "@type": "Annotation"
+        }
+      ],
+      "description": "An identifier for the organization (for example a ROR), when the source material supplies one. A name alone is a valid organization.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/identifier"
+      ],
+      "slot_uri": "http://schema.org/identifier",
+      "alias": "id",
+      "owner": "Organization",
+      "domain_of": [
+        "Organization"
+      ],
+      "range": "uriorcurie",
+      "recommended": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "organization__name",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "University of Washington",
+          "@type": "Annotation"
+        }
+      ],
+      "description": "A human-readable name for the organization.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/name"
+      ],
+      "slot_uri": "http://schema.org/name",
+      "alias": "name",
+      "owner": "Organization",
+      "domain_of": [
+        "Organization"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "organization__description",
+      "description": "A human-readable description for the organization.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/description"
+      ],
+      "slot_uri": "http://schema.org/description",
+      "alias": "description",
+      "owner": "Organization",
+      "domain_of": [
+        "Organization"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "datasetProperty__id",
       "annotations": [
         {
@@ -4225,6 +4288,7 @@
       ],
       "range": "Organization",
       "multivalued": true,
+      "inlined": true,
       "@type": "SlotDefinition"
     },
     {
@@ -4422,7 +4486,7 @@
     },
     {
       "name": "creator__principal_investigator",
-      "description": "A key individual (Principal Investigator) responsible for or overseeing dataset creation.",
+      "description": "The name of the key individual (Principal Investigator) responsible for or overseeing dataset creation \u2014 a person's name such as 'Aaron Lee', never a yes/no flag. The slot name reads like a boolean; the value is not one (#360).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/principalInvestigator"
@@ -4495,7 +4559,7 @@
       "domain_of": [
         "FundingMechanism"
       ],
-      "range": "Grantor",
+      "range": "string",
       "@type": "SlotDefinition"
     },
     {
@@ -4515,6 +4579,55 @@
       "multivalued": true,
       "inlined": true,
       "inlined_as_list": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "grant__id",
+      "description": "An identifier for the grant, when the source material supplies one. The grant_number alone is a valid grant reference.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
+      "mappings": [
+        "http://schema.org/identifier"
+      ],
+      "slot_uri": "http://schema.org/identifier",
+      "alias": "id",
+      "owner": "Grant",
+      "domain_of": [
+        "Grant"
+      ],
+      "range": "uriorcurie",
+      "recommended": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "grant__name",
+      "description": "A human-readable name for the grant or funding mechanism.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
+      "mappings": [
+        "http://schema.org/name"
+      ],
+      "slot_uri": "http://schema.org/name",
+      "alias": "name",
+      "owner": "Grant",
+      "domain_of": [
+        "Grant"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "grant__description",
+      "description": "A human-readable description of the grant.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
+      "mappings": [
+        "http://schema.org/description"
+      ],
+      "slot_uri": "http://schema.org/description",
+      "alias": "description",
+      "owner": "Grant",
+      "domain_of": [
+        "Grant"
+      ],
+      "range": "string",
       "@type": "SlotDefinition"
     },
     {
@@ -4761,7 +4874,6 @@
         "SamplingStrategy"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -4821,7 +4933,6 @@
         "SamplingStrategy"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -4923,7 +5034,6 @@
         "Relationships"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -4947,7 +5057,6 @@
         "Splits"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -4974,7 +5083,6 @@
         "DataAnomaly"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5165,7 +5273,6 @@
         "ExternalResource"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5241,7 +5348,6 @@
         "Confidentiality"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5317,7 +5423,6 @@
         "Subpopulation"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5344,7 +5449,6 @@
         "Subpopulation"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5414,7 +5518,6 @@
         "Deidentification"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5454,12 +5557,15 @@
         "SensitiveElement"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
       "name": "datasetRelationship__target_dataset",
-      "description": "The dataset that this relationship points to. Can be specified by identifier, URL, or Dataset object.",
+      "description": "The identifier or URL of the dataset this relationship points to.",
+      "comments": [
+        "A reference, not an inline dataset. The description used to promise \"identifier, URL, or Dataset object\" while the range permitted only the first, and LinkML cannot express the union: its JSON Schema generator always emits a top-level type or $ref from the slot's range, which ANDs with `any_of`, so whichever branch the range names the other one fails. Verified both ways on VOICE (#297).",
+        "A related dataset with its own DOI, protocol and approval is its own datasheet and is referenced from here by identifier. That is the resolution of #292 for VOICE, whose pediatric companion has all three."
+      ],
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
         "http://purl.org/dc/terms/relation"
@@ -5589,7 +5695,6 @@
         "InstanceAcquisition"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5613,7 +5718,6 @@
         "CollectionMechanism"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5660,7 +5764,6 @@
         "DataCollector"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5730,7 +5833,6 @@
         "CollectionTimeframe"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5770,7 +5872,6 @@
         "DirectCollection"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5794,7 +5895,6 @@
         "MissingDataDocumentation"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5818,7 +5918,6 @@
         "MissingDataDocumentation"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5892,7 +5991,6 @@
         "RawDataSource"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5939,7 +6037,6 @@
         "RawDataSource"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5963,7 +6060,6 @@
         "PreprocessingStrategy"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5987,7 +6083,6 @@
         "CleaningStrategy"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6011,7 +6106,6 @@
         "LabelingStrategy"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6031,7 +6125,6 @@
         "LabelingStrategy"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6124,7 +6217,6 @@
         "LabelingStrategy"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6164,7 +6256,6 @@
         "RawData"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6494,7 +6585,6 @@
         "OtherTask"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6518,7 +6608,6 @@
         "FutureUseImpact"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6542,7 +6631,6 @@
         "DiscouragedUse"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6607,7 +6695,6 @@
         "IntendedUse"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6631,7 +6718,6 @@
         "ProhibitedUse"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6735,7 +6821,6 @@
         "Maintainer"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6829,7 +6914,6 @@
         "UpdatePlan"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6876,7 +6960,6 @@
         "RetentionLimits"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6940,7 +7023,6 @@
         "VersionAccess"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6987,7 +7069,6 @@
         "ExtensionMechanism"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7011,7 +7092,7 @@
     },
     {
       "name": "ethicalReview__reviewing_organization",
-      "description": "Organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). Provides information about the body responsible for ethical oversight.",
+      "description": "Name or identifier of the organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). A plain string: every one of the 245 corpus values here was a name, ROR or curie, and Organization no longer carries the identifier that made string references expressible (#360).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
       "mappings": [
         "http://schema.org/provider"
@@ -7025,7 +7106,7 @@
       "domain_of": [
         "EthicalReview"
       ],
-      "range": "Organization",
+      "range": "string",
       "@type": "SlotDefinition"
     },
     {
@@ -7049,7 +7130,6 @@
         "EthicalReview"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7073,7 +7153,6 @@
         "DataProtectionImpact"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7097,7 +7176,6 @@
         "CollectionNotification"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7121,7 +7199,6 @@
         "CollectionConsent"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7145,7 +7222,6 @@
         "ConsentRevocation"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7202,7 +7278,6 @@
         "HumanSubjectResearch"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7283,7 +7358,6 @@
         "InformedConsent"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7307,7 +7381,6 @@
         "InformedConsent"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7324,7 +7397,6 @@
         "InformedConsent"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7341,7 +7413,6 @@
         "InformedConsent"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7365,7 +7436,6 @@
         "ParticipantPrivacy"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7389,7 +7459,6 @@
         "ParticipantPrivacy"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7423,7 +7492,6 @@
         "ParticipantPrivacy"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7463,7 +7531,6 @@
         "HumanSubjectCompensation"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7487,7 +7554,6 @@
         "HumanSubjectCompensation"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7504,7 +7570,6 @@
         "HumanSubjectCompensation"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7606,7 +7671,6 @@
         "LicenseAndUseTerms"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7749,7 +7813,6 @@
         "ExportControlRegulatoryRestrictions"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -8090,7 +8153,6 @@
         "VariableMetadata"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -9364,13 +9426,50 @@
       "mappings": [
         "schema:Organization"
       ],
-      "is_a": "NamedThing",
       "slots": [
-        "namedThing__id",
-        "namedThing__name",
-        "namedThing__description"
+        "organization__id",
+        "organization__name",
+        "organization__description"
       ],
       "slot_usage": {},
+      "attributes": [
+        {
+          "name": "id",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "https://ror.org/01yc7t268",
+              "@type": "Annotation"
+            }
+          ],
+          "description": "An identifier for the organization (for example a ROR), when the source material supplies one. A name alone is a valid organization.",
+          "slot_uri": "schema:identifier",
+          "range": "uriorcurie",
+          "recommended": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "name",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "University of Washington",
+              "@type": "Annotation"
+            }
+          ],
+          "description": "A human-readable name for the organization.",
+          "slot_uri": "schema:name",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "description",
+          "description": "A human-readable description for the organization.",
+          "slot_uri": "schema:description",
+          "range": "string",
+          "@type": "SlotDefinition"
+        }
+      ],
       "class_uri": "http://schema.org/Organization",
       "@type": "ClassDefinition"
     },
@@ -9767,7 +9866,7 @@
       "attributes": [
         {
           "name": "principal_investigator",
-          "description": "A key individual (Principal Investigator) responsible for or overseeing dataset creation.",
+          "description": "The name of the key individual (Principal Investigator) responsible for or overseeing dataset creation \u2014 a person's name such as 'Aaron Lee', never a yes/no flag. The slot name reads like a boolean; the value is not one (#360).",
           "broad_mappings": [
             "dcterms:creator",
             "schema:creator"
@@ -9823,7 +9922,7 @@
             "schema:funder"
           ],
           "slot_uri": "d4d:grantor",
-          "range": "Grantor",
+          "range": "string",
           "@type": "SlotDefinition"
         },
         {
@@ -9846,9 +9945,9 @@
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "is_a": "Organization",
       "slots": [
-        "namedThing__id",
-        "namedThing__name",
-        "namedThing__description"
+        "organization__id",
+        "organization__name",
+        "organization__description"
       ],
       "slot_usage": {},
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#Grantor",
@@ -9859,15 +9958,36 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#Grant",
       "description": "The name and/or identifier of the specific mechanism providing monetary support or other resources supporting creation of the dataset.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
-      "is_a": "NamedThing",
       "slots": [
-        "namedThing__id",
-        "namedThing__name",
-        "namedThing__description",
+        "grant__id",
+        "grant__name",
+        "grant__description",
         "grant__grant_number"
       ],
       "slot_usage": {},
       "attributes": [
+        {
+          "name": "id",
+          "description": "An identifier for the grant, when the source material supplies one. The grant_number alone is a valid grant reference.",
+          "slot_uri": "schema:identifier",
+          "range": "uriorcurie",
+          "recommended": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "name",
+          "description": "A human-readable name for the grant or funding mechanism.",
+          "slot_uri": "schema:name",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "description",
+          "description": "A human-readable description of the grant.",
+          "slot_uri": "schema:description",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
         {
           "name": "grant_number",
           "annotations": [
@@ -10053,7 +10173,6 @@
           "description": "One or more descriptions of the larger sets from which the sample was drawn, if applicable.\n",
           "slot_uri": "d4d:sourceData",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -10086,7 +10205,6 @@
           "description": "One or more explanations of why the sample is not representative of the larger set, if applicable.\n",
           "slot_uri": "d4d:whyNotRepresentative",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -10191,7 +10309,6 @@
           "description": "Free-text description of how relationships between instances are represented (e.g., graph edges, ratings matrices, foreign keys), including relationship types and any associated metadata.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -10225,7 +10342,6 @@
           "description": "Free-text description of the recommended data splits (e.g., 80/10/10 train/ validation/test), how they are defined, and the rationale for the split strategy.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -10262,7 +10378,6 @@
           ],
           "slot_uri": "d4d:anomalyDetails",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -10444,7 +10559,6 @@
           ],
           "slot_uri": "d4d:availabilityGuarantee",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -10504,7 +10618,6 @@
           "description": "Free-text description of which data elements are confidential, the basis for confidentiality (e.g., legal privilege, patient data), and how they are handled or restricted.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -10585,7 +10698,6 @@
           ],
           "slot_uri": "d4d:subpopulationIdentification",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -10603,7 +10715,6 @@
           ],
           "slot_uri": "d4d:subpopulationDistribution",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -10661,7 +10772,6 @@
           "description": "Details on de-identification procedures and residual risks.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -10706,7 +10816,6 @@
           "description": "Details on sensitive data elements present and handling procedures.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -10731,7 +10840,11 @@
       "attributes": [
         {
           "name": "target_dataset",
-          "description": "The dataset that this relationship points to. Can be specified by identifier, URL, or Dataset object.",
+          "description": "The identifier or URL of the dataset this relationship points to.",
+          "comments": [
+            "A reference, not an inline dataset. The description used to promise \"identifier, URL, or Dataset object\" while the range permitted only the first, and LinkML cannot express the union: its JSON Schema generator always emits a top-level type or $ref from the slot's range, which ANDs with `any_of`, so whichever branch the range names the other one fails. Verified both ways on VOICE (#297).",
+            "A related dataset with its own DOI, protocol and approval is its own datasheet and is referenced from here by identifier. That is the resolution of #292 for VOICE, whose pediatric companion has all three."
+          ],
           "slot_uri": "dcterms:relation",
           "range": "string",
           "required": true,
@@ -10814,7 +10927,6 @@
           "description": "Free-text description of how data was acquired for each instance, including instruments, protocols, and any manual steps involved.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -10851,7 +10963,6 @@
           "description": "Free-text description of the specific mechanisms or procedures used to collect the data (e.g., hardware model, software API, manual curation process), including how those mechanisms were validated.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -10900,7 +11011,6 @@
           "description": "Free-text description of who was involved in data collection (e.g., students, crowdworkers, contractors), their training or qualifications, and how they were compensated.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -10967,7 +11077,6 @@
           "description": "Free-text description of the data collection period and whether this timeframe matches the creation timeframe of the underlying data (e.g., historical records, prospective collection).\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -11009,7 +11118,6 @@
           "description": "Free-text description of whether data was collected directly from individuals or obtained via third parties or other indirect sources, and what those sources are.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -11048,7 +11156,6 @@
           "description": "Description of patterns in missing data (e.g., missing completely at random, missing at random, missing not at random).\n",
           "slot_uri": "d4d:missingDataPatterns",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -11063,7 +11170,6 @@
           "description": "Known or suspected causes of missing data (e.g., sensor failures, participant dropout, privacy constraints).\n",
           "slot_uri": "d4d:missingDataCauses",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -11135,7 +11241,6 @@
           ],
           "slot_uri": "d4d:sourceType",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -11164,7 +11269,6 @@
           "description": "One or more formats of the raw data before any preprocessing (e.g., CSV, DICOM, JSON).\n",
           "slot_uri": "d4d:rawDataFormat",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -11201,7 +11305,6 @@
           "description": "Free-text description of preprocessing steps applied to the data, including tools used, parameters, order of operations, and rationale for each step.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -11238,7 +11341,6 @@
           "description": "Free-text description of data cleaning procedures applied, including criteria for removing or correcting instances, tools used, and how removed instances are accounted for.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -11277,7 +11379,6 @@
           "description": "One or more platforms or tools used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
           "slot_uri": "rai:dataAnnotationPlatform",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -11288,7 +11389,6 @@
           ],
           "slot_uri": "d4d:dataAnnotationProtocol",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -11345,7 +11445,6 @@
           "description": "Free-text description of the labeling or annotation procedures, including annotation guidelines, task definitions, and quality control metrics.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -11387,7 +11486,6 @@
           "description": "Free-text description of raw data availability, access procedures, and any conditions or restrictions on accessing the raw data.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -11708,7 +11806,6 @@
           "description": "Free-text description of other potential tasks the dataset could support, including any prerequisites or limitations for those uses.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -11745,7 +11842,6 @@
           "description": "Free-text description of potential future impacts or risks arising from the dataset's composition or collection (e.g., unfair treatment, privacy violations, legal or financial risks), and any recommended mitigation strategies.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -11779,7 +11875,6 @@
           "description": "Free-text description of tasks or applications for which the dataset is not recommended, with explanation of why (e.g., out-of-scope, risk of harm, poor coverage).\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -11845,7 +11940,6 @@
           "description": "One or more categories of intended use (e.g., research, clinical, educational, commercial, policy).",
           "slot_uri": "d4d:useCategory",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -11879,7 +11973,6 @@
           "description": "One or more reasons why this use is prohibited (e.g., license restriction, ethical concern, privacy risk, legal constraint).",
           "slot_uri": "d4d:prohibitionReason",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12015,7 +12108,6 @@
           "description": "Free-text description of the organization, team, or individual responsible for maintaining the dataset, including contact information and hosting arrangements.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12116,7 +12208,6 @@
           "description": "Free-text description of planned update types (e.g., corrections, additions, deletions), responsible parties, and how updates will be communicated to users.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12165,7 +12256,6 @@
           "description": "Free-text description of applicable retention limits, legal or ethical basis for those limits, and how they will be enforced (e.g., automated deletion, anonymization after the retention period).\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12223,7 +12313,6 @@
           "description": "Free-text description of version support policies, how long older versions will be hosted, and how dataset consumers will be notified when versions become obsolete.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12272,7 +12361,6 @@
           "description": "Free-text description of how third parties can contribute to the dataset, how contributions are validated (e.g., peer review, automated tests), and how accepted contributions will be communicated to the community.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12308,12 +12396,12 @@
         },
         {
           "name": "reviewing_organization",
-          "description": "Organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). Provides information about the body responsible for ethical oversight.",
+          "description": "Name or identifier of the organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). A plain string: every one of the 245 corpus values here was a name, ROR or curie, and Organization no longer carries the identifier that made string references expressible (#360).",
           "exact_mappings": [
             "schema:provider"
           ],
           "slot_uri": "schema:provider",
-          "range": "Organization",
+          "range": "string",
           "@type": "SlotDefinition"
         },
         {
@@ -12328,7 +12416,6 @@
           "description": "Free-text description of the ethical review process, board decisions, outcomes, and any supporting documentation (e.g., IRB approval number, ethics committee name).\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12362,7 +12449,6 @@
           "description": "Free-text description of the data protection impact analysis, including methodology, privacy risks identified, mitigation measures taken, and any regulatory findings.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12396,7 +12482,6 @@
           "description": "Free-text description of how individuals were notified about data collection, including the notification method (e.g., email, poster, in-person), timing, and the language or text of the notification itself if available.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12430,7 +12515,6 @@
           "description": "Free-text description of how consent was requested (e.g., opt-in form, verbal agreement), provided, and documented, including the language individuals consented to.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12464,7 +12548,6 @@
           "description": "Free-text description of the mechanism provided for individuals to revoke consent (e.g., opt-out portal, written request), the scope of revocation (full withdrawal or specific uses), and what happens to their data after revocation.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12517,7 +12600,6 @@
           "description": "What ethics review board(s) reviewed this research? Include institution names and approval details.\n",
           "slot_uri": "d4d:ethicsReviewBoard",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -12585,7 +12667,6 @@
           "description": "What type of consent was obtained (e.g., written, verbal, electronic, implied through participation)?\n",
           "slot_uri": "d4d:consentType",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -12600,7 +12681,6 @@
           "description": "How is consent documented? Include references to consent forms or procedures used.\n",
           "slot_uri": "d4d:consentDocumentation",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -12608,7 +12688,6 @@
           "description": "How can participants withdraw their consent? What procedures are in place for data deletion upon withdrawal?\n",
           "slot_uri": "d4d:withdrawalMechanism",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -12616,7 +12695,6 @@
           "description": "What specific uses did participants consent to? Are there limitations on data use based on consent?\n",
           "slot_uri": "d4d:consentScope",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12653,7 +12731,6 @@
           "description": "What methods were used to anonymize or de-identify participant data? Include technical details of privacy-preserving techniques.\n",
           "slot_uri": "d4d:anonymizationMethod",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -12668,7 +12745,6 @@
           "description": "What is the assessed risk of re-identification? What measures were taken to minimize this risk?\n",
           "slot_uri": "d4d:reidentificationRisk",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -12684,7 +12760,6 @@
           "description": "Can this dataset be linked to other datasets in ways that might compromise participant privacy?\n",
           "slot_uri": "d4d:dataLinkage",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12728,7 +12803,6 @@
           "description": "What type of compensation was provided (e.g., monetary payment, gift cards, course credit, other incentives)?\n",
           "slot_uri": "d4d:compensationType",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -12743,7 +12817,6 @@
           "description": "What was the amount or value of compensation provided? Include currency or equivalent value.\n",
           "slot_uri": "d4d:compensationAmount",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -12751,7 +12824,6 @@
           "description": "What was the rationale for the compensation structure? How was the amount determined to be appropriate?\n",
           "slot_uri": "d4d:compensationRationale",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12851,7 +12923,6 @@
           ],
           "slot_uri": "d4d:licenseDescription",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -12982,7 +13053,6 @@
           "description": "Other regulatory compliance frameworks applicable to this dataset (e.g., CCPA, PIPEDA, industry-specific regulations).",
           "slot_uri": "d4d:otherCompliance",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -13217,7 +13287,6 @@
           ],
           "slot_uri": "d4d:qualityNotes",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -13388,9 +13457,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-08-01T19:29:40",
+  "source_file_date": "2026-08-06T11:46:39",
   "source_file_size": 32488,
-  "generation_date": "2026-08-01T20:36:28",
+  "generation_date": "2026-08-06T12:01:28",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

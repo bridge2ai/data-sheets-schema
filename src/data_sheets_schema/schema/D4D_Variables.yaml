@@ -162,7 +162,6 @@ classes:
           to this variable.
         slot_uri: d4d:qualityNotes
         range: string
-        multivalued: true
         broad_mappings:
           - dcterms:description
 

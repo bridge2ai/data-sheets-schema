@@ -112,11 +112,38 @@ classes:
           "d4d:docExample": "A multimodal dataset of 4,000 participants with Type 2 Diabetes."
     class_uri: schema:Thing
 
+  # Not a NamedThing, like DatasetProperty below and for the same reason:
+  # NamedThing's required id turned every bare-name affiliation into a
+  # validation failure (46 of the corpus's 55 union mismatches, #360) —
+  # bundles name organizations far more often than they identify them.
+  # Without an identifier the class always inlines; the two slots that used
+  # to hold string *references* to organizations (grantor,
+  # reviewing_organization) are now plain strings, which is what 573
+  # corpus values already were.
   Organization:
-    is_a: NamedThing
     class_uri: schema:Organization
     description: >-
       Represents a group or organization.
+    attributes:
+      id:
+        slot_uri: schema:identifier
+        range: uriorcurie
+        recommended: true
+        description: >-
+          An identifier for the organization (for example a ROR), when the
+          source material supplies one. A name alone is a valid organization.
+        annotations:
+          "d4d:docExample": "https://ror.org/01yc7t268"
+      name:
+        slot_uri: schema:name
+        description: A human-readable name for the organization.
+        range: string
+        annotations:
+          "d4d:docExample": "University of Washington"
+      description:
+        slot_uri: schema:description
+        description: A human-readable description for the organization.
+        range: string
 
   # Base class for all dataset properties and components
   # Note: Does NOT inherit from NamedThing to avoid required id constraint

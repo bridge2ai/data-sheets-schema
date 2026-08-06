@@ -129,7 +129,6 @@ classes:
           One or more descriptions of the larger sets from which the sample was drawn, if applicable.
         slot_uri: d4d:sourceData
         range: string
-        multivalued: true
       is_representative:
         description: >
           Indicates whether the sample is representative of the larger set.
@@ -150,7 +149,6 @@ classes:
           One or more explanations of why the sample is not representative of the larger set, if applicable.
         slot_uri: d4d:whyNotRepresentative
         range: string
-        multivalued: true
       strategies:
         description: >
           One or more sampling strategies used (e.g., deterministic, simple random,
@@ -202,7 +200,6 @@ classes:
           (e.g., graph edges, ratings matrices, foreign keys), including relationship types
           and any associated metadata.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "Participants linked to multiple visits via participant_id foreign key"
@@ -219,7 +216,6 @@ classes:
           Free-text description of the recommended data splits (e.g., 80/10/10 train/
           validation/test), how they are defined, and the rationale for the split strategy.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "70/15/15 train/validation/test split stratified by site and T2DM severity"
@@ -235,7 +231,6 @@ classes:
           Free-text description of errors, noise sources, or redundancies in the dataset,
           including their known causes and estimated prevalence.
         range: string
-        multivalued: true
         slot_uri: d4d:anomalyDetails
         broad_mappings:
           - dcterms:description
@@ -339,7 +334,6 @@ classes:
           Explanation of any commitments that external resources will remain
           available and stable over time.
         range: string
-        multivalued: true
         slot_uri: d4d:availabilityGuarantee
         broad_mappings:
           - dcterms:description
@@ -376,7 +370,6 @@ classes:
           confidentiality (e.g., legal privilege, patient data), and how they are handled
           or restricted.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "ZIP codes suppressed; race/ethnicity available only in aggregate"
@@ -419,7 +412,6 @@ classes:
           How subpopulations are identified and defined (e.g., by age groups, gender,
           geographic region, disease status, or other demographic/clinical characteristics).
         range: string
-        multivalued: true
         slot_uri: d4d:subpopulationIdentification
         broad_mappings:
           - dcterms:description
@@ -428,7 +420,6 @@ classes:
           The distribution of instances across identified subpopulations, including counts,
           percentages, or proportions for each subgroup.
         range: string
-        multivalued: true
         slot_uri: d4d:subpopulationDistribution
         broad_mappings:
           - dcterms:description
@@ -460,7 +451,6 @@ classes:
         description: >
           Details on de-identification procedures and residual risks.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "HIPAA Safe Harbor method applied; expert re-identification risk assessment confirms low risk"
@@ -482,7 +472,6 @@ classes:
         description: >
           Details on sensitive data elements present and handling procedures.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "Genetic sequencing data requires additional DUA"

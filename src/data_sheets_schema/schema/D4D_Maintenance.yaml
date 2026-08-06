@@ -53,7 +53,6 @@ classes:
           Free-text description of the organization, team, or individual responsible for
           maintaining the dataset, including contact information and hosting arrangements.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "AI-READI Data Coordinating Center, University of Washington"
@@ -101,7 +100,6 @@ classes:
           Free-text description of planned update types (e.g., corrections, additions,
           deletions), responsible parties, and how updates will be communicated to users.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "Quarterly releases with approximately 500 new participants per release"
@@ -127,7 +125,6 @@ classes:
           for those limits, and how they will be enforced (e.g., automated deletion,
           anonymization after the retention period).
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "Data retained for minimum 10 years per NIH data sharing policy"
@@ -155,7 +152,6 @@ classes:
           Free-text description of version support policies, how long older versions will
           be hosted, and how dataset consumers will be notified when versions become obsolete.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "All versions available at fairhub.io; older versions archived on Zenodo"
@@ -180,7 +176,6 @@ classes:
           how contributions are validated (e.g., peer review, automated tests),
           and how accepted contributions will be communicated to the community.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "New modalities added via versioned data releases; schema extensions via GitHub PRs"

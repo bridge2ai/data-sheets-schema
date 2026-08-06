@@ -255,11 +255,8 @@
             "properties": {
                 "cleaning_details": {
                     "description": "Free-text description of data cleaning procedures applied, including criteria for removing or correcting instances, tools used, and how removed instances are accounted for.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -304,11 +301,8 @@
             "properties": {
                 "consent_details": {
                     "description": "Free-text description of how consent was requested (e.g., opt-in form, verbal agreement), provided, and documented, including the language individuals consented to.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -367,11 +361,8 @@
                 },
                 "mechanism_details": {
                     "description": "Free-text description of the specific mechanisms or procedures used to collect the data (e.g., hardware model, software API, manual curation process), including how those mechanisms were validated.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -423,11 +414,8 @@
                 },
                 "notification_details": {
                     "description": "Free-text description of how individuals were notified about data collection, including the notification method (e.g., email, poster, in-person), timing, and the language or text of the notification itself if available.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -488,11 +476,8 @@
                 },
                 "timeframe_details": {
                     "description": "Free-text description of the data collection period and whether this timeframe matches the creation timeframe of the underlying data (e.g., historical records, prospective collection).\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -549,11 +534,8 @@
                 },
                 "confidentiality_details": {
                     "description": "Free-text description of which data elements are confidential, the basis for confidentiality (e.g., legal privilege, patient data), and how they are handled or restricted.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -629,11 +611,8 @@
                 },
                 "revocation_details": {
                     "description": "Free-text description of the mechanism provided for individuals to revoke consent (e.g., opt-out portal, written request), the scope of revocation (full withdrawal or specific uses), and what happens to their data after revocation.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -753,7 +732,7 @@
                     ]
                 },
                 "principal_investigator": {
-                    "description": "A key individual (Principal Investigator) responsible for or overseeing dataset creation.",
+                    "description": "The name of the key individual (Principal Investigator) responsible for or overseeing dataset creation \u2014 a person's name such as 'Aaron Lee', never a yes/no flag. The slot name reads like a boolean; the value is not one (#360).",
                     "type": [
                         "string",
                         "null"
@@ -797,11 +776,8 @@
             "properties": {
                 "anomaly_details": {
                     "description": "Free-text description of errors, noise sources, or redundancies in the dataset, including their known causes and estimated prevalence.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -846,11 +822,8 @@
             "properties": {
                 "collector_details": {
                     "description": "Free-text description of who was involved in data collection (e.g., students, crowdworkers, contractors), their training or qualifications, and how they were compensated.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -916,11 +889,8 @@
                 },
                 "impact_details": {
                     "description": "Free-text description of the data protection impact analysis, including methodology, privacy risks identified, mitigation measures taken, and any regulatory findings.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -3133,7 +3103,7 @@
                     "description": "The type of relationship (e.g., derives_from, supplements, is_version_of). Uses DatasetRelationshipTypeEnum for standardized relationship types."
                 },
                 "target_dataset": {
-                    "description": "The dataset that this relationship points to. Can be specified by identifier, URL, or Dataset object.",
+                    "description": "The identifier or URL of the dataset this relationship points to.",
                     "type": "string"
                 },
                 "used_software": {
@@ -3203,11 +3173,8 @@
             "properties": {
                 "deidentification_details": {
                     "description": "Details on de-identification procedures and residual risks.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -3276,11 +3243,8 @@
             "properties": {
                 "collection_details": {
                     "description": "Free-text description of whether data was collected directly from individuals or obtained via third parties or other indirect sources, and what those sources are.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -3339,11 +3303,8 @@
                 },
                 "discouragement_details": {
                     "description": "Free-text description of tasks or applications for which the dataset is not recommended, with explanation of why (e.g., out-of-scope, risk of harm, poor coverage).\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -3613,16 +3574,13 @@
                 },
                 "review_details": {
                     "description": "Free-text description of the ethical review process, board decisions, outcomes, and any supporting documentation (e.g., IRB approval number, ethics committee name).\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "reviewing_organization": {
-                    "description": "Organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). Provides information about the body responsible for ethical oversight.",
+                    "description": "Name or identifier of the organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). A plain string: every one of the 245 corpus values here was a name, ROR or curie, and Organization no longer carries the identifier that made string references expressible (#360).",
                     "type": [
                         "string",
                         "null"
@@ -3733,11 +3691,8 @@
                 },
                 "other_compliance": {
                     "description": "Other regulatory compliance frameworks applicable to this dataset (e.g., CCPA, PIPEDA, industry-specific regulations).",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -3785,11 +3740,8 @@
                 },
                 "extension_details": {
                     "description": "Free-text description of how third parties can contribute to the dataset, how contributions are validated (e.g., peer review, automated tests), and how accepted contributions will be communicated to the community.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -3851,11 +3803,8 @@
                 },
                 "future_guarantees": {
                     "description": "Explanation of any commitments that external resources will remain available and stable over time.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -4529,11 +4478,8 @@
                 },
                 "impact_details": {
                     "description": "Free-text description of potential future impacts or risks arising from the dataset's composition or collection (e.g., unfair treatment, privacy violations, legal or financial risks), and any recommended mitigation strategies.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -4563,7 +4509,7 @@
             "description": "The name and/or identifier of the specific mechanism providing monetary support or other resources supporting creation of the dataset.",
             "properties": {
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description of the grant.",
                     "type": [
                         "string",
                         "null"
@@ -4577,20 +4523,20 @@
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An identifier for the grant, when the source material supplies one. The grant_number alone is a valid grant reference.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for the grant or funding mechanism.",
                     "type": [
                         "string",
                         "null"
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Grant",
             "type": "object"
         },
@@ -4599,27 +4545,27 @@
             "description": "The name and/or identifier of the organization providing monetary support  or other resources supporting creation of the dataset.",
             "properties": {
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for the organization.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An identifier for the organization (for example a ROR), when the source material supplies one. A name alone is a valid organization.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for the organization.",
                     "type": [
                         "string",
                         "null"
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Grantor",
             "type": "object"
         },
@@ -4629,11 +4575,8 @@
             "properties": {
                 "compensation_amount": {
                     "description": "What was the amount or value of compensation provided? Include currency or equivalent value.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -4646,21 +4589,15 @@
                 },
                 "compensation_rationale": {
                     "description": "What was the rationale for the compensation structure? How was the amount determined to be appropriate?\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "compensation_type": {
                     "description": "What type of compensation was provided (e.g., monetary payment, gift cards, course credit, other incentives)?\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -4712,11 +4649,8 @@
                 },
                 "ethics_review_board": {
                     "description": "What ethics review board(s) reviewed this research? Include institution names and approval details.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -5089,11 +5023,8 @@
             "properties": {
                 "consent_documentation": {
                     "description": "How is consent documented? Include references to consent forms or procedures used.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -5106,21 +5037,15 @@
                 },
                 "consent_scope": {
                     "description": "What specific uses did participants consent to? Are there limitations on data use based on consent?\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "consent_type": {
                     "description": "What type of consent was obtained (e.g., written, verbal, electronic, implied through participation)?\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -5157,11 +5082,8 @@
                 },
                 "withdrawal_mechanism": {
                     "description": "How can participants withdraw their consent? What procedures are in place for data deletion upon withdrawal?\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 }
@@ -5276,11 +5198,8 @@
             "properties": {
                 "acquisition_details": {
                     "description": "Free-text description of how data was acquired for each instance, including instruments, protocols, and any manual steps involved.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -5391,11 +5310,8 @@
                 },
                 "use_category": {
                     "description": "One or more categories of intended use (e.g., research, clinical, educational, commercial, policy).",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -5436,21 +5352,15 @@
                 },
                 "data_annotation_platform": {
                     "description": "One or more platforms or tools used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "data_annotation_protocol": {
                     "description": "Annotation methodology, tasks, and protocols followed during labeling. Includes annotation guidelines, quality control procedures, and task definitions.",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -5477,11 +5387,8 @@
                 },
                 "labeling_details": {
                     "description": "Free-text description of the labeling or annotation procedures, including annotation guidelines, task definitions, and quality control metrics.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -5543,11 +5450,8 @@
                 },
                 "license_terms": {
                     "description": "Description of the dataset's license and terms of use, including links, costs, or usage constraints (e.g., 'CC BY 4.0', 'Apache 2.0', 'MIT', 'CC BY-NC-SA 4.0', 'proprietary - contact data@example.org for access').",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -5675,11 +5579,8 @@
                 },
                 "maintainer_details": {
                     "description": "Free-text description of the organization, team, or individual responsible for maintaining the dataset, including contact information and hosting arrangements.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -5761,21 +5662,15 @@
                 },
                 "missing_data_causes": {
                     "description": "Known or suspected causes of missing data (e.g., sensor failures, participant dropout, privacy constraints).\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "missing_data_patterns": {
                     "description": "Description of patterns in missing data (e.g., missing completely at random, missing at random, missing not at random).\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -5896,27 +5791,27 @@
             "description": "Represents a group or organization.",
             "properties": {
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for the organization.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An identifier for the organization (for example a ROR), when the source material supplies one. A name alone is a valid organization.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for the organization.",
                     "type": [
                         "string",
                         "null"
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Organization",
             "type": "object"
         },
@@ -5947,11 +5842,8 @@
                 },
                 "task_details": {
                     "description": "Free-text description of other potential tasks the dataset could support, including any prerequisites or limitations for those uses.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -5975,21 +5867,15 @@
             "properties": {
                 "anonymization_method": {
                     "description": "What methods were used to anonymize or de-identify participant data? Include technical details of privacy-preserving techniques.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "data_linkage": {
                     "description": "Can this dataset be linked to other datasets in ways that might compromise participant privacy?\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6026,11 +5912,8 @@
                 },
                 "reidentification_risk": {
                     "description": "What is the assessed risk of re-identification? What measures were taken to minimize this risk?\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6055,7 +5938,7 @@
                 "affiliation": {
                     "description": "The organization(s) to which the person belongs in the context of this dataset. May vary across datasets; multivalued to support multiple affiliations.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Organization"
                     },
                     "type": [
                         "array",
@@ -6129,11 +6012,8 @@
                 },
                 "preprocessing_details": {
                     "description": "Free-text description of preprocessing steps applied to the data, including tools used, parameters, order of operations, and rationale for each step.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6178,11 +6058,8 @@
                 },
                 "prohibition_reason": {
                     "description": "One or more reasons why this use is prohibited (e.g., license restriction, ethical concern, privacy risk, legal constraint).",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6280,11 +6157,8 @@
                 },
                 "raw_data_details": {
                     "description": "Free-text description of raw data availability, access procedures, and any conditions or restrictions on accessing the raw data.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6336,11 +6210,8 @@
                 },
                 "raw_data_format": {
                     "description": "One or more formats of the raw data before any preprocessing (e.g., CSV, DICOM, JSON).\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6350,11 +6221,8 @@
                 },
                 "source_type": {
                     "description": "One or more types of raw source (e.g., sensor, database, user input, web scraping).\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6402,11 +6270,8 @@
                 },
                 "relationship_details": {
                     "description": "Free-text description of how relationships between instances are represented (e.g., graph edges, ratings matrices, foreign keys), including relationship types and any associated metadata.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6451,11 +6316,8 @@
                 },
                 "retention_details": {
                     "description": "Free-text description of applicable retention limits, legal or ethical basis for those limits, and how they will be enforced (e.g., automated deletion, anonymization after the retention period).\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6538,11 +6400,8 @@
                 },
                 "source_data": {
                     "description": "One or more descriptions of the larger sets from which the sample was drawn, if applicable.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6568,11 +6427,8 @@
                 },
                 "why_not_representative": {
                     "description": "One or more explanations of why the sample is not representative of the larger set, if applicable.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 }
@@ -6614,11 +6470,8 @@
                 },
                 "sensitivity_details": {
                     "description": "Details on sensitive data elements present and handling procedures.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6713,11 +6566,8 @@
                 },
                 "split_details": {
                     "description": "Free-text description of the recommended data splits (e.g., 80/10/10 train/ validation/test), how they are defined, and the rationale for the split strategy.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6748,11 +6598,8 @@
                 },
                 "distribution": {
                     "description": "The distribution of instances across identified subpopulations, including counts, percentages, or proportions for each subgroup.",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6765,11 +6612,8 @@
                 },
                 "identification": {
                     "description": "How subpopulations are identified and defined (e.g., by age groups, gender, geographic region, disease status, or other demographic/clinical characteristics).",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6927,11 +6771,8 @@
                 },
                 "update_details": {
                     "description": "Free-text description of planned update types (e.g., corrections, additions, deletions), responsible parties, and how updates will be communicated to users.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -7115,11 +6956,8 @@
                 },
                 "quality_notes": {
                     "description": "Notes about data quality, reliability, or known issues specific to this variable.",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -7215,11 +7053,8 @@
                 },
                 "version_details": {
                     "description": "Free-text description of version support policies, how long older versions will be hosted, and how dataset consumers will be notified when versions become obsolete.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -7432,5 +7267,5 @@
     ],
     "title": "data-sheets-schema",
     "type": "object",
-    "version": "1.0.0"
+    "version": "2.0.0"
 }

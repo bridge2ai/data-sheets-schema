@@ -90,7 +90,11 @@ classes:
     is_a: DatasetProperty
     attributes:
       principal_investigator:
-        description: "A key individual (Principal Investigator) responsible for or overseeing dataset creation."
+        description: >-
+          The name of the key individual (Principal Investigator)
+          responsible for or overseeing dataset creation — a person's name
+          such as 'Aaron Lee', never a yes/no flag. The slot name reads like
+          a boolean; the value is not one (#360).
         range: Person
         slot_uri: d4d:principalInvestigator
         broad_mappings:
@@ -123,8 +127,13 @@ classes:
     is_a: DatasetProperty
     attributes:
       grantor:
+        # range string, not Grantor: the description always said
+        # "name/identifier", all 328 corpus values were strings, and with
+        # Organization no longer identifiable a class range would force an
+        # inline object here (#360). The Grantor class remains defined for
+        # mappings and compatibility.
         description: "Name/identifier of the organization providing monetary or resource support."
-        range: Grantor
+        range: string
         slot_uri: d4d:grantor
         broad_mappings:
           - schema:funder
@@ -145,12 +154,30 @@ classes:
     # Additional attributes or specialized properties can be placed here if needed.
 
 
+  # Not a NamedThing, for the same reason as Organization (#360): the bundle
+  # names a grant and gives its grant_number far more often than it supplies
+  # a resolvable identifier, and the inherited required id produced 10
+  # validation failures across the corpus.
   Grant:
     description: >
       The name and/or identifier of the specific mechanism providing monetary support
       or other resources supporting creation of the dataset.
-    is_a: NamedThing
     attributes:
+      id:
+        slot_uri: schema:identifier
+        range: uriorcurie
+        recommended: true
+        description: >-
+          An identifier for the grant, when the source material supplies
+          one. The grant_number alone is a valid grant reference.
+      name:
+        slot_uri: schema:name
+        description: A human-readable name for the grant or funding mechanism.
+        range: string
+      description:
+        slot_uri: schema:description
+        description: A human-readable description of the grant.
+        range: string
       grant_number:
         description: "The alphanumeric identifier for the grant."
         range: string
