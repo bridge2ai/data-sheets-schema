@@ -544,8 +544,12 @@ def build_record(project: str, method: str, label: str, *, mode: str,
             "temperature": declared.get("temperature"),
             "max_tokens": declared.get("max_tokens"),
         }
+        # Exact inequality, not substring (#349). The pin `claude-opus-5` is a
+        # substring of every family variant — `claude-opus-5[1m]`,
+        # `google/claude-opus-5-high` — so a containment test can never fire
+        # for route drift, which is precisely what this note exists to record.
         if declared.get("name") and model.get("model") and \
-                str(declared["name"]) not in str(model["model"]):
+                str(declared["name"]) != str(model["model"]):
             notes.append(
                 f"Model mismatch: this run used {model['model']!r} while "
                 f"{DETERMINISTIC_CONFIG} pins {declared['name']!r}. The two "
