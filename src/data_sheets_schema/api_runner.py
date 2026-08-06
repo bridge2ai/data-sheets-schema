@@ -159,13 +159,23 @@ PHASES = ("full", "core", "audit", "reconcile_full", "reconcile_core", "report")
 # 97 report records already generated, plus ~40% headroom. A guessed ceiling is
 # how the previous design truncated five of six projects mid-YAML.
 PHASE_MAX_TOKENS = {
-    "full": 64000, "reconcile_full": 64000,
+    # 96000, not 64000. The v3 prompt roughly doubled full-phase thinking spend
+    # (35.7k-48.7k tokens observed on AI-READI, vs 14.7k-29.3k under v1/v2),
+    # and thinking and record share this budget — two of three 2026-08-05
+    # AI-READI full attempts died at 64000 with the record truncated. The value
+    # is clamped per route by `output_limit()`, so on a 64k route (the
+    # `google/…` rebroadcasts) the request still asks for exactly 64000.
+    "full": 96000, "reconcile_full": 96000,
     "core": 56000, "reconcile_core": 56000,
     # 24000, not 12000. The original was derived from records generated before
     # the v2 rules existed, and two AI-READI runs truncated mid-audit — a phase
     # that fails at its ceiling costs the whole run, since the phases before it
     # are already billed.
-    "audit": 24000, "report": 12000,
+    # Report raised for the same reason as full: under v3 the report phase
+    # spent 6.6k-6.8k tokens thinking and hit 12000 twice on 2026-08-05 before
+    # a third sample fit at 10.5k. The ceiling was derived from pre-v2 records
+    # and left no room for the thinking share.
+    "audit": 24000, "report": 24000,
 }
 DEFAULT_MAX_TOKENS = 64000
 
