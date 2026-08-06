@@ -91,3 +91,69 @@
     hollow_value_count 0 for all six current-sweep artifacts and for all six
     2026-07-31 v2 AI_READI artifacts, measured with the same counter.
   relates_to: ["#369"]
+
+- topic: repair cost share, tested across replicates
+  kind: comparison
+  claim: >-
+    Shape repair consumed the majority of output tokens on every AI_READI
+    replicate — 56.3%, 58.1% and 60.5% of the run's total output (repair vs
+    generation), against CHORUS's 46.3%. Repair cost more than generating
+    the record itself on all three AI_READI replicates.
+  evidence: >-
+    Per-run phase attempt sums in this report; AI_READI repair output
+    250k/216k/224k tokens vs generation 195k/156k/146k.
+  relates_to: ["#360", "#361"]
+
+- topic: repair economics argue for schema-side fixes
+  kind: interpretation
+  claim: >-
+    At $16.5-19.5 per AI_READI run with more than half the spend going to
+    repair of a small recurring trap-slot family, fixing the traps in the
+    schema would roughly halve generation cost per run and remove the
+    two-invocation pattern entirely.
+  evidence: repair-share comparison above; trap inventory below.
+  relates_to: ["#360", "#297"]
+
+- topic: trap inventory across replicates
+  kind: observation
+  claim: >-
+    Each replicate's last-surviving validation failure was a different
+    member of the same schema-trap family. rep1: affiliations as bare
+    strings; rep2: human_subject_research/special_populations holding prose
+    where the schema requires an array; rep3: affiliations as a proper
+    Organization object that still fails because the schema requires an id
+    the bundle does not supply ({name: 'Washington University in St.
+    Louis'}). The object-without-id case shows even the model's correct
+    structural instinct cannot satisfy the slot.
+  evidence: batch log validation errors per replicate; final repair rounds.
+  relates_to: ["#360", "#297"]
+
+- topic: core-to-full size ratio tracks bundle richness
+  kind: interpretation
+  claim: >-
+    The core record is barely a reduction of the full record when the
+    evidence bundle is thin: CHORUS core/full = 0.96 (36KB bundle), while
+    AI_READI ranges 0.72-0.84 (421KB bundle). For documentation-poor
+    projects the full/core distinction does little work.
+  evidence: RecordStats bytes in this report across the four runs.
+  relates_to: []
+
+- topic: bundle-to-record compression
+  kind: observation
+  claim: >-
+    AI_READI compresses its 421KB bundle into 80-95KB records (4.4-5.2:1);
+    CHORUS's 36KB bundle yields a 37.5KB record (~1:1). Bundle size also
+    tracks full-phase reasoning spend (50.1k/33.6k/28.2k estimates on
+    AI_READI replicates vs 17.4k on CHORUS).
+  evidence: RecordStats and full-phase attempts in this report.
+  relates_to: []
+
+- topic: replicate variance under the new configuration
+  kind: observation
+  claim: >-
+    Across three valid AI_READI replicates, full-record root slots span
+    70/76/72, sizes 80-95KB, and cost $16.5-19.5; every replicate ran all
+    six phases first-attempt except rep1's audit (three attempts). All
+    three needed a second invocation to finish repair.
+  evidence: this report's runs and comparisons sections.
+  relates_to: ["#364"]

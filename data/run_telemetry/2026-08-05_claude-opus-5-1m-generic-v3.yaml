@@ -1,6 +1,6 @@
 label: 2026-08-05_claude-opus-5-1m-generic-v3
 method: claudecode_agent
-generated_at: '2026-08-06T07:10:53+00:00'
+generated_at: '2026-08-06T08:07:28+00:00'
 schema_version: 1.2.0
 runs:
 - project: AI_READI
@@ -428,7 +428,7 @@ runs:
     findings: 6
 - project: AI_READI
   label: 2026-08-05_claude-opus-5-1m-generic-v3_rep2
-  validation_state: invalid
+  validation_state: valid
   timing_basis: file_mtime
   phases:
   - phase: full
@@ -545,7 +545,20 @@ runs:
       visible_text_chars: 82021
       reasoning_present: true
       reasoning_available: false
-    artifact_written_at: '2026-08-06T06:36:42+00:00'
+    - attempt: 1
+      started_at: '2026-08-06T07:54:12+00:00'
+      seconds: 252.819
+      input_tokens: 27847
+      output_tokens: 27594
+      cache_read_tokens: 0
+      cache_write_tokens: 10512
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7085
+      visible_text_chars: 82037
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-06T07:58:26+00:00'
   - phase: repair_core
     attempts:
     - attempt: 1
@@ -597,14 +610,14 @@ runs:
   model: claude-opus-5
   provider: LBL CBORG (proxy to Anthropic)
   arm: baseline
-  finished_at: '2026-08-06T06:22:38+00:00'
-  validation_problem_count: 1
+  finished_at: '2026-08-06T07:54:06+00:00'
+  validation_problem_count: 0
   records:
   - artifact: full
     path: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-1m-generic-v3_rep2/AI_READI_d4d.yaml
-    sha256: 12d7427c1ce953ebc4283b95331c10bdb743d0db6a6512df6a07f5a2151894cf
-    bytes: 82075
-    lines: 1476
+    sha256: 14f1471263e0ddbc744155568326292c8dbfafb6eaab1940f251e37f195207c6
+    bytes: 82091
+    lines: 1477
     root_slot_count: 76
     populated_root_slot_count: 76
     hollow_value_count: 0
@@ -621,44 +634,253 @@ runs:
     sha256: d1dbe5302d26a0d60b2cc419d955c1259dc8355d45bb68b885670652ae535505
     bytes: 20317
     lines: 234
-  total_input_tokens: 417566
-  total_output_tokens: 344748
+  total_input_tokens: 445413
+  total_output_tokens: 372342
   total_cache_read_tokens: 33063
-  total_cache_write_tokens: 938493
-  total_reasoning_tokens_estimate: 132387
-  approx_cost_usd: 16.59
+  total_cache_write_tokens: 949005
+  total_reasoning_tokens_estimate: 139472
+  approx_cost_usd: 17.48
   repair_rounds:
   - artifact: full
     round: 1
     outcome: applied
-    findings: 169
-  - artifact: full
-    round: 2
-    outcome: applied
-    findings: 8
-  - artifact: full
-    round: 3
-    outcome: applied
     findings: 1
+- project: AI_READI
+  label: 2026-08-05_claude-opus-5-1m-generic-v3_rep3
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      input_tokens: 2215
+      output_tokens: 48245
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 28975
+      visible_text_chars: 77080
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      input_tokens: 28595
+      output_tokens: 20244
+      cache_read_tokens: 0
+      cache_write_tokens: 149662
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5267
+      visible_text_chars: 59908
+      reasoning_present: false
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      input_tokens: 48949
+      output_tokens: 7550
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2100
+      visible_text_chars: 21802
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      input_tokens: 36184
+      output_tokens: 35848
+      cache_read_tokens: 152657
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 16750
+      visible_text_chars: 76392
+      reasoning_present: true
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      input_tokens: 56035
+      output_tokens: 19274
+      cache_read_tokens: 0
+      cache_write_tokens: 149662
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4886
+      visible_text_chars: 57553
+      reasoning_present: false
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      input_tokens: 9777
+      output_tokens: 15162
+      cache_read_tokens: 0
+      cache_write_tokens: 152657
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7485
+      visible_text_chars: 30710
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-06T07:18:11+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      input_tokens: 55229
+      output_tokens: 31019
+      cache_read_tokens: 0
+      cache_write_tokens: 10512
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 11352
+      visible_text_chars: 78670
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      input_tokens: 29947
+      output_tokens: 28414
+      cache_read_tokens: 10512
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8749
+      visible_text_chars: 78662
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 3
+      input_tokens: 28972
+      output_tokens: 28281
+      cache_read_tokens: 10512
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8163
+      visible_text_chars: 80474
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 4
+      input_tokens: 27520
+      output_tokens: 27304
+      cache_read_tokens: 10512
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7183
+      visible_text_chars: 80486
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-06T07:36:05+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      input_tokens: 41221
+      output_tokens: 23110
+      cache_read_tokens: 0
+      cache_write_tokens: 7517
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8324
+      visible_text_chars: 59145
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      input_tokens: 23411
+      output_tokens: 22263
+      cache_read_tokens: 7517
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7494
+      visible_text_chars: 59077
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 3
+      input_tokens: 22185
+      output_tokens: 22078
+      cache_read_tokens: 7517
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7276
+      visible_text_chars: 59211
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 1
+      started_at: '2026-08-06T07:58:43+00:00'
+      seconds: 180.964
+      input_tokens: 22297
+      output_tokens: 19845
+      cache_read_tokens: 0
+      cache_write_tokens: 7517
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5070
+      visible_text_chars: 59103
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-06T08:01:46+00:00'
+      seconds: 207.883
+      input_tokens: 21963
+      output_tokens: 21706
+      cache_read_tokens: 7517
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7228
+      visible_text_chars: 57914
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-06T08:05:14+00:00'
+  replicate: 3
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-06T07:58:35+00:00'
+  validation_problem_count: 0
+  records:
   - artifact: full
-    round: 4
-    outcome: 'not converging: 1 -> 1 findings; stopped'
+    path: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-1m-generic-v3_rep3/AI_READI_d4d.yaml
+    sha256: 30272da7131e18901b06378f3aa0cf1492d315c86d3e4b249a125ba5130a4445
+    bytes: 80474
+    lines: 1538
+    root_slot_count: 72
+    populated_root_slot_count: 72
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep3/AI_READI_d4d_core.yaml
+    sha256: 1e08eea9b22168f1f2938e2dd1484dc7a8317e95e0c8fe98d9a10d2641a8021d
+    bytes: 57902
+    lines: 1041
+    root_slot_count: 58
+    populated_root_slot_count: 58
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep3/AI_READI_reconciliation.md
+    sha256: 7ba9df42c6cefba33b2778cb5fbc9a5670f1cbc36ed9530dd4d8063af6c7c0f2
+    bytes: 30875
+    lines: 283
+  total_input_tokens: 454500
+  total_output_tokens: 370343
+  total_cache_read_tokens: 206744
+  total_cache_write_tokens: 782841
+  total_reasoning_tokens_estimate: 136302
+  approx_cost_usd: 16.53
+  repair_rounds:
   - artifact: core
     round: 1
     outcome: applied
-    findings: 129
+    findings: 21
   - artifact: core
     round: 2
     outcome: applied
-    findings: 31
-  - artifact: core
-    round: 3
-    outcome: applied
-    findings: 24
-  - artifact: core
-    round: 4
-    outcome: applied
-    findings: 1
+    findings: 20
 comparisons:
 - metric: full_phase_output_tokens
   unit: tokens
@@ -669,6 +891,8 @@ comparisons:
     value: 26564.0
   - subject: AI_READI rep2
     value: 56259.0
+  - subject: AI_READI rep3
+    value: 48245.0
 - metric: full_phase_reasoning_tokens_estimate
   unit: tokens
   values:
@@ -678,6 +902,8 @@ comparisons:
     value: 17434.0
   - subject: AI_READI rep2
     value: 36421.0
+  - subject: AI_READI rep3
+    value: 28975.0
 - metric: total_output_tokens
   unit: tokens
   values:
@@ -686,7 +912,9 @@ comparisons:
   - subject: CHORUS rep1
     value: 158380.0
   - subject: AI_READI rep2
-    value: 344748.0
+    value: 372342.0
+  - subject: AI_READI rep3
+    value: 370343.0
 - metric: approx_cost_usd
   unit: USD
   values:
@@ -695,7 +923,9 @@ comparisons:
   - subject: CHORUS rep1
     value: 5.68
   - subject: AI_READI rep2
-    value: 16.59
+    value: 17.48
+  - subject: AI_READI rep3
+    value: 16.53
 - metric: repair_call_count
   unit: calls
   values:
@@ -704,7 +934,9 @@ comparisons:
   - subject: CHORUS rep1
     value: 5.0
   - subject: AI_READI rep2
-    value: 7.0
+    value: 8.0
+  - subject: AI_READI rep3
+    value: 9.0
 - metric: full_root_slot_count
   unit: slots
   values:
@@ -714,6 +946,8 @@ comparisons:
     value: 53.0
   - subject: AI_READI rep2
     value: 76.0
+  - subject: AI_READI rep3
+    value: 72.0
 - metric: core_root_slot_count
   unit: slots
   values:
@@ -723,6 +957,8 @@ comparisons:
     value: 48.0
   - subject: AI_READI rep2
     value: 62.0
+  - subject: AI_READI rep3
+    value: 58.0
 - metric: full_hollow_value_count
   unit: hollows
   values:
@@ -731,6 +967,8 @@ comparisons:
   - subject: CHORUS rep1
     value: 0.0
   - subject: AI_READI rep2
+    value: 0.0
+  - subject: AI_READI rep3
     value: 0.0
 - metric: core_hollow_value_count
   unit: hollows
@@ -741,6 +979,8 @@ comparisons:
     value: 0.0
   - subject: AI_READI rep2
     value: 0.0
+  - subject: AI_READI rep3
+    value: 0.0
 - metric: validation_problem_count
   unit: artifacts
   values:
@@ -749,7 +989,9 @@ comparisons:
   - subject: CHORUS rep1
     value: 0.0
   - subject: AI_READI rep2
-    value: 1.0
+    value: 0.0
+  - subject: AI_READI rep3
+    value: 0.0
 findings:
 - topic: reasoning on the unprefixed route
   kind: observation
@@ -826,3 +1068,60 @@ findings:
     2026-07-31 v2 AI_READI artifacts, measured with the same counter.
   relates_to:
   - '#369'
+- topic: repair cost share, tested across replicates
+  kind: comparison
+  claim: Shape repair consumed the majority of output tokens on every AI_READI replicate
+    — 56.3%, 58.1% and 60.5% of the run's total output (repair vs generation), against
+    CHORUS's 46.3%. Repair cost more than generating the record itself on all three
+    AI_READI replicates.
+  evidence: Per-run phase attempt sums in this report; AI_READI repair output 250k/216k/224k
+    tokens vs generation 195k/156k/146k.
+  relates_to:
+  - '#360'
+  - '#361'
+- topic: repair economics argue for schema-side fixes
+  kind: interpretation
+  claim: At $16.5-19.5 per AI_READI run with more than half the spend going to repair
+    of a small recurring trap-slot family, fixing the traps in the schema would roughly
+    halve generation cost per run and remove the two-invocation pattern entirely.
+  evidence: repair-share comparison above; trap inventory below.
+  relates_to:
+  - '#360'
+  - '#297'
+- topic: trap inventory across replicates
+  kind: observation
+  claim: 'Each replicate''s last-surviving validation failure was a different member
+    of the same schema-trap family. rep1: affiliations as bare strings; rep2: human_subject_research/special_populations
+    holding prose where the schema requires an array; rep3: affiliations as a proper
+    Organization object that still fails because the schema requires an id the bundle
+    does not supply ({name: ''Washington University in St. Louis''}). The object-without-id
+    case shows even the model''s correct structural instinct cannot satisfy the slot.'
+  evidence: batch log validation errors per replicate; final repair rounds.
+  relates_to:
+  - '#360'
+  - '#297'
+- topic: core-to-full size ratio tracks bundle richness
+  kind: interpretation
+  claim: 'The core record is barely a reduction of the full record when the evidence
+    bundle is thin: CHORUS core/full = 0.96 (36KB bundle), while AI_READI ranges 0.72-0.84
+    (421KB bundle). For documentation-poor projects the full/core distinction does
+    little work.'
+  evidence: RecordStats bytes in this report across the four runs.
+  relates_to: []
+- topic: bundle-to-record compression
+  kind: observation
+  claim: AI_READI compresses its 421KB bundle into 80-95KB records (4.4-5.2:1); CHORUS's
+    36KB bundle yields a 37.5KB record (~1:1). Bundle size also tracks full-phase
+    reasoning spend (50.1k/33.6k/28.2k estimates on AI_READI replicates vs 17.4k on
+    CHORUS).
+  evidence: RecordStats and full-phase attempts in this report.
+  relates_to: []
+- topic: replicate variance under the new configuration
+  kind: observation
+  claim: Across three valid AI_READI replicates, full-record root slots span 70/76/72,
+    sizes 80-95KB, and cost $16.5-19.5; every replicate ran all six phases first-attempt
+    except rep1's audit (three attempts). All three needed a second invocation to
+    finish repair.
+  evidence: this report's runs and comparisons sections.
+  relates_to:
+  - '#364'
