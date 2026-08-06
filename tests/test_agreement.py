@@ -482,8 +482,18 @@ class TestPublishedMatrixReproduces(unittest.TestCase):
 
     def test_matrix_rebuilds_offline_and_matches(self):
         published = json.loads((CACHE / "matrix.json").read_text())
-        matrix, _ = build_matrix(root=REPO / "data" / "d4d_concatenated",
-                                 cache_dir=CACHE, offline=True)
+        # Rebuild on the instrument the publication records, not the live
+        # config pin (#351): the pin moved once (#345) and every model-scoped
+        # cached verdict fell out of scope. The mock proves the pin is not
+        # even consulted — a reproduction must not depend on mutable config.
+        models = {c["judge_model"] for c in published.values()}
+        self.assertEqual(len(models), 1, "published matrix spans judge models")
+        with unittest.mock.patch(
+                "data_sheets_schema.api_runner._model_settings",
+                side_effect=AssertionError("reproduction consulted the config pin")):
+            matrix, _ = build_matrix(root=REPO / "data" / "d4d_concatenated",
+                                     cache_dir=CACHE, offline=True,
+                                     judge_model=models.pop())
         self.assertEqual(len(matrix), 8)
         for key, cell in published.items():
             self.assertIn(key, matrix)

@@ -18,6 +18,7 @@ from data_sheets_schema.form_defects import (
     _parse_subtype,
     attribute,
     load_form_failures,
+    recorded_model,
     table,
 )
 
@@ -193,8 +194,12 @@ class TestTheSplitResult(unittest.TestCase):
 
     def _classified(self):
         failures = attribute(load_form_failures(JUDGEMENTS))
+        # The recorded instrument, not the live config pin (#351): the pin
+        # moved once (#345) and every model-scoped cached subtype fell out of
+        # scope, failing this offline rebuild of a frozen finding.
+        cache = SUBTYPE_CACHE / "form_subtypes.jsonl"
         classifier = FormSubtypeClassifier(
-            cache_path=SUBTYPE_CACHE / "form_subtypes.jsonl", offline=True)
+            model=recorded_model(cache), cache_path=cache, offline=True)
         return [(f, *classifier(f)) for f in failures]
 
     def test_collapsed_cardinality_all_but_disappears_under_v2(self):

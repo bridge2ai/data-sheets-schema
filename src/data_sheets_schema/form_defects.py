@@ -175,6 +175,31 @@ def attribute(failures: list[FormFailure], *, root: Path = DEFAULT_ROOT,
     return failures
 
 
+def recorded_model(cache_path: Path) -> str:
+    """The one model the cached subtype judgements were made under.
+
+    A reproduction must run on the instrument the cache records, not on the
+    live config pin: the pin is free to move (#345 moved it), and the moment it
+    does, every model-scoped entry falls out of scope and an offline rebuild of
+    a frozen artifact fails (#351). Requires exactly one recorded model for the
+    current rubric — zero means there is nothing to reproduce, two means two
+    instruments are pooled and neither table can be trusted (#277).
+    """
+    models: set[str] = set()
+    for line in Path(cache_path).read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        entry = json.loads(line)
+        if entry.get("rubric") == _digest(FORM_SUBTYPE_SYSTEM):
+            models.add(entry.get("model", ""))
+    models.discard("")
+    if len(models) != 1:
+        raise ValueError(
+            f"{cache_path} records {len(models)} models for the current "
+            f"rubric ({sorted(models)}); a reproduction needs exactly one.")
+    return models.pop()
+
+
 class FormSubtypeClassifier:
     """Which form failure is this? Cached, model-scoped, offline-capable."""
 
