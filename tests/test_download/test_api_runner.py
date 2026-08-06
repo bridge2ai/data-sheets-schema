@@ -7,6 +7,7 @@ anything is billed, so the tests exercise exactly what a real run would send.
 
 import json
 import unittest
+import unittest.mock
 from pathlib import Path
 
 from data_sheets_schema import schema_digest
@@ -686,6 +687,34 @@ class TestValidatorDrivenRepair(unittest.TestCase):
                       "a failed repair must never overwrite the record")
         self.assertEqual(len(log), self.api.REPAIR_ROUNDS)
         self.assertTrue(all(x["outcome"].startswith("unusable") for x in log))
+
+    def test_execute_repairs_through_the_real_call_path(self):
+        """The repair branch in execute() must be exercised end to end: it
+        names client/settings/usage from enclosing scope, and a wrong name
+        there survives every test that validates cleanly — the exact failure
+        class the TestExecuteOffline docstring records."""
+        import yaml as _yaml
+        from data_sheets_schema import api_runner
+        s = spec(out_dir=self.out)
+        keep = api_runner._client
+        api_runner._client = lambda: FakeClient()
+        self.addCleanup(lambda: setattr(api_runner, "_client", keep))
+        # Seven validator calls: validate#1 (full fails, core clean); repair
+        # full round 1 (fails, rewrite) and round 2 (clean); repair checks
+        # core (clean); validate#2 (both clean).
+        verdicts = iter([(["[ERROR] x"], None), ([], None),
+                         (["[ERROR] x"], None), ([], None), ([], None),
+                         ([], None), ([], None)])
+        with unittest.mock.patch.object(
+                self.api, "_validator_lines", lambda *a: next(verdicts)):
+            res = self.api.execute(s)
+        self.assertEqual(res["validation_problems"], [])
+        self.assertIn("repaired", s.full_path.read_text())
+        d = _yaml.safe_load((self.out / "CHORUS_provenance.yaml").read_text())
+        self.assertEqual([x["outcome"] for x in d["repair"]], ["applied"])
+        self.assertEqual([u["phase"] for u in d["api_usage"]][-1],
+                         "repair_full")
+        self.assertEqual(len(d["api_usage"]), 7)
 
     def test_execute_records_no_repair_when_records_validate(self):
         import yaml as _yaml
