@@ -384,7 +384,7 @@
 
 
 <h1 id="slot-reviewing_organization">Slot: reviewing_organization</h1>
-<p><em>Organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). Provides information about the body responsible for ethical oversight.</em></p>
+<p><em>Name or identifier of the organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). A plain string: every one of the 245 corpus values here was a name, ROR or curie, and Organization no longer carries the identifier that made string references expressible (#360).</em></p>
 <p>URI: <a href="http://schema.org/provider">schema:provider</a>
 Alias: reviewing_organization</p>
 <!-- no inheritance hierarchy -->
@@ -408,7 +408,7 @@ Alias: reviewing_organization</p>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>Range: <a href="../Organization/">Organization</a></li>
+<li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
 <h3 id="schema-source">Schema Source</h3>
@@ -442,9 +442,10 @@ Alias: reviewing_organization</p>
 <details>
 
 <pre><code class="language-yaml">name: reviewing_organization
-description: Organization that conducted the ethical review (e.g., Institutional Review
-  Board, Ethics Committee, Research Ethics Board). Provides information about the
-  body responsible for ethical oversight.
+description: 'Name or identifier of the organization that conducted the ethical review
+  (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). A plain
+  string: every one of the 245 corpus values here was a name, ROR or curie, and Organization
+  no longer carries the identifier that made string references expressible (#360).'
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 exact_mappings:
 - schema:provider
@@ -454,7 +455,7 @@ alias: reviewing_organization
 owner: EthicalReview
 domain_of:
 - EthicalReview
-range: Organization
+range: string
 
 </code></pre>
 

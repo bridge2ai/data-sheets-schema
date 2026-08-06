@@ -360,6 +360,8 @@
 
       DatasetProperty : name
 
+      DatasetProperty : notes
+
       DatasetProperty : used_software
 
 
@@ -473,6 +475,12 @@
 <td>direct</td>
 </tr>
 <tr>
+<td><a href="../notes/">notes</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Content from the source material that belongs to this property but fits no de...</td>
+<td>direct</td>
+</tr>
+<tr>
 <td><a href="../used_software/">used_software</a></td>
 <td>* <br/> <a href="../Software/">Software</a></td>
 <td>What software was used as part of this dataset property?</td>
@@ -523,7 +531,9 @@ attributes:
     slot_uri: schema:identifier
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: uriorcurie
   name:
     name: name
@@ -532,7 +542,9 @@ attributes:
     slot_uri: schema:name
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: string
   description:
     name: description
@@ -541,8 +553,25 @@ attributes:
     slot_uri: schema:description
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: 'Content from the source material that belongs to this property but
+      fits no dedicated slot. The escape hatch that makes inventing keys unnecessary:
+      put the fact here with enough context to be findable, rather than adding fields
+      the schema does not declare (#380 — undeclared keys were the corpus''s third-largest
+      failure class).'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:comment
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
     range: string
   used_software:
     name: used_software
@@ -578,7 +607,9 @@ attributes:
     owner: DatasetProperty
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: uriorcurie
   name:
     name: name
@@ -589,7 +620,9 @@ attributes:
     owner: DatasetProperty
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: string
   description:
     name: description
@@ -600,8 +633,27 @@ attributes:
     owner: DatasetProperty
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: 'Content from the source material that belongs to this property but
+      fits no dedicated slot. The escape hatch that makes inventing keys unnecessary:
+      put the fact here with enough context to be findable, rather than adding fields
+      the schema does not declare (#380 — undeclared keys were the corpus''s third-largest
+      failure class).'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:comment
+    alias: notes
+    owner: DatasetProperty
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
     range: string
   used_software:
     name: used_software

@@ -746,6 +746,8 @@
 
       DataSubset : name
 
+      DataSubset : notes
+
       DataSubset : other_tasks
 
 
@@ -1637,6 +1639,12 @@
 <td><a href="../description/">description</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>A human-readable description for a thing</td>
+<td><a href="../NamedThing/">NamedThing</a></td>
+</tr>
+<tr>
+<td><a href="../notes/">notes</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Content from the source material that belongs to this entity but fits no dedi...</td>
 <td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
 </tbody>
@@ -3200,7 +3208,9 @@ attributes:
     owner: DataSubset
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: uriorcurie
     required: true
   name:
@@ -3217,7 +3227,9 @@ attributes:
     owner: DataSubset
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: string
   description:
     name: description
@@ -3233,8 +3245,26 @@ attributes:
     owner: DataSubset
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: Content from the source material that belongs to this entity but
+      fits no dedicated slot. Use this rather than inventing keys the schema does
+      not declare (#380).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    rank: 1000
+    slot_uri: schema:comment
+    alias: notes
+    owner: DataSubset
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
     range: string
 
 </code></pre>

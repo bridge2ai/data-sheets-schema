@@ -251,18 +251,11 @@
 
       EthicalReview : name
 
+      EthicalReview : notes
+
       EthicalReview : review_details
 
       EthicalReview : reviewing_organization
-
-
-
-
-
-        EthicalReview --&gt; "0..1" Organization : reviewing_organization
-        click Organization href "../Organization/"
-
-
 
       EthicalReview : used_software
 
@@ -303,13 +296,13 @@
 </tr>
 <tr>
 <td><a href="../reviewing_organization/">reviewing_organization</a></td>
-<td>0..1 <br/> <a href="../Organization/">Organization</a></td>
-<td>Organization that conducted the ethical review (e</td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Name or identifier of the organization that conducted the ethical review (e</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../review_details/">review_details</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
 <td>Free-text description of the ethical review process, board decisions, outcome...</td>
 <td>direct</td>
 </tr>
@@ -329,6 +322,12 @@
 <td><a href="../description/">description</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>A human-readable description for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../notes/">notes</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Content from the source material that belongs to this property but fits no de...</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
@@ -417,9 +416,11 @@ attributes:
     range: Person
   reviewing_organization:
     name: reviewing_organization
-    description: Organization that conducted the ethical review (e.g., Institutional
-      Review Board, Ethics Committee, Research Ethics Board). Provides information
-      about the body responsible for ethical oversight.
+    description: 'Name or identifier of the organization that conducted the ethical
+      review (e.g., Institutional Review Board, Ethics Committee, Research Ethics
+      Board). A plain string: every one of the 245 corpus values here was a name,
+      ROR or curie, and Organization no longer carries the identifier that made string
+      references expressible (#360).'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
     exact_mappings:
     - schema:provider
@@ -427,7 +428,7 @@ attributes:
     slot_uri: schema:provider
     domain_of:
     - EthicalReview
-    range: Organization
+    range: string
   review_details:
     name: review_details
     annotations:
@@ -445,7 +446,6 @@ attributes:
     domain_of:
     - EthicalReview
     range: string
-    multivalued: true
 
 </code></pre>
 </details>
@@ -478,9 +478,11 @@ attributes:
     range: Person
   reviewing_organization:
     name: reviewing_organization
-    description: Organization that conducted the ethical review (e.g., Institutional
-      Review Board, Ethics Committee, Research Ethics Board). Provides information
-      about the body responsible for ethical oversight.
+    description: 'Name or identifier of the organization that conducted the ethical
+      review (e.g., Institutional Review Board, Ethics Committee, Research Ethics
+      Board). A plain string: every one of the 245 corpus values here was a name,
+      ROR or curie, and Organization no longer carries the identifier that made string
+      references expressible (#360).'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
     exact_mappings:
     - schema:provider
@@ -490,7 +492,7 @@ attributes:
     owner: EthicalReview
     domain_of:
     - EthicalReview
-    range: Organization
+    range: string
   review_details:
     name: review_details
     annotations:
@@ -510,7 +512,6 @@ attributes:
     domain_of:
     - EthicalReview
     range: string
-    multivalued: true
   id:
     name: id
     annotations:
@@ -524,7 +525,9 @@ attributes:
     owner: EthicalReview
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: uriorcurie
   name:
     name: name
@@ -535,7 +538,9 @@ attributes:
     owner: EthicalReview
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: string
   description:
     name: description
@@ -546,8 +551,27 @@ attributes:
     owner: EthicalReview
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: 'Content from the source material that belongs to this property but
+      fits no dedicated slot. The escape hatch that makes inventing keys unnecessary:
+      put the fact here with enough context to be findable, rather than adding fields
+      the schema does not declare (#380 — undeclared keys were the corpus''s third-largest
+      failure class).'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:comment
+    alias: notes
+    owner: EthicalReview
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
     range: string
   used_software:
     name: used_software

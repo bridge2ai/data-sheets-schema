@@ -384,7 +384,7 @@
 
 
 <h1 id="slot-principal_investigator">Slot: principal_investigator</h1>
-<p><em>A key individual (Principal Investigator) responsible for or overseeing dataset creation.</em></p>
+<p><em>The name of the key individual (Principal Investigator) responsible for or overseeing dataset creation — a person's name such as 'Aaron Lee', never a yes/no flag. The slot name reads like a boolean; the value is not one (#360).</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/principalInvestigator">d4d:principalInvestigator</a>
 Alias: principal_investigator</p>
 <!-- no inheritance hierarchy -->
@@ -442,8 +442,9 @@ Alias: principal_investigator</p>
 <details>
 
 <pre><code class="language-yaml">name: principal_investigator
-description: A key individual (Principal Investigator) responsible for or overseeing
-  dataset creation.
+description: The name of the key individual (Principal Investigator) responsible for
+  or overseeing dataset creation — a person's name such as 'Aaron Lee', never a yes/no
+  flag. The slot name reads like a boolean; the value is not one (#360).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 broad_mappings:
 - dcterms:creator

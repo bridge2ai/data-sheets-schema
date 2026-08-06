@@ -162,11 +162,6 @@
     </label>
 <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#inheritance">
-    Inheritance
-  </a>
-</li>
-<li class="md-nav__item">
 <a class="md-nav__link" href="#slots">
     Slots
   </a>
@@ -231,9 +226,6 @@
 <div class="mermaid"> classDiagram
     class Grant
     click Grant href "../Grant/"
-      NamedThing &lt;|-- Grant
-        click NamedThing href "../NamedThing/"
-
       Grant : description
 
       Grant : grant_number
@@ -242,15 +234,11 @@
 
       Grant : name
 
+      Grant : notes
+
 
 </div>
-<h2 id="inheritance">Inheritance</h2>
-<ul>
-<li><a href="../NamedThing/">NamedThing</a><ul>
-<li><strong>Grant</strong></li>
-</ul>
-</li>
-</ul>
+<!-- no inheritance hierarchy -->
 <h2 id="slots">Slots</h2>
 <table>
 <thead>
@@ -263,28 +251,34 @@
 </thead>
 <tbody>
 <tr>
-<td><a href="../grant_number/">grant_number</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The alphanumeric identifier for the grant</td>
-<td>direct</td>
-</tr>
-<tr>
 <td><a href="../id/">id</a></td>
-<td>1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>A unique identifier for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
+<td>0..1 <em>recommended</em> <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>An identifier for the grant, when the source material supplies one</td>
+<td>direct</td>
 </tr>
 <tr>
 <td><a href="../name/">name</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>A human-readable name for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
+<td>A human-readable name for the grant or funding mechanism</td>
+<td>direct</td>
 </tr>
 <tr>
 <td><a href="../description/">description</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>A human-readable description for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
+<td>A human-readable description of the grant</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../notes/">notes</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Content about the grant that fits no dedicated slot; never invent keys (#380)</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../grant_number/">grant_number</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>The alphanumeric identifier for the grant</td>
+<td>direct</td>
 </tr>
 </tbody>
 </table>
@@ -341,8 +335,55 @@ description: 'The name and/or identifier of the specific mechanism providing mon
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-is_a: NamedThing
 attributes:
+  id:
+    name: id
+    description: An identifier for the grant, when the source material supplies one.
+      The grant_number alone is a valid grant reference.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    slot_uri: schema:identifier
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: uriorcurie
+    recommended: true
+  name:
+    name: name
+    description: A human-readable name for the grant or funding mechanism.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    slot_uri: schema:name
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: string
+  description:
+    name: description
+    description: A human-readable description of the grant.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    slot_uri: schema:description
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: Content about the grant that fits no dedicated slot; never invent
+      keys (#380).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    slot_uri: schema:comment
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: string
   grant_number:
     name: grant_number
     annotations:
@@ -369,8 +410,63 @@ description: 'The name and/or identifier of the specific mechanism providing mon
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-is_a: NamedThing
 attributes:
+  id:
+    name: id
+    description: An identifier for the grant, when the source material supplies one.
+      The grant_number alone is a valid grant reference.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    slot_uri: schema:identifier
+    alias: id
+    owner: Grant
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: uriorcurie
+    recommended: true
+  name:
+    name: name
+    description: A human-readable name for the grant or funding mechanism.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    slot_uri: schema:name
+    alias: name
+    owner: Grant
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: string
+  description:
+    name: description
+    description: A human-readable description of the grant.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    slot_uri: schema:description
+    alias: description
+    owner: Grant
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: Content about the grant that fits no dedicated slot; never invent
+      keys (#380).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    slot_uri: schema:comment
+    alias: notes
+    owner: Grant
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: string
   grant_number:
     name: grant_number
     annotations:
@@ -387,57 +483,6 @@ attributes:
     owner: Grant
     domain_of:
     - Grant
-    range: string
-  id:
-    name: id
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: https://example.org/dataset/my-dataset-001
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: Grant
-    domain_of:
-    - NamedThing
-    - DatasetProperty
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: AI-READI Dataset
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: Grant
-    domain_of:
-    - NamedThing
-    - DatasetProperty
-    range: string
-  description:
-    name: description
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
-    description: A human-readable description for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:description
-    alias: description
-    owner: Grant
-    domain_of:
-    - NamedThing
-    - DatasetProperty
-    - DatasetRelationship
     range: string
 
 </code></pre>

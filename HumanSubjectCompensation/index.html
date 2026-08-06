@@ -248,6 +248,8 @@
 
       HumanSubjectCompensation : name
 
+      HumanSubjectCompensation : notes
+
       HumanSubjectCompensation : used_software
 
 
@@ -287,19 +289,19 @@
 </tr>
 <tr>
 <td><a href="../compensation_type/">compensation_type</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
 <td>What type of compensation was provided (e</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../compensation_amount/">compensation_amount</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
 <td>What was the amount or value of compensation provided? Include currency or eq...</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../compensation_rationale/">compensation_rationale</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
 <td>What was the rationale for the compensation structure? How was the amount det...</td>
 <td>direct</td>
 </tr>
@@ -319,6 +321,12 @@
 <td><a href="../description/">description</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>A human-readable description for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../notes/">notes</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Content from the source material that belongs to this property but fits no de...</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
@@ -415,7 +423,6 @@ attributes:
     domain_of:
     - HumanSubjectCompensation
     range: string
-    multivalued: true
   compensation_amount:
     name: compensation_amount
     annotations:
@@ -432,7 +439,6 @@ attributes:
     domain_of:
     - HumanSubjectCompensation
     range: string
-    multivalued: true
   compensation_rationale:
     name: compensation_rationale
     description: 'What was the rationale for the compensation structure? How was the
@@ -445,7 +451,6 @@ attributes:
     domain_of:
     - HumanSubjectCompensation
     range: string
-    multivalued: true
 
 </code></pre>
 </details>
@@ -488,7 +493,6 @@ attributes:
     domain_of:
     - HumanSubjectCompensation
     range: string
-    multivalued: true
   compensation_amount:
     name: compensation_amount
     annotations:
@@ -507,7 +511,6 @@ attributes:
     domain_of:
     - HumanSubjectCompensation
     range: string
-    multivalued: true
   compensation_rationale:
     name: compensation_rationale
     description: 'What was the rationale for the compensation structure? How was the
@@ -522,7 +525,6 @@ attributes:
     domain_of:
     - HumanSubjectCompensation
     range: string
-    multivalued: true
   id:
     name: id
     annotations:
@@ -536,7 +538,9 @@ attributes:
     owner: HumanSubjectCompensation
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: uriorcurie
   name:
     name: name
@@ -547,7 +551,9 @@ attributes:
     owner: HumanSubjectCompensation
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: string
   description:
     name: description
@@ -558,8 +564,27 @@ attributes:
     owner: HumanSubjectCompensation
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: 'Content from the source material that belongs to this property but
+      fits no dedicated slot. The escape hatch that makes inventing keys unnecessary:
+      put the fact here with enough context to be findable, rather than adding fields
+      the schema does not declare (#380 — undeclared keys were the corpus''s third-largest
+      failure class).'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:comment
+    alias: notes
+    owner: HumanSubjectCompensation
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
     range: string
   used_software:
     name: used_software

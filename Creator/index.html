@@ -262,6 +262,8 @@
 
       Creator : name
 
+      Creator : notes
+
       Creator : principal_investigator
 
 
@@ -307,7 +309,7 @@
 <tr>
 <td><a href="../principal_investigator/">principal_investigator</a></td>
 <td>0..1 <br/> <a href="../Person/">Person</a></td>
-<td>A key individual (Principal Investigator) responsible for or overseeing datas...</td>
+<td>The name of the key individual (Principal Investigator) responsible for or ov...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -338,6 +340,12 @@
 <td><a href="../description/">description</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>A human-readable description for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../notes/">notes</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Content from the source material that belongs to this property but fits no de...</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
@@ -412,8 +420,9 @@ is_a: DatasetProperty
 attributes:
   principal_investigator:
     name: principal_investigator
-    description: A key individual (Principal Investigator) responsible for or overseeing
-      dataset creation.
+    description: The name of the key individual (Principal Investigator) responsible
+      for or overseeing dataset creation — a person's name such as 'Aaron Lee', never
+      a yes/no flag. The slot name reads like a boolean; the value is not one (#360).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
     broad_mappings:
     - dcterms:creator
@@ -465,8 +474,9 @@ is_a: DatasetProperty
 attributes:
   principal_investigator:
     name: principal_investigator
-    description: A key individual (Principal Investigator) responsible for or overseeing
-      dataset creation.
+    description: The name of the key individual (Principal Investigator) responsible
+      for or overseeing dataset creation — a person's name such as 'Aaron Lee', never
+      a yes/no flag. The slot name reads like a boolean; the value is not one (#360).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
     broad_mappings:
     - dcterms:creator
@@ -521,7 +531,9 @@ attributes:
     owner: Creator
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: uriorcurie
   name:
     name: name
@@ -532,7 +544,9 @@ attributes:
     owner: Creator
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: string
   description:
     name: description
@@ -543,8 +557,27 @@ attributes:
     owner: Creator
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: 'Content from the source material that belongs to this property but
+      fits no dedicated slot. The escape hatch that makes inventing keys unnecessary:
+      put the fact here with enough context to be findable, rather than adding fields
+      the schema does not declare (#380 — undeclared keys were the corpus''s third-largest
+      failure class).'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:comment
+    alias: notes
+    owner: Creator
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
     range: string
   used_software:
     name: used_software

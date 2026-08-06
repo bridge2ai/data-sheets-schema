@@ -230,13 +230,8 @@
 <div class="mermaid"> classDiagram
     class Organization
     click Organization href "../Organization/"
-      NamedThing &lt;|-- Organization
-        click NamedThing href "../NamedThing/"
-
-
       Organization &lt;|-- Grantor
         click Grantor href "../Grantor/"
-
 
       Organization : description
 
@@ -244,15 +239,14 @@
 
       Organization : name
 
+      Organization : notes
+
 
 </div>
 <h2 id="inheritance">Inheritance</h2>
 <ul>
-<li><a href="../NamedThing/">NamedThing</a><ul>
 <li><strong>Organization</strong><ul>
 <li><a href="../Grantor/">Grantor</a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -269,21 +263,27 @@
 <tbody>
 <tr>
 <td><a href="../id/">id</a></td>
-<td>1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>A unique identifier for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
+<td>0..1 <em>recommended</em> <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>An identifier for the organization (for example a ROR), when the source mater...</td>
+<td>direct</td>
 </tr>
 <tr>
 <td><a href="../name/">name</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>A human-readable name for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
+<td>A human-readable name for the organization</td>
+<td>direct</td>
 </tr>
 <tr>
 <td><a href="../description/">description</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>A human-readable description for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
+<td>A human-readable description for the organization</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../notes/">notes</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Content about the organization that fits no dedicated slot; never invent keys...</td>
+<td>direct</td>
 </tr>
 </tbody>
 </table>
@@ -307,12 +307,6 @@
 <tr>
 <td><a href="../Creator/">Creator</a></td>
 <td><a href="../affiliations/">affiliations</a></td>
-<td>range</td>
-<td><a href="./">Organization</a></td>
-</tr>
-<tr>
-<td><a href="../EthicalReview/">EthicalReview</a></td>
-<td><a href="../reviewing_organization/">reviewing_organization</a></td>
 <td>range</td>
 <td><a href="./">Organization</a></td>
 </tr>
@@ -349,7 +343,63 @@
 <pre><code class="language-yaml">name: Organization
 description: Represents a group or organization.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-is_a: NamedThing
+attributes:
+  id:
+    name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://ror.org/01yc7t268
+    description: An identifier for the organization (for example a ROR), when the
+      source material supplies one. A name alone is a valid organization.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: uriorcurie
+    recommended: true
+  name:
+    name: name
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: University of Washington
+    description: A human-readable name for the organization.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: string
+  description:
+    name: description
+    description: A human-readable description for the organization.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: Content about the organization that fits no dedicated slot; never
+      invent keys (#380).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:comment
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: string
 class_uri: schema:Organization
 
 </code></pre>
@@ -359,58 +409,70 @@ class_uri: schema:Organization
 <pre><code class="language-yaml">name: Organization
 description: Represents a group or organization.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-is_a: NamedThing
 attributes:
   id:
     name: id
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: https://example.org/dataset/my-dataset-001
-    description: A unique identifier for a thing.
+        value: https://ror.org/01yc7t268
+    description: An identifier for the organization (for example a ROR), when the
+      source material supplies one. A name alone is a valid organization.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
     slot_uri: schema:identifier
-    identifier: true
     alias: id
     owner: Organization
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: uriorcurie
-    required: true
+    recommended: true
   name:
     name: name
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: AI-READI Dataset
-    description: A human-readable name for a thing.
+        value: University of Washington
+    description: A human-readable name for the organization.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
     slot_uri: schema:name
     alias: name
     owner: Organization
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: string
   description:
     name: description
-    annotations:
-      d4d:docExample:
-        tag: d4d:docExample
-        value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
-    description: A human-readable description for a thing.
+    description: A human-readable description for the organization.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
     slot_uri: schema:description
     alias: description
     owner: Organization
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: Content about the organization that fits no dedicated slot; never
+      invent keys (#380).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:comment
+    alias: notes
+    owner: Organization
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
     range: string
 class_uri: schema:Organization
 

@@ -246,6 +246,8 @@
 
       ExternalResource : name
 
+      ExternalResource : notes
+
       ExternalResource : restrictions
 
       ExternalResource : used_software
@@ -287,7 +289,7 @@
 </tr>
 <tr>
 <td><a href="../future_guarantees/">future_guarantees</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
 <td>Explanation of any commitments that external resources will remain available ...</td>
 <td>direct</td>
 </tr>
@@ -319,6 +321,12 @@
 <td><a href="../description/">description</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>A human-readable description for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../notes/">notes</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Content from the source material that belongs to this property but fits no de...</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
@@ -418,7 +426,6 @@ attributes:
     domain_of:
     - ExternalResource
     range: string
-    multivalued: true
   archival:
     name: archival
     description: 'Indicates whether official archival versions of external resources
@@ -483,7 +490,6 @@ attributes:
     domain_of:
     - ExternalResource
     range: string
-    multivalued: true
   archival:
     name: archival
     description: 'Indicates whether official archival versions of external resources
@@ -544,7 +550,9 @@ attributes:
     owner: ExternalResource
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: uriorcurie
   name:
     name: name
@@ -555,7 +563,9 @@ attributes:
     owner: ExternalResource
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: string
   description:
     name: description
@@ -566,8 +576,27 @@ attributes:
     owner: ExternalResource
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: 'Content from the source material that belongs to this property but
+      fits no dedicated slot. The escape hatch that makes inventing keys unnecessary:
+      put the fact here with enough context to be findable, rather than adding fields
+      the schema does not declare (#380 — undeclared keys were the corpus''s third-largest
+      failure class).'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:comment
+    alias: notes
+    owner: ExternalResource
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
     range: string
   used_software:
     name: used_software

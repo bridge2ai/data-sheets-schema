@@ -264,6 +264,8 @@
 
       LicenseAndUseTerms : name
 
+      LicenseAndUseTerms : notes
+
       LicenseAndUseTerms : used_software
 
 
@@ -297,7 +299,7 @@
 <tbody>
 <tr>
 <td><a href="../license_terms/">license_terms</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
 <td>Description of the dataset's license and terms of use, including links, costs...</td>
 <td>direct</td>
 </tr>
@@ -329,6 +331,12 @@
 <td><a href="../description/">description</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>A human-readable description for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../notes/">notes</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Content from the source material that belongs to this property but fits no de...</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
@@ -419,7 +427,6 @@ attributes:
     domain_of:
     - LicenseAndUseTerms
     range: string
-    multivalued: true
   data_use_permission:
     name: data_use_permission
     annotations:
@@ -486,7 +493,6 @@ attributes:
     domain_of:
     - LicenseAndUseTerms
     range: string
-    multivalued: true
   data_use_permission:
     name: data_use_permission
     annotations:
@@ -536,7 +542,9 @@ attributes:
     owner: LicenseAndUseTerms
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: uriorcurie
   name:
     name: name
@@ -547,7 +555,9 @@ attributes:
     owner: LicenseAndUseTerms
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: string
   description:
     name: description
@@ -558,8 +568,27 @@ attributes:
     owner: LicenseAndUseTerms
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: 'Content from the source material that belongs to this property but
+      fits no dedicated slot. The escape hatch that makes inventing keys unnecessary:
+      put the fact here with enough context to be findable, rather than adding fields
+      the schema does not declare (#380 — undeclared keys were the corpus''s third-largest
+      failure class).'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:comment
+    alias: notes
+    owner: LicenseAndUseTerms
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
     range: string
   used_software:
     name: used_software

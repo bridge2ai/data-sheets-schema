@@ -248,6 +248,8 @@
 
       InformedConsent : name
 
+      InformedConsent : notes
+
       InformedConsent : used_software
 
 
@@ -289,25 +291,25 @@
 </tr>
 <tr>
 <td><a href="../consent_type/">consent_type</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
 <td>What type of consent was obtained (e</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../consent_documentation/">consent_documentation</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
 <td>How is consent documented? Include references to consent forms or procedures ...</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../withdrawal_mechanism/">withdrawal_mechanism</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
 <td>How can participants withdraw their consent? What procedures are in place for...</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../consent_scope/">consent_scope</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
 <td>What specific uses did participants consent to? Are there limitations on data...</td>
 <td>direct</td>
 </tr>
@@ -327,6 +329,12 @@
 <td><a href="../description/">description</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>A human-readable description for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../notes/">notes</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Content from the source material that belongs to this property but fits no de...</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
@@ -422,7 +430,6 @@ attributes:
     domain_of:
     - InformedConsent
     range: string
-    multivalued: true
   consent_documentation:
     name: consent_documentation
     annotations:
@@ -439,7 +446,6 @@ attributes:
     domain_of:
     - InformedConsent
     range: string
-    multivalued: true
   withdrawal_mechanism:
     name: withdrawal_mechanism
     description: 'How can participants withdraw their consent? What procedures are
@@ -452,7 +458,6 @@ attributes:
     domain_of:
     - InformedConsent
     range: string
-    multivalued: true
   consent_scope:
     name: consent_scope
     description: 'What specific uses did participants consent to? Are there limitations
@@ -465,7 +470,6 @@ attributes:
     domain_of:
     - InformedConsent
     range: string
-    multivalued: true
 
 </code></pre>
 </details>
@@ -507,7 +511,6 @@ attributes:
     domain_of:
     - InformedConsent
     range: string
-    multivalued: true
   consent_documentation:
     name: consent_documentation
     annotations:
@@ -526,7 +529,6 @@ attributes:
     domain_of:
     - InformedConsent
     range: string
-    multivalued: true
   withdrawal_mechanism:
     name: withdrawal_mechanism
     description: 'How can participants withdraw their consent? What procedures are
@@ -541,7 +543,6 @@ attributes:
     domain_of:
     - InformedConsent
     range: string
-    multivalued: true
   consent_scope:
     name: consent_scope
     description: 'What specific uses did participants consent to? Are there limitations
@@ -556,7 +557,6 @@ attributes:
     domain_of:
     - InformedConsent
     range: string
-    multivalued: true
   id:
     name: id
     annotations:
@@ -570,7 +570,9 @@ attributes:
     owner: InformedConsent
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: uriorcurie
   name:
     name: name
@@ -581,7 +583,9 @@ attributes:
     owner: InformedConsent
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     range: string
   description:
     name: description
@@ -592,8 +596,27 @@ attributes:
     owner: InformedConsent
     domain_of:
     - NamedThing
+    - Organization
     - DatasetProperty
+    - Grant
     - DatasetRelationship
+    range: string
+  notes:
+    name: notes
+    description: 'Content from the source material that belongs to this property but
+      fits no dedicated slot. The escape hatch that makes inventing keys unnecessary:
+      put the fact here with enough context to be findable, rather than adding fields
+      the schema does not declare (#380 — undeclared keys were the corpus''s third-largest
+      failure class).'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:comment
+    alias: notes
+    owner: InformedConsent
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
     range: string
   used_software:
     name: used_software
