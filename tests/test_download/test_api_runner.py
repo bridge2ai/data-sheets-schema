@@ -760,6 +760,20 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         self.assertEqual(len(phases), 7, phases)
         self.assertEqual(phases[:6], [u["phase"] for u in first["api_usage"]])
         self.assertEqual(phases[-1], "repair_full")
+        # #366: a third invocation must keep the second's repair rounds in
+        # the record, exactly as api_usage keeps every billed call.
+        self.api._save_progress(s, list(self.api.PHASES), None)
+        verdicts2 = iter([(["[ERROR] y"], None), ([], None),
+                          (["[ERROR] y"], None), ([], None), ([], None),
+                          ([], None), ([], None)])
+        with unittest.mock.patch.object(
+                self.api, "_validator_lines", lambda *a: next(verdicts2)):
+            self.api.execute(s)
+        third = _yaml.safe_load(prov.read_text())
+        self.assertEqual([r["outcome"] for r in third["repair"]],
+                         ["applied", "applied"],
+                         "prior invocation's repair rounds must survive")
+        self.assertEqual(len(third["api_usage"]), 8)
 
     def test_execute_snapshots_every_intermediate(self):
         """#369: reconcile and repair overwrite artifacts in place, and the

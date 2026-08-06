@@ -600,7 +600,9 @@ class D4DEvaluator:
         return found
 
     def evaluate_all_projects(self, base_dir: Path, projects: List[str],
-                              methods: List[str]) -> List[D4DEvaluation]:
+                              methods: List[str],
+                              include_invalid: bool = False,
+                              ) -> List[D4DEvaluation]:
         """Evaluate every discovered record for the given projects and methods."""
         evaluations = []
 
@@ -615,10 +617,17 @@ class D4DEvaluator:
                     tag = f"{project}/{method}" + (f"/{label}" if label else "")
 
                     # Validate before evaluating; skip on failure so the batch
-                    # report only contains evaluations of valid YAML.
+                    # report only contains evaluations of valid YAML — unless
+                    # the caller opts in: records generated under an older
+                    # schema version fail the current validator without being
+                    # wrong (#374), and a silent skip excluded whole sweeps.
                     if not validate_d4d_yaml(file_path, method):
-                        print(f"Skipping evaluation for {tag}: validation failed.")
-                        continue
+                        if not include_invalid:
+                            print(f"Skipping evaluation for {tag}: "
+                                  "validation failed.")
+                            continue
+                        print(f"Evaluating {tag} despite validation failure "
+                              "(--include-invalid).")
 
                     print(f"Evaluating {tag}...")
                     evaluation = self.evaluate_d4d_file(
@@ -919,6 +928,13 @@ def main():
                         help='Evaluate single project only (concatenated mode)')
     parser.add_argument('--individual', action='store_true',
                         help='Evaluate individual D4D files instead of concatenated')
+    parser.add_argument('--include-invalid', action='store_true',
+                        help='Evaluate records that fail schema validation too. '
+                             'Presence detection works on any parseable YAML; '
+                             'records generated under an older schema version '
+                             'fail the current validator without being wrong '
+                             '(#374), and skipping them silently excluded '
+                             'whole sweeps from the scores.')
 
     args = parser.parse_args()
 
@@ -945,7 +961,8 @@ def main():
     else:
         # Evaluate concatenated files
         evaluations = evaluator.evaluate_all_projects(
-            base_dir, projects, args.methods)
+            base_dir, projects, args.methods,
+            include_invalid=args.include_invalid)
 
     if not evaluations:
         print("No evaluations completed!")

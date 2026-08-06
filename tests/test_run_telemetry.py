@@ -149,7 +149,7 @@ class TestRunTelemetry(unittest.TestCase):
              "file_path": "data/d4d_concatenated/claudecode_agent_core/CHORUS_d4d_core.yaml",
              "rubric10": {"total": 10, "max": 50}},
         ]))
-        got = _evaluations_for({"core": core_path}, scores, "presence")
+        got = _evaluations_for({"core": core_path}, str(scores), "presence")
         self.assertEqual(len(got), 1, "the label-less legacy path must not "
                                       "attach to a label-addressed run")
         self.assertEqual(got[0]["score"], 34.0)

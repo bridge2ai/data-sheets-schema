@@ -1,7 +1,7 @@
 label: 2026-08-05_claude-opus-5-1m-generic-v3
 method: claudecode_agent
-generated_at: '2026-08-06T08:07:28+00:00'
-schema_version: 1.2.0
+generated_at: '2026-08-06T20:02:48+00:00'
+schema_version: 1.3.0
 runs:
 - project: AI_READI
   label: 2026-08-05_claude-opus-5-1m-generic-v3_rep1
@@ -231,6 +231,39 @@ runs:
     sha256: aa7a377ddd75f06cef8dd96c3898ba9cf57f2ace171c94047569c7599bbd92ea
     bytes: 27194
     lines: 300
+  presence_evaluations:
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: full
+    score: 45.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 90.0
+    evaluated_at: '2026-08-06T12:56:29-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: full
+    score: 61.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 69.31818181818183
+    evaluated_at: '2026-08-06T12:56:29-07:00'
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: core
+    score: 40.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 80.0
+    evaluated_at: '2026-08-06T12:57:07-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: core
+    score: 61.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 69.31818181818183
+    evaluated_at: '2026-08-06T12:57:07-07:00'
   total_input_tokens: 626040
   total_output_tokens: 444955
   total_cache_read_tokens: 483517
@@ -415,6 +448,39 @@ runs:
     sha256: a77bfccba9fe1dfeef0c41b0d9efe3825f3369996dd5c99dd74a7b3fbea49b02
     bytes: 15451
     lines: 122
+  presence_evaluations:
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: full
+    score: 38.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 76.0
+    evaluated_at: '2026-08-06T12:57:48-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: full
+    score: 61.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 69.31818181818183
+    evaluated_at: '2026-08-06T12:57:48-07:00'
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: core
+    score: 35.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 70.0
+    evaluated_at: '2026-08-06T12:58:20-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: core
+    score: 61.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 69.31818181818183
+    evaluated_at: '2026-08-06T12:58:20-07:00'
   total_input_tokens: 191298
   total_output_tokens: 158380
   total_cache_read_tokens: 66523
@@ -634,6 +700,39 @@ runs:
     sha256: d1dbe5302d26a0d60b2cc419d955c1259dc8355d45bb68b885670652ae535505
     bytes: 20317
     lines: 234
+  presence_evaluations:
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: full
+    score: 47.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 94.0
+    evaluated_at: '2026-08-06T12:56:32-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: full
+    score: 67.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 76.13636363636364
+    evaluated_at: '2026-08-06T12:56:32-07:00'
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: core
+    score: 42.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 84.0
+    evaluated_at: '2026-08-06T12:57:09-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: core
+    score: 67.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 76.13636363636364
+    evaluated_at: '2026-08-06T12:57:09-07:00'
   total_input_tokens: 445413
   total_output_tokens: 372342
   total_cache_read_tokens: 33063
@@ -866,6 +965,39 @@ runs:
     sha256: 7ba9df42c6cefba33b2778cb5fbc9a5670f1cbc36ed9530dd4d8063af6c7c0f2
     bytes: 30875
     lines: 283
+  presence_evaluations:
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: full
+    score: 46.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 92.0
+    evaluated_at: '2026-08-06T12:56:36-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: full
+    score: 67.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 76.13636363636364
+    evaluated_at: '2026-08-06T12:56:36-07:00'
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: core
+    score: 41.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 82.0
+    evaluated_at: '2026-08-06T12:57:10-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: core
+    score: 65.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 73.86363636363636
+    evaluated_at: '2026-08-06T12:57:10-07:00'
   total_input_tokens: 454500
   total_output_tokens: 370343
   total_cache_read_tokens: 206744

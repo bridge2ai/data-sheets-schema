@@ -18,9 +18,9 @@ Evidence honesty rules, mirrored in the schema:
 * Attempts join to reasoning entries by (phase, order of appearance), not by
   attempt number: both files accumulate across invocations, so numbers repeat
   while order is preserved.
-* The ``repair_rounds`` outcomes come from the provenance repair block, which
-  records only the latest invocation until #366 is fixed; every repair *call*
-  still appears under ``phases`` from the cumulative usage rows.
+* The ``repair_rounds`` outcomes come from the provenance repair block,
+  seeded across invocations since #366; every repair *call* also appears
+  under ``phases`` from the cumulative usage rows.
 """
 
 from __future__ import annotations
@@ -246,27 +246,38 @@ def comparisons(runs: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
-PRESENCE_SCORES = Path("data/evaluation/scores.json")
-LLM_SCORES = Path("data/evaluation_llm/scores.json")
+# Globs, not single files (#374): the legacy scores.json keys label-less
+# paths, and label-aware evaluation runs write their own scores.json under
+# subdirectories. Every file is scanned; only exact artifact-path matches
+# attach, so overlapping files cannot double-claim a run.
+PRESENCE_SCORES_GLOB = "data/evaluation/**/scores.json"
+LLM_SCORES_GLOB = "data/evaluation_llm/**/scores.json"
 
 
 def _evaluations_for(artifact_paths: dict[str, Path],
-                     scores_path: Path,
+                     scores_glob: str,
                      evaluation_type: str) -> list[dict[str, Any]]:
     """Rubric scores whose recorded file path matches this run's artifacts.
 
     Exact path match only: the published evaluation outputs are keyed by
     label-less legacy paths (#286), so for label-addressed runs this returns
-    empty until the evaluators are re-run against the label's files — an
+    empty until the evaluators are run against the label's files — an
     honest absence, not a missing feature.
     """
-    if not scores_path.exists():
-        return []
-    try:
-        entries = json.loads(scores_path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, UnicodeDecodeError):
-        return []
-    if not isinstance(entries, list):
+    import glob as _glob
+    entries: list[Any] = []
+    for sp in sorted(_glob.glob(scores_glob, recursive=True)):
+        scores_path = Path(sp)
+        try:
+            batch = json.loads(scores_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            continue
+        if isinstance(batch, list):
+            for e in batch:
+                if isinstance(e, dict):
+                    e["_source"] = str(scores_path)
+            entries.extend(batch)
+    if not entries:
         return []
     by_path = {str(p): art for art, p in artifact_paths.items()
                if art in ("full", "core")}
@@ -285,12 +296,23 @@ def _evaluations_for(artifact_paths: dict[str, Path],
                 "artifact": art,
                 "score": float(r["total"]),
                 "max_score": float(r.get("max", 0)),
-                "source": str(scores_path),
+                "source": e.get("_source", ""),
             }
             if r.get("percentage") is not None:
                 score["percent"] = float(r["percentage"])
             if e.get("timestamp"):
-                score["evaluated_at"] = e["timestamp"]
+                # The evaluator stamps naive microsecond timestamps; the
+                # schema range is datetime and the validator's format check
+                # rejects fractional seconds. Normalize, don't fabricate.
+                try:
+                    # astimezone() interprets a naive stamp as local time —
+                    # which is what the evaluator's clock was — and gives the
+                    # offset the date-time format requires.
+                    score["evaluated_at"] = datetime.fromisoformat(
+                        e["timestamp"]).astimezone().isoformat(
+                        timespec="seconds")
+                except ValueError:
+                    pass
             if e.get("judge_model") or e.get("model"):
                 score["judge_model"] = e.get("judge_model") or e.get("model")
             out.append(score)
@@ -407,10 +429,12 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
         if s is not None]
     if records:
         out["records"] = records
-    presence = _evaluations_for(artifact_paths, PRESENCE_SCORES, "presence")
+    presence = _evaluations_for(artifact_paths, PRESENCE_SCORES_GLOB,
+                                "presence")
     if presence:
         out["presence_evaluations"] = presence
-    judged = _evaluations_for(artifact_paths, LLM_SCORES, "llm_judge")
+    judged = _evaluations_for(artifact_paths, LLM_SCORES_GLOB,
+                              "llm_judge")
     if judged:
         out["llm_judge_evaluations"] = judged
     out["total_input_tokens"] = total["input_tokens"]
