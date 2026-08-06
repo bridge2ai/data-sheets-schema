@@ -139,6 +139,28 @@ class TestPhaseAssembly(unittest.TestCase):
         blob = " ".join(p["text"] for p in req.messages[0]["content"])
         self.assertIn("Completed full record", blob)
 
+    def test_instruction_is_the_last_part_so_carry_never_trails(self):
+        # #346: when the carried full record was the final content block, the
+        # message ended with a large YAML document and the model continued it
+        # instead of answering — ten consecutive core attempts on AI-READI
+        # returned a mid-record fragment. The instruction must come last.
+        for ph, carry in (
+                ("core", {"Completed full record": "id: x\n"}),
+                ("reconcile_core", {"Reconciled full record": "id: x\n",
+                                    "Completed core record": "id: y\n",
+                                    "Audit findings": "{}"}),
+                ("report", {"Audit findings": "{}"})):
+            req = build_phase(spec(), ph, carry=carry)
+            self.assertEqual(req.messages[0]["content"][-1]["text"],
+                             PHASE_INSTRUCTIONS[ph], ph)
+
+    def test_carry_instructions_say_above_not_below(self):
+        # The instruction follows the carry, so any instruction describing a
+        # carried artifact's position must say "above". "Below" would point at
+        # nothing and invite exactly the confusion #346 documents.
+        for ph, instr in PHASE_INSTRUCTIONS.items():
+            self.assertNotIn("supplied below", instr, ph)
+
     def test_unknown_phase_rejected(self):
         with self.assertRaises(ValueError):
             build_phase(spec(), "nonsense", carry={})

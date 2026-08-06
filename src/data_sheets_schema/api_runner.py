@@ -391,7 +391,7 @@ PHASE_INSTRUCTIONS = {
         "commentary before or after."),
     "core": (
         "Phase 2. Produce the CORE D4D record for class `CoreDataset`, using "
-        "the declared bundle and the completed full record supplied below. The "
+        "the declared bundle and the completed full record supplied above. The "
         "core record must not assert anything the full record does not support. "
         "Output only the YAML."),
     "audit": (
@@ -408,7 +408,7 @@ PHASE_INSTRUCTIONS = {
         "Phase 4b. Apply the audit findings that concern the CORE record and "
         "emit the corrected core record in its entirety, header block included. "
         "It must remain consistent with the reconciled full record supplied "
-        "below and assert nothing the full record does not support. If no "
+        "above and assert nothing the full record does not support. If no "
         "finding requires a change, emit it unchanged. Output only YAML."),
     "report": (
         "Phase 4c. Write the reconciliation report as Markdown: what the audit "
@@ -461,12 +461,18 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
          "cache_control": {"type": "ephemeral"}},
     ]
 
+    # Carried artifacts go BEFORE the phase instruction, so the instruction is
+    # the last thing in the message (#346). With the old order the message
+    # ended with the carried full record — for AI-READI an 83KB YAML document
+    # sitting 21k tokens after "Output only the YAML" — and the model continued
+    # that document instead of answering: ten consecutive core-phase attempts
+    # produced a mid-record fragment growing an `extension_mechanism` slot.
     parts: list[dict[str, Any]] = list(cached)
     parts.append({"type": "text", "text": resolve_prompt(spec)})
-    parts.append({"type": "text", "text": PHASE_INSTRUCTIONS[phase]})
     for name, text in carry.items():
         parts.append({"type": "text",
                       "text": f"# {name}\n\n{text}"})
+    parts.append({"type": "text", "text": PHASE_INSTRUCTIONS[phase]})
 
     return PhaseRequest(
         phase=phase,
