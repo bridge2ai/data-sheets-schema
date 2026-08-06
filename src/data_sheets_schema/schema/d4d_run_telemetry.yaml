@@ -1,0 +1,266 @@
+id: https://w3id.org/bridge2ai/data-sheets-schema/d4d-run-telemetry
+name: d4d-run-telemetry
+title: D4D Generation Run Telemetry
+description: >-
+  Process telemetry for six-phase D4D generation runs: per-attempt token
+  accounting, reasoning spend, repair convergence, validation outcome and
+  what timing evidence exists. Standalone — deliberately NOT imported by the
+  main D4D schema; this describes the machinery, not a dataset. Named outside
+  the D4D_*.yaml convention so the module build and lint globs never sweep
+  it in.
+license: MIT
+prefixes:
+  linkml: https://w3id.org/linkml/
+  d4drt: https://w3id.org/bridge2ai/data-sheets-schema/d4d-run-telemetry/
+default_prefix: d4drt
+default_range: string
+imports:
+  - linkml:types
+
+enums:
+  PhaseEnum:
+    description: >-
+      The six generation phases, plus the validator-driven repair phases
+      (#361) that run only when a completed record fails validation.
+    permissible_values:
+      full:
+        description: Generate the full Dataset record.
+      core:
+        description: Generate the CoreDataset record from the full record.
+      audit:
+        description: Audit both records against bundle, boundary and shape.
+      reconcile_full:
+        description: Apply audit findings to the full record.
+      reconcile_core:
+        description: Apply audit findings to the core record.
+      report:
+        description: Write the reconciliation report.
+      repair_full:
+        description: Validator-driven shape repair of the full record.
+      repair_core:
+        description: Validator-driven shape repair of the core record.
+  StopReasonEnum:
+    description: >-
+      Why the model stopped. max_tokens marks an attempt whose output was
+      truncated and discarded; the guard never writes those.
+    permissible_values:
+      end_turn:
+        description: The model finished of its own accord.
+      max_tokens:
+        description: The ceiling cut the response off.
+      stop_sequence:
+        description: A configured stop sequence fired.
+      other:
+        description: Any stop reason this schema does not name.
+  ValidationStateEnum:
+    description: Whether the run's records pass LinkML validation.
+    permissible_values:
+      valid:
+        description: Both records pass linkml-validate.
+      invalid:
+        description: At least one record fails; the run is not shippable.
+      unchecked:
+        description: >-
+          Validation evidence is absent — distinct from valid, exactly as a
+          record that could not be checked is not a record that passed.
+  TimingBasisEnum:
+    description: >-
+      Where the timing figures come from. Runs made before per-attempt
+      timestamps existed can only be dated by artifact mtimes and the
+      provenance stamp, and a reader must be able to tell.
+    permissible_values:
+      recorded:
+        description: Per-attempt timestamps and durations from the run itself.
+      file_mtime:
+        description: >-
+          Approximated from artifact modification times; per-attempt
+          durations are not available.
+      absent:
+        description: No timing evidence of any kind survives.
+
+classes:
+  RunTelemetryReport:
+    tree_root: true
+    description: One report per collection pass, covering every run it found.
+    attributes:
+      label:
+        description: The run label the report covers, e.g. 2026-08-05_claude-opus-5-1m-generic-v3.
+        required: true
+      method:
+        description: Generation method, e.g. claudecode_agent.
+        required: true
+      generated_at:
+        description: When this report was collected (UTC).
+        range: datetime
+        required: true
+      schema_version:
+        description: Version of this telemetry schema the report conforms to.
+        required: true
+      runs:
+        description: Every run found under the label, one entry per project.
+        range: RunTelemetry
+        multivalued: true
+        inlined_as_list: true
+
+  RunTelemetry:
+    description: One project's run under the label, with every billed attempt.
+    attributes:
+      project:
+        description: Project the run documents, e.g. AI_READI.
+        required: true
+      replicate:
+        description: Replicate number parsed from the run label.
+        range: integer
+      label:
+        description: Full run label including the replicate suffix.
+        required: true
+      model:
+        description: Model route the run was billed against, as recorded.
+      provider:
+        description: API provider, e.g. LBL CBORG (proxy to Anthropic).
+      arm:
+        description: Experimental arm, e.g. BASELINE (input documents only).
+      validation_state:
+        description: Final validation outcome of both records.
+        range: ValidationStateEnum
+        required: true
+      validation_problem_count:
+        description: How many artifacts still carry validation problems.
+        range: integer
+      timing_basis:
+        description: Where every time figure in this run comes from.
+        range: TimingBasisEnum
+        required: true
+      finished_at:
+        range: datetime
+        description: The provenance record_generated_at, when present.
+      wall_seconds_estimate:
+        range: float
+        description: >-
+          Coarse whole-run estimate; basis given by timing_basis. Absent when
+          no two time points exist to subtract.
+      total_input_tokens:
+        description: Sum of uncached input tokens across every billed call.
+        range: integer
+      total_output_tokens:
+        description: Sum of output tokens (thinking and visible text together).
+        range: integer
+      total_cache_read_tokens:
+        description: Sum of prompt-cache read tokens across every billed call.
+        range: integer
+      total_cache_write_tokens:
+        description: Sum of prompt-cache write tokens across every billed call.
+        range: integer
+      total_reasoning_tokens_estimate:
+        range: integer
+        description: >-
+          Sum of per-attempt estimates (output tokens minus a chars/4 estimate
+          of visible text). Sound for comparison, not cost attribution — the
+          proxy withholds reasoning text, so the estimate is the only measure.
+      approx_cost_usd:
+        range: float
+        description: >-
+          input*$5/M + cache_write*$6.25/M + cache_read*$0.50/M + output*$25/M
+          at the CBORG-posted opus-5 rates; an estimate, not an invoice.
+      invocations:
+        range: integer
+        description: >-
+          How many batch invocations the run took. Completed-but-invalid runs
+          keep resume state so a re-run can continue repair (#361, #362), so
+          more than one is routine for large records.
+      phases:
+        description: Per-phase attempt history, in first-appearance order.
+        range: PhaseTelemetry
+        multivalued: true
+        inlined_as_list: true
+      repair_rounds:
+        description: Validator-driven repair rounds with their outcomes.
+        range: RepairRound
+        multivalued: true
+        inlined_as_list: true
+
+  PhaseTelemetry:
+    description: All attempts of one phase, in order.
+    attributes:
+      phase:
+        description: Which phase these attempts belong to.
+        range: PhaseEnum
+        required: true
+      attempts:
+        description: Every billed attempt of this phase, in call order.
+        range: AttemptTelemetry
+        multivalued: true
+        inlined_as_list: true
+        required: true
+      artifact_written_at:
+        range: datetime
+        description: >-
+          Modification time of the artifact this phase writes, when the file
+          still exists. The only per-phase time point for runs predating
+          recorded timing.
+
+  AttemptTelemetry:
+    description: One billed API call.
+    attributes:
+      attempt:
+        description: >-
+          Attempt number as recorded; numbers repeat across invocations while
+          list order is chronological.
+        range: integer
+        required: true
+      started_at:
+        range: datetime
+        description: Present only for runs made after timing was recorded.
+      seconds:
+        range: float
+        description: Wall time of the call, retries at the transport layer included.
+      input_tokens:
+        description: Uncached input tokens billed for this call.
+        range: integer
+      output_tokens:
+        description: Output tokens billed, thinking included.
+        range: integer
+      cache_read_tokens:
+        description: Prompt-cache tokens read by this call.
+        range: integer
+      cache_write_tokens:
+        description: Prompt-cache tokens written by this call.
+        range: integer
+      max_tokens:
+        range: integer
+        description: The ceiling requested, after the per-route clamp.
+      stop_reason:
+        description: Why the model stopped on this attempt.
+        range: StopReasonEnum
+      reasoning_tokens_estimate:
+        description: Output tokens minus a chars/4 estimate of visible text.
+        range: integer
+      visible_text_chars:
+        description: Characters of visible (non-thinking) response text.
+        range: integer
+      reasoning_present:
+        range: boolean
+        description: A thinking block came back, possibly with its text stripped.
+      reasoning_available:
+        range: boolean
+        description: The thinking text itself was capturable, not just attested.
+
+  RepairRound:
+    description: >-
+      One round of validator-driven repair (#361/#365). findings is the
+      validator line count the round started from; the trajectory across
+      rounds is the convergence record (e.g. 165 -> 27 -> 22 -> 21).
+    attributes:
+      artifact:
+        required: true
+        description: full or core.
+      round:
+        description: Repair round number within one invocation.
+        range: integer
+        required: true
+      outcome:
+        required: true
+        description: applied, truncated, unusable response, not converging, or validator did not run.
+      findings:
+        description: Validator finding lines this round started from.
+        range: integer

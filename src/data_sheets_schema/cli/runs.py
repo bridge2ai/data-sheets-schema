@@ -12,6 +12,54 @@ def runs():
     pass
 
 
+@runs.command("telemetry")
+@click.option("--label-prefix", required=True,
+              help="run label or prefix, e.g. 2026-08-05_claude-opus-5-1m-generic-v3")
+@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("-o", "--output", type=click.Path(), default=None,
+              help="output path; defaults to data/run_telemetry/{label_prefix}.yaml")
+@click.option("--validate", "do_validate", is_flag=True,
+              help="linkml-validate the report against the telemetry schema")
+def telemetry_cmd(label_prefix, method, output, do_validate):
+    """Collect per-phase process telemetry into a schema-backed report.
+
+    Harvests provenance api_usage, the reasoning log, repair rounds,
+    validation outcomes and what timing evidence exists (see the schema's
+    timing_basis for how honest each figure is).
+    """
+    import subprocess
+    import yaml as _yaml
+
+    from data_sheets_schema.run_telemetry import SCHEMA_PATH, collect_report
+
+    report = collect_report(label_prefix, method=method)
+    if not report["runs"]:
+        raise click.ClickException(
+            f"no runs with provenance found for prefix {label_prefix!r} "
+            f"under method {method!r}")
+    out = Path(output) if output else (
+        Path("data/run_telemetry") / f"{label_prefix}.yaml")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(_yaml.safe_dump(report, sort_keys=False,
+                                   allow_unicode=True), encoding="utf-8")
+    click.echo(f"✓ {len(report['runs'])} run(s) -> {out}")
+    for r in report["runs"]:
+        click.echo(f"   {r['project']:9} rep{r.get('replicate', '?')} "
+                   f"{r['validation_state']:9} in={r['total_input_tokens']:,} "
+                   f"out={r['total_output_tokens']:,} "
+                   f"~${r['approx_cost_usd']:.2f} timing={r['timing_basis']}")
+    if do_validate:
+        res = subprocess.run(
+            ["poetry", "run", "linkml-validate", "-s", str(SCHEMA_PATH),
+             "-C", "RunTelemetryReport", str(out)],
+            capture_output=True, text=True, timeout=180)
+        if res.returncode != 0:
+            raise click.ClickException(
+                f"telemetry report failed schema validation:\n"
+                f"{(res.stdout + res.stderr).strip()[:800]}")
+        click.echo("✓ report validates against d4d_run_telemetry.yaml")
+
+
 @runs.command()
 @click.option('--label', 'labels', multiple=True,
               help='Run label(s) to archive; repeatable.')
