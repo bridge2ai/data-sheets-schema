@@ -1122,6 +1122,54 @@ def build_repair(artifact: str, body: str, errors: list[str]) -> PhaseRequest:
                         messages=[{"role": "user", "content": parts}])
 
 
+def _intermediate_dir(spec: RunSpec) -> Path:
+    """Where a run's phase snapshots live, beside its provenance."""
+    return spec.provenance_path.parent / "intermediate"
+
+
+def _snapshot(spec: RunSpec, name: str, body: str) -> Path:
+    """Preserve one phase's output before a later phase overwrites it (#369).
+
+    Never overwrites: repair round numbers restart on a resumed invocation,
+    so a colliding name gets a numeric suffix — losing the earlier round's
+    state to the later one would defeat the point.
+    """
+    d = _intermediate_dir(spec)
+    d.mkdir(parents=True, exist_ok=True)
+    stem, dot, ext = name.rpartition(".")
+    path = d / name
+    n = 2
+    while path.exists():
+        path = d / f"{stem}_{n}.{ext}"
+        n += 1
+    path.write_text(body, encoding="utf-8")
+    return path
+
+
+def _intermediates_block(spec: RunSpec) -> list[dict[str, Any]] | None:
+    """Every snapshot on disk for this run's project, pinned by hash.
+
+    Globbed at record-build time rather than accumulated in memory, so a
+    resumed invocation lists the earlier invocations' snapshots too.
+    """
+    d = _intermediate_dir(spec)
+    if not d.is_dir():
+        return None
+    out = []
+    for p in sorted(d.glob(f"{spec.project}_*")):
+        # The remainder after the project name must be a phase token:
+        # VOICE and VOICE_PEDIATRIC share label directories, and a bare
+        # prefix glob would claim the other project's snapshots.
+        rest = p.name[len(spec.project) + 1:]
+        if not rest.startswith(("full", "core", "audit", "reconcile",
+                                "repair", "report")):
+            continue
+        out.append({"path": str(p),
+                    "sha256": hashlib.sha256(
+                        p.read_bytes()).hexdigest()})
+    return out or None
+
+
 def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                     usage: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Validator-driven shape repair of whichever artifacts fail (#356).
@@ -1208,8 +1256,9 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 log.append({"phase": ph, "round": rnd,
                             "outcome": f"unusable response: {exc}"})
                 continue
-            path.write_text(normalise_enum_aliases(normalise_temporal(body)),
-                            encoding="utf-8")
+            body = normalise_enum_aliases(normalise_temporal(body))
+            path.write_text(body, encoding="utf-8")
+            _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
             applied_from = len(errors)
             log.append({"phase": ph, "round": rnd, "outcome": "applied",
                         "findings": len(errors)})
@@ -1559,11 +1608,20 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             time.sleep(BACKOFF_BASE_SECONDS ** attempt)
         if ph == "audit":
             carry["Audit findings"] = body
+            # The progress file that carries the findings is deleted on
+            # success, so without this the run's richest intermediate
+            # survives only as the report's prose summary (#369).
+            _snapshot(spec, f"{spec.project}_audit.json", body)
         elif artifact:
             target.parent.mkdir(parents=True, exist_ok=True)
             if artifact in ("full", "core"):
                 body = normalise_enum_aliases(normalise_temporal(body))
             target.write_text(body, encoding="utf-8")
+            # Reconcile (and later repair) overwrite the artifact in place;
+            # the snapshot is the only record of what this phase produced.
+            _snapshot(spec, f"{spec.project}_{ph}.yaml"
+                      if artifact != "report" else f"{spec.project}_{ph}.md",
+                      body)
             label = {"full": "Completed full record",
                      "core": "Completed core record",
                      "report": "Reconciliation report"}[artifact]
@@ -1647,6 +1705,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     else:
         rec.data["repair"] = None
     rec.data["validation"] = validation_block(spec, problems)
+    rec.data["intermediates"] = _intermediates_block(spec)
 
     rec.write(spec.provenance_path)
 

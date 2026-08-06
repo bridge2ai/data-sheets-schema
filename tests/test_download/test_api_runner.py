@@ -761,6 +761,48 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         self.assertEqual(phases[:6], [u["phase"] for u in first["api_usage"]])
         self.assertEqual(phases[-1], "repair_full")
 
+    def test_execute_snapshots_every_intermediate(self):
+        """#369: reconcile and repair overwrite artifacts in place, and the
+        audit findings die with the progress file on success. The snapshots
+        are the only phase-evolution record the manuscript can analyze."""
+        import yaml as _yaml
+        from data_sheets_schema import api_runner
+        s = spec(out_dir=self.out)
+        keep = api_runner._client
+        api_runner._client = lambda: FakeClient()
+        self.addCleanup(lambda: setattr(api_runner, "_client", keep))
+        self.api.execute(s)
+        inter = s.provenance_path.parent / "intermediate"
+        names = sorted(p.name for p in inter.iterdir())
+        for expected in ("CHORUS_full.yaml", "CHORUS_core.yaml",
+                         "CHORUS_audit.json", "CHORUS_reconcile_full.yaml",
+                         "CHORUS_reconcile_core.yaml", "CHORUS_report.md"):
+            self.assertIn(expected, names)
+        d = _yaml.safe_load((self.out / "CHORUS_provenance.yaml").read_text())
+        listed = {Path(i["path"]).name for i in d["intermediates"]}
+        self.assertEqual(listed, set(names))
+        for i in d["intermediates"]:
+            self.assertEqual(len(i["sha256"]), 64)
+
+    def test_snapshot_never_overwrites_a_colliding_name(self):
+        s = spec(out_dir=self.out)
+        self.out.mkdir(parents=True, exist_ok=True)
+        first = self.api._snapshot(s, "CHORUS_repair_full_r1.yaml", "one\n")
+        second = self.api._snapshot(s, "CHORUS_repair_full_r1.yaml", "two\n")
+        self.assertNotEqual(first, second)
+        self.assertEqual(first.read_text(), "one\n")
+        self.assertEqual(second.read_text(), "two\n")
+        self.assertEqual(second.name, "CHORUS_repair_full_r1_2.yaml")
+
+    def test_intermediates_do_not_claim_a_prefix_sibling_project(self):
+        s = spec(out_dir=self.out)
+        self.out.mkdir(parents=True, exist_ok=True)
+        self.api._snapshot(s, "CHORUS_full.yaml", "id: x\n")
+        self.api._snapshot(s, "CHORUS_EXTENDED_full.yaml", "id: y\n")
+        block = self.api._intermediates_block(s)
+        self.assertEqual([Path(i["path"]).name for i in block],
+                         ["CHORUS_full.yaml"])
+
     def test_execute_records_no_repair_when_records_validate(self):
         import yaml as _yaml
         from data_sheets_schema import api_runner
