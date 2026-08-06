@@ -25,6 +25,7 @@ Evidence honesty rules, mirrored in the schema:
 
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -35,7 +36,7 @@ import yaml
 from data_sheets_schema.api_runner import CONCAT_DIR
 
 SCHEMA_PATH = Path("src/data_sheets_schema/schema/d4d_run_telemetry.yaml")
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "1.1.0"
 
 # CBORG-posted opus-5 rates (2026-08-05, /model/info): $ per token. Cache
 # writes bill at 1.25x input, cache reads at 0.1x. No premium tier above 200k.
@@ -119,6 +120,146 @@ def _invocations(rows: list[dict[str, Any]]) -> int | None:
     gaps = sum(1 for a, b in zip(stamps, stamps[1:])
                if (b - a).total_seconds() > _INVOCATION_GAP_SECONDS)
     return 1 + gaps
+
+
+def _record_stats(artifact: str, path: Path) -> dict[str, Any] | None:
+    """File and content statistics for one final artifact.
+
+    Content figures require the YAML to parse to a mapping; a report (or a
+    record that does not parse) carries file figures only — measured facts,
+    never guessed ones.
+    """
+    if not path.exists():
+        return None
+    data = path.read_bytes()
+    out: dict[str, Any] = {
+        "artifact": artifact,
+        "path": str(path),
+        "sha256": hashlib.sha256(data).hexdigest(),
+        "bytes": len(data),
+        "lines": data.count(b"\n") + (0 if data.endswith(b"\n") else 1),
+    }
+    if path.suffix in (".yaml", ".yml"):
+        try:
+            parsed = yaml.safe_load(data.decode("utf-8", errors="ignore"))
+        except yaml.YAMLError:
+            parsed = None
+        if isinstance(parsed, dict):
+            out["root_slot_count"] = len(parsed)
+            out["populated_root_slot_count"] = sum(
+                1 for v in parsed.values()
+                if v is not None and v != "" and v != [] and v != {})
+    return out
+
+
+# Metrics compared across runs. Each entry: (metric name, unit, extractor).
+_COMPARISON_METRICS = (
+    ("full_phase_output_tokens", "tokens",
+     lambda r: next((a.get("output_tokens")
+                     for p in r["phases"] if p["phase"] == "full"
+                     for a in p["attempts"]
+                     if a.get("stop_reason") == "end_turn"), None)),
+    ("full_phase_reasoning_tokens_estimate", "tokens",
+     lambda r: next((a.get("reasoning_tokens_estimate")
+                     for p in r["phases"] if p["phase"] == "full"
+                     for a in p["attempts"]
+                     if a.get("stop_reason") == "end_turn"), None)),
+    ("total_output_tokens", "tokens",
+     lambda r: r.get("total_output_tokens")),
+    ("approx_cost_usd", "USD", lambda r: r.get("approx_cost_usd")),
+    ("repair_call_count", "calls",
+     lambda r: sum(len(p["attempts"]) for p in r["phases"]
+                   if p["phase"].startswith("repair_")) or None),
+    ("full_root_slot_count", "slots",
+     lambda r: next((s.get("root_slot_count")
+                     for s in r.get("records", [])
+                     if s["artifact"] == "full"), None)),
+    ("core_root_slot_count", "slots",
+     lambda r: next((s.get("root_slot_count")
+                     for s in r.get("records", [])
+                     if s["artifact"] == "core"), None)),
+    ("validation_problem_count", "artifacts",
+     lambda r: r.get("validation_problem_count")),
+)
+
+
+def comparisons(runs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Mechanical cross-run comparisons: numbers side by side, no judgement.
+
+    A metric appears only when at least two runs carry it — a single value
+    compares nothing.
+    """
+    out = []
+    for metric, unit, get in _COMPARISON_METRICS:
+        values = []
+        for r in runs:
+            v = get(r)
+            if v is not None:
+                values.append({"subject": f"{r['project']} "
+                                          f"rep{r.get('replicate', '?')}",
+                               "value": float(v)})
+        if len(values) >= 2:
+            out.append({"metric": metric, "unit": unit, "values": values})
+    return out
+
+
+PRESENCE_SCORES = Path("data/evaluation/scores.json")
+LLM_SCORES = Path("data/evaluation_llm/scores.json")
+
+
+def _evaluations_for(artifact_paths: dict[str, Path],
+                     scores_path: Path,
+                     evaluation_type: str) -> list[dict[str, Any]]:
+    """Rubric scores whose recorded file path matches this run's artifacts.
+
+    Exact path match only: the published evaluation outputs are keyed by
+    label-less legacy paths (#286), so for label-addressed runs this returns
+    empty until the evaluators are re-run against the label's files — an
+    honest absence, not a missing feature.
+    """
+    if not scores_path.exists():
+        return []
+    try:
+        entries = json.loads(scores_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return []
+    if not isinstance(entries, list):
+        return []
+    by_path = {str(p): art for art, p in artifact_paths.items()
+               if art in ("full", "core")}
+    out = []
+    for e in entries:
+        art = by_path.get(str(e.get("file_path", "")))
+        if art is None:
+            continue
+        for rubric in ("rubric10", "rubric20"):
+            r = e.get(rubric)
+            if not isinstance(r, dict) or r.get("total") is None:
+                continue
+            score: dict[str, Any] = {
+                "evaluation_type": evaluation_type,
+                "rubric": rubric,
+                "artifact": art,
+                "score": float(r["total"]),
+                "max_score": float(r.get("max", 0)),
+                "source": str(scores_path),
+            }
+            if r.get("percentage") is not None:
+                score["percent"] = float(r["percentage"])
+            if e.get("timestamp"):
+                score["evaluated_at"] = e["timestamp"]
+            if e.get("judge_model") or e.get("model"):
+                score["judge_model"] = e.get("judge_model") or e.get("model")
+            out.append(score)
+    return out
+
+
+def load_findings(path: Path) -> list[dict[str, Any]]:
+    """Authored findings from a curated YAML file: a list of Finding dicts."""
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(data, list):
+        raise ValueError(f"{path} must contain a list of findings")
+    return data
 
 
 def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
@@ -216,6 +357,19 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
         out["wall_seconds_estimate"] = wall
     if prob_count is not None:
         out["validation_problem_count"] = prob_count
+    records = [s for s in (
+        _record_stats("full", artifact_paths["full"]),
+        _record_stats("core", artifact_paths["core"]),
+        _record_stats("report", artifact_paths["report"]))
+        if s is not None]
+    if records:
+        out["records"] = records
+    presence = _evaluations_for(artifact_paths, PRESENCE_SCORES, "presence")
+    if presence:
+        out["presence_evaluations"] = presence
+    judged = _evaluations_for(artifact_paths, LLM_SCORES, "llm_judge")
+    if judged:
+        out["llm_judge_evaluations"] = judged
     out["total_input_tokens"] = total["input_tokens"]
     out["total_output_tokens"] = total["output_tokens"]
     out["total_cache_read_tokens"] = total["cache_read"]
@@ -238,8 +392,14 @@ def run_telemetry(run_dir: Path, project: str) -> dict[str, Any] | None:
 
 def collect_report(label_prefix: str,
                    method: str = "claudecode_agent",
-                   root: Path | None = None) -> dict[str, Any]:
-    """A RunTelemetryReport over every run dir matching the label prefix."""
+                   root: Path | None = None,
+                   findings: list[dict[str, Any]] | None = None,
+                   ) -> dict[str, Any]:
+    """A RunTelemetryReport over every run dir matching the label prefix.
+
+    Comparisons are computed mechanically across the collected runs;
+    findings are authored analysis passed in, never generated here.
+    """
     base = (root or CONCAT_DIR) / f"{method}_core"
     runs: list[dict[str, Any]] = []
     dirs = sorted(p for p in base.glob(f"{label_prefix}*") if p.is_dir())
@@ -249,7 +409,7 @@ def collect_report(label_prefix: str,
             t = run_telemetry(d, project)
             if t:
                 runs.append(t)
-    return {
+    report = {
         "label": label_prefix,
         "method": method,
         "generated_at": datetime.now(timezone.utc).isoformat(
@@ -257,3 +417,9 @@ def collect_report(label_prefix: str,
         "schema_version": SCHEMA_VERSION,
         "runs": runs,
     }
+    comp = comparisons(runs)
+    if comp:
+        report["comparisons"] = comp
+    if findings:
+        report["findings"] = findings
+    return report

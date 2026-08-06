@@ -63,6 +63,25 @@ enums:
         description: >-
           Validation evidence is absent — distinct from valid, exactly as a
           record that could not be checked is not a record that passed.
+  EvaluationTypeEnum:
+    description: The two evaluation families this report can carry.
+    permissible_values:
+      presence:
+        description: Field-presence detection; free, no model involved.
+      llm_judge:
+        description: LLM-as-judge quality assessment with evidence quotes.
+  FindingKindEnum:
+    description: >-
+      How much judgement a finding carries. Observations restate evidence;
+      comparisons put two measurements side by side; interpretations are
+      claims a reader should weigh, not facts.
+    permissible_values:
+      observation:
+        description: A direct restatement of recorded evidence.
+      comparison:
+        description: Two or more measurements set against each other.
+      interpretation:
+        description: A judgement drawn from evidence; contestable by design.
   TimingBasisEnum:
     description: >-
       Where the timing figures come from. Runs made before per-attempt
@@ -99,6 +118,20 @@ classes:
       runs:
         description: Every run found under the label, one entry per project.
         range: RunTelemetry
+        multivalued: true
+        inlined_as_list: true
+      comparisons:
+        description: >-
+          Mechanical cross-run comparisons, one per metric, computed by the
+          collector — no judgement, only numbers set side by side.
+        range: Comparison
+        multivalued: true
+        inlined_as_list: true
+      findings:
+        description: >-
+          Authored analysis: observations, comparisons and interpretations,
+          each labeled with how much judgement it carries.
+        range: Finding
         multivalued: true
         inlined_as_list: true
 
@@ -168,6 +201,26 @@ classes:
           How many batch invocations the run took. Completed-but-invalid runs
           keep resume state so a re-run can continue repair (#361, #362), so
           more than one is routine for large records.
+      records:
+        description: File and content statistics of the run's final artifacts.
+        range: RecordStats
+        multivalued: true
+        inlined_as_list: true
+      presence_evaluations:
+        description: >-
+          Field-presence rubric scores whose recorded path matches this
+          run's artifacts. Empty until the presence evaluator is run against
+          this label's files (#286).
+        range: EvaluationScore
+        multivalued: true
+        inlined_as_list: true
+      llm_judge_evaluations:
+        description: >-
+          LLM-as-judge rubric scores whose recorded path matches this run's
+          artifacts. Empty until the judge is run against this label's files.
+        range: EvaluationScore
+        multivalued: true
+        inlined_as_list: true
       phases:
         description: Per-phase attempt history, in first-appearance order.
         range: PhaseTelemetry
@@ -244,6 +297,121 @@ classes:
       reasoning_available:
         range: boolean
         description: The thinking text itself was capturable, not just attested.
+
+  RecordStats:
+    description: >-
+      Basic file and content statistics for one final artifact. Content
+      figures come from parsing the YAML; a file that does not parse reports
+      file figures only.
+    attributes:
+      artifact:
+        description: Which artifact this describes — full, core or report.
+        required: true
+      path:
+        description: Repository-relative path of the file measured.
+        required: true
+      sha256:
+        description: Hash of the measured bytes, pinning what was described.
+        required: true
+      bytes:
+        description: File size in bytes.
+        range: integer
+        required: true
+      lines:
+        description: Newline-delimited line count.
+        range: integer
+      root_slot_count:
+        description: Top-level keys the parsed record carries.
+        range: integer
+      populated_root_slot_count:
+        description: >-
+          Top-level keys whose value is neither null nor an empty string,
+          list or mapping.
+        range: integer
+
+  Comparison:
+    description: One metric measured across runs, with no interpretation.
+    attributes:
+      metric:
+        description: What is being compared, e.g. full_phase_output_tokens.
+        required: true
+      unit:
+        description: Unit of the values, e.g. tokens, USD, slots, rounds.
+      values:
+        description: One measurement per run.
+        range: ComparisonValue
+        multivalued: true
+        inlined_as_list: true
+        required: true
+
+  ComparisonValue:
+    description: One run's value for a compared metric.
+    attributes:
+      subject:
+        description: The run measured, e.g. AI_READI rep1.
+        required: true
+      value:
+        description: The measurement, as a number.
+        range: float
+        required: true
+
+  EvaluationScore:
+    description: >-
+      One rubric evaluation of one artifact — field-presence detection or
+      LLM-as-judge quality assessment. Attached to a run only when the
+      evaluation's recorded file path matches this run's artifact exactly:
+      the published evaluation outputs are keyed by label-less legacy paths
+      (#286), and a score for a different file is not a score for this run.
+    attributes:
+      evaluation_type:
+        description: presence (field detection) or llm_judge (quality).
+        range: EvaluationTypeEnum
+        required: true
+      rubric:
+        description: Which rubric produced the score, e.g. rubric10, rubric20.
+        required: true
+      artifact:
+        description: Which of the run's artifacts was scored — full or core.
+        required: true
+      score:
+        description: Points awarded.
+        range: float
+        required: true
+      max_score:
+        description: Points available under the rubric.
+        range: float
+        required: true
+      percent:
+        description: score / max_score, as a percentage.
+        range: float
+      judge_model:
+        description: The judging model, for llm_judge evaluations.
+      evaluated_at:
+        description: When the evaluation ran, as recorded by the evaluator.
+        range: datetime
+      source:
+        description: Path of the evaluation output the score was read from.
+
+  Finding:
+    description: One item of authored analysis, labeled by its kind.
+    attributes:
+      topic:
+        description: Short subject line, e.g. repair convergence.
+        required: true
+      kind:
+        description: How much judgement the claim carries.
+        range: FindingKindEnum
+        required: true
+      claim:
+        description: The statement itself, one or two sentences.
+        required: true
+      evidence:
+        description: >-
+          What backs the claim — figures, file paths, issue numbers. A
+          finding without evidence is an opinion and should say so via kind.
+      relates_to:
+        description: Related run labels, projects or issue references.
+        multivalued: true
 
   RepairRound:
     description: >-

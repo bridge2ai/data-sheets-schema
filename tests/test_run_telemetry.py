@@ -11,7 +11,9 @@ import yaml
 from data_sheets_schema.run_telemetry import (
     SCHEMA_PATH,
     SCHEMA_VERSION,
+    _evaluations_for,
     collect_report,
+    comparisons,
     run_telemetry,
 )
 
@@ -115,9 +117,61 @@ class TestRunTelemetry(unittest.TestCase):
     def test_missing_provenance_returns_none(self):
         self.assertIsNone(run_telemetry(self.run_dir, "NOPE"))
 
+    def test_record_stats_carry_file_and_content_figures(self):
+        t = run_telemetry(self.run_dir, "CHORUS")
+        stats = {s["artifact"]: s for s in t["records"]}
+        self.assertEqual(set(stats), {"full", "core", "report"})
+        self.assertEqual(stats["full"]["root_slot_count"], 1)
+        self.assertEqual(stats["full"]["populated_root_slot_count"], 1)
+        self.assertEqual(len(stats["full"]["sha256"]), 64)
+        # The report is markdown: file figures only, no content claims.
+        self.assertNotIn("root_slot_count", stats["report"])
+
+    def test_comparisons_need_two_values_and_stay_mechanical(self):
+        t = run_telemetry(self.run_dir, "CHORUS")
+        self.assertEqual(comparisons([t]), [],
+                         "a single run compares nothing")
+        t2 = dict(t, project="AI_READI")
+        comp = {c["metric"]: c for c in comparisons([t, t2])}
+        self.assertIn("total_output_tokens", comp)
+        self.assertEqual(len(comp["total_output_tokens"]["values"]), 2)
+        full = comp["full_phase_output_tokens"]["values"][0]
+        self.assertEqual(full["value"], 100.0)
+
+    def test_evaluations_attach_on_exact_path_match_only(self):
+        scores = self.root / "scores.json"
+        core_path = self.run_dir / "CHORUS_d4d_core.yaml"
+        scores.write_text(json.dumps([
+            {"project": "CHORUS", "file_path": str(core_path),
+             "timestamp": "2026-08-06T00:00:00",
+             "rubric10": {"total": 34, "max": 50, "percentage": 68.0}},
+            {"project": "CHORUS",
+             "file_path": "data/d4d_concatenated/claudecode_agent_core/CHORUS_d4d_core.yaml",
+             "rubric10": {"total": 10, "max": 50}},
+        ]))
+        got = _evaluations_for({"core": core_path}, scores, "presence")
+        self.assertEqual(len(got), 1, "the label-less legacy path must not "
+                                      "attach to a label-addressed run")
+        self.assertEqual(got[0]["score"], 34.0)
+        self.assertEqual(got[0]["artifact"], "core")
+        self.assertEqual(got[0]["evaluation_type"], "presence")
+
+    def test_findings_pass_through_to_the_report(self):
+        finding = {"topic": "test", "kind": "observation",
+                   "claim": "the fixture ran", "evidence": "this test"}
+        report = collect_report("2026-08-05_test", root=self.root,
+                                findings=[finding])
+        self.assertEqual(report["findings"], [finding])
+
     def test_report_validates_against_the_schema(self):
-        report = collect_report("2026-08-05_test", root=self.root)
+        report = collect_report(
+            "2026-08-05_test", root=self.root,
+            findings=[{"topic": "fixture", "kind": "interpretation",
+                       "claim": "synthetic data behaves",
+                       "evidence": "this suite",
+                       "relates_to": ["#369"]}])
         self.assertEqual(len(report["runs"]), 1)
+        self.assertIn("records", report["runs"][0])
         self.assertEqual(report["schema_version"], SCHEMA_VERSION)
         out = self.root / "report.yaml"
         out.write_text(yaml.safe_dump(report, sort_keys=False),
