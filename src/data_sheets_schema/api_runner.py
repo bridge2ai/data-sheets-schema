@@ -1365,6 +1365,21 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     skipped: list[str] = []
     carry: dict[str, str] = {}
 
+    # Seed the accounting from a prior pass (#362). A completed-but-invalid
+    # run keeps its resume state so a re-run can repair it (#361) — but this
+    # invocation rebuilds the provenance record, and starting `usage` empty
+    # would replace six phases of real token accounting with only the calls
+    # this invocation makes. Every billed call stays on the record. Gated on
+    # the progress file too: without resume state this is a from-scratch
+    # regeneration, and a dead run's accounting does not belong on it.
+    if spec.provenance_path.exists() and _progress_path(spec).exists():
+        try:
+            prior = yaml.safe_load(
+                spec.provenance_path.read_text(encoding="utf-8")) or {}
+            usage.extend(prior.get("api_usage") or [])
+        except yaml.YAMLError:
+            pass
+
     # Resume from an explicit progress file rather than inferring from
     # artifacts. A `full` record on disk may be pre- or post-reconciliation and
     # nothing in the file distinguishes them, so guessing would silently skip
