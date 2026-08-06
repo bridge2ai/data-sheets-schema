@@ -165,8 +165,8 @@ PHASE_MAX_TOKENS = {
     # AI-READI full attempts died at 64000 with the record truncated. The value
     # is clamped per route by `output_limit()`, so on a 64k route (the
     # `google/…` rebroadcasts) the request still asks for exactly 64000.
-    "full": 96000, "reconcile_full": 96000,
-    "core": 56000, "reconcile_core": 56000,
+    "full": 96000, "reconcile_full": 96000, "repair_full": 96000,
+    "core": 56000, "reconcile_core": 56000, "repair_core": 56000,
     # 24000, not 12000. The original was derived from records generated before
     # the v2 rules existed, and two AI-READI runs truncated mid-audit — a phase
     # that fails at its ceiling costs the whole run, since the phases before it
@@ -1029,6 +1029,29 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     return block
 
 
+def _validator_lines(path: Path, schema: str,
+                     cls: str) -> tuple[list[str] | None, str | None]:
+    """(findings, failure): every validator finding, one per line.
+
+    `findings` is None exactly when `failure` says why the validator itself
+    could not run — the two outcomes must stay distinguishable, because a
+    record that could not be checked is not a record that passed, and a
+    repair attempted against a broken validator would be flying blind.
+    """
+    try:
+        r = subprocess.run(
+            ["poetry", "run", "linkml-validate", "-s", schema, "-C", cls,
+             str(path)],
+            capture_output=True, text=True, timeout=180)
+    except Exception as exc:                           # noqa: BLE001
+        return None, str(exc)
+    if r.returncode == 0:
+        return [], None
+    lines = [l for l in (r.stdout + r.stderr).strip().splitlines()
+             if l.strip()]
+    return lines, None
+
+
 def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
     """LinkML-validate both records, returning problems rather than raising.
 
@@ -1042,20 +1065,137 @@ def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
         if not path.exists():
             problems.append({"artifact": str(path), "error": "missing"})
             continue
-        try:
-            r = subprocess.run(
-                ["poetry", "run", "linkml-validate", "-s", schema, "-C", cls,
-                 str(path)],
-                capture_output=True, text=True, timeout=180)
-        except Exception as exc:                       # noqa: BLE001
+        lines, failure = _validator_lines(path, schema, cls)
+        if failure is not None:
             problems.append({"artifact": str(path),
-                             "error": f"validator did not run: {exc}"})
+                             "error": f"validator did not run: {failure}"})
             continue
-        if r.returncode != 0:
-            detail = (r.stdout + r.stderr).strip().splitlines()
+        if lines:
             problems.append({"artifact": str(path), "class": cls,
-                             "error": " | ".join(detail[:4])})
+                             "error": " | ".join(lines[:4])})
     return problems
+
+
+REPAIR_SYSTEM = (
+    "You repair the shape of Datasheets-for-Datasets records. The schema "
+    "digest defines the required structure. The validator findings are the "
+    "complete work order: correct what they name and nothing else. Never add, "
+    "remove or reword dataset facts; a fact whose required structure the "
+    "record cannot supply moves to the nearest slot that accepts it, or is "
+    "omitted as a last resort.")
+
+REPAIR_INSTRUCTION = (
+    "Shape repair. The record above failed LinkML validation; each finding "
+    "names the failing path and the shape the schema requires. Emit the "
+    "record in its entirety with only those failures corrected. Output only "
+    "YAML.")
+
+# Two, not one: reconciliation once introduced a shape error while repairing
+# an audited omission, so a first repair can conceivably do the same. Two, not
+# more: a repair that has not converged in two rounds is not converging, and
+# every further round bills the whole record again.
+REPAIR_ROUNDS = 2
+
+
+def build_repair(artifact: str, body: str, errors: list[str]) -> PhaseRequest:
+    """A shape-repair request: digest, failing record, validator findings.
+
+    Deliberately excludes the input bundle. The validator names shapes, not
+    facts; a repair with the corpus in view is an invitation to fix content,
+    and the evidence boundary belongs to the six generation phases. Excluding
+    it also makes a repair call an order of magnitude cheaper than a phase.
+    """
+    cls = "CoreDataset" if artifact == "core" else "Dataset"
+    digest = schema_digest.digest_text(cls)
+    cached = [{"type": "text", "text": digest,
+               "cache_control": {"type": "ephemeral"}}]
+    parts: list[dict[str, Any]] = list(cached)
+    parts.append({"type": "text",
+                  "text": f"# Record that failed validation\n\n{body}"})
+    parts.append({"type": "text",
+                  "text": "# Validator findings\n\n" + "\n".join(errors)})
+    parts.append({"type": "text", "text": REPAIR_INSTRUCTION})
+    return PhaseRequest(phase=f"repair_{artifact}", system=REPAIR_SYSTEM,
+                        cached_blocks=cached,
+                        messages=[{"role": "user", "content": parts}])
+
+
+def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
+                    usage: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Validator-driven shape repair of whichever artifacts fail (#356).
+
+    The six phases audit evidence; none of them reliably checks values
+    against the digest even when asked (#360: the shape-instructed audit
+    discussed `external_resources` without noticing its `restrictions` type).
+    The LinkML validator does exactly that, precisely — so its findings drive
+    a bounded repair pass instead of failing the fully billed run outright.
+
+    Every failure mode leaves the last-written bytes on disk and is recorded
+    in the returned log; the caller re-validates afterwards, so a repair that
+    made things worse is caught by the same gate that caught the original.
+    """
+    log: list[dict[str, Any]] = []
+    for artifact, schema, cls in (("full", FULL_SCHEMA_PATH, "Dataset"),
+                                  ("core", CORE_SCHEMA_PATH, "CoreDataset")):
+        path = _artifact_path(spec, artifact)
+        if not path.exists():
+            continue
+        ph = f"repair_{artifact}"
+        for rnd in range(1, REPAIR_ROUNDS + 1):
+            errors, failure = _validator_lines(path, schema, cls)
+            if failure is not None:
+                log.append({"phase": ph, "round": rnd,
+                            "outcome": f"validator did not run: {failure}"})
+                break
+            if not errors:
+                break
+            req = build_repair(artifact, path.read_text(encoding="utf-8"),
+                               errors)
+            try:
+                resp = _call_with_retry(
+                    client, model=settings["name"],
+                    max_tokens=PHASE_MAX_TOKENS.get(ph, DEFAULT_MAX_TOKENS),
+                    temperature=settings["temperature"],
+                    system=req.system, messages=req.messages)
+            except Exception as exc:                   # noqa: BLE001
+                # A dead repair call must not take down a run that would
+                # otherwise report invalid-but-complete, as before repair
+                # existed.
+                log.append({"phase": ph, "round": rnd,
+                            "outcome": f"call failed: {exc}"})
+                break
+            cap = reasoning.capture(resp)
+            reasoning.append(_reasoning_path(spec),
+                             {"phase": ph, "label": spec.label,
+                              "project": spec.project,
+                              "model": settings["name"],
+                              "attempt": rnd, **cap.to_dict()})
+            usage.append({
+                "phase": ph, "attempt": rnd,
+                "input_tokens": getattr(resp.usage, "input_tokens", None),
+                "output_tokens": getattr(resp.usage, "output_tokens", None),
+                "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
+                "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
+                "max_tokens": PHASE_MAX_TOKENS.get(ph, DEFAULT_MAX_TOKENS),
+                "stop_reason": getattr(resp, "stop_reason", None),
+            })
+            if getattr(resp, "stop_reason", None) == "max_tokens":
+                log.append({"phase": ph, "round": rnd,
+                            "outcome": "truncated; record left as it was"})
+                continue
+            text = "".join(b.text for b in resp.content
+                           if getattr(b, "type", "") == "text")
+            try:
+                body = _extract(text, "yaml", schema, cls)
+            except RuntimeError as exc:
+                log.append({"phase": ph, "round": rnd,
+                            "outcome": f"unusable response: {exc}"})
+                continue
+            path.write_text(normalise_enum_aliases(normalise_temporal(body)),
+                            encoding="utf-8")
+            log.append({"phase": ph, "round": rnd, "outcome": "applied",
+                        "findings": len(errors)})
+    return log
 
 
 # Server-side conditions that clear on their own. `overloaded_error` is the one
@@ -1455,6 +1595,16 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # because it only checks that files exist. An invalid record that looks
     # finished is worse than a failed run.
     problems = validate_outputs(spec)
+    if problems:
+        # Validator-driven shape repair (#356): the validator's findings are
+        # precise and the run is already fully billed, so a bounded repair is
+        # cheaper than discarding the run. Hashing happens in
+        # validation_block() below, *after* repair — integrity pins the final
+        # bytes, never an intermediate state.
+        rec.data["repair"] = _repair_invalid(spec, client, settings, usage)
+        problems = validate_outputs(spec)
+    else:
+        rec.data["repair"] = None
     rec.data["validation"] = validation_block(spec, problems)
 
     rec.write(spec.provenance_path)

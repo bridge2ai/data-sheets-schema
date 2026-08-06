@@ -491,6 +491,11 @@ class FakeMessages:
         phase = next((ph for ph, instr in PHASE_INSTRUCTIONS.items()
                       if instr in blob), None)
         if phase is None:
+            from data_sheets_schema.api_runner import REPAIR_INSTRUCTION
+            if REPAIR_INSTRUCTION in blob:
+                return FakeResponse(
+                    "```yaml\nid: x\ntitle: T\nname: n\ndescription: d\n"
+                    "keywords: [repaired]\n```")
             raise AssertionError("could not identify the phase from the request")
         if self.fail_on == phase:
             raise self.exc or RuntimeError("boom")
@@ -599,6 +604,101 @@ class TestExecuteOffline(unittest.TestCase):
                                  "the route allows")
             # every phase must be given a limit large enough for its artifact
             self.assertGreaterEqual(kw["max_tokens"], 12000)
+
+
+class TestValidatorDrivenRepair(unittest.TestCase):
+    """#356 option 1: the validator's findings drive a bounded shape repair.
+
+    The shape-instructed audit still missed every type violation on the #347
+    canary (#360), so the only reliable shape check is the validator — and a
+    fully billed run should get a cheap repair before being declared invalid.
+    """
+
+    def setUp(self):
+        import tempfile
+        from data_sheets_schema import api_runner
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.out = Path(self.tmp.name) / "out"
+        self.api = api_runner
+        self.settings = {"name": "claude-opus-5", "temperature": 0.0}
+
+    def _spec_with_artifacts(self):
+        s = spec(out_dir=self.out)
+        self.out.mkdir(parents=True, exist_ok=True)
+        for p in (s.full_path, s.core_path):
+            p.write_text("id: x\ntitle: T\nname: n\ndescription: d\n"
+                         "keywords: [original]\n", encoding="utf-8")
+        return s
+
+    def test_build_repair_puts_instruction_last_and_omits_bundle(self):
+        from data_sheets_schema.api_runner import (
+            REPAIR_INSTRUCTION, build_repair)
+        req = build_repair("full", "id: x\n", ["[ERROR] bad shape"])
+        texts = [p["text"] for p in req.messages[0]["content"]]
+        self.assertEqual(texts[-1], REPAIR_INSTRUCTION)
+        # No bundle: the validator names shapes, not facts, and the evidence
+        # boundary belongs to the six generation phases.
+        self.assertFalse(any("Declared input bundle" in t for t in texts))
+        self.assertEqual(len(req.cached_blocks), 1)
+        self.assertIn("[ERROR] bad shape", texts[-2])
+        core = build_repair("core", "id: x\n", ["e"])
+        self.assertIn("CoreDataset", core.cached_blocks[0]["text"])
+
+    def test_repair_rewrites_the_failing_artifact_and_stops_when_clean(self):
+        s = self._spec_with_artifacts()
+        # full fails round 1, is clean after the rewrite; core is clean.
+        verdicts = iter([(["[ERROR] x"], None), ([], None), ([], None)])
+        with unittest.mock.patch.object(
+                self.api, "_validator_lines", lambda *a: next(verdicts)):
+            usage = []
+            log = self.api._repair_invalid(s, FakeClient(), self.settings,
+                                           usage)
+        self.assertIn("repaired", s.full_path.read_text())
+        self.assertIn("original", s.core_path.read_text())
+        self.assertEqual([x["outcome"] for x in log], ["applied"])
+        self.assertEqual([u["phase"] for u in usage], ["repair_full"])
+
+    def test_unusable_repair_leaves_the_record_untouched(self):
+        s = self._spec_with_artifacts()
+
+        class ProseClient:
+            class messages:
+                @staticmethod
+                def stream(**kw):
+                    class _S:
+                        def __enter__(self):
+                            return self
+
+                        def __exit__(self, *a):
+                            return False
+
+                        def get_final_message(self):
+                            return FakeResponse("I cannot repair this record.")
+                    return _S()
+
+        with unittest.mock.patch.object(
+                self.api, "_validator_lines",
+                lambda path, schema, cls: (["[ERROR] x"], None)
+                if "core" not in str(path) else ([], None)):
+            log = self.api._repair_invalid(s, ProseClient(), self.settings, [])
+        self.assertIn("original", s.full_path.read_text(),
+                      "a failed repair must never overwrite the record")
+        self.assertEqual(len(log), self.api.REPAIR_ROUNDS)
+        self.assertTrue(all(x["outcome"].startswith("unusable") for x in log))
+
+    def test_execute_records_no_repair_when_records_validate(self):
+        import yaml as _yaml
+        from data_sheets_schema import api_runner
+        s = spec(out_dir=self.out)
+        keep = api_runner._client
+        api_runner._client = lambda: FakeClient()
+        self.addCleanup(lambda: setattr(api_runner, "_client", keep))
+        self.api.execute(s)
+        d = _yaml.safe_load((self.out / "CHORUS_provenance.yaml").read_text())
+        self.assertIn("repair", d)
+        self.assertIsNone(d["repair"])
+        self.assertEqual(len(d["api_usage"]), 6)
 
 
 class TestResumeAndRetry(unittest.TestCase):
