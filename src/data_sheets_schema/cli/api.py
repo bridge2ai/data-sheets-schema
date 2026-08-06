@@ -1,4 +1,4 @@
-"""API generation commands — four-phase D4D runs over the Anthropic API."""
+"""API generation commands — six-phase D4D runs over the Anthropic API."""
 
 import json
 import sys
@@ -62,7 +62,7 @@ def _require_bundle(spec, project, bundle):
 
 @click.group()
 def api():
-    """Generate D4D records via the Anthropic API (four-phase)."""
+    """Generate D4D records via the Anthropic API (six-phase)."""
 
 
 @api.command("plan")
@@ -117,7 +117,7 @@ def plan_cmd(project, arm, label, condition, bundle, out_dir, as_json):
               help="flat output directory (the assistant layout)")
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
 def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
-    """Execute all four phases and write outputs plus a live provenance record."""
+    """Execute all six phases and write outputs plus a live provenance record."""
     from data_sheets_schema.api_runner import execute, plan
     spec = _spec(project, arm, label, condition, bundle, out_dir)
     _require_bundle(spec, project, bundle)
@@ -126,7 +126,7 @@ def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
             f"{spec.full_path} already exists; a run label is never reused")
 
     p = plan(spec)
-    click.echo(f"~{p['approx_total_input_tokens']:,} input tokens across 4 phases "
+    click.echo(f"~{p['approx_total_input_tokens']:,} input tokens across 6 phases "
                f"on {p['model']['name']}")
     if not yes and not click.confirm("Proceed with billed API calls?"):
         click.echo("aborted")

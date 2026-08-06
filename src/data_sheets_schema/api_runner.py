@@ -22,7 +22,7 @@ Settings come from the GitHub assistant's deterministic config, so the two
 paths cannot drift into different procedures claiming to be the same one.
 
 Cost: the schema digest replaces the merged schema (254 KB -> 18 KB), and the
-bundle plus digest form a cached prefix reused across all four phases.
+bundle plus digest form a cached prefix reused across all six phases.
 """
 
 from __future__ import annotations
@@ -179,7 +179,8 @@ PHASE_MAX_TOKENS = {
 }
 DEFAULT_MAX_TOKENS = 64000
 
-# The API is called four to six times per run over minutes; transient 429s and
+# The API is called at least six times per run (one per phase, plus
+# phase-level retries) over minutes; transient 429s and
 # 5xx are expected rather than exceptional.
 MAX_ATTEMPTS = 5
 BACKOFF_BASE_SECONDS = 2
@@ -449,7 +450,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     """Assemble one phase's request.
 
     The bundle and schema digest are the cached prefix: identical across all
-    four phases of a run, and by far the largest inputs.
+    six phases of a run, and by far the largest inputs.
     """
     if phase not in PHASES:
         raise ValueError(f"unknown phase {phase!r}")
