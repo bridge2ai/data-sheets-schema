@@ -688,6 +688,20 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         self.assertEqual(len(log), self.api.REPAIR_ROUNDS)
         self.assertTrue(all(x["outcome"].startswith("unusable") for x in log))
 
+    def test_repair_stops_when_an_applied_round_makes_no_progress(self):
+        """#364: strict decrease is the convergence test, but only across
+        APPLIED rounds — a dud round rewrote nothing and must not cancel the
+        retry the ceiling allows."""
+        s = self._spec_with_artifacts()
+        with unittest.mock.patch.object(
+                self.api, "_validator_lines",
+                lambda path, schema, cls: (["[ERROR] a", "[ERROR] b"], None)
+                if "core" not in str(path) else ([], None)):
+            log = self.api._repair_invalid(s, FakeClient(), self.settings, [])
+        self.assertEqual([x["outcome"] for x in log][:1], ["applied"])
+        self.assertEqual(len(log), 2, log)
+        self.assertIn("not converging", log[1]["outcome"])
+
     def test_execute_repairs_through_the_real_call_path(self):
         """The repair branch in execute() must be exercised end to end: it
         names client/settings/usage from enclosing scope, and a wrong name

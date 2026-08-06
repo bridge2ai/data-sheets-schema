@@ -1090,11 +1090,13 @@ REPAIR_INSTRUCTION = (
     "record in its entirety with only those failures corrected. Output only "
     "YAML.")
 
-# Two, not one: reconciliation once introduced a shape error while repairing
-# an audited omission, so a first repair can conceivably do the same. Two, not
-# more: a repair that has not converged in two rounds is not converging, and
-# every further round bills the whole record again.
-REPAIR_ROUNDS = 2
+# The loop runs while the finding count strictly decreases, up to this
+# ceiling. A fixed budget of 2 was cut short by the live canary (#364): the
+# core record converged 76 -> 9 -> 4 and was stopped mid-repair. Strict
+# decrease is the real convergence test — a round that leaves the count equal
+# or higher IS non-convergence and stops immediately — and the ceiling bounds
+# what a stubborn record can bill.
+REPAIR_ROUNDS = 4
 
 
 def build_repair(artifact: str, body: str, errors: list[str]) -> PhaseRequest:
@@ -1141,6 +1143,11 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
         if not path.exists():
             continue
         ph = f"repair_{artifact}"
+        # The count the last APPLIED repair was working from. Compared only
+        # against applied rounds: a truncated or unusable round rewrote
+        # nothing, so its unchanged count says nothing about convergence and
+        # must not cancel the retry the round ceiling allows for.
+        applied_from: int | None = None
         for rnd in range(1, REPAIR_ROUNDS + 1):
             errors, failure = _validator_lines(path, schema, cls)
             if failure is not None:
@@ -1148,6 +1155,11 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                             "outcome": f"validator did not run: {failure}"})
                 break
             if not errors:
+                break
+            if applied_from is not None and len(errors) >= applied_from:
+                log.append({"phase": ph, "round": rnd,
+                            "outcome": (f"not converging: {applied_from} -> "
+                                        f"{len(errors)} findings; stopped")})
                 break
             req = build_repair(artifact, path.read_text(encoding="utf-8"),
                                errors)
@@ -1193,6 +1205,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 continue
             path.write_text(normalise_enum_aliases(normalise_temporal(body)),
                             encoding="utf-8")
+            applied_from = len(errors)
             log.append({"phase": ph, "round": rnd, "outcome": "applied",
                         "findings": len(errors)})
     return log
