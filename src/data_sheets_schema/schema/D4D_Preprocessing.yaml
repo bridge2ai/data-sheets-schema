@@ -55,7 +55,6 @@ classes:
           including tools used, parameters, order of operations, and rationale
           for each step.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "DICOM to NIfTI conversion using dcm2niix v1.0.20211006"
@@ -75,7 +74,6 @@ classes:
           criteria for removing or correcting instances, tools used, and how
           removed instances are accounted for.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "Outlier removal using 3-sigma rule; manual review of flagged records"
@@ -92,7 +90,6 @@ classes:
           One or more platforms or tools used for annotation (e.g., Label Studio, Prodigy,
           Amazon Mechanical Turk, custom annotation tool).
         range: string
-        multivalued: true
         slot_uri: rai:dataAnnotationPlatform
         annotations:
           "d4d:docExample": "Label Studio 1.7.3"
@@ -102,7 +99,6 @@ classes:
           Includes annotation guidelines, quality control procedures, and task definitions.
         slot_uri: d4d:dataAnnotationProtocol
         range: string
-        multivalued: true
         exact_mappings:
           - rai:dataAnnotationProtocol
       annotations_per_item:
@@ -137,7 +133,6 @@ classes:
           Free-text description of the labeling or annotation procedures, including
           annotation guidelines, task definitions, and quality control metrics.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "Board-certified ophthalmologists graded retinal images using ETDRS scale"
@@ -160,7 +155,6 @@ classes:
           Free-text description of raw data availability, access procedures,
           and any conditions or restrictions on accessing the raw data.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
 
 

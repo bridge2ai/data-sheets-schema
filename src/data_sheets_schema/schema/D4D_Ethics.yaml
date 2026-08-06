@@ -55,10 +55,13 @@ classes:
           - schema:contactPoint
       reviewing_organization:
         description: >-
-          Organization that conducted the ethical review (e.g., Institutional Review Board,
-          Ethics Committee, Research Ethics Board). Provides information about the body
-          responsible for ethical oversight.
-        range: Organization
+          Name or identifier of the organization that conducted the ethical
+          review (e.g., Institutional Review Board, Ethics Committee,
+          Research Ethics Board). A plain string: every one of the 245
+          corpus values here was a name, ROR or curie, and Organization no
+          longer carries the identifier that made string references
+          expressible (#360).
+        range: string
         slot_uri: schema:provider
         exact_mappings:
           - schema:provider
@@ -67,7 +70,6 @@ classes:
           Free-text description of the ethical review process, board decisions, outcomes,
           and any supporting documentation (e.g., IRB approval number, ethics committee name).
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "IRB approval: UAB IRB-300010084, UCSD IRB-811480, UW IRB-STUDY00017428"
@@ -85,7 +87,6 @@ classes:
           Free-text description of the data protection impact analysis, including methodology,
           privacy risks identified, mitigation measures taken, and any regulatory findings.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "DPIA conducted; minimal residual re-identification risk after de-identification"
@@ -107,7 +108,6 @@ classes:
           including the notification method (e.g., email, poster, in-person), timing,
           and the language or text of the notification itself if available.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "Participants notified in-person at clinic visit; written information sheet provided in English and Spanish"
@@ -125,7 +125,6 @@ classes:
           Free-text description of how consent was requested (e.g., opt-in form, verbal
           agreement), provided, and documented, including the language individuals consented to.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "Written informed consent obtained before any study procedures; available in English and Spanish"
@@ -143,7 +142,6 @@ classes:
           consent (e.g., opt-out portal, written request), the scope of revocation
           (full withdrawal or specific uses), and what happens to their data after revocation.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "Participants may withdraw via written request; data retained but excluded from future analyses"

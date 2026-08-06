@@ -81,7 +81,6 @@ classes:
           Free-text description of other potential tasks the dataset could support,
           including any prerequisites or limitations for those uses.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "Longitudinal disease trajectory modeling"
@@ -103,7 +102,6 @@ classes:
           dataset's composition or collection (e.g., unfair treatment, privacy violations,
           legal or financial risks), and any recommended mitigation strategies.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "Models trained on this data may reinforce existing health disparities if deployed without fairness audits"
@@ -120,7 +118,6 @@ classes:
           not recommended, with explanation of why (e.g., out-of-scope, risk of harm,
           poor coverage).
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "Not recommended for clinical diagnosis without additional validation"
@@ -154,7 +151,6 @@ classes:
           commercial, policy).
         slot_uri: d4d:useCategory
         range: string
-        multivalued: true
         annotations:
           "d4d:docExample": "academic research"
 
@@ -173,6 +169,5 @@ classes:
           ethical concern, privacy risk, legal constraint).
         slot_uri: d4d:prohibitionReason
         range: string
-        multivalued: true
         annotations:
           "d4d:docExample": "Re-identification of participants is strictly prohibited"

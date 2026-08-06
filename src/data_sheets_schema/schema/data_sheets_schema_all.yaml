@@ -1,10 +1,11 @@
+---
 name: data-sheets-schema
 description: A LinkML schema for Datasheets for Datasets.
 title: data-sheets-schema
 see_also:
 - https://bridge2ai.github.io/data-sheets-schema
 id: https://w3id.org/bridge2ai/data-sheets-schema
-version: 1.0.0
+version: 2.0.0
 license: MIT
 prefixes:
   AIO:
@@ -2467,11 +2468,12 @@ classes:
         owner: DatasetCollection
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -2481,7 +2483,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -2556,11 +2557,12 @@ classes:
         owner: DatasetCollection
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -2570,7 +2572,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -2645,12 +2646,13 @@ classes:
         owner: DatasetCollection
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -2660,7 +2662,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -4201,11 +4202,12 @@ classes:
         owner: Dataset
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -4215,7 +4217,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -4291,11 +4292,12 @@ classes:
         owner: Dataset
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -4305,7 +4307,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -4380,12 +4381,13 @@ classes:
         owner: Dataset
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -4395,7 +4397,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -5874,11 +5875,12 @@ classes:
         owner: DataSubset
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -5888,7 +5890,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -5964,11 +5965,12 @@ classes:
         owner: DataSubset
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -5978,7 +5980,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -6053,12 +6054,13 @@ classes:
         owner: DataSubset
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -6068,7 +6070,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -6148,11 +6149,12 @@ classes:
         owner: NamedThing
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -6162,7 +6164,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -6238,11 +6239,12 @@ classes:
         owner: NamedThing
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -6252,7 +6254,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -6327,12 +6328,13 @@ classes:
         owner: NamedThing
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -6342,7 +6344,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -6408,27 +6409,27 @@ classes:
     name: Organization
     description: Represents a group or organization.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    is_a: NamedThing
     attributes:
       id:
         name: id
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://example.org/dataset/my-dataset-001
-        description: A unique identifier for a thing.
+            value: https://ror.org/01yc7t268
+        description: An identifier for the organization (for example a ROR), when
+          the source material supplies one. A name alone is a valid organization.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
-        identifier: true
         alias: id
         owner: Organization
         domain_of:
-        - NamedThing
-        - DatasetProperty
         - DatasetCollection
         - Dataset
         - DataSubset
+        - NamedThing
         - Organization
+        - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -6437,88 +6438,27 @@ classes:
         - AddressingGap
         - Creator
         - FundingMechanism
-        - Grantor
-        - Grant
-        - Instance
-        - SamplingStrategy
-        - MissingInfo
-        - Relationships
-        - Splits
-        - DataAnomaly
-        - DatasetBias
-        - DatasetLimitation
-        - ExternalResource
-        - Confidentiality
-        - ContentWarning
-        - Subpopulation
-        - Deidentification
-        - SensitiveElement
-        - DatasetRelationship
-        - InstanceAcquisition
-        - CollectionMechanism
-        - DataCollector
-        - CollectionTimeframe
-        - DirectCollection
-        - MissingDataDocumentation
-        - RawDataSource
-        - PreprocessingStrategy
-        - CleaningStrategy
-        - LabelingStrategy
-        - RawData
-        - ImputationProtocol
-        - AnnotationAnalysis
-        - MachineAnnotationTools
-        - ExistingUse
-        - UseRepository
-        - OtherTask
-        - FutureUseImpact
-        - DiscouragedUse
-        - IntendedUse
-        - ProhibitedUse
-        - ThirdPartySharing
-        - DistributionFormat
-        - DistributionDate
-        - Maintainer
-        - Erratum
-        - UpdatePlan
-        - RetentionLimits
-        - VersionAccess
-        - ExtensionMechanism
-        - EthicalReview
-        - DataProtectionImpact
-        - CollectionNotification
-        - CollectionConsent
-        - ConsentRevocation
-        - HumanSubjectResearch
-        - InformedConsent
-        - ParticipantPrivacy
-        - HumanSubjectCompensation
-        - AtRiskPopulations
-        - LicenseAndUseTerms
-        - IPRestrictions
-        - ExportControlRegulatoryRestrictions
-        - VariableMetadata
-        - File
         range: uriorcurie
-        required: true
+        recommended: true
       name:
         name: name
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: AI-READI Dataset
-        description: A human-readable name for a thing.
+            value: University of Washington
+        description: A human-readable name for the organization.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
         alias: name
         owner: Organization
         domain_of:
-        - NamedThing
-        - DatasetProperty
         - DatasetCollection
         - Dataset
         - DataSubset
+        - NamedThing
         - Organization
+        - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -6527,88 +6467,23 @@ classes:
         - AddressingGap
         - Creator
         - FundingMechanism
-        - Grantor
-        - Grant
-        - Instance
-        - SamplingStrategy
-        - MissingInfo
-        - Relationships
-        - Splits
-        - DataAnomaly
-        - DatasetBias
-        - DatasetLimitation
-        - ExternalResource
-        - Confidentiality
-        - ContentWarning
-        - Subpopulation
-        - Deidentification
-        - SensitiveElement
-        - DatasetRelationship
-        - InstanceAcquisition
-        - CollectionMechanism
-        - DataCollector
-        - CollectionTimeframe
-        - DirectCollection
-        - MissingDataDocumentation
-        - RawDataSource
-        - PreprocessingStrategy
-        - CleaningStrategy
-        - LabelingStrategy
-        - RawData
-        - ImputationProtocol
-        - AnnotationAnalysis
-        - MachineAnnotationTools
-        - ExistingUse
-        - UseRepository
-        - OtherTask
-        - FutureUseImpact
-        - DiscouragedUse
-        - IntendedUse
-        - ProhibitedUse
-        - ThirdPartySharing
-        - DistributionFormat
-        - DistributionDate
-        - Maintainer
-        - Erratum
-        - UpdatePlan
-        - RetentionLimits
-        - VersionAccess
-        - ExtensionMechanism
-        - EthicalReview
-        - DataProtectionImpact
-        - CollectionNotification
-        - CollectionConsent
-        - ConsentRevocation
-        - HumanSubjectResearch
-        - InformedConsent
-        - ParticipantPrivacy
-        - HumanSubjectCompensation
-        - AtRiskPopulations
-        - LicenseAndUseTerms
-        - IPRestrictions
-        - ExportControlRegulatoryRestrictions
-        - VariableMetadata
-        - File
         range: string
       description:
         name: description
-        annotations:
-          d4d:docExample:
-            tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
-        description: A human-readable description for a thing.
+        description: A human-readable description for the organization.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
         alias: description
         owner: Organization
         domain_of:
-        - NamedThing
-        - DatasetProperty
-        - DatasetRelationship
         - DatasetCollection
         - Dataset
         - DataSubset
+        - NamedThing
         - Organization
+        - DatasetProperty
+        - Grant
+        - DatasetRelationship
         - Software
         - Person
         - Information
@@ -6617,67 +6492,6 @@ classes:
         - AddressingGap
         - Creator
         - FundingMechanism
-        - Grantor
-        - Grant
-        - Instance
-        - SamplingStrategy
-        - MissingInfo
-        - Relationships
-        - Splits
-        - DataAnomaly
-        - DatasetBias
-        - DatasetLimitation
-        - ExternalResource
-        - Confidentiality
-        - ContentWarning
-        - Subpopulation
-        - Deidentification
-        - SensitiveElement
-        - InstanceAcquisition
-        - CollectionMechanism
-        - DataCollector
-        - CollectionTimeframe
-        - DirectCollection
-        - MissingDataDocumentation
-        - RawDataSource
-        - PreprocessingStrategy
-        - CleaningStrategy
-        - LabelingStrategy
-        - RawData
-        - ImputationProtocol
-        - AnnotationAnalysis
-        - MachineAnnotationTools
-        - ExistingUse
-        - UseRepository
-        - OtherTask
-        - FutureUseImpact
-        - DiscouragedUse
-        - IntendedUse
-        - ProhibitedUse
-        - ThirdPartySharing
-        - DistributionFormat
-        - DistributionDate
-        - Maintainer
-        - Erratum
-        - UpdatePlan
-        - RetentionLimits
-        - VersionAccess
-        - ExtensionMechanism
-        - EthicalReview
-        - DataProtectionImpact
-        - CollectionNotification
-        - CollectionConsent
-        - ConsentRevocation
-        - HumanSubjectResearch
-        - InformedConsent
-        - ParticipantPrivacy
-        - HumanSubjectCompensation
-        - AtRiskPopulations
-        - LicenseAndUseTerms
-        - IPRestrictions
-        - ExportControlRegulatoryRestrictions
-        - VariableMetadata
-        - File
         range: string
     class_uri: schema:Organization
   DatasetProperty:
@@ -6703,6 +6517,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -6712,7 +6527,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -6786,6 +6600,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -6795,7 +6610,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -6869,6 +6683,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -6879,7 +6694,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -7088,11 +6902,12 @@ classes:
         owner: Software
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -7102,7 +6917,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -7178,11 +6992,12 @@ classes:
         owner: Software
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -7192,7 +7007,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -7267,12 +7081,13 @@ classes:
         owner: Software
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -7282,7 +7097,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -7416,11 +7230,12 @@ classes:
         owner: Person
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -7430,7 +7245,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -7506,11 +7320,12 @@ classes:
         owner: Person
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -7520,7 +7335,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -7595,12 +7409,13 @@ classes:
         owner: Person
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -7610,7 +7425,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -8106,11 +7920,12 @@ classes:
         owner: Information
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -8120,7 +7935,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -8196,11 +8010,12 @@ classes:
         owner: Information
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -8210,7 +8025,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -8285,12 +8099,13 @@ classes:
         owner: Information
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -8300,7 +8115,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -8460,6 +8274,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -8469,7 +8284,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -8543,6 +8357,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -8552,7 +8367,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -8626,6 +8440,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -8636,7 +8451,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -8813,6 +8627,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -8822,7 +8637,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -8896,6 +8710,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -8905,7 +8720,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -8979,6 +8793,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -8989,7 +8804,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -9169,6 +8983,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -9178,7 +8993,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -9252,6 +9066,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -9261,7 +9076,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -9335,6 +9149,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -9345,7 +9160,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -9492,8 +9306,10 @@ classes:
     attributes:
       principal_investigator:
         name: principal_investigator
-        description: A key individual (Principal Investigator) responsible for or
-          overseeing dataset creation.
+        description: The name of the key individual (Principal Investigator) responsible
+          for or overseeing dataset creation — a person's name such as 'Aaron Lee',
+          never a yes/no flag. The slot name reads like a boolean; the value is not
+          one (#360).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
         broad_mappings:
         - dcterms:creator
@@ -9549,6 +9365,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -9558,7 +9375,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -9632,6 +9448,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -9641,7 +9458,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -9715,6 +9531,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -9725,7 +9542,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -9881,7 +9697,7 @@ classes:
         owner: FundingMechanism
         domain_of:
         - FundingMechanism
-        range: Grantor
+        range: string
       grants:
         name: grants
         description: Grant mechanisms supporting dataset creation. Multiple grants
@@ -9913,6 +9729,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -9922,7 +9739,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -9996,6 +9812,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -10005,7 +9822,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -10079,6 +9895,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -10089,7 +9906,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -10238,20 +10054,21 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: https://example.org/dataset/my-dataset-001
-        description: A unique identifier for a thing.
+            value: https://ror.org/01yc7t268
+        description: An identifier for the organization (for example a ROR), when
+          the source material supplies one. A name alone is a valid organization.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
-        identifier: true
         alias: id
         owner: Grantor
         domain_of:
-        - NamedThing
-        - DatasetProperty
         - DatasetCollection
         - Dataset
         - DataSubset
+        - NamedThing
         - Organization
+        - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -10260,88 +10077,27 @@ classes:
         - AddressingGap
         - Creator
         - FundingMechanism
-        - Grantor
-        - Grant
-        - Instance
-        - SamplingStrategy
-        - MissingInfo
-        - Relationships
-        - Splits
-        - DataAnomaly
-        - DatasetBias
-        - DatasetLimitation
-        - ExternalResource
-        - Confidentiality
-        - ContentWarning
-        - Subpopulation
-        - Deidentification
-        - SensitiveElement
-        - DatasetRelationship
-        - InstanceAcquisition
-        - CollectionMechanism
-        - DataCollector
-        - CollectionTimeframe
-        - DirectCollection
-        - MissingDataDocumentation
-        - RawDataSource
-        - PreprocessingStrategy
-        - CleaningStrategy
-        - LabelingStrategy
-        - RawData
-        - ImputationProtocol
-        - AnnotationAnalysis
-        - MachineAnnotationTools
-        - ExistingUse
-        - UseRepository
-        - OtherTask
-        - FutureUseImpact
-        - DiscouragedUse
-        - IntendedUse
-        - ProhibitedUse
-        - ThirdPartySharing
-        - DistributionFormat
-        - DistributionDate
-        - Maintainer
-        - Erratum
-        - UpdatePlan
-        - RetentionLimits
-        - VersionAccess
-        - ExtensionMechanism
-        - EthicalReview
-        - DataProtectionImpact
-        - CollectionNotification
-        - CollectionConsent
-        - ConsentRevocation
-        - HumanSubjectResearch
-        - InformedConsent
-        - ParticipantPrivacy
-        - HumanSubjectCompensation
-        - AtRiskPopulations
-        - LicenseAndUseTerms
-        - IPRestrictions
-        - ExportControlRegulatoryRestrictions
-        - VariableMetadata
-        - File
         range: uriorcurie
-        required: true
+        recommended: true
       name:
         name: name
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: AI-READI Dataset
-        description: A human-readable name for a thing.
+            value: University of Washington
+        description: A human-readable name for the organization.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
         alias: name
         owner: Grantor
         domain_of:
-        - NamedThing
-        - DatasetProperty
         - DatasetCollection
         - Dataset
         - DataSubset
+        - NamedThing
         - Organization
+        - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -10350,88 +10106,23 @@ classes:
         - AddressingGap
         - Creator
         - FundingMechanism
-        - Grantor
-        - Grant
-        - Instance
-        - SamplingStrategy
-        - MissingInfo
-        - Relationships
-        - Splits
-        - DataAnomaly
-        - DatasetBias
-        - DatasetLimitation
-        - ExternalResource
-        - Confidentiality
-        - ContentWarning
-        - Subpopulation
-        - Deidentification
-        - SensitiveElement
-        - DatasetRelationship
-        - InstanceAcquisition
-        - CollectionMechanism
-        - DataCollector
-        - CollectionTimeframe
-        - DirectCollection
-        - MissingDataDocumentation
-        - RawDataSource
-        - PreprocessingStrategy
-        - CleaningStrategy
-        - LabelingStrategy
-        - RawData
-        - ImputationProtocol
-        - AnnotationAnalysis
-        - MachineAnnotationTools
-        - ExistingUse
-        - UseRepository
-        - OtherTask
-        - FutureUseImpact
-        - DiscouragedUse
-        - IntendedUse
-        - ProhibitedUse
-        - ThirdPartySharing
-        - DistributionFormat
-        - DistributionDate
-        - Maintainer
-        - Erratum
-        - UpdatePlan
-        - RetentionLimits
-        - VersionAccess
-        - ExtensionMechanism
-        - EthicalReview
-        - DataProtectionImpact
-        - CollectionNotification
-        - CollectionConsent
-        - ConsentRevocation
-        - HumanSubjectResearch
-        - InformedConsent
-        - ParticipantPrivacy
-        - HumanSubjectCompensation
-        - AtRiskPopulations
-        - LicenseAndUseTerms
-        - IPRestrictions
-        - ExportControlRegulatoryRestrictions
-        - VariableMetadata
-        - File
         range: string
       description:
         name: description
-        annotations:
-          d4d:docExample:
-            tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
-        description: A human-readable description for a thing.
+        description: A human-readable description for the organization.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
         alias: description
         owner: Grantor
         domain_of:
-        - NamedThing
-        - DatasetProperty
-        - DatasetRelationship
         - DatasetCollection
         - Dataset
         - DataSubset
+        - NamedThing
         - Organization
+        - DatasetProperty
+        - Grant
+        - DatasetRelationship
         - Software
         - Person
         - Information
@@ -10440,67 +10131,6 @@ classes:
         - AddressingGap
         - Creator
         - FundingMechanism
-        - Grantor
-        - Grant
-        - Instance
-        - SamplingStrategy
-        - MissingInfo
-        - Relationships
-        - Splits
-        - DataAnomaly
-        - DatasetBias
-        - DatasetLimitation
-        - ExternalResource
-        - Confidentiality
-        - ContentWarning
-        - Subpopulation
-        - Deidentification
-        - SensitiveElement
-        - InstanceAcquisition
-        - CollectionMechanism
-        - DataCollector
-        - CollectionTimeframe
-        - DirectCollection
-        - MissingDataDocumentation
-        - RawDataSource
-        - PreprocessingStrategy
-        - CleaningStrategy
-        - LabelingStrategy
-        - RawData
-        - ImputationProtocol
-        - AnnotationAnalysis
-        - MachineAnnotationTools
-        - ExistingUse
-        - UseRepository
-        - OtherTask
-        - FutureUseImpact
-        - DiscouragedUse
-        - IntendedUse
-        - ProhibitedUse
-        - ThirdPartySharing
-        - DistributionFormat
-        - DistributionDate
-        - Maintainer
-        - Erratum
-        - UpdatePlan
-        - RetentionLimits
-        - VersionAccess
-        - ExtensionMechanism
-        - EthicalReview
-        - DataProtectionImpact
-        - CollectionNotification
-        - CollectionConsent
-        - ConsentRevocation
-        - HumanSubjectResearch
-        - InformedConsent
-        - ParticipantPrivacy
-        - HumanSubjectCompensation
-        - AtRiskPopulations
-        - LicenseAndUseTerms
-        - IPRestrictions
-        - ExportControlRegulatoryRestrictions
-        - VariableMetadata
-        - File
         range: string
   Grant:
     name: Grant
@@ -10509,8 +10139,85 @@ classes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    is_a: NamedThing
     attributes:
+      id:
+        name: id
+        description: An identifier for the grant, when the source material supplies
+          one. The grant_number alone is a valid grant reference.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+        slot_uri: schema:identifier
+        alias: id
+        owner: Grant
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        range: uriorcurie
+        recommended: true
+      name:
+        name: name
+        description: A human-readable name for the grant or funding mechanism.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+        slot_uri: schema:name
+        alias: name
+        owner: Grant
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        range: string
+      description:
+        name: description
+        description: A human-readable description of the grant.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+        slot_uri: schema:description
+        alias: description
+        owner: Grant
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - DatasetRelationship
+        range: string
       grant_number:
         name: grant_number
         annotations:
@@ -10526,275 +10233,6 @@ classes:
         owner: Grant
         domain_of:
         - Grant
-        range: string
-      id:
-        name: id
-        annotations:
-          d4d:docExample:
-            tag: d4d:docExample
-            value: https://example.org/dataset/my-dataset-001
-        description: A unique identifier for a thing.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-        slot_uri: schema:identifier
-        identifier: true
-        alias: id
-        owner: Grant
-        domain_of:
-        - NamedThing
-        - DatasetProperty
-        - DatasetCollection
-        - Dataset
-        - DataSubset
-        - Organization
-        - Software
-        - Person
-        - Information
-        - Purpose
-        - Task
-        - AddressingGap
-        - Creator
-        - FundingMechanism
-        - Grantor
-        - Grant
-        - Instance
-        - SamplingStrategy
-        - MissingInfo
-        - Relationships
-        - Splits
-        - DataAnomaly
-        - DatasetBias
-        - DatasetLimitation
-        - ExternalResource
-        - Confidentiality
-        - ContentWarning
-        - Subpopulation
-        - Deidentification
-        - SensitiveElement
-        - DatasetRelationship
-        - InstanceAcquisition
-        - CollectionMechanism
-        - DataCollector
-        - CollectionTimeframe
-        - DirectCollection
-        - MissingDataDocumentation
-        - RawDataSource
-        - PreprocessingStrategy
-        - CleaningStrategy
-        - LabelingStrategy
-        - RawData
-        - ImputationProtocol
-        - AnnotationAnalysis
-        - MachineAnnotationTools
-        - ExistingUse
-        - UseRepository
-        - OtherTask
-        - FutureUseImpact
-        - DiscouragedUse
-        - IntendedUse
-        - ProhibitedUse
-        - ThirdPartySharing
-        - DistributionFormat
-        - DistributionDate
-        - Maintainer
-        - Erratum
-        - UpdatePlan
-        - RetentionLimits
-        - VersionAccess
-        - ExtensionMechanism
-        - EthicalReview
-        - DataProtectionImpact
-        - CollectionNotification
-        - CollectionConsent
-        - ConsentRevocation
-        - HumanSubjectResearch
-        - InformedConsent
-        - ParticipantPrivacy
-        - HumanSubjectCompensation
-        - AtRiskPopulations
-        - LicenseAndUseTerms
-        - IPRestrictions
-        - ExportControlRegulatoryRestrictions
-        - VariableMetadata
-        - File
-        range: uriorcurie
-        required: true
-      name:
-        name: name
-        annotations:
-          d4d:docExample:
-            tag: d4d:docExample
-            value: AI-READI Dataset
-        description: A human-readable name for a thing.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-        slot_uri: schema:name
-        alias: name
-        owner: Grant
-        domain_of:
-        - NamedThing
-        - DatasetProperty
-        - DatasetCollection
-        - Dataset
-        - DataSubset
-        - Organization
-        - Software
-        - Person
-        - Information
-        - Purpose
-        - Task
-        - AddressingGap
-        - Creator
-        - FundingMechanism
-        - Grantor
-        - Grant
-        - Instance
-        - SamplingStrategy
-        - MissingInfo
-        - Relationships
-        - Splits
-        - DataAnomaly
-        - DatasetBias
-        - DatasetLimitation
-        - ExternalResource
-        - Confidentiality
-        - ContentWarning
-        - Subpopulation
-        - Deidentification
-        - SensitiveElement
-        - DatasetRelationship
-        - InstanceAcquisition
-        - CollectionMechanism
-        - DataCollector
-        - CollectionTimeframe
-        - DirectCollection
-        - MissingDataDocumentation
-        - RawDataSource
-        - PreprocessingStrategy
-        - CleaningStrategy
-        - LabelingStrategy
-        - RawData
-        - ImputationProtocol
-        - AnnotationAnalysis
-        - MachineAnnotationTools
-        - ExistingUse
-        - UseRepository
-        - OtherTask
-        - FutureUseImpact
-        - DiscouragedUse
-        - IntendedUse
-        - ProhibitedUse
-        - ThirdPartySharing
-        - DistributionFormat
-        - DistributionDate
-        - Maintainer
-        - Erratum
-        - UpdatePlan
-        - RetentionLimits
-        - VersionAccess
-        - ExtensionMechanism
-        - EthicalReview
-        - DataProtectionImpact
-        - CollectionNotification
-        - CollectionConsent
-        - ConsentRevocation
-        - HumanSubjectResearch
-        - InformedConsent
-        - ParticipantPrivacy
-        - HumanSubjectCompensation
-        - AtRiskPopulations
-        - LicenseAndUseTerms
-        - IPRestrictions
-        - ExportControlRegulatoryRestrictions
-        - VariableMetadata
-        - File
-        range: string
-      description:
-        name: description
-        annotations:
-          d4d:docExample:
-            tag: d4d:docExample
-            value: A multimodal dataset of 4,000 participants with Type 2 Diabetes.
-        description: A human-readable description for a thing.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-        slot_uri: schema:description
-        alias: description
-        owner: Grant
-        domain_of:
-        - NamedThing
-        - DatasetProperty
-        - DatasetRelationship
-        - DatasetCollection
-        - Dataset
-        - DataSubset
-        - Organization
-        - Software
-        - Person
-        - Information
-        - Purpose
-        - Task
-        - AddressingGap
-        - Creator
-        - FundingMechanism
-        - Grantor
-        - Grant
-        - Instance
-        - SamplingStrategy
-        - MissingInfo
-        - Relationships
-        - Splits
-        - DataAnomaly
-        - DatasetBias
-        - DatasetLimitation
-        - ExternalResource
-        - Confidentiality
-        - ContentWarning
-        - Subpopulation
-        - Deidentification
-        - SensitiveElement
-        - InstanceAcquisition
-        - CollectionMechanism
-        - DataCollector
-        - CollectionTimeframe
-        - DirectCollection
-        - MissingDataDocumentation
-        - RawDataSource
-        - PreprocessingStrategy
-        - CleaningStrategy
-        - LabelingStrategy
-        - RawData
-        - ImputationProtocol
-        - AnnotationAnalysis
-        - MachineAnnotationTools
-        - ExistingUse
-        - UseRepository
-        - OtherTask
-        - FutureUseImpact
-        - DiscouragedUse
-        - IntendedUse
-        - ProhibitedUse
-        - ThirdPartySharing
-        - DistributionFormat
-        - DistributionDate
-        - Maintainer
-        - Erratum
-        - UpdatePlan
-        - RetentionLimits
-        - VersionAccess
-        - ExtensionMechanism
-        - EthicalReview
-        - DataProtectionImpact
-        - CollectionNotification
-        - CollectionConsent
-        - ConsentRevocation
-        - HumanSubjectResearch
-        - InformedConsent
-        - ParticipantPrivacy
-        - HumanSubjectCompensation
-        - AtRiskPopulations
-        - LicenseAndUseTerms
-        - IPRestrictions
-        - ExportControlRegulatoryRestrictions
-        - VariableMetadata
-        - File
         range: string
   Instance:
     name: Instance
@@ -10942,6 +10380,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -10951,7 +10390,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -11025,6 +10463,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -11034,7 +10473,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -11108,6 +10546,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -11118,7 +10557,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -11304,7 +10742,6 @@ classes:
         domain_of:
         - SamplingStrategy
         range: string
-        multivalued: true
       is_representative:
         name: is_representative
         annotations:
@@ -11351,7 +10788,6 @@ classes:
         domain_of:
         - SamplingStrategy
         range: string
-        multivalued: true
       strategies:
         name: strategies
         annotations:
@@ -11388,6 +10824,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -11397,7 +10834,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -11471,6 +10907,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -11480,7 +10917,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -11554,6 +10990,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -11564,7 +11001,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -11764,6 +11200,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -11773,7 +11210,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -11847,6 +11283,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -11856,7 +11293,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -11930,6 +11366,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -11940,7 +11377,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -12103,7 +11539,6 @@ classes:
         domain_of:
         - Relationships
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -12122,6 +11557,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -12131,7 +11567,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -12205,6 +11640,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -12214,7 +11650,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -12288,6 +11723,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -12298,7 +11734,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -12461,7 +11896,6 @@ classes:
         domain_of:
         - Splits
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -12480,6 +11914,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -12489,7 +11924,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -12563,6 +11997,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -12572,7 +12007,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -12646,6 +12080,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -12656,7 +12091,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -12818,7 +12252,6 @@ classes:
         domain_of:
         - DataAnomaly
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -12837,6 +12270,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -12846,7 +12280,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -12920,6 +12353,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -12929,7 +12363,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -13003,6 +12436,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -13013,7 +12447,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -13243,6 +12676,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -13252,7 +12686,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -13326,6 +12759,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -13335,7 +12769,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -13409,6 +12842,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -13419,7 +12853,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -13645,6 +13078,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -13654,7 +13088,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -13728,6 +13161,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -13737,7 +13171,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -13811,6 +13244,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -13821,7 +13255,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -13988,7 +13421,6 @@ classes:
         domain_of:
         - ExternalResource
         range: string
-        multivalued: true
       archival:
         name: archival
         description: 'Indicates whether official archival versions of external resources
@@ -14052,6 +13484,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -14061,7 +13494,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -14135,6 +13567,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -14144,7 +13577,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -14218,6 +13650,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -14228,7 +13661,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -14400,7 +13832,6 @@ classes:
         domain_of:
         - Confidentiality
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -14419,6 +13850,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -14428,7 +13860,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -14502,6 +13933,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -14511,7 +13943,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -14585,6 +14016,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -14595,7 +14027,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -14784,6 +14215,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -14793,7 +14225,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -14867,6 +14298,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -14876,7 +14308,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -14950,6 +14381,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -14960,7 +14392,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -15128,7 +14559,6 @@ classes:
         domain_of:
         - Subpopulation
         range: string
-        multivalued: true
       distribution:
         name: distribution
         annotations:
@@ -15146,7 +14576,6 @@ classes:
         domain_of:
         - Subpopulation
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -15165,6 +14594,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -15174,7 +14604,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -15248,6 +14677,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -15257,7 +14687,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -15331,6 +14760,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -15341,7 +14771,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -15533,7 +14962,6 @@ classes:
         domain_of:
         - Deidentification
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -15552,6 +14980,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -15561,7 +14990,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -15635,6 +15063,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -15644,7 +15073,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -15718,6 +15146,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -15728,7 +15157,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -15900,7 +15328,6 @@ classes:
         domain_of:
         - SensitiveElement
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -15919,6 +15346,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -15928,7 +15356,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -16002,6 +15429,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -16011,7 +15439,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -16085,6 +15512,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -16095,7 +15523,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -16332,6 +15759,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -16341,7 +15769,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -16415,6 +15842,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -16424,7 +15852,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -16630,7 +16057,6 @@ classes:
         domain_of:
         - InstanceAcquisition
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -16649,6 +16075,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -16658,7 +16085,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -16732,6 +16158,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -16741,7 +16168,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -16815,6 +16241,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -16825,7 +16252,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -16990,7 +16416,6 @@ classes:
         domain_of:
         - CollectionMechanism
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -17009,6 +16434,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -17018,7 +16444,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -17092,6 +16517,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -17101,7 +16527,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -17175,6 +16600,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -17185,7 +16611,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -17362,7 +16787,6 @@ classes:
         domain_of:
         - DataCollector
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -17381,6 +16805,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -17390,7 +16815,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -17464,6 +16888,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -17473,7 +16898,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -17547,6 +16971,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -17557,7 +16982,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -17749,7 +17173,6 @@ classes:
         domain_of:
         - CollectionTimeframe
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -17768,6 +17191,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -17777,7 +17201,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -17851,6 +17274,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -17860,7 +17284,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -17934,6 +17357,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -17944,7 +17368,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -18116,7 +17539,6 @@ classes:
         domain_of:
         - DirectCollection
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -18135,6 +17557,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -18144,7 +17567,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -18218,6 +17640,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -18227,7 +17650,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -18301,6 +17723,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -18311,7 +17734,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -18474,7 +17896,6 @@ classes:
         domain_of:
         - MissingDataDocumentation
         range: string
-        multivalued: true
       missing_data_causes:
         name: missing_data_causes
         annotations:
@@ -18492,7 +17913,6 @@ classes:
         domain_of:
         - MissingDataDocumentation
         range: string
-        multivalued: true
       handling_strategy:
         name: handling_strategy
         annotations:
@@ -18528,6 +17948,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -18537,7 +17958,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -18611,6 +18031,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -18620,7 +18041,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -18694,6 +18114,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -18704,7 +18125,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -18888,7 +18308,6 @@ classes:
         domain_of:
         - RawDataSource
         range: string
-        multivalued: true
       access_details:
         name: access_details
         annotations:
@@ -18922,7 +18341,6 @@ classes:
         domain_of:
         - RawDataSource
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -18941,6 +18359,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -18950,7 +18369,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -19024,6 +18442,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -19033,7 +18452,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -19107,6 +18525,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -19117,7 +18536,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -19281,7 +18699,6 @@ classes:
         domain_of:
         - PreprocessingStrategy
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -19300,6 +18717,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -19309,7 +18727,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -19383,6 +18800,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -19392,7 +18810,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -19466,6 +18883,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -19476,7 +18894,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -19640,7 +19057,6 @@ classes:
         domain_of:
         - CleaningStrategy
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -19659,6 +19075,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -19668,7 +19085,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -19742,6 +19158,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -19751,7 +19168,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -19825,6 +19241,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -19835,7 +19252,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -19994,7 +19410,6 @@ classes:
         domain_of:
         - LabelingStrategy
         range: string
-        multivalued: true
       data_annotation_protocol:
         name: data_annotation_protocol
         description: Annotation methodology, tasks, and protocols followed during
@@ -20009,7 +19424,6 @@ classes:
         domain_of:
         - LabelingStrategy
         range: string
-        multivalued: true
       annotations_per_item:
         name: annotations_per_item
         annotations:
@@ -20076,7 +19490,6 @@ classes:
         domain_of:
         - LabelingStrategy
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -20095,6 +19508,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -20104,7 +19518,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -20178,6 +19591,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -20187,7 +19601,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -20261,6 +19674,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -20271,7 +19685,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -20442,7 +19855,6 @@ classes:
         domain_of:
         - RawData
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -20461,6 +19873,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -20470,7 +19883,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -20544,6 +19956,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -20553,7 +19966,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -20627,6 +20039,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -20637,7 +20050,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -20866,6 +20278,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -20875,7 +20288,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -20949,6 +20361,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -20958,7 +20371,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -21032,6 +20444,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -21042,7 +20455,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -21275,6 +20687,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -21284,7 +20697,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -21358,6 +20770,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -21367,7 +20780,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -21441,6 +20853,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -21451,7 +20864,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -21672,6 +21084,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -21681,7 +21094,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -21755,6 +21167,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -21764,7 +21177,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -21838,6 +21250,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -21848,7 +21261,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -22026,6 +21438,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -22035,7 +21448,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -22109,6 +21521,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -22118,7 +21531,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -22192,6 +21604,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -22202,7 +21615,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -22390,6 +21802,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -22399,7 +21812,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -22473,6 +21885,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -22482,7 +21895,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -22556,6 +21968,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -22566,7 +21979,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -22726,7 +22138,6 @@ classes:
         domain_of:
         - OtherTask
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -22745,6 +22156,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -22754,7 +22166,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -22828,6 +22239,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -22837,7 +22249,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -22911,6 +22322,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -22921,7 +22333,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -23089,7 +22500,6 @@ classes:
         - FutureUseImpact
         - DataProtectionImpact
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -23108,6 +22518,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -23117,7 +22528,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -23191,6 +22601,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -23200,7 +22611,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -23274,6 +22684,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -23284,7 +22695,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -23445,7 +22855,6 @@ classes:
         domain_of:
         - DiscouragedUse
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -23464,6 +22873,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -23473,7 +22883,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -23547,6 +22956,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -23556,7 +22966,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -23630,6 +23039,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -23640,7 +23050,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -23832,7 +23241,6 @@ classes:
         domain_of:
         - IntendedUse
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -23851,6 +23259,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -23860,7 +23269,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -23934,6 +23342,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -23943,7 +23352,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -24017,6 +23425,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -24027,7 +23436,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -24187,7 +23595,6 @@ classes:
         domain_of:
         - ProhibitedUse
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -24206,6 +23613,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -24215,7 +23623,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -24289,6 +23696,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -24298,7 +23706,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -24372,6 +23779,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -24382,7 +23790,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -24558,6 +23965,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -24567,7 +23975,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -24641,6 +24048,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -24650,7 +24058,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -24724,6 +24131,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -24734,7 +24142,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -24912,6 +24319,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -24921,7 +24329,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -24995,6 +24402,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -25004,7 +24412,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -25078,6 +24485,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -25088,7 +24496,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -25268,6 +24675,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -25277,7 +24685,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -25351,6 +24758,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -25360,7 +24768,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -25434,6 +24841,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -25444,7 +24852,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -25618,7 +25025,6 @@ classes:
         domain_of:
         - Maintainer
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -25637,6 +25043,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -25646,7 +25053,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -25720,6 +25126,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -25729,7 +25136,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -25803,6 +25209,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -25813,7 +25220,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -26008,6 +25414,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -26017,7 +25424,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -26091,6 +25497,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -26100,7 +25507,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -26174,6 +25580,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -26184,7 +25591,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -26364,7 +25770,6 @@ classes:
         domain_of:
         - UpdatePlan
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -26383,6 +25788,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -26392,7 +25798,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -26466,6 +25871,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -26475,7 +25881,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -26549,6 +25954,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -26559,7 +25965,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -26737,7 +26142,6 @@ classes:
         domain_of:
         - RetentionLimits
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -26756,6 +26160,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -26765,7 +26170,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -26839,6 +26243,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -26848,7 +26253,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -26922,6 +26326,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -26932,7 +26337,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -27122,7 +26526,6 @@ classes:
         domain_of:
         - VersionAccess
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -27141,6 +26544,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -27150,7 +26554,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -27224,6 +26627,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -27233,7 +26637,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -27307,6 +26710,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -27317,7 +26721,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -27495,7 +26898,6 @@ classes:
         domain_of:
         - ExtensionMechanism
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -27514,6 +26916,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -27523,7 +26926,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -27597,6 +26999,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -27606,7 +27009,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -27680,6 +27082,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -27690,7 +27093,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -27852,9 +27254,11 @@ classes:
         range: Person
       reviewing_organization:
         name: reviewing_organization
-        description: Organization that conducted the ethical review (e.g., Institutional
-          Review Board, Ethics Committee, Research Ethics Board). Provides information
-          about the body responsible for ethical oversight.
+        description: 'Name or identifier of the organization that conducted the ethical
+          review (e.g., Institutional Review Board, Ethics Committee, Research Ethics
+          Board). A plain string: every one of the 245 corpus values here was a name,
+          ROR or curie, and Organization no longer carries the identifier that made
+          string references expressible (#360).'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
         exact_mappings:
         - schema:provider
@@ -27863,7 +27267,7 @@ classes:
         owner: EthicalReview
         domain_of:
         - EthicalReview
-        range: Organization
+        range: string
       review_details:
         name: review_details
         annotations:
@@ -27882,7 +27286,6 @@ classes:
         domain_of:
         - EthicalReview
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -27901,6 +27304,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -27910,7 +27314,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -27984,6 +27387,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -27993,7 +27397,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -28067,6 +27470,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -28077,7 +27481,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -28242,7 +27645,6 @@ classes:
         - FutureUseImpact
         - DataProtectionImpact
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -28261,6 +27663,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -28270,7 +27673,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -28344,6 +27746,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -28353,7 +27756,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -28427,6 +27829,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -28437,7 +27840,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -28602,7 +28004,6 @@ classes:
         domain_of:
         - CollectionNotification
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -28621,6 +28022,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -28630,7 +28032,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -28704,6 +28105,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -28713,7 +28115,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -28787,6 +28188,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -28797,7 +28199,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -28961,7 +28362,6 @@ classes:
         domain_of:
         - CollectionConsent
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -28980,6 +28380,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -28989,7 +28390,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -29063,6 +28463,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -29072,7 +28473,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -29146,6 +28546,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -29156,7 +28557,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -29321,7 +28721,6 @@ classes:
         domain_of:
         - ConsentRevocation
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -29340,6 +28739,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -29349,7 +28749,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -29423,6 +28822,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -29432,7 +28832,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -29506,6 +28905,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -29516,7 +28916,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -29702,7 +29101,6 @@ classes:
         domain_of:
         - HumanSubjectResearch
         range: string
-        multivalued: true
       special_populations:
         name: special_populations
         description: 'Does the research involve any special populations that require
@@ -29753,6 +29151,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -29762,7 +29161,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -29836,6 +29234,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -29845,7 +29244,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -29919,6 +29317,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -29929,7 +29328,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -30101,7 +29499,6 @@ classes:
         domain_of:
         - InformedConsent
         range: string
-        multivalued: true
       consent_documentation:
         name: consent_documentation
         annotations:
@@ -30120,7 +29517,6 @@ classes:
         domain_of:
         - InformedConsent
         range: string
-        multivalued: true
       withdrawal_mechanism:
         name: withdrawal_mechanism
         description: 'How can participants withdraw their consent? What procedures
@@ -30134,7 +29530,6 @@ classes:
         domain_of:
         - InformedConsent
         range: string
-        multivalued: true
       consent_scope:
         name: consent_scope
         description: 'What specific uses did participants consent to? Are there limitations
@@ -30148,7 +29543,6 @@ classes:
         domain_of:
         - InformedConsent
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -30167,6 +29561,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -30176,7 +29571,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -30250,6 +29644,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -30259,7 +29654,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -30333,6 +29727,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -30343,7 +29738,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -30505,7 +29899,6 @@ classes:
         domain_of:
         - ParticipantPrivacy
         range: string
-        multivalued: true
       reidentification_risk:
         name: reidentification_risk
         annotations:
@@ -30523,7 +29916,6 @@ classes:
         domain_of:
         - ParticipantPrivacy
         range: string
-        multivalued: true
       privacy_techniques:
         name: privacy_techniques
         description: 'What privacy-preserving techniques were applied (e.g., differential
@@ -30551,7 +29943,6 @@ classes:
         domain_of:
         - ParticipantPrivacy
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -30570,6 +29961,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -30579,7 +29971,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -30653,6 +30044,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -30662,7 +30054,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -30736,6 +30127,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -30746,7 +30138,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -30917,7 +30308,6 @@ classes:
         domain_of:
         - HumanSubjectCompensation
         range: string
-        multivalued: true
       compensation_amount:
         name: compensation_amount
         annotations:
@@ -30935,7 +30325,6 @@ classes:
         domain_of:
         - HumanSubjectCompensation
         range: string
-        multivalued: true
       compensation_rationale:
         name: compensation_rationale
         description: 'What was the rationale for the compensation structure? How was
@@ -30949,7 +30338,6 @@ classes:
         domain_of:
         - HumanSubjectCompensation
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -30968,6 +30356,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -30977,7 +30366,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -31051,6 +30439,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -31060,7 +30449,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -31134,6 +30522,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -31144,7 +30533,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -31365,6 +30753,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -31374,7 +30763,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -31448,6 +30836,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -31457,7 +30846,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -31531,6 +30919,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -31541,7 +30930,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -31705,7 +31093,6 @@ classes:
         domain_of:
         - LicenseAndUseTerms
         range: string
-        multivalued: true
       data_use_permission:
         name: data_use_permission
         annotations:
@@ -31760,6 +31147,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -31769,7 +31157,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -31843,6 +31230,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -31852,7 +31240,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -31926,6 +31313,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -31936,7 +31324,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -32120,6 +31507,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -32129,7 +31517,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -32203,6 +31590,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -32212,7 +31600,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -32286,6 +31673,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -32296,7 +31684,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -32492,7 +31879,6 @@ classes:
         domain_of:
         - ExportControlRegulatoryRestrictions
         range: string
-        multivalued: true
       confidentiality_level:
         name: confidentiality_level
         description: Confidentiality classification of the dataset indicating level
@@ -32536,6 +31922,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -32545,7 +31932,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -32619,6 +32005,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -32628,7 +32015,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -32702,6 +32088,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -32712,7 +32099,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -33062,7 +32448,6 @@ classes:
         domain_of:
         - VariableMetadata
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -33081,6 +32466,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -33090,7 +32476,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -33164,6 +32549,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - Software
         - Person
         - Information
@@ -33173,7 +32559,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -33247,6 +32632,7 @@ classes:
         - NamedThing
         - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - Software
         - Person
@@ -33257,7 +32643,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -33977,11 +33362,12 @@ classes:
         owner: File
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -33991,7 +33377,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -34067,11 +33452,12 @@ classes:
         owner: File
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -34081,7 +33467,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -34156,12 +33541,13 @@ classes:
         owner: File
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -34171,7 +33557,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -34778,11 +34163,12 @@ classes:
         owner: FileCollection
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -34792,7 +34178,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -34868,11 +34253,12 @@ classes:
         owner: FileCollection
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -34882,7 +34268,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo
@@ -34957,12 +34342,13 @@ classes:
         owner: FileCollection
         domain_of:
         - NamedThing
+        - Organization
         - DatasetProperty
+        - Grant
         - DatasetRelationship
         - DatasetCollection
         - Dataset
         - DataSubset
-        - Organization
         - Software
         - Person
         - Information
@@ -34972,7 +34358,6 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
-        - Grant
         - Instance
         - SamplingStrategy
         - MissingInfo

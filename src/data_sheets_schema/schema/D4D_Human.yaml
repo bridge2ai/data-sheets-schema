@@ -62,7 +62,6 @@ classes:
           Include institution names and approval details.
         slot_uri: d4d:ethicsReviewBoard
         range: string
-        multivalued: true
       special_populations:
         description: >
           Does the research involve any special populations that require
@@ -96,7 +95,6 @@ classes:
           implied through participation)?
         slot_uri: d4d:consentType
         range: string
-        multivalued: true
         annotations:
           "d4d:docExample": "Written informed consent with optional consent for future use of biospecimens"
       consent_documentation:
@@ -105,7 +103,6 @@ classes:
           or procedures used.
         slot_uri: d4d:consentDocumentation
         range: string
-        multivalued: true
         annotations:
           "d4d:docExample": "Separate consent forms for main study, biorepository, and genetic analysis"
       withdrawal_mechanism:
@@ -114,14 +111,12 @@ classes:
           are in place for data deletion upon withdrawal?
         slot_uri: d4d:withdrawalMechanism
         range: string
-        multivalued: true
       consent_scope:
         description: >
           What specific uses did participants consent to? Are there
           limitations on data use based on consent?
         slot_uri: d4d:consentScope
         range: string
-        multivalued: true
 
 
   ParticipantPrivacy:
@@ -136,7 +131,6 @@ classes:
           Include technical details of privacy-preserving techniques.
         slot_uri: d4d:anonymizationMethod
         range: string
-        multivalued: true
         annotations:
           "d4d:docExample": "De-identified per HIPAA Safe Harbor; 5-digit ZIP replaced with region codes"
       reidentification_risk:
@@ -145,7 +139,6 @@ classes:
           were taken to minimize this risk?
         slot_uri: d4d:reidentificationRisk
         range: string
-        multivalued: true
         annotations:
           "d4d:docExample": "Low risk; expert determination per 45 CFR 164.514(b)(1)"
       privacy_techniques:
@@ -161,7 +154,6 @@ classes:
           compromise participant privacy?
         slot_uri: d4d:dataLinkage
         range: string
-        multivalued: true
 
 
   HumanSubjectCompensation:
@@ -179,7 +171,6 @@ classes:
           gift cards, course credit, other incentives)?
         slot_uri: d4d:compensationType
         range: string
-        multivalued: true
         annotations:
           "d4d:docExample": "Monetary payment via gift card"
       compensation_amount:
@@ -188,7 +179,6 @@ classes:
           Include currency or equivalent value.
         slot_uri: d4d:compensationAmount
         range: string
-        multivalued: true
         annotations:
           "d4d:docExample": "$75 for initial visit; $25 for annual follow-up"
       compensation_rationale:
@@ -197,7 +187,6 @@ classes:
           How was the amount determined to be appropriate?
         slot_uri: d4d:compensationRationale
         range: string
-        multivalued: true
 
 
   AtRiskPopulations:
