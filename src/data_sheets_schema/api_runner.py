@@ -269,6 +269,28 @@ def prompt_body(path: Path = GENERIC_PROMPT) -> str:
     return text.split("## Prompt body", 1)[1].strip()
 
 
+# Updated by hand when build_phase() reorders its parts; the instruction texts
+# are hashed mechanically below, so wording changes cannot go unrecorded, but
+# nothing derives this ordering from the code — keep it true.
+ASSEMBLY_LAYOUT = ("schema digest, input bundle, arm prompt, "
+                   "carried artifacts, phase instruction")
+
+
+def assembly_digest() -> dict[str, Any]:
+    """Fingerprint of how requests are assembled, for provenance (#353).
+
+    The prompt-file and resolved-text hashes witness the arm prompt only. #352
+    moved the phase instruction after the carried artifacts and reworded two
+    instructions — a change that materially altered every request — yet a
+    record made the day before and the day after carried byte-identical prompt
+    evidence. This digest covers what those hashes do not: the phase
+    instruction texts and the order the parts are assembled in.
+    """
+    basis = json.dumps([ASSEMBLY_LAYOUT, PHASE_INSTRUCTIONS], sort_keys=True)
+    return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
+            "layout": ASSEMBLY_LAYOUT}
+
+
 def resolved_prompt_digest(spec: RunSpec) -> dict[str, Any]:
     """A hash of the text the model is actually sent.
 
@@ -1395,6 +1417,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # both: the file for provenance of the source, the resolution for the
     # request actually sent.
     rec.data["prompts"]["resolved"] = resolved_prompt_digest(spec)
+    rec.data["prompts"]["assembly"] = assembly_digest()
     ident = provider_identity()
     rec.data["model"] = {
         "generation_method": "schema-grounded API, six phases",

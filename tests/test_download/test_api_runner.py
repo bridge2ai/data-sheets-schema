@@ -419,6 +419,19 @@ class TestTheRunDateIsFrozenPerRun(unittest.TestCase):
         sent = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
         self.assertEqual(sent, resolved_prompt_digest(spec)["sha256"])
 
+    def test_assembly_digest_moves_when_an_instruction_moves(self):
+        """#353: the prompt hashes witness the arm prompt only; #352 changed
+        every request without moving them. The assembly digest must move with
+        the instruction texts, and be stable when nothing changed."""
+        from data_sheets_schema.api_runner import (
+            PHASE_INSTRUCTIONS, assembly_digest)
+        before = assembly_digest()
+        self.assertEqual(before, assembly_digest())
+        with unittest.mock.patch.dict(PHASE_INSTRUCTIONS,
+                                      {"core": "reworded"}):
+            self.assertNotEqual(before["sha256"], assembly_digest()["sha256"])
+        self.assertEqual(before, assembly_digest())
+
     def test_the_date_can_be_pinned_explicitly(self):
         """Frozen on the spec, so a rerun can reproduce an earlier run's text."""
         from data_sheets_schema.api_runner import resolve_prompt
