@@ -575,12 +575,20 @@ def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
                  reps: int = 3, cache_dir: Path = DEFAULT_CACHE,
                  embed: bool = False, offline: bool = False,
                  embed_online: bool = False,
+                 judge_model: str | None = None,
                  ) -> tuple[dict[str, dict[str, Any]], dict[str, list[SlotAgreement]]]:
     """The whole matrix, plus the per-slot rows behind every cell.
 
     `embed_online` is separate from `offline` so that re-judging a handful of
     slots cannot quietly buy ~1400 embeddings on the way past. The embedder
     reads its cache and stops there unless asked otherwise.
+
+    `judge_model` pins the instrument. Left as None the judge inherits the
+    live config pin — right for a fresh measurement, wrong for reproducing a
+    published one: when #345 switched the pin, every model-scoped cached
+    verdict silently fell out of scope and the offline rebuild of an already
+    frozen artifact failed (#351). A reproduction passes the judge_model the
+    publication records.
     """
     configs = configs or DEFAULT_CONFIGS
     embedder = (Embedder(cache_path=cache_dir / "embeddings.jsonl",
@@ -596,6 +604,7 @@ def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
                       file=sys.stderr)
                 continue
             judge = EquivalenceJudge(
+                model=judge_model,
                 cache_path=cache_dir / f"{project}_equivalence.jsonl",
                 offline=offline)
             result = compare_records(records, embedder=embedder, judge=judge)
