@@ -716,6 +716,37 @@ class TestValidatorDrivenRepair(unittest.TestCase):
                          "repair_full")
         self.assertEqual(len(d["api_usage"]), 7)
 
+    def test_resume_of_a_completed_run_keeps_the_prior_accounting(self):
+        """#362: re-running an invalid-but-complete run is how repair is
+        triggered (#361), and that invocation rebuilds provenance. The six
+        phases' real token accounting must survive into the new record, not
+        be replaced by only the resumed calls."""
+        import yaml as _yaml
+        from data_sheets_schema import api_runner
+        s = spec(out_dir=self.out)
+        keep = api_runner._client
+        api_runner._client = lambda: FakeClient()
+        self.addCleanup(lambda: setattr(api_runner, "_client", keep))
+        self.api.execute(s)                      # full pass: 6 usage rows
+        prov = self.out / "CHORUS_provenance.yaml"
+        first = _yaml.safe_load(prov.read_text())
+        self.assertEqual(len(first["api_usage"]), 6)
+        # Keep resume state, as a validation failure would have.
+        self.api._save_progress(s, list(self.api.PHASES), None)
+        # Re-run: all phases skip, repair runs once on the full record.
+        verdicts = iter([(["[ERROR] x"], None), ([], None),
+                         (["[ERROR] x"], None), ([], None), ([], None),
+                         ([], None), ([], None)])
+        with unittest.mock.patch.object(
+                self.api, "_validator_lines", lambda *a: next(verdicts)):
+            res = self.api.execute(s)
+        self.assertEqual(len(res["skipped"]), 6)
+        second = _yaml.safe_load(prov.read_text())
+        phases = [u["phase"] for u in second["api_usage"]]
+        self.assertEqual(len(phases), 7, phases)
+        self.assertEqual(phases[:6], [u["phase"] for u in first["api_usage"]])
+        self.assertEqual(phases[-1], "repair_full")
+
     def test_execute_records_no_repair_when_records_validate(self):
         import yaml as _yaml
         from data_sheets_schema import api_runner
