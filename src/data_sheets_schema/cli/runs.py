@@ -65,6 +65,46 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
         click.echo("✓ report validates against d4d_run_telemetry.yaml")
 
 
+@runs.command("trap-inventory")
+@click.option("-o", "--output", type=click.Path(),
+              default="data/run_telemetry/trap_slot_inventory.yaml",
+              show_default=True)
+@click.option("--validate", "do_validate", is_flag=True,
+              help="linkml-validate the inventory against the telemetry schema")
+def trap_inventory_cmd(output, do_validate):
+    """Mine every generated record for validation-failure sites (#360).
+
+    Runs the validator over the whole corpus (slow: one subprocess per
+    record) and aggregates findings by normalized slot path and error class.
+    """
+    import subprocess
+    import yaml as _yaml
+
+    from data_sheets_schema.run_telemetry import SCHEMA_PATH, trap_inventory
+
+    report = trap_inventory()
+    out = Path(output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(_yaml.safe_dump(report, sort_keys=False,
+                                   allow_unicode=True), encoding="utf-8")
+    click.echo(f"✓ {report['records_scanned']} records scanned, "
+               f"{report['records_with_errors']} with errors, "
+               f"{len(report['traps'])} trap rows -> {out}")
+    for t in report["traps"][:12]:
+        click.echo(f"   {t['occurrence_count']:>4}x {t['error_class']:18} "
+                   f"{t['slot_path']}")
+    if do_validate:
+        res = subprocess.run(
+            ["poetry", "run", "linkml-validate", "-s", str(SCHEMA_PATH),
+             "-C", "TrapSlotInventoryReport", str(out)],
+            capture_output=True, text=True, timeout=180)
+        if res.returncode != 0:
+            raise click.ClickException(
+                "inventory failed schema validation:\n"
+                + (res.stdout + res.stderr).strip()[:800])
+        click.echo("✓ inventory validates against d4d_run_telemetry.yaml")
+
+
 @runs.command()
 @click.option('--label', 'labels', multiple=True,
               help='Run label(s) to archive; repeatable.')

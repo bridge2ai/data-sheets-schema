@@ -1,0 +1,1542 @@
+generated_at: '2026-08-06T18:27:40+00:00'
+schema_version: 1.3.0
+corpus_note: All *_d4d.yaml and *_d4d_core.yaml under data/d4d_concatenated excluding
+  ATTIC and quarantined .failed-* files. Valid records contribute zero rows.
+records_scanned: 299
+records_with_errors: 31
+traps:
+- slot_path: /creators/*
+  error_class: undeclared_slot
+  observed_shapes:
+  - unknown
+  occurrence_count: 47
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - Additional properties are not allowed ('affiliation' was unexpected)
+  - Additional properties are not allowed ('affiliation' was unexpected)
+  record_count: 1
+- slot_path: /creators/*/affiliations/*
+  error_class: union_mismatch
+  observed_shapes:
+  - string
+  occurrence_count: 46
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Washington University in St. Louis (https://ror.org/01yc7t268), as recorded
+    in the FAIRhub study metadata for v3.0.0; the NIH RePORTER record for award OT2OD03'
+  - '''Washington University in St. Louis (https://ror.org/01yc7t268), as recorded
+    in the FAIRhub study metadata; the Nature Metabolism comment gives the University
+    o'
+  record_count: 4
+- slot_path: /variables/*/quality_notes
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 39
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  examples:
+  - '''Reference range varies by age. Included as a severity and outcome predictor
+    of heart failure.'' is not of type ''array'', ''null'''
+  - '''Reference range female less than 11, male less than 16. Included as a marker
+    of myocardial injury.'' is not of type ''array'', ''null'''
+  record_count: 1
+- slot_path: /collection_mechanisms/*/mechanism_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 30
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''REDCap was used for the recruitment interface, electronic consent, patient-reported
+    questionnaire data, and the following clinical data from the visit: medicat'
+  - '''Retinal imaging was performed with seven devices: the Optomed Aurora IQ handheld
+    undilated fundus camera, the iCare Eidon widefield truecolor confocal fundus s'
+  record_count: 4
+- slot_path: /related_datasets/*/relationship_type
+  error_class: invalid_enum_value
+  expected: '[''derives_from'', ''is_source_of'', ''supplements'', ''is_supplemented_by'',
+    ''is_version_of'', ''has_version'', ''is_new_version_of'
+  observed_shapes:
+  - string
+  occurrence_count: 23
+  projects:
+  - AI_READI
+  - VOICE
+  - CM4AI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_crate
+  examples:
+  - '''IsNewVersionOf'' is not one of [''derives_from'', ''is_source_of'', ''supplements'',
+    ''is_supplemented_by'', ''is_version_of'', ''has_version'', ''is_new_version_of'',
+    ''is_pr'
+  - '''IsNewVersionOf'' is not one of [''derives_from'', ''is_source_of'', ''supplements'',
+    ''is_supplemented_by'', ''is_version_of'', ''has_version'', ''is_new_version_of'',
+    ''is_pr'
+  record_count: 6
+- slot_path: /preprocessing_strategies/*/preprocessing_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 22
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Clinical data collected through REDCap were mapped to the Observational Medical
+    Outcomes Partnership Common Data Model, with each CSV file in the clinical_data'
+  - '''Retinal imaging exported in proprietary formats was converted to the DICOM
+    standard prior to upload; Topcon .fda and Heidelberg .sdt files were converted
+    for t'
+  record_count: 4
+- slot_path: /raw_data_sources/*/source_type
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 20
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Imaging device export'' is not of type ''array'', ''null'''
+  - '''Electronic data capture system'' is not of type ''array'', ''null'''
+  record_count: 4
+- slot_path: /raw_data_sources/*/raw_data_format
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 20
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''.fda, .sdt, DICOM'' is not of type ''array'', ''null'''
+  - '''REDCap export'' is not of type ''array'', ''null'''
+  record_count: 4
+- slot_path: /cleaning_strategies/*/cleaning_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 16
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Clinical data outside expected minimum and maximum ranges were flagged in REDCap
+    and appeared in reports viewed by clinical research coordinators and data mana'
+  - '''Records were checked for incorrect flow through prescribed skip patterns.''
+    is not of type ''array'', ''null'''
+  record_count: 4
+- slot_path: /data_collectors/*/collector_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 14
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Clinical research coordinators and study coordinators at the three sites contacted
+    and consented participants, ushered them through the visit, conducted study '
+  - '''Retinal imaging technicians acquired the ophthalmic imaging and were trained
+    to detect potentially life- or vision-threatening conditions, specifically retinal'
+  record_count: 4
+- slot_path: /future_use_impacts/*/impact_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 14
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''There is a theoretical risk of future re-identification. AI algorithms can
+    infer individual patient characteristics and could facilitate individual-level
+    ident'
+  - '''Because enrollment is ongoing, the pilot data release and periodic updates
+    to data releases may not have achieved balanced distribution across race and ethnici'
+  record_count: 4
+- slot_path: /intended_uses/*/use_category
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 14
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Artificial intelligence and machine learning research on type 2 diabetes mellitus''
+    is not of type ''array'', ''null'''
+  - '''Salutogenesis research'' is not of type ''array'', ''null'''
+  record_count: 4
+- slot_path: /issued
+  error_class: other
+  observed_shapes:
+  - string
+  occurrence_count: 12
+  projects:
+  - AI_READI
+  - CHORUS
+  - VOICE
+  - CM4AI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_crate
+  - claudecode_agent_crate_only
+  - gpt5
+  - claudecode_agent_crate_core
+  - claudecode_agent_crate_only_core
+  examples:
+  - '''2025-11-17'' is not a ''date-time'''
+  - '''2026-04-03T00:00:00'' is not a ''date-time'''
+  record_count: 12
+- slot_path: /anomalies/*/anomaly_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 12
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''In survey data, skipped questions or incomplete responses are expected.'' is
+    not of type ''array'', ''null'''
+  - '''In wearable data, improper use, technical failure such as battery failure,
+    and system malfunction are expected.'' is not of type ''array'', ''null'''
+  record_count: 2
+- slot_path: /sensitive_elements/*/sensitivity_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - unknown
+  - string
+  occurrence_count: 12
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '"The version 3.0.0 healthsheet states that the public dataset does not contain
+    data considered sensitive, but that the controlled-access dataset contains data
+    r'
+  - '''The dataset consists of clinical records of critically ill patients, including
+    demographics, diagnoses, procedures, medication administration and high-frequenc'
+  record_count: 4
+- slot_path: /distributions/*
+  error_class: undeclared_slot
+  observed_shapes:
+  - unknown
+  occurrence_count: 11
+  projects:
+  - VOICE
+  - CM4AI
+  methods:
+  - claudecode_agent_core
+  examples:
+  - Additional properties are not allowed ('download_url' was unexpected)
+  - Additional properties are not allowed ('checksum' was unexpected)
+  record_count: 2
+- slot_path: /funders/*/grants/*
+  error_class: wrong_type
+  expected: '''object'''
+  observed_shapes:
+  - string
+  occurrence_count: 10
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''OT2OD032644 - Bridge2AI: Salutogenesis Data Generation Project (application
+    10471118, award amount 5,026,499 USD, project period 2022-09-01 to 2025-08-31)''
+    is '
+  - '''P30DK035816'' is not of type ''object'''
+  record_count: 4
+- slot_path: /prohibited_uses/*/prohibition_reason
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  - unknown
+  occurrence_count: 10
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Licensees shall not make clinical treatment decisions based on the data, as
+    it is intended solely as a research resource.'' is not of type ''array'', ''null'''
+  - '"Licensees shall not use or attempt to use the data, alone or in concert with
+    other information, to compromise or otherwise infringe the confidentiality of
+    info'
+  record_count: 2
+- slot_path: /acquisition_methods/*/acquisition_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 8
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Directly observable data include vitals, anthropometry, 12-lead electrocardiography,
+    monofilament testing, cognitive screening, visual function testing, autore'
+  - '''Subject-reported data include the screening questionnaire, demographics, the
+    CES-D-10 depression screen, the PAID-5 diabetes distress measure, the diabetes
+    sel'
+  record_count: 4
+- slot_path: /collection_timeframes/*/timeframe_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 8
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Collection window for version 3.0.0 of the dataset, as recorded in the dataset
+    description metadata and the README: 19 July 2023 to 1 May 2025, covering the
+    fi'
+  - '''Preliminary pilot enrolment period recorded in the BMJ Open protocol publication,
+    run in order to secure sufficient familiarity for all coordinators. The proto'
+  record_count: 4
+- slot_path: /maintainers/*/maintainer_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 8
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''The AI-READI team supports and maintains the dataset. It is hosted on FAIRhub,
+    https://fairhub.io, a Microsoft Azure cloud-based data management, curation and '
+  - '''Ciera McCrary, Program Manager, Massachusetts General Hospital; contact cmccrary@mgh.havard.edu
+    (as listed on the CHoRUS project website).'' is not of type ''arr'
+  record_count: 4
+- slot_path: /file_collections/*/collection_type
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 6
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  examples:
+  - '''metadata'' is not of type ''array'', ''null'''
+  - '''processed_data'' is not of type ''array'', ''null'''
+  record_count: 2
+- slot_path: /subpopulations/*/identification
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 6
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''The healthsheet for version 3.0.0 states that the dataset does not identify
+    demographic sub-populations at the level of individual instances. Individual-level '
+  - '''Admissions are drawn from adult intensive care units (ICU), pediatric intensive
+    care units (PICU) and neonatal intensive care units (NICU).'' is not of type ''ar'
+  record_count: 4
+- slot_path: /subpopulations/*/distribution
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 6
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Aggregate counts for the whole 2,280-participant release are published in the
+    dataset README. Race and ethnicity: Hispanic 380, Asian 545, Black 519, White
+    836'
+  - '''The current released dataset comprises 50,000 patient admissions from ICU,
+    PICU and NICU combined; no per-unit breakdown is reported in the available documenta'
+  record_count: 4
+- slot_path: /other_tasks/*/task_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 6
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Research on social determinants of health and contextual data elements included
+    among the acquired data types.'' is not of type ''array'', ''null'''
+  - '''Development and evaluation of standards, validated semantic mappings, and open-source
+    tooling for transforming and interacting with multi-modal clinical data.'''
+  record_count: 2
+- slot_path: /subsets/*
+  error_class: undeclared_slot
+  observed_shapes:
+  - unknown
+  occurrence_count: 6
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - Additional properties are not allowed ('format', 'md5', 'media_type' were unexpected)
+  - Additional properties are not allowed ('format', 'md5', 'media_type' were unexpected)
+  record_count: 1
+- slot_path: /subsets/*/funders/*
+  error_class: undeclared_slot
+  observed_shapes:
+  - unknown
+  occurrence_count: 6
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - Additional properties are not allowed ('grant' was unexpected)
+  - Additional properties are not allowed ('grant' was unexpected)
+  record_count: 1
+- slot_path: /subsets/*/funders/*/grantor
+  error_class: wrong_type
+  expected: '''string'', ''null'''
+  observed_shapes:
+  - object
+  occurrence_count: 6
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - '{''id'': ''https://reporter.nih.gov/'', ''name'': ''National Institutes of Health''}
+    is not of type ''string'', ''null'''
+  - '{''id'': ''https://reporter.nih.gov/'', ''name'': ''National Institutes of Health''}
+    is not of type ''string'', ''null'''
+  record_count: 1
+- slot_path: /subsets/*/instances/*
+  error_class: undeclared_slot
+  observed_shapes:
+  - unknown
+  occurrence_count: 6
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - Additional properties are not allowed ('data_type', 'representation' were unexpected)
+  - Additional properties are not allowed ('data_type', 'representation' were unexpected)
+  record_count: 1
+- slot_path: /subsets/*/license_and_use_terms/description
+  error_class: wrong_type
+  expected: '''string'', ''null'''
+  observed_shapes:
+  - array
+  occurrence_count: 6
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - '[''Attribution required; cite related publication(s) and this data collection.'',
+    ''Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International.'']
+    is n'
+  - '[''Attribution required; cite related publication(s) and this data collection.'',
+    ''Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International.'']
+    is n'
+  record_count: 1
+- slot_path: /subsets/*/ip_restrictions/description
+  error_class: wrong_type
+  expected: '''string'', ''null'''
+  observed_shapes:
+  - array
+  occurrence_count: 6
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - '[''Copyright (c) 2025 The Regents of the University of California.''] is not
+    of type ''string'', ''null'''
+  - '[''Copyright (c) 2025 The Regents of the University of California.''] is not
+    of type ''string'', ''null'''
+  record_count: 1
+- slot_path: /subsets/*/maintainers/*/description
+  error_class: wrong_type
+  expected: '''string'', ''null'''
+  observed_shapes:
+  - array
+  occurrence_count: 6
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - '[''Hosted by University of Virginia Dataverse; contact via dataset page.'', {''Point
+    of Contact'': ''Trey Ideker (University of California San Diego).''}] is not of
+    t'
+  - '[''Hosted by University of Virginia Dataverse; contact via dataset page.'', {''Point
+    of Contact'': ''Trey Ideker (University of California San Diego).''}] is not of
+    t'
+  record_count: 1
+- slot_path: /splits/*/split_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 5
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  examples:
+  - '''Training split, 1,576 participants, 70 percent of the release. Race and ethnicity:
+    Hispanic 204, Asian 369, Black 343, White 660. Sex: 599 male, 977 female. Di'
+  - '''Validation split, 352 participants, 15 percent of the release. Race and ethnicity:
+    Hispanic 88, Asian 88, Black 88, White 88. Sex: 176 male, 176 female. Diabet'
+  record_count: 2
+- slot_path: /resources/*
+  error_class: union_mismatch
+  observed_shapes:
+  - object
+  occurrence_count: 5
+  projects:
+  - AI_READI
+  - CHORUS
+  - VOICE
+  methods:
+  - gpt5
+  examples:
+  - '{''id'': ''https://fairhub.io/datasets/2'', ''name'': ''AI-READI Dataset'', ''title'':
+    ''AI-READI Flagship Dataset of Type 2 Diabetes'', ''description'': ''The AI-READI
+    datase'
+  - '{''id'': ''chorus-for-equitable-ai-github-pdf'', ''name'': ''CHoRUS for Equitable
+    AI - GitHub PDF'', ''title'': ''CHoRUS for Equitable AI'', ''description'': ''PDF
+    document re'
+  record_count: 3
+- slot_path: /instances/*/missing_information
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 4
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Not all modalities are available for all participants. Some participants elected
+    not to participate in some study elements; in a few cases the data collection '
+  - '''Coverage varies by modality. As of August 2025, clinical notes were stored
+    locally at contributing sites with only tokens available, approximately 1,000
+    images'
+  record_count: 4
+- slot_path: /confidential_elements/*/confidentiality_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 4
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''The version 3.0.0 healthsheet states that the dataset does not contain data
+    that might be considered confidential and that no personally identifiable informati'
+  - '''Full clinical note text is not released; notes are stored locally at contributing
+    sites and only tokens leave the site. Every data type in the resource (demogr'
+  record_count: 4
+- slot_path: /sampling_strategies/*/source_data
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 4
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''The study base is all patients aged 40 years or older who had a medical encounter
+    within each health system site (University of Alabama at Birmingham, Universi'
+  - '''Admissions of critically ill patients (ICU, PICU and NICU) at 14 data-contributing
+    hospitals within the 20-center CHoRUS academic network.'' is not of type ''arr'
+  record_count: 4
+- slot_path: /ethical_reviews/*/review_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 4
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''AI-READI was approved by the Institutional Review Board of the University of
+    Washington under approval number STUDY00016228, with initial approval received
+    on '
+  - '''A Community Advisory Board of eleven persons from the three sites, including
+    diversity in race and ethnicity as represented in the AI-READI sample, contributes'
+  record_count: 2
+- slot_path: /updates/update_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 4
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''The dataset is released as static versions and is not updated in place; new
+    versions are released with additional instances as more study participants complete'
+  - '''The dataset is being expanded toward an anticipated final size of 100,000 patient
+    admissions, nine data modalities and 14 data-contributing hospitals. As of Au'
+  record_count: 4
+- slot_path: /is_deidentified/deidentification_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 4
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''The sources in the bundle characterise the de-identification status differently
+    and are not reconciled here. The version 3.0.0 dataset_description metadata rec'
+  - '''Data are transformed using approaches that limit re-identification. Unstructured
+    electronic health record text is tokenized with the OHNLP toolkit; imaging de-'
+  record_count: 4
+- slot_path: /labeling_strategies/*/labeling_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 4
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''A visualization and annotation environment is developed within CHoRUS to label
+    data with targets important for prediction. Capabilities to acquire, standardize'
+  - '''Clinical collaborators contribute to semantic mapping and validation; pooled
+    tabular mappings in the chorus-mapping repository are reviewed under a clinical
+    va'
+  record_count: 2
+- slot_path: /subsets/*/compression
+  error_class: invalid_enum_value
+  expected: '[''gzip'', ''bzip2'', ''zip'', ''tar'', ''xz'', ''lzma'', ''compress'']'
+  observed_shapes:
+  - string
+  occurrence_count: 3
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - '''ZIP'' is not one of [''gzip'', ''bzip2'', ''zip'', ''tar'', ''xz'', ''lzma'',
+    ''compress'']'
+  - '''ZIP'' is not one of [''gzip'', ''bzip2'', ''zip'', ''tar'', ''xz'', ''lzma'',
+    ''compress'']'
+  record_count: 1
+- slot_path: /issued
+  error_class: wrong_type
+  expected: '''string'', ''null'''
+  observed_shapes:
+  - unknown
+  occurrence_count: 2
+  projects:
+  - VOICE
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - datetime.datetime(2026, 5, 1, 0, 0, tzinfo=datetime.timezone.utc) is not of type
+    'string', 'null'
+  - datetime.datetime(2026, 5, 1, 0, 0, tzinfo=datetime.timezone.utc) is not of type
+    'string', 'null'
+  record_count: 2
+- slot_path: /external_resources/*/future_guarantees
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''The dataset is self-contained but relies on the dataset documentation for users
+    requiring additional information about its provenance; one documentation versio'
+  - '''The dataset is self-contained but relies on the dataset documentation for users
+    requiring additional information about its provenance; one documentation versio'
+  record_count: 2
+- slot_path: /relationships/*/relationship_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  examples:
+  - '''All instances are part of the same prospective data generation project, AI-READI.
+    There is currently only one study visit per participant, so instances are not'
+  - '''Within the dataset, records for one participant are related across the nine
+    data type directories by the participant identifier used as the participant directo'
+  record_count: 1
+- slot_path: /sampling_strategies/*/why_not_representative
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Rather than targeting the demographic distribution of the United States population,
+    the study deliberately recruits equal proportions of the four race and ethn'
+  - '''Rather than targeting the demographic distribution of the United States population,
+    the study deliberately recruits equal proportions of the four race and ethn'
+  record_count: 2
+- slot_path: /direct_collection/*/collection_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  examples:
+  - '''Data were collected directly from participants across the three recruiting
+    sites; this was active data collection rather than passive collection or secondary
+    u'
+  - '''Data are obtained retrospectively from hospital clinical systems (electronic
+    health records, PACS, bedside telemetry gateways, EEG databases) at contributing
+    h'
+  record_count: 2
+- slot_path: /human_subject_research/ethics_review_board
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''University of Washington Institutional Review Board, with reliance agreements
+    from the Institutional Review Boards of the University of Alabama at Birmingham
+    a'
+  - '''University of Washington Institutional Review Board, with reliance agreements
+    from the Institutional Review Boards of the University of Alabama at Birmingham
+    a'
+  record_count: 2
+- slot_path: /informed_consent/*/consent_type
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Written informed consent, obtained either remotely as electronic consent with
+    an electronic signature through REDCap, by computer, tablet or smart phone, or
+    in'
+  - '''Written informed consent, obtained either remotely as electronic consent with
+    an electronic signature through REDCap, by computer, tablet or smart phone, or
+    in'
+  record_count: 2
+- slot_path: /informed_consent/*/consent_documentation
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''The approved consent form for the principal project site, the University of
+    Washington, is distributed with the dataset documentation at https://docs.aireadi.o'
+  - '''The approved consent form for the principal project site, the University of
+    Washington, is distributed with the dataset documentation at https://docs.aireadi.o'
+  record_count: 2
+- slot_path: /informed_consent/*/withdrawal_mechanism
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Participants are permitted to withdraw consent at any time and cease study
+    participation. Any data that had been shared or used up to that point would stay
+    in '
+  - '''Participants are permitted to withdraw consent at any time and cease study
+    participation. Any data that had been shared or used up to that point would stay
+    in '
+  record_count: 2
+- slot_path: /informed_consent/*/consent_scope
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Consent covers the entire protocol including questionnaires, on-site physical,
+    ophthalmic, cardiac, neuropathy and cognitive assessments, blood and urine colle'
+  - '''Consent covers the entire protocol including questionnaires, on-site physical,
+    ophthalmic, cardiac, neuropathy and cognitive assessments, blood and urine colle'
+  record_count: 2
+- slot_path: /participant_privacy/*/anonymization_method
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  examples:
+  - '''Removal of Protected Health Information as defined by the HIPAA Privacy Rule
+    using the Safe Harbor method, plus removal of participant sex, race and ethnicity '
+  - '''Tokenization of unstructured EHR text using the OHNLP toolkit, de-identification
+    of imaging, and transformation approaches that limit re-identification.'' is no'
+  record_count: 2
+- slot_path: /participant_privacy/*/reidentification_risk
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  - CHORUS
+  methods:
+  - claudecode_agent
+  examples:
+  - '''The project states that no personally identifiable information is included
+    and that the data were checked for identifiable data per US HIPAA, but also that
+    the'
+  - '''Data are transformed using approaches that limit re-identification; imaging
+    de-identification for the larger cohort was still in process as of August 2025.''
+    is'
+  record_count: 2
+- slot_path: /participant_compensation/*/compensation_type
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  examples:
+  - '''Monetary stipend'' is not of type ''array'', ''null'''
+  - '''Travel and transportation support'' is not of type ''array'', ''null'''
+  record_count: 1
+- slot_path: /participant_compensation/*/compensation_rationale
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  examples:
+  - '''Study subjects received a compensation of 200 US dollars for the study visit,
+    funded through National Institutes of Health award OT2OD032644. Payment is provid'
+  - '''The study covers reasonable costs for parking, public transit or rideshare
+    fees related to the study visit, and transportation assistance through rideshare
+    ser'
+  record_count: 1
+- slot_path: /raw_sources/*/raw_data_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''The raw data are saved and expected to be preserved by the AI-READI project
+    at least for the duration of the project, but are not currently shared outside
+    the '
+  - '''The raw data are saved and expected to be preserved by the AI-READI project
+    at least for the duration of the project, but are not currently shared outside
+    the '
+  record_count: 2
+- slot_path: /license_and_use_terms/data_use_permission
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''disease_specific_research'' is not of type ''array'', ''null'''
+  - '''disease_specific_research'' is not of type ''array'', ''null'''
+  record_count: 2
+- slot_path: /regulatory_restrictions/other_compliance
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Protected health information as defined by the HIPAA Privacy Rule is removed
+    from the public release via the Safe Harbor method, and the project states that
+    it'
+  - '''Protected health information as defined by the HIPAA Privacy Rule is removed
+    from the public release via the Safe Harbor method, and the project states that
+    it'
+  record_count: 2
+- slot_path: /retention_limit/retention_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''There are no limits on the retention of the data associated with the instances;
+    participants were not told that their data would be retained only for a fixed
+    p'
+  - '''There are no limits on the retention of the data associated with the instances;
+    participants were not told that their data would be retained only for a fixed
+    p'
+  record_count: 2
+- slot_path: /version_access/version_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''One version of the documentation is associated with each dataset version and
+    can be selected from the version dropdown at docs.aireadi.org. The FAIRhub record '
+  - '''One version of the documentation is associated with each dataset version and
+    can be selected from the version dropdown at docs.aireadi.org. The FAIRhub record '
+  record_count: 2
+- slot_path: /creators/*/principal_investigator
+  error_class: wrong_type
+  expected: '''string'', ''null'''
+  observed_shapes:
+  - boolean
+  occurrence_count: 2
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - True is not of type 'string', 'null'
+  - True is not of type 'string', 'null'
+  record_count: 2
+- slot_path: /missing_data_documentation/*/missing_data_patterns
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Coverage is uneven across the nine planned modalities. As of August 2025, clinical
+    notes were absent from the enclave except as tokens; approximately 1,000 ima'
+  - '''Coverage is uneven across the nine planned modalities. As of August 2025, clinical
+    notes were absent from the enclave except as tokens; approximately 1,000 ima'
+  record_count: 2
+- slot_path: /missing_data_documentation/*/missing_data_causes
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Imaging de-identification and EEG extraction workflows were still in process,
+    and clinical notes are stored locally at contributing sites rather than in the
+    en'
+  - '''Imaging de-identification and EEG extraction workflows were still in process,
+    and clinical notes are stored locally at contributing sites rather than in the
+    en'
+  record_count: 2
+- slot_path: /human_subject_research/special_populations
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''The dataset includes admissions to pediatric intensive care units (PICU) and
+    neonatal intensive care units (NICU), and therefore data concerning children and
+    n'
+  - '''The dataset includes admissions to pediatric intensive care units (PICU) and
+    neonatal intensive care units (NICU), and therefore data concerning children and
+    n'
+  record_count: 2
+- slot_path: /at_risk_populations/at_risk_groups_included
+  error_class: wrong_type
+  expected: '''boolean'', ''null'''
+  observed_shapes:
+  - array
+  occurrence_count: 2
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '[''Critically ill and acutely ill patients'', ''Children (pediatric intensive
+    care unit admissions)'', ''Neonates (neonatal intensive care unit admissions)'']
+    is not '
+  - '[''Critically ill and acutely ill patients'', ''Children (pediatric intensive
+    care unit admissions)'', ''Neonates (neonatal intensive care unit admissions)'']
+    is not '
+  record_count: 2
+- slot_path: /labeling_strategies/*/data_annotation_platform
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''CHoRUS visualization and annotation environment'' is not of type ''array'',
+    ''null'''
+  - '''CHoRUS visualization and annotation environment'' is not of type ''array'',
+    ''null'''
+  record_count: 2
+- slot_path: /labeling_strategies/*/data_annotation_protocol
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''CHoRUS clinical validation SOP for semantic mappings'' is not of type ''array'',
+    ''null'''
+  - '''CHoRUS clinical validation SOP for semantic mappings'' is not of type ''array'',
+    ''null'''
+  record_count: 2
+- slot_path: /license_and_use_terms/license_terms
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Access to the CHoRUS dataset is controlled. All participants must sign a licensing
+    agreement, included in the registration form, before gaining access to the d'
+  - '''Access to the CHoRUS dataset is controlled. All participants must sign a licensing
+    agreement, included in the registration form, before gaining access to the d'
+  record_count: 2
+- slot_path: /regulatory_restrictions/regulatory_restrictions
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Every data type in the dataset is designated controlled access. Users complete
+    a registration form recording name, email and institution, sign a licensing agre'
+  - '''Every data type in the dataset is designated controlled access. Users complete
+    a registration form recording name, email and institution, sign a licensing agre'
+  record_count: 2
+- slot_path: /extension_mechanism/extension_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 2
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent
+  - claudecode_agent_core
+  examples:
+  - '''Data site managers begin from the Chorus_SOP page, which presents an interactive
+    workflow diagram for extracting and contributing clinical data to CHoRUS with '
+  - '''Data site managers begin from the Chorus_SOP page, which presents an interactive
+    workflow diagram for extracting and contributing clinical data to CHoRUS with '
+  record_count: 2
+- slot_path: /at_risk_populations
+  error_class: union_mismatch
+  observed_shapes:
+  - array
+  occurrence_count: 1
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  examples:
+  - '[{''description'': ''The study enrolls only adults aged 40 years and older (study
+    metadata state a maximum age of 85 years); no minors are enrolled, so no parental'
+  record_count: 1
+- slot_path: /related_datasets/*/target_dataset
+  error_class: wrong_type
+  expected: '''string'''
+  observed_shapes:
+  - object
+  occurrence_count: 1
+  projects:
+  - VOICE
+  methods:
+  - claudecode_agent
+  examples:
+  - '{''id'': ''https://doi.org/10.13026/h995-bt35'', ''name'': ''Bridge2AI-Voice
+    Pediatric Dataset'', ''title'': ''Bridge2AI-Voice Pediatric Dataset'', ''description'':
+    ''A compan'
+  record_count: 1
+- slot_path: /collection_notifications/*/notification_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 1
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  examples:
+  - '''Each individual was aware of the data collection, since this was active data
+    collection directly from participants rather than passive collection or secondary '
+  record_count: 1
+- slot_path: /collection_consents/*/consent_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 1
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  examples:
+  - '''Informed consent to participate was required before participation in any part
+    of the protocol, including the questionnaires. Potential participants were given '
+  record_count: 1
+- slot_path: /consent_revocations/*/revocation_details
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 1
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  examples:
+  - '''Consenting participants may revoke their consent at any time and cease study
+    participation, but data that had already been shared or used up to that point
+    rema'
+  record_count: 1
+- slot_path: /participant_privacy/*/data_linkage
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 1
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  examples:
+  - '''Modalities are linked within the dataset by participant identifier. The controlled-access
+    tier additionally links participants to past health records and to tr'
+  record_count: 1
+- slot_path: /participant_compensation/*/compensation_amount
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 1
+  projects:
+  - AI_READI
+  methods:
+  - claudecode_agent
+  examples:
+  - '''200 US dollars'' is not of type ''array'', ''null'''
+  record_count: 1
+- slot_path: /license_and_use_terms
+  error_class: union_mismatch
+  observed_shapes:
+  - array
+  occurrence_count: 1
+  projects:
+  - VOICE
+  methods:
+  - claudecode_agent_crate
+  examples:
+  - '[{''description'': ''The dataset is released under the Bridge2AI Voice Registered
+    Access License with an accompanying Bridge2AI Voice Registered Access Agreement
+    ('
+  record_count: 1
+- slot_path: /ip_restrictions
+  error_class: union_mismatch
+  observed_shapes:
+  - array
+  occurrence_count: 1
+  projects:
+  - VOICE
+  methods:
+  - claudecode_agent_crate
+  examples:
+  - '[{''description'': ''The registered access agreement states that the data may
+    be protected by copyright and other intellectual property rights; duplication
+    as reas'
+  record_count: 1
+- slot_path: /regulatory_restrictions
+  error_class: union_mismatch
+  observed_shapes:
+  - array
+  occurrence_count: 1
+  projects:
+  - VOICE
+  methods:
+  - claudecode_agent_crate
+  examples:
+  - '[{''description'': ''No export controls or other regulatory restrictions apply
+    to the dataset.''}, {''description'': ''HIPAA de-identification rules were applied
+    and H'
+  record_count: 1
+- slot_path: /
+  error_class: undeclared_slot
+  observed_shapes:
+  - unknown
+  occurrence_count: 1
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - Additional properties are not allowed ('same_as' was unexpected)
+  record_count: 1
+- slot_path: /funders/*
+  error_class: undeclared_slot
+  observed_shapes:
+  - unknown
+  occurrence_count: 1
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - Additional properties are not allowed ('grant' was unexpected)
+  record_count: 1
+- slot_path: /funders/*/grantor
+  error_class: wrong_type
+  expected: '''string'', ''null'''
+  observed_shapes:
+  - object
+  occurrence_count: 1
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - '{''id'': ''https://reporter.nih.gov/'', ''name'': ''National Institutes of Health''}
+    is not of type ''string'', ''null'''
+  record_count: 1
+- slot_path: /subsets/*/external_resources/*/external_resources
+  error_class: wrong_type
+  expected: '''array'', ''null'''
+  observed_shapes:
+  - string
+  occurrence_count: 1
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - '''PRIDE repository (planned upload when available).'' is not of type ''array'',
+    ''null'''
+  record_count: 1
+- slot_path: /license_and_use_terms/description
+  error_class: wrong_type
+  expected: '''string'', ''null'''
+  observed_shapes:
+  - array
+  occurrence_count: 1
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - '[''Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International. Attribution
+    required to copyright holders and authors.'', ''Cite related publication(s)'
+  record_count: 1
+- slot_path: /ip_restrictions/description
+  error_class: wrong_type
+  expected: '''string'', ''null'''
+  observed_shapes:
+  - array
+  occurrence_count: 1
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - '[''Copyright (c) 2025 The Regents of the University of California except where
+    otherwise noted.'', ''Spatial proteomics raw image data Copyright (c) 2025 The
+    Board'
+  record_count: 1
+- slot_path: /maintainers/*/description
+  error_class: wrong_type
+  expected: '''string'', ''null'''
+  observed_shapes:
+  - array
+  occurrence_count: 1
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - '[''Hosted/maintained by University of Virginia Dataverse (LibraData); contact
+    via dataset page.'', {''Point of Contact'': ''Trey Ideker (University of California
+    San'
+  record_count: 1
+- slot_path: /updates/description
+  error_class: wrong_type
+  expected: '''string'', ''null'''
+  observed_shapes:
+  - array
+  occurrence_count: 1
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - '[''Data will be augmented regularly through the end of the project.''] is not
+    of type ''string'', ''null'''
+  record_count: 1
+- slot_path: /created_on
+  error_class: other
+  observed_shapes:
+  - string
+  occurrence_count: 1
+  projects:
+  - CM4AI
+  methods:
+  - gpt5
+  examples:
+  - '''2025-02-27'' is not a ''date-time'''
+  record_count: 1
+- slot_path: /
+  error_class: missing_required
+  observed_shapes:
+  - string
+  occurrence_count: 1
+  projects:
+  - VOICE
+  methods:
+  - gpt5
+  examples:
+  - '''id'' is a required property'
+  record_count: 1
+- slot_path: /resources/*/issued
+  error_class: other
+  observed_shapes:
+  - string
+  occurrence_count: 1
+  projects:
+  - CHORUS
+  methods:
+  - claudecode_agent_crate_core
+  examples:
+  - '''2026-04-03T00:00:00'' is not a ''date-time'''
+  record_count: 1
+- slot_path: /dialect
+  error_class: undeclared_slot
+  observed_shapes:
+  - unknown
+  occurrence_count: 1
+  projects:
+  - VOICE
+  methods:
+  - claudecode_agent_crate_only_core
+  examples:
+  - Additional properties are not allowed ('description' was unexpected)
+  record_count: 1

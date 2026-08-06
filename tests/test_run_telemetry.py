@@ -188,6 +188,30 @@ class TestRunTelemetry(unittest.TestCase):
                                 findings=[finding])
         self.assertEqual(report["findings"], [finding])
 
+    def test_validator_line_parsing_normalizes_and_classifies(self):
+        from data_sheets_schema.run_telemetry import parse_validator_line
+        cases = [
+            ("[ERROR] [x/0] 'prose here' is not of type 'array', 'null' "
+             "in /collection_mechanisms/3/mechanism_details",
+             ("/collection_mechanisms/*/mechanism_details", "wrong_type",
+              "string")),
+            ("[ERROR] [x/0] {'name': 'WashU'} is not valid under any of the "
+             "given schemas in /creators/0/affiliations/0",
+             ("/creators/*/affiliations/*", "union_mismatch", "object")),
+            ("[ERROR] [x/0] True is not of type 'string', 'null' "
+             "in /creators/2/principal_investigator",
+             ("/creators/*/principal_investigator", "wrong_type", "boolean")),
+            ("[ERROR] [x/0] 'other' is not one of ['derives_from'] "
+             "in /related_datasets/1/relationship_type",
+             ("/related_datasets/*/relationship_type", "invalid_enum_value",
+              "string")),
+        ]
+        for line, (path, cls, shape) in cases:
+            p = parse_validator_line(line)
+            self.assertEqual((p["slot_path"], p["error_class"],
+                              p["observed_shape"]), (path, cls, shape), line)
+        self.assertIsNone(parse_validator_line("INFO something else"))
+
     def test_report_validates_against_the_schema(self):
         report = collect_report(
             "2026-08-05_test", root=self.root,

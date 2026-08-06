@@ -36,7 +36,7 @@ import yaml
 from data_sheets_schema.api_runner import CONCAT_DIR
 
 SCHEMA_PATH = Path("src/data_sheets_schema/schema/d4d_run_telemetry.yaml")
-SCHEMA_VERSION = "1.2.0"
+SCHEMA_VERSION = "1.3.0"
 
 # CBORG-posted opus-5 rates (2026-08-05, /model/info): $ per token. Cache
 # writes bill at 1.25x input, cache reads at 0.1x. No premium tier above 200k.
@@ -466,3 +466,132 @@ def collect_report(label_prefix: str,
     if findings:
         report["findings"] = findings
     return report
+
+
+# ---------------------------------------------------------------------------
+# Trap-slot inventory (#360): mine every generated record for validation-
+# failure sites. Valid records contribute zero rows, which is evidence too.
+
+_PATH_IN_MSG = __import__("re").compile(r"^(?P<msg>.*?) in (?P<path>/\S*)$")
+_INDEX = __import__("re").compile(r"/\d+(?=/|$)")
+
+
+def _classify_error(msg: str) -> tuple[str, str | None]:
+    """(error_class, expected) from one validator message."""
+    if " is not of type " in msg:
+        expected = msg.split(" is not of type ", 1)[1].strip()
+        return "wrong_type", expected
+    if "is not valid under any of the given schemas" in msg:
+        return "union_mismatch", None
+    if " is not one of " in msg:
+        return "invalid_enum_value", msg.split(" is not one of ", 1)[1][:120]
+    if "Additional properties are not allowed" in msg:
+        return "undeclared_slot", None
+    if "is a required property" in msg:
+        return "missing_required", None
+    return "other", None
+
+
+def _observed_shape(msg: str) -> str:
+    m = msg.lstrip()
+    if m.startswith("'"):
+        return "string"
+    if m.startswith("{"):
+        return "object"
+    if m.startswith("["):
+        return "array"
+    if m.startswith(("True", "False")):
+        return "boolean"
+    if m.startswith("None"):
+        return "null"
+    if m[:1].isdigit() or m.startswith("-"):
+        return "number"
+    return "unknown"
+
+
+def parse_validator_line(line: str) -> dict[str, Any] | None:
+    """One structured finding from one `[ERROR] [...] msg in /path` line."""
+    if "[ERROR]" not in line:
+        return None
+    body = line.split("]", 2)[-1].strip()
+    m = _PATH_IN_MSG.match(body)
+    msg, path = (m.group("msg"), m.group("path")) if m else (body, "(root)")
+    error_class, expected = _classify_error(msg)
+    return {"slot_path": _INDEX.sub("/*", path),
+            "error_class": error_class,
+            "expected": expected,
+            "observed_shape": _observed_shape(msg),
+            "message": msg[:200]}
+
+
+def trap_inventory(root: Path | None = None,
+                   corpus_note: str = "") -> dict[str, Any]:
+    """Validate every *_d4d.yaml / *_d4d_core.yaml under root; aggregate.
+
+    Slow (one validator subprocess per record); run it deliberately, not on
+    import. Quarantined `.failed-*` files and ATTIC are excluded — the former
+    are evidence for closed issues, the latter is archived.
+    """
+    from data_sheets_schema.api_runner import (
+        CORE_SCHEMA_PATH, FULL_SCHEMA_PATH, _validator_lines)
+    base = root or CONCAT_DIR
+    files = sorted(p for p in base.rglob("*_d4d.yaml")
+                   if "ATTIC" not in p.parts) + \
+        sorted(p for p in base.rglob("*_d4d_core.yaml")
+               if "ATTIC" not in p.parts)
+    traps: dict[tuple[str, str, str | None], dict[str, Any]] = {}
+    scanned = with_errors = 0
+    for f in files:
+        core = f.name.endswith("_d4d_core.yaml")
+        project = f.name.replace("_d4d_core.yaml", "").replace(
+            "_d4d.yaml", "")
+        method = f.relative_to(base).parts[0]
+        lines, failure = _validator_lines(
+            f, CORE_SCHEMA_PATH if core else FULL_SCHEMA_PATH,
+            "CoreDataset" if core else "Dataset")
+        if failure is not None:
+            continue
+        scanned += 1
+        if lines:
+            with_errors += 1
+        for line in lines:
+            parsed = parse_validator_line(line)
+            if not parsed:
+                continue
+            key = (parsed["slot_path"], parsed["error_class"],
+                   parsed["expected"])
+            t = traps.setdefault(key, {
+                "slot_path": parsed["slot_path"],
+                "error_class": parsed["error_class"],
+                **({"expected": parsed["expected"]}
+                   if parsed["expected"] else {}),
+                "observed_shapes": [], "occurrence_count": 0,
+                "_records": set(), "projects": [], "methods": [],
+                "examples": []})
+            t["occurrence_count"] += 1
+            t["_records"].add(str(f))
+            if parsed["observed_shape"] not in t["observed_shapes"]:
+                t["observed_shapes"].append(parsed["observed_shape"])
+            if project not in t["projects"]:
+                t["projects"].append(project)
+            if method not in t["methods"]:
+                t["methods"].append(method)
+            if len(t["examples"]) < 2:
+                t["examples"].append(parsed["message"][:160])
+    rows = []
+    for t in traps.values():
+        t["record_count"] = len(t.pop("_records"))
+        rows.append(t)
+    rows.sort(key=lambda r: -r["occurrence_count"])
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(
+            timespec="seconds"),
+        "schema_version": SCHEMA_VERSION,
+        "corpus_note": corpus_note or (
+            "All *_d4d.yaml and *_d4d_core.yaml under data/d4d_concatenated "
+            "excluding ATTIC and quarantined .failed-* files. Valid records "
+            "contribute zero rows."),
+        "records_scanned": scanned,
+        "records_with_errors": with_errors,
+        "traps": rows,
+    }

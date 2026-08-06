@@ -98,6 +98,74 @@ enums:
         description: No timing evidence of any kind survives.
 
 classes:
+  TrapSlotInventoryReport:
+    description: >-
+      A corpus-wide inventory of validation-failure sites ("trap slots"),
+      mined by running the validator over every generated record on disk and
+      aggregating its findings by normalized slot path and error class.
+      Valid records contribute zero rows — which is itself evidence of the
+      post-repair state. Validated with -C TrapSlotInventoryReport.
+    attributes:
+      generated_at:
+        description: When the inventory was mined (UTC).
+        range: datetime
+        required: true
+      schema_version:
+        description: Version of this telemetry schema the report conforms to.
+        required: true
+      corpus_note:
+        description: What was scanned and what was deliberately excluded.
+      records_scanned:
+        description: How many record files the validator ran over.
+        range: integer
+        required: true
+      records_with_errors:
+        description: How many of them carried at least one finding.
+        range: integer
+        required: true
+      traps:
+        description: One row per (slot path, error class, expected shape).
+        range: TrapSlot
+        multivalued: true
+        inlined_as_list: true
+
+  TrapSlot:
+    description: >-
+      One recurring validation-failure site. slot_path is normalized — list
+      indices become '*' — so every creator's affiliation failure lands on
+      one row.
+    attributes:
+      slot_path:
+        description: Normalized JSON path, e.g. /creators/*/affiliations/*.
+        required: true
+      error_class:
+        description: >-
+          wrong_type, union_mismatch, invalid_enum_value, undeclared_slot,
+          missing_required, or other.
+        required: true
+      expected:
+        description: The shape the schema demands, from the validator text.
+      observed_shapes:
+        description: Value shapes seen failing here — string, object, boolean.
+        multivalued: true
+      occurrence_count:
+        description: Total findings at this site across the corpus.
+        range: integer
+        required: true
+      record_count:
+        description: Distinct record files carrying at least one finding here.
+        range: integer
+        required: true
+      projects:
+        description: Projects whose records fail here.
+        multivalued: true
+      methods:
+        description: Generation methods whose records fail here.
+        multivalued: true
+      examples:
+        description: Up to two truncated verbatim findings, as evidence.
+        multivalued: true
+
   RunTelemetryReport:
     tree_root: true
     description: One report per collection pass, covering every run it found.
