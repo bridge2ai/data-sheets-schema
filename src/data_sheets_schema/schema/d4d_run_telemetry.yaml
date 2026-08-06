@@ -325,8 +325,15 @@ classes:
         range: integer
       populated_root_slot_count:
         description: >-
-          Top-level keys whose value is neither null nor an empty string,
-          list or mapping.
+          Top-level keys whose value is not hollow — hollow being null, a
+          blank string, an empty container, or a container whose every
+          member is hollow, recursively.
+        range: integer
+      hollow_value_count:
+        description: >-
+          Maximal hollow subtrees at any depth: a hollow object counts once,
+          not once per empty member. The mechanical, structural kin of the
+          form-defects hollow_object class, which is LLM-judged.
         range: integer
 
   Comparison:

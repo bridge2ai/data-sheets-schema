@@ -1,7 +1,7 @@
 label: 2026-08-05_claude-opus-5-1m-generic-v3
 method: claudecode_agent
-generated_at: '2026-08-06T07:02:48+00:00'
-schema_version: 1.1.0
+generated_at: '2026-08-06T07:10:53+00:00'
+schema_version: 1.2.0
 runs:
 - project: AI_READI
   label: 2026-08-05_claude-opus-5-1m-generic-v3_rep1
@@ -217,6 +217,7 @@ runs:
     lines: 1701
     root_slot_count: 70
     populated_root_slot_count: 70
+    hollow_value_count: 0
   - artifact: core
     path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/AI_READI_d4d_core.yaml
     sha256: c3f7c4944b0278dd1765607d8797396e485f5e5d031644979f38892d7f7ddfbf
@@ -224,6 +225,7 @@ runs:
     lines: 1305
     root_slot_count: 58
     populated_root_slot_count: 58
+    hollow_value_count: 0
   - artifact: report
     path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/AI_READI_reconciliation.md
     sha256: aa7a377ddd75f06cef8dd96c3898ba9cf57f2ace171c94047569c7599bbd92ea
@@ -399,6 +401,7 @@ runs:
     lines: 763
     root_slot_count: 53
     populated_root_slot_count: 53
+    hollow_value_count: 0
   - artifact: core
     path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/CHORUS_d4d_core.yaml
     sha256: 810488e1961311245c7f4df3fc4567149f5c79b42837d6a9dadfa5efb55ccfcc
@@ -406,6 +409,7 @@ runs:
     lines: 718
     root_slot_count: 48
     populated_root_slot_count: 48
+    hollow_value_count: 0
   - artifact: report
     path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/CHORUS_reconciliation.md
     sha256: a77bfccba9fe1dfeef0c41b0d9efe3825f3369996dd5c99dd74a7b3fbea49b02
@@ -603,6 +607,7 @@ runs:
     lines: 1476
     root_slot_count: 76
     populated_root_slot_count: 76
+    hollow_value_count: 0
   - artifact: core
     path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep2/AI_READI_d4d_core.yaml
     sha256: 1a8db435e1636240011ac7ea8ec00df6fcb4d37a03cc191e9974e2636197efb6
@@ -610,6 +615,7 @@ runs:
     lines: 1254
     root_slot_count: 62
     populated_root_slot_count: 62
+    hollow_value_count: 0
   - artifact: report
     path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep2/AI_READI_reconciliation.md
     sha256: d1dbe5302d26a0d60b2cc419d955c1259dc8355d45bb68b885670652ae535505
@@ -717,6 +723,24 @@ comparisons:
     value: 48.0
   - subject: AI_READI rep2
     value: 62.0
+- metric: full_hollow_value_count
+  unit: hollows
+  values:
+  - subject: AI_READI rep1
+    value: 0.0
+  - subject: CHORUS rep1
+    value: 0.0
+  - subject: AI_READI rep2
+    value: 0.0
+- metric: core_hollow_value_count
+  unit: hollows
+  values:
+  - subject: AI_READI rep1
+    value: 0.0
+  - subject: CHORUS rep1
+    value: 0.0
+  - subject: AI_READI rep2
+    value: 0.0
 - metric: validation_problem_count
   unit: artifacts
   values:
@@ -791,3 +815,14 @@ findings:
     issue #286 documents the stale-baseline problem.'
   relates_to:
   - '#286'
+- topic: nested hollow values
+  kind: observation
+  claim: Every record in this sweep counts zero mechanical hollows at any depth (null,
+    blank, empty, or containers of only those) — but so does every v2-sweep AI_READI
+    record. The hollow_object defect class the form-defects analysis found under v2
+    is therefore semantic hollowness inside structurally populated objects, visible
+    only to the LLM judge; a mechanical zero here does not clear a record of it.
+  evidence: hollow_value_count 0 for all six current-sweep artifacts and for all six
+    2026-07-31 v2 AI_READI artifacts, measured with the same counter.
+  relates_to:
+  - '#369'

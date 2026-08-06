@@ -36,7 +36,7 @@ import yaml
 from data_sheets_schema.api_runner import CONCAT_DIR
 
 SCHEMA_PATH = Path("src/data_sheets_schema/schema/d4d_run_telemetry.yaml")
-SCHEMA_VERSION = "1.1.0"
+SCHEMA_VERSION = "1.2.0"
 
 # CBORG-posted opus-5 rates (2026-08-05, /model/info): $ per token. Cache
 # writes bill at 1.25x input, cache reads at 0.1x. No premium tier above 200k.
@@ -122,6 +122,41 @@ def _invocations(rows: list[dict[str, Any]]) -> int | None:
     return 1 + gaps
 
 
+def _is_hollow(v: Any) -> bool:
+    """Null, blank, empty — or a container whose every member is.
+
+    False and 0 are values, not hollows. A whitespace-only string is hollow:
+    it renders as content and carries none, which is the defect's whole
+    shape.
+    """
+    if v is None:
+        return True
+    if isinstance(v, str):
+        return not v.strip()
+    if isinstance(v, dict):
+        return all(_is_hollow(x) for x in v.values())
+    if isinstance(v, list):
+        return all(_is_hollow(x) for x in v)
+    return False
+
+
+def count_hollows(v: Any) -> int:
+    """Maximal hollow subtrees at any depth.
+
+    A hollow object counts once, not once per empty member — the question is
+    "how many hollows does a reader meet", not "how many empty cells exist".
+    Mechanical kin of the form-defects `hollow_object` class, which is
+    LLM-judged; this one is structural and free.
+    """
+    if _is_hollow(v):
+        return 1
+    if isinstance(v, dict):
+        return sum(count_hollows(x) for x in v.values())
+    if isinstance(v, list):
+        return sum(count_hollows(x) for x in v)
+    return 0
+
+
 def _record_stats(artifact: str, path: Path) -> dict[str, Any] | None:
     """File and content statistics for one final artifact.
 
@@ -147,8 +182,8 @@ def _record_stats(artifact: str, path: Path) -> dict[str, Any] | None:
         if isinstance(parsed, dict):
             out["root_slot_count"] = len(parsed)
             out["populated_root_slot_count"] = sum(
-                1 for v in parsed.values()
-                if v is not None and v != "" and v != [] and v != {})
+                1 for v in parsed.values() if not _is_hollow(v))
+            out["hollow_value_count"] = count_hollows(parsed)
     return out
 
 
@@ -176,6 +211,14 @@ _COMPARISON_METRICS = (
                      if s["artifact"] == "full"), None)),
     ("core_root_slot_count", "slots",
      lambda r: next((s.get("root_slot_count")
+                     for s in r.get("records", [])
+                     if s["artifact"] == "core"), None)),
+    ("full_hollow_value_count", "hollows",
+     lambda r: next((s.get("hollow_value_count")
+                     for s in r.get("records", [])
+                     if s["artifact"] == "full"), None)),
+    ("core_hollow_value_count", "hollows",
+     lambda r: next((s.get("hollow_value_count")
                      for s in r.get("records", [])
                      if s["artifact"] == "core"), None)),
     ("validation_problem_count", "artifacts",
