@@ -110,6 +110,13 @@ classes:
         range: string
         annotations:
           "d4d:docExample": "A multimodal dataset of 4,000 participants with Type 2 Diabetes."
+      notes:
+        slot_uri: schema:comment
+        range: string
+        description: >-
+          Content from the source material that belongs to this entity but
+          fits no dedicated slot. Use this rather than inventing keys the
+          schema does not declare (#380).
     class_uri: schema:Thing
 
   # Not a NamedThing, like DatasetProperty below and for the same reason:
@@ -144,6 +151,12 @@ classes:
         slot_uri: schema:description
         description: A human-readable description for the organization.
         range: string
+      notes:
+        slot_uri: schema:comment
+        range: string
+        description: >-
+          Content about the organization that fits no dedicated slot; never
+          invent keys (#380).
 
   # Base class for all dataset properties and components
   # Note: Does NOT inherit from NamedThing to avoid required id constraint
@@ -164,6 +177,15 @@ classes:
         slot_uri: schema:description
         description: A human-readable description for this property.
         range: string
+      notes:
+        slot_uri: schema:comment
+        range: string
+        description: >-
+          Content from the source material that belongs to this property but
+          fits no dedicated slot. The escape hatch that makes inventing keys
+          unnecessary: put the fact here with enough context to be findable,
+          rather than adding fields the schema does not declare (#380 —
+          undeclared keys were the corpus's third-largest failure class).
       used_software:
         description: "What software was used as part of this dataset property?"
         slot_uri: d4d:usedSoftware

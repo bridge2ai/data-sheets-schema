@@ -25,6 +25,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "response": {
                     "description": "Short explanation of the knowledge or resource gap that this dataset was intended to address.",
                     "type": [
@@ -112,6 +119,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -173,6 +187,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -281,6 +302,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -322,6 +350,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -373,6 +408,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -407,6 +449,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -461,6 +510,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -560,6 +616,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -604,6 +667,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -657,6 +727,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -726,6 +803,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -802,6 +886,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -843,6 +934,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -896,6 +994,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -1488,6 +1593,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for a thing.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this entity but fits no dedicated slot. Use this rather than inventing keys the schema does not declare (#380).",
                     "type": [
                         "string",
                         "null"
@@ -2403,6 +2515,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this entity but fits no dedicated slot. Use this rather than inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "other_tasks": {
                     "description": "Additional tasks the dataset may support beyond its original intent. List of OtherTask objects from the Uses module describing potential applications not originally planned by the dataset creators.",
                     "items": {
@@ -2773,6 +2892,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -2911,6 +3037,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this entity but fits no dedicated slot. Use this rather than inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "page": {
                     "description": "A landing page or web page providing access to or information about the resource.",
                     "type": [
@@ -3006,6 +3139,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "recommended_mitigation": {
                     "description": "Recommended approaches for users to address this limitation.\n",
                     "type": [
@@ -3059,6 +3199,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3093,6 +3240,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -3223,6 +3377,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3276,6 +3437,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3322,6 +3490,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3356,6 +3531,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -3415,6 +3597,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -3526,6 +3715,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3567,6 +3763,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -3635,6 +3838,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3684,6 +3894,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -3759,6 +3976,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3817,6 +4041,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -4009,6 +4240,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for a thing.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this entity but fits no dedicated slot. Use this rather than inventing keys the schema does not declare (#380).",
                     "type": [
                         "string",
                         "null"
@@ -4223,6 +4461,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for a thing.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this entity but fits no dedicated slot. Use this rather than inventing keys the schema does not declare (#380).",
                     "type": [
                         "string",
                         "null"
@@ -4444,6 +4689,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -4485,6 +4737,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -4535,6 +4794,13 @@
                         "string",
                         "null"
                     ]
+                },
+                "notes": {
+                    "description": "Content about the grant that fits no dedicated slot; never invent keys (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 }
             },
             "title": "Grant",
@@ -4560,6 +4826,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for the organization.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content about the organization that fits no dedicated slot; never invent keys (#380).",
                     "type": [
                         "string",
                         "null"
@@ -4617,6 +4890,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -4685,6 +4965,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "regulatory_compliance": {
                     "description": "What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, HIPAA)?\n",
                     "items": {
@@ -4739,6 +5026,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -4825,6 +5119,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -4968,6 +5269,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this entity but fits no dedicated slot. Use this rather than inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "page": {
                     "description": "A landing page or web page providing access to or information about the resource.",
                     "type": [
@@ -5065,6 +5373,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -5168,6 +5483,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "sampling_strategies": {
                     "description": "References to one or more SamplingStrategy objects.\n",
                     "items": {
@@ -5219,6 +5541,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -5296,6 +5625,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -5399,6 +5735,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -5462,6 +5805,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -5510,6 +5860,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -5586,6 +5943,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -5681,6 +6045,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -5725,6 +6096,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -5778,6 +6156,13 @@
                         "string",
                         "null"
                     ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this entity but fits no dedicated slot. Use this rather than inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 }
             },
             "required": [
@@ -5810,6 +6195,13 @@
                         "string",
                         "null"
                     ]
+                },
+                "notes": {
+                    "description": "Content about the organization that fits no dedicated slot; never invent keys (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 }
             },
             "title": "Organization",
@@ -5835,6 +6227,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -5895,6 +6294,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -5970,6 +6376,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this entity but fits no dedicated slot. Use this rather than inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "orcid": {
                     "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4). Use this for stable cross-dataset identification.",
                     "pattern": "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$",
@@ -6005,6 +6418,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -6056,6 +6476,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "prohibition_reason": {
                     "description": "One or more reasons why this use is prohibited (e.g., license restriction, ethical concern, privacy risk, legal constraint).",
                     "type": [
@@ -6097,6 +6524,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -6155,6 +6589,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "raw_data_details": {
                     "description": "Free-text description of raw data availability, access procedures, and any conditions or restrictions on accessing the raw data.\n",
                     "type": [
@@ -6203,6 +6644,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -6268,6 +6716,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "relationship_details": {
                     "description": "Free-text description of how relationships between instances are represented (e.g., graph edges, ratings matrices, foreign keys), including relationship types and any associated metadata.\n",
                     "type": [
@@ -6309,6 +6764,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -6388,6 +6850,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "representative_verification": {
                     "description": "One or more explanations of how representativeness was validated or verified (e.g., statistical tests, domain expert review).\n",
                     "items": {
@@ -6461,6 +6930,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "sensitive_elements_present": {
                     "description": "Indicates whether sensitive data elements are present.",
                     "type": [
@@ -6518,6 +6994,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this entity but fits no dedicated slot. Use this rather than inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "url": {
                     "description": "URL where the software can be found (e.g., homepage, repository, or documentation).",
                     "type": [
@@ -6559,6 +7042,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -6624,6 +7114,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "subpopulation_elements_present": {
                     "description": "Indicates whether any subpopulations are explicitly identified.",
                     "type": [
@@ -6665,6 +7162,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -6723,6 +7227,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -6769,6 +7280,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "update_details": {
                     "description": "Free-text description of planned update types (e.g., corrections, additions, deletions), responsible parties, and how updates will be communicated to users.\n",
                     "type": [
@@ -6810,6 +7328,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -6947,6 +7472,13 @@
                         "null"
                     ]
                 },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "precision": {
                     "description": "The precision or number of decimal places for numeric variables.",
                     "type": [
@@ -7036,6 +7568,13 @@
                 },
                 "name": {
                     "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Content from the source material that belongs to this property but fits no dedicated slot. The escape hatch that makes inventing keys unnecessary: put the fact here with enough context to be findable, rather than adding fields the schema does not declare (#380 \u2014 undeclared keys were the corpus's third-largest failure class).",
                     "type": [
                         "string",
                         "null"
@@ -7204,6 +7743,13 @@
         },
         "name": {
             "description": "A human-readable name for a thing.",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "notes": {
+            "description": "Content from the source material that belongs to this entity but fits no dedicated slot. Use this rather than inventing keys the schema does not declare (#380).",
             "type": [
                 "string",
                 "null"

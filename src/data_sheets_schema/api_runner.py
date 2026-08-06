@@ -409,14 +409,17 @@ class PhaseRequest:
 
 PHASE_INSTRUCTIONS = {
     "full": (
-        "Phase 1. Produce the FULL D4D record for class `Dataset`. Output only "
-        "the YAML, beginning with the header comment block specified above. No "
-        "commentary before or after."),
+        "Phase 1. Produce the FULL D4D record for class `Dataset`. Use only "
+        "keys the schema digest declares; supported content that fits no "
+        "dedicated slot goes in the nearest class's `notes` slot, never in "
+        "an invented key. Output only the YAML, beginning with the header "
+        "comment block specified above. No commentary before or after."),
     "core": (
         "Phase 2. Produce the CORE D4D record for class `CoreDataset`, using "
         "the declared bundle and the completed full record supplied above. The "
         "core record must not assert anything the full record does not support. "
-        "Output only the YAML."),
+        "Use only keys the schema digest declares; unplaced content goes in "
+        "`notes`, never in an invented key. Output only the YAML."),
     "audit": (
         "Phase 3. Audit both records against the declared bundle and the "
         "evidence boundary. Report, as a JSON object with keys `findings` (a "
