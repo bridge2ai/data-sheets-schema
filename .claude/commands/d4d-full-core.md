@@ -366,7 +366,15 @@ in either generated record.
    - identify unsupported, stale, omitted, or mis-scoped assertions;
    - verify repeated identifiers, versions, dates, counts, licenses, access
      rules, people, and organizations are internally consistent in each file;
-   - keep historical values only when their historical scope is explicit.
+   - keep historical values only when their historical scope is explicit;
+   - audit shape as well as evidence (same contract as the API pipeline's
+     audit phase): flag any value whose shape does not conform to the
+     schema — prose where the schema requires a list, enum values the
+     schema does not define, commentary embedded inside a name, identifier
+     or affiliation value — and any slot-filling violation: structured
+     slots left empty while their content sits in prose, narrative in
+     `notes` that belongs in `description`, sibling values restated in
+     `notes`, or evidence commentary outside `source_caveats`.
 4. Back-port every source-supported Phase 2 discovery into the full record in
    the correct full-schema slot. Correct the full record first whenever the
    source audit changes a fact.

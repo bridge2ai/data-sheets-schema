@@ -196,6 +196,12 @@ purposes:
 - Maintain valid YAML syntax
 - Update only the requested fields, keeping others intact
 - Add comments if clarification is helpful (YAML supports `# comments`)
+- Follow the slot-filling order when placing new content (same contract as
+  the API pipeline and d4d_assistant_create.md §1b-2): structured slots
+  first, then `description`, then `notes` only for what `description`
+  cannot hold, with evidence commentary (source conflicts, transcription
+  provenance) in `source_caveats` — never restate a sibling value, never
+  invent a key, and match every value's shape to its slot's range
 
 **Examples:**
 

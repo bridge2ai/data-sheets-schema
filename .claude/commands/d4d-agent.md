@@ -130,6 +130,19 @@ For each project (AI_READI, CM4AI, VOICE, CHORUS):
    - Include every field required by the applicable class
    - Respect scalar versus multivalued and inlined-object constraints
    - Follow schema ranges for nested structures and enum values
+   - **Slot-filling order** (same contract as the API pipeline's phase
+     instructions): a class's structured slots first — `name`, `id`,
+     `affiliations`, `grants` and kin must not sit empty while their content
+     sits in prose — then `description` as the default home for narrative,
+     then `notes` only for content `description` cannot hold. Evidence
+     commentary (source conflicts, what a value was transcribed from,
+     questions the sources leave unanswered) goes in `source_caveats`,
+     never in `notes`. Never restate a sibling slot's value, and never
+     invent a key.
+   - **Shape check before writing**: a value must match its slot's range —
+     no prose where the schema requires a list, no enum values the schema
+     does not define, no commentary embedded inside a name, identifier or
+     affiliation value.
 
 9. **REQUIRED validation** (NON-SKIPPABLE):
    ```bash
