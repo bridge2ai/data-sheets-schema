@@ -1,0 +1,84 @@
+# Ethics & privacy extract — CHORUS D4D datasheet
+# Source record: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/CHORUS_d4d.yaml
+# Source sha256: be2646dbe460cae84334c334bdc41ac787f485902e44e422240e026b2f8c9283
+# Generated record: AI-extracted from project documentation (schema 2.0.0, run 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1)
+# Extract created: 2026-08-07
+# Slots included (10): at_risk_populations, confidential_elements, ethical_reviews, human_subject_research, ip_restrictions, is_deidentified, license_and_use_terms, regulatory_restrictions, sensitive_elements, subpopulations
+# Values are verbatim from the record; 'source_caveats' and 'notes'
+# fields carry the record's own evidence commentary.
+
+at_risk_populations:
+  at_risk_groups_included: true
+  notes: 'Minors and neonates: the current released dataset covers patient admissions from pediatric intensive
+    care units (PICU) and neonatal intensive care units (NICU) alongside adult ICU admissions. The declared
+    bundle records the inclusion of PICU and NICU admissions but does not describe specific assent procedures,
+    guardian consent arrangements, or additional safeguards applied to these groups.'
+confidential_elements:
+- confidential_elements_present: true
+  confidentiality_details: Every data type in the dataset (demographics, medication administration, procedures,
+    nursing flowsheets, diagnoses, clinical notes, imaging, waveform telemetry, and EEG) is designated
+    controlled access. Clinical notes are stored locally at contributing sites, and only tokens are made
+    available in the enclave.
+  notes: Community-facing ethics focus groups are conducted to determine what data is appropriate for
+    public sharing.
+ethical_reviews:
+- notes: Patient-focused efforts determine the ethical and legal approaches to manage privacy and bias
+    while accounting for Social Determinants of Health; expertise is drawn from team science, law, ethics,
+    health services, biomedical science, engineering, and scientific journal publications. The declared
+    bundle does not name an IRB or ethics committee of record for the dataset.
+  review_details: Ethics is one of the three pillars of the CHoRUS data generation project (Ethical and
+    Trustworthy AI). The project establishes a legal framework for collecting data at scale, performs
+    community-facing ethics focus groups to determine what data is appropriate for public sharing, and
+    analyses the existing legal and regulatory landscape to increase trustworthiness of provenance and
+    privacy in AI.
+human_subject_research:
+  involves_human_subjects: true
+  notes: The dataset consists of retrospective clinical records from critically ill patients, with an
+    anticipated cohort of more than 100,000 critically ill patients.
+  special_populations:
+  - The current released dataset includes admissions from pediatric intensive care units (PICU) and neonatal
+    intensive care units (NICU), and therefore covers minors and neonates.
+ip_restrictions:
+  notes: These license terms are stated for the CHoRUS software repositories; access to the dataset itself
+    is governed by a separate signed licensing agreement.
+  restrictions:
+  - Software of the CHoRUS project published in the chorus-ai GitHub organization is licensed under the
+    MIT License, with individual repositories carrying MIT or Apache-2.0 licenses (for example Chorus_SOP
+    under Apache-2.0; UF-Geocoding, chorus-extract-upload, and chorus_waveform under MIT).
+is_deidentified:
+  deidentification_details: Data are transformed using approaches that limit re-identification. Imaging
+    de-identification was in process for the larger cohort as of September 2025, with 1,000 de-identified
+    images available. All modalities remain under controlled access within the cloud enclave.
+  method: Tokenization of unstructured electronic health record text using the OHNLP toolkit, with full
+    notes retained locally at contributing sites; de-identification of DICOM imaging supported by tooling
+    including the CTP-deid repository; transformation of data using approaches that limit re-identification.
+  notes: The consortium maintains de-identification and privacy tooling in the chorus-ai GitHub organization,
+    including the CTP-deid repository and a privacy_scan_tool for medical records.
+license_and_use_terms:
+  contact_person: 'Access requests: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org'
+  data_use_permission: institution_specific
+  license_terms: The CHoRUS dataset is controlled access. Users complete a registration form providing
+    name, email, and institution, and all participants must sign a licensing agreement included in the
+    registration form before gaining access to the dataset. Access to the dataset requires a ".edu" email
+    address; once access is granted and compute is provisioned, an email is sent to the user.
+  notes: In the AIM-AHEAD Bridge2AI for Clinical Care Training Program, the licensing agreement and .edu
+    email requirements are stated not to be barriers to acceptance into the program; program administrators
+    assist with access if needed.
+regulatory_restrictions:
+  confidentiality_level: restricted
+  regulatory_restrictions:
+  - All data modalities are designated controlled access; access is granted only after registration, signature
+    of a licensing agreement, and verification of an institutional (".edu") email address, with data accessed
+    inside a provisioned cloud enclave.
+sensitive_elements:
+- sensitive_elements_present: true
+  sensitivity_details: The dataset comprises hospital clinical records of critically ill patients, including
+    demographics, diagnoses, procedures, medication administration, nursing flowsheets, clinical notes,
+    PACS imaging, waveform telemetry, EEG recordings, and social determinants of health. All listed data
+    types are released under controlled access.
+subpopulations:
+- identification: Admissions in the current released dataset are drawn from adult intensive care units
+    (ICU), pediatric intensive care units (PICU), and neonatal intensive care units (NICU).
+  notes: Federated access is intended to enable sampling methods that ensure a balanced and diverse cohort,
+    and data elements are intended to feature contextual factors such as geographic distance to the nearest
+    hospital, alongside social determinants of health.
