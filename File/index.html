@@ -343,6 +343,8 @@
 
       File : sha256
 
+      File : source_caveats
+
       File : status
 
       File : title
@@ -578,6 +580,12 @@
 <td>Residual content only, after every fitting slot is used — structured slots fi...</td>
 <td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
+<tr>
+<td><a href="../source_caveats/">source_caveats</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Commentary on the evidence behind this object's values — source conflicts, wh...</td>
+<td><a href="../NamedThing/">NamedThing</a></td>
+</tr>
 </tbody>
 </table>
 <h2 id="usages">Usages</h2>
@@ -745,6 +753,7 @@ attributes:
     alias: format
     owner: File
     domain_of:
+    - DistributionFormat
     - File
     range: FormatEnum
   encoding:
@@ -794,6 +803,7 @@ attributes:
     alias: media_type
     owner: File
     domain_of:
+    - DistributionFormat
     - File
     range: MediaTypeEnum
   hash:
@@ -990,6 +1000,7 @@ attributes:
     owner: File
     domain_of:
     - Information
+    - DistributionFormat
     range: uri
   issued:
     name: issued
@@ -1248,6 +1259,23 @@ attributes:
     rank: 1000
     slot_uri: schema:comment
     alias: notes
+    owner: File
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: string
+  source_caveats:
+    name: source_caveats
+    description: 'Commentary on the evidence behind this object''s values — source
+      conflicts, what a value was transcribed from, questions the source material
+      leaves unanswered (#385). A trust annotation about the sibling slots, not dataset
+      content: content belongs in the structured slots, description or notes.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    rank: 1000
+    slot_uri: dcterms:provenance
+    alias: source_caveats
     owner: File
     domain_of:
     - NamedThing

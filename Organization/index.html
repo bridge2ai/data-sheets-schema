@@ -241,6 +241,8 @@
 
       Organization : notes
 
+      Organization : source_caveats
+
 
 </div>
 <h2 id="inheritance">Inheritance</h2>
@@ -283,6 +285,12 @@
 <td><a href="../notes/">notes</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>Residual content about the organization after name, id and description are us...</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../source_caveats/">source_caveats</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Commentary on the evidence behind this object's values — source conflicts, wh...</td>
 <td>direct</td>
 </tr>
 </tbody>
@@ -400,6 +408,20 @@ attributes:
     - DatasetProperty
     - Grant
     range: string
+  source_caveats:
+    name: source_caveats
+    description: 'Commentary on the evidence behind this object''s values — source
+      conflicts, what a value was transcribed from, questions the source material
+      leaves unanswered (#385). A trust annotation about the sibling slots, not dataset
+      content: content belongs in the structured slots, description or notes.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: dcterms:provenance
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: string
 class_uri: schema:Organization
 
 </code></pre>
@@ -467,6 +489,22 @@ attributes:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:comment
     alias: notes
+    owner: Organization
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: string
+  source_caveats:
+    name: source_caveats
+    description: 'Commentary on the evidence behind this object''s values — source
+      conflicts, what a value was transcribed from, questions the source material
+      leaves unanswered (#385). A trust annotation about the sibling slots, not dataset
+      content: content belongs in the structured slots, description or notes.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: dcterms:provenance
+    alias: source_caveats
     owner: Organization
     domain_of:
     - NamedThing

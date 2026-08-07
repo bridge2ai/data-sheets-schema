@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/media_type/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/checksum/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: media_type - data-sheets-schema</title>
+        <title>Slot: checksum - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-media_type" class="md-skip">
+        <a href="#slot-checksum" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: media_type
+              Slot: checksum
             
           </span>
         </div>
@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -384,16 +377,16 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/media_type.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/checksum.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-media_type">Slot: media_type</h1>
-<p><em>The media type of the data. This should be a MIME type.</em></p>
-<p>URI: <a href="http://www.w3.org/ns/dcat#mediaType">dcat:mediaType</a>
-Alias: media_type</p>
+<h1 id="slot-checksum">Slot: checksum</h1>
+<p><em>Integrity checksum of the distributed artifact, stated with its algorithm, e.g. "md5:9e107d9d372bb6826bd81d3542a419d6".</em></p>
+<p>URI: <a href="http://spdx.org/rdf/terms#checksum">spdx:checksum</a>
+Alias: checksum</p>
 <!-- no inheritance hierarchy -->
 
 <h2 id="applicable-classes">Applicable Classes</h2>
@@ -407,11 +400,6 @@ Alias: media_type</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../DistributionFormat/">DistributionFormat</a></td>
 <td>How will the dataset be distributed (e</td>
 <td>no</td>
@@ -420,24 +408,9 @@ Alias: media_type</p>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>Range: <a href="../MediaTypeEnum/">MediaTypeEnum</a></li>
+<li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>text/csv</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -453,37 +426,28 @@ Alias: media_type</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcat:mediaType</td>
+<td>spdx:checksum</td>
 </tr>
 <tr>
 <td>native</td>
-<td>data_sheets_schema:media_type</td>
-</tr>
-<tr>
-<td>exact</td>
-<td>schema:encodingFormat</td>
+<td>data_sheets_schema:checksum</td>
 </tr>
 </tbody>
 </table>
 <h2 id="linkml-source">LinkML Source</h2>
 <details>
 
-<pre><code class="language-yaml">name: media_type
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: text/csv
-description: The media type of the data. This should be a MIME type.
+<pre><code class="language-yaml">name: checksum
+description: Integrity checksum of the distributed artifact, stated with its algorithm,
+  e.g. &quot;md5:9e107d9d372bb6826bd81d3542a419d6&quot;.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
-- schema:encodingFormat
 rank: 1000
-slot_uri: dcat:mediaType
-alias: media_type
+slot_uri: spdx:checksum
+alias: checksum
+owner: DistributionFormat
 domain_of:
 - DistributionFormat
-- File
-range: MediaTypeEnum
+range: string
 
 </code></pre>
 

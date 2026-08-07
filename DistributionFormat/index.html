@@ -236,13 +236,23 @@
 
       DistributionFormat : access_urls
 
+      DistributionFormat : checksum
+
       DistributionFormat : description
 
+      DistributionFormat : download_url
+
+      DistributionFormat : format
+
       DistributionFormat : id
+
+      DistributionFormat : media_type
 
       DistributionFormat : name
 
       DistributionFormat : notes
+
+      DistributionFormat : source_caveats
 
       DistributionFormat : used_software
 
@@ -276,6 +286,30 @@
 </thead>
 <tbody>
 <tr>
+<td><a href="../download_url/">download_url</a></td>
+<td>0..1 <br/> <a href="../Uri/">Uri</a></td>
+<td>Direct download URL for this distribution, when one exists (distinct from acc...</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../media_type/">media_type</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>IANA media type of the distributed files, e</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../format/">format</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>File format of the distribution when no exact IANA media type applies, e</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../checksum/">checksum</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Integrity checksum of the distributed artifact, stated with its algorithm, e</td>
+<td>direct</td>
+</tr>
+<tr>
 <td><a href="../access_urls/">access_urls</a></td>
 <td>* <br/> <a href="../Uri/">Uri</a></td>
 <td>One or more URLs providing access to the distribution channel(s) or format(s)</td>
@@ -303,6 +337,12 @@
 <td><a href="../notes/">notes</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>Residual content only, after every fitting slot is used (#385): structured sl...</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../source_caveats/">source_caveats</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Commentary on the evidence behind this object's values — source conflicts, wh...</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
@@ -374,6 +414,46 @@ description: 'How will the dataset be distributed (e.g., tarball on a website, A
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
+  download_url:
+    name: download_url
+    description: Direct download URL for this distribution, when one exists (distinct
+      from access_urls, which may point at portals or registration pages).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
+    slot_uri: dcat:downloadURL
+    domain_of:
+    - Information
+    - DistributionFormat
+    range: uri
+  media_type:
+    name: media_type
+    description: IANA media type of the distributed files, e.g. application/dicom,
+      text/csv.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
+    slot_uri: dcat:mediaType
+    domain_of:
+    - DistributionFormat
+    - File
+    range: string
+  format:
+    name: format
+    description: File format of the distribution when no exact IANA media type applies,
+      e.g. WFDB, OMOP CSV bundle.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
+    slot_uri: dcterms:format
+    domain_of:
+    - DistributionFormat
+    - File
+    range: string
+  checksum:
+    name: checksum
+    description: Integrity checksum of the distributed artifact, stated with its algorithm,
+      e.g. "md5:9e107d9d372bb6826bd81d3542a419d6".
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
+    rank: 1000
+    slot_uri: spdx:checksum
+    domain_of:
+    - DistributionFormat
+    range: string
   access_urls:
     name: access_urls
     annotations:
@@ -402,6 +482,54 @@ description: 'How will the dataset be distributed (e.g., tarball on a website, A
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
+  download_url:
+    name: download_url
+    description: Direct download URL for this distribution, when one exists (distinct
+      from access_urls, which may point at portals or registration pages).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
+    slot_uri: dcat:downloadURL
+    alias: download_url
+    owner: DistributionFormat
+    domain_of:
+    - Information
+    - DistributionFormat
+    range: uri
+  media_type:
+    name: media_type
+    description: IANA media type of the distributed files, e.g. application/dicom,
+      text/csv.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
+    slot_uri: dcat:mediaType
+    alias: media_type
+    owner: DistributionFormat
+    domain_of:
+    - DistributionFormat
+    - File
+    range: string
+  format:
+    name: format
+    description: File format of the distribution when no exact IANA media type applies,
+      e.g. WFDB, OMOP CSV bundle.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
+    slot_uri: dcterms:format
+    alias: format
+    owner: DistributionFormat
+    domain_of:
+    - DistributionFormat
+    - File
+    range: string
+  checksum:
+    name: checksum
+    description: Integrity checksum of the distributed artifact, stated with its algorithm,
+      e.g. "md5:9e107d9d372bb6826bd81d3542a419d6".
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
+    rank: 1000
+    slot_uri: spdx:checksum
+    alias: checksum
+    owner: DistributionFormat
+    domain_of:
+    - DistributionFormat
+    range: string
   access_urls:
     name: access_urls
     annotations:
@@ -473,6 +601,22 @@ attributes:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:comment
     alias: notes
+    owner: DistributionFormat
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: string
+  source_caveats:
+    name: source_caveats
+    description: 'Commentary on the evidence behind this object''s values — source
+      conflicts, what a value was transcribed from, questions the source material
+      leaves unanswered (#385). A trust annotation about the sibling slots, not dataset
+      content: content belongs in the structured slots, description or notes.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: dcterms:provenance
+    alias: source_caveats
     owner: DistributionFormat
     domain_of:
     - NamedThing

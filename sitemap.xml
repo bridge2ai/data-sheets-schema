@@ -816,6 +816,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/checksum/</loc>
+         <lastmod>2026-08-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/citation/</loc>
          <lastmod>2026-08-07</lastmod>
          <changefreq>daily</changefreq>
@@ -1977,6 +1982,11 @@
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/sha256/</loc>
+         <lastmod>2026-08-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/source_caveats/</loc>
          <lastmod>2026-08-07</lastmod>
          <changefreq>daily</changefreq>
     </url>

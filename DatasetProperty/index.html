@@ -362,6 +362,8 @@
 
       DatasetProperty : notes
 
+      DatasetProperty : source_caveats
+
       DatasetProperty : used_software
 
 
@@ -481,6 +483,12 @@
 <td>direct</td>
 </tr>
 <tr>
+<td><a href="../source_caveats/">source_caveats</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Commentary on the evidence behind this object's values — source conflicts, wh...</td>
+<td>direct</td>
+</tr>
+<tr>
 <td><a href="../used_software/">used_software</a></td>
 <td>* <br/> <a href="../Software/">Software</a></td>
 <td>What software was used as part of this dataset property?</td>
@@ -573,6 +581,20 @@ attributes:
     - DatasetProperty
     - Grant
     range: string
+  source_caveats:
+    name: source_caveats
+    description: 'Commentary on the evidence behind this object''s values — source
+      conflicts, what a value was transcribed from, questions the source material
+      leaves unanswered (#385). A trust annotation about the sibling slots, not dataset
+      content: content belongs in the structured slots, description or notes.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: dcterms:provenance
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: string
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -648,6 +670,22 @@ attributes:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:comment
     alias: notes
+    owner: DatasetProperty
+    domain_of:
+    - NamedThing
+    - Organization
+    - DatasetProperty
+    - Grant
+    range: string
+  source_caveats:
+    name: source_caveats
+    description: 'Commentary on the evidence behind this object''s values — source
+      conflicts, what a value was transcribed from, questions the source material
+      leaves unanswered (#385). A trust annotation about the sibling slots, not dataset
+      content: content belongs in the structured slots, description or notes.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: dcterms:provenance
+    alias: source_caveats
     owner: DatasetProperty
     domain_of:
     - NamedThing
