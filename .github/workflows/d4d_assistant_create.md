@@ -223,6 +223,23 @@ make full-schema
 - Identify field types (string, integer, enum, etc.)
 - Check for multivalued fields (lists)
 
+#### 1b-2. Slot-Filling Order (same contract as the API pipeline)
+
+Fill each class in this order, and never skip a tier:
+
+1. **Structured slots first** — `name`, `id`, `affiliations`, `grants` and
+   kin must not sit empty while their content sits in prose elsewhere.
+2. **`description`** is the default home for narrative.
+3. **`notes`** only for content `description` cannot hold. Never restate a
+   sibling slot's value in `notes`.
+4. **`source_caveats`** for evidence commentary only: source conflicts,
+   what a value was transcribed from, questions the sources leave
+   unanswered. Never mix it into `notes`.
+
+And match each value's shape to its slot's range: no prose where the schema
+requires a list, no enum values the schema does not define, no commentary
+embedded inside a name, identifier or affiliation value.
+
 #### 1c. Common Field Name Mistakes to AVOID
 
 **Problem**: Agents often invent semantic field names that "make sense" but aren't in the schema.
