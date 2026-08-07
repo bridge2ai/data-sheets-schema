@@ -11,7 +11,6 @@ organizations:
   description: University of California, San Diego
   name: University of California, San Diego
   ror_id: ror:0168r3w48
-  _mention_count_in_d4d_corpus: 15
 - id: B2AI_ORG:TODO
   category: B2AI_ORG:Organization
   contributor_github_name: TODO
@@ -20,7 +19,6 @@ organizations:
   description: Stanford University
   name: Stanford University
   ror_id: ror:00f54p054
-  _mention_count_in_d4d_corpus: 12
 - id: B2AI_ORG:TODO
   category: B2AI_ORG:Organization
   contributor_github_name: TODO
@@ -29,7 +27,6 @@ organizations:
   description: Johns Hopkins University
   name: Johns Hopkins University
   ror_id: ror:00za53h95
-  _mention_count_in_d4d_corpus: 11
 - id: B2AI_ORG:TODO
   category: B2AI_ORG:Organization
   contributor_github_name: TODO
@@ -37,7 +34,6 @@ organizations:
   contributor_orcid: TODO
   description: University of Washington
   name: University of Washington
-  _mention_count_in_d4d_corpus: 9
 - id: B2AI_ORG:TODO
   category: B2AI_ORG:Organization
   contributor_github_name: TODO
@@ -46,7 +42,6 @@ organizations:
   description: Washington University in St. Louis
   name: Washington University in St. Louis
   ror_id: ror:01yc7t268
-  _mention_count_in_d4d_corpus: 4
 - id: B2AI_ORG:TODO
   category: B2AI_ORG:Organization
   contributor_github_name: TODO
@@ -55,7 +50,6 @@ organizations:
   description: University of Utah
   name: University of Utah
   ror_id: ror:03r0ha626
-  _mention_count_in_d4d_corpus: 4
 - id: B2AI_ORG:TODO
   category: B2AI_ORG:Organization
   contributor_github_name: TODO
@@ -64,7 +58,6 @@ organizations:
   description: University of Massachusetts Lowell
   name: University of Massachusetts Lowell
   ror_id: ror:03hamhx47
-  _mention_count_in_d4d_corpus: 4
 - id: B2AI_ORG:TODO
   category: B2AI_ORG:Organization
   contributor_github_name: TODO
@@ -72,7 +65,6 @@ organizations:
   contributor_orcid: TODO
   description: Oregon Health & Science University
   name: Oregon Health & Science University
-  _mention_count_in_d4d_corpus: 4
 - id: B2AI_ORG:TODO
   category: B2AI_ORG:Organization
   contributor_github_name: TODO
@@ -81,31 +73,6 @@ organizations:
   description: California Medical Innovations Institute
   name: California Medical Innovations Institute
   ror_id: ror:0156zyn36
-  _mention_count_in_d4d_corpus: 4
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: OT2OD032644
-  name: OT2OD032644
-  _mention_count_in_d4d_corpus: 3
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: P30DK035816
-  name: P30DK035816
-  _mention_count_in_d4d_corpus: 3
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: UL1TR003096
-  name: UL1TR003096
-  _mention_count_in_d4d_corpus: 3
 - id: B2AI_ORG:TODO
   category: B2AI_ORG:Organization
   contributor_github_name: TODO
@@ -113,116 +80,3 @@ organizations:
   contributor_orcid: TODO
   description: University of Florida
   name: University of Florida
-  _mention_count_in_d4d_corpus: 3
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: FAIR Data Innovations Hub
-  name: FAIR Data Innovations Hub
-  _mention_count_in_d4d_corpus: 3
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: 'OT2OD032644 — Bridge2AI: Salutogenesis Data Generation Project (core
-    project number OT2OD032644; application ID 10471118; award amount USD 5,026,499;
-    project period 2022-09-01 to 2025-08-31)'
-  name: 'OT2OD032644 — Bridge2AI: Salutogenesis Data Generation Project (core project
-    number OT2OD032644; application ID 10471118; award amount USD 5,026,499; project
-    period 2022-09-01 to 2025-08-31)'
-  _mention_count_in_d4d_corpus: 2
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: P30DK035816 — supports the University of Washington Nutrition and Obesity
-    Research Center, which performed the central clinical laboratory assays
-  name: P30DK035816 — supports the University of Washington Nutrition and Obesity
-    Research Center, which performed the central clinical laboratory assays
-  _mention_count_in_d4d_corpus: 2
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: UL1TR003096 — Clinical and Translational Science Award acknowledged
-    in the study protocol publication
-  name: UL1TR003096 — Clinical and Translational Science Award acknowledged in the
-    study protocol publication
-  _mention_count_in_d4d_corpus: 2
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: In-kind support of the cloud services needed for the project
-  name: In-kind support of the cloud services needed for the project
-  _mention_count_in_d4d_corpus: 2
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: AI-READI Consortium
-  name: AI-READI Consortium
-  _mention_count_in_d4d_corpus: 2
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: OMOP Common Data Model tables
-  name: OMOP Common Data Model tables
-  _mention_count_in_d4d_corpus: 2
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: OHNLP tokenized notes
-  name: OHNLP tokenized notes
-  _mention_count_in_d4d_corpus: 2
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: DICOM imaging
-  name: DICOM imaging
-  _mention_count_in_d4d_corpus: 2
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: WFDB waveforms
-  name: WFDB waveforms
-  _mention_count_in_d4d_corpus: 2
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: EDF+ and Persyst EEG
-  name: EDF+ and Persyst EEG
-  _mention_count_in_d4d_corpus: 2
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: Controlled cloud enclave
-  name: Controlled cloud enclave
-  _mention_count_in_d4d_corpus: 2
-- id: B2AI_ORG:TODO
-  category: B2AI_ORG:Organization
-  contributor_github_name: TODO
-  contributor_name: TODO
-  contributor_orcid: TODO
-  description: CHoRUS project website
-  name: CHoRUS project website
-  _mention_count_in_d4d_corpus: 2
