@@ -157,3 +157,35 @@
     three needed a second invocation to finish repair.
   evidence: this report's runs and comparisons sections.
   relates_to: ["#364"]
+
+# --- schema-2 sweep (2026-08-06_...-schema2) judge findings, appended 2026-08-07 ---
+
+- topic: LLM-judge quality of the schema-2 records
+  kind: comparison
+  claim: >-
+    Session rubric agents scored AI_READI rep1 at 47/50 (rubric10) and 85/88
+    (rubric20) — near ceiling — while CHORUS rep1 scored 37/50 and 68/88.
+    Every CHORUS deficit the judges cite is source-corpus-bound (no dataset
+    DOI, no publication citations, no IRB of record, no version history in
+    the bundle), while the CHORUS strengths are exactly what its corpus does
+    document (collection/processing tooling, access mechanics, both 5/5).
+  evidence: >-
+    data/evaluation_llm/label_aware/scores.json; judge transcripts in this
+    session, 2026-08-07.
+  relates_to: ["#286"]
+
+- topic: the notes escape hatch is misused four-to-one
+  kind: observation
+  claim: >-
+    A full audit of all 155 notes values classified only 22 (14%) as
+    well-placed. 70 are misplaced (the class has a fitting slot — above all
+    the inherited description, empty while notes carries ordinary prose in
+    every DistributionFormat and DatasetRelationship object; then
+    Creator.affiliations and FundingMechanism.grants, both empty with their
+    content as notes prose), 44 restate a sibling value, and 19 carry
+    evidence/provenance commentary that is genuinely homeless but mixed
+    indistinguishably with content. CHORUS Creator objects have empty name
+    slots and principal_investigator 'true' despite the strengthened
+    description.
+  evidence: notes-placement audit, this session 2026-08-07; issue #385.
+  relates_to: ["#380"]

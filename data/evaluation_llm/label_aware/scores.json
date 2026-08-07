@@ -1,0 +1,38 @@
+[
+ {
+  "project": "CHORUS",
+  "method": "claudecode_agent",
+  "label": "2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1",
+  "file_path": "data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/CHORUS_d4d.yaml",
+  "timestamp": "2026-08-07T16:33:00",
+  "judge_model": "claude-fable-5 (session rubric agents d4d-rubric10/d4d-rubric20)",
+  "rubric10": {
+   "total": 37,
+   "max": 50,
+   "percentage": 74.0
+  },
+  "rubric20": {
+   "total": 68,
+   "max": 88,
+   "percentage": 77.3
+  }
+ },
+ {
+  "project": "AI_READI",
+  "method": "claudecode_agent",
+  "label": "2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1",
+  "file_path": "data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_d4d.yaml",
+  "timestamp": "2026-08-07T16:33:00",
+  "judge_model": "claude-fable-5 (session rubric agents d4d-rubric10/d4d-rubric20)",
+  "rubric10": {
+   "total": 47,
+   "max": 50,
+   "percentage": 94.0
+  },
+  "rubric20": {
+   "total": 85,
+   "max": 88,
+   "percentage": 96.6
+  }
+ }
+]

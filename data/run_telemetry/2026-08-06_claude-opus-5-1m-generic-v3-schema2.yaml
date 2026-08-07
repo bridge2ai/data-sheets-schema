@@ -1,6 +1,6 @@
 label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2
 method: claudecode_agent
-generated_at: '2026-08-07T08:16:08+00:00'
+generated_at: '2026-08-07T16:38:32+00:00'
 schema_version: 1.3.0
 runs:
 - project: AI_READI
@@ -284,6 +284,25 @@ runs:
     source: data/evaluation/label_aware/scores.json
     percent: 71.5909090909091
     evaluated_at: '2026-08-07T01:11:59-07:00'
+  llm_judge_evaluations:
+  - evaluation_type: llm_judge
+    rubric: rubric10
+    artifact: full
+    score: 47.0
+    max_score: 50.0
+    source: data/evaluation_llm/label_aware/scores.json
+    percent: 94.0
+    evaluated_at: '2026-08-07T16:33:00-07:00'
+    judge_model: claude-fable-5 (session rubric agents d4d-rubric10/d4d-rubric20)
+  - evaluation_type: llm_judge
+    rubric: rubric20
+    artifact: full
+    score: 85.0
+    max_score: 88.0
+    source: data/evaluation_llm/label_aware/scores.json
+    percent: 96.6
+    evaluated_at: '2026-08-07T16:33:00-07:00'
+    judge_model: claude-fable-5 (session rubric agents d4d-rubric10/d4d-rubric20)
   total_input_tokens: 720306
   total_output_tokens: 461492
   total_cache_read_tokens: 620016
@@ -506,6 +525,25 @@ runs:
     source: data/evaluation/label_aware/scores.json
     percent: 69.31818181818183
     evaluated_at: '2026-08-07T01:13:04-07:00'
+  llm_judge_evaluations:
+  - evaluation_type: llm_judge
+    rubric: rubric10
+    artifact: full
+    score: 37.0
+    max_score: 50.0
+    source: data/evaluation_llm/label_aware/scores.json
+    percent: 74.0
+    evaluated_at: '2026-08-07T16:33:00-07:00'
+    judge_model: claude-fable-5 (session rubric agents d4d-rubric10/d4d-rubric20)
+  - evaluation_type: llm_judge
+    rubric: rubric20
+    artifact: full
+    score: 68.0
+    max_score: 88.0
+    source: data/evaluation_llm/label_aware/scores.json
+    percent: 77.3
+    evaluated_at: '2026-08-07T16:33:00-07:00'
+    judge_model: claude-fable-5 (session rubric agents d4d-rubric10/d4d-rubric20)
   total_input_tokens: 132618
   total_output_tokens: 120218
   total_cache_read_tokens: 49268
@@ -1671,3 +1709,161 @@ comparisons:
     value: 0.0
   - subject: CHORUS rep3
     value: 0.0
+findings:
+- topic: reasoning on the unprefixed route
+  kind: observation
+  claim: 'The unprefixed claude-opus-5 route emits thinking: every phase returns a
+    signed thinking block whose text CBORG strips, exactly as on the -high route (reasoning_present
+    true, reasoning_available false).'
+  evidence: CHORUS full phase ~17.4k reasoning-token estimate; AI_READI full phase
+    ~50.1k; blocks recorded in *_reasoning.jsonl for both runs.
+  relates_to:
+  - '#347'
+- topic: reasoning effort vs the -high route
+  kind: comparison
+  claim: 'The bare route thinks at least as hard as -high on the same workload: AI_READI
+    full-phase reasoning estimate was 50.1k tokens against 35.7k, 39.9k and 48.7k
+    across the three -high samples of the same day.'
+  evidence: data/run_telemetry/2026-08-05_claude-opus-5-generic-v3.yaml (superseded
+    -high label) vs this report's AI_READI full phase.
+  relates_to:
+  - '#347'
+- topic: repair convergence
+  kind: observation
+  claim: 'Validator-driven repair converged both projects to valid records. CHORUS:
+    full 80 -> 9 -> 0, core 76 -> 9 -> 4 -> 0 findings across two resumed invocations.
+    AI_READI: full 165 -> 27 -> 22 -> 21 findings, hit the 4-round ceiling, then 21
+    -> 0 on the next invocation; core 121 -> 28 -> 23 -> 0 within the first.'
+  evidence: 'Repair logs in both provenance records and *_reasoning.jsonl; issue #364
+    documents the ceiling change the AI_READI trajectory motivated.'
+  relates_to:
+  - '#361'
+  - '#364'
+  - '#365'
+- topic: residual validation failures are schema traps
+  kind: interpretation
+  claim: 'Every slot that resisted repair longest is a schema-design trap rather than
+    model noise: Creator.affiliations requires an Organization with a required id,
+    so a bare organisation name can never validate; principal_investigator is a string
+    with a boolean-shaped name; and rep2 surfaced a third trap, human_subject_research/special_populations
+    holding prose where the schema requires an array. The trap inventory is growing
+    with replicates and is not limited to the two slots #360 names.'
+  evidence: rep1 residuals were four affiliation strings; rep2's single residual is
+    special_populations; the -high runs failed on the same class.
+  relates_to:
+  - '#360'
+  - '#297'
+- topic: repair does not invent facts
+  kind: interpretation
+  claim: 'Spot-checks show repair choosing evidence-preserving shapes rather than
+    fabricating data: affiliations became Organization objects reusing the name (CHORUS)
+    or a FAIRhub fragment URI already grounded in the bundle (AI_READI); principal_investigator
+    became the PI''s name where the bundle supplies one.'
+  evidence: 'creators[0] in both projects'' final full records; compare the intermediate
+    snapshots once #370-era runs exist.'
+  relates_to:
+  - '#361'
+  - '#360'
+- topic: presence and LLM-judge sections are empty
+  kind: observation
+  claim: The presence_evaluations and llm_judge_evaluations sections of this report
+    are empty because the published evaluation outputs are keyed by label-less legacy
+    paths with 2026-04-10 timestamps — they score the archived baseline, not these
+    runs. The sections fill when the evaluators are re-run against this label's files.
+  evidence: 'data/evaluation/scores.json file_path values lack label directories;
+    issue #286 documents the stale-baseline problem.'
+  relates_to:
+  - '#286'
+- topic: nested hollow values
+  kind: observation
+  claim: Every record in this sweep counts zero mechanical hollows at any depth (null,
+    blank, empty, or containers of only those) — but so does every v2-sweep AI_READI
+    record. The hollow_object defect class the form-defects analysis found under v2
+    is therefore semantic hollowness inside structurally populated objects, visible
+    only to the LLM judge; a mechanical zero here does not clear a record of it.
+  evidence: hollow_value_count 0 for all six current-sweep artifacts and for all six
+    2026-07-31 v2 AI_READI artifacts, measured with the same counter.
+  relates_to:
+  - '#369'
+- topic: repair cost share, tested across replicates
+  kind: comparison
+  claim: Shape repair consumed the majority of output tokens on every AI_READI replicate
+    — 56.3%, 58.1% and 60.5% of the run's total output (repair vs generation), against
+    CHORUS's 46.3%. Repair cost more than generating the record itself on all three
+    AI_READI replicates.
+  evidence: Per-run phase attempt sums in this report; AI_READI repair output 250k/216k/224k
+    tokens vs generation 195k/156k/146k.
+  relates_to:
+  - '#360'
+  - '#361'
+- topic: repair economics argue for schema-side fixes
+  kind: interpretation
+  claim: At $16.5-19.5 per AI_READI run with more than half the spend going to repair
+    of a small recurring trap-slot family, fixing the traps in the schema would roughly
+    halve generation cost per run and remove the two-invocation pattern entirely.
+  evidence: repair-share comparison above; trap inventory below.
+  relates_to:
+  - '#360'
+  - '#297'
+- topic: trap inventory across replicates
+  kind: observation
+  claim: 'Each replicate''s last-surviving validation failure was a different member
+    of the same schema-trap family. rep1: affiliations as bare strings; rep2: human_subject_research/special_populations
+    holding prose where the schema requires an array; rep3: affiliations as a proper
+    Organization object that still fails because the schema requires an id the bundle
+    does not supply ({name: ''Washington University in St. Louis''}). The object-without-id
+    case shows even the model''s correct structural instinct cannot satisfy the slot.'
+  evidence: batch log validation errors per replicate; final repair rounds.
+  relates_to:
+  - '#360'
+  - '#297'
+- topic: core-to-full size ratio tracks bundle richness
+  kind: interpretation
+  claim: 'The core record is barely a reduction of the full record when the evidence
+    bundle is thin: CHORUS core/full = 0.96 (36KB bundle), while AI_READI ranges 0.72-0.84
+    (421KB bundle). For documentation-poor projects the full/core distinction does
+    little work.'
+  evidence: RecordStats bytes in this report across the four runs.
+  relates_to: []
+- topic: bundle-to-record compression
+  kind: observation
+  claim: AI_READI compresses its 421KB bundle into 80-95KB records (4.4-5.2:1); CHORUS's
+    36KB bundle yields a 37.5KB record (~1:1). Bundle size also tracks full-phase
+    reasoning spend (50.1k/33.6k/28.2k estimates on AI_READI replicates vs 17.4k on
+    CHORUS).
+  evidence: RecordStats and full-phase attempts in this report.
+  relates_to: []
+- topic: replicate variance under the new configuration
+  kind: observation
+  claim: Across three valid AI_READI replicates, full-record root slots span 70/76/72,
+    sizes 80-95KB, and cost $16.5-19.5; every replicate ran all six phases first-attempt
+    except rep1's audit (three attempts). All three needed a second invocation to
+    finish repair.
+  evidence: this report's runs and comparisons sections.
+  relates_to:
+  - '#364'
+- topic: LLM-judge quality of the schema-2 records
+  kind: comparison
+  claim: Session rubric agents scored AI_READI rep1 at 47/50 (rubric10) and 85/88
+    (rubric20) — near ceiling — while CHORUS rep1 scored 37/50 and 68/88. Every CHORUS
+    deficit the judges cite is source-corpus-bound (no dataset DOI, no publication
+    citations, no IRB of record, no version history in the bundle), while the CHORUS
+    strengths are exactly what its corpus does document (collection/processing tooling,
+    access mechanics, both 5/5).
+  evidence: data/evaluation_llm/label_aware/scores.json; judge transcripts in this
+    session, 2026-08-07.
+  relates_to:
+  - '#286'
+- topic: the notes escape hatch is misused four-to-one
+  kind: observation
+  claim: A full audit of all 155 notes values classified only 22 (14%) as well-placed.
+    70 are misplaced (the class has a fitting slot — above all the inherited description,
+    empty while notes carries ordinary prose in every DistributionFormat and DatasetRelationship
+    object; then Creator.affiliations and FundingMechanism.grants, both empty with
+    their content as notes prose), 44 restate a sibling value, and 19 carry evidence/provenance
+    commentary that is genuinely homeless but mixed indistinguishably with content.
+    CHORUS Creator objects have empty name slots and principal_investigator 'true'
+    despite the strengthened description.
+  evidence: notes-placement audit, this session 2026-08-07; issue
+  relates_to:
+  - '#380'
