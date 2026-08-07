@@ -184,6 +184,15 @@ classes:
         description: >-
           Residual content about the grant after name, grant_number and
           description are used (#385); never invent keys (#380).
+      source_caveats:
+        slot_uri: dcterms:provenance
+        range: string
+        description: >-
+          Commentary on the evidence behind this object's values — source
+          conflicts, what a value was transcribed from, questions the source
+          material leaves unanswered (#385). A trust annotation about the
+          sibling slots, not dataset content: content belongs in the
+          structured slots, description or notes.
       grant_number:
         description: "The alphanumeric identifier for the grant."
         range: string

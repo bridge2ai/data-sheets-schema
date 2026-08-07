@@ -39,6 +39,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -123,6 +130,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -188,6 +202,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -303,6 +324,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -351,6 +379,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -409,6 +444,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -457,6 +499,13 @@
                 },
                 "notification_details": {
                     "description": "Free-text description of how individuals were notified about data collection, including the notification method (e.g., email, poster, in-person), timing, and the language or text of the notification itself if available.\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -511,6 +560,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -617,6 +673,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -680,6 +743,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -728,6 +798,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -816,6 +893,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -887,6 +971,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -947,6 +1038,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -995,6 +1093,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -1772,6 +1877,13 @@
                     },
                     "type": [
                         "array",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
                         "null"
                     ]
                 },
@@ -2692,6 +2804,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "splits": {
                     "description": "Recommended data splits for this dataset. List of Splits objects from the Composition module describing train/validation/test partitions and the rationale for each split strategy.",
                     "items": {
@@ -2893,6 +3012,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3062,6 +3188,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "status": {
                     "description": "The status of the resource (e.g., draft, published, deprecated).",
                     "type": [
@@ -3154,6 +3287,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3195,6 +3335,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -3249,6 +3396,13 @@
                 "relationship_type": {
                     "$ref": "#/$defs/DatasetRelationshipTypeEnum",
                     "description": "The type of relationship (e.g., derives_from, supplements, is_version_of). Uses DatasetRelationshipTypeEnum for standardized relationship types."
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "target_dataset": {
                     "description": "The identifier or URL of the dataset this relationship points to.",
@@ -3375,6 +3529,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3435,6 +3596,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3483,6 +3651,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -3544,6 +3719,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3572,6 +3754,13 @@
                         "null"
                     ]
                 },
+                "checksum": {
+                    "description": "Integrity checksum of the distributed artifact, stated with its algorithm, e.g. \"md5:9e107d9d372bb6826bd81d3542a419d6\".",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "description": {
                     "description": "A human-readable description for this property.",
                     "type": [
@@ -3579,8 +3768,29 @@
                         "null"
                     ]
                 },
+                "download_url": {
+                    "description": "Direct download URL for this distribution, when one exists (distinct from access_urls, which may point at portals or registration pages).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "format": {
+                    "description": "File format of the distribution when no exact IANA media type applies, e.g. WFDB, OMOP CSV bundle.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "id": {
                     "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "media_type": {
+                    "description": "IANA media type of the distributed files, e.g. application/dicom, text/csv.",
                     "type": [
                         "string",
                         "null"
@@ -3595,6 +3805,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -3710,6 +3927,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3777,6 +4001,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3828,6 +4059,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -3911,6 +4149,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -3966,6 +4211,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -4048,6 +4300,13 @@
                     },
                     "type": [
                         "array",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
                         "null"
                     ]
                 },
@@ -4263,6 +4522,13 @@
                 },
                 "sha256": {
                     "description": "SHA-256 hash value of the data (256-bit cryptographic hash, recommended).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -4486,6 +4752,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "status": {
                     "description": "The status of the resource (e.g., draft, published, deprecated).",
                     "type": [
@@ -4678,6 +4951,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -4726,6 +5006,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -4783,6 +5070,13 @@
                         "string",
                         "null"
                     ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 }
             },
             "title": "Grant",
@@ -4815,6 +5109,13 @@
                 },
                 "notes": {
                     "description": "Residual content about the organization after name, id and description are used (#385); never invent keys (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -4879,6 +5180,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -4964,6 +5272,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "special_populations": {
                     "description": "Does the research involve any special populations that require additional protections (e.g., minors, pregnant women, prisoners)?\n",
                     "items": {
@@ -5027,6 +5342,13 @@
                     },
                     "type": [
                         "array",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
                         "null"
                     ]
                 },
@@ -5108,6 +5430,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -5272,6 +5601,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "status": {
                     "description": "The status of the resource (e.g., draft, published, deprecated).",
                     "type": [
@@ -5362,6 +5698,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -5482,6 +5825,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -5530,6 +5880,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -5614,6 +5971,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -5724,6 +6088,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -5788,6 +6159,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -5843,6 +6221,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -5931,6 +6316,13 @@
                 "role": {
                     "$ref": "#/$defs/CreatorOrMaintainerEnum",
                     "description": "Role of the maintainer (e.g., researcher, platform, organization).\n"
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
@@ -6025,6 +6417,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -6076,6 +6475,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -6136,6 +6542,13 @@
                         "string",
                         "null"
                     ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 }
             },
             "required": [
@@ -6175,6 +6588,13 @@
                         "string",
                         "null"
                     ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 }
             },
             "title": "Organization",
@@ -6207,6 +6627,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -6293,6 +6720,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -6360,6 +6794,13 @@
                         "string",
                         "null"
                     ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 }
             },
             "required": [
@@ -6402,6 +6843,13 @@
                 },
                 "preprocessing_details": {
                     "description": "Free-text description of preprocessing steps applied to the data, including tools used, parameters, order of operations, and rationale for each step.\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -6460,6 +6908,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -6508,6 +6963,13 @@
                 },
                 "response": {
                     "description": "Short explanation describing the primary purpose of creating the dataset.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -6573,6 +7035,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -6628,6 +7097,13 @@
                 },
                 "raw_data_format": {
                     "description": "One or more formats of the raw data before any preprocessing (e.g., CSV, DICOM, JSON).\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -6700,6 +7176,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -6755,6 +7238,13 @@
                 },
                 "retention_period": {
                     "description": "Time period for data retention.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -6834,6 +7324,13 @@
                     },
                     "type": [
                         "array",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
                         "null"
                     ]
                 },
@@ -6918,6 +7415,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -6963,6 +7467,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used \u2014 structured slots first, then description; notes solely for what description cannot hold (#385). Never invent keys (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -7016,6 +7527,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -7088,6 +7606,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "subpopulation_elements_present": {
                     "description": "Indicates whether any subpopulations are explicitly identified.",
                     "type": [
@@ -7148,6 +7673,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -7201,6 +7733,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
@@ -7249,6 +7788,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -7316,6 +7862,13 @@
                 },
                 "repository_url": {
                     "description": "URL to a repository of known dataset uses.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -7457,6 +8010,13 @@
                         "null"
                     ]
                 },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "unit": {
                     "description": "The unit of measurement for the variable, preferably using QUDT units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.",
                     "type": [
@@ -7539,6 +8099,13 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
                     "type": [
                         "string",
                         "null"
@@ -7740,6 +8307,13 @@
             },
             "type": [
                 "array",
+                "null"
+            ]
+        },
+        "source_caveats": {
+            "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+            "type": [
+                "string",
                 "null"
             ]
         },

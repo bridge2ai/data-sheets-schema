@@ -27,6 +27,7 @@ prefixes:
   schema: "http://schema.org/"
   dcterms: "http://purl.org/dc/terms/"
   dcat: "http://www.w3.org/ns/dcat#"
+  spdx: "http://spdx.org/rdf/terms#"
 
 
 default_prefix: "d4ddistribution"
@@ -61,6 +62,35 @@ classes:
       API, GitHub)?
     is_a: DatasetProperty
     attributes:
+      # download_url, media_type, format and checksum are the DCAT/DCTERMS
+      # standard fields generators repeatedly invented here before they
+      # existed (#380: 11 undeclared-key findings on distributions) — the
+      # models know the standard vocabulary; the schema now declares it.
+      download_url:
+        description: >-
+          Direct download URL for this distribution, when one exists
+          (distinct from access_urls, which may point at portals or
+          registration pages).
+        range: uri
+        slot_uri: dcat:downloadURL
+      media_type:
+        description: >-
+          IANA media type of the distributed files, e.g. application/dicom,
+          text/csv.
+        range: string
+        slot_uri: dcat:mediaType
+      format:
+        description: >-
+          File format of the distribution when no exact IANA media type
+          applies, e.g. WFDB, OMOP CSV bundle.
+        range: string
+        slot_uri: dcterms:format
+      checksum:
+        description: >-
+          Integrity checksum of the distributed artifact, stated with its
+          algorithm, e.g. "md5:9e107d9d372bb6826bd81d3542a419d6".
+        range: string
+        slot_uri: spdx:checksum
       access_urls:
         description: "One or more URLs providing access to the distribution channel(s) or format(s)."
         range: uri
