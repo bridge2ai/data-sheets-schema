@@ -1,12 +1,12 @@
 # Detailed Evaluation: AI_READI - CLAUDECODE_AGENT_CORE
 
-Evaluated: 2026-08-07T01:11:50.748991
-File: `data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/AI_READI_d4d_core.yaml`
+Evaluated: 2026-08-07T01:11:59.292931
+File: `data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_d4d_core.yaml`
 
 ## Overall Scores
 
 - **Rubric10**: 42.0/50 (84.0%)
-- **Rubric20**: 61.0/88 (69.3%)
+- **Rubric20**: 63.0/88 (71.6%)
 
 ## Rubric10 Element Scores
 
@@ -189,7 +189,7 @@ Note: For Bridge2AI datasets, citation metadata is mandatory and should include:
 
 | ID | Question | Score | Status |
 |----|----------|-------|--------|
-| 1 | Field Completeness | 3.0/5 | ✅ |
+| 1 | Field Completeness | 5.0/5 | ✅ |
 | 2 | Entry Length Adequacy | 5.0/5 | ✅ |
 | 3 | Keyword Diversity | 5.0/5 | ✅ |
 | 4 | File Enumeration and Type Variety | 0.0/5 | ❌ |

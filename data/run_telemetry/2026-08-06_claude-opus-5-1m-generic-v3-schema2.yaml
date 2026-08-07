@@ -1,0 +1,1673 @@
+label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2
+method: claudecode_agent
+generated_at: '2026-08-07T08:16:08+00:00'
+schema_version: 1.3.0
+runs:
+- project: AI_READI
+  label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1
+  validation_state: valid
+  timing_basis: recorded
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:31:35+00:00'
+      seconds: 1653.708
+      input_tokens: 2284
+      output_tokens: 76973
+      cache_read_tokens: 0
+      cache_write_tokens: 153044
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 47878
+      visible_text_chars: 116382
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:59:09+00:00'
+      seconds: 285.419
+      input_tokens: 42903
+      output_tokens: 30823
+      cache_read_tokens: 0
+      cache_write_tokens: 149985
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8639
+      visible_text_chars: 88739
+      reasoning_present: false
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T05:03:54+00:00'
+      seconds: 97.045
+      input_tokens: 73803
+      output_tokens: 7398
+      cache_read_tokens: 0
+      cache_write_tokens: 153044
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1914
+      visible_text_chars: 21938
+      reasoning_present: false
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-07T05:05:33+00:00'
+      seconds: 76.395
+      input_tokens: 73803
+      output_tokens: 6399
+      cache_read_tokens: 153044
+      cache_write_tokens: 0
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1686
+      visible_text_chars: 18852
+      reasoning_present: false
+      reasoning_available: false
+    - attempt: 3
+      started_at: '2026-08-07T05:06:54+00:00'
+      seconds: 101.93
+      input_tokens: 73803
+      output_tokens: 8207
+      cache_read_tokens: 153044
+      cache_write_tokens: 0
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2315
+      visible_text_chars: 23571
+      reasoning_present: false
+      reasoning_available: false
+    - attempt: 4
+      started_at: '2026-08-07T05:08:44+00:00'
+      seconds: 83.102
+      input_tokens: 73803
+      output_tokens: 6315
+      cache_read_tokens: 153044
+      cache_write_tokens: 0
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1646
+      visible_text_chars: 18676
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T05:10:07+00:00'
+      seconds: 384.498
+      input_tokens: 49229
+      output_tokens: 43714
+      cache_read_tokens: 153044
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 12359
+      visible_text_chars: 125422
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T05:16:32+00:00'
+      seconds: 382.634
+      input_tokens: 83168
+      output_tokens: 39538
+      cache_read_tokens: 0
+      cache_write_tokens: 149985
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 16030
+      visible_text_chars: 94032
+      reasoning_present: true
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T05:22:54+00:00'
+      seconds: 102.182
+      input_tokens: 8567
+      output_tokens: 8443
+      cache_read_tokens: 0
+      cache_write_tokens: 153044
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2517
+      visible_text_chars: 23705
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T05:24:37+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T05:24:44+00:00'
+      seconds: 413.36
+      input_tokens: 48709
+      output_tokens: 46082
+      cache_read_tokens: 0
+      cache_write_tokens: 10899
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 14828
+      visible_text_chars: 125016
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-07T05:31:41+00:00'
+      seconds: 419.995
+      input_tokens: 44068
+      output_tokens: 44206
+      cache_read_tokens: 0
+      cache_write_tokens: 10899
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 12957
+      visible_text_chars: 124999
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 3
+      started_at: '2026-08-07T05:38:44+00:00'
+      seconds: 796.455
+      input_tokens: 43881
+      output_tokens: 43702
+      cache_read_tokens: 0
+      cache_write_tokens: 10899
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 12449
+      visible_text_chars: 125013
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T05:52:01+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T05:52:06+00:00'
+      seconds: 313.215
+      input_tokens: 37091
+      output_tokens: 34283
+      cache_read_tokens: 0
+      cache_write_tokens: 7840
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 10858
+      visible_text_chars: 93703
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-07T05:57:22+00:00'
+      seconds: 305.956
+      input_tokens: 32692
+      output_tokens: 33111
+      cache_read_tokens: 0
+      cache_write_tokens: 7840
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 9690
+      visible_text_chars: 93686
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 3
+      started_at: '2026-08-07T06:02:31+00:00'
+      seconds: 295.703
+      input_tokens: 32502
+      output_tokens: 32298
+      cache_read_tokens: 7840
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8873
+      visible_text_chars: 93700
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T06:07:27+00:00'
+  replicate: 1
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-07T05:24:37+00:00'
+  wall_seconds_estimate: 5711.6
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_d4d.yaml
+    sha256: e5dc8a12c5584b4b0bc21aba9fc62a65bea1288d9f4042662ebe3e01202bd380
+    bytes: 125001
+    lines: 2137
+    root_slot_count: 77
+    populated_root_slot_count: 77
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_d4d_core.yaml
+    sha256: 8a19d34ebf55595c97de8e35ad51e13f3b17805b48f675eabc39105bcd07146e
+    bytes: 93688
+    lines: 1457
+    root_slot_count: 63
+    populated_root_slot_count: 63
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_reconciliation.md
+    sha256: d25f40ae2a91fe598b014c56af1962fe2e22973f3abe362f5fff679c0fdbb746
+    bytes: 23848
+    lines: 239
+  presence_evaluations:
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: full
+    score: 47.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 94.0
+    evaluated_at: '2026-08-07T01:11:32-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: full
+    score: 65.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 73.86363636363636
+    evaluated_at: '2026-08-07T01:11:32-07:00'
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: core
+    score: 42.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 84.0
+    evaluated_at: '2026-08-07T01:11:59-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: core
+    score: 63.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 71.5909090909091
+    evaluated_at: '2026-08-07T01:11:59-07:00'
+  total_input_tokens: 720306
+  total_output_tokens: 461492
+  total_cache_read_tokens: 620016
+  total_cache_write_tokens: 807479
+  total_reasoning_tokens_estimate: 164639
+  approx_cost_usd: 20.5
+  invocations: 1
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 34
+  - artifact: full
+    round: 2
+    outcome: applied
+    findings: 2
+  - artifact: full
+    round: 3
+    outcome: applied
+    findings: 1
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 33
+  - artifact: core
+    round: 2
+    outcome: applied
+    findings: 2
+  - artifact: core
+    round: 3
+    outcome: applied
+    findings: 1
+- project: CHORUS
+  label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1
+  validation_state: valid
+  timing_basis: recorded
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:25:14+00:00'
+      seconds: 384.178
+      input_tokens: 2284
+      output_tokens: 34162
+      cache_read_tokens: 0
+      cache_write_tokens: 24634
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 25317
+      visible_text_chars: 35381
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:31:40+00:00'
+      seconds: 124.36
+      input_tokens: 14658
+      output_tokens: 13971
+      cache_read_tokens: 0
+      cache_write_tokens: 21575
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5190
+      visible_text_chars: 35127
+      reasoning_present: true
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:33:45+00:00'
+      seconds: 56.019
+      input_tokens: 27012
+      output_tokens: 4515
+      cache_read_tokens: 0
+      cache_write_tokens: 24634
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1172
+      visible_text_chars: 13375
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:34:41+00:00'
+      seconds: 157.002
+      input_tokens: 19179
+      output_tokens: 16178
+      cache_read_tokens: 24634
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6653
+      visible_text_chars: 38100
+      reasoning_present: true
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:37:18+00:00'
+      seconds: 143.664
+      input_tokens: 32295
+      output_tokens: 15774
+      cache_read_tokens: 0
+      cache_write_tokens: 21575
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6449
+      visible_text_chars: 37300
+      reasoning_present: true
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:39:42+00:00'
+      seconds: 83.638
+      input_tokens: 6762
+      output_tokens: 6709
+      cache_read_tokens: 24634
+      cache_write_tokens: 0
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1994
+      visible_text_chars: 18860
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T03:41:05+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:41:13+00:00'
+      seconds: 127.556
+      input_tokens: 15315
+      output_tokens: 14279
+      cache_read_tokens: 0
+      cache_write_tokens: 10899
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4746
+      visible_text_chars: 38132
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T03:43:21+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:43:25+00:00'
+      seconds: 134.89
+      input_tokens: 15113
+      output_tokens: 14630
+      cache_read_tokens: 0
+      cache_write_tokens: 7840
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5302
+      visible_text_chars: 37315
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T03:45:40+00:00'
+  replicate: 1
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-07T03:41:06+00:00'
+  wall_seconds_estimate: 1211.3
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/CHORUS_d4d.yaml
+    sha256: be2646dbe460cae84334c334bdc41ac787f485902e44e422240e026b2f8c9283
+    bytes: 38122
+    lines: 671
+    root_slot_count: 56
+    populated_root_slot_count: 56
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/CHORUS_d4d_core.yaml
+    sha256: 171aea7f2600f014fa3151b82556e68d49ab7c098e35cce388e826f517f739db
+    bytes: 37305
+    lines: 641
+    root_slot_count: 52
+    populated_root_slot_count: 52
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/CHORUS_reconciliation.md
+    sha256: 0d01c44ceddb65b4bc07b8afc69f7b11335edd9fe74f471a49271d66498d6d91
+    bytes: 18980
+    lines: 229
+  presence_evaluations:
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: full
+    score: 36.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 72.0
+    evaluated_at: '2026-08-07T01:12:30-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: full
+    score: 61.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 69.31818181818183
+    evaluated_at: '2026-08-07T01:12:30-07:00'
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: core
+    score: 36.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 72.0
+    evaluated_at: '2026-08-07T01:13:04-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: core
+    score: 61.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 69.31818181818183
+    evaluated_at: '2026-08-07T01:13:04-07:00'
+  total_input_tokens: 132618
+  total_output_tokens: 120218
+  total_cache_read_tokens: 49268
+  total_cache_write_tokens: 111157
+  total_reasoning_tokens_estimate: 56823
+  approx_cost_usd: 4.39
+  invocations: 1
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 16
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 16
+- project: AI_READI
+  label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  validation_state: valid
+  timing_basis: recorded
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T06:07:34+00:00'
+      seconds: 735.26
+      input_tokens: 2284
+      output_tokens: 68793
+      cache_read_tokens: 0
+      cache_write_tokens: 153044
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 42075
+      visible_text_chars: 106873
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T06:19:49+00:00'
+      seconds: 286.792
+      input_tokens: 38910
+      output_tokens: 30933
+      cache_read_tokens: 0
+      cache_write_tokens: 149985
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 9843
+      visible_text_chars: 84360
+      reasoning_present: true
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T06:24:36+00:00'
+      seconds: 231.979
+      input_tokens: 67753
+      output_tokens: 11571
+      cache_read_tokens: 153044
+      cache_write_tokens: 0
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 3143
+      visible_text_chars: 33714
+      reasoning_present: false
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-07T06:28:30+00:00'
+      seconds: 98.629
+      input_tokens: 67753
+      output_tokens: 8130
+      cache_read_tokens: 153044
+      cache_write_tokens: 0
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2225
+      visible_text_chars: 23623
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T06:30:09+00:00'
+      seconds: 390.638
+      input_tokens: 47046
+      output_tokens: 41891
+      cache_read_tokens: 153044
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 14135
+      visible_text_chars: 111026
+      reasoning_present: true
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T06:36:40+00:00'
+      seconds: 273.768
+      input_tokens: 77103
+      output_tokens: 29298
+      cache_read_tokens: 0
+      cache_write_tokens: 149985
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7500
+      visible_text_chars: 87193
+      reasoning_present: false
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T06:41:14+00:00'
+      seconds: 99.44
+      input_tokens: 10377
+      output_tokens: 8290
+      cache_read_tokens: 0
+      cache_write_tokens: 153044
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2795
+      visible_text_chars: 21982
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T06:42:53+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T06:43:01+00:00'
+      seconds: 244.437
+      input_tokens: 43487
+      output_tokens: 3
+      cache_read_tokens: 0
+      cache_write_tokens: 10899
+      max_tokens: 96000
+      reasoning_tokens_estimate: 0
+      visible_text_chars: 72241
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-07T06:47:10+00:00'
+      seconds: 231.918
+      input_tokens: 24730
+      output_tokens: 24943
+      cache_read_tokens: 10899
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6885
+      visible_text_chars: 72235
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 3
+      started_at: '2026-08-07T06:51:05+00:00'
+      seconds: 222.239
+      input_tokens: 24245
+      output_tokens: 24224
+      cache_read_tokens: 10899
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6163
+      visible_text_chars: 72245
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T06:54:47+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T06:54:54+00:00'
+      seconds: 281.318
+      input_tokens: 34748
+      output_tokens: 30454
+      cache_read_tokens: 0
+      cache_write_tokens: 7840
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8662
+      visible_text_chars: 87169
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-07T06:59:38+00:00'
+      seconds: 274.621
+      input_tokens: 30029
+      output_tokens: 29743
+      cache_read_tokens: 7840
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7948
+      visible_text_chars: 87180
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 3
+      started_at: '2026-08-07T07:04:16+00:00'
+      seconds: 267.341
+      input_tokens: 29540
+      output_tokens: 29396
+      cache_read_tokens: 7840
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7599
+      visible_text_chars: 87190
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T07:08:43+00:00'
+  replicate: 2
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-07T06:42:53+00:00'
+  wall_seconds_estimate: 3638.4
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_d4d.yaml
+    sha256: 065f88c4fbf93a266bcd09ced0e8a0eb31b41e5abde969cae72f60ff842c4314
+    bytes: 72236
+    lines: 1179
+    root_slot_count: 61
+    populated_root_slot_count: 61
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_d4d_core.yaml
+    sha256: ad1e7bd06820facc179379e29b3c6aebfd52d4d762c5e227c2a2aee890462a6e
+    bytes: 87181
+    lines: 1410
+    root_slot_count: 66
+    populated_root_slot_count: 66
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_reconciliation.md
+    sha256: 409f3ed5e7b70b69105fdf89767a643620e42df9c6877068d7ebe2b651953bef
+    bytes: 22092
+    lines: 345
+  presence_evaluations:
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: full
+    score: 36.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 72.0
+    evaluated_at: '2026-08-07T01:11:33-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: full
+    score: 55.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 62.5
+    evaluated_at: '2026-08-07T01:11:33-07:00'
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: core
+    score: 42.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 84.0
+    evaluated_at: '2026-08-07T01:12:00-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: core
+    score: 63.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 71.5909090909091
+    evaluated_at: '2026-08-07T01:12:00-07:00'
+  total_input_tokens: 498005
+  total_output_tokens: 337669
+  total_cache_read_tokens: 496610
+  total_cache_write_tokens: 624797
+  total_reasoning_tokens_estimate: 118973
+  approx_cost_usd: 15.09
+  invocations: 1
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 40
+  - artifact: full
+    round: 2
+    outcome: applied
+    findings: 3
+  - artifact: full
+    round: 3
+    outcome: applied
+    findings: 1
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 39
+  - artifact: core
+    round: 2
+    outcome: applied
+    findings: 3
+  - artifact: core
+    round: 3
+    outcome: applied
+    findings: 1
+- project: CHORUS
+  label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  validation_state: valid
+  timing_basis: recorded
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:45:46+00:00'
+      seconds: 381.994
+      input_tokens: 2284
+      output_tokens: 33793
+      cache_read_tokens: 0
+      cache_write_tokens: 24634
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 24703
+      visible_text_chars: 36363
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:52:08+00:00'
+      seconds: 121.289
+      input_tokens: 15027
+      output_tokens: 13281
+      cache_read_tokens: 0
+      cache_write_tokens: 21575
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5015
+      visible_text_chars: 33066
+      reasoning_present: true
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:54:10+00:00'
+      seconds: 114.24
+      input_tokens: 26596
+      output_tokens: 9486
+      cache_read_tokens: 0
+      cache_write_tokens: 24634
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2483
+      visible_text_chars: 28014
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:56:04+00:00'
+      seconds: 140.935
+      input_tokens: 24519
+      output_tokens: 14879
+      cache_read_tokens: 24634
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5510
+      visible_text_chars: 37477
+      reasoning_present: true
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T03:58:25+00:00'
+      seconds: 129.273
+      input_tokens: 36323
+      output_tokens: 13558
+      cache_read_tokens: 0
+      cache_write_tokens: 21575
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4907
+      visible_text_chars: 34606
+      reasoning_present: true
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:00:34+00:00'
+      seconds: 140.889
+      input_tokens: 11733
+      output_tokens: 11139
+      cache_read_tokens: 24634
+      cache_write_tokens: 0
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5777
+      visible_text_chars: 21449
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T04:02:55+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:03:05+00:00'
+      seconds: 132.067
+      input_tokens: 15472
+      output_tokens: 14398
+      cache_read_tokens: 0
+      cache_write_tokens: 10899
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5051
+      visible_text_chars: 37389
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T04:05:17+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:05:22+00:00'
+      seconds: 124.144
+      input_tokens: 14411
+      output_tokens: 13196
+      cache_read_tokens: 0
+      cache_write_tokens: 7840
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4553
+      visible_text_chars: 34572
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T04:07:26+00:00'
+  replicate: 2
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-07T04:02:55+00:00'
+  wall_seconds_estimate: 1284.8
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/CHORUS_d4d.yaml
+    sha256: dad5ed52b9a65dc1ee2e1409a8583b0ea692253bb3b70a0165b12cb976203840
+    bytes: 37377
+    lines: 634
+    root_slot_count: 51
+    populated_root_slot_count: 51
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/CHORUS_d4d_core.yaml
+    sha256: 6e6c20a357785c629aafce0c85a33f6d0dae6b307a033214162fedd8667ce549
+    bytes: 34560
+    lines: 568
+    root_slot_count: 46
+    populated_root_slot_count: 46
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/CHORUS_reconciliation.md
+    sha256: f8d701adc9c851cac51244ca051f47c60a3cbb3fa8cb3e5ab0fe990e944dfcf0
+    bytes: 21523
+    lines: 229
+  presence_evaluations:
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: full
+    score: 33.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 66.0
+    evaluated_at: '2026-08-07T01:12:34-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: full
+    score: 61.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 69.31818181818183
+    evaluated_at: '2026-08-07T01:12:34-07:00'
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: core
+    score: 33.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 66.0
+    evaluated_at: '2026-08-07T01:13:08-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: core
+    score: 61.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 69.31818181818183
+    evaluated_at: '2026-08-07T01:13:08-07:00'
+  total_input_tokens: 146365
+  total_output_tokens: 123730
+  total_cache_read_tokens: 49268
+  total_cache_write_tokens: 111157
+  total_reasoning_tokens_estimate: 57999
+  approx_cost_usd: 4.54
+  invocations: 1
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 19
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 19
+- project: AI_READI
+  label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3
+  validation_state: valid
+  timing_basis: recorded
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T07:08:50+00:00'
+      seconds: 616.123
+      input_tokens: 2284
+      output_tokens: 57752
+      cache_read_tokens: 0
+      cache_write_tokens: 153044
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 32719
+      visible_text_chars: 100132
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T07:19:06+00:00'
+      seconds: 250.438
+      input_tokens: 37172
+      output_tokens: 27466
+      cache_read_tokens: 0
+      cache_write_tokens: 149985
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7616
+      visible_text_chars: 79403
+      reasoning_present: false
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T07:23:17+00:00'
+      seconds: 80.04
+      input_tokens: 64715
+      output_tokens: 6477
+      cache_read_tokens: 0
+      cache_write_tokens: 153044
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1768
+      visible_text_chars: 18839
+      reasoning_present: false
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-07T07:24:39+00:00'
+      seconds: 97.378
+      input_tokens: 64715
+      output_tokens: 7753
+      cache_read_tokens: 153044
+      cache_write_tokens: 0
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2134
+      visible_text_chars: 22478
+      reasoning_present: false
+      reasoning_available: false
+    - attempt: 3
+      started_at: '2026-08-07T07:26:20+00:00'
+      seconds: 73.327
+      input_tokens: 64715
+      output_tokens: 5852
+      cache_read_tokens: 153044
+      cache_write_tokens: 0
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1492
+      visible_text_chars: 17441
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T07:27:34+00:00'
+      seconds: 319.282
+      input_tokens: 43030
+      output_tokens: 35488
+      cache_read_tokens: 153044
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 10035
+      visible_text_chars: 101815
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T07:32:53+00:00'
+      seconds: 262.707
+      input_tokens: 71117
+      output_tokens: 28434
+      cache_read_tokens: 0
+      cache_write_tokens: 149985
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7919
+      visible_text_chars: 82062
+      reasoning_present: false
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T07:37:16+00:00'
+      seconds: 119.113
+      input_tokens: 8099
+      output_tokens: 9199
+      cache_read_tokens: 0
+      cache_write_tokens: 153044
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4961
+      visible_text_chars: 16954
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T07:39:15+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T07:39:27+00:00'
+      seconds: 340.794
+      input_tokens: 40054
+      output_tokens: 37341
+      cache_read_tokens: 0
+      cache_write_tokens: 10899
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 11923
+      visible_text_chars: 101675
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-07T07:45:10+00:00'
+      seconds: 843.786
+      input_tokens: 36178
+      output_tokens: 36124
+      cache_read_tokens: 0
+      cache_write_tokens: 10899
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 10705
+      visible_text_chars: 101676
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T07:59:15+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T07:59:24+00:00'
+      seconds: 285.599
+      input_tokens: 33129
+      output_tokens: 30267
+      cache_read_tokens: 0
+      cache_write_tokens: 7840
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 9809
+      visible_text_chars: 81835
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-07T08:04:12+00:00'
+      seconds: 361.191
+      input_tokens: 29408
+      output_tokens: 29321
+      cache_read_tokens: 0
+      cache_write_tokens: 7840
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8862
+      visible_text_chars: 81839
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T08:10:14+00:00'
+  replicate: 3
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-07T07:39:15+00:00'
+  wall_seconds_estimate: 3649.8
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/AI_READI_d4d.yaml
+    sha256: d06e4e458e85a648908fc68bab6709069fd9af5ae8a042f23137973bc3a3ab5c
+    bytes: 101664
+    lines: 1758
+    root_slot_count: 77
+    populated_root_slot_count: 77
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/AI_READI_d4d_core.yaml
+    sha256: 82401dae2d4404d6ecd7e0530c3c0c607be0e043535628abca25692548245796
+    bytes: 81827
+    lines: 1346
+    root_slot_count: 63
+    populated_root_slot_count: 63
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/AI_READI_reconciliation.md
+    sha256: ccddd596ed673b5fc8b42fc565f320f66b2d5d2866819122d035bcd8ac4777bf
+    bytes: 17015
+    lines: 166
+  presence_evaluations:
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: full
+    score: 47.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 94.0
+    evaluated_at: '2026-08-07T01:11:34-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: full
+    score: 61.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 69.31818181818183
+    evaluated_at: '2026-08-07T01:11:34-07:00'
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: core
+    score: 42.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 84.0
+    evaluated_at: '2026-08-07T01:12:01-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: core
+    score: 61.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 69.31818181818183
+    evaluated_at: '2026-08-07T01:12:01-07:00'
+  total_input_tokens: 494616
+  total_output_tokens: 311474
+  total_cache_read_tokens: 459132
+  total_cache_write_tokens: 796580
+  total_reasoning_tokens_estimate: 109943
+  approx_cost_usd: 15.47
+  invocations: 1
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 30
+  - artifact: full
+    round: 2
+    outcome: applied
+    findings: 3
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 31
+  - artifact: core
+    round: 2
+    outcome: applied
+    findings: 6
+- project: CHORUS
+  label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3
+  validation_state: valid
+  timing_basis: recorded
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:07:34+00:00'
+      seconds: 389.872
+      input_tokens: 2284
+      output_tokens: 34628
+      cache_read_tokens: 0
+      cache_write_tokens: 24634
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 24794
+      visible_text_chars: 39336
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:14:04+00:00'
+      seconds: 119.591
+      input_tokens: 15672
+      output_tokens: 13132
+      cache_read_tokens: 0
+      cache_write_tokens: 21575
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4246
+      visible_text_chars: 35546
+      reasoning_present: true
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:16:04+00:00'
+      seconds: 44.977
+      input_tokens: 27807
+      output_tokens: 3628
+      cache_read_tokens: 0
+      cache_write_tokens: 24634
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 936
+      visible_text_chars: 10770
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:16:49+00:00'
+      seconds: 134.27
+      input_tokens: 19311
+      output_tokens: 14616
+      cache_read_tokens: 24634
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4747
+      visible_text_chars: 39478
+      reasoning_present: true
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:19:03+00:00'
+      seconds: 138.38
+      input_tokens: 31474
+      output_tokens: 15056
+      cache_read_tokens: 21575
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5293
+      visible_text_chars: 39055
+      reasoning_present: true
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:21:22+00:00'
+      seconds: 77.356
+      input_tokens: 5880
+      output_tokens: 6083
+      cache_read_tokens: 24634
+      cache_write_tokens: 0
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1776
+      visible_text_chars: 17230
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T04:22:39+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:22:46+00:00'
+      seconds: 133.869
+      input_tokens: 15150
+      output_tokens: 14791
+      cache_read_tokens: 0
+      cache_write_tokens: 10899
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4942
+      visible_text_chars: 39396
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-07T04:25:04+00:00'
+      seconds: 125.328
+      input_tokens: 13711
+      output_tokens: 14030
+      cache_read_tokens: 10899
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4187
+      visible_text_chars: 39375
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T04:27:09+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-07T04:27:13+00:00'
+      seconds: 127.383
+      input_tokens: 14562
+      output_tokens: 14084
+      cache_read_tokens: 0
+      cache_write_tokens: 7840
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4333
+      visible_text_chars: 39004
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-07T04:29:24+00:00'
+      seconds: 123.354
+      input_tokens: 13656
+      output_tokens: 13769
+      cache_read_tokens: 7840
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4037
+      visible_text_chars: 38930
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-07T04:31:27+00:00'
+  replicate: 3
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-07T04:22:39+00:00'
+  wall_seconds_estimate: 1414.4
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/CHORUS_d4d.yaml
+    sha256: 2017d0466b0aae78121fac65791aa378a47a03ea1cd43c15c4c366e028970e51
+    bytes: 39363
+    lines: 708
+    root_slot_count: 54
+    populated_root_slot_count: 54
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/CHORUS_d4d_core.yaml
+    sha256: 667cb0a2ddd235b65b8410292933c601fd7c911542a680a519cc24848f015c11
+    bytes: 38918
+    lines: 690
+    root_slot_count: 50
+    populated_root_slot_count: 50
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/CHORUS_reconciliation.md
+    sha256: dfae5cd9e20523530adad4eabcfb64f0ba7662dce0eceed7e48b9c48ea1c8139
+    bytes: 17289
+    lines: 261
+  presence_evaluations:
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: full
+    score: 36.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 72.0
+    evaluated_at: '2026-08-07T01:12:36-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: full
+    score: 61.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 69.31818181818183
+    evaluated_at: '2026-08-07T01:12:36-07:00'
+  - evaluation_type: presence
+    rubric: rubric10
+    artifact: core
+    score: 35.0
+    max_score: 50.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 70.0
+    evaluated_at: '2026-08-07T01:13:11-07:00'
+  - evaluation_type: presence
+    rubric: rubric20
+    artifact: core
+    score: 61.0
+    max_score: 88.0
+    source: data/evaluation/label_aware/scores.json
+    percent: 69.31818181818183
+    evaluated_at: '2026-08-07T01:13:11-07:00'
+  total_input_tokens: 159507
+  total_output_tokens: 143817
+  total_cache_read_tokens: 89582
+  total_cache_write_tokens: 89582
+  total_reasoning_tokens_estimate: 59291
+  approx_cost_usd: 5.0
+  invocations: 1
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 12
+  - artifact: full
+    round: 2
+    outcome: applied
+    findings: 1
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 9
+  - artifact: core
+    round: 2
+    outcome: applied
+    findings: 2
+comparisons:
+- metric: full_phase_output_tokens
+  unit: tokens
+  values:
+  - subject: AI_READI rep1
+    value: 76973.0
+  - subject: CHORUS rep1
+    value: 34162.0
+  - subject: AI_READI rep2
+    value: 68793.0
+  - subject: CHORUS rep2
+    value: 33793.0
+  - subject: AI_READI rep3
+    value: 57752.0
+  - subject: CHORUS rep3
+    value: 34628.0
+- metric: full_phase_reasoning_tokens_estimate
+  unit: tokens
+  values:
+  - subject: AI_READI rep1
+    value: 47878.0
+  - subject: CHORUS rep1
+    value: 25317.0
+  - subject: AI_READI rep2
+    value: 42075.0
+  - subject: CHORUS rep2
+    value: 24703.0
+  - subject: AI_READI rep3
+    value: 32719.0
+  - subject: CHORUS rep3
+    value: 24794.0
+- metric: total_output_tokens
+  unit: tokens
+  values:
+  - subject: AI_READI rep1
+    value: 461492.0
+  - subject: CHORUS rep1
+    value: 120218.0
+  - subject: AI_READI rep2
+    value: 337669.0
+  - subject: CHORUS rep2
+    value: 123730.0
+  - subject: AI_READI rep3
+    value: 311474.0
+  - subject: CHORUS rep3
+    value: 143817.0
+- metric: approx_cost_usd
+  unit: USD
+  values:
+  - subject: AI_READI rep1
+    value: 20.5
+  - subject: CHORUS rep1
+    value: 4.39
+  - subject: AI_READI rep2
+    value: 15.09
+  - subject: CHORUS rep2
+    value: 4.54
+  - subject: AI_READI rep3
+    value: 15.47
+  - subject: CHORUS rep3
+    value: 5.0
+- metric: repair_call_count
+  unit: calls
+  values:
+  - subject: AI_READI rep1
+    value: 6.0
+  - subject: CHORUS rep1
+    value: 2.0
+  - subject: AI_READI rep2
+    value: 6.0
+  - subject: CHORUS rep2
+    value: 2.0
+  - subject: AI_READI rep3
+    value: 4.0
+  - subject: CHORUS rep3
+    value: 4.0
+- metric: full_root_slot_count
+  unit: slots
+  values:
+  - subject: AI_READI rep1
+    value: 77.0
+  - subject: CHORUS rep1
+    value: 56.0
+  - subject: AI_READI rep2
+    value: 61.0
+  - subject: CHORUS rep2
+    value: 51.0
+  - subject: AI_READI rep3
+    value: 77.0
+  - subject: CHORUS rep3
+    value: 54.0
+- metric: core_root_slot_count
+  unit: slots
+  values:
+  - subject: AI_READI rep1
+    value: 63.0
+  - subject: CHORUS rep1
+    value: 52.0
+  - subject: AI_READI rep2
+    value: 66.0
+  - subject: CHORUS rep2
+    value: 46.0
+  - subject: AI_READI rep3
+    value: 63.0
+  - subject: CHORUS rep3
+    value: 50.0
+- metric: full_hollow_value_count
+  unit: hollows
+  values:
+  - subject: AI_READI rep1
+    value: 0.0
+  - subject: CHORUS rep1
+    value: 0.0
+  - subject: AI_READI rep2
+    value: 0.0
+  - subject: CHORUS rep2
+    value: 0.0
+  - subject: AI_READI rep3
+    value: 0.0
+  - subject: CHORUS rep3
+    value: 0.0
+- metric: core_hollow_value_count
+  unit: hollows
+  values:
+  - subject: AI_READI rep1
+    value: 0.0
+  - subject: CHORUS rep1
+    value: 0.0
+  - subject: AI_READI rep2
+    value: 0.0
+  - subject: CHORUS rep2
+    value: 0.0
+  - subject: AI_READI rep3
+    value: 0.0
+  - subject: CHORUS rep3
+    value: 0.0
+- metric: validation_problem_count
+  unit: artifacts
+  values:
+  - subject: AI_READI rep1
+    value: 0.0
+  - subject: CHORUS rep1
+    value: 0.0
+  - subject: AI_READI rep2
+    value: 0.0
+  - subject: CHORUS rep2
+    value: 0.0
+  - subject: AI_READI rep3
+    value: 0.0
+  - subject: CHORUS rep3
+    value: 0.0
