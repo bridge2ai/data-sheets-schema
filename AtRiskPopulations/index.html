@@ -295,7 +295,7 @@
 </tr>
 <tr>
 <td><a href="../assent_procedures/">assent_procedures</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
 <td>For research involving minors, what assent procedures were used? How was deve...</td>
 <td>direct</td>
 </tr>
@@ -439,7 +439,6 @@ attributes:
     domain_of:
     - AtRiskPopulations
     range: string
-    multivalued: true
   guardian_consent:
     name: guardian_consent
     description: 'For participants unable to provide their own consent, how was guardian
@@ -513,7 +512,6 @@ attributes:
     domain_of:
     - AtRiskPopulations
     range: string
-    multivalued: true
   guardian_consent:
     name: guardian_consent
     description: 'For participants unable to provide their own consent, how was guardian

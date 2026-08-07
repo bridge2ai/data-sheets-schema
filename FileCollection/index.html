@@ -244,7 +244,7 @@
 
 
 
-        FileCollection --&gt; "*" FileCollectionTypeEnum : collection_type
+        FileCollection --&gt; "0..1" FileCollectionTypeEnum : collection_type
         click FileCollectionTypeEnum href "../FileCollectionTypeEnum/"
 
 
@@ -383,7 +383,7 @@
 </tr>
 <tr>
 <td><a href="../collection_type/">collection_type</a></td>
-<td>* <br/> <a href="../FileCollectionTypeEnum/">FileCollectionTypeEnum</a></td>
+<td>0..1 <br/> <a href="../FileCollectionTypeEnum/">FileCollectionTypeEnum</a></td>
 <td>Type(s) of content in this file collection</td>
 <td>direct</td>
 </tr>
@@ -662,7 +662,6 @@ attributes:
     domain_of:
     - FileCollection
     range: FileCollectionTypeEnum
-    multivalued: true
   file_count:
     name: file_count
     annotations:
@@ -751,7 +750,6 @@ attributes:
     domain_of:
     - FileCollection
     range: FileCollectionTypeEnum
-    multivalued: true
   file_count:
     name: file_count
     annotations:

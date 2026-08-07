@@ -251,7 +251,7 @@
 
 
 
-        LicenseAndUseTerms --&gt; "*" DataUsePermissionEnum : data_use_permission
+        LicenseAndUseTerms --&gt; "0..1" DataUsePermissionEnum : data_use_permission
         click DataUsePermissionEnum href "../DataUsePermissionEnum/"
 
 
@@ -305,7 +305,7 @@
 </tr>
 <tr>
 <td><a href="../data_use_permission/">data_use_permission</a></td>
-<td>* <br/> <a href="../DataUsePermissionEnum/">DataUsePermissionEnum</a></td>
+<td>0..1 <br/> <a href="../DataUsePermissionEnum/">DataUsePermissionEnum</a></td>
 <td>Structured data use permissions using the Data Use Ontology (DUO)</td>
 <td>direct</td>
 </tr>
@@ -445,7 +445,6 @@ attributes:
     domain_of:
     - LicenseAndUseTerms
     range: DataUsePermissionEnum
-    multivalued: true
   contact_person:
     name: contact_person
     description: Contact person for licensing questions. Provides structured contact
@@ -513,7 +512,6 @@ attributes:
     domain_of:
     - LicenseAndUseTerms
     range: DataUsePermissionEnum
-    multivalued: true
   contact_person:
     name: contact_person
     description: Contact person for licensing questions. Provides structured contact
