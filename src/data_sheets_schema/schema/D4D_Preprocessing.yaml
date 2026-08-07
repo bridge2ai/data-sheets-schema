@@ -236,7 +236,6 @@ classes:
           Additional details on annotation quality assessment and findings.
         slot_uri: d4d:annotationQualityDetails
         range: string
-        multivalued: true
         annotations:
           "d4d:docExample": "Inter-rater reliability: Cohen's κ = 0.82"
 
@@ -265,7 +264,6 @@ classes:
           what types of annotations it produces. Should correspond to the tools list.
         slot_uri: d4d:toolDescriptions
         range: string
-        multivalued: true
         annotations:
           "d4d:docExample": "DeepDR automated grading system (AUC = 0.94)"
       tool_accuracy:

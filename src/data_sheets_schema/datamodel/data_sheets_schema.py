@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-08-06T15:34:49
+# Generation date: 2026-08-06T20:21:37
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1110,7 +1110,7 @@ class SamplingStrategy(DatasetProperty):
     is_representative: Optional[Union[bool, Bool]] = None
     representative_verification: Optional[Union[str, list[str]]] = empty_list()
     why_not_representative: Optional[str] = None
-    strategies: Optional[Union[str, list[str]]] = empty_list()
+    strategies: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self.is_sample is not None and not isinstance(self.is_sample, Bool):
@@ -1132,9 +1132,8 @@ class SamplingStrategy(DatasetProperty):
         if self.why_not_representative is not None and not isinstance(self.why_not_representative, str):
             self.why_not_representative = str(self.why_not_representative)
 
-        if not isinstance(self.strategies, list):
-            self.strategies = [self.strategies] if self.strategies is not None else []
-        self.strategies = [v if isinstance(v, str) else str(v) for v in self.strategies]
+        if self.strategies is not None and not isinstance(self.strategies, str):
+            self.strategies = str(self.strategies)
 
         super().__post_init__(**kwargs)
 
@@ -1433,7 +1432,7 @@ class Deidentification(DatasetProperty):
 
     identifiable_elements_present: Optional[Union[bool, Bool]] = None
     method: Optional[str] = None
-    identifiers_removed: Optional[Union[str, list[str]]] = empty_list()
+    identifiers_removed: Optional[str] = None
     deidentification_details: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
@@ -1443,9 +1442,8 @@ class Deidentification(DatasetProperty):
         if self.method is not None and not isinstance(self.method, str):
             self.method = str(self.method)
 
-        if not isinstance(self.identifiers_removed, list):
-            self.identifiers_removed = [self.identifiers_removed] if self.identifiers_removed is not None else []
-        self.identifiers_removed = [v if isinstance(v, str) else str(v) for v in self.identifiers_removed]
+        if self.identifiers_removed is not None and not isinstance(self.identifiers_removed, str):
+            self.identifiers_removed = str(self.identifiers_removed)
 
         if self.deidentification_details is not None and not isinstance(self.deidentification_details, str):
             self.deidentification_details = str(self.deidentification_details)
@@ -1885,7 +1883,7 @@ class AnnotationAnalysis(DatasetProperty):
     agreement_metric: Optional[str] = None
     analysis_method: Optional[str] = None
     disagreement_patterns: Optional[Union[str, list[str]]] = empty_list()
-    annotation_quality_details: Optional[Union[str, list[str]]] = empty_list()
+    annotation_quality_details: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self.inter_annotator_agreement_score is not None and not isinstance(self.inter_annotator_agreement_score, float):
@@ -1901,9 +1899,8 @@ class AnnotationAnalysis(DatasetProperty):
             self.disagreement_patterns = [self.disagreement_patterns] if self.disagreement_patterns is not None else []
         self.disagreement_patterns = [v if isinstance(v, str) else str(v) for v in self.disagreement_patterns]
 
-        if not isinstance(self.annotation_quality_details, list):
-            self.annotation_quality_details = [self.annotation_quality_details] if self.annotation_quality_details is not None else []
-        self.annotation_quality_details = [v if isinstance(v, str) else str(v) for v in self.annotation_quality_details]
+        if self.annotation_quality_details is not None and not isinstance(self.annotation_quality_details, str):
+            self.annotation_quality_details = str(self.annotation_quality_details)
 
         super().__post_init__(**kwargs)
 
@@ -1922,7 +1919,7 @@ class MachineAnnotationTools(DatasetProperty):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.MachineAnnotationTools
 
     tools: Optional[Union[str, list[str]]] = empty_list()
-    tool_descriptions: Optional[Union[str, list[str]]] = empty_list()
+    tool_descriptions: Optional[str] = None
     tool_accuracy: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
@@ -1930,9 +1927,8 @@ class MachineAnnotationTools(DatasetProperty):
             self.tools = [self.tools] if self.tools is not None else []
         self.tools = [v if isinstance(v, str) else str(v) for v in self.tools]
 
-        if not isinstance(self.tool_descriptions, list):
-            self.tool_descriptions = [self.tool_descriptions] if self.tool_descriptions is not None else []
-        self.tool_descriptions = [v if isinstance(v, str) else str(v) for v in self.tool_descriptions]
+        if self.tool_descriptions is not None and not isinstance(self.tool_descriptions, str):
+            self.tool_descriptions = str(self.tool_descriptions)
 
         if not isinstance(self.tool_accuracy, list):
             self.tool_accuracy = [self.tool_accuracy] if self.tool_accuracy is not None else []
@@ -1977,15 +1973,14 @@ class UseRepository(DatasetProperty):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.UseRepository
 
     repository_url: Optional[Union[str, URI]] = None
-    repository_details: Optional[Union[str, list[str]]] = empty_list()
+    repository_details: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self.repository_url is not None and not isinstance(self.repository_url, URI):
             self.repository_url = URI(self.repository_url)
 
-        if not isinstance(self.repository_details, list):
-            self.repository_details = [self.repository_details] if self.repository_details is not None else []
-        self.repository_details = [v if isinstance(v, str) else str(v) for v in self.repository_details]
+        if self.repository_details is not None and not isinstance(self.repository_details, str):
+            self.repository_details = str(self.repository_details)
 
         super().__post_init__(**kwargs)
 
@@ -2211,15 +2206,14 @@ class Erratum(DatasetProperty):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Erratum
 
     erratum_url: Optional[Union[str, URI]] = None
-    erratum_details: Optional[Union[str, list[str]]] = empty_list()
+    erratum_details: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self.erratum_url is not None and not isinstance(self.erratum_url, URI):
             self.erratum_url = URI(self.erratum_url)
 
-        if not isinstance(self.erratum_details, list):
-            self.erratum_details = [self.erratum_details] if self.erratum_details is not None else []
-        self.erratum_details = [v if isinstance(v, str) else str(v) for v in self.erratum_details]
+        if self.erratum_details is not None and not isinstance(self.erratum_details, str):
+            self.erratum_details = str(self.erratum_details)
 
         super().__post_init__(**kwargs)
 
@@ -2546,7 +2540,7 @@ class ParticipantPrivacy(DatasetProperty):
 
     anonymization_method: Optional[str] = None
     reidentification_risk: Optional[str] = None
-    privacy_techniques: Optional[Union[str, list[str]]] = empty_list()
+    privacy_techniques: Optional[str] = None
     data_linkage: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
@@ -2556,9 +2550,8 @@ class ParticipantPrivacy(DatasetProperty):
         if self.reidentification_risk is not None and not isinstance(self.reidentification_risk, str):
             self.reidentification_risk = str(self.reidentification_risk)
 
-        if not isinstance(self.privacy_techniques, list):
-            self.privacy_techniques = [self.privacy_techniques] if self.privacy_techniques is not None else []
-        self.privacy_techniques = [v if isinstance(v, str) else str(v) for v in self.privacy_techniques]
+        if self.privacy_techniques is not None and not isinstance(self.privacy_techniques, str):
+            self.privacy_techniques = str(self.privacy_techniques)
 
         if self.data_linkage is not None and not isinstance(self.data_linkage, str):
             self.data_linkage = str(self.data_linkage)
@@ -2613,7 +2606,7 @@ class AtRiskPopulations(DatasetProperty):
 
     at_risk_groups_included: Optional[Union[bool, Bool]] = None
     special_protections: Optional[Union[str, list[str]]] = empty_list()
-    assent_procedures: Optional[Union[str, list[str]]] = empty_list()
+    assent_procedures: Optional[str] = None
     guardian_consent: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
@@ -2624,9 +2617,8 @@ class AtRiskPopulations(DatasetProperty):
             self.special_protections = [self.special_protections] if self.special_protections is not None else []
         self.special_protections = [v if isinstance(v, str) else str(v) for v in self.special_protections]
 
-        if not isinstance(self.assent_procedures, list):
-            self.assent_procedures = [self.assent_procedures] if self.assent_procedures is not None else []
-        self.assent_procedures = [v if isinstance(v, str) else str(v) for v in self.assent_procedures]
+        if self.assent_procedures is not None and not isinstance(self.assent_procedures, str):
+            self.assent_procedures = str(self.assent_procedures)
 
         if not isinstance(self.guardian_consent, list):
             self.guardian_consent = [self.guardian_consent] if self.guardian_consent is not None else []
@@ -2649,16 +2641,15 @@ class LicenseAndUseTerms(DatasetProperty):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.LicenseAndUseTerms
 
     license_terms: Optional[str] = None
-    data_use_permission: Optional[Union[Union[str, "DataUsePermissionEnum"], list[Union[str, "DataUsePermissionEnum"]]]] = empty_list()
+    data_use_permission: Optional[Union[str, "DataUsePermissionEnum"]] = None
     contact_person: Optional[Union[str, PersonId]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self.license_terms is not None and not isinstance(self.license_terms, str):
             self.license_terms = str(self.license_terms)
 
-        if not isinstance(self.data_use_permission, list):
-            self.data_use_permission = [self.data_use_permission] if self.data_use_permission is not None else []
-        self.data_use_permission = [v if isinstance(v, DataUsePermissionEnum) else DataUsePermissionEnum(v) for v in self.data_use_permission]
+        if self.data_use_permission is not None and not isinstance(self.data_use_permission, DataUsePermissionEnum):
+            self.data_use_permission = DataUsePermissionEnum(self.data_use_permission)
 
         if self.contact_person is not None and not isinstance(self.contact_person, PersonId):
             self.contact_person = PersonId(self.contact_person)
@@ -2897,7 +2888,7 @@ class FileCollection(Information):
     compression: Optional[Union[str, "CompressionEnum"]] = None
     external_resources: Optional[Union[Union[dict, ExternalResource], list[Union[dict, ExternalResource]]]] = empty_list()
     resources: Optional[Union[dict[Union[str, FileId], Union[dict, File]], list[Union[dict, File]]]] = empty_dict()
-    collection_type: Optional[Union[Union[str, "FileCollectionTypeEnum"], list[Union[str, "FileCollectionTypeEnum"]]]] = empty_list()
+    collection_type: Optional[Union[str, "FileCollectionTypeEnum"]] = None
     file_count: Optional[int] = None
     total_bytes: Optional[int] = None
 
@@ -2919,9 +2910,8 @@ class FileCollection(Information):
 
         self._normalize_inlined_as_list(slot_name="resources", slot_type=File, key_name="id", keyed=True)
 
-        if not isinstance(self.collection_type, list):
-            self.collection_type = [self.collection_type] if self.collection_type is not None else []
-        self.collection_type = [v if isinstance(v, FileCollectionTypeEnum) else FileCollectionTypeEnum(v) for v in self.collection_type]
+        if self.collection_type is not None and not isinstance(self.collection_type, FileCollectionTypeEnum):
+            self.collection_type = FileCollectionTypeEnum(self.collection_type)
 
         if self.file_count is not None and not isinstance(self.file_count, int):
             self.file_count = int(self.file_count)
@@ -4405,7 +4395,7 @@ slots.samplingStrategy__why_not_representative = Slot(uri=D4D.whyNotRepresentati
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__why_not_representative, domain=None, range=Optional[str])
 
 slots.samplingStrategy__strategies = Slot(uri=D4D.strategies, name="samplingStrategy__strategies", curie=D4D.curie('strategies'),
-                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__strategies, domain=None, range=Optional[Union[str, list[str]]])
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__strategies, domain=None, range=Optional[str])
 
 slots.missingInfo__missing = Slot(uri=D4D.missingDataDescription, name="missingInfo__missing", curie=D4D.curie('missingDataDescription'),
                    model_uri=DATA_SHEETS_SCHEMA.missingInfo__missing, domain=None, range=Optional[Union[str, list[str]]])
@@ -4483,7 +4473,7 @@ slots.deidentification__method = Slot(uri=D4DCOMPOSITION.method, name="deidentif
                    model_uri=DATA_SHEETS_SCHEMA.deidentification__method, domain=None, range=Optional[str])
 
 slots.deidentification__identifiers_removed = Slot(uri=D4D.removedIdentifierTypes, name="deidentification__identifiers_removed", curie=D4D.curie('removedIdentifierTypes'),
-                   model_uri=DATA_SHEETS_SCHEMA.deidentification__identifiers_removed, domain=None, range=Optional[Union[str, list[str]]])
+                   model_uri=DATA_SHEETS_SCHEMA.deidentification__identifiers_removed, domain=None, range=Optional[str])
 
 slots.deidentification__deidentification_details = Slot(uri=DCTERMS.description, name="deidentification__deidentification_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.deidentification__deidentification_details, domain=None, range=Optional[str])
@@ -4618,13 +4608,13 @@ slots.annotationAnalysis__disagreement_patterns = Slot(uri=D4D.disagreementPatte
                    model_uri=DATA_SHEETS_SCHEMA.annotationAnalysis__disagreement_patterns, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.annotationAnalysis__annotation_quality_details = Slot(uri=D4D.annotationQualityDetails, name="annotationAnalysis__annotation_quality_details", curie=D4D.curie('annotationQualityDetails'),
-                   model_uri=DATA_SHEETS_SCHEMA.annotationAnalysis__annotation_quality_details, domain=None, range=Optional[Union[str, list[str]]])
+                   model_uri=DATA_SHEETS_SCHEMA.annotationAnalysis__annotation_quality_details, domain=None, range=Optional[str])
 
 slots.machineAnnotationTools__tools = Slot(uri=D4D.toolNames, name="machineAnnotationTools__tools", curie=D4D.curie('toolNames'),
                    model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tools, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.machineAnnotationTools__tool_descriptions = Slot(uri=D4D.toolDescriptions, name="machineAnnotationTools__tool_descriptions", curie=D4D.curie('toolDescriptions'),
-                   model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tool_descriptions, domain=None, range=Optional[Union[str, list[str]]])
+                   model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tool_descriptions, domain=None, range=Optional[str])
 
 slots.machineAnnotationTools__tool_accuracy = Slot(uri=D4D.toolAccuracy, name="machineAnnotationTools__tool_accuracy", curie=D4D.curie('toolAccuracy'),
                    model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tool_accuracy, domain=None, range=Optional[Union[str, list[str]]])
@@ -4636,7 +4626,7 @@ slots.useRepository__repository_url = Slot(uri=D4DUSES.repository_url, name="use
                    model_uri=DATA_SHEETS_SCHEMA.useRepository__repository_url, domain=None, range=Optional[Union[str, URI]])
 
 slots.useRepository__repository_details = Slot(uri=DCTERMS.description, name="useRepository__repository_details", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.useRepository__repository_details, domain=None, range=Optional[Union[str, list[str]]])
+                   model_uri=DATA_SHEETS_SCHEMA.useRepository__repository_details, domain=None, range=Optional[str])
 
 slots.otherTask__task_details = Slot(uri=DCTERMS.description, name="otherTask__task_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.otherTask__task_details, domain=None, range=Optional[str])
@@ -4678,7 +4668,7 @@ slots.erratum__erratum_url = Slot(uri=D4D.erratumURL, name="erratum__erratum_url
                    model_uri=DATA_SHEETS_SCHEMA.erratum__erratum_url, domain=None, range=Optional[Union[str, URI]])
 
 slots.erratum__erratum_details = Slot(uri=DCTERMS.description, name="erratum__erratum_details", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.erratum__erratum_details, domain=None, range=Optional[Union[str, list[str]]])
+                   model_uri=DATA_SHEETS_SCHEMA.erratum__erratum_details, domain=None, range=Optional[str])
 
 slots.updatePlan__frequency = Slot(uri=D4D.frequency, name="updatePlan__frequency", curie=D4D.curie('frequency'),
                    model_uri=DATA_SHEETS_SCHEMA.updatePlan__frequency, domain=None, range=Optional[str])
@@ -4765,7 +4755,7 @@ slots.participantPrivacy__reidentification_risk = Slot(uri=D4D.reidentificationR
                    model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__reidentification_risk, domain=None, range=Optional[str])
 
 slots.participantPrivacy__privacy_techniques = Slot(uri=D4D.privacyTechniques, name="participantPrivacy__privacy_techniques", curie=D4D.curie('privacyTechniques'),
-                   model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__privacy_techniques, domain=None, range=Optional[Union[str, list[str]]])
+                   model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__privacy_techniques, domain=None, range=Optional[str])
 
 slots.participantPrivacy__data_linkage = Slot(uri=D4D.dataLinkage, name="participantPrivacy__data_linkage", curie=D4D.curie('dataLinkage'),
                    model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__data_linkage, domain=None, range=Optional[str])
@@ -4789,7 +4779,7 @@ slots.atRiskPopulations__special_protections = Slot(uri=D4D.specialProtections, 
                    model_uri=DATA_SHEETS_SCHEMA.atRiskPopulations__special_protections, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.atRiskPopulations__assent_procedures = Slot(uri=D4D.assentProcedures, name="atRiskPopulations__assent_procedures", curie=D4D.curie('assentProcedures'),
-                   model_uri=DATA_SHEETS_SCHEMA.atRiskPopulations__assent_procedures, domain=None, range=Optional[Union[str, list[str]]])
+                   model_uri=DATA_SHEETS_SCHEMA.atRiskPopulations__assent_procedures, domain=None, range=Optional[str])
 
 slots.atRiskPopulations__guardian_consent = Slot(uri=D4D.guardianConsent, name="atRiskPopulations__guardian_consent", curie=D4D.curie('guardianConsent'),
                    model_uri=DATA_SHEETS_SCHEMA.atRiskPopulations__guardian_consent, domain=None, range=Optional[Union[str, list[str]]])
@@ -4798,7 +4788,7 @@ slots.licenseAndUseTerms__license_terms = Slot(uri=D4D.licenseDescription, name=
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__license_terms, domain=None, range=Optional[str])
 
 slots.licenseAndUseTerms__data_use_permission = Slot(uri=DUO['0000001'], name="licenseAndUseTerms__data_use_permission", curie=DUO.curie('0000001'),
-                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__data_use_permission, domain=None, range=Optional[Union[Union[str, "DataUsePermissionEnum"], list[Union[str, "DataUsePermissionEnum"]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__data_use_permission, domain=None, range=Optional[Union[str, "DataUsePermissionEnum"]])
 
 slots.licenseAndUseTerms__contact_person = Slot(uri=D4D.licenseContactPoint, name="licenseAndUseTerms__contact_person", curie=D4D.curie('licenseContactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__contact_person, domain=None, range=Optional[Union[str, PersonId]])
@@ -4867,7 +4857,7 @@ slots.file__file_type = Slot(uri=D4D.fileType, name="file__file_type", curie=D4D
                    model_uri=DATA_SHEETS_SCHEMA.file__file_type, domain=None, range=Optional[Union[str, "FileTypeEnum"]])
 
 slots.fileCollection__collection_type = Slot(uri=D4D.collectionType, name="fileCollection__collection_type", curie=D4D.curie('collectionType'),
-                   model_uri=DATA_SHEETS_SCHEMA.fileCollection__collection_type, domain=None, range=Optional[Union[Union[str, "FileCollectionTypeEnum"], list[Union[str, "FileCollectionTypeEnum"]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.fileCollection__collection_type, domain=None, range=Optional[Union[str, "FileCollectionTypeEnum"]])
 
 slots.fileCollection__file_count = Slot(uri=D4D.fileCount, name="fileCollection__file_count", curie=D4D.curie('fileCount'),
                    model_uri=DATA_SHEETS_SCHEMA.fileCollection__file_count, domain=None, range=Optional[int])

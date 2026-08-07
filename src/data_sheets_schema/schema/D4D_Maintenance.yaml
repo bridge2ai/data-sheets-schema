@@ -74,7 +74,6 @@ classes:
           Free-text description of the error, its scope, the affected data or records,
           and the correction applied.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
         annotations:
           "d4d:docExample": "v1.0.1: Corrected mislabeled CGM device serial numbers for 12 participants"

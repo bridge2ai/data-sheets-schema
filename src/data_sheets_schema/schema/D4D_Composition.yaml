@@ -155,7 +155,6 @@ classes:
           stratified, cluster, systematic).
         slot_uri: d4d:strategies
         range: string
-        multivalued: true
         annotations:
           "d4d:docExample": "Triple-balanced by race/ethnicity, sex, and T2DM severity"
 
@@ -442,7 +441,6 @@ classes:
         description: "Method used for de-identification (e.g., HIPAA Safe Harbor)."
       identifiers_removed:
         range: string
-        multivalued: true
         description: >-
           List of identifier types removed during de-identification
           (e.g., 'name', 'date of birth', 'SSN', 'email address', 'geographic subdivision').

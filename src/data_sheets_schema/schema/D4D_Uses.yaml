@@ -67,7 +67,6 @@ classes:
           Free-text description of the repository of known dataset uses, including
           how it is maintained and how to contribute new use cases.
         range: string
-        multivalued: true
         slot_uri: dcterms:description
 
 

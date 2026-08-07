@@ -73,11 +73,8 @@
                 },
                 "annotation_quality_details": {
                     "description": "Additional details on annotation quality assessment and findings.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -146,11 +143,8 @@
             "properties": {
                 "assent_procedures": {
                     "description": "For research involving minors, what assent procedures were used? How was developmentally appropriate assent obtained?\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -3355,11 +3349,8 @@
                 },
                 "identifiers_removed": {
                     "description": "List of identifier types removed during de-identification (e.g., 'name', 'date of birth', 'SSN', 'email address', 'geographic subdivision').",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -3686,11 +3677,8 @@
                 },
                 "erratum_details": {
                     "description": "Free-text description of the error, its scope, the affected data or records, and the correction applied.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -4320,14 +4308,8 @@
             "description": "A collection of files with shared characteristics (format, purpose, structure). Represents a logical grouping of related files within a dataset, such as all training data files, all image files, or all raw data files. Maps to RO-Crate Dataset entities via schema:hasPart relationships.",
             "properties": {
                 "collection_type": {
-                    "description": "Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed.",
-                    "items": {
-                        "$ref": "#/$defs/FileCollectionTypeEnum"
-                    },
-                    "type": [
-                        "array",
-                        "null"
-                    ]
+                    "$ref": "#/$defs/FileCollectionTypeEnum",
+                    "description": "Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed."
                 },
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
@@ -5768,14 +5750,8 @@
                     ]
                 },
                 "data_use_permission": {
-                    "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO.",
-                    "items": {
-                        "$ref": "#/$defs/DataUsePermissionEnum"
-                    },
-                    "type": [
-                        "array",
-                        "null"
-                    ]
+                    "$ref": "#/$defs/DataUsePermissionEnum",
+                    "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO."
                 },
                 "description": {
                     "description": "A human-readable description for this property.",
@@ -5884,11 +5860,8 @@
                 },
                 "tool_descriptions": {
                     "description": "Descriptions of what each tool does in the annotation process and what types of annotations it produces. Should correspond to the tools list.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6308,11 +6281,8 @@
                 },
                 "privacy_techniques": {
                     "description": "What privacy-preserving techniques were applied (e.g., differential privacy, k-anonymity, data masking)?\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -6876,11 +6846,8 @@
                 },
                 "strategies": {
                     "description": "One or more sampling strategies used (e.g., deterministic, simple random, stratified, cluster, systematic).\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -7342,11 +7309,8 @@
                 },
                 "repository_details": {
                     "description": "Free-text description of the repository of known dataset uses, including how it is maintained and how to contribute new use cases.\n",
-                    "items": {
-                        "type": "string"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
