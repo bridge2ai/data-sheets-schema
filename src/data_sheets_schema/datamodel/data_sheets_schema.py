@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-08-07T09:59:04
+# Generation date: 2026-08-07T11:17:43
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -92,6 +92,7 @@ RAI = CurieNamespace('rai', 'http://mlcommons.org/croissant/RAI/')
 SCHEMA = CurieNamespace('schema', 'http://schema.org/')
 SH = CurieNamespace('sh', 'https://w3id.org/shacl/')
 SKOS = CurieNamespace('skos', 'http://www.w3.org/2004/02/skos/core#')
+SPDX = CurieNamespace('spdx', 'http://spdx.org/rdf/terms#')
 DEFAULT_ = DATA_SHEETS_SCHEMA
 
 
@@ -150,6 +151,7 @@ class NamedThing(YAMLRoot):
     name: Optional[str] = None
     description: Optional[str] = None
     notes: Optional[str] = None
+    source_caveats: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -165,6 +167,9 @@ class NamedThing(YAMLRoot):
 
         if self.notes is not None and not isinstance(self.notes, str):
             self.notes = str(self.notes)
+
+        if self.source_caveats is not None and not isinstance(self.source_caveats, str):
+            self.source_caveats = str(self.source_caveats)
 
         super().__post_init__(**kwargs)
 
@@ -185,6 +190,7 @@ class Organization(YAMLRoot):
     name: Optional[str] = None
     description: Optional[str] = None
     notes: Optional[str] = None
+    source_caveats: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self.id is not None and not isinstance(self.id, URIorCURIE):
@@ -198,6 +204,9 @@ class Organization(YAMLRoot):
 
         if self.notes is not None and not isinstance(self.notes, str):
             self.notes = str(self.notes)
+
+        if self.source_caveats is not None and not isinstance(self.source_caveats, str):
+            self.source_caveats = str(self.source_caveats)
 
         super().__post_init__(**kwargs)
 
@@ -218,6 +227,7 @@ class DatasetProperty(YAMLRoot):
     name: Optional[str] = None
     description: Optional[str] = None
     notes: Optional[str] = None
+    source_caveats: Optional[str] = None
     used_software: Optional[Union[dict[Union[str, SoftwareId], Union[dict, "Software"]], list[Union[dict, "Software"]]]] = empty_dict()
 
     def __post_init__(self, *_: str, **kwargs: Any):
@@ -232,6 +242,9 @@ class DatasetProperty(YAMLRoot):
 
         if self.notes is not None and not isinstance(self.notes, str):
             self.notes = str(self.notes)
+
+        if self.source_caveats is not None and not isinstance(self.source_caveats, str):
+            self.source_caveats = str(self.source_caveats)
 
         self._normalize_inlined_as_list(slot_name="used_software", slot_type=Software, key_name="id", keyed=True)
 
@@ -1019,6 +1032,7 @@ class Grant(YAMLRoot):
     name: Optional[str] = None
     description: Optional[str] = None
     notes: Optional[str] = None
+    source_caveats: Optional[str] = None
     grant_number: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
@@ -1033,6 +1047,9 @@ class Grant(YAMLRoot):
 
         if self.notes is not None and not isinstance(self.notes, str):
             self.notes = str(self.notes)
+
+        if self.source_caveats is not None and not isinstance(self.source_caveats, str):
+            self.source_caveats = str(self.source_caveats)
 
         if self.grant_number is not None and not isinstance(self.grant_number, str):
             self.grant_number = str(self.grant_number)
@@ -2136,9 +2153,25 @@ class DistributionFormat(DatasetProperty):
     class_name: ClassVar[str] = "DistributionFormat"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DistributionFormat
 
+    download_url: Optional[Union[str, URI]] = None
+    media_type: Optional[str] = None
+    format: Optional[str] = None
+    checksum: Optional[str] = None
     access_urls: Optional[Union[Union[str, URI], list[Union[str, URI]]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
+        if self.download_url is not None and not isinstance(self.download_url, URI):
+            self.download_url = URI(self.download_url)
+
+        if self.media_type is not None and not isinstance(self.media_type, str):
+            self.media_type = str(self.media_type)
+
+        if self.format is not None and not isinstance(self.format, str):
+            self.format = str(self.format)
+
+        if self.checksum is not None and not isinstance(self.checksum, str):
+            self.checksum = str(self.checksum)
+
         if not isinstance(self.access_urls, list):
             self.access_urls = [self.access_urls] if self.access_urls is not None else []
         self.access_urls = [v if isinstance(v, URI) else URI(v) for v in self.access_urls]
@@ -4252,6 +4285,9 @@ slots.namedThing__description = Slot(uri=SCHEMA.description, name="namedThing__d
 slots.namedThing__notes = Slot(uri=SCHEMA.comment, name="namedThing__notes", curie=SCHEMA.curie('comment'),
                    model_uri=DATA_SHEETS_SCHEMA.namedThing__notes, domain=None, range=Optional[str])
 
+slots.namedThing__source_caveats = Slot(uri=DCTERMS.provenance, name="namedThing__source_caveats", curie=DCTERMS.curie('provenance'),
+                   model_uri=DATA_SHEETS_SCHEMA.namedThing__source_caveats, domain=None, range=Optional[str])
+
 slots.organization__id = Slot(uri=SCHEMA.identifier, name="organization__id", curie=SCHEMA.curie('identifier'),
                    model_uri=DATA_SHEETS_SCHEMA.organization__id, domain=None, range=Optional[Union[str, URIorCURIE]])
 
@@ -4264,6 +4300,9 @@ slots.organization__description = Slot(uri=SCHEMA.description, name="organizatio
 slots.organization__notes = Slot(uri=SCHEMA.comment, name="organization__notes", curie=SCHEMA.curie('comment'),
                    model_uri=DATA_SHEETS_SCHEMA.organization__notes, domain=None, range=Optional[str])
 
+slots.organization__source_caveats = Slot(uri=DCTERMS.provenance, name="organization__source_caveats", curie=DCTERMS.curie('provenance'),
+                   model_uri=DATA_SHEETS_SCHEMA.organization__source_caveats, domain=None, range=Optional[str])
+
 slots.datasetProperty__id = Slot(uri=SCHEMA.identifier, name="datasetProperty__id", curie=SCHEMA.curie('identifier'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetProperty__id, domain=None, range=Optional[Union[str, URIorCURIE]])
 
@@ -4275,6 +4314,9 @@ slots.datasetProperty__description = Slot(uri=SCHEMA.description, name="datasetP
 
 slots.datasetProperty__notes = Slot(uri=SCHEMA.comment, name="datasetProperty__notes", curie=SCHEMA.curie('comment'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetProperty__notes, domain=None, range=Optional[str])
+
+slots.datasetProperty__source_caveats = Slot(uri=DCTERMS.provenance, name="datasetProperty__source_caveats", curie=DCTERMS.curie('provenance'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetProperty__source_caveats, domain=None, range=Optional[str])
 
 slots.datasetProperty__used_software = Slot(uri=D4D.usedSoftware, name="datasetProperty__used_software", curie=D4D.curie('usedSoftware'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetProperty__used_software, domain=None, range=Optional[Union[dict[Union[str, SoftwareId], Union[dict, Software]], list[Union[dict, Software]]]])
@@ -4348,6 +4390,9 @@ slots.grant__description = Slot(uri=SCHEMA.description, name="grant__description
 
 slots.grant__notes = Slot(uri=SCHEMA.comment, name="grant__notes", curie=SCHEMA.curie('comment'),
                    model_uri=DATA_SHEETS_SCHEMA.grant__notes, domain=None, range=Optional[str])
+
+slots.grant__source_caveats = Slot(uri=DCTERMS.provenance, name="grant__source_caveats", curie=DCTERMS.curie('provenance'),
+                   model_uri=DATA_SHEETS_SCHEMA.grant__source_caveats, domain=None, range=Optional[str])
 
 slots.grant__grant_number = Slot(uri=D4D.grantIdentifier, name="grant__grant_number", curie=D4D.curie('grantIdentifier'),
                    model_uri=DATA_SHEETS_SCHEMA.grant__grant_number, domain=None, range=Optional[str])
@@ -4651,6 +4696,18 @@ slots.prohibitedUse__prohibition_reason = Slot(uri=D4D.prohibitionReason, name="
 
 slots.thirdPartySharing__is_shared = Slot(uri=D4D.isExternallyShared, name="thirdPartySharing__is_shared", curie=D4D.curie('isExternallyShared'),
                    model_uri=DATA_SHEETS_SCHEMA.thirdPartySharing__is_shared, domain=None, range=Optional[Union[bool, Bool]])
+
+slots.distributionFormat__download_url = Slot(uri=DCAT.downloadURL, name="distributionFormat__download_url", curie=DCAT.curie('downloadURL'),
+                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__download_url, domain=None, range=Optional[Union[str, URI]])
+
+slots.distributionFormat__media_type = Slot(uri=DCAT.mediaType, name="distributionFormat__media_type", curie=DCAT.curie('mediaType'),
+                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__media_type, domain=None, range=Optional[str])
+
+slots.distributionFormat__format = Slot(uri=DCTERMS.format, name="distributionFormat__format", curie=DCTERMS.curie('format'),
+                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__format, domain=None, range=Optional[str])
+
+slots.distributionFormat__checksum = Slot(uri=SPDX.checksum, name="distributionFormat__checksum", curie=SPDX.curie('checksum'),
+                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__checksum, domain=None, range=Optional[str])
 
 slots.distributionFormat__access_urls = Slot(uri=DCAT.accessURL, name="distributionFormat__access_urls", curie=DCAT.curie('accessURL'),
                    model_uri=DATA_SHEETS_SCHEMA.distributionFormat__access_urls, domain=None, range=Optional[Union[Union[str, URI], list[Union[str, URI]]]])

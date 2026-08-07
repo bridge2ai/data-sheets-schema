@@ -117,6 +117,15 @@ classes:
           Residual content only, after every fitting slot is used —
           structured slots first, then description; notes solely for what
           description cannot hold (#385). Never invent keys (#380).
+      source_caveats:
+        slot_uri: dcterms:provenance
+        range: string
+        description: >-
+          Commentary on the evidence behind this object's values — source
+          conflicts, what a value was transcribed from, questions the source
+          material leaves unanswered (#385). A trust annotation about the
+          sibling slots, not dataset content: content belongs in the
+          structured slots, description or notes.
     class_uri: schema:Thing
 
   # Not a NamedThing, like DatasetProperty below and for the same reason:
@@ -158,6 +167,15 @@ classes:
           Residual content about the organization after name, id and
           description are used (#385); never invent keys (#380).
 
+      source_caveats:
+        slot_uri: dcterms:provenance
+        range: string
+        description: >-
+          Commentary on the evidence behind this object's values — source
+          conflicts, what a value was transcribed from, questions the source
+          material leaves unanswered (#385). A trust annotation about the
+          sibling slots, not dataset content: content belongs in the
+          structured slots, description or notes.
   # Base class for all dataset properties and components
   # Note: Does NOT inherit from NamedThing to avoid required id constraint
   DatasetProperty:
@@ -186,6 +204,15 @@ classes:
           narrative, notes last — solely for content description cannot
           hold. Never a restatement of a sibling slot's value, and never a
           substitute for inventing keys the schema does not declare (#380).
+      source_caveats:
+        slot_uri: dcterms:provenance
+        range: string
+        description: >-
+          Commentary on the evidence behind this object's values — source
+          conflicts, what a value was transcribed from, questions the source
+          material leaves unanswered (#385). A trust annotation about the
+          sibling slots, not dataset content: content belongs in the
+          structured slots, description or notes.
       used_software:
         description: "What software was used as part of this dataset property?"
         slot_uri: d4d:usedSoftware

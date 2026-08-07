@@ -4084,6 +4084,22 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "namedThing__source_caveats",
+      "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/provenance"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/provenance",
+      "alias": "source_caveats",
+      "owner": "NamedThing",
+      "domain_of": [
+        "NamedThing"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "organization__id",
       "annotations": [
         {
@@ -4163,6 +4179,22 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "organization__source_caveats",
+      "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/provenance"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/provenance",
+      "alias": "source_caveats",
+      "owner": "Organization",
+      "domain_of": [
+        "Organization"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "datasetProperty__id",
       "annotations": [
         {
@@ -4226,6 +4258,22 @@
       ],
       "slot_uri": "http://schema.org/comment",
       "alias": "notes",
+      "owner": "DatasetProperty",
+      "domain_of": [
+        "DatasetProperty"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "datasetProperty__source_caveats",
+      "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/provenance"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/provenance",
+      "alias": "source_caveats",
       "owner": "DatasetProperty",
       "domain_of": [
         "DatasetProperty"
@@ -4687,6 +4735,22 @@
       ],
       "slot_uri": "http://schema.org/comment",
       "alias": "notes",
+      "owner": "Grant",
+      "domain_of": [
+        "Grant"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "grant__source_caveats",
+      "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
+      "mappings": [
+        "http://purl.org/dc/terms/provenance"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/provenance",
+      "alias": "source_caveats",
       "owner": "Grant",
       "domain_of": [
         "Grant"
@@ -6796,6 +6860,70 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "distributionFormat__download_url",
+      "description": "Direct download URL for this distribution, when one exists (distinct from access_urls, which may point at portals or registration pages).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/distribution",
+      "mappings": [
+        "http://www.w3.org/ns/dcat#downloadURL"
+      ],
+      "slot_uri": "http://www.w3.org/ns/dcat#downloadURL",
+      "alias": "download_url",
+      "owner": "DistributionFormat",
+      "domain_of": [
+        "DistributionFormat"
+      ],
+      "range": "uri",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "distributionFormat__media_type",
+      "description": "IANA media type of the distributed files, e.g. application/dicom, text/csv.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/distribution",
+      "mappings": [
+        "http://www.w3.org/ns/dcat#mediaType"
+      ],
+      "slot_uri": "http://www.w3.org/ns/dcat#mediaType",
+      "alias": "media_type",
+      "owner": "DistributionFormat",
+      "domain_of": [
+        "DistributionFormat"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "distributionFormat__format",
+      "description": "File format of the distribution when no exact IANA media type applies, e.g. WFDB, OMOP CSV bundle.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/distribution",
+      "mappings": [
+        "http://purl.org/dc/terms/format"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/format",
+      "alias": "format",
+      "owner": "DistributionFormat",
+      "domain_of": [
+        "DistributionFormat"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "distributionFormat__checksum",
+      "description": "Integrity checksum of the distributed artifact, stated with its algorithm, e.g. \"md5:9e107d9d372bb6826bd81d3542a419d6\".",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/distribution",
+      "mappings": [
+        "http://spdx.org/rdf/terms#checksum"
+      ],
+      "slot_uri": "http://spdx.org/rdf/terms#checksum",
+      "alias": "checksum",
+      "owner": "DistributionFormat",
+      "domain_of": [
+        "DistributionFormat"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "distributionFormat__access_urls",
       "annotations": [
         {
@@ -8515,6 +8643,7 @@
         "namedThing__name",
         "namedThing__description",
         "namedThing__notes",
+        "namedThing__source_caveats",
         "compression",
         "conforms_to",
         "conforms_to_class",
@@ -8564,6 +8693,7 @@
         "namedThing__name",
         "namedThing__description",
         "namedThing__notes",
+        "namedThing__source_caveats",
         "compression",
         "conforms_to",
         "conforms_to_class",
@@ -9301,6 +9431,7 @@
         "namedThing__name",
         "namedThing__description",
         "namedThing__notes",
+        "namedThing__source_caveats",
         "compression",
         "conforms_to",
         "conforms_to_class",
@@ -9425,7 +9556,8 @@
         "namedThing__id",
         "namedThing__name",
         "namedThing__description",
-        "namedThing__notes"
+        "namedThing__notes",
+        "namedThing__source_caveats"
       ],
       "slot_usage": {},
       "attributes": [
@@ -9478,6 +9610,13 @@
           "slot_uri": "schema:comment",
           "range": "string",
           "@type": "SlotDefinition"
+        },
+        {
+          "name": "source_caveats",
+          "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+          "slot_uri": "dcterms:provenance",
+          "range": "string",
+          "@type": "SlotDefinition"
         }
       ],
       "class_uri": "http://schema.org/Thing",
@@ -9495,7 +9634,8 @@
         "organization__id",
         "organization__name",
         "organization__description",
-        "organization__notes"
+        "organization__notes",
+        "organization__source_caveats"
       ],
       "slot_usage": {},
       "attributes": [
@@ -9541,6 +9681,13 @@
           "slot_uri": "schema:comment",
           "range": "string",
           "@type": "SlotDefinition"
+        },
+        {
+          "name": "source_caveats",
+          "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+          "slot_uri": "dcterms:provenance",
+          "range": "string",
+          "@type": "SlotDefinition"
         }
       ],
       "class_uri": "http://schema.org/Organization",
@@ -9556,6 +9703,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software"
       ],
       "slot_usage": {},
@@ -9596,6 +9744,13 @@
           "@type": "SlotDefinition"
         },
         {
+          "name": "source_caveats",
+          "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+          "slot_uri": "dcterms:provenance",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
           "name": "used_software",
           "description": "What software was used as part of this dataset property?",
           "slot_uri": "d4d:usedSoftware",
@@ -9625,6 +9780,7 @@
         "namedThing__name",
         "namedThing__description",
         "namedThing__notes",
+        "namedThing__source_caveats",
         "software__version",
         "software__license",
         "software__url"
@@ -9691,6 +9847,7 @@
         "namedThing__name",
         "namedThing__description",
         "namedThing__notes",
+        "namedThing__source_caveats",
         "person__affiliation",
         "person__email",
         "person__orcid"
@@ -9755,6 +9912,7 @@
         "namedThing__name",
         "namedThing__description",
         "namedThing__notes",
+        "namedThing__source_caveats",
         "compression",
         "conforms_to",
         "conforms_to_class",
@@ -9834,6 +9992,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "purpose__response"
       ],
@@ -9871,6 +10030,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "task__response"
       ],
@@ -9908,6 +10068,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "addressingGap__response"
       ],
@@ -9945,6 +10106,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "creator__principal_investigator",
         "creator__affiliations",
@@ -9998,6 +10160,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "fundingMechanism__grantor",
         "fundingMechanism__grants"
@@ -10037,7 +10200,8 @@
         "organization__id",
         "organization__name",
         "organization__description",
-        "organization__notes"
+        "organization__notes",
+        "organization__source_caveats"
       ],
       "slot_usage": {},
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#Grantor",
@@ -10053,6 +10217,7 @@
         "grant__name",
         "grant__description",
         "grant__notes",
+        "grant__source_caveats",
         "grant__grant_number"
       ],
       "slot_usage": {},
@@ -10083,6 +10248,13 @@
           "name": "notes",
           "description": "Residual content about the grant after name, grant_number and description are used (#385); never invent keys (#380).",
           "slot_uri": "schema:comment",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "source_caveats",
+          "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+          "slot_uri": "dcterms:provenance",
           "range": "string",
           "@type": "SlotDefinition"
         },
@@ -10118,6 +10290,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "instance__data_topic",
         "instance__instance_type",
@@ -10229,6 +10402,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "samplingStrategy__is_sample",
         "samplingStrategy__is_random",
@@ -10336,6 +10510,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "missingInfo__missing",
         "missingInfo__why_missing"
@@ -10393,6 +10568,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "relationships__relationship_details"
       ],
@@ -10427,6 +10603,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "splits__split_details"
       ],
@@ -10461,6 +10638,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "dataAnomaly__anomaly_details"
       ],
@@ -10501,6 +10679,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "datasetBias__bias_type",
         "datasetBias__bias_description",
@@ -10577,6 +10756,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "datasetLimitation__limitation_type",
         "datasetLimitation__limitation_description",
@@ -10649,6 +10829,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "ExternalResource_external_resources",
         "externalResource__future_guarantees",
@@ -10700,6 +10881,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "confidentiality__confidential_elements_present",
         "confidentiality__confidentiality_details"
@@ -10742,6 +10924,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "contentWarning__content_warnings_present",
         "contentWarning__warnings"
@@ -10785,6 +10968,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "subpopulation__subpopulation_elements_present",
         "subpopulation__identification",
@@ -10841,6 +11025,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "deidentification__identifiable_elements_present",
         "deidentification__method",
@@ -10901,6 +11086,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "sensitiveElement__sensitive_elements_present",
         "sensitiveElement__sensitivity_details"
@@ -10942,6 +11128,7 @@
         "datasetProperty__id",
         "datasetProperty__name",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "datasetRelationship__target_dataset",
         "datasetRelationship__relationship_type",
@@ -10990,6 +11177,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "instanceAcquisition__was_directly_observed",
         "instanceAcquisition__was_reported_by_subjects",
@@ -11059,6 +11247,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "collectionMechanism__mechanism_details"
       ],
@@ -11093,6 +11282,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "dataCollector__role",
         "dataCollector__collector_details"
@@ -11145,6 +11335,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "collectionTimeframe__start_date",
         "collectionTimeframe__end_date",
@@ -11209,6 +11400,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "directCollection__is_direct",
         "directCollection__collection_details"
@@ -11254,6 +11446,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "missingDataDocumentation__missing_data_patterns",
         "missingDataDocumentation__missing_data_causes",
@@ -11321,6 +11514,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "rawDataSource__source_description",
         "rawDataSource__source_type",
@@ -11407,6 +11601,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "preprocessingStrategy__preprocessing_details"
       ],
@@ -11444,6 +11639,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "cleaningStrategy__cleaning_details"
       ],
@@ -11478,6 +11674,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "labelingStrategy__data_annotation_platform",
         "labelingStrategy__data_annotation_protocol",
@@ -11583,6 +11780,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "rawData__access_url",
         "rawData__raw_data_details"
@@ -11628,6 +11826,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "imputationProtocol__imputation_method",
         "imputationProtocol__imputed_fields",
@@ -11706,6 +11905,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "annotationAnalysis__inter_annotator_agreement_score",
         "annotationAnalysis__agreement_metric",
@@ -11776,6 +11976,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "machineAnnotationTools__tools",
         "machineAnnotationTools__tool_descriptions",
@@ -11838,6 +12039,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "existingUse__examples"
       ],
@@ -11873,6 +12075,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "useRepository__repository_url",
         "useRepository__repository_details"
@@ -11914,6 +12117,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "otherTask__task_details"
       ],
@@ -11951,6 +12155,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "futureUseImpact__impact_details"
       ],
@@ -11985,6 +12190,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "discouragedUse__discouragement_details"
       ],
@@ -12022,6 +12228,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "intendedUse__examples",
         "intendedUse__usage_notes",
@@ -12085,6 +12292,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "prohibitedUse__prohibition_reason"
       ],
@@ -12119,6 +12327,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "thirdPartySharing__is_shared"
       ],
@@ -12146,11 +12355,44 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
+        "distributionFormat__download_url",
+        "distributionFormat__media_type",
+        "distributionFormat__format",
+        "distributionFormat__checksum",
         "distributionFormat__access_urls"
       ],
       "slot_usage": {},
       "attributes": [
+        {
+          "name": "download_url",
+          "description": "Direct download URL for this distribution, when one exists (distinct from access_urls, which may point at portals or registration pages).",
+          "slot_uri": "dcat:downloadURL",
+          "range": "uri",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "media_type",
+          "description": "IANA media type of the distributed files, e.g. application/dicom, text/csv.",
+          "slot_uri": "dcat:mediaType",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "format",
+          "description": "File format of the distribution when no exact IANA media type applies, e.g. WFDB, OMOP CSV bundle.",
+          "slot_uri": "dcterms:format",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "checksum",
+          "description": "Integrity checksum of the distributed artifact, stated with its algorithm, e.g. \"md5:9e107d9d372bb6826bd81d3542a419d6\".",
+          "slot_uri": "spdx:checksum",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
         {
           "name": "access_urls",
           "annotations": [
@@ -12181,6 +12423,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "distributionDate__release_dates"
       ],
@@ -12216,6 +12459,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "maintainer__role",
         "maintainer__maintainer_details"
@@ -12258,6 +12502,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "erratum__erratum_url",
         "erratum__erratum_details"
@@ -12310,6 +12555,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "updatePlan__frequency",
         "updatePlan__update_details"
@@ -12359,6 +12605,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "retentionLimits__retention_period",
         "retentionLimits__retention_details"
@@ -12408,6 +12655,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "versionAccess__latest_version_doi",
         "versionAccess__versions_available",
@@ -12466,6 +12714,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "extensionMechanism__contribution_url",
         "extensionMechanism__extension_details"
@@ -12515,6 +12764,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "ethicalReview__contact_person",
         "ethicalReview__reviewing_organization",
@@ -12571,6 +12821,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "dataProtectionImpact__impact_details"
       ],
@@ -12605,6 +12856,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "collectionNotification__notification_details"
       ],
@@ -12639,6 +12891,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "collectionConsent__consent_details"
       ],
@@ -12673,6 +12926,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "consentRevocation__revocation_details"
       ],
@@ -12707,6 +12961,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "humanSubjectResearch__involves_human_subjects",
         "humanSubjectResearch__irb_approval",
@@ -12783,6 +13038,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "informedConsent__consent_obtained",
         "informedConsent__consent_type",
@@ -12856,6 +13112,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "participantPrivacy__anonymization_method",
         "participantPrivacy__reidentification_risk",
@@ -12921,6 +13178,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "humanSubjectCompensation__compensation_provided",
         "humanSubjectCompensation__compensation_type",
@@ -12986,6 +13244,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "atRiskPopulations__at_risk_groups_included",
         "atRiskPopulations__special_protections",
@@ -13046,6 +13305,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "licenseAndUseTerms__license_terms",
         "licenseAndUseTerms__data_use_permission",
@@ -13113,6 +13373,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "iPRestrictions__restrictions"
       ],
@@ -13152,6 +13413,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "exportControlRegulatoryRestrictions__regulatory_restrictions",
         "exportControlRegulatoryRestrictions__hipaa_compliant",
@@ -13240,6 +13502,7 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__notes",
+        "datasetProperty__source_caveats",
         "datasetProperty__used_software",
         "variableMetadata__variable_name",
         "variableMetadata__data_type",
@@ -13463,6 +13726,7 @@
         "namedThing__name",
         "namedThing__description",
         "namedThing__notes",
+        "namedThing__source_caveats",
         "conforms_to",
         "conforms_to_class",
         "conforms_to_schema",
@@ -13532,6 +13796,7 @@
         "namedThing__name",
         "namedThing__description",
         "namedThing__notes",
+        "namedThing__source_caveats",
         "conforms_to",
         "conforms_to_class",
         "conforms_to_schema",
@@ -13608,7 +13873,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-08-06T12:37:37",
   "source_file_size": 32488,
-  "generation_date": "2026-08-07T09:59:03",
+  "generation_date": "2026-08-07T11:17:41",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

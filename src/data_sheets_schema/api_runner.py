@@ -414,18 +414,20 @@ PHASE_INSTRUCTIONS = {
         "class's structured slots first (name, id, affiliations, grants and "
         "kin must not sit empty while their content sits in prose), then "
         "`description` as the default home for narrative, and `notes` last — "
-        "only for content `description` cannot hold. Never restate a sibling "
-        "slot's value in `notes`, and never invent a key. Output only the "
-        "YAML, beginning with the header comment block specified above. No "
-        "commentary before or after."),
+        "only for content `description` cannot hold. Evidence commentary — "
+        "source conflicts, what a value was transcribed from, questions the "
+        "sources leave unanswered — goes in `source_caveats`, never in "
+        "`notes`. Never restate a sibling slot's value, and never invent a "
+        "key. Output only the YAML, beginning with the header comment block "
+        "specified above. No commentary before or after."),
     "core": (
         "Phase 2. Produce the CORE D4D record for class `CoreDataset`, using "
         "the declared bundle and the completed full record supplied above. The "
         "core record must not assert anything the full record does not support. "
         "Use only keys the schema digest declares; structured slots first, "
         "then `description`, with `notes` last and only for content "
-        "`description` cannot hold — never an invented key. Output only the "
-        "YAML."),
+        "`description` cannot hold; evidence commentary in `source_caveats` "
+        "— never an invented key. Output only the YAML."),
     "audit": (
         "Phase 3. Audit both records against the declared bundle and the "
         "evidence boundary. Report, as a JSON object with keys `findings` (a "
