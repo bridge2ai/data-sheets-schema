@@ -1,6 +1,6 @@
 # Detailed Evaluation: CM4AI - CLAUDECODE_AGENT_CORE
 
-Evaluated: 2026-08-06T12:59:04.271976
+Evaluated: 2026-08-07T01:13:45.460017
 File: `data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/CM4AI_d4d_core.yaml`
 
 ## Overall Scores

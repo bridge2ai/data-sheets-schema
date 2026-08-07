@@ -1,10 +1,10 @@
 # D4D Evaluation Summary Report
 
-Generated: 2026-08-06T12:59:57.985604
+Generated: 2026-08-07T01:14:31.306686
 
 ## Overview
 
-Total evaluations: 142
+Total evaluations: 60
 
 Projects evaluated: AI_READI, CHORUS, CM4AI, VOICE
 
@@ -35,11 +35,11 @@ Methods evaluated: claudecode_agent, claudecode_agent_core
 
 
 ### CLAUDECODE_AGENT
-- Average Rubric10: 83.6%
-- Average Rubric20: 72.9%
-- Evaluations: 71
+- Average Rubric10: 76.7%
+- Average Rubric20: 70.7%
+- Evaluations: 27
 
 ### CLAUDECODE_AGENT_CORE
-- Average Rubric10: 77.5%
-- Average Rubric20: 71.4%
-- Evaluations: 71
+- Average Rubric10: 75.8%
+- Average Rubric20: 70.3%
+- Evaluations: 33

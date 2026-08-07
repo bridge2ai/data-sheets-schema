@@ -1,11 +1,11 @@
-# Detailed Evaluation: AI_READI - CLAUDECODE_AGENT_CORE
+# Detailed Evaluation: CHORUS - CLAUDECODE_AGENT_CORE
 
-Evaluated: 2026-08-07T01:11:50.748991
-File: `data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/AI_READI_d4d_core.yaml`
+Evaluated: 2026-08-07T01:13:11.282893
+File: `data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/CHORUS_d4d_core.yaml`
 
 ## Overall Scores
 
-- **Rubric10**: 42.0/50 (84.0%)
+- **Rubric10**: 35.0/50 (70.0%)
 - **Rubric20**: 61.0/88 (69.3%)
 
 ## Rubric10 Element Scores
@@ -15,13 +15,13 @@ File: `data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-gene
 | 1 | Dataset Discovery and Identification | 4/5 | 4/5 sub-elements present |
 | 2 | Dataset Access and Retrieval | 4/5 | 4/5 sub-elements present |
 | 3 | Data Reuse and Interoperability | 3/5 | 3/5 sub-elements present |
-| 4 | Ethical Use and Privacy Safeguards | 3/5 | 3/5 sub-elements present |
-| 5 | Data Composition and Structure | 5/5 | 5/5 sub-elements present |
-| 6 | Data Provenance and Version Tracking | 5/5 | 5/5 sub-elements present |
+| 4 | Ethical Use and Privacy Safeguards | 2/5 | 2/5 sub-elements present |
+| 5 | Data Composition and Structure | 4/5 | 4/5 sub-elements present |
+| 6 | Data Provenance and Version Tracking | 3/5 | 3/5 sub-elements present |
 | 7 | Scientific Motivation and Funding Transparency | 5/5 | 5/5 sub-elements present |
 | 8 | Technical Transparency (Data Collection and Processing) | 4/5 | 4/5 sub-elements present |
-| 9 | Dataset Evaluation and Limitations Disclosure | 5/5 | 5/5 sub-elements present |
-| 10 | Cross-Platform and Community Integration | 4/5 | 4/5 sub-elements present |
+| 9 | Dataset Evaluation and Limitations Disclosure | 4/5 | 4/5 sub-elements present |
+| 10 | Cross-Platform and Community Integration | 2/5 | 2/5 sub-elements present |
 
 ### Rubric10 Sub-Element Details
 
@@ -31,13 +31,13 @@ File: `data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-gene
 Can a user or system discover and uniquely identify this dataset?
 
 - ✅ **Persistent Identifier (DOI, RRID, or URI)**
-  - Found: doi: 10.60775/fairhub.3
+  - Found: id: https://chorus4ai.org/
 - ✅ **Dataset Title and Description Completeness**
-  - Found: title: Flagship Dataset of Type 2 Diabetes from the AI-READI Project
+  - Found: title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI
 - ✅ **Keywords or Tags for Searchability**
   - Found: keywords: list (non-empty)
 - ✅ **Landing Page and Resources (page, hierarchical resources)**
-  - Found: page: https://fairhub.io/datasets/3
+  - Found: page: https://chorus4ai.org/
 - ❌ **Hierarchical Structure (parent datasets, relationships)**
   - Fields checked: parent_datasets, related_datasets
 
@@ -67,7 +67,7 @@ Note: Evaluate whether the dataset is designed for integration with similar data
 - ❌ **Data Formats Are Standardized (encoding, format)**
   - Fields checked: format, encoding
 - ✅ **Schema or Ontology Conformance Stated**
-  - Found: conforms_to: Clinical Dataset Structure (CDS) v0.1.1
+  - Found: conforms_to: OMOP Common Data Model (OHDSI)
 - ❌ **Variable Metadata with Identifiers Defined**
   - Fields checked: variables
 - ✅ **Use Guidance Provided (intended, prohibited uses)**
@@ -83,8 +83,8 @@ Does the dataset provide clear information about consent, privacy, and ethical o
   - Found: is_deidentified: dict (non-empty)
 - ❌ **Privacy Protections and Re-identification Risk Assessment**
   - Fields checked: participant_privacy, reidentification_risk
-- ✅ **Informed Consent Obtained from Participants**
-  - Found: informed_consent: list (non-empty)
+- ❌ **Informed Consent Obtained from Participants**
+  - Fields checked: informed_consent
 - ❌ **Vulnerable Populations and Compensation Documented**
   - Fields checked: vulnerable_populations, participant_compensation
 
@@ -96,27 +96,27 @@ Can the dataset's structure, modality, and population be understood from metadat
   - Found: subpopulations: list (non-empty)
 - ✅ **Number of Instances or Samples Reported**
   - Found: instances: list (non-empty)
-- ✅ **Variable-Level Metadata, Tabular Flag, and Data Splits**
-  - Found: is_tabular: False
+- ❌ **Variable-Level Metadata, Tabular Flag, and Data Splits**
+  - Fields checked: variables, is_tabular, is_data_split, is_subpopulation
 - ✅ **Data Topics or Conditions Represented**
   - Found: instances: list (non-empty)
 - ✅ **Data Quality, Anomalies, and Missing Data Documented**
-  - Found: anomalies: list (non-empty)
+  - Found: sampling_strategies: list (non-empty)
 
 #### 6. Data Provenance and Version Tracking
 
 Can a user determine dataset versions, update history, and provenance?
 
-- ✅ **Dataset Version Number Provided**
-  - Found: version: 3.0.0
-- ✅ **Version Access Methods Documented**
-  - Found: version_access: dict (non-empty)
+- ❌ **Dataset Version Number Provided**
+  - Fields checked: version
+- ❌ **Version Access Methods Documented**
+  - Fields checked: version_access
 - ✅ **Change Descriptions and Errata Provided**
   - Found: updates: dict (non-empty)
 - ✅ **Update Schedule or Frequency Indicated**
   - Found: updates: dict (non-empty)
 - ✅ **Provenance, Source Derivation, and Raw Data Sources**
-  - Found: raw_data_sources: list (non-empty)
+  - Found: was_derived_from: Clinical source systems at 14 contributing hospitals: electronic health record systems, PACS imaging
 
 #### 7. Scientific Motivation and Funding Transparency
 
@@ -158,8 +158,8 @@ Does the metadata communicate known risks, biases, or dataset limitations?
   - Found: known_limitations: list (non-empty)
 - ✅ **Biases Categorized Using Standard Taxonomy (RAI-aligned)**
   - Found: known_biases: list (non-empty)
-- ✅ **Data Anomalies and Quality Issues Noted**
-  - Found: anomalies: list (non-empty)
+- ❌ **Data Anomalies and Quality Issues Noted**
+  - Fields checked: anomalies
 - ✅ **Sensitive Content and Warnings Provided**
   - Found: sensitive_elements: list (non-empty)
 - ✅ **Ethical Review and Social Impact Analysis**
@@ -171,12 +171,12 @@ Does the dataset connect to wider data ecosystems, repositories, or standards?
 Note: For Bridge2AI datasets, citation metadata is mandatory and should include: (1) formatted citation string, (2) DOI, and (3) citation instructions. Hosting platform identification should specify the publisher or repository (e.g., PhysioNet, Dataverse, institutional repositories).
 
 
-- ✅ **Dataset Published on a Recognized Platform**
-  - Found: publisher: https://fairhub.io/
-- ✅ **Citation and DOI for Cross-referencing**
-  - Found: doi: 10.60775/fairhub.3
+- ❌ **Dataset Published on a Recognized Platform**
+  - Fields checked: publisher
+- ❌ **Citation and DOI for Cross-referencing**
+  - Fields checked: citation, doi
 - ✅ **Community Standards or Schema Conformance**
-  - Found: conforms_to: Clinical Dataset Structure (CDS) v0.1.1
+  - Found: conforms_to: OMOP Common Data Model (OHDSI)
 - ✅ **Outreach Materials and Documentation Links**
   - Found: external_resources: list (non-empty)
 - ❌ **Related Datasets with Typed Relationships**

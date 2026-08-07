@@ -117,8 +117,14 @@ def _invocations(rows: list[dict[str, Any]]) -> int | None:
                 return None
     if len(stamps) != len(rows) or not stamps:
         return None
-    gaps = sum(1 for a, b in zip(stamps, stamps[1:])
-               if (b - a).total_seconds() > _INVOCATION_GAP_SECONDS)
+    # Gap measured from the END of one call (start + seconds) to the start
+    # of the next: a 20-minute full-phase stream is one call, not an
+    # invocation boundary. Start-to-start comparison over-counted 7
+    # invocations on a single-invocation run.
+    ends = [t + __import__("datetime").timedelta(seconds=r.get("seconds") or 0)
+            for t, r in zip(stamps, rows)]
+    gaps = sum(1 for e, b in zip(ends, stamps[1:])
+               if (b - e).total_seconds() > _INVOCATION_GAP_SECONDS)
     return 1 + gaps
 
 
@@ -469,7 +475,11 @@ def collect_report(label_prefix: str,
     """
     base = (root or CONCAT_DIR) / f"{method}_core"
     runs: list[dict[str, Any]] = []
-    dirs = sorted(p for p in base.glob(f"{label_prefix}*") if p.is_dir())
+    # Quarantined runs (.superseded-*, .failed-*) are evidence for closed
+    # issues, not members of the sweep they were removed from.
+    dirs = sorted(p for p in base.glob(f"{label_prefix}*")
+                  if p.is_dir() and ".superseded" not in p.name
+                  and ".failed" not in p.name)
     for d in dirs:
         for prov in sorted(d.glob("*_provenance.yaml")):
             project = prov.name.replace("_provenance.yaml", "")

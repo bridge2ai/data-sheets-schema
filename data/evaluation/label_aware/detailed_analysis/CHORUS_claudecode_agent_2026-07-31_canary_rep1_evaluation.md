@@ -1,6 +1,6 @@
 # Detailed Evaluation: CHORUS - CLAUDECODE_AGENT
 
-Evaluated: 2026-08-06T12:57:32.872109
+Evaluated: 2026-08-07T01:12:15.560109
 File: `data/d4d_concatenated/claudecode_agent/2026-07-31_canary_rep1/CHORUS_d4d.yaml`
 
 ## Overall Scores

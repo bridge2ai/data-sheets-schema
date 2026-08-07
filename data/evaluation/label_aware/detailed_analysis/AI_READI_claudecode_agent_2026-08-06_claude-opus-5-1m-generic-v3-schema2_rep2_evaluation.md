@@ -1,23 +1,23 @@
-# Detailed Evaluation: AI_READI - CLAUDECODE_AGENT_CORE
+# Detailed Evaluation: AI_READI - CLAUDECODE_AGENT
 
-Evaluated: 2026-08-07T01:11:50.748991
-File: `data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/AI_READI_d4d_core.yaml`
+Evaluated: 2026-08-07T01:11:33.363734
+File: `data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_d4d.yaml`
 
 ## Overall Scores
 
-- **Rubric10**: 42.0/50 (84.0%)
-- **Rubric20**: 61.0/88 (69.3%)
+- **Rubric10**: 36.0/50 (72.0%)
+- **Rubric20**: 55.0/88 (62.5%)
 
 ## Rubric10 Element Scores
 
 | ID | Element | Score | Details |
 |----|---------|-------|---------|
 | 1 | Dataset Discovery and Identification | 4/5 | 4/5 sub-elements present |
-| 2 | Dataset Access and Retrieval | 4/5 | 4/5 sub-elements present |
-| 3 | Data Reuse and Interoperability | 3/5 | 3/5 sub-elements present |
-| 4 | Ethical Use and Privacy Safeguards | 3/5 | 3/5 sub-elements present |
+| 2 | Dataset Access and Retrieval | 0/5 | 0/5 sub-elements present |
+| 3 | Data Reuse and Interoperability | 2/5 | 2/5 sub-elements present |
+| 4 | Ethical Use and Privacy Safeguards | 5/5 | 5/5 sub-elements present |
 | 5 | Data Composition and Structure | 5/5 | 5/5 sub-elements present |
-| 6 | Data Provenance and Version Tracking | 5/5 | 5/5 sub-elements present |
+| 6 | Data Provenance and Version Tracking | 2/5 | 2/5 sub-elements present |
 | 7 | Scientific Motivation and Funding Transparency | 5/5 | 5/5 sub-elements present |
 | 8 | Technical Transparency (Data Collection and Processing) | 4/5 | 4/5 sub-elements present |
 | 9 | Dataset Evaluation and Limitations Disclosure | 5/5 | 5/5 sub-elements present |
@@ -45,16 +45,16 @@ Can a user or system discover and uniquely identify this dataset?
 
 Can the dataset and its associated resources be located, accessed, and downloaded?
 
-- ✅ **Access Policy and IP Restrictions Defined**
-  - Found: license_and_use_terms: dict (non-empty)
-- ✅ **Regulatory Compliance and Confidentiality Classification**
-  - Found: regulatory_restrictions: dict (non-empty)
+- ❌ **Access Policy and IP Restrictions Defined**
+  - Fields checked: license_and_use_terms, ip_restrictions
+- ❌ **Regulatory Compliance and Confidentiality Classification**
+  - Fields checked: regulatory_restrictions, confidentiality_level, hipaa_compliant, other_compliance, governance_committee_contact
 - ❌ **Download URL or Platform Link Available**
   - Fields checked: download_url
-- ✅ **Distribution Formats and File Types Specified**
-  - Found: distribution_formats: list (non-empty)
-- ✅ **Related Datasets and External Resources Linked**
-  - Found: external_resources: list (non-empty)
+- ❌ **Distribution Formats and File Types Specified**
+  - Fields checked: distribution_formats, format, media_type
+- ❌ **Related Datasets and External Resources Linked**
+  - Fields checked: related_datasets, external_resources
 
 #### 3. Data Reuse and Interoperability
 
@@ -62,8 +62,8 @@ Is sufficient information provided to reuse and integrate the dataset with other
 Note: Evaluate whether the dataset is designed for integration with similar datasets, including: common identifiers for cross-dataset linking, standardized formats for data harmonization, and documented integration procedures.
 
 
-- ✅ **License Terms Allow Reuse**
-  - Found: license_and_use_terms: dict (non-empty)
+- ❌ **License Terms Allow Reuse**
+  - Fields checked: license_and_use_terms
 - ❌ **Data Formats Are Standardized (encoding, format)**
   - Fields checked: format, encoding
 - ✅ **Schema or Ontology Conformance Stated**
@@ -81,12 +81,12 @@ Does the dataset provide clear information about consent, privacy, and ethical o
   - Found: ethical_reviews: list (non-empty)
 - ✅ **Deidentification Method Described**
   - Found: is_deidentified: dict (non-empty)
-- ❌ **Privacy Protections and Re-identification Risk Assessment**
-  - Fields checked: participant_privacy, reidentification_risk
+- ✅ **Privacy Protections and Re-identification Risk Assessment**
+  - Found: participant_privacy: list (non-empty)
 - ✅ **Informed Consent Obtained from Participants**
   - Found: informed_consent: list (non-empty)
-- ❌ **Vulnerable Populations and Compensation Documented**
-  - Fields checked: vulnerable_populations, participant_compensation
+- ✅ **Vulnerable Populations and Compensation Documented**
+  - Found: participant_compensation: list (non-empty)
 
 #### 5. Data Composition and Structure
 
@@ -109,12 +109,12 @@ Can a user determine dataset versions, update history, and provenance?
 
 - ✅ **Dataset Version Number Provided**
   - Found: version: 3.0.0
-- ✅ **Version Access Methods Documented**
-  - Found: version_access: dict (non-empty)
-- ✅ **Change Descriptions and Errata Provided**
-  - Found: updates: dict (non-empty)
-- ✅ **Update Schedule or Frequency Indicated**
-  - Found: updates: dict (non-empty)
+- ❌ **Version Access Methods Documented**
+  - Fields checked: version_access
+- ❌ **Change Descriptions and Errata Provided**
+  - Fields checked: errata, updates
+- ❌ **Update Schedule or Frequency Indicated**
+  - Fields checked: updates
 - ✅ **Provenance, Source Derivation, and Raw Data Sources**
   - Found: raw_data_sources: list (non-empty)
 
@@ -148,7 +148,7 @@ Note: Preprocessing and collection metadata may be represented as structured tex
 - ❌ **Software and Tools Documented**
   - Fields checked: software_and_tools
 - ✅ **External Standards, Resources, and Imputation Protocols**
-  - Found: external_resources: list (non-empty)
+  - Found: conforms_to: Clinical Dataset Structure (CDS) v0.1.1
 
 #### 9. Dataset Evaluation and Limitations Disclosure
 
@@ -178,7 +178,7 @@ Note: For Bridge2AI datasets, citation metadata is mandatory and should include:
 - ✅ **Community Standards or Schema Conformance**
   - Found: conforms_to: Clinical Dataset Structure (CDS) v0.1.1
 - ✅ **Outreach Materials and Documentation Links**
-  - Found: external_resources: list (non-empty)
+  - Found: page: https://fairhub.io/datasets/3
 - ❌ **Related Datasets with Typed Relationships**
   - Fields checked: related_datasets
 
@@ -202,7 +202,7 @@ Note: For Bridge2AI datasets, citation metadata is mandatory and should include:
 | 6 | Dataset Identification Metadata | Pass | ✅ |
 | 7 | Funding and Acknowledgements Completeness | 5.0/5 | ✅ |
 | 8 | Ethical and Privacy Declarations | 3.0/5 | ✅ |
-| 9 | Access Requirements and Governance Documentation | 3.0/5 | ✅ |
+| 9 | Access Requirements and Governance Documentation | 0.0/5 | ❌ |
 | 10 | Interoperability, Standardization, and Cross-Platform Integration | 3.0/5 | ✅ |
 
 ### Technical Documentation
@@ -220,7 +220,7 @@ Note: For Bridge2AI datasets, citation metadata is mandatory and should include:
 | ID | Question | Score | Status |
 |----|----------|-------|--------|
 | 16 | Findability (Persistent Links) | Pass | ✅ |
-| 17 | Accessibility (Access Mechanism) | 3.0/5 | ✅ |
+| 17 | Accessibility (Access Mechanism) | 0.0/5 | ❌ |
 | 18 | Reusability, Use Guidance, and Social Impact | 3.0/5 | ✅ |
 | 19 | Data Integrity, Provenance Graph, and Quality | 3.0/5 | ✅ |
 | 20 | Bias Documentation and Responsible AI Alignment | 5.0/5 | ✅ |

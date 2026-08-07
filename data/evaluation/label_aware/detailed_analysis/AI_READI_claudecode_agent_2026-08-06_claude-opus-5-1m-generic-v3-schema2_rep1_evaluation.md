@@ -1,27 +1,27 @@
-# Detailed Evaluation: AI_READI - CLAUDECODE_AGENT_CORE
+# Detailed Evaluation: AI_READI - CLAUDECODE_AGENT
 
-Evaluated: 2026-08-07T01:11:50.748991
-File: `data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/AI_READI_d4d_core.yaml`
+Evaluated: 2026-08-07T01:11:32.099802
+File: `data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_d4d.yaml`
 
 ## Overall Scores
 
-- **Rubric10**: 42.0/50 (84.0%)
-- **Rubric20**: 61.0/88 (69.3%)
+- **Rubric10**: 47.0/50 (94.0%)
+- **Rubric20**: 65.0/88 (73.9%)
 
 ## Rubric10 Element Scores
 
 | ID | Element | Score | Details |
 |----|---------|-------|---------|
-| 1 | Dataset Discovery and Identification | 4/5 | 4/5 sub-elements present |
+| 1 | Dataset Discovery and Identification | 5/5 | 5/5 sub-elements present |
 | 2 | Dataset Access and Retrieval | 4/5 | 4/5 sub-elements present |
-| 3 | Data Reuse and Interoperability | 3/5 | 3/5 sub-elements present |
-| 4 | Ethical Use and Privacy Safeguards | 3/5 | 3/5 sub-elements present |
+| 3 | Data Reuse and Interoperability | 4/5 | 4/5 sub-elements present |
+| 4 | Ethical Use and Privacy Safeguards | 5/5 | 5/5 sub-elements present |
 | 5 | Data Composition and Structure | 5/5 | 5/5 sub-elements present |
 | 6 | Data Provenance and Version Tracking | 5/5 | 5/5 sub-elements present |
 | 7 | Scientific Motivation and Funding Transparency | 5/5 | 5/5 sub-elements present |
 | 8 | Technical Transparency (Data Collection and Processing) | 4/5 | 4/5 sub-elements present |
 | 9 | Dataset Evaluation and Limitations Disclosure | 5/5 | 5/5 sub-elements present |
-| 10 | Cross-Platform and Community Integration | 4/5 | 4/5 sub-elements present |
+| 10 | Cross-Platform and Community Integration | 5/5 | 5/5 sub-elements present |
 
 ### Rubric10 Sub-Element Details
 
@@ -38,8 +38,8 @@ Can a user or system discover and uniquely identify this dataset?
   - Found: keywords: list (non-empty)
 - ✅ **Landing Page and Resources (page, hierarchical resources)**
   - Found: page: https://fairhub.io/datasets/3
-- ❌ **Hierarchical Structure (parent datasets, relationships)**
-  - Fields checked: parent_datasets, related_datasets
+- ✅ **Hierarchical Structure (parent datasets, relationships)**
+  - Found: related_datasets: list (non-empty)
 
 #### 2. Dataset Access and Retrieval
 
@@ -54,7 +54,7 @@ Can the dataset and its associated resources be located, accessed, and downloade
 - ✅ **Distribution Formats and File Types Specified**
   - Found: distribution_formats: list (non-empty)
 - ✅ **Related Datasets and External Resources Linked**
-  - Found: external_resources: list (non-empty)
+  - Found: related_datasets: list (non-empty)
 
 #### 3. Data Reuse and Interoperability
 
@@ -68,8 +68,8 @@ Note: Evaluate whether the dataset is designed for integration with similar data
   - Fields checked: format, encoding
 - ✅ **Schema or Ontology Conformance Stated**
   - Found: conforms_to: Clinical Dataset Structure (CDS) v0.1.1
-- ❌ **Variable Metadata with Identifiers Defined**
-  - Fields checked: variables
+- ✅ **Variable Metadata with Identifiers Defined**
+  - Found: variables: list (non-empty)
 - ✅ **Use Guidance Provided (intended, prohibited uses)**
   - Found: intended_uses: list (non-empty)
 
@@ -81,12 +81,12 @@ Does the dataset provide clear information about consent, privacy, and ethical o
   - Found: ethical_reviews: list (non-empty)
 - ✅ **Deidentification Method Described**
   - Found: is_deidentified: dict (non-empty)
-- ❌ **Privacy Protections and Re-identification Risk Assessment**
-  - Fields checked: participant_privacy, reidentification_risk
+- ✅ **Privacy Protections and Re-identification Risk Assessment**
+  - Found: participant_privacy: list (non-empty)
 - ✅ **Informed Consent Obtained from Participants**
   - Found: informed_consent: list (non-empty)
-- ❌ **Vulnerable Populations and Compensation Documented**
-  - Fields checked: vulnerable_populations, participant_compensation
+- ✅ **Vulnerable Populations and Compensation Documented**
+  - Found: participant_compensation: list (non-empty)
 
 #### 5. Data Composition and Structure
 
@@ -97,7 +97,7 @@ Can the dataset's structure, modality, and population be understood from metadat
 - ✅ **Number of Instances or Samples Reported**
   - Found: instances: list (non-empty)
 - ✅ **Variable-Level Metadata, Tabular Flag, and Data Splits**
-  - Found: is_tabular: False
+  - Found: variables: list (non-empty)
 - ✅ **Data Topics or Conditions Represented**
   - Found: instances: list (non-empty)
 - ✅ **Data Quality, Anomalies, and Missing Data Documented**
@@ -174,13 +174,13 @@ Note: For Bridge2AI datasets, citation metadata is mandatory and should include:
 - ✅ **Dataset Published on a Recognized Platform**
   - Found: publisher: https://fairhub.io/
 - ✅ **Citation and DOI for Cross-referencing**
-  - Found: doi: 10.60775/fairhub.3
+  - Found: citation: AI-READI Consortium (2025). Flagship Dataset of Type 2 Diabetes from the AI-READI Project (Version 3
 - ✅ **Community Standards or Schema Conformance**
   - Found: conforms_to: Clinical Dataset Structure (CDS) v0.1.1
 - ✅ **Outreach Materials and Documentation Links**
   - Found: external_resources: list (non-empty)
-- ❌ **Related Datasets with Typed Relationships**
-  - Fields checked: related_datasets
+- ✅ **Related Datasets with Typed Relationships**
+  - Found: related_datasets: list (non-empty)
 
 ## Rubric20 Question Scores
 
@@ -189,7 +189,7 @@ Note: For Bridge2AI datasets, citation metadata is mandatory and should include:
 
 | ID | Question | Score | Status |
 |----|----------|-------|--------|
-| 1 | Field Completeness | 3.0/5 | ✅ |
+| 1 | Field Completeness | 5.0/5 | ✅ |
 | 2 | Entry Length Adequacy | 5.0/5 | ✅ |
 | 3 | Keyword Diversity | 5.0/5 | ✅ |
 | 4 | File Enumeration and Type Variety | 0.0/5 | ❌ |
@@ -212,7 +212,7 @@ Note: For Bridge2AI datasets, citation metadata is mandatory and should include:
 | 11 | Tool and Software Transparency | 3.0/5 | ✅ |
 | 12 | Collection Protocol Clarity | 5.0/5 | ✅ |
 | 13 | Version History, Maintenance, and Sustainability | 3.0/5 | ✅ |
-| 14 | Associated Publications | 3.0/5 | ✅ |
+| 14 | Associated Publications | 5.0/5 | ✅ |
 | 15 | Human Subject Representation | 3.0/5 | ✅ |
 
 ### FAIRness & Accessibility
