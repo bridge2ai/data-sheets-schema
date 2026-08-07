@@ -182,8 +182,8 @@ classes:
         slot_uri: schema:comment
         range: string
         description: >-
-          Content about the grant that fits no dedicated slot; never invent
-          keys (#380).
+          Residual content about the grant after name, grant_number and
+          description are used (#385); never invent keys (#380).
       grant_number:
         description: "The alphanumeric identifier for the grant."
         range: string
