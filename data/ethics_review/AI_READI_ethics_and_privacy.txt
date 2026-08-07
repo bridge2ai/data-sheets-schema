@@ -1,0 +1,303 @@
+# Ethics & privacy extract — AI_READI D4D datasheet
+# Source record: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_d4d.yaml
+# Source sha256: e5dc8a12c5584b4b0bc21aba9fc62a65bea1288d9f4042662ebe3e01202bd380
+# Generated record: AI-extracted from project documentation (schema 2.0.0, run 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1)
+# Extract created: 2026-08-07
+# Slots included (19): collection_consents, collection_notifications, confidential_elements, consent_revocations, content_warnings, data_protection_impacts, ethical_reviews, human_subject_research, informed_consent, ip_restrictions, is_deidentified, license_and_use_terms, participant_compensation, participant_privacy, prohibited_uses, regulatory_restrictions, retention_limit, sensitive_elements, subpopulations
+# Values are verbatim from the record; 'source_caveats' and 'notes'
+# fields carry the record's own evidence commentary.
+
+collection_consents:
+- consent_details: Written informed consent was provided by all participants before any protocol activity.
+    For most participants, informed consent was performed remotely by computer, tablet or smart phone
+    through a link in the hardcopy invitation letter or the invitation email that directed them into the
+    REDCap database; participants who did not select electronic consent were consented in person at the
+    start of the visit, followed by completion of all questionnaires. Consent was obtained in a private
+    room by a study team member, with the opportunity to ask questions before signing and the option of
+    additional time and a scheduled follow-up discussion.
+collection_notifications:
+- notification_details: Each individual was aware of the data collection, as this was active data collection
+    directly from participants rather than passive collection or secondary use of existing data. Individuals
+    in each recruitment pool were mailed a hardcopy invitation letter and sent an invitation email, both
+    personalised to direct them into the online REDCap recruitment interface using links, access codes
+    and QR codes. Within the REDCap interface, individuals could read an overview of the research programme,
+    expectations for participation and answers to Frequently Asked Questions, download the informed consent
+    document, request a call back from study staff, complete a screening survey for qualification, and
+    enroll by signing the electronic consent. Those without internet access could call research staff
+    for alternative methods of enrolment.
+confidential_elements:
+- confidential_elements_present: false
+  confidentiality_details: The healthsheet states that the dataset does not contain data that might be
+    considered confidential and that no personally identifiable information is included in the dataset.
+consent_revocations:
+- revocation_details: Participants were permitted to withdraw consent at any time and cease study participation.
+    However, any data that had been shared or used up to that point would stay in the dataset. This is
+    clearly communicated in the consent document.
+content_warnings:
+- content_warnings_present: false
+  notes: The healthsheet answers "No" to whether the dataset contains data that, if viewed directly, might
+    be offensive, insulting, threatening, or otherwise pose any safety risk such as psychological safety
+    and anxiety.
+data_protection_impacts:
+- impact_details: No data protection impact analysis has been conducted. The v3.0.0 healthsheet answers
+    the question "Has an analysis of the potential impact of the dataset and its use on data subjects
+    (e.g., a data protection impact analysis) been conducted?" with "No, a data protection impact analysis
+    has not been conducted."
+ethical_reviews:
+- review_details: AI-READI was approved by the Institutional Review Board of the University of Washington
+    (approval number STUDY00016228), including reliance agreements with the IRBs of the University of
+    Alabama at Birmingham and the University of California, San Diego. Initial approval was received on
+    20 December 2022; the approval letter is published in the dataset documentation. Annual renewal reporting
+    on the status and progress of the study is required within 90 days of expiration.
+  reviewing_organization: University of Washington Institutional Review Board
+- notes: Through engagement with the Native Biodata Consortium, the project provides a co-learning opportunity
+    for understanding challenges specific to American Indian and Alaska Native communities and for evaluating
+    tools such as data usage agreements, contract negotiations, transparent access agreements and forms
+    of assured return of benefit and sustainable input, control and monitoring of Tribal data.
+  review_details: Ethical, legal and social implications are considered at every stage of the project
+    cycle, with guidance from bioethicists; the project reviewed existing documentation approaches such
+    as datasheets and healthsheets to identify the most suitable one for biomedical data, and implements
+    a robust data dissemination system, a strict licence agreement and data watermarking for both public
+    and controlled sets to prevent re-identification attempts.
+human_subject_research:
+  ethics_review_board: Institutional Review Board of the University of Washington, with reliance agreements
+    with the IRBs of the University of Alabama at Birmingham and the University of California, San Diego.
+  involves_human_subjects: true
+  irb_approval:
+  - STUDY00016228, University of Washington Institutional Review Board; initial approval received 20 December
+    2022, with the approval letter published at https://docs.aireadi.org/v3/Approval_STUDY00016228_Lee_initial.pdf.
+    An annual renewal application reporting the status and progress of the study is required and due within
+    90 days of expiration.
+  notes: The BMJ Open protocol refers to the same number, STUDY00016228, as a "Clinicaltrials.org approval
+    number".
+  regulatory_compliance:
+  - The FAIRhub study description oversight module records the study as not FDA-regulated for either drug
+    or device, with human subject review status "Submitted, approved" and no Data Monitoring Committee.
+    Written informed consent is provided by all participants. The study is registered on ClinicalTrials.gov
+    as NCT06002048.
+  special_populations:
+  - Adults aged 40 years or older (maximum 85 years per the FAIRhub eligibility module) with and without
+    type 2 diabetes, who are able to provide consent and who speak and read English. Pregnancy, gestational
+    diabetes and type 1 diabetes are exclusionary, so pregnant women are not enrolled; children are not
+    enrolled.
+informed_consent:
+- consent_documentation: The approved consent form for the principal project site, the University of Washington,
+    is published at https://docs.aireadi.org/v3/AI-READI%20Consent_Form_Standard_Mod17May2023_useforpilot.pdf.
+    The other clinical sites had IRB reliance and used the same consent form, with minor institution-specific
+    language incorporated depending on individual institutional requirements (for example, the State of
+    California requires inclusion of the Bill of Rights in the UCSD consent form). Once signed, the electronic
+    consent form is automatically emailed to the participant, who may request an additional copy from
+    the study coordinator for the duration of the study.
+  consent_obtained: true
+  consent_scope: Consent covered participation in the full study protocol, banking of biospecimens for
+    future research, and placement of data in an open-source repository. Informed consent to participate
+    was required before participation in any part of the protocol, including questionnaires. The dataset
+    consent metadata records that the public version of the dataset can only be used for type 2 diabetes
+    related research while a private version will allow for more generic use.
+  consent_type: Written informed consent, obtained either electronically (e-consent signed in REDCap before
+    the visit) or in person at the start of the visit for participants who did not select the electronic
+    option.
+  notes: Potential participants could read all consent documentation electronically before their visit
+    and give consent with an electronic signature without verbal communication with a clinical research
+    coordinator, or could decide at that point not to participate or to request additional information.
+    No study-specific questionnaires other than the screening questionnaire were available to participants
+    until consent was given.
+  withdrawal_mechanism: Participants were permitted to withdraw consent at any time and cease study participation;
+    however, any data that had been shared or used up to that point would stay in the dataset, and this
+    is clearly communicated in the consent document.
+ip_restrictions:
+  notes: Transcribed from the AI-READI Data License Agreement v1.0. The healthsheet answers the question
+    about third-party IP-based restrictions by referring to the license.
+  restrictions:
+  - Title to the data, and all industrial and intellectual property rights therein, remain solely and
+    exclusively with the licensor (University of Washington) and its suppliers; the licensee shall not
+    take any action inconsistent with such ownership and any rights not expressly granted are reserved.
+  - The licensee shall not transfer, license, sublicense, sell, assign, display, share or otherwise convey
+    any portion of the data or any derivative work to any third party other than another licensee bound
+    by an agreement on identical terms.
+  - Licensees must acknowledge the source and any funder of the data in any publications reporting use
+    of the data, following the citation instructions in the dataset documentation.
+is_deidentified:
+  deidentification_details: 'The FAIRhub dataset_description records deIdentType "NoDeIdentification"
+    with deIdentDirect and deIdentHIPAA both true and deIdentDates, deIdentNonarr and deIdentKAnon all
+    false: no identifiers were collected, so no active de-identification was necessary, but the team checked
+    that no identifiable data per US HIPAA were present in the data. The Nature Metabolism comment describes
+    the public set as stripped of Protected Health Information as defined by the HIPAA Privacy Rule via
+    the "Safe Harbor" method. The data in the public v3.0.0 release contain no protected health information.
+    Information related to the sex and race/ethnicity of the participants, as well as medications used,
+    has also been removed, in the case of sex and race/ethnicity to prevent stigmatization of findings.
+    More sensitive variables (5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health
+    records, medications, and traffic and accident reports) are retained in a controlled-access dataset
+    available only to scientists whose institutions have completed legal and privacy use agreements with
+    the AI-READI research programme. Raw data are not shared because they may accidentally include personal
+    health information or personally identifiable information, for example in free-text fields.'
+  identifiable_elements_present: false
+  identifiers_removed: Protected Health Information as defined by the HIPAA Privacy Rule (Safe Harbor
+    method); Sex; Race and ethnicity; Medication information.
+  method: HIPAA Safe Harbor verification; no direct identifiers collected
+  notes: The healthsheet questions asking whether measures were taken to avoid re-identification and whether
+    there was any pre-processing for de-identification of the patients were left unanswered in the v3.0.0
+    record.
+license_and_use_terms:
+  contact_person: Aaron Lee, MD, central contact for the study, contact@aireadi.org; general contact form
+    at https://aireadi.org/contact.
+  data_use_permission: disease_specific_research
+  license_terms: Version 3.0.0 is released under a custom license, "AI-READI custom license v2.0" (https://doi.org/10.5281/zenodo.17555036),
+    specifically tailored to enable reuse of the AI-READI dataset (and other clinical datasets) for commercial
+    or research purposes while placing strong requirements around data usage, security and secondary sharing
+    to protect study participants, especially when data are reused for artificial intelligence and machine
+    learning applications. The corresponding v1.0 license text present in the source bundle (University
+    of Washington Data License Agreement, Zenodo 10.5281/zenodo.10642459) grants a non-exclusive, non-transferable
+    license to download, reproduce and use the data and create derivative works for research and commercial
+    purposes; forbids conveying any portion of the data or derivative works to third parties other than
+    another identically bound licensee; permits distribution of models trained on the data provided they
+    do not contain the data and provided reasonable efforts are made to minimise memorisation or reconstruction;
+    forbids clinical treatment decisions based on the data; forbids re-identification or contact of data
+    subjects; requires compliance with NIH Genomic Data Sharing Policy security and privacy standards;
+    requires acknowledgement of the source and funder in publications; provides the data "as is" without
+    warranty; limits the licensor's aggregate liability to one US dollar; requires indemnification of
+    the licensor; and terminates automatically on any breach, after which the licensee must delete all
+    copies.
+  notes: 'Access to the dataset requires several steps: logging in through a verified ID system; agreeing
+    to use the data only for type 2 diabetes related research; and agreeing to the license terms. The
+    FAIRhub record labels the license "Health Data License" and the dataset accessType is "PublicDownloadSelfAttestationRequired".
+    The license additionally requires acknowledgement of the source and any funder of the data in publications
+    reporting use of the data, a condition that corresponds to the "publication_required" permission category
+    as well as the recorded disease-specific restriction; only one value could be recorded in data_use_permission.
+    The BMJ Open protocol describes an additional controlled-access set containing all publicly available
+    data plus more sensitive data, available only to scientists whose institutions have completed legal
+    and privacy use agreements with the AI-READI research programme, with requirements set by a Data Access
+    Committee.'
+participant_compensation:
+- compensation_amount: USD 200
+  compensation_provided: true
+  compensation_rationale: Compensation for the burden of the study visit, which lasts 2.5-4 hours, plus
+    a subsequent 10-day at-home monitoring period and return of the study devices.
+  compensation_type: Monetary stipend, plus reimbursement of reasonable travel costs
+  notes: The healthsheet states that study subjects received a compensation of $200 for the study visit,
+    funded through the grant. The UW IRB protocol form states that the $200 stipend is provided when the
+    final data are received from participants and the study devices are returned, typically at least two
+    weeks after the study visit, that the payment is not prorated, and that the study covers reasonable
+    costs for parking, public transit or rideshare fees related to the study visit; the same type and
+    amount of compensation applies to participants asked to return in year 4. Costs for transport exceeding
+    $25 may not be reimbursed. Study staff effort was supported by NIH award OT2OD032644 according to
+    percentage of effort, with salaries aligned to the funding guidelines at each site.
+participant_privacy:
+- anonymization_method: No identifiers were collected, so no active de-identification was necessary; the
+    team verified that no data identifiable per US HIPAA were present. The public release is stripped
+    of Protected Health Information via the HIPAA Safe Harbor method and additionally of sex, race/ethnicity
+    and medication information.
+  data_linkage: Within the released dataset, records are linked across datatypes only by the participant's
+    study ID number, which names the participant folder in each device directory; no direct identifiers
+    are released alongside the data.
+  privacy_techniques: HIPAA Safe Harbor removal and verification of Protected Health Information; removal
+    of sex and race/ethnicity from the public set to prevent stigmatization of findings; removal of medication
+    information from the public set; a two-tier release model in which more sensitive variables are available
+    only in a controlled-access dataset requiring completed legal and privacy use agreements; data watermarking
+    for both the public and controlled sets; a robust data dissemination system with a strict licence
+    agreement, verified-ID login and self-attestation before download; selection of at-home monitoring
+    devices that do not capture video or audio, are not equipped with GPS location monitoring and are
+    not synced with participant-owned devices.
+  reidentification_risk: A theoretical risk of future re-identification is acknowledged. AI algorithms
+    can infer individual patient characteristics and could facilitate individual-level identification;
+    to prevent re-identification attempts the project implements a robust data dissemination system, a
+    strict licence agreement and data watermarking for both public and controlled sets. The license further
+    prohibits any attempt to identify or contact data subjects or to establish their membership in a particular
+    group.
+prohibited_uses:
+- notes: Transcribed from the University of Washington AI-READI Data License Agreement v1.0 (Zenodo record
+    10.5281/zenodo.10642459), which is the only license text present in the source bundle. Version 3.0.0
+    of the dataset is distributed under "AI-READI custom license v2.0" (https://doi.org/10.5281/zenodo.17555036),
+    whose text is not present in the bundle, so it cannot be established from the bundle that this clause
+    carries forward unchanged into v2.0.
+  prohibition_reason: Licensees shall not make clinical treatment decisions based on the data, as it is
+    intended solely as a research resource (AI-READI Data License Agreement v1.0, section 3(i)).
+- notes: Transcribed from the University of Washington AI-READI Data License Agreement v1.0 (Zenodo record
+    10.5281/zenodo.10642459), which is the only license text present in the source bundle. Version 3.0.0
+    of the dataset is distributed under "AI-READI custom license v2.0" (https://doi.org/10.5281/zenodo.17555036),
+    whose text is not present in the bundle, so it cannot be established from the bundle that this clause
+    carries forward unchanged into v2.0.
+  prohibition_reason: Licensees shall not use or attempt to use the data, alone or in concert with other
+    information, to compromise or otherwise infringe the confidentiality of information on an individual
+    data subject or their right to privacy, to identify or contact any individual data subject or group
+    of data subjects, to extract or extrapolate identifying information, to establish a particular data
+    subject's membership in a particular group of persons, or otherwise to cause harm or injury to any
+    data subject (section 3(ii)).
+- notes: Transcribed from the University of Washington AI-READI Data License Agreement v1.0 (Zenodo record
+    10.5281/zenodo.10642459), which is the only license text present in the source bundle. Version 3.0.0
+    of the dataset is distributed under "AI-READI custom license v2.0" (https://doi.org/10.5281/zenodo.17555036),
+    whose text is not present in the bundle, so it cannot be established from the bundle that this clause
+    carries forward unchanged into v2.0.
+  prohibition_reason: Licensees shall not transfer, license, sublicense, sell, assign, display, share
+    or otherwise convey any portion of the data or any derivative work to any third party other than another
+    licensee bound by an agreement with the licensor on identical terms (section 2).
+- notes: Transcribed from the University of Washington AI-READI Data License Agreement v1.0 (Zenodo record
+    10.5281/zenodo.10642459), which is the only license text present in the source bundle. Version 3.0.0
+    of the dataset is distributed under "AI-READI custom license v2.0" (https://doi.org/10.5281/zenodo.17555036),
+    whose text is not present in the bundle, so it cannot be established from the bundle that this clause
+    carries forward unchanged into v2.0.
+  prohibition_reason: Licensees shall not disseminate models developed from the data without first undertaking
+    all reasonable efforts to minimise the likelihood that data can be memorized, derived, reconstructed
+    or reconstituted through the use or construction of such models (section 2).
+regulatory_restrictions:
+  confidentiality_level: restricted
+  hipaa_compliant: compliant
+  notes: The public dataset is stripped of Protected Health Information as defined by the HIPAA Privacy
+    Rule using the Safe Harbor method, and the project verified that no data identifiable per US HIPAA
+    were present. The healthsheet answers the question about export controls and other regulatory restrictions
+    by referring to the license. Requirements for the controlled-access dataset were being developed by
+    a Data Access Committee at the time of the BMJ Open protocol publication.
+  regulatory_restrictions:
+  - The licensee agrees to comply with all data security and privacy standards established by the US National
+    Institutes of Health under its Genomic Data Sharing (GDS) Policy from time to time, including the
+    NIH Security Best Practices for Controlled-Access Data Subject to the NIH GDS Policy.
+  - The licensee agrees to comply with all applicable laws, regulations and restrictions relating to the
+    distribution and use of the data and of models developed from it.
+retention_limit:
+  retention_details: There are no limits on the retention of the data associated with the instances; participants
+    were not told that their data would be retained only for a fixed period and then deleted.
+sensitive_elements:
+- sensitive_elements_present: true
+  sensitivity_details: Race and ethnic origin (self-reported). Not included in the public dataset; available
+    only in the controlled-access dataset.
+- sensitive_elements_present: true
+  sensitivity_details: Biological sex. Removed from the public dataset to prevent stigmatization of findings;
+    available only in the controlled-access dataset.
+- sensitive_elements_present: true
+  sensitivity_details: Location data in the form of 5-digit zip code. Held under controlled access only.
+- sensitive_elements_present: true
+  sensitivity_details: Genetic sequencing data. Held under controlled access only; genomic DNA is extracted
+    from banked buffy coats for future studies such as whole genome sequencing.
+- sensitive_elements_present: true
+  sensitivity_details: Past health records and current medications (recorded with RxNorm codes). Held
+    under controlled access only.
+- sensitive_elements_present: true
+  sensitivity_details: Motor vehicle traffic and accident reports, including driving record and accident
+    reports obtained for the previous three years. Held under controlled access only.
+subpopulations:
+- distribution: 'Aggregate counts documented in the v3.0.0 README recommended-split table for all 2,280
+    participants: Hispanic 380, Asian 545, Black 519, White 836. Within the recommended split the training
+    set contains Hispanic 204, Asian 369, Black 343, White 660, while the validation and test sets each
+    contain 88 participants in each of the four groups.'
+  identification: Self-reported race/ethnicity in four groups (Asian, Black, Hispanic, White) is collected
+    at screening but is withheld from the public dataset and released only under controlled access, so
+    the public release does not identify this demographic sub-population at the instance level.
+  notes: The Nature Metabolism comment states that information related to sex and race/ethnicity is stripped
+    from the public set to prevent stigmatization of findings.
+  subpopulation_elements_present: false
+- distribution: 'Aggregate counts for all 2,280 participants: male 951, female 1,329. Training set male
+    599, female 977; validation set male 176, female 176; test set male 176, female 176.'
+  identification: Biological sex (male, female) is collected at screening but is withheld from the public
+    dataset and released only under controlled access.
+  subpopulation_elements_present: false
+- distribution: 'Aggregate counts for all 2,280 participants: no diabetes 776, lifestyle 560, oral 686,
+    insulin 258. Training set 600/384/487/105; validation set 88/88/109/67; test set 88/88/90/86.'
+  identification: 'Diabetes status group in four categories used to balance the cohort: no diabetes; pre-diabetes
+    or type 2 diabetes controlled by lifestyle adjustments; type 2 diabetes controlled by oral or non-insulin
+    injectable medications; and insulin-controlled type 2 diabetes.'
+  subpopulation_elements_present: true
+- distribution: 'Mean age in years for the v3.0.0 cohort: overall 60.8 +/- 11.3; training set 61.1 +/-
+    11.3; validation set 60.3 +/- 10.8; test set 60.5 +/- 11.4.'
+  identification: Age of participants (inclusion criterion 40 years or older; the FAIRhub eligibility
+    module records a maximum age of 85 years).
+  subpopulation_elements_present: true
