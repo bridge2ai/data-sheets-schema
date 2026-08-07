@@ -147,7 +147,6 @@ classes:
           privacy, k-anonymity, data masking)?
         slot_uri: d4d:privacyTechniques
         range: string
-        multivalued: true
       data_linkage:
         description: >
           Can this dataset be linked to other datasets in ways that might
@@ -215,7 +214,6 @@ classes:
           How was developmentally appropriate assent obtained?
         slot_uri: d4d:assentProcedures
         range: string
-        multivalued: true
       guardian_consent:
         description: >
           For participants unable to provide their own consent, how was

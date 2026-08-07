@@ -5020,7 +5020,6 @@
         "SamplingStrategy"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5558,7 +5557,6 @@
         "Deidentification"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6496,7 +6494,6 @@
         "AnnotationAnalysis"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6540,7 +6537,6 @@
         "MachineAnnotationTools"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6625,7 +6621,6 @@
         "UseRepository"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -6931,7 +6926,6 @@
         "Erratum"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7539,7 +7533,6 @@
         "ParticipantPrivacy"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7690,7 +7683,6 @@
         "AtRiskPopulations"
       ],
       "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -7761,7 +7753,6 @@
         "LicenseAndUseTerms"
       ],
       "range": "DataUsePermissionEnum",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -8249,7 +8240,6 @@
         "FileCollection"
       ],
       "range": "FileCollectionTypeEnum",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -10329,7 +10319,6 @@
           "description": "One or more sampling strategies used (e.g., deterministic, simple random, stratified, cluster, systematic).\n",
           "slot_uri": "d4d:strategies",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -10878,7 +10867,6 @@
           "description": "List of identifier types removed during de-identification (e.g., 'name', 'date of birth', 'SSN', 'email address', 'geographic subdivision').",
           "slot_uri": "d4d:removedIdentifierTypes",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -11768,7 +11756,6 @@
           "description": "Additional details on annotation quality assessment and findings.\n",
           "slot_uri": "d4d:annotationQualityDetails",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -11819,7 +11806,6 @@
           "description": "Descriptions of what each tool does in the annotation process and what types of annotations it produces. Should correspond to the tools list.\n",
           "slot_uri": "d4d:toolDescriptions",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -11911,7 +11897,6 @@
           "description": "Free-text description of the repository of known dataset uses, including how it is maintained and how to contribute new use cases.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12305,7 +12290,6 @@
           "description": "Free-text description of the error, its scope, the affected data or records, and the correction applied.\n",
           "slot_uri": "dcterms:description",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -12913,7 +12897,6 @@
           "description": "What privacy-preserving techniques were applied (e.g., differential privacy, k-anonymity, data masking)?\n",
           "slot_uri": "d4d:privacyTechniques",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -13038,7 +13021,6 @@
           "description": "For research involving minors, what assent procedures were used? How was developmentally appropriate assent obtained?\n",
           "slot_uri": "d4d:assentProcedures",
           "range": "string",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -13104,7 +13086,6 @@
           ],
           "slot_uri": "DUO:0000001",
           "range": "DataUsePermissionEnum",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -13585,7 +13566,6 @@
           "description": "Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed.",
           "slot_uri": "d4d:collectionType",
           "range": "FileCollectionTypeEnum",
-          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -13628,7 +13608,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-08-06T12:37:37",
   "source_file_size": 32488,
-  "generation_date": "2026-08-06T15:34:46",
+  "generation_date": "2026-08-06T20:21:35",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

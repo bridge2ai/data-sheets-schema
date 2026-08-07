@@ -65,7 +65,6 @@ classes:
           disease-specific research) and restrictions (e.g., non-commercial use,
           ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO.
         range: DataUsePermissionEnum
-        multivalued: true
         slot_uri: DUO:0000001
         exact_mappings:
           - DUO:0000001

@@ -7371,7 +7371,6 @@ classes:
         domain_of:
         - SamplingStrategy
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -12388,7 +12387,6 @@ classes:
         domain_of:
         - Deidentification
         range: string
-        multivalued: true
       deidentification_details:
         name: deidentification_details
         annotations:
@@ -19311,7 +19309,6 @@ classes:
         domain_of:
         - AnnotationAnalysis
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -19769,7 +19766,6 @@ classes:
         domain_of:
         - MachineAnnotationTools
         range: string
-        multivalued: true
       tool_accuracy:
         name: tool_accuracy
         annotations:
@@ -20666,7 +20662,6 @@ classes:
         domain_of:
         - UseRepository
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -25078,7 +25073,6 @@ classes:
         domain_of:
         - Erratum
         range: string
-        multivalued: true
       id:
         name: id
         annotations:
@@ -30572,7 +30566,6 @@ classes:
         domain_of:
         - ParticipantPrivacy
         range: string
-        multivalued: true
       data_linkage:
         name: data_linkage
         description: 'Can this dataset be linked to other datasets in ways that might
@@ -31523,7 +31516,6 @@ classes:
         domain_of:
         - AtRiskPopulations
         range: string
-        multivalued: true
       guardian_consent:
         name: guardian_consent
         description: 'For participants unable to provide their own consent, how was
@@ -31995,7 +31987,6 @@ classes:
         domain_of:
         - LicenseAndUseTerms
         range: DataUsePermissionEnum
-        multivalued: true
       contact_person:
         name: contact_person
         description: Contact person for licensing questions. Provides structured contact
