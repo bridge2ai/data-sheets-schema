@@ -17,6 +17,7 @@ tell the agent to read the corresponding command file before execution.
 /d4d-full-core    # Model-neutral four-phase full/core production workflow
 /d4d-assistant    # Assistant approach following workflow methodology
 /d4d-webfetch     # Live URL fetching with WebFetch + ARTL
+/d4d-deep-research # Monarch deep-research client over input docs (research-augmented arm)
 /d4d-add-mapping  # Add D4D ↔ RO-Crate SSSOM mappings for new classes
 ```
 
