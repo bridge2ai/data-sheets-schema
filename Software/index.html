@@ -306,7 +306,7 @@
 <tr>
 <td><a href="../notes/">notes</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>Content from the source material that belongs to this entity but fits no dedi...</td>
+<td>Residual content only, after every fitting slot is used — structured slots fi...</td>
 <td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
 </tbody>
@@ -913,9 +913,9 @@ attributes:
     range: string
   notes:
     name: notes
-    description: Content from the source material that belongs to this entity but
-      fits no dedicated slot. Use this rather than inventing keys the schema does
-      not declare (#380).
+    description: Residual content only, after every fitting slot is used — structured
+      slots first, then description; notes solely for what description cannot hold
+      (#385). Never invent keys (#380).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:comment

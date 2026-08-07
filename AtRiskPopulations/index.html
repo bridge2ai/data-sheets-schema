@@ -326,7 +326,7 @@
 <tr>
 <td><a href="../notes/">notes</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>Content from the source material that belongs to this property but fits no de...</td>
+<td>Residual content only, after every fitting slot is used (#385): structured sl...</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
@@ -573,11 +573,11 @@ attributes:
     range: string
   notes:
     name: notes
-    description: 'Content from the source material that belongs to this property but
-      fits no dedicated slot. The escape hatch that makes inventing keys unnecessary:
-      put the fact here with enough context to be findable, rather than adding fields
-      the schema does not declare (#380 — undeclared keys were the corpus''s third-largest
-      failure class).'
+    description: 'Residual content only, after every fitting slot is used (#385):
+      structured slots first, description as the default home for narrative, notes
+      last — solely for content description cannot hold. Never a restatement of a
+      sibling slot''s value, and never a substitute for inventing keys the schema
+      does not declare (#380).'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:comment
     alias: notes
