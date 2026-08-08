@@ -32,10 +32,55 @@ class TestD4DPairConsistency(unittest.TestCase):
     def setUpClass(cls):
         cls.pair_schema = load_pair_schema(FULL_SCHEMA, CORE_SCHEMA)
 
+    #: Every slot `Dataset` and `CoreDataset` share with an identical value
+    #: signature. Named rather than counted (#407): the assertion used to be
+    #: `assertEqual(76, len(...))`, which said nothing about *which* slots, so
+    #: a change that removed one and added another would have passed. It also
+    #: gave no clue what had happened when it did fail.
+    #:
+    #: Went 76 -> 78 when `notes` and `source_caveats` were added to the base
+    #: class in f192c34f (#385). Both are genuinely shared and genuinely
+    #: identical, so the count was stale rather than the schema wrong.
+    EXPECTED_IDENTITY_SLOTS = (
+    'acquisition_methods', 'addressing_gaps', 'annotation_analyses',
+    'anomalies', 'at_risk_populations', 'cleaning_strategies',
+    'collection_mechanisms', 'collection_timeframes', 'compression',
+    'confidential_elements', 'conforms_to', 'conforms_to_class',
+    'conforms_to_schema', 'content_warnings', 'created_by',
+    'created_on', 'creators', 'data_collectors',
+    'data_protection_impacts', 'description', 'discouraged_uses',
+    'distribution_dates', 'distribution_formats', 'doi',
+    'download_url', 'errata', 'ethical_reviews', 'existing_uses',
+    'extension_mechanism', 'external_resources', 'funders',
+    'future_use_impacts', 'human_subject_research', 'id',
+    'imputation_protocols', 'informed_consent', 'instances',
+    'intended_uses', 'ip_restrictions', 'is_deidentified',
+    'is_tabular', 'issued', 'keywords', 'known_biases',
+    'known_limitations', 'labeling_strategies', 'language',
+    'last_updated_on', 'license', 'license_and_use_terms',
+    'machine_annotation_tools', 'maintainers',
+    'missing_data_documentation', 'modified_by', 'name', 'notes',
+    'other_tasks', 'page', 'preprocessing_strategies',
+    'prohibited_uses', 'publisher', 'purposes', 'raw_data_sources',
+    'raw_sources', 'regulatory_restrictions', 'retention_limit',
+    'sampling_strategies', 'sensitive_elements', 'source_caveats',
+    'status', 'subpopulations', 'tasks', 'title', 'updates',
+    'use_repository', 'version', 'version_access',
+    'was_derived_from'
+    )
+
     def test_schema_derives_identity_and_projected_slots(self):
-        self.assertEqual(76, len(self.pair_schema.identity_slots))
-        self.assertIn("description", self.pair_schema.identity_slots)
+        self.assertEqual(self.EXPECTED_IDENTITY_SLOTS,
+                         tuple(sorted(self.pair_schema.identity_slots)))
         self.assertEqual(("resources",), self.pair_schema.projected_slots)
+
+    def test_the_evidence_channel_slots_are_shared(self):
+        """#385 added `notes` and `source_caveats` to the base class, which is
+        what moved the count. Pinned separately so that if they are ever
+        removed from one class only, the failure names the cause."""
+        for slot in ("notes", "source_caveats", "description"):
+            with self.subTest(slot=slot):
+                self.assertIn(slot, self.pair_schema.identity_slots)
 
     def test_identical_shared_content_passes(self):
         full = {

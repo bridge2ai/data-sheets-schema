@@ -493,6 +493,59 @@ class TestProvenanceModeReportingAndArchive(unittest.TestCase):
                 f"{Path(src).parent.parent.name}/{Path(src).parent.name}/"
                 f"{Path(src).name}"))
 
+    def test_the_archive_note_appends_rather_than_clobbering(self):
+        """#408: it used to `write_text` the whole file, so every archiving run
+        destroyed the record of the one before it. Four invocations left a
+        README describing only the fourth, and the rationale for the runs
+        archived earlier — the thing the file exists to carry — was gone."""
+        import tempfile
+        from data_sheets_schema.runs import _write_archive_note
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            first = [(root / "a.yaml", root / "m" / "label-one" / "a.yaml")]
+            second = [(root / "b.yaml", root / "m" / "label-two" / "b.yaml")]
+            _write_archive_note(root, first, "first reason")
+            _write_archive_note(root, second, "second reason")
+            text = (root / "README.md").read_text()
+
+        self.assertIn("first reason", text, "the earlier reason was destroyed")
+        self.assertIn("second reason", text)
+        self.assertIn("label-one/a.yaml", text)
+        self.assertIn("label-two/b.yaml", text)
+        self.assertEqual(1, text.count("# Archived runs"),
+                         "the preamble must not repeat per invocation")
+
+    def test_the_archive_note_counts_files_and_directories_separately(self):
+        """The heading said "N run directories" while N counted files, so an
+        archive of 9 files in 2 directories read as 9 directories."""
+        import tempfile
+        from data_sheets_schema.runs import _write_archive_note
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            moved = [(root / "x", root / "m" / "one" / "a.yaml"),
+                     (root / "y", root / "m" / "one" / "b.yaml"),
+                     (root / "z", root / "m" / "two" / "c.yaml")]
+            _write_archive_note(root, moved, "r")
+            text = (root / "README.md").read_text()
+
+        self.assertIn("3 file(s) in 2 run directories", text)
+
+    def test_the_archive_note_names_the_method_not_just_the_label(self):
+        """`claudecode_agent` and `claudecode_agent_core` hold the same label,
+        so the last two path segments alone do not identify the file."""
+        import tempfile
+        from data_sheets_schema.runs import _write_archive_note
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            moved = [(root / "x", root / "claudecode_agent_core" / "lbl" / "a.yaml")]
+            _write_archive_note(root, moved, "r")
+            text = (root / "README.md").read_text()
+
+        self.assertIn("claudecode_agent_core/lbl/a.yaml", text)
+
     def test_dry_run_moves_nothing(self):
         from data_sheets_schema.runs import archive_runs
         before = sorted(Path("data/d4d_concatenated").rglob("*_d4d.yaml"))
