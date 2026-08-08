@@ -1151,6 +1151,18 @@ def _prune(dirs: list[Path]) -> None:
                 d.rmdir()
 
 
+_ARCHIVE_PREAMBLE = (
+    "# Archived runs\n"
+    "\nReal generations, moved out of `data/d4d_concatenated/` so `discover()`"
+    "\nno longer finds them. Nothing was deleted, and the layout is preserved,"
+    "\nso restoring is the same move reversed:\n"
+    "\n```bash\nd4d runs restore --label <LABEL> --execute\n```\n"
+    "\nOne section per archiving run, appended in order. The reason is a claim"
+    "\nabout the runs it names and only about those, so the sections are kept"
+    "\nseparate rather than merged into a running total.\n"
+)
+
+
 def _write_archive_note(root: Path, moved: list[tuple[Path, Path]],
                         reason: str) -> None:
     """Say why these runs were archived, at the place they were archived to.
@@ -1158,14 +1170,35 @@ def _write_archive_note(root: Path, moved: list[tuple[Path, Path]],
     Without it an ATTIC directory is indistinguishable from abandoned output,
     and the reason for archiving — which is a claim about the runs — is exactly
     what a later reader needs and cannot reconstruct.
+
+    Appends. This used to `write_text` the whole file, so every archiving run
+    silently destroyed the record of the one before it: four invocations under
+    #408 left a README describing only the fourth, and the rationale for the
+    2026-04 and 2026-07-23 series — the thing the file exists to carry — was
+    gone. A note that documents only the most recent write is worse than none,
+    because it reads as complete.
     """
-    lines = [f"# Archived runs\n", f"\n{reason}\n",
-             "\nThese are real generations, moved out of `data/d4d_concatenated/`",
-             "\nso `discover()` no longer finds them. Nothing was deleted, and the",
-             "\nlayout is preserved, so restoring is the same move reversed:\n",
-             "\n```bash\nd4d runs restore --label <LABEL> --execute\n```\n",
-             f"\n## Contents ({len(moved)} run directories)\n\n"]
+    from datetime import date
+
+    dirs = sorted({dest.parent for _, dest in moved})
+    heading = (f"{len(moved)} file(s) in {len(dirs)} run "
+               f"director{'y' if len(dirs) == 1 else 'ies'}")
+    section = [f"\n## Archived {date.today().isoformat()} — {heading}\n",
+               f"\n{reason}\n\n"]
     for _, dest in sorted(moved, key=lambda t: str(t[1])):
-        lines.append(f"- `{dest.parent.name}/{dest.name}`\n")
+        # Relative to the archive root, not just the last two segments: the
+        # method directory is what distinguishes `claudecode_agent` from
+        # `claudecode_agent_core`, and both hold the same label.
+        try:
+            shown = dest.relative_to(root)
+        except ValueError:
+            shown = Path(dest.parent.name) / dest.name
+        section.append(f"- `{shown}`\n")
+
     root.mkdir(parents=True, exist_ok=True)
-    (root / "README.md").write_text("".join(lines), encoding="utf-8")
+    path = root / "README.md"
+    existing = path.read_text(encoding="utf-8") if path.exists() else ""
+    if not existing.strip():
+        existing = _ARCHIVE_PREAMBLE
+    path.write_text(existing.rstrip("\n") + "\n" + "".join(section),
+                    encoding="utf-8")
