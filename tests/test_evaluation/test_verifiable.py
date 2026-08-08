@@ -44,6 +44,31 @@ class TestDateRenderings(unittest.TestCase):
         which is the safer direction for a check whose signal is absence."""
         self.assertNotIn("june 2026", renderings("iso_date", "2026-06-17"))
 
+    def test_abbreviated_months_are_rendered(self):
+        """#404. PhysioNet writes "Aug. 18, 2025", Dataverse "Aug 18, 2025".
+        Generating only the full name reported 11 dates as invented on the
+        2026-08-07 sweep that the bundles plainly carried."""
+        r = renderings("iso_date", "2025-08-18")
+        for form in ("aug. 18, 2025", "aug 18, 2025", "august 18, 2025"):
+            self.assertIn(form, r)
+
+    def test_september_gets_its_four_letter_abbreviation(self):
+        """"Sept." is commoner than "Sep." and is what PhysioNet uses."""
+        r = renderings("iso_date", "2025-09-03")
+        self.assertIn("sept. 3, 2025", r)
+        self.assertIn("sep. 3, 2025", r)
+
+    def test_may_is_not_given_a_spurious_abbreviation(self):
+        r = renderings("iso_date", "2026-05-01")
+        self.assertNotIn("may. 1, 2026", r)
+        self.assertIn("may 1, 2026", r)
+
+    def test_abbreviation_cannot_equate_two_different_dates(self):
+        """Widening the month form is safe because day and year still have to
+        match; the risk would be a rendering that names a different date."""
+        r = renderings("iso_date", "2025-08-18")
+        self.assertFalse([x for x in r if "17" in x or "2024" in x])
+
     def test_a_malformed_date_degrades_to_the_literal(self):
         self.assertEqual(renderings("iso_date", "not-a-date"), ["not-a-date"])
 
@@ -180,13 +205,36 @@ class TestAgainstTheCorpus(unittest.TestCase):
                 if stated:
                     self.assertEqual(grounded, stated)
 
-    def test_the_known_voice_finding_is_still_detected(self):
-        """VOICE rep2 states three release dates absent from its bundle in any
-        format. This is the check's first real positive; if it stops firing,
-        the checker has been broken rather than the record fixed."""
+    def test_the_supposed_voice_finding_was_a_false_positive(self):
+        """This test used to assert the opposite, and was wrong (#404).
+
+        It claimed VOICE rep2 stated three release dates "absent from its
+        bundle in any format" and called them the check's first real positive.
+        All three are in the bundle, abbreviated: `Aug. 18, 2025` (3
+        occurrences), `Dec. 16, 2025` (4) and `Dec. 17, 2025` (1). The check
+        generated only full month names, so it could not see them, and the
+        test then froze that blindness in place as the expected behaviour.
+
+        Kept, inverted, as the regression guard: if these three are ever
+        reported ungrounded again, month abbreviation has regressed.
+        """
         r = self._check("VOICE", 2)
         missing = {c.value for c in r.ungrounded if c.kind == "iso_date"}
-        self.assertTrue({"2025-08-18", "2025-12-16", "2025-12-17"} <= missing)
+        self.assertEqual(set(), {"2025-08-18", "2025-12-16",
+                                 "2025-12-17"} & missing)
+
+    def test_a_date_absent_by_construction_is_still_reported(self):
+        """The true-positive case the corpus test was supposed to cover.
+
+        Absence is constructed here rather than assumed of a real bundle, so
+        the assertion cannot quietly become a statement about the matcher's
+        blind spots instead of about the record.
+        """
+        bundle = "Released Aug. 18, 2025 and Dec. 16, 2025."
+        r = check_record({"issued": "2025-08-18"}, bundle, skip_slots=set())
+        self.assertEqual(1, r.grounded)
+        r = check_record({"issued": "2024-03-09"}, bundle, skip_slots=set())
+        self.assertEqual(0, r.grounded)
 
     def test_no_record_falls_below_the_measured_floor(self):
         """Guards against a normalisation regression reintroducing false
@@ -200,7 +248,14 @@ class TestAgainstTheCorpus(unittest.TestCase):
                         # false groundings and the corpus moved 87.3% -> 79.9%;
                         # a floor set against the inflated figure would fail on
                         # the honest one.
-                        self.assertGreaterEqual(r.rate, 0.70)
+                        #
+                        # Raised to 0.80 in #404, once trailing-slash URLs and
+                        # abbreviated months stopped being read as invented.
+                        # The lowest record on this label is now CHORUS rep3 at
+                        # 0.864. 0.80 leaves room for a record that genuinely
+                        # overstates its bundle without leaving so much slack
+                        # that a matcher regression could hide under it.
+                        self.assertGreaterEqual(r.rate, 0.80)
 
 
 if __name__ == "__main__":
@@ -231,6 +286,25 @@ class TestTokenBoundaries(unittest.TestCase):
                                         "https://example.org/abc"))
         self.assertTrue(self._grounded("url", "https://example.org/a",
                                        "visit https://example.org/a for more"))
+
+    def test_a_trailing_slash_in_the_source_still_grounds(self):
+        """#404. `normalise` strips the claim's trailing slash but the bundle
+        is normalised wholesale and keeps it, and `/` continues a URL, so the
+        boundary guard rejected every URL a source wrote with one -- 104 values
+        on the 2026-08-07 sweep, all of them present."""
+        self.assertTrue(self._grounded("url", "https://example.org/a",
+                                       "visit https://example.org/a/ here"))
+        self.assertTrue(self._grounded("url", "https://example.org/a/",
+                                       "visit https://example.org/a here"))
+
+    def test_the_trailing_slash_does_not_weaken_the_boundary(self):
+        """The optional slash must not let a URL match a longer path: against
+        `example.org/a/b` both branches have to fail, the one that consumes the
+        slash and the one that backtracks past it."""
+        self.assertFalse(self._grounded("url", "https://example.org/a",
+                                        "https://example.org/a/b"))
+        self.assertFalse(self._grounded("url", "https://example.org/a/",
+                                        "https://example.org/a/b"))
 
     def test_a_number_does_not_match_a_longer_number(self):
         self.assertFalse(self._grounded("count", "1234", "value 12345"))
