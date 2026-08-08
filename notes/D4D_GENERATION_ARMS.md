@@ -543,17 +543,28 @@ Both predictions above held, and one thing came out differently:
    `ro-crate-linkml.yaml`**, exactly as VOICE does not. `deterministic_upstream`
    therefore cannot run for AI-READI either, so AI-READI gains
    `deterministic_ours` and `de_novo` only, and no project runs all five arms.
-2. **The redundancy check was run, and near-null is confirmed as likely.**
-   Measured 2026-08-07 against `AI_READI_preprocessed.txt`: of the crate root's
-   11 `rai:` fields, the long narratives — `dataCollection`, `dataBiases`,
-   `dataLimitations`, `dataPreprocessingProtocol`, `dataCollectionMissingData`,
-   `dataUseCases`, `dataReleaseMaintenancePlan` — are recoverable from the bundle
-   verbatim or near-verbatim, because the FAIRhub healthsheet
-   (`fairhub_dataset_v3_api`) is a curated corpus source. So are the IRB protocol
-   id `STUDY00016228`, the named ethics reviewers, the principal investigator and
-   the licence DOI. Genuinely crate-unique strings amount to three:
-   `confidentialityLevel: HL7:2N (normal)`, `dataGovernanceCommittee`, and the
-   typed "Washington University IRB" organization.
+2. **The redundancy check was run. Substantial, but not near-null.**
+   Measured 2026-08-07 against `AI_READI_preprocessed.txt`, sentence by
+   sentence (≥40 characters, whitespace and smart punctuation normalised):
+   **32 of 45 `rai:` sentences (71%) are already in the bundle**, because the
+   FAIRhub healthsheet (`fairhub_dataset_v3_api`) is a curated corpus source.
+   Four fields are fully redundant (`dataCollectionMissingData`,
+   `dataCollectionRawData`, `dataReleaseMaintenancePlan`, `dataUseCases`), but
+   `dataLimitations` is 64%, `dataPreprocessingProtocol` 54% and `dataBiases`
+   50% — so **roughly 29% of the crate's narrative is new to the corpus**,
+   concentrated in exactly the fields a datasheet cares most about.
+
+   Also already present: the IRB protocol id `STUDY00016228`, the named ethics
+   reviewers, the principal investigator and the licence DOI. Verified
+   crate-unique strings are three: `confidentialityLevel: HL7:2N (normal)`,
+   `dataGovernanceCommittee`, and the typed "Washington University IRB"
+   organization — the bundle carries "Washington University" six times but
+   never as the IRB.
+
+   An earlier draft of this section called the narratives "recoverable verbatim
+   or near-verbatim" and read the prediction above as confirmed. The
+   sentence-level measurement does not support that: expect a *smaller* delta
+   than CHORUS, not a null one.
 3. **The crate's contribution here is structure, not evidence** — typed governance
    fields, booleans (`deidentified`, `fdaRegulated`, `humanSubjectResearch`), and a
    nine-subcrate modality decomposition (ECG, OMOP/EHR, FLIO, retinal OCT, OCTA,

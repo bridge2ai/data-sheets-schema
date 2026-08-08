@@ -188,24 +188,46 @@ projects:
       the provenance anchor; the transcode belongs in the normalize step and
       should be recorded in processed/AI_READI_crate_changes.md.
     overlap_note: >-
-      Measured 2026-08-07 against data/preprocessed/concatenated/AI_READI_preprocessed.txt:
-      the crate's narrative content is largely ALREADY IN the document corpus,
-      because the FAIRhub healthsheet is a curated corpus source
-      (`fairhub_dataset_v3_api`). Of the 11 rai: fields, the long narratives
-      (dataCollection, dataBiases, dataLimitations, dataPreprocessingProtocol,
-      dataCollectionMissingData, dataUseCases, dataReleaseMaintenancePlan) are
-      recoverable from the bundle verbatim or near-verbatim, as are the IRB
-      protocol id STUDY00016228, the named ethics reviewers, the principal
-      investigator and the licence DOI. Genuinely crate-unique strings are few:
-      `confidentialityLevel: HL7:2N (normal)`, `dataGovernanceCommittee`, and
-      the typed "Washington University IRB" organization. The crate's real
-      contribution for AI_READI is therefore STRUCTURE -- typed governance
-      fields, booleans (deidentified, fdaRegulated, humanSubjectResearch) and
-      the nine-subcrate modality decomposition -- rather than new evidence.
-      Expect a much smaller with-crate/without-crate delta here than for
-      CHORUS, whose crate carries content the corpus lacks. This is an
-      expectation about the MEASUREMENT, recorded here in the manifest; it must
-      not be stated in any generation prompt.
+      Measured 2026-08-07 against data/preprocessed/concatenated/AI_READI_preprocessed.txt,
+      by splitting each rai: field into sentences of 40 characters or more and
+      testing each for verbatim presence in the bundle after whitespace and
+      smart-punctuation normalisation. Overall 32 of 45 sentences (71%) are
+      present, because the FAIRhub healthsheet is itself a curated corpus source
+      (`fairhub_dataset_v3_api`). Per field:
+
+        dataCollectionMissingData  4/4   100%
+        dataCollectionRawData      1/1   100%
+        dataReleaseMaintenancePlan 4/4   100%
+        dataUseCases               4/4   100%
+        dataCollection             4/5    80%
+        dataLimitations            7/11   64%
+        dataPreprocessingProtocol  7/13   54%
+        dataBiases                 1/2    50%
+        personalSensitiveInformation 0/1    0%
+
+      So the redundancy is substantial but NOT wholesale: roughly 29% of the
+      crate's narrative sentences are new to the corpus, concentrated in
+      dataLimitations, dataPreprocessingProtocol and dataBiases. An earlier
+      draft of this note said the long narratives were recoverable "verbatim or
+      near-verbatim" and predicted a near-null delta; the sentence-level
+      measurement does not support that strength, and the claim was corrected
+      rather than left to be quoted onward.
+
+      Also already in the corpus: the IRB protocol id STUDY00016228, the named
+      ethics reviewers, the principal investigator and the licence DOI.
+      Verified crate-unique strings are three: `confidentialityLevel: HL7:2N
+      (normal)`, `dataGovernanceCommittee`, and the typed "Washington
+      University IRB" organization -- the bundle carries "Washington
+      University" six times but never as the IRB.
+
+      Beyond text, the crate contributes STRUCTURE the corpus has in prose
+      only: typed governance fields, booleans (deidentified, fdaRegulated,
+      humanSubjectResearch) and the nine-subcrate modality decomposition.
+
+      Expect a smaller with-crate/without-crate delta here than for CHORUS,
+      whose crate carries content the corpus lacks entirely -- but do not
+      expect null. This is an expectation about the MEASUREMENT, recorded here
+      in the manifest; it must not be stated in any generation prompt.
     structural_note: >-
       Ships 5 artifacts and is missing ro-crate-linkml.yaml -- the D4D-shaped
       rendering that the deterministic arm consumes -- exactly as for VOICE.
