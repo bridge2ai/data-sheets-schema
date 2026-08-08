@@ -1,0 +1,100 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "cr": "http://mlcommons.org/croissant/",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "sc": "https://schema.org/",
+    "dct": "http://purl.org/dc/terms/",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataBiases": "cr:dataBiases",
+    "dataCollection": "cr:dataCollection",
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "includes": "cr:includes",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform"
+  },
+  "@type": "sc:Dataset",
+  "name": "Flagship_Dataset_of_Type_2_Diabetes_from_the_AI-READI_Project",
+  "description": "\nThe Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights (AI-READI) project seeks to create a flagship ethically-sourced dataset to enable future generations of artificial intelligence/machine learning (AI/ML) research to provide critical insights into type 2 diabetes mellitus (T2DM), including salutogenic pathways to return to health. The ability to understand and affect the course of complex, multi-organ diseases such as T2DM has been limited by a lack of well-designed, high quality, large, and inclusive multimodal datasets. The AI-READI team of investigators will aim to collect a cross-sectional dataset of 4,000 people and longitudinal data from 10% of the study cohort across the US. The study cohort will be balanced for self-reported race/ethnicity, gender, and diabetes disease stage. Data collection will be specifically designed to permit downstream pseudo-time manifold analysis, an approach used to predict disease trajectories by collecting and learning from complex, multimodal data from participants with differing disease severity (normal to insulin-dependent T2DM). The long-term objective for this project is to develop a foundational dataset in T2DM, agnostic to existing classification criteria or biases, which can be used to reconstruct a temporal atlas of T2DM development and reversal towards health (i.e., salutogenesis). Data will be optimized for downstream AI/ML research and made publicly available\n\nThis dataset contains data from 2280 participants that was collected between July 19, 2023 and May 01, 2025. Data from multiple modalities are included. A full list is provided in the Data Standards section below. The data in this dataset contain no protected health information (PHI). Information related to the sex and race/ethnicity of the participants as well as medication used has also been removed.\n\nThe dataset contains 356,343 files and is around 3.82 TB in size.\n\nA detailed description of the dataset is available in the AI-READI documentation for v3.0.0 of the dataset at docs.aireadi.org.\n",
+  "dct:conformsTo": "http://mlcommons.org/croissant/RAI/1.0",
+  "license": "https://doi.org/10.5281/zenodo.17555036",
+  "citeAs": "AI-READI Consortium. (2024). \"AI-READI: rethinking data collection, preparation and\nsharing for propelling AI-based discoveries in diabetes research and beyond.\"\nNature metabolism. https://doi.org/10.1038/s42255-024-01165-x",
+  "keywords": [
+    "diabetes mellitus",
+    "Machine Learning",
+    "Artificial Intelligence",
+    "Electrocardiography",
+    "Continuous Glucose Monitoring",
+    "Retinal Imaging",
+    "Eye Exam"
+  ],
+  "version": "3.0.0",
+  "creator": [
+    {
+      "@type": "sc:Person",
+      "name": "AI-READI Consortium"
+    }
+  ],
+  "publisher": {
+    "@type": "sc:Organization",
+    "name": "AI-READi Consortium"
+  },
+  "distribution": [],
+  "recordSet": [],
+  "rai:dataCollection": "Multiple modalities of data are collected for each participant, including survey data, clinical data, retinal imaging data, environmental sensor data, continuous glucose monitor data, and wearable activity monitor data. These encompass tabular data, imaging data, and physiological signal/waveform data. There is no unstructured text data included in this dataset. The exact forms used for data collection in REDCap are available here. Furthermore, all modalities, file formats, and devices are detailed in the dataset documentation at https://docs.aireadi.org/.",
+  "rai:dataCollectionType": [
+    "Manual Human Curation"
+  ],
+  "rai:dataCollectionMissingData": "Yes, not all modalities are available for all participants. Some participants elected not to participate in some study elements. In a few cases, the data collection device did not have any stored results or was returned too late to retrieve the results (e.g. battery died, data was lost). In a few cases, there may have been a data collision at some point in the process and data has been lost.",
+  "rai:dataCollectionRawData": "Each instance consists of all of the data available for an individual participating in the study.",
+  "rai:dataPreprocessingProtocol": [
+    "\nThere were several quality control measures used at the time of data entry/acquisition. For example, clinical data outside of expected min/max ranges were flagged in REDCap, which was visible in reports viewed by clinical research coordinators (CRCs) and Data Managers. Using these REDCap reports as guides, Data Managers and CRCs examined participant records and determined if an error was likely. Data were checked for the following and edited if errors were detected:\n\n\ti. Credibility, based on range checks to determine if all responses fall within a prespecified reasonable range\n ii. Incorrect flow through prescribed skip patterns\n\tiii. Missing data that can be directly filed from other portions of an individual\u2019 s record\n\tiv. The omission and/or duplication of records\n\nEditing was only done under the guidance and approval of the site PI. If corrected data was available from elsewhere in the respondent\u2019s answers, the error was corrected. If there was no logical or appropriate way to correct the data, the Data site PI reviewed the values and made decisions about whether those values should be removed from the data.\n\nOnce data +were sent from each of the study sites to the central project team, additional processing steps were conducted in preparation for dissemination. For example, all data were mapped to standardized terminologies when possible, such as the Observational Medical Outcomes Partnership (OMOP) Common Data Model, a common data model for observational health data, and the Digital Imaging and Communications in Medicine (DICOM), a commonly used standard for medical imaging data. Details about the data processing approaches for each data domain/modality are described in the dataset documentation at https://docs.aireadi.org.\n"
+  ],
+  "rai:dataAnnotationProtocol": "N/A - no labels are provided",
+  "rai:dataReleaseMaintenancePlan": [
+    "The dataset gets released as static versions. This is the third version of the dataset and consists of data collected up through the end of the second year of the study, i.e. between July 19, 2023 and May 1st, 2025. There are plans to release new versions of the dataset approximately once a year with additional data from participants who have been enrolled since the last dataset version release."
+  ],
+  "rai:personalSensitiveInformation": [
+    "EHR",
+    "Wearable Monitoring",
+    "ECG",
+    "Environmental Sensor",
+    "Continuous glucose monitor",
+    "Wearable accelerometer"
+  ],
+  "rai:dataBiases": [
+    "\nUniform data collection protocols were implemented for all subjects, irrespective of their race/ethnicity, biological sex, or diabetes severity, across all study sites. The selection of study sites was intended to ensure varied representation and minimize the potential for sampling bias.\n"
+  ],
+  "rai:dataLimitations": [
+    "\nWhile the AI-READI's cross-sectional database ultimately aims to achieve balance across race/ethnicity, biological sex, and diabetes presence and severity, the pilot study is not balanced across these parameters.\n\nThree recording sites were strategically selected to achieve broad recruitment: the University of Alabama at Birmingham (UAB), the University of California San Diego (UCSD), and the University of Washington (UW). The sites were chosen for geographic variability across the United States and to ensure representation across various racial and ethnic groups. Individuals from all demographic backgrounds were recruited at all 3 sites. Factors influencing the generalization of derived models include the predominantly urban and hospital-based recruitment, which may not fully capture all possible cultural and socioeconomic backgrounds. The study cohort may not provide a comprehensive representation of the population, as it does not include other races/ethnicities such as Pacific Islanders and Native Americans. Information on device make and model, including specific modalities like macula scans or wide scans during OCT, were documented to ensure repeatability. Moreover, the study included multiple devices for one measure to enhance generalizability and represent the broad range of equipment utilized in clinical settings.\n\nIn cases of survey data, skipped questions or incomplete responses are expected. In cases of using wearables, improper use, technical failure such as battery failure or system malfunction are expected. In cases of imaging data, patient uncooperation, noise that may obscure the images and technical failure such as system malfunction, and data transfer failures are expected.\n"
+  ],
+  "rai:dataUseCases": [
+    "The purpose for creating the dataset was to enable future generations of artificial intelligence/machine learning (AI/ML) research to provide critical insights into type 2 diabetes mellitus (T2DM), including salutogenic pathways to return to health. T2DM is a growing public health threat. Yet, the current understanding of T2DM, especially in the context of salutogenesis, is limited. Given the complexity of T2DM, AI-based approaches may help with improving our understanding but a key issue is the lack of data ready for training AI models. The AI-READI dataset is intended to fill this gap."
+  ]
+}

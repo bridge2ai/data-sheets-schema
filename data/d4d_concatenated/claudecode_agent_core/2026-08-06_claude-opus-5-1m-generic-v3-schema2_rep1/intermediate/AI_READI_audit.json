@@ -1,0 +1,179 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "resources",
+      "issue": "The core record uses `resources` (range Dataset) to carry the nine per-datatype directory groupings, but the schema description for `resources` states 'For file collections, use the file_collections attribute instead.' The full record correctly models these same nine directories as `file_collections` with collection_type/file_count/total_bytes/path populated. In the core record the file_count and total_bytes facts are demoted into free-text `description` prose, contradicting the v3 rule that declared fields be populated rather than restated in prose. If the core schema declares `file_collections`, these belong there; if it does not, the file/byte counts should not be smuggled into description text."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators",
+      "issue": "The first Creator object populates only `notes` and leaves every declared field of Creator empty. The single most important creator fact in the bundle — that the FAIRhub dataset_description names 'AI-READI Consortium' (nameType Organizational) as the sole creator — is expressed only as source commentary inside a free-text field. Creator declares `affiliations`, `credit_roles`, `principal_investigator`; the organizational creator name has no declared home and the object as emitted carries none of the structure the class exists to hold. Same defect duplicated in the core record."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators[].affiliations",
+      "issue": "Affiliation values embed source commentary and identifiers inside the affiliation string, e.g. 'Washington University in St. Louis (ROR 01yc7t268)', 'University of California, San Diego (ROR 0168r3w48)', 'California Medical Innovations Institute (ROR 0156zyn36)'. The ROR identifier is not part of the affiliation name. Under the stated audit criterion (no source commentary or identifiers embedded in name/identifier/affiliation values) these should carry the institution name alone."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "funders[].grantor",
+      "issue": "Grantor values embed ROR identifiers as parenthetical commentary: 'National Institutes of Health (ROR 01cwqze88)'. FundingMechanism declares `grantor`, `grants`, `notes`; the identifier belongs in notes, not inside the grantor name."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "license",
+      "issue": "The `license` slot (range string, 'e.g. MIT, CC-BY-4.0') carries a name plus a parenthetical URL: 'AI-READI custom license v2.0 (https://doi.org/10.5281/zenodo.17555036)'. The bundle gives rightsName 'AI-READI custom license v2.0' and rightsURI separately; the URI is source commentary embedded in a name value. The URI is already recorded in license_and_use_terms and external_resources."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "created_by",
+      "issue": "`created_by` is populated with 'AI-READI Consortium'. The bundle supports this as the dataset creator, but `created_by` is described as the person or organization primarily responsible for creating the resource — this duplicates the creators slot rather than adding evidence. Not a fabrication, but redundant; flagged only because the same fact is simultaneously left unstructured in creators[0]."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "prohibited_uses / license / license_and_use_terms",
+      "issue": "Internal inconsistency the records acknowledge but do not resolve consistently. The dataset-level `license` slot asserts v2.0, while every prohibited_uses entry is transcribed verbatim from license v1.0, whose text is the only license text in the bundle. The v1.0 text is University of Washington's agreement for an earlier release; the bundle does not establish that its clauses carry into v2.0. The trailing note on the last prohibited_uses object states this caveat, but the first three objects carry no such qualification and read as current-version prohibitions. Attaching the caveat to only one of four sibling objects is an internal inconsistency."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_formats",
+      "issue": "DistributionFormat declares `access_urls` and `notes`. Every one of the five objects puts the actual format identity (DICOM, CSV, JSON, Markdown, WFDB) into `notes` and repeats the identical access_urls value (https://fairhub.io/datasets/3) five times. The format — the thing the slot exists to record — never occupies a declared field, and the repeated URL does not distinguish the entries. Same defect in the core record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_dates",
+      "issue": "Three DistributionDate objects each carry a single-element `release_dates` list and put all substance in `notes`. This is acceptable per the class's thin declaration, but the v1.0.0 and v2.0.0 entries describe releases of *other versions* of the dataset, not of the record's declared referent (v3.0.0, DOI 10.60775/fairhub.3). Version history is already carried correctly in version_access. Mixing prior-version release dates into the current dataset's distribution_dates blurs the single-referent commitment stated in the reconciliation rules."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "subsets",
+      "issue": "The three DataSubset objects set `is_data_split: true` and put all split composition (counts by race/ethnicity, sex, diabetes status, mean age) into free-text `description`. DataSubset accepts the full Dataset slot inventory, including `subpopulations` (with declared `distribution` and `identification` fields) and `instances` (with declared `counts`). The per-split counts have declared homes and were instead rendered as prose."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "subsets / splits",
+      "issue": "The core record drops `splits` and `subsets` entirely and relocates the recommended 70/15/15 split and all per-split counts into the free-text `notes` blob (item 13). The bundle clearly and specifically supports this content (README recommended-split table, healthsheet labeling Q7). If the core schema declares these slots, this is a supported omission; if it does not, the content is correctly placed. The audit cannot verify which, but the asymmetry with the full record is an internal inconsistency between the paired records that the reconciliation phase should have resolved explicitly."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "relationships / related_datasets / file_collections / variables / total_file_count / total_size_bytes / citation / participant_compensation / third_party_sharing / collection_notifications / collection_consents / consent_revocations / direct_collection",
+      "issue": "Thirteen slots populated in the full record are absent from the core record, with their content compressed into the `notes` blob (file/byte totals, citation, compensation, version relationships) or dropped (variables, relationships, direct_collection, collection_notifications, collection_consents, consent_revocations, third_party_sharing — the latter four folded into informed_consent.notes and license_and_use_terms.notes). Where the core schema declares these slots, moving evidence-supported content into `notes` violates the rule that `notes` is for content fitting no dedicated slot. The pairing is not verifiably consistent from the records alone."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "notes",
+      "issue": "The `notes` slot is described as content that 'fits no dedicated slot.' Several numbered items have dedicated slots and are therefore misplaced: item (2) 'no data protection impact analysis has been conducted' duplicates data_protection_impacts in the core record and is *only* in notes in the full record, where the full record omits data_protection_impacts entirely despite the bundle answering that healthsheet question explicitly; item (3) 'the dataset had not been used for any tasks' and 'no repository links to papers or systems that use the dataset' answer existing_uses and use_repository; item (12) participant compensation duplicates participant_compensation (core only); item (13) split composition duplicates splits/subsets."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_protection_impacts",
+      "issue": "Omission the bundle clearly supports. The healthsheet Collection Q12 asks whether a data protection impact analysis was conducted and answers 'No, a data protection impact analysis has not been conducted.' The core record captures this as a DataProtectionImpact object; the full record buries it in notes item (2) and leaves the slot empty. A documented negative finding is a supported value for this slot."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "existing_uses",
+      "issue": "Omission the bundle supports. Healthsheet Uses Q1: 'Has the dataset been used for any tasks already?' — 'No'. This is a documented answer, recorded only as notes item (3) in both records. Omitting the slot is defensible under the prefer-omission rule since a negative is not an existing use; flagged as low because the treatment is inconsistent with how the equally-negative data_protection_impacts finding was handled in the core record."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "labeling_strategies / annotation_analyses / machine_annotation_tools",
+      "issue": "Correctly omitted — the healthsheet answers the entire labeling section 'N/A - no labels are provided'. The fact is captured in instances[].label_description. No defect; noted to confirm the omission is deliberate and evidence-backed rather than an oversight."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_timeframes[3] (full) / [3] (core)",
+      "issue": "The fourth CollectionTimeframe object populates only `timeframe_details` with per-participant visit duration, and contains an unresolved internal inconsistency stated inline: 'Approximately 10 percent (elsewhere stated as approximately 4 percent) of participants are expected to be invited back'. Both figures are in the bundle (BMJ Open says ~4%; NIH RePORTER and README say 10%). Surfacing the conflict is correct per the disagreement rule, but a per-participant protocol duration is not a collection timeframe for the dataset and sits oddly in a slot whose declared fields are start_date/end_date."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "is_deidentified.method",
+      "issue": "The `method` field carries a multi-sentence explanation of the FAIRhub deIdent* metadata flags rather than a method designation. Deidentification separately declares `deidentification_details` and `notes`, which are both populated. The bundle supports a compact method value ('HIPAA Safe Harbor verification; no identifiers collected'); the flag-by-flag transcription is commentary that belongs in details or notes."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables",
+      "issue": "Roughly 40 of the ~85 VariableMetadata objects put the laboratory reference range into free-text `notes` (e.g. 'Reference range 3.6-5.2') while leaving the declared `minimum_value` and `maximum_value` fields empty. BMJ Open Table 2 gives these as explicit numeric bounds. Where the range is a plain numeric interval the declared fields are the correct home; asymmetric ranges (female/male, age-varying) legitimately need notes."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables[].data_type",
+      "issue": "'Monofilament touch perception' is typed `categorical` with categories, which is fine, but 'ECG recording position' is also `categorical` with ordered angular values (0/30/60/90 degrees) where `ordinal` is the better-supported enum member. Minor; both values are schema-legal."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "known_biases[].bias_type",
+      "issue": "All five bias_type values (selection_bias, sampling_bias, representation_bias, historical_bias, measurement_bias) are within the declared enum. No defect. Noted for completeness of enum audit."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "known_limitations[].limitation_type",
+      "issue": "All six limitation_type values (representativeness_limitation, coverage_limitation x2, scope_limitation, temporal_limitation, methodological_limitation) are within the declared enum. No defect. Noted for completeness of enum audit."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license_and_use_terms.data_use_permission",
+      "issue": "Value `disease_specific_research` is within the declared enum and is well supported (access requires attesting to type 2 diabetes related research). However the bundle also supports `publication_required` (license section 3 requires acknowledgement of source and funder in publications) and the slot appears single-valued, so only one could be recorded. Choice is defensible; flagged so the reconciliation notes the discarded alternative."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "maintainers[1].role",
+      "issue": "FAIRhub/Microsoft Azure hosting is assigned role `other`. The Maintainer role enum includes `academic_institution` and `non_profit_organization`; FAIRhub is developed by the FAIR Data Innovations Hub at the California Medical Innovations Institute per the bundle. `other` is enum-legal but a weaker fit than the evidence supports."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "id",
+      "issue": "`id` is set to https://doi.org/10.60775/fairhub.3 while `doi` is 10.60775/fairhub.3. Consistent and schema-legal (uriorcurie). Noted only to confirm the single-referent choice (v3.0.0, not the abstract dataset or the v2.0.0 record the input sheet selects) is applied uniformly across both records — it is."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "issued",
+      "issue": "Value '2025-11-17T00:00:00Z' synthesizes a time component and UTC offset not present in the bundle, which gives only the date 2025-11-17. Minor over-specification forced by the datetime range; flagged as a shape observation rather than a factual defect."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "status",
+      "issue": "`status` (range string, 'e.g., draft, published, deprecated') carries a three-sentence paragraph covering publication state, the superseded status of v1/v2, and ongoing enrollment. The latter two facts are already in version_access and collection_timeframes. A short status token plus notes would conform better to the slot's evident intent."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to / conforms_to_schema",
+      "issue": "`conforms_to` = 'Clinical Dataset Structure (CDS) v0.1.1' and `conforms_to_schema` = the CDS readthedocs URL. Supported. Note the bundle also records a distinct AI-READI schema (https://schema.aireadi.org/v0.1.0/dataset_description.json) governing the metadata files, which is not represented; `conforms_to_class` is unpopulated and the bundle does not support a value for it. No action required."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "sampling_strategies[0].is_representative",
+      "issue": "Set to `false` with a populated why_not_representative. Well supported (volunteer bias, urban/hospital recruitment, excluded groups). However `is_sample: true` sits in tension with the healthsheet's own answer to Composition Q4, which states 'The dataset contains all possible instances.' The record surfaces this in the trailing note, which is the correct handling of a source disagreement; flagged only to confirm the tension was noticed rather than glossed."
+    }
+  ],
+  "summary": "Both records are substantially evidence-grounded: every factual claim I checked traces to the declared bundle, source disagreements (Washington University in St. Louis vs. University of Washington; 4,000 vs. 4,600 target enrolment; 18 vs. 19 July 2023; 4% vs. 10% follow-up; license v1.0 text vs. v2.0 designation) are surfaced rather than silently resolved, and no prior-D4D contamination is detectable. The defects are predominantly shape rather than substance. Three structural issues dominate. First, the schema-digest rule that class-ranged slots populate their declared fields is violated in several places: the primary Creator object holds only `notes` with the organizational creator name unrepresented in any declared field; all five DistributionFormat objects put the format identity in `notes` while repeating an identical access_urls value; DataSubset objects render split composition as prose despite declared homes in subpopulations/instances. Second, identifiers and commentary are embedded in name and affiliation values throughout — ROR codes inside affiliation and grantor strings, a DOI URL inside the license name. Third, the paired records diverge structurally in ways the reconciliation phase should have justified explicitly: the core record routes the nine datatype directories through `resources` rather than `file_collections` (contrary to the resources slot's own description) and demotes roughly thirteen full-record slots into a single `notes` blob, including file/byte totals, citation, compensation and the recommended data splits — content with dedicated slots and clear bundle support. One genuine omission: the full record leaves `data_protection_impacts` empty despite the healthsheet answering that question directly, while the core record captures it, an internal inconsistency between the pair. Minor issues include ~40 VariableMetadata objects with numeric reference ranges in `notes` rather than minimum_value/maximum_value, and prohibited_uses entries transcribed from license v1.0 with the version caveat attached to only the last of four siblings. All enum values used (bias_type, limitation_type, data_use_permission, role, collection_type, data_type, relationship_type) are within their declared vocabularies; no undefined enum members and no prose-where-list-required were found."
+}

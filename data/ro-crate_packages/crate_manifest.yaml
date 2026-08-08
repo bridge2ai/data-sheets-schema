@@ -142,16 +142,139 @@ projects:
           from generation input.
 
   AI_READI:
-    status: link_pending
-    note: URL to be supplied; not yet downloaded.
-    document_corpus: undecided
+    source_type: supplied_locally
+    source_url: https://drive.google.com/drive/folders/1qDrFlGGWiShhWO-QBfAzdwHmHfoKe6T2
+    provenance_note: >-
+      Supplied as a shared Google Drive folder ("v3-root-level-standard-team")
+      on 2026-08-07 rather than downloaded from a repository, so as with VOICE
+      there is no upstream-published checksum to verify these files against.
+      The md5s below are of the copies as received; the byte counts match the
+      sizes Drive reports for each file. If a canonical published location for
+      this crate exists, record it here and re-verify. The folder name says
+      "root level": these are the root-level crate artifacts only, and the nine
+      per-modality subcrates are referenced by `hasPart` but not included.
+    describes_dataset: https://fairhub.io/datasets/3
+    doi: 10.60775/fairhub.3
+    crate_id: ark:59853/rocrate-b2ai-aireadi-release-3-0-0
+    crate_version: 3.0.0
+    crate_date_published: "11/17/25"
+    captured_at: "2026-08-07"
+    archive: false
+    document_corpus: allow
     document_corpus_reason: >-
-      Decide when the crate link arrives. If it is published at a record the
-      input sheet cites (or comes to cite), set `exclude`; if the crate is one
-      file among a wider data release whose landing page is independently
-      useful, set `allow`, as for CM4AI. `undecided` is treated as `allow` --
-      it must not silently drop a source -- but is reported by
-      `document_corpus_exclusions()` so it cannot be forgotten.
+      No exclusion is possible or needed: this crate was supplied as a Drive
+      folder, so it has no upstream record the sheet could cite. Its
+      `describes_dataset` (fairhub.io/datasets/3) is a genuine document corpus
+      source in its own right -- source_manifest.yaml `fairhub_dataset_v3` and
+      `fairhub_dataset_v3_api` -- and must stay: the crate describes that
+      release, it is not published by it. This resolves the `undecided` that
+      `document_corpus_exclusions()` was reporting.
+    curation_note: >-
+      The crate describes AI-READI dataset v3.0.0, which is the release the
+      document corpus already prefers (source_manifest.yaml
+      `fairhub_dataset_v3`), so unlike VOICE there is no version skew between
+      crate-derived and document-derived facts. Its date is written 11/17/25 in
+      an ambiguous format, the same mixed-format issue noted for the CHORUS and
+      VOICE crates; the FAIRhub record gives the publication date as
+      2025-11-17. Shares the ark:59853 identifier namespace with the CHORUS,
+      CM4AI and VOICE crates, indicating the same generating pipeline.
+    encoding_note: >-
+      BLOCKER for ingestion: ro-crate-metadata.json is windows-1252 encoded,
+      not UTF-8, so it is not valid JSON per RFC 8259 and any UTF-8 parser
+      raises UnicodeDecodeError at byte 5096. 31 bytes are affected -- 0xa9
+      (copyright sign) in `copyrightNotice`, 0x92 (right single quote) inside
+      the preprocessing narrative, and 0x96 (en dash) in the OMOP description.
+      It parses cleanly as cp1252. Do not repair the bytes in raw/, which is
+      the provenance anchor; the transcode belongs in the normalize step and
+      should be recorded in processed/AI_READI_crate_changes.md.
+    overlap_note: >-
+      Measured 2026-08-07 against data/preprocessed/concatenated/AI_READI_preprocessed.txt:
+      the crate's narrative content is largely ALREADY IN the document corpus,
+      because the FAIRhub healthsheet is a curated corpus source
+      (`fairhub_dataset_v3_api`). Of the 11 rai: fields, the long narratives
+      (dataCollection, dataBiases, dataLimitations, dataPreprocessingProtocol,
+      dataCollectionMissingData, dataUseCases, dataReleaseMaintenancePlan) are
+      recoverable from the bundle verbatim or near-verbatim, as are the IRB
+      protocol id STUDY00016228, the named ethics reviewers, the principal
+      investigator and the licence DOI. Genuinely crate-unique strings are few:
+      `confidentialityLevel: HL7:2N (normal)`, `dataGovernanceCommittee`, and
+      the typed "Washington University IRB" organization. The crate's real
+      contribution for AI_READI is therefore STRUCTURE -- typed governance
+      fields, booleans (deidentified, fdaRegulated, humanSubjectResearch) and
+      the nine-subcrate modality decomposition -- rather than new evidence.
+      Expect a much smaller with-crate/without-crate delta here than for
+      CHORUS, whose crate carries content the corpus lacks. This is an
+      expectation about the MEASUREMENT, recorded here in the manifest; it must
+      not be stated in any generation prompt.
+    structural_note: >-
+      Ships 5 artifacts and is missing ro-crate-linkml.yaml -- the D4D-shaped
+      rendering that the deterministic arm consumes -- exactly as for VOICE.
+      The deterministic arm therefore cannot run for AI_READI without a
+      Croissant/RAI-to-D4D mapping step; see notes/D4D_GENERATION_ARMS.md.
+      Bulk profile is mild compared with the other crates: ro-crate-metadata.json
+      is 112 KB for 11 entities (1 root + 9 subcrate stubs + the metadata
+      descriptor) with no large file inventories, so unlike CM4AI and VOICE it
+      needs no size reduction before use as generation input.
+    files:
+      - name: ro-crate-metadata.json
+        path: AI_READI/raw/ro-crate-metadata.json
+        bytes: 112329
+        md5: 4458d888f75a93d92501a848fbf81e33
+        role: >-
+          crate metadata (RO-Crate + EVI + rai:); 11 entities. The root entity
+          carries 11 rai: fields plus irb (typed Organization with
+          contactPoint), irbProtocolId, ethicalReview, confidentialityLevel,
+          dataGovernanceCommittee, deidentified, fdaRegulated,
+          humanSubjectResearch, humanSubjectExemption, completeness,
+          conditionsOfAccess, copyrightNotice, principalInvestigator, funder,
+          contentSize and contentUrl. See encoding_note before parsing.
+      - name: ro-crate-croissant.json
+        path: AI_READI/raw/ro-crate-croissant.json
+        bytes: 10712
+        md5: dadec153363c98cb10265d73126eab3a
+        role: >-
+          Croissant/RAI rendering. Verified to be a duplicate representation
+          rather than additional evidence: it carries exactly the same 11 rai:
+          fields as ro-crate-metadata.json, 7 byte-identical and the other 4
+          differing only by list-vs-string wrapping of the same text, with none
+          genuinely different and none unique to either file. Retained for
+          completeness; deliberately not bundled, since it would add size
+          without information. (Note this differs from VOICE, where
+          ro-crate-metadata.json carried 5 rai: fields Croissant lacked.)
+      - name: ro-crate-datasheet.html
+        path: AI_READI/raw/ro-crate-datasheet.html
+        bytes: 144843
+        md5: 8e54fb3859455dd6a169b56353d35446
+        role: human-readable datasheet rendering (withheld from the de novo arm)
+      - name: ai_ready_score.json
+        path: AI_READI/raw/ai_ready_score.json
+        bytes: 8453
+        md5: 789c1bba682ab7a0e073e2d24591eab3
+        role: >-
+          AI-readiness self-assessment; same seven-section shape as the CHORUS
+          score (fairness, provenance, characterization,
+          pre_model_explainability, ethics, sustainability, computability).
+      - name: ro-crate-preview.html
+        path: AI_READI/raw/ro-crate-preview.html
+        bytes: 19452
+        md5: 8388efac428c2b256db895d37a806302
+        role: >-
+          file listing; excluded from generation input. Far smaller than the
+          VOICE preview (643 KB) because only root-level artifacts are present.
+    subcrates:
+      note: >-
+        Referenced by the root entity's `hasPart` but NOT included in this
+        capture, which is root-level only. Each would be a separate crate.
+      ids:
+        - ark:59853/rocrate-b2ai-ai-readi-ecg
+        - ark:59853/rocrate-b2ai-ai-readi-omop
+        - ark:59853/rocrate-b2ai-ai-readi-flio
+        - ark:59853/rocrate-b2ai-ai-readi-retinal-oct
+        - ark:59853/rocrate-b2ai-ai-readi-retinal-octa
+        - ark:59853/rocrate-b2ai-ai-readi-retinal-photography
+        - ark:59853/rocrate-b2ai-ai-readi-wearable-blood-glucose
+        - ark:59853/rocrate-b2ai-ai-readi-wearable-activity-monitor
+        - ark:59853/rocrate-b2ai-ai-readi-environmental-sensor
 
   VOICE:
     source_type: supplied_locally

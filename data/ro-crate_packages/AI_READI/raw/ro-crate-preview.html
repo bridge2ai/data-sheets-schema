@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flagship Dataset of Type 2 Diabetes from the AI-READI Project - RO-Crate Preview</title>
+    <style>
+      :root {
+        --color-primary: #1f3a52;
+        --color-primary-dark: #16293a;
+        --color-accent: #2d7dd2;
+        --color-bg: #f4f6f9;
+        --color-surface: #ffffff;
+        --color-surface-alt: #f8fafc;
+        --color-border: #e3e8ee;
+        --color-text: #24323f;
+        --color-text-muted: #5d6b7a;
+        --radius: 10px;
+        --radius-sm: 6px;
+        --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.06),
+          0 1px 3px rgba(16, 24, 40, 0.1);
+        --font-sans: system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+      }
+      body {
+        font-family: var(--font-sans);
+        margin: 0;
+        padding: 0;
+        color: var(--color-text);
+        line-height: 1.55;
+        background-color: var(--color-bg);
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px 24px;
+        background-color: var(--color-surface);
+        box-shadow: var(--shadow-card);
+      }
+      header {
+        margin-bottom: 18px;
+        padding: 26px 24px 22px;
+        border-radius: var(--radius);
+        background: linear-gradient(
+          135deg,
+          var(--color-primary-dark) 0%,
+          var(--color-primary) 55%,
+          #2a5078 100%
+        );
+        color: #fff;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      h1 {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin: 0 0 10px 0;
+        color: #fff;
+      }
+      h2 {
+        font-size: 19px;
+        color: var(--color-primary);
+        margin-top: 0;
+        margin-bottom: 10px;
+        padding-left: 10px;
+        border-left: 4px solid var(--color-accent);
+        letter-spacing: -0.01em;
+      }
+      .badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .badge-row .badge {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 999px;
+        background-color: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      .badge-row a.badge:hover {
+        background-color: rgba(255, 255, 255, 0.26);
+      }
+      .summary-section {
+        background-color: var(--color-surface);
+        padding: 16px 18px;
+        border-radius: var(--radius);
+        margin-bottom: 24px;
+        border: 1px solid var(--color-border);
+        box-shadow: var(--shadow-card);
+        page-break-inside: avoid;
+      }
+      .summary-row {
+        display: flex;
+        margin-bottom: 0;
+        border-bottom: 1px solid var(--color-border);
+        padding: 7px 0;
+      }
+      .summary-row:last-child {
+        border-bottom: none;
+      }
+      .summary-label {
+        width: 220px;
+        flex-shrink: 0;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--color-text-muted);
+        padding-top: 2px;
+      }
+      .summary-value {
+        flex: 1;
+      }
+      .tabs {
+        display: flex;
+        border-bottom: 2px solid var(--color-border);
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 2px;
+      }
+      .tab {
+        padding: 10px 14px;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--color-text-muted);
+        white-space: nowrap;
+        transition: color 0.15s ease;
+      }
+      .tab:hover {
+        color: var(--color-primary);
+      }
+      .tab.active {
+        border-bottom: 3px solid var(--color-accent);
+        color: var(--color-primary);
+      }
+      .tab .badge {
+        display: inline-block;
+        background-color: var(--color-surface-alt);
+        border: 1px solid var(--color-border);
+        color: var(--color-text-muted);
+        padding: 1px 8px;
+        border-radius: 999px;
+        font-size: 11.5px;
+        margin-left: 5px;
+      }
+      .tab.active .badge {
+        background-color: var(--color-accent);
+        border-color: var(--color-accent);
+        color: #fff;
+      }
+      .tab-content {
+        margin-bottom: 30px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-card);
+        table-layout: fixed;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--color-border);
+        word-wrap: break-word;
+      }
+      th {
+        background-color: var(--color-surface-alt);
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--color-text-muted);
+        border-bottom: 2px solid var(--color-border);
+      }
+      tr:nth-child(even) {
+        background-color: var(--color-surface-alt);
+      }
+      tr:hover {
+        background-color: #eef5fc;
+      }
+      td:nth-child(2) {
+        max-width: 400px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      td:nth-child(2)[title] {
+        cursor: help;
+      }
+      .publications-list {
+        margin: 5px 0 0 15px;
+        padding: 0;
+        list-style: disc;
+      }
+      .publications-list li {
+        margin-bottom: 6px;
+      }
+      .schema-details {
+        margin: 0;
+        padding: 15px;
+        background-color: var(--color-surface-alt);
+        border-top: 1px solid var(--color-border);
+        border-bottom: 1px solid var(--color-border);
+      }
+      .schema-details-container {
+        padding: 0;
+      }
+      .toggle-schema {
+        cursor: pointer;
+        color: var(--color-accent);
+        text-decoration: underline;
+      }
+      .properties-table {
+        margin: 0;
+        width: 100%;
+        box-shadow: none;
+        border: 1px solid var(--color-border);
+      }
+      .properties-table th,
+      .properties-table td {
+        padding: 8px 12px;
+        background-color: var(--color-surface);
+      }
+      .properties-table th {
+        background-color: var(--color-surface-alt);
+      }
+      .schema-properties-row {
+        background-color: var(--color-surface-alt) !important;
+      }
+      tr.schema-row:hover
+        + tr.schema-properties-row:not([style*="display: none"]) {
+        background-color: #eef5fc !important;
+      }
+      a {
+        color: var(--color-accent);
+      }
+      @media print {
+        body {
+          font-size: 11pt;
+          background-color: white;
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
+        }
+        .container {
+          max-width: 100%;
+          padding: 10px;
+          box-shadow: none;
+        }
+        table {
+          border: 1px solid var(--color-border);
+          page-break-inside: auto;
+        }
+        tr {
+          page-break-inside: avoid;
+        }
+        th,
+        td {
+          border: 1px solid var(--color-border);
+        }
+        .tab-content {
+          display: block !important;
+          page-break-before: always;
+        }
+        .tab-content:first-of-type {
+          page-break-before: avoid;
+        }
+        .tabs {
+          display: none;
+        }
+        .summary-section {
+          box-shadow: none;
+        }
+        h1 {
+          font-size: 18pt;
+        }
+      }
+      @media (max-width: 768px) {
+        .summary-row {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .summary-label {
+          width: 100%;
+          margin-bottom: 3px;
+        }
+        .summary-value {
+          width: 100%;
+        }
+        td:nth-child(2) {
+          white-space: normal;
+        }
+        .tabs {
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Flagship Dataset of Type 2 Diabetes from the AI-READI Project</h1>
+        <div class="badge-row">
+          <span class="badge">Version 3.0.0</span>
+          <a class="badge" href="https://doi.org/10.60775/fairhub.3" target="_blank" rel="noopener" title="https://doi.org/10.60775/fairhub.3">DOI ↗</a>
+          <a class="badge" href="https://doi.org/10.5281/zenodo.17555036" target="_blank" rel="noopener" title="https://doi.org/10.5281/zenodo.17555036">License ↗</a>
+          <span class="badge">Released 11/17/25</span>
+        </div>
+      </header>
+
+      <div class="summary-section">
+        <h2>RO-Crate Summary</h2>
+        <div class="summary-row">
+          <div class="summary-label">ROCrate ID</div>
+          <div class="summary-value" id="accession">
+ ark:59853/rocrate-b2ai-aireadi-release-3-0-0           </div>
+        </div>
+        <div class="summary-row">
+          <div class="summary-label">DOI</div>
+          <div class="summary-value" id="doi">
+            <a href="https://doi.org/10.60775/fairhub.3" target="_blank">https://doi.org/10.60775/fairhub.3</a>
+          </div>
+        </div>
+         <div class="summary-row">
+          <div class="summary-label">Release Date</div>
+          <div class="summary-value" id="release-date">11/17/25</div>
+        </div>
+           <div class="summary-row">
+          <div class="summary-label">Description</div>
+          <div class="summary-value" id="description">
+The Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights (AI-READI) project seeks to create a flagship ethically-sourced dataset to enable future generations of artificial intelligence/machine learning (AI/ML) research to provide critical insights into type 2 diabetes mellitus (T2DM), including salutogenic pathways to return to health. The ability to understand and affect the course of complex, multi-organ diseases such as T2DM has been limited by a lack of well-designed, high quality, large, and inclusive multimodal datasets. The AI-READI team of investigators will aim to collect a cross-sectional dataset of 4,000 people and longitudinal data from 10% of the study cohort across the US. The study cohort will be balanced for self-reported race/ethnicity, gender, and diabetes disease stage. Data collection will be specifically designed to permit downstream pseudo-time manifold analysis, an approach used to predict disease trajectories by collecting and learning from complex, multimodal data from participants with differing disease severity (normal to insulin-dependent T2DM). The long-term objective for this project is to develop a foundational dataset in T2DM, agnostic to existing classification criteria or biases, which can be used to reconstruct a temporal atlas of T2DM development and reversal towards health (i.e., salutogenesis). Data will be optimized for downstream AI/ML research and made publicly available
+
+This dataset contains data from 2280 participants that was collected between July 19, 2023 and May 01, 2025. Data from multiple modalities are included. A full list is provided in the Data Standards section below. The data in this dataset contain no protected health information (PHI). Information related to the sex and race/ethnicity of the participants as well as medication used has also been removed.
+
+The dataset contains 356,343 files and is around 3.82 TB in size.
+
+A detailed description of the dataset is available in the AI-READI documentation for v3.0.0 of the dataset at docs.aireadi.org.
+</div>
+        </div>
+         <div class="summary-row">
+          <div class="summary-label">Authors</div>
+          <div class="summary-value" id="authors">AI-READI Consortium</div>
+        </div>
+         <div class="summary-row">
+          <div class="summary-label">Publisher</div>
+          <div class="summary-value" id="publisher">AI-READi Consortium</div>
+        </div>
+         <div class="summary-row">
+          <div class="summary-label">Principal Investigator</div>
+          <div class="summary-value" id="principal-investigator">
+            Aaron Lee, Department of Ophthalmology, University of Washington
+          </div>
+        </div>
+          <div class="summary-row">
+          <div class="summary-label">License</div>
+          <div class="summary-value" id="license">
+            <a href="https://doi.org/10.5281/zenodo.17555036" target="_blank"
+              >https://doi.org/10.5281/zenodo.17555036</a
+            >
+          </div>
+        </div>
+         <div class="summary-row">
+          <div class="summary-label">Confidentiality Level</div>
+          <div class="summary-value" id="confidentiality-level">
+            HL7:2N (normal)
+          </div>
+        </div>
+         <div class="summary-row">
+          <div class="summary-label">Keywords</div>
+          <div class="summary-value" id="keywords">
+diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal Imaging, Eye Exam          </div>
+        </div>
+          <div class="summary-row">
+          <div class="summary-label">Citation</div>
+          <div class="summary-value" id="citation">https://docs.aireadi.org</div>
+        </div>
+         <div class="summary-row">
+          <div class="summary-label">Related Publications</div>
+          <div class="summary-value" id="related-publications">
+            <ul class="publications-list">
+              <li>AI-READI Consortium. (2024). "AI-READI: rethinking data collection, preparation and
+sharing for propelling AI-based discoveries in diabetes research and beyond."
+Nature metabolism. https://doi.org/10.1038/s42255-024-01165-x</li>
+              <li>AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the
+AI-READI Project (3.0.0) [Data set]. FAIRhub.
+https://doi.org/10.60775/fairhub.3</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+             </div>
+
+         <div
+        id="datasets-content"
+        class="tab-content"
+        style="display: none;"
+      >
+        <p>No datasets found in this RO-Crate.</p>
+      </div>
+       <div
+        id="software-content"
+        class="tab-content"
+        style="display: none;"
+      >
+        <p>No software found in this RO-Crate.</p>
+      </div>
+       <div
+        id="computations-content"
+        class="tab-content"
+        style="display: none;"
+      >
+        <p>No computations found in this RO-Crate.</p>
+      </div>
+       <div
+        id="samples-content"
+        class="tab-content"
+        style="display: none;"
+      >
+        <p>No samples found in this RO-Crate.</p>
+      </div>
+       <div
+        id="experiments-content"
+        class="tab-content"
+        style="display: none;"
+      >
+        <p>No experiments found in this RO-Crate.</p>
+      </div>
+       <div
+        id="instruments-content"
+        class="tab-content"
+        style="display: none;"
+      >
+        <p>No instruments found in this RO-Crate.</p>
+      </div>
+       <div
+        id="schemas-content"
+        class="tab-content"
+        style="display: none;"
+      >
+        <p>No schemas found in this RO-Crate.</p>
+      </div>
+       <div
+        id="other-content"
+        class="tab-content"
+        style="display: none;"
+      >
+        <p>No other found in this RO-Crate.</p>
+      </div>
+
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const tabs = document.querySelectorAll(".tab");
+        if (!tabs.length) return;
+
+        const activeTab = document.querySelector(".tab.active");
+        if (!activeTab) {
+          // Ensure first tab with content is active if none are pre-set
+          let firstContentTab = null;
+          for (let i = 0; i < tabs.length; i++) {
+            const tabId = tabs[i].getAttribute("data-tab");
+            const content = document.getElementById(`${tabId}-content`);
+            // Check if the tab content exists and has items or is not a "No items found" paragraph
+            if (
+              content &&
+              (content.querySelector("table") ||
+                !content.querySelector("p:only-child"))
+            ) {
+              firstContentTab = tabs[i];
+              break;
+            }
+          }
+          if (firstContentTab) {
+            firstContentTab.classList.add("active");
+            const firstTabId = firstContentTab.getAttribute("data-tab");
+            const firstTabContent = document.getElementById(
+              `${firstTabId}-content`
+            );
+            if (firstTabContent) {
+              firstTabContent.style.display = "block";
+            }
+          } else if (tabs.length > 0) {
+            // Fallback: if all tabs are empty, activate the first one anyway
+            tabs[0].classList.add("active");
+            const firstTabId = tabs[0].getAttribute("data-tab");
+            const firstTabContent = document.getElementById(
+              `${firstTabId}-content`
+            );
+            if (firstTabContent) {
+              firstTabContent.style.display = "block";
+            }
+          }
+        }
+
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", function () {
+            tabs.forEach((t) => t.classList.remove("active"));
+            this.classList.add("active");
+
+            document.querySelectorAll(".tab-content").forEach((content) => {
+              content.style.display = "none";
+            });
+
+            const tabId = this.getAttribute("data-tab");
+            const targetContent = document.getElementById(`${tabId}-content`);
+            if (targetContent) {
+              targetContent.style.display = "block";
+            }
+          });
+        });
+
+        document.querySelectorAll(".toggle-schema").forEach((button) => {
+          button.addEventListener("click", function () {
+            const schemaId = this.getAttribute("data-schema-id");
+            const detailsRow = document.getElementById(
+              `schema-details-row-${schemaId}`
+            );
+
+            if (detailsRow.style.display === "table-row") {
+              detailsRow.style.display = "none";
+              this.textContent = "Show Properties";
+            } else {
+              detailsRow.style.display = "table-row";
+              this.textContent = "Hide Properties";
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

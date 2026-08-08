@@ -150,21 +150,7 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/CM4AI_d4d_core.yaml
       md5: 8845bd9aad1c518e1dc65396a9b18dd6
   recorded_by: d4d runs validate
-canonical:
-  criterion: full and core both validate against the current schema, then most slots,
-    then lowest label
-  selected_from:
-  - label: 2026-07-31_claude-opus-5-generic-v2_rep1
-    slots: 67
-    validation: invalid (core)
-    validation_recorded_at_run_time: invalid
-  - label: 2026-07-31_claude-opus-5-generic-v2_rep2
-    slots: 72
-    validation: valid
-    validation_recorded_at_run_time: valid
-  - label: 2026-07-31_claude-opus-5-generic-v2_rep3
-    slots: 70
-    validation: invalid (full)
-    validation_recorded_at_run_time: invalid
-  margin_over_runner_up: null
-  selected_by: d4d runs select
+canonical_superseded_by:
+  label: 2026-08-07_claude-opus-5-claudecode-generic-v3_rep2
+  at: '2026-08-08T01:19:31+00:00'
+  by: d4d runs select

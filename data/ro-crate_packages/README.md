@@ -45,12 +45,18 @@ cd data/ro-crate_packages/CM4AI && unzip -q -o raw/cm4ai_release_metadata.zip \
 |---------|--------|-------|---------------|
 | CHORUS | Dataverse `doi:10.18130/V3/XNBOPG` | standalone file set | Nearly — one key to drop |
 | CM4AI | Dataverse `doi:10.18130/V3/HIGT4C` | inside `cm4ai_release_metadata.zip` | No — four repairs needed |
-| AI_READI | *link pending* | — | — |
-| VOICE | *link pending* | — | — |
+| AI_READI | supplied locally (Drive folder, 2026-08-07) | root-level file set, 5 artifacts | No — `ro-crate-metadata.json` is windows-1252, not UTF-8 |
+| VOICE | supplied locally (directory, 2026-07-27) | standalone file set, 8 artifacts | No — no `ro-crate-linkml.yaml` |
 
 ## What each crate ships
 
-Both crates follow the same four-artifact shape:
+The Dataverse-published crates (CHORUS, CM4AI) follow the same four-artifact
+shape. The two supplied locally do not: **AI_READI and VOICE both lack
+`ro-crate-linkml.yaml`**, the artifact the deterministic arm consumes, and both
+add `ro-crate-croissant.json` instead. See `crate_manifest.yaml` for each
+crate's exact file list.
+
+The four-artifact shape:
 
 - **`ro-crate-metadata.json`** — RO-Crate JSON-LD with EVI typing and Croissant
   `rai:` (Responsible AI) fields. Carries the richest D4D-relevant content:

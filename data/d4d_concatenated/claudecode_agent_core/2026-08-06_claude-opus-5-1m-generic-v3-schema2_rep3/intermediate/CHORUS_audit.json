@@ -1,0 +1,131 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "funders",
+      "issue": "FundingMechanism declares `grantor` and `grants` fields, but the full record places all funding content in `notes` and leaves both declared fields empty. The bundle clearly supports grantor = National Institutes of Health (NIH Common Fund, Bridge2AI program) and grants = OT2OD032701. This is exactly the v3 defect the core record avoided; the two records are inconsistent on the same fact."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "collection_timeframes",
+      "issue": "CollectionTimeframe declares `start_date` and `end_date`, both left empty while the award period 2022-09-01 to 2026-11-30 is stated only in prose inside `timeframe_details`. The core record populates start_date/end_date from the same evidence, so the pair diverges."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_collectors",
+      "issue": "DataCollector declares a `role` field, left empty in all four objects while role information (data acquisition centers, data site managers, sub-teams, clinical collaborators) is carried in `collector_details` prose. The core record populates `role` for the same four objects."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "ethical_reviews",
+      "issue": "EthicalReview declares `reviewing_organization`, left empty; the core record populates it as 'CHoRUS consortium (Ethics pillar)'. Inconsistent treatment of identical evidence across the pair."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "splits",
+      "issue": "The full record carries a `splits` entry for the sequestered holdout test set. The core record omits `splits` and instead folds the holdout fact into free-text `notes`. If the core schema declares `splits`, this is an omission the bundle clearly supports; the holdout set is stated in both the NIH RePORTER abstract and the project description."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "third_party_sharing",
+      "issue": "The full record carries `third_party_sharing` with is_shared=true. The core record drops the slot and relocates the trainee-access and holdout-sharing facts into `notes` prose, which is a pointer-style restatement rather than a populated field."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "The full record carries `direct_collection` with is_direct=false. The core record omits the slot and restates the fact ('obtained retrospectively ... rather than collected directly from patients') inside `notes`, losing the boolean the class declares."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "file_collections",
+      "issue": "The full record enumerates nine per-modality FileCollection entries (demographics, medication administration, procedures, nursing flowsheets, diagnoses, clinical notes, imaging, waveform telemetry, waveform EEG) directly supported by the webinar data-type table. The core record omits this entirely, so the nine-modality structure the bundle tabulates survives only as scattered prose."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "participant_privacy",
+      "issue": "The full record carries a ParticipantPrivacy object with anonymization_method and five privacy_techniques. The core record omits the slot despite the same supporting evidence (tokenization, local note retention, imaging de-id, privacy_scan_tool, enclave access)."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "maintainers",
+      "issue": "Maintainer.role is a closed enum; 'academic_institution' and 'other' are valid, but the substantive identity content (named individuals Ciera McCrary, Jared Houghtaling, and the email addresses) sits in `maintainer_details` prose because Maintainer declares no name field. Acceptable under the digest, but note that the misspelled address 'cmccrary@mgh.havard.edu' is reproduced verbatim from the source; the flag 'as printed on the site' is source commentary embedded in a value field."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "id",
+      "issue": "`id` is set to the project website URL https://chorus4ai.org/, which identifies the project site rather than the dataset. The bundle offers no dataset-specific persistent identifier, so this is defensible, but the same URI is also used for `page`, making the identifier non-distinguishing."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "creators",
+      "issue": "Five of six Creator objects leave `principal_investigator` empty and carry the person's name only inside `notes` (e.g. 'Azra Bihorac, Bridge2AI CHoRUS leadership team'). Creator declares no generic name slot, so this is a schema limitation rather than a fabrication, but the names are structurally invisible while affiliations are populated."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to",
+      "issue": "Set to 'OMOP Common Data Model (OHDSI)' at dataset level, but the bundle shows the dataset conforms to five distinct standards by modality (OMOP, OHNLP, DICOM, WFDB, EDF+/Persyst). The single-value slot forces a choice; OMOP is the best-supported dominant standard, and the modality breakdown is preserved in file_collections (full) — but the core record loses that qualification entirely."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances",
+      "issue": "`counts: 50000` adopts the project-website figure while the webinar states 'over 45K unique admissions' as of August 2025. The discrepancy is disclosed in `notes` and in the instance-level `notes`, satisfying the disagreement rule, but the structured integer silently selects one source."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats",
+      "issue": "All six DistributionFormat objects populate only `notes`; `access_urls` is never used and no format is expressed as a discrete value. The last entry describes the enclave access route rather than a distribution format, which belongs closer to license/access terms than to the format field."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "external_resources",
+      "issue": "ExternalResource objects populate `external_resources` (URL list) and `notes` only; `archival`, `future_guarantees` and `restrictions` are unpopulated. The bundle does not clearly support those fields, so omission is correct — noted only for completeness."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "status",
+      "issue": "`status` is a free-text string slot whose description cites examples such as draft/published/deprecated. The value is a multi-sentence narrative including award dates, which duplicates collection_timeframes content and exceeds the slot's evident intent."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "notes",
+      "issue": "The 2025-11-14 website banner ('This repoitory is under review for potential modification in compliance with Administration directives') is reproduced with the source's typo, correctly quoted rather than silently corrected. Consistent across both records and also surfaced in regulatory_restrictions.notes."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "known_biases",
+      "issue": "bias_type 'selection_bias' is a permitted enum value and is a reasonable reading of the multi-center academic ICU sampling described. The bundle does not itself label any bias by type, so the categorization is an interpretive act, though a conservative one supported by the stated federated-sampling mitigation."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "known_limitations",
+      "issue": "All three limitation_type values (coverage_limitation, scope_limitation, integration_limitation) are permitted enum members and each maps to explicitly stated bundle content (partial modality availability, ICU/PICU/NICU scope, enclave-only access)."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "'restricted' is a permitted enum value and is supported by the uniform 'Controlled' access designation across all nine data types. `hipaa_compliant` is correctly omitted — the bundle mentions HIPAA only as a training-curriculum topic, not as a dataset compliance assertion."
+    }
+  ],
+  "summary": "Both records stay within the declared bundle; no fabricated facts, no undefined enum values, and no prose-where-a-list-is-required defects were found. All enum-valued slots (bias_type, limitation_type, confidentiality_level, Maintainer.role) use permitted members. The dominant problem is a systematic pair inconsistency in the opposite direction from the usual: the core record populates declared class fields (FundingMechanism.grantor/grants, CollectionTimeframe.start_date/end_date, DataCollector.role, EthicalReview.reviewing_organization) that the full record leaves empty while carrying the same facts as prose in notes/details fields. That is a v3 structure defect in the full record on four slots. Running the other way, the core record drops five slots the full record populates from clearly supported evidence — splits (holdout test set), third_party_sharing, direct_collection, participant_privacy and file_collections (the nine-modality table) — and partially compensates by restating three of them as narrative in the top-level notes, which is pointer-style rather than field population. Reconciliation should therefore push declared-field population from core into full, and push the five dropped slots from full into core, rather than treating either record as authoritative. Remaining findings are low-severity and mostly reflect genuine schema limitations: Creator has no generic name field so five of six creators carry names only in notes; conforms_to is single-valued against a five-standard dataset; id reuses the project-site URL for want of a dataset DOI. The 45K-vs-50K admission discrepancy between the webinar and the website is disclosed in both records' notes, satisfying the disagreement rule, though the structured counts value silently adopts the website figure. Source typos ('repoitory', 'mgh.havard.edu') are reproduced verbatim rather than corrected, which is correct practice, but the parenthetical 'as printed on the site' is editorial commentary sitting inside a value field."
+}

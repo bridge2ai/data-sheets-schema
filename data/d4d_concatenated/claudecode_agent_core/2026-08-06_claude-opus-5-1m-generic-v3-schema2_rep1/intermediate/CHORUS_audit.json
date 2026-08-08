@@ -1,0 +1,197 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Every Creator object leaves the declared fields empty and packs the person's name, role and provenance into `notes`. The Creator range declares `principal_investigator`, `credit_roles` and `affiliations`; the bundle names six individuals (Eric Rosenthal, Azra Bihorac, Xiaoqian Jiang, Yulia Strekalova, Parisa Rashidi, Manlik Kwong) and identifies Rosenthal as PI on NIH RePORTER, so `principal_investigator` is supported for that entry. This is the v3 defect: object of correct shape carrying none of the structure it exists to carry."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "creators",
+      "issue": "Same defect as the full record — all six Creator objects have empty declared fields with the name buried in free-text `notes`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[6]",
+      "issue": "The seventh entry ('The CHoRUS consortium as a whole: 60+ members across 20 different institutions') is not a distinct creator entity but an aggregate commentary about the other entries. It duplicates content already carried in the top-level `notes` and does not name an entity."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "creators[6]",
+      "issue": "Same aggregate-commentary pseudo-entity as in the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_formats",
+      "issue": "A single DistributionFormat object with only `notes` collapses nine distinct formats (OMOP, OHNLP, DICOM, WFDB/PhysioNet-extended, EDF+/Persyst) plus the enclave access route into one prose blob. The slot is multivalued and the range declares `access_urls`; the bundle's modality table supports one entry per format."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "distribution_formats",
+      "issue": "Same single-object collapse of nine distinct distribution formats."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "license",
+      "issue": "Omitted although the bundle supports it: the GitHub organization README states 'This project is licensed under the MIT License.' Note this applies to CHoRUS software, not the dataset, so if populated it must be scoped — but the value currently lives only inside `ip_restrictions.restrictions`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "collection_timeframes",
+      "issue": "`start_date` and `end_date` are declared fields on CollectionTimeframe and are left empty while the dates (project start 2022-09-01, project end 2026-11-30) are stated in the prose of `timeframe_details`. However, these are the NIH award period, not verified data-collection boundaries; the bundle does not state the retrospective clinical record date range, so the structured fields may be correctly withheld. Flagged as ambiguous rather than clearly wrong."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections",
+      "issue": "`collection_type` is a declared field on FileCollection with an enum including `raw_data` and `processed_data`; all nine modality collections leave it unset while the access-control and metadata-schema facts are pushed into free-text `notes`. Also `imaging.file_count: 1000` conflicts with the same object's note reporting 7,642 admissions with radiology data — the bundle carries both figures from different sources, but asserting 1000 as the file count privileges one source silently."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "resources",
+      "issue": "The nine modality entries plus the holdout test set were remapped from `file_collections`/`subsets` into `resources`. The holdout test set is a data split, not a component resource; the full record correctly typed it as a DataSubset with `is_data_split: true`, and that distinction is lost in the core record without the reconciliation report accounting for it."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances",
+      "issue": "`counts: 50000` asserts a single figure while the object's own `notes` records three mutually inconsistent counts from three sources (50,000 released admissions per the website, 'over 45K unique admissions' as of August 2025 per the webinar, 100,000 anticipated). Promoting one to a structured field selects among disagreeing sources, which the decision rules forbid doing silently. Also `instance_type` and `data_substrate` are declared fields left unpopulated though 'patient hospital admission' and the multimodal substrate are stated."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "instances",
+      "issue": "Same silent selection among disagreeing admission counts and same unpopulated declared fields."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "sampling_strategies",
+      "issue": "`is_sample: true` is asserted, but the bundle describes sampling as an intended design goal ('federated access will enable sampling methods to ensure a balanced and diverse cohort') rather than a completed property of the released data. Forward-looking intent stated as realized fact."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "sampling_strategies",
+      "issue": "Same forward-looking intent asserted as realized fact."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources",
+      "issue": "All three ExternalResource objects use only `notes`; the range declares `external_resources`, `archival`, `restrictions` and `future_guarantees`. The URLs (https://chorus4ai.org/, https://github.com/chorus-ai, https://reporter.nih.gov/project-details/10472824) are stated in the bundle and belong in the declared field, not embedded in prose."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "external_resources",
+      "issue": "Same — URLs embedded in prose rather than placed in the declared `external_resources` field."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "maintainers",
+      "issue": "All three Maintainer objects populate only `maintainer_details`; `role` is a declared enum field and the bundle supports `academic_institution` for the MGH program manager entry. Names and email addresses are embedded in prose."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "maintainers",
+      "issue": "Same — `role` enum unset across all three entries."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "The contact address 'cmccrary@mgh.havard.edu' contains an evident typo in the source ('havard'). It is correctly reproduced verbatim with an explicit annotation, which is the right handling, but the same address is repeated in `maintainers` without the annotation."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "license_and_use_terms",
+      "issue": "`data_use_permission` is a declared enum field and is unset. The bundle supports `ethics_approval_required`-adjacent and `institution_specific` semantics (a signed licensing agreement plus a mandatory '.edu' institutional email), so at minimum `institution_specific` is defensible. Left entirely to prose in `license_terms`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "human_subject_research",
+      "issue": "`involves_human_subjects: true` is asserted and `special_populations` is left unset, although the bundle states the released cohort includes PICU and NICU admissions — i.e. minors and neonates. The related `at_risk_populations` slot is omitted entirely despite this support."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "human_subject_research",
+      "issue": "Same — `special_populations` unset despite explicit PICU/NICU coverage in the bundle."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "ethical_reviews",
+      "issue": "`reviewing_organization` and `contact_person` are declared fields left unset. The bundle describes ethics activity (focus groups, legal/regulatory analysis) but does not name an IRB or ethics committee, so the omission of those two fields is defensible; flagged only because the object as written is pure prose in `review_details`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_biases",
+      "issue": "`bias_type: representation_bias` is an inference. The bundle states the project works to 'manage privacy and bias' and to build a 'diverse' cohort, but never identifies a specific bias type present in the data. The bias_description is honest that this is a framing of an open problem rather than a measured bias, but selecting an enum value asserts a categorization the bundle does not make."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "known_biases",
+      "issue": "Same enum categorization not made by the bundle."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "existing_uses",
+      "issue": "Both ExistingUse objects use only `notes`; `examples` is a declared field and the training-program use is a concrete example that belongs there."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_limitations",
+      "issue": "The scope_limitation entry asserts the 20 academic centers are 'all located in the United States'. The bundle places the CHoRUS GitHub organization in 'United States of America' and lists US-based eligibility for the training program, but does not state that all 20 contributing centers are US-located. Mild over-reach beyond the evidence."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "known_limitations",
+      "issue": "Same unsupported 'all located in the United States' claim about the contributing centers."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "citation",
+      "issue": "Omitted. The bundle supplies no recommended citation, so omission is correct — noted only to confirm the absence was checked and is not a gap."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "is_deidentified",
+      "issue": "`identifiable_elements_present`, `identifiers_removed` and `method` are declared fields left unset while tokenization and imaging de-identification are described in prose. `method` in particular is supported ('tokenized using OHNLP toolkit', 'CTP-deid')."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "notes",
+      "issue": "The core `notes` field absorbs four distinct facts displaced from full-record slots that the core schema may not declare (holdout split, third-party sharing, direct-collection status). This is the documented fallback, but it concentrates content that the reconciliation report must justify slot-by-slot rather than as a block."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "status",
+      "issue": "The website banner 'This repoitory is under review for potential modification in compliance with Administration directives' is a status-bearing statement about the resource and is recorded only in `notes`, not reflected in `status`. Defensible either way, but the two fields now tell partly different stories about the resource's current condition."
+    }
+  ],
+  "summary": "Both records are factually well grounded in the declared bundle — no fabricated institutions, awards, counts or identifiers were found, source disagreements are generally surfaced rather than hidden, and the transcription error in the MGH contact address is reproduced verbatim with annotation. The dominant defect is structural rather than factual: across creators, external_resources, maintainers, file_collections, ethical_reviews and is_deidentified, objects of the correct class are emitted with their declared fields empty and the substance pushed into free-text notes, which is precisely the v3 failure mode. Two multivalued slots (distribution_formats in both records) collapse nine distinct entities into one object. Three findings concern silent selection among disagreeing sources — the promotion of instances.counts to 50000 when the bundle carries 45K, 50K and 100K figures, and imaging file_count 1000 against 7,642 radiology admissions. Minor over-reach appears in the 'all located in the United States' limitation claim, the representation_bias enum categorization, and sampling_strategies.is_sample asserting a design intention as a realized property. Clearly supported omissions: license (MIT, scoped to software), human_subject_research.special_populations and at_risk_populations (PICU/NICU minors and neonates are explicitly in the released cohort), and license_and_use_terms.data_use_permission (institution_specific). The core record faithfully mirrors the full record and inherits its defects; its remapping of the holdout test set from a typed DataSubset into an untyped resource loses the is_data_split distinction and needs explicit accounting in the reconciliation report."
+}

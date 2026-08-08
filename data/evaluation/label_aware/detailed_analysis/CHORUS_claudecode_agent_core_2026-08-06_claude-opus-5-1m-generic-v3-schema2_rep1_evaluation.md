@@ -1,6 +1,6 @@
 # Detailed Evaluation: CHORUS - CLAUDECODE_AGENT_CORE
 
-Evaluated: 2026-08-07T01:13:04.151872
+Evaluated: 2026-08-07T18:14:09.538636
 File: `data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/CHORUS_d4d_core.yaml`
 
 ## Overall Scores
