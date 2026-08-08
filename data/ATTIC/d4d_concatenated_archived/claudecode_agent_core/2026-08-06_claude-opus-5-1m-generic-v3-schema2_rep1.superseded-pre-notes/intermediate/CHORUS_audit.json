@@ -1,0 +1,209 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "file_collections",
+      "issue": "The full record places the nine modality groupings in `file_collections`, but the core record moves them into `resources` and additionally folds the holdout test set (a split, represented in the full record via `subsets` and `splits`) into the same list. This is an unreconciled structural divergence between the paired records: the same nine entities are typed as file collections in one and as component sub-datasets in the other, and the holdout appears in `resources` in core with no counterpart typing in full. Core must either retain `file_collections` if the core schema declares it, or the full record must be aligned to the same slot choice; the holdout must not be silently retyped from a split to a resource."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "subsets",
+      "issue": "Omitted from the core record while present in the full record (`subsets` holding the holdout test set). The bundle supports it identically for both records ('sequestering holdout datasets for external validation'), and the core schema is a subset of Dataset slots, so an evidence-supported slot present in full should be reproduced in core unless the core schema does not declare it. If `subsets` is not a CoreDataset slot this must be stated in the reconciliation report rather than resolved by moving the entity into `resources`."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "splits",
+      "issue": "Omitted from the core record while present in the full record with the same supporting evidence (holdout sequestration). Same reconciliation issue as `subsets`."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "relationships",
+      "issue": "Omitted from core while present in full (per-admission linkage across modalities; 7,642 admissions with radiology data). Evidence support is identical in both records."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "Omitted from core while present in full. The bundle supports the claim equally for both records (retrospective acquisition from hospital source systems, not collected from individuals)."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "participant_privacy",
+      "issue": "Omitted from core while present in full, with identical bundle support (tokenization, local note retention, imaging de-identification, privacy scanning, geocoded Location linkage)."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "third_party_sharing",
+      "issue": "Omitted from core while present in full (`is_shared: true`). Same evidence basis in both."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "instances.counts",
+      "issue": "`counts: 50000` is asserted as the instance count, but the bundle carries two non-equivalent figures from different sources: the project website reports 50,000 released admissions, while the September 2025 webinar reports 'over 45K unique admissions' as of August 2025, and the website separately gives 100,000 as the anticipated final figure. Selecting 50,000 as a bare integer silently resolves a source disagreement that the decision rules require to be represented rather than collapsed. The disagreement is narrated in `description` but not at the point of the numeric claim."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "acquisition_methods[0].was_directly_observed",
+      "issue": "`was_directly_observed: true` is asserted for retrospective extraction from hospital source systems. The bundle describes acquisition of pre-existing records ('retrospective data collection'), not direct observation by the dataset creators. This conflicts with `direct_collection.is_direct: false` in the full record, an internal inconsistency; the same acquisition event is characterised as directly observed in one slot and not direct in another."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "human_subject_research.involves_human_subjects",
+      "issue": "Asserted `true`. The bundle establishes that the data are patient hospital records and that ethics and legal workstreams exist, but no source in the bundle states an IRB determination or characterises the dataset as human subjects research. The adjacent declared fields `irb_approval`, `ethics_review_board` and `regulatory_compliance` are left empty, so the object carries a determination the bundle does not make while omitting the fields that would evidence it."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "'Critically ill adults admitted to intensive care', 'Pediatric intensive care (PICU) patients' and 'Neonatal intensive care (NICU) patients' are listed as at-risk groups. The bundle states only that the released dataset draws from ICU, PICU and NICU; it does not designate any group as at-risk or describe protections targeted at at-risk status. `special_protections` restates the general controlled-access terms rather than any protection specific to these populations, so the object infers a safeguarding frame the bundle does not supply."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "ethical_reviews[0].reviewing_organization / [1].reviewing_organization",
+      "issue": "'CHoRUS consortium Ethics pillar (Ethical and Trustworthy AI)' and 'CHoRUS legal and ethics workstream' are presented as reviewing organizations. The bundle names 'Ethics (Ethical and Trustworthy AI)' as one of three project pillars and describes ethics focus groups and legal analysis; it does not name either as an organization that conducted an ethical review of the dataset. The second value in particular is a coined label, not an entity named in the bundle. `contact_person` is left empty in both objects."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "known_biases[1]",
+      "issue": "A `representation_bias` entry is asserted whose `bias_description` states only that the project treats bias as a risk to be managed. The bundle records an intent to 'manage privacy and bias'; it does not identify representation bias as present in the dataset. This populates a known-bias slot with a governance statement rather than a known bias."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators",
+      "issue": "Six people are listed under `principal_investigator`. The bundle names ROSENTHAL, ERIC S. as the principal investigator of the NIH award; the other five (Bihorac, Jiang, Strekalova, Rashidi, Kwong) appear only as members of the 'Bridge2AI CHoRUS Leadership Team' slide, which does not assign them PI status. Five of six values overstate the role the bundle supports. `credit_roles` is unpopulated throughout."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "funders[0].grantor",
+      "issue": "The grantor value embeds award recipient, fiscal year and dollar amount ('awarded to Massachusetts General Hospital for fiscal year 2022 in the amount of $5,880,300') inside what the schema declares as the granting entity. This is source commentary inside an entity-name field; the grantor is the NIH Common Fund / Bridge2AI program."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to",
+      "issue": "The slot declares a single established standard, but the value packs five standards (OMOP, OHNLP, DICOM, WFDB, EDF+/Persyst) into one prose string. The per-modality standards are already correctly carried on the individual file_collection/resource objects, so the top-level value is prose where a single standard identifier is declared."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "status",
+      "issue": "The value is multi-sentence narrative combining release state with the website's Administration-directives notice, the latter also appearing verbatim in `regulatory_restrictions.regulatory_restrictions`. `status` is declared as a short state string (e.g. draft, published, deprecated); this is source commentary in a status field and duplicates content held elsewhere."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "created_by",
+      "issue": "The value embeds a membership count and institution count ('comprising more than 60 members across 20 institutions') inside a creator-identity field. The counts are bundle-supported but belong in `description`, not inside the name of the responsible party."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license_and_use_terms.contact_person",
+      "issue": "The value is prefixed with 'Access requests:' and holds two email addresses. `contact_person` is declared as a person; the value is a labelled multi-address route. The same two addresses are also duplicated in `maintainers[2].maintainer_details`."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "maintainers[*].maintainer_details",
+      "issue": "Maintainer entities are described entirely in free prose within `maintainer_details`; no maintainer name is carried in a structured field. maintainers[1] describes the GitHub organization's repository inventory (28 repos, package status page) rather than identifying a maintaining party, so that object records infrastructure facts in a slot that asks who maintains the dataset."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license",
+      "issue": "Omitted, while the bundle states that the chorus-ai GitHub project 'is licensed under the MIT License'. If the omission is deliberate on the ground that MIT governs the software repositories rather than the dataset (the dataset being controlled-access under a separate licensing agreement), that distinction should be recorded in the reconciliation report; as written the record is silent on a licence term the bundle names explicitly."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license_and_use_terms.data_use_permission",
+      "issue": "Unpopulated although the bundle supports enum-valued constraints: access requires a signed licensing agreement and a '.edu' email address, which correspond to declared permitted values such as `institution_specific`. The free-text `license_terms` carries the content the enum field is declared to hold."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "regulatory_restrictions.hipaa_compliant",
+      "issue": "Unpopulated. The bundle references 'HIPAA/GDPR compliance for OMOP/FHIR data' only as a training-curriculum topic, not as a compliance determination about the CHoRUS dataset, so omission is defensible; flagged because the adjacent `confidentiality_level: restricted` is asserted without a bundle statement using that or an equivalent term — the bundle says 'Controlled access', which is an access-control statement rather than a confidentiality classification."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_timeframes[0].start_date / end_date",
+      "issue": "2022-09-01 and 2026-11-30 are the NIH award project start and end dates, used here as the data collection timeframe. `timeframe_details` correctly discloses this substitution, but the dates as populated assert a collection window the bundle does not state; the underlying clinical data are retrospective and their actual coverage period is nowhere given in the bundle."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "sensitive_elements[1]",
+      "issue": "A second SensitiveElement object asserts that geographic distance to the nearest hospital and social-determinant elements are sensitive. The bundle lists these as contextual data elements to be included; it does not characterise them as sensitive. The sensitivity attribution is the record's inference."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "total_file_count / total_size_bytes",
+      "issue": "Both omitted. The bundle gives '23 Tb' of waveform data and '1.6 Billion' rows of EHR OMOP data. Neither is a file count and 23 Tb is a modality subtotal rather than a dataset total, so omission is defensible; noted so the reconciliation report can record that these figures were deliberately not converted into total-size claims."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "doi / citation / download_url / version / issued",
+      "issue": "All omitted. The bundle supplies no DOI, no recommended citation, no direct download URL (access is by registration and licensing agreement), no version identifier and no formal issuance date. Omission is correct; recorded here so the audit is explicit that these absences were checked against the bundle rather than overlooked."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "machine_annotation_tools[0]",
+      "issue": "Three tools are collapsed into a single MachineAnnotationTools object with parallel `tools` and `tool_descriptions` lists. The slot is multivalued, so one object per distinct tool would represent the entities the slot declares; as written the pairing between a tool and its description is positional and implicit, and `tool_accuracy` is unpopulated for all three."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "existing_uses",
+      "issue": "Two ExistingUse objects each carry a single `examples` entry, and the first ('being used for training activities and publications') is a bare restatement of the bundle phrase with no identified use. The two objects are not clearly distinct entities — both concern the AIM-AHEAD training programme — so the split does not correspond to two distinct existing uses."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "missing_data_documentation[0].handling_strategy",
+      "issue": "The value describes how site submission gaps are tracked and reported back to sites, which is a curation-workflow fact rather than a strategy for handling missing data in the released dataset. The bundle does not state how missing values are handled analytically; the slot is populated with an adjacent fact."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "id",
+      "issue": "https://chorus4ai.org/dataset is a constructed identifier; the bundle gives https://chorus4ai.org/ as the project homepage and does not publish a dataset URI. The fragment-based child identifiers under it are likewise constructed. Acceptable as a local minting convention but should be declared as such in the reconciliation report."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "maintainers[0].maintainer_details",
+      "issue": "The contact email is reproduced as 'cmccrary@mgh.havard.edu', matching the bundle exactly. The bundle value contains an apparent typographical error ('havard' for 'harvard'). Faithful transcription is correct under the evidence boundary; flagged so the reconciliation report can note that the defect originates in the source."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "instances[0].sampling_strategies",
+      "issue": "Unpopulated on the Instance object while a top-level `sampling_strategies` is populated. Not an error, but the two locations are not cross-consistent in coverage; the reconciliation report should confirm the top-level placement is intentional."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "collection_consents / collection_notifications / consent_revocations / informed_consent",
+      "issue": "All omitted. The bundle describes retrospective use of existing hospital records and community-facing ethics focus groups, but states nothing about individual consent, notification or revocation. Omission is the correct treatment; recorded to confirm these were assessed."
+    }
+  ],
+  "summary": "Both records are broadly faithful to the declared bundle and no fact was found that lacks any bundle basis. The most serious defects are structural rather than factual: the nine modality groupings are typed as `file_collections` in the full record but as `resources` in the core record, and the holdout test set is carried as `subsets`+`splits` in full but silently retyped into `resources` in core — an unreconciled divergence between the paired records that also drops `relationships`, `direct_collection`, `participant_privacy` and `third_party_sharing` from core despite identical evidence support. A second cluster concerns over-assertion: five of six `creators` are labelled `principal_investigator` when the bundle names only Rosenthal as PI; `human_subject_research.involves_human_subjects: true` and the entire `at_risk_populations` object impose determinations the bundle never makes while leaving the declared evidencing fields (`irb_approval`, `ethics_review_board`) empty; `ethical_reviews` names two coined organizations; and `known_biases[1]` records a governance intention as a known bias. There is one internal inconsistency: `acquisition_methods[0].was_directly_observed: true` contradicts `direct_collection.is_direct: false` for the same retrospective extraction. Shape defects are minor and consistent across both records — source commentary embedded in `funders[0].grantor`, `created_by` and `license_and_use_terms.contact_person`; five standards packed into the single-valued `conforms_to`; narrative prose in `status`; three tools collapsed into one MachineAnnotationTools object; and maintainer identities carried only as free text. Finally, the 45K/50K/100K admission-count disagreement between the webinar and the website is narrated in `description` but resolved silently to 50000 at `instances.counts`, and the collection timeframe substitutes NIH award dates for an unstated data coverage period (disclosed in `timeframe_details`). Omissions of `doi`, `citation`, `download_url`, `version`, `issued` and all consent-related slots are correct against the bundle; the omission of `license` despite the bundle's explicit MIT statement should be justified in the reconciliation report."
+}

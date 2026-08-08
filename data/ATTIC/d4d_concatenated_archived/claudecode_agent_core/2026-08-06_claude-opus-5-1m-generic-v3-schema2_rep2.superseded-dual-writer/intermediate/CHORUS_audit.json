@@ -1,0 +1,191 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "resources",
+      "issue": "The nine modality entries and the holdout test set were emitted as `resources` (range Dataset) in the core record but as `subsets` (range DataSubset) in the full record. In the full record the holdout entry carries `is_data_split: true`, a DataSubset-only slot; that flag is silently dropped in the core record, so the core record no longer states that the holdout set is a data split. The two records therefore assert different structural relationships for the same ten entities. If `subsets` exists on CoreDataset it should have been used; if it does not, the loss of `is_data_split` should have been carried in `notes` on the holdout entry rather than dropped."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Five of the six Creator objects carry no name in any declared field. `Creator` declares `principal_investigator`, `affiliations`, `credit_roles`, and `notes`; only the Rosenthal entry populates a naming field. For Bihorac, Jiang, Strekalova, Rashidi and Kwong the person's name appears only inside free-text `notes` ('Azra Bihorac, Bridge2AI CHoRUS leadership team.'), leaving the object structurally anonymous. This is the v3 failure mode: content parked in prose while declared fields stay empty."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "creators",
+      "issue": "Same defect as the full record: five of six Creator objects identify the person only in `notes`, with no declared naming field populated."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_formats",
+      "issue": "All five DistributionFormat objects populate only `notes`. The class declares `access_urls` and `notes`; the format information (OMOP, DICOM, WFDB, EDF+/Persyst, OHNLP tokens) is carried entirely as prose commentary rather than in any declared field, and the same content is already stated in `subsets` and `conforms_to_schema`. The bundle does supply access-route facts (cloud enclave, controlled access, registration + licensing agreement) that were placed in `license_and_use_terms` instead — correct per the v2 rule — leaving these objects with no declared content of their own."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "distribution_formats",
+      "issue": "Identical to the full record: five objects populating only `notes`, with no declared field carrying the format or access-URL information."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_dates",
+      "issue": "The single DistributionDate object populates only `notes` and its content explicitly states that the information the slot asks for is absent: 'Specific release dates are not stated in the source material.' Per the v2 rule, a value recording that the fact is unavailable has not answered the field; `release_dates` is empty and the slot should have been omitted."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "distribution_dates",
+      "issue": "Same defect as the full record: the object records the absence of release dates rather than supplying them, with `release_dates` unpopulated."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances",
+      "issue": "The second Instance object records the anticipated final dataset (100,000 admissions) as though it were a present instance population. The bundle presents this as a projection ('Anticipated Final Dataset'), not as instances the dataset contains. Composition slots describe what the dataset holds; the forward-looking figure is already correctly carried in `updates.update_details` and duplicating it as an Instance overstates current composition."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "instances",
+      "issue": "Same defect: the anticipated-final-dataset projection is emitted as a second Instance object rather than confined to `updates`."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "instances / subsets / resources",
+      "issue": "Unreconciled internal inconsistency in the headline instance count. `instances[0].counts: 50000` is asserted as a scalar while the object's own `notes` records that the bundle carries two conflicting figures (50,000 admissions on chorus4ai.org versus 'over 45K unique admissions' as of August 2025 in the Cohort 2 webinar). The disagreement is disclosed in prose but a single figure is nonetheless asserted in the structured field, which is the silent selection the decision rules prohibit."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "labeling_strategies",
+      "issue": "The single LabelingStrategy describes an annotation environment that is 'being developed' and states that labeling targets are not enumerated. No labeling has been documented as performed; the object records planned capability rather than an applied methodology. `data_annotation_platform` names an environment the bundle does not confirm exists in operational form."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "labeling_strategies",
+      "issue": "Same defect as the full record: a prospective annotation capability recorded as an applied labeling strategy."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "machine_annotation_tools",
+      "issue": "CTP-deid, privacy_scan_tool and DeGauss/UF-Geocoding are de-identification, privacy-scanning and geocoding utilities, not annotation tools. The bundle supports them as preprocessing tooling (already correctly recorded in `preprocessing_strategies`); only the OHNLP toolkit is plausibly an annotation tool. The slot's scope has been stretched to hold general tooling."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "machine_annotation_tools",
+      "issue": "Same scope stretch: three of four listed tools are preprocessing/de-identification utilities rather than annotation tools."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "relationships",
+      "issue": "The single Relationships object restates a coverage statistic already carried in `instances[0].notes` (7,642 admissions with radiology data) rather than describing a relationship between instances in the sense the slot declares (graph edges, ratings, links). Weakly supported as an instance-to-instance relationship."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "splits",
+      "issue": "The Splits object and the `subsets` holdout entry carry the same single fact about the sequestered holdout set, duplicating content across two Composition slots without adding structure."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets",
+      "issue": "Nine of the ten DataSubset entries carry synthetic fragment identifiers (e.g. `https://chorus4ai.org/#demographics`, `https://chorus4ai.org/#waveform-eeg`) that the bundle does not attest. The bundle names the modalities in a table but supplies no per-modality URLs or anchors. The `id` slot is required, so identifiers were necessary, but these are constructed rather than sourced."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "resources",
+      "issue": "Same constructed-identifier issue: ten fragment URIs under chorus4ai.org that the bundle does not attest."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_protection_impacts",
+      "issue": "The DataProtectionImpact object describes the project's general ethics and legal work rather than a conducted DPIA. The bundle documents an Ethics pillar, ethics focus groups, and legal-framework development, but never a data protection impact assessment. The content substantially duplicates `ethical_reviews[0].review_details`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "data_protection_impacts",
+      "issue": "Same defect: general ethics-pillar activity recorded as a data protection impact assessment, duplicating `ethical_reviews`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "ethical_reviews",
+      "issue": "`reviewing_organization` is populated with 'CHoRUS consortium Ethics pillar (Ethical and Trustworthy AI)', which is a project workstream rather than a reviewing body. The bundle documents no IRB, ethics committee, or external review organization. The value gives the slot the shape of an ethics review without an attested reviewer."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "ethical_reviews",
+      "issue": "Same: a project pillar named as the reviewing organization, with no IRB or ethics committee attested in the bundle."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "maintainers",
+      "issue": "Both Maintainer objects fold person names, institutional affiliations and email addresses into the single free-text `maintainer_details` string. `Maintainer` declares only `maintainer_details`, `role` and `notes`, so no better-fitting declared field exists, but the second entry additionally embeds curatorial attribution ('Contacts listed on the chorus-ai GitHub organization overview') in `notes`, mixing source commentary with contact content."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "The dataset-level `notes` reproduces a source typo without flagging it as such in the address itself ('cmccrary@mgh.havard.edu'), and separately embeds an unresolved schema-attribution ambiguity about which OMOP data type carries the extensions. The disclosure is appropriate per the ambiguity rule, but the same misspelled address is repeated verbatim in `maintainers[0].maintainer_details` without the '(address as printed in the source)' qualifier, so the qualifier does not travel with the value."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "notes",
+      "issue": "Same: misspelled email reproduced in both `notes` (qualified) and `maintainers[0].maintainer_details` (unqualified). The core `notes` additionally absorbs the holdout-test-set fact displaced by the `subsets`→`resources` substitution, which is a reasonable mitigation but leaves a composition fact in dataset-level prose."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "status",
+      "issue": "`status` is a free-text summary of release maturity. The bundle carries a more specific and directly quotable status signal — the website banner 'This repoitory is under review for potential modification in compliance with Administration directives' — which was placed in `notes` and `regulatory_restrictions.notes` instead. Not incorrect, but the slot's value is inferred synthesis rather than an attested status string."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "language",
+      "issue": "Omission the bundle arguably supports: the Cohort 2 webinar lists 'Working command of English' as a required applicant skill and all documented materials are English. Weak evidence for the dataset's own content language, so omission is defensible, but it was not considered."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "citation",
+      "issue": "Omission. The bundle supplies the NIH award attribution sentence and award number OT2OD032701 that the project website directs users to acknowledge. This is an acknowledgement requirement rather than a citation format, so omission is defensible; noted as a borderline supported omission."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "total_size_bytes",
+      "issue": "Omission. The bundle states '23 Tb Waveform data' for the current release. This covers one modality only and the unit notation is ambiguous (Tb vs TB), so omitting the dataset-level total is correct; the figure is preserved in the waveform subset `notes`. Recorded as a considered omission rather than a defect."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources",
+      "issue": "All five ExternalResource objects use `external_resources` (the URL) plus `notes`. The class declares `archival`, `future_guarantees` and `restrictions`, none populated. The bundle does not attest archival status or future guarantees for these links, so omission of those fields is correct; flagged only to record that the objects are minimally populated by evidence limits rather than by oversight."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "purposes / tasks / addressing_gaps / intended_uses",
+      "issue": "Substantial content overlap across the four Motivation/Uses slots: the holdout-set-for-external-validation fact appears in `purposes[2]`, `tasks[3]`, `intended_uses[1]` and `future_use_impacts[0]`; the training/education fact appears in `purposes[4]`, `intended_uses[2]` and `existing_uses`. Each placement is individually defensible against its slot description, but the repetition inflates apparent coverage."
+    }
+  ],
+  "summary": "Both records are well grounded in the declared bundle — no fabricated facts, no external-knowledge leakage, no prior-D4D reuse, and the two genuine source conflicts (50,000 vs 45K admissions; the ambiguous OMOP-extension row) are surfaced rather than hidden. Enum usage is valid throughout (credit_roles, bias_type, limitation_type, role, confidentiality_level all draw on defined values) and all required keys are present (Dataset.id, DataSubset.id, RawDataSource.source_description). The dominant defect is structural rather than factual: five of six Creator objects in each record are anonymous, carrying the person's name only in free-text `notes` while the declared naming fields stay empty — precisely the v3 failure mode. Second, the core record substitutes `resources` (range Dataset) for the full record's `subsets` (range DataSubset), silently dropping the `is_data_split: true` flag on the holdout test set and leaving the paired records asserting different structure for the same ten modality entities. Third, several objects are shaped but hollow: all five DistributionFormat entries and the single DistributionDate entry populate only `notes`, with the DistributionDate value explicitly recording that release dates are unavailable — an omission dressed as an answer. Lower-severity issues cluster around slot-scope stretch (preprocessing utilities filed as machine_annotation_tools; the Ethics pillar named as a reviewing_organization; general ethics work recorded as a DPIA), forward-looking content placed in composition slots (the 100,000-admission projection as an Instance; a not-yet-built annotation environment as a labeling_strategy), constructed subset identifiers the bundle does not attest, and redundancy across the Motivation/Uses slots. Recommended remediation before Phase 4: populate Creator naming fields for all six creators; reconcile the subsets/resources divergence and preserve the holdout split flag; drop distribution_dates and either drop distribution_formats or move its content to a field that carries it; demote the anticipated-final-dataset Instance to updates only; and either surface both admission counts structurally or qualify the asserted 50000."
+}
