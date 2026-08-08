@@ -29,15 +29,40 @@ class TestCanonicalRuns(unittest.TestCase):
         self.found = canonical_runs()
 
     def test_it_finds_the_marked_records(self):
-        self.assertEqual(sorted(self.found), ["AI_READI", "CHORUS", "CM4AI"])
+        """Which projects are marked is a property of the corpus, not of the
+        resolver, so it is not asserted as a literal.
 
-    def test_voice_is_absent_rather_than_guessed(self):
-        """No VOICE replicate validates (#292), so it has no canonical record.
-
-        Absent, not least-bad: picking one would ship a record known to be
-        broken, which is what `select` refuses to do.
+        This used to read `["AI_READI", "CHORUS", "CM4AI"]`. Two sweeps later
+        that list was wrong twice over: #292 was fixed so VOICE gained a
+        canonical record, and VOICE_PEDIATRIC became a project in its own
+        right. A test that has to be edited every time generation improves is
+        measuring the calendar.
         """
-        self.assertNotIn("VOICE", self.found)
+        self.assertTrue(self.found, "no project has a canonical record")
+        self.assertLessEqual(set(self.found), set(PROJECTS))
+
+    def test_a_project_with_no_valid_replicate_is_absent_rather_than_guessed(self):
+        """Absent, not least-bad: marking one would ship a record known to be
+        broken, which is what `select` refuses to do.
+
+        Constructed rather than read off the corpus. This assertion used to be
+        `assertNotIn("VOICE", found)` and rested on #292 keeping every VOICE
+        replicate invalid; when that was fixed the test failed, having become a
+        statement about VOICE rather than about the resolver.
+        """
+        import tempfile
+        import yaml as _yaml
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp) / "m_core" / "2026-01-01_config_rep1"
+            d.mkdir(parents=True)
+            # A run with provenance but no `canonical` block: the shape
+            # `select` leaves behind when no replicate is fit to mark.
+            (d / "CHORUS_provenance.yaml").write_text(_yaml.safe_dump({
+                "run": {"project": "CHORUS", "label": "2026-01-01_config_rep1",
+                        "method": "m"},
+                "outputs": {"full": {"path": "f.yaml"},
+                            "core": {"path": "c.yaml"}}}))
+            self.assertEqual({}, canonical_runs(concat_dir=Path(tmp)))
 
     def test_every_entry_resolves_to_records_that_exist(self):
         for project, entry in self.found.items():
@@ -54,9 +79,12 @@ class TestCanonicalRuns(unittest.TestCase):
                 self.assertEqual(entry["candidates"], 3)
 
     def test_a_config_filter_narrows_it(self):
-        self.assertEqual(
-            canonical_runs(config="2026-07-31_claude-opus-5-generic-v2"),
-            self.found)
+        """The config is derived from the marks, not hardcoded: it changes with
+        every sweep, and pinning it made this test expire on a schedule."""
+        configs = {e["label"].rsplit("_rep", 1)[0] for e in self.found.values()}
+        self.assertEqual(1, len(configs),
+                         f"marks span more than one config: {sorted(configs)}")
+        self.assertEqual(canonical_runs(config=configs.pop()), self.found)
         self.assertEqual(canonical_runs(config="no-such-config"), {})
 
 
@@ -77,14 +105,18 @@ class TestTheCommand(unittest.TestCase):
         for line in lines:
             self.assertTrue((REPO / line).is_file(), line)
 
-    def test_missing_names_the_gap(self):
-        out = self._run("--missing")
-        self.assertIn("VOICE", out.output)
-
     def test_the_gap_is_every_project_without_a_mark(self):
+        """Derived, not literal. This pair used to assert `"VOICE" in output`;
+        #292 was fixed, every project gained a mark, and the gap is now empty —
+        so the old assertion tested that generation was still broken."""
+        gap = set(PROJECTS) - set(canonical_runs())
         out = self._run("--missing")
+        self.assertEqual(out.exit_code, 0, out.output)
+        if not gap:
+            self.assertIn("Every project has a canonical record", out.output)
+            return
         named = {l.strip() for l in out.output.splitlines() if l.strip()}
-        self.assertEqual(named, set(PROJECTS) - set(canonical_runs()))
+        self.assertEqual(named, gap)
 
     def test_one_project_can_be_asked_for(self):
         out = self._run("--project", "CHORUS")
@@ -93,8 +125,18 @@ class TestTheCommand(unittest.TestCase):
         self.assertNotIn("CM4AI", out.output)
 
     def test_asking_for_a_project_without_one_fails_rather_than_empties(self):
-        """Silence would read as "no canonical needed" rather than "none exists"."""
-        out = self._run("--project", "VOICE")
+        """Silence would read as "no canonical needed" rather than "none exists".
+
+        The project is derived. This used to name VOICE, which had no mark only
+        because #292 was open; when that was fixed the test asserted that a
+        successful lookup should fail. With every project now marked there is
+        nothing on the real corpus to exercise, so the case is skipped here and
+        the behaviour is held by the library-level test above.
+        """
+        gap = sorted(set(PROJECTS) - set(canonical_runs()))
+        if not gap:
+            self.skipTest("every project has a canonical record")
+        out = self._run("--project", gap[0])
         self.assertNotEqual(out.exit_code, 0)
 
 
