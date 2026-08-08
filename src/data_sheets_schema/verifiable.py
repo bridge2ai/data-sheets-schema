@@ -218,6 +218,13 @@ def _month_forms(m: int) -> list[str]:
     return list(dict.fromkeys(forms))
 
 
+def _ordinal(d: int) -> str:
+    """`17` -> `17th`. 11, 12 and 13 take `th` despite ending 1, 2, 3."""
+    if 11 <= d % 100 <= 13:
+        return f"{d}th"
+    return f"{d}{ {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th') }"
+
+
 def renderings(kind: str, value: str) -> list[str]:
     """Every spelling a source document might plausibly use for one token.
 
@@ -251,7 +258,11 @@ def renderings(kind: str, value: str) -> list[str]:
         out += [f"{month} {d}, {y}",
                 f"{month} {d:02d}, {y}",
                 f"{d} {month} {y}",
-                f"{d:02d} {month} {y}"]
+                f"{d:02d} {month} {y}",
+                # Ordinal day. The VOICE IRB protocol writes "January 17th,
+                # 2023", which no cardinal rendering matches (#406).
+                f"{month} {_ordinal(d)}, {y}",
+                f"{_ordinal(d)} {month} {y}"]
     out += [f"{m:02d}/{d:02d}/{y}",
             f"{m}/{d}/{y}",
             f"{y}/{m:02d}/{d:02d}"]
@@ -266,7 +277,13 @@ def normalise(kind: str, value: str) -> str:
     equating tokens that genuinely differ, which is the failure this is meant to
     detect.
     """
-    v = value.strip().rstrip(".,;)]").lower()
+    # `:` joined the strip set in #406. `rstrip` stops at the first character
+    # not in it, so `10.60775/fairhub.1):` halted on the colon and never
+    # reached the `)` — the DOI kept two characters of prose punctuation and
+    # could not match. Four values on the 2026-08-07 sweep. A DOI may contain a
+    # colon, but only a broken one *ends* with bare punctuation, which is the
+    # same trade already accepted for `.`, `;` and `)`.
+    v = value.strip().rstrip(".,;:)]").lower()
     # Applied to both kinds, and identically to the bundle. Stripping the
     # resolver from DOIs but not from DOI-shaped URLs made the two sides
     # asymmetric, so `https://doi.org/10.18130/V3/HIGT4C` could never match a
@@ -275,6 +292,35 @@ def normalise(kind: str, value: str) -> str:
     v = re.sub(r"^https?://", "", v)
     v = re.sub(r"^(?:dx\.)?doi\.org/|^doi:", "", v)
     return v.rstrip("/")
+
+
+def _is_whole_token(kind: str, text: str, start: int, end: int) -> bool:
+    """Is this match a token in its own right, or part of a longer one?
+
+    The same boundary rule `grounded_in` applies to the bundle, applied to the
+    record — because the question is the same question. `\\b\\d{4,}\\b` fires
+    inside a dotted identifier, so `2024.11.03.621734` yielded the claim
+    `621734`, a grant number `2021.0346` yielded `0346`, and `zenodo.17555036`
+    yielded `17555036`. None of those is a figure the record asserts; each was
+    counted in `stated` and then, correctly, never found (#406).
+
+    That inflated the denominator with tokens that were never claims, which
+    biases the reported rate *downward* — the opposite direction to the
+    false-negative bugs fixed alongside this, and the reason both had to be
+    settled before any rate from this check is quoted.
+
+    Applied to every kind, not just counts: the asymmetry between what is
+    extracted and what is looked for is the defect, and it is not specific to
+    one pattern.
+    """
+    before = text[start - 1] if start else ""
+    after = text[end] if end < len(text) else ""
+    if before and re.fullmatch(_PRECEDES.get(kind, r"\w"), before):
+        return False
+    # `_CONTINUES` entries may need two characters (`\.\d`), so test the tail.
+    if after and re.match(_CONTINUES.get(kind, r"\w"), text[end:]):
+        return False
+    return True
 
 
 def extract(record: dict[str, Any], *,
@@ -316,6 +362,8 @@ def extract(record: dict[str, Any], *,
                 for m in PATTERNS[kind].finditer(text):
                     if _overlaps(m.start(), m.end()):
                         continue
+                    if not _is_whole_token(kind, text, m.start(), m.end()):
+                        continue
                     taken.append((m.start(), m.end()))
                     yield Claim(kind=kind, value=m.group(),
                                 slot=slot or "(root)")
@@ -350,7 +398,16 @@ _CONTINUES = {
     "accession": r"[\w-]",
     # A dot continues a count only when a digit follows: `1234.5` is a different
     # quantity, while `1234.` ends a sentence. Same shape as the DOI rule.
-    "count": r"(?:[\d,]|\.\d)",
+    #
+    # A comma needs the identical treatment and did not get it (#406). It was
+    # `[\d,]`, so any comma continued the number — but a comma is a thousands
+    # separator only before a digit. After one it is a delimiter, and the
+    # commonest place a figure is followed by a delimiter is JSON:
+    # `"size": 3815969779678,`. That rejected every byte count in the FAIRhub
+    # API source, 10 values on the 2026-08-07 sweep, each of them plainly
+    # present. `1,234,567` must still not be matched by `1234`, which the
+    # `,\d` branch preserves.
+    "count": r"(?:\d|,\d|\.\d)",
     "iso_date": r"[\d-]",
 }
 # What may *precede* is narrower than what may follow. A slash is a path

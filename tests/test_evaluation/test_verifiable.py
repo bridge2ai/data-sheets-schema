@@ -341,6 +341,99 @@ class TestTokenBoundaries(unittest.TestCase):
         self.assertTrue(self._grounded("accession", "GSE123", "see GSE123)"))
 
 
+class TestTheCommaIsBothSeparatorAndDelimiter(unittest.TestCase):
+    r"""#406. `_CONTINUES["count"]` was `[\d,]`, so *any* comma continued the
+    number. A comma is a thousands separator only before a digit; after one it
+    is a delimiter, and the commonest place a figure meets a delimiter is JSON.
+
+    That rejected every byte count in AI-READI's FAIRhub API source — ten
+    values on the 2026-08-07 sweep, `"size": 3815969779678,` and kin, each
+    plainly present in the bundle.
+    """
+
+    def _grounded(self, value, bundle):
+        return check_record({"counts": value}, bundle,
+                            skip_slots=set()).grounded == 1
+
+    def test_a_json_number_followed_by_a_comma_grounds(self):
+        self.assertTrue(self._grounded("3815969779678",
+                                       '"size": 3815969779678, "n": 2'))
+        self.assertTrue(self._grounded("1234", "the total was 1234, then more"))
+
+    def test_a_thousands_separator_still_blocks_a_partial_match(self):
+        """The reason the comma was a continuation in the first place."""
+        self.assertFalse(self._grounded("1234", "value 1,234,567 total"))
+        self.assertFalse(self._grounded("234", "value 1,234 total"))
+
+    def test_the_other_boundaries_are_unaffected(self):
+        self.assertFalse(self._grounded("1234", "value 12345"))
+        self.assertFalse(self._grounded("1234", "value 1234.5"))
+        self.assertTrue(self._grounded("1234", "value 1234. Next sentence"))
+
+
+class TestTrailingColonOnADoi(unittest.TestCase):
+    """#406. `rstrip` halts at the first character not in its set, so
+    `10.60775/fairhub.1):` stopped on the colon and never reached the `)`,
+    leaving two characters of prose punctuation on the DOI."""
+
+    def test_a_colon_is_stripped(self):
+        self.assertEqual("10.60775/fairhub.1",
+                         normalise("doi", "10.60775/fairhub.1):"))
+        self.assertEqual("10.18130/v3/b35xwx",
+                         normalise("doi", "10.18130/V3/B35XWX:"))
+
+    def test_the_previously_handled_punctuation_still_strips(self):
+        for suffix in (".", ",", ";", ")", "]"):
+            with self.subTest(suffix=suffix):
+                self.assertEqual("10.1234/x", normalise("doi", "10.1234/x" + suffix))
+
+
+class TestOrdinalDays(unittest.TestCase):
+    """#406. The VOICE IRB protocol writes "January 17th, 2023", which no
+    cardinal rendering matched."""
+
+    def test_an_ordinal_day_is_rendered(self):
+        r = renderings("iso_date", "2023-01-17")
+        self.assertIn("january 17th, 2023", r)
+        self.assertIn("17th january 2023", r)
+
+    def test_the_awkward_suffixes_are_right(self):
+        from data_sheets_schema.verifiable import _ordinal
+        self.assertEqual(
+            ["1st", "2nd", "3rd", "4th", "11th", "12th", "13th",
+             "21st", "22nd", "23rd", "31st"],
+            [_ordinal(d) for d in (1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 31)],
+            "11-13 take 'th' despite ending in 1, 2, 3")
+
+
+class TestExtractionDoesNotInventClaims(unittest.TestCase):
+    r"""#406. `\b\d{4,}\b` fired inside dotted identifiers, so the record was
+    charged for figures it never asserted.
+
+    This is the denominator direction: a token that was never a claim inflates
+    `stated` and is then correctly never found, biasing the rate *downward* —
+    the opposite of the false negatives fixed alongside it. Both had to be
+    settled before any rate from this check could be quoted.
+    """
+
+    def _counts(self, text):
+        return [c.value for c in extract({"x": text}, skip_slots=set())
+                if c.kind == "count"]
+
+    def test_a_digit_run_inside_a_biorxiv_doi_is_not_a_claim(self):
+        self.assertNotIn("621734", self._counts("bioRxiv 2024.11.03.621734."))
+
+    def test_a_digit_run_inside_a_grant_number_is_not_a_claim(self):
+        self.assertEqual([], self._counts("Wallenberg Foundation (2021.0346)"))
+
+    def test_a_real_figure_beside_one_is_still_extracted(self):
+        self.assertEqual(["61937"], self._counts("61937 recordings"))
+        self.assertEqual(["3815969779678"], self._counts('"size": 3815969779678,'))
+
+    def test_a_standalone_year_is_still_extracted(self):
+        self.assertIn("2024", self._counts("published in 2024 by the team"))
+
+
 class TestThousandsSeparators(unittest.TestCase):
     """Sources group thousands; records do not.
 
