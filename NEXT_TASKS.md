@@ -3,7 +3,7 @@
 Open work, most blocking first. Each item states what is true now, not only what
 should happen, so an item can be checked rather than believed.
 
-Last verified: 2026-08-03.
+Last verified: 2026-08-08.
 
 ---
 
@@ -116,19 +116,14 @@ is for; this path is the free, deterministic one and should not be read as more.
 Also corrected: the rubric declared "84 points (16 numeric + 4 pass/fail)" while
 its questions define 17 numeric + 3 pass/fail = 88. The questions are what get
 scored, so the prose was stale — and it is why the presence and LLM paths used
-different denominators. A test now fails if the two drift apart again. **The 84 is still in two places
-and both are wrong** (checked 2026-08-03):
+different denominators. A test now fails if the two drift apart again.
 
-- `constants/evaluation.py: RUBRIC20_MAX_SCORE = 84` — exported from
-  `constants/__init__.py` and imported by nothing. Dead *and* wrong, which is
-  the combination that gets picked up by the next person who needs a
-  denominator.
-- `scripts/summarize_rubric20_results.py` — `overall.get('max_points', 84)` as
-  a fallback in three places, and one hardcoded `/84` in the markdown table
-  (line 186) that ignores `max_points` entirely, so the printed denominator is
-  84 even when the data says 88.
-
-Small and self-contained.
+**The two stale 84s are gone** (re-checked 2026-08-08).
+`RUBRIC20_MAX_SCORE` is now derived — `RUBRIC20_NUMERIC_QUESTIONS * 5 +
+RUBRIC20_PASS_FAIL_QUESTIONS` = 88 — so it cannot drift from the questions
+again, and `summarize_rubric20_results.py` has no live `84` left: every
+remaining occurrence is a comment explaining the history for the 167 records
+that *were* scored out of 84.
 
 ---
 
@@ -158,7 +153,7 @@ section concluded the arm had never run on exactly that mistake (#269).
 
 ---
 
-## 6. Run the generic-v2 arm — staged, not run
+## 6. generic-v2 vs v3 — both have now run; the promotion decision is still open
 
 **Staged:** `src/download/prompts/d4d_generic_arm_prompt_v2.md` is v1 plus three
 uniform decision rules, with `condition="generic_v2"` wired through `RunSpec`.
@@ -202,7 +197,26 @@ not sampling noise.
 3 and rework 1, or split the `form` class into collapsed-cardinality and hollow
 -object before rerunning, so the next comparison can see what this one could not.
 The rules are still **not** in the playbook, so a run today gets v1 behaviour
-unless it explicitly selects `condition="generic_v2"`.
+unless it explicitly selects a condition.
+
+### v3 has run (2026-08-05 → 2026-08-07)
+
+This section said v3 was "drafted, wired and tested but unrun". That is no
+longer true — `src/download/prompts/d4d_generic_arm_prompt_v3.md` has 20 runs
+across four labels:
+
+| label | what it was |
+|---|---|
+| `2026-08-05_claude-opus-5-generic-v3_rep1`, `…-1m-generic-v3_rep{1,2,3}` | first v3 passes, AI_READI + CHORUS |
+| `2026-08-06_…-1m-generic-v3-schema2_rep{1,2,3}` | schema-2 series, with the trap-slot and repair work below |
+| `2026-08-07_claude-opus-5-claudecode-generic-v3_rep{1,2,3}` | the five-project sweep; **canonical set** |
+
+**Still open, and this is the actionable part:** the v2-vs-v3 comparison the
+promotion decision rests on has not been written up. `notes/generic_v2_results.md`
+exists for v1→v2; there is no v3 equivalent, and the hollow-object regression
+rule 1 introduced has not been re-measured under v3. Until that is done the
+playbook keeps v1 behaviour by default, which is the safe state but not a
+decision.
 
 Guards in place:
 
@@ -262,7 +276,7 @@ from cache with no paid call, and the suite asserts it.
 
 ## 8. Repository hygiene — a 3.19 GB orphan, and the guard for the next one
 
-Landed 2026-08-03, PR #261; PR #265 open.
+Landed 2026-08-03, PR #261. **PR #265 merged 2026-08-04.**
 
 A single unreferenced blob — a 3.19 GB ZIP of CM4AI `untreated` images, staged
 then unstaged in March — was 96% of a 3.3 GB local `.git`. Never committed,
@@ -277,13 +291,14 @@ nothing in this repo backs it up. It is also one of three image conditions;
 recorded in the bundled metadata. Copy it somewhere durable or delete it
 deliberately; do not leave the decision to the next `rm`.
 
-**PR #265 (open)** adds the guard that would have stopped it: a CI check on the
-PR diff refusing files over 10 MB (largest tracked file today is 3.94 MB), plus
-a budget on every tracked cache under `agreement_cache/`.
+**The guard is in place** (PR #265): `scripts/check_large_files.py` runs on every
+pull request and refuses files over 10 MB, plus a budget on every tracked cache
+under `agreement_cache/`. Exercised repeatedly since — the 2026-08-07 sweep
+passed it at 290 files / 11.05 MB total, largest 1.34 MB.
 
 ---
 
-## 9. Split VOICE into two datasets — registered, not generated
+## 9. Split VOICE into two datasets — done (2026-08-07, PR #395)
 
 `VOICE_PEDIATRIC` is a project as of #298. The companion pediatric dataset has
 its own DOI (10.13026/h995-bt35), protocol and Research Ethics Board approval,
@@ -309,55 +324,24 @@ broke nothing; the four-project list in 26 files is prose, not logic.
 
   The VOICE bundle is byte-identical (md5 `e637eb75`, what 49 runs attest), and
   a test pins it.
-- **A generation run — deferred to v3, by decision.** Running under v2 now would
-  mean running again when v3 lands, so `VOICE_PEDIATRIC` is generated with
-  whichever config the v2-vs-v3 comparison settles on. v3 is drafted, wired and
-  tested (#272) but unrun.
+- **A generation run — done.** Both projects were generated in the 2026-08-07
+  five-project sweep (`2026-08-07_claude-opus-5-claudecode-generic-v3_rep{1,2,3}`,
+  PR #395), under v3. `VOICE_PEDIATRIC` was generated from its own 204 KB bundle
+  as its own project, which is what the fork was for.
 
-  `VOICE_PEDIATRIC` cannot join that comparison itself — it has no v1 or v2
-  baseline, so it is generated once under the winning config rather than as a
-  third arm.
+  **#292 is closed.** All three VOICE replicates validate; `d4d evaluate
+  related-datasets` reports 0 defects across the canonical set; and VOICE
+  carries the pediatric reference the way the slot intends — `target_dataset:
+  https://doi.org/10.13026/h995-bt35`, `relationship_type: references`, a DOI
+  rather than an inline object. The enum casing normaliser is on the write path
+  and no replicate emitted `related_to`, so the one failure mode a re-run was
+  not guaranteed to avoid did not recur.
 
-  **Regenerate VOICE in the same run.** Its three 2026-07-31 replicates are the
-  reason no VOICE record is canonical (#292), and both causes are now addressed
-  for future runs but not for those records:
+  **Canonical records now exist for all five projects** (#293, merged
+  2026-08-04). VOICE is no longer the gap; `d4d runs canonical` marks
+  AI_READI, CHORUS, CM4AI, VOICE and VOICE_PEDIATRIC, all from the 2026-08-07
+  label.
 
-  - the enum values: `References` normalises to `references` on the write path,
-    and `related_to` still fails, which is correct — it names nothing in the
-    vocabulary;
-  - the inline object in `target_dataset`: the slot is `range: string` with
-    `slot_uri: dcterms:relation` — an **identifier**, not a pointer to a record
-    we hold. rep2 and rep3 already put a URL there and that slot passed; they
-    failed on `relationship_type` alone. The pediatric DOI appears 11 times in
-    VOICE's own bundle, so VOICE can reference it whether or not a pediatric
-    datasheet exists.
-
-  **There is no ordering constraint.** An earlier version of this section said
-  the pediatric record had to exist before VOICE could point at it. That was
-  wrong, and it conflated two things: referencing a dataset by identifier, which
-  needs only the DOI in the input documents, and referencing a D4D record we
-  produced, which is not what this slot holds. VOICE and `VOICE_PEDIATRIC` can
-  be generated in either order, or independently.
-
-  The fork stands on its own reasoning — a dataset with its own DOI, protocol
-  and ethics approval is its own datasheet (#292) — not on VOICE needing it.
-
-  So the **next run of any configuration** is the first chance for VOICE to have
-  a canonical record — the enum normaliser is on the write path and the slot
-  description is in the schema, so neither is tied to v3. v3 is what is planned,
-  not what is required.
-
-  A chance, not a guarantee. Of the three failures, casing is fixed on the write
-  path and the inline object should not recur now the description no longer
-  promises "or Dataset object" — but **`related_to` names nothing in the
-  vocabulary and nothing stops the generator emitting it again**. Correcting
-  rep2's `related_to` to a permitted value makes that record validate
-  completely, so the enum is the whole remaining blocker, and it is the one a
-  re-run is not guaranteed to avoid (#313).
-
-  On canonical counts: there are **none at all** on `main` today — the three
-  marks for AI_READI, CHORUS and CM4AI are in #293, still open. Once that lands
-  it is three of four, and VOICE is the gap.
 - **Whether `VOICE` becomes `VOICE_main` — decided: no.** Attempted and reverted.
   The path moves were clean (567 files, no clashes), but the content rewrite
   broke attestation two ways that no amount of care avoids: record bodies carry
@@ -374,6 +358,92 @@ broke nothing; the four-project list in 26 files is prose, not logic.
 share a source corpus, so they are not two independent samples, and
 `SHARED_CORPUS_GROUPS` records that for any analysis that would otherwise
 count them as such.
+
+---
+
+## 10. The six-phase API pipeline hardening — landed, unlogged until now
+
+Roughly thirty PRs between 2026-08-05 and 2026-08-07 that never reached this
+file. Recorded here so the thread can be picked up cold.
+
+**Repair loop.** The API runner now repairs invalid records from the validator's
+own findings before failing the run (#361), repeating while findings strictly
+decrease, up to four rounds (#365), and keeping prior accounting when resuming a
+completed run (#363).
+
+**Trap slots.** `d4d runs trap-inventory` mines every record's validation
+failures schema-first (#375). The narrative family was scalarized and
+`Organization.id` made optional to defuse the commonest traps (#376, #382), and
+the post-rerun inventory shows the schema-2 records contributing **zero**
+findings (#384).
+
+**Telemetry.** `d4d runs telemetry` collects per-phase process measurements
+(#367), excludes quarantined runs and measures invocation gaps end-to-start
+(#383), with retroactive reports for the superseded `-high` label and the 7-31
+v2 sweep (#368).
+
+**Provenance depth.** Every intermediate phase record is snapshotted and listed
+hashed in provenance (#370); an assembly fingerprint is recorded (#353/#359);
+and published artifacts are reproduced on the recorded instrument rather than
+the live one (#355).
+
+**Prompt/slot discipline.** Slot-filling order — structured slots, then
+`description`, `notes` last (#385/#387); a `notes` escape hatch with
+only-declared-keys instructions (#380/#381); DCAT distribution slots and the
+`source_caveats` evidence channel (#388); and playbook parity so the agentic
+paths carry the API pipeline's tuned guidance (#394).
+
+**Not logged as open work** — all merged. Listed because the next person reading
+§6 needs to know what changed between v2 and v3 besides the prompt.
+
+---
+
+## 11. Instrument hygiene: the verifiable checker and the test debt — done 2026-08-08
+
+Five PRs (#405, #411, #414, #415, #416) closing seven issues (#404, #406, #407,
+#408, #409, #410, #412, #413). The theme: **the instruments were wrong, not the
+records.**
+
+`d4d evaluate verifiable` reported 1869/2044 = 91.4% grounded. After four
+matcher fixes it reports **1991/2033 = 97.9%**, and — the actual finding —
+**no unsupported value anywhere in the sweep**. All 42 remaining ungrounded
+values are correct derivations that are simply not literal in the sources
+(`publisher: https://dataverse.lib.virginia.edu/`, a host the bundle carries
+only as a prefix; `counts: 1600000000` where the bundle says "1.6 Billion").
+
+The four defects, three false-negative and one false-positive:
+
+| defect | values | cause |
+|---|---|---|
+| trailing-slash URLs | 104 | `normalise` strips the slash, the bundle keeps it, `/` continues a URL |
+| delimiter comma read as a thousands separator | 10 | `_CONTINUES["count"]` was `[\d,]`; JSON writes `"size": 123,` |
+| abbreviated months | 11 | `renderings` emitted only full month names |
+| digit runs inside dotted identifiers | 11 | `extract` applied no boundary rule while `grounded_in` applied a careful one |
+
+The last one moves the **denominator** (2044 → 2033) and four of the eleven had
+been counted as *grounded* by coincidence, so it biases the rate the opposite way
+to the other three. Both directions had to be settled before any figure from
+this check could be quoted.
+
+⚠️ **Rates published from this check before 2026-08-08 are lower bounds.**
+Anything quoting the old 91.4%, or comparing arms or replicates on it, should be
+re-derived.
+
+**Two guard tests were found asserting the bug they guarded.**
+`test_the_known_voice_finding_is_still_detected` claimed three VOICE dates were
+"absent from the bundle in any format" and called them the check's first real
+positive; all three were present, abbreviated, so the check had no confirmed true
+positive on that record. `test_voice_is_absent_rather_than_guessed` rested on
+#292 staying open and failed for the best possible reason. Both replaced with
+constructed fixtures.
+
+**`d4d runs archive` was destroying documentation** — it rebuilt the ATTIC README
+from each invocation, so four archiving runs deleted the rationale for the
+2026-04 and 2026-07-23 series (#412). Now appends; the function had no direct
+test coverage, which is how a clobbering writer survived.
+
+`make test` went from 5 failures to **1365 passed, 0 failed**, and the working
+tree from 23 untracked entries to none.
 
 ---
 
