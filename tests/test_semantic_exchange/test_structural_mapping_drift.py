@@ -125,6 +125,45 @@ class TestStructuralMappingDrift(unittest.TestCase):
 
 
 
+class TestCompositionSubjectsDoNotCollide(unittest.TestCase):
+    """#410. `_map_composition_paths` named its subject after the last segment
+    of the path, so `anomalies.id` became `d4d:Dataset/id` — which is also the
+    identifier of `Dataset`'s *own* `id` slot. The row then asserted that the
+    Dataset's id closely matches an anomaly, which is false. What distinguished
+    them survived only in the free-text `structural_notes` column.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import csv
+        cls.rows = list(csv.DictReader(
+            COMMITTED.read_text(encoding="utf-8").splitlines(), delimiter="\t"))
+        cls.comp = [r for r in cls.rows
+                    if "Composition path" in (r.get("structural_notes") or "")]
+
+    def test_composition_rows_carry_the_whole_path_in_the_subject(self):
+        self.assertTrue(self.comp, "no composition rows found")
+        for r in self.comp:
+            path = r["structural_notes"].split("Composition path:", 1)[1].strip()
+            with self.subTest(subject=r["subject_id"]):
+                self.assertTrue(r["subject_id"].endswith("/" + path),
+                                f"{r['subject_id']} does not encode {path!r}")
+
+    def test_no_composition_row_claims_a_class_own_slot(self):
+        """The falsehood the collision produced: `Dataset/id` is a real slot of
+        `Dataset`, and it does not closely match an anomaly."""
+        for own in ("d4d:Dataset/id", "d4d:Dataset/name",
+                    "d4d:Dataset/description", "d4d:Dataset/notes",
+                    "d4d:Dataset/source_caveats"):
+            with self.subTest(subject=own):
+                self.assertNotIn(own, {r["subject_id"] for r in self.comp})
+
+    def test_subject_ids_are_unique(self):
+        subs = [r["subject_id"] for r in self.rows]
+        dupes = {s for s in subs if subs.count(s) > 1}
+        self.assertEqual(set(), dupes)
+
+
 class TestTheCheckCoversBothArtifacts(unittest.TestCase):
     """`make gen-sssom-structural` writes two files; the check reads two (#295).
 

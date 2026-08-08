@@ -392,7 +392,15 @@ class StructuralMappingGenerator:
                     for rocrate_prop in rocrate_candidates:
                         mapping = StructuralMapping(
                             d4d_class=class_name,
-                            d4d_slot=path.split('.')[-1],
+                            # The whole path, not its last segment (#410).
+                            # `anomalies.id` reached through composition became
+                            # subject `d4d:Dataset/id`, which is also the id of
+                            # `Dataset`'s *own* `id` slot — so the row read as
+                            # "the Dataset's id closely matches an anomaly",
+                            # which is false. What distinguished them survived
+                            # only in the free-text `structural_notes` column,
+                            # which nothing reads.
+                            d4d_slot=path,
                             d4d_slot_uri=None,
                             d4d_range=None,
                             d4d_multivalued=False,
