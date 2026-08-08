@@ -1,0 +1,136 @@
+"""`d4d provenance record --prompt` — hash the prompt into the record.
+
+The recorder builds its `prompts` block from `prompt_paths`, and `d4d api run`
+has always passed it (`api_runner.py`, `prompt_paths=spec.prompt_files`). The
+CLI — the only route the Claude Code agentic path has — did not expose it, so
+every agentic record in the corpus carried `prompts: null` while every API
+record carried hashes. The same procedure was reproducible from one and not the
+other.
+
+That gap bites hardest here specifically: the study these records feed compares
+a generic prompt condition against a tuned one, and the generic prompt file's
+own editing rule says a change to it re-baselines the arm for every project at
+once. A record that names its prompt but does not hash it cannot detect that.
+"""
+
+import os
+import tempfile
+import unittest
+from pathlib import Path
+
+import yaml
+from click.testing import CliRunner
+
+
+HEADER = """\
+# D4D Datasheet for TESTPROJ Dataset
+# Agent runtime: Claude Code
+# Provider: Anthropic
+# Model: claude-opus-5
+# Reasoning effort: high
+# Temperature: 0.0
+"""
+
+
+class TestProvenancePromptFlag(unittest.TestCase):
+    def setUp(self):
+        from data_sheets_schema.cli import provenance as prov_cli
+
+        self.cli = prov_cli.provenance
+        self.runner = CliRunner()
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+
+        self.label = "2026-08-07_test_rep1"
+        self.method = "claudecode_agent"
+        concat = self.root / "data" / "d4d_concatenated"
+        full_dir = concat / self.method / self.label
+        core_dir = concat / f"{self.method}_core" / self.label
+        full_dir.mkdir(parents=True)
+        core_dir.mkdir(parents=True)
+
+        body = yaml.safe_dump({"id": "https://example.org/x", "name": "x"})
+        (full_dir / "TESTPROJ_d4d.yaml").write_text(HEADER + body)
+        (core_dir / "TESTPROJ_d4d_core.yaml").write_text(HEADER + body)
+        (core_dir / "TESTPROJ_reconciliation.md").write_text("# report\n")
+
+        self.bundle = self.root / "bundle.txt"
+        self.bundle.write_text("source documents\n")
+        self.prompt = self.root / "arm_prompt.md"
+        self.prompt.write_text("# generic arm prompt\n")
+
+        self.concat = concat
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _record(self, *extra):
+        args = ["record", "--project", "TESTPROJ", "--method", self.method,
+                "--label", self.label, "--input-bundle", str(self.bundle),
+                *extra]
+        # The recorder's paths are repo-relative module constants bound as
+        # default arguments, so they follow the working directory rather than
+        # a patched attribute.
+        cwd = os.getcwd()
+        os.chdir(self.root)
+        try:
+            return self.runner.invoke(self.cli, args)
+        finally:
+            os.chdir(cwd)
+
+    def _written(self):
+        p = (self.concat / f"{self.method}_core" / self.label
+             / "TESTPROJ_provenance.yaml")
+        return yaml.safe_load(p.read_text())
+
+    def test_prompt_is_hashed_into_the_record(self):
+        result = self._record("--prompt", str(self.prompt))
+        self.assertEqual(result.exit_code, 0, result.output)
+
+        prompts = self._written()["prompts"]
+        self.assertEqual(prompts["hash_algorithm"], "sha256")
+        self.assertEqual(len(prompts["files"]), 1)
+        entry = prompts["files"][0]
+        self.assertEqual(entry["path"], str(self.prompt))
+        self.assertTrue(entry["exists"])
+        self.assertEqual(entry["bytes"], self.prompt.stat().st_size)
+        self.assertEqual(len(entry["sha256"]), 64)
+
+    def test_repeated_prompt_flags_are_all_recorded(self):
+        second = self.root / "component.md"
+        second.write_text("# per-project component\n")
+
+        result = self._record("--prompt", str(self.prompt),
+                              "--prompt", str(second))
+        self.assertEqual(result.exit_code, 0, result.output)
+
+        files = self._written()["prompts"]["files"]
+        self.assertEqual([f["path"] for f in files],
+                         [str(self.prompt), str(second)])
+        # The tuned condition is prompt + component; two files that hash the
+        # same would mean the component never made it into the record.
+        self.assertNotEqual(files[0]["sha256"], files[1]["sha256"])
+
+    def test_without_the_flag_the_block_says_so_rather_than_going_missing(self):
+        result = self._record()
+        self.assertEqual(result.exit_code, 0, result.output)
+
+        prompts = self._written()["prompts"]
+        self.assertIsNone(prompts["paths"])
+        self.assertIn("not recoverable", prompts["note"])
+
+    def test_a_missing_prompt_file_fails_instead_of_recording_a_false_path(self):
+        result = self._record("--prompt", str(self.root / "nope.md"))
+        self.assertNotEqual(result.exit_code, 0)
+        # A live record asserting a prompt path that does not exist is the
+        # same class of false claim the module refuses for input bundles.
+        self.assertNotIn("nope.md", str(self._probe_written()))
+
+    def _probe_written(self):
+        p = (self.concat / f"{self.method}_core" / self.label
+             / "TESTPROJ_provenance.yaml")
+        return p.read_text() if p.exists() else ""
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,6 +1,6 @@
 # Detailed Evaluation: AI_READI - CLAUDECODE_AGENT_CORE
 
-Evaluated: 2026-08-07T01:11:59.292931
+Evaluated: 2026-08-07T18:12:36.458898
 File: `data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_d4d_core.yaml`
 
 ## Overall Scores

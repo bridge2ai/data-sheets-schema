@@ -1,0 +1,1881 @@
+# D4D Core Datasheet for AI_READI Dataset
+# Generation Method: schema-grounded agentic, phase 2
+# Agent runtime: Claude Code
+# Provider: Anthropic
+# Model: claude-opus-5
+# Reasoning effort: high
+# Mode: four-phase project agent, generic prompt
+# Prompt: src/download/prompts/d4d_generic_arm_prompt.md (identical for all projects)
+# Arm: BASELINE (input documents only)
+# Schema: D4D Core (CoreDataset class), semantic exchange layer subset
+# Schema path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+# Sources: data/preprocessed/concatenated/AI_READI_preprocessed.txt + data/d4d_concatenated/claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/AI_READI_d4d.yaml
+# Source manifest: data/preprocessed/source_manifest.yaml
+# Prior D4D factual reuse: prohibited
+# Temperature: 0.0
+# Generated: 2026-08-07
+# Phase 4 reconciliation: completed
+
+id: https://doi.org/10.60775/fairhub.3
+name: Flagship Dataset of Type 2 Diabetes from the AI-READI Project
+title: Flagship Dataset of Type 2 Diabetes from the AI-READI Project
+description: >-
+  The flagship dataset of the Artificial Intelligence Ready and Equitable (also rendered
+  "Exploratory") Atlas for Diabetes Insights (AI-READI) project, one of four Data Generation
+  Projects of the NIH Common Fund Bridge2AI programme. Version 3.0.0 contains multimodal data
+  from 2,280 participants with and without type 2 diabetes mellitus (T2DM), collected between
+  19 July 2023 and 1 May 2025 at three US sites (University of Alabama at Birmingham,
+  University of California San Diego, and University of Washington) and harmonised across
+  them. The cohort was recruited so as to be approximately balanced across self-reported
+  race/ethnicity (Asian, Black, Hispanic, White), biological sex, and four categories of
+  diabetes status (no diabetes; pre-diabetes or lifestyle-controlled; controlled by oral or
+  non-insulin injectable medication; insulin-controlled), the aim being to support unbiased
+  AI/ML model development. Each instance is an individual participant. Modalities include
+  survey and social-determinants-of-health data, physical measurements and vitals, clinical
+  laboratory results from blood and urine, a 12-lead electrocardiogram, cognitive screening,
+  visual function testing, retinal photography, OCT, OCTA and fluorescence lifetime imaging
+  ophthalmoscopy, ten days of continuous glucose monitoring, ten days of wearable activity
+  monitoring, and ten days of home environmental sensing. The release comprises 356,343 files
+  totalling about 3.82 TB, organised following the Clinical Dataset Structure (CDS) v0.1.1 as
+  one directory per datatype, then modality, then device, then participant, with the files in
+  each datatype directory following a domain-appropriate standard (WFDB, OMOP CDM, DICOM,
+  Open mHealth, and the NASA ESDS ASCII guidelines). The dataset is published on the FAIRhub
+  platform under DOI 10.60775/fairhub.3 and is distributed as a publicly downloadable set
+  that carries no protected health information, alongside a controlled-access set available
+  under a data use agreement. The stated goal is to enable AI/ML research into salutogenesis
+  in T2DM - the pathway from disease back to health - and to serve as a model for future
+  ethically sourced, AI-ready biomedical datasets.
+notes: >-
+  AI-READI is organised as six cross-disciplinary project modules with teams at eight
+  institutions, and its remit extends beyond the dataset itself to a reusable blueprint for
+  AI-ready data generation (project management, data collection, management and sharing
+  guidance published through the project's Zenodo community and GitHub organisation), the
+  development of the FAIRhub platform and the Clinical Dataset Structure specification, a
+  year-long research internship programme, and engagement with the Native Biodata Consortium
+  on tools for American Indian and Alaska Native data governance.
+source_caveats: >-
+  The declared bundle carries two FAIRhub records for this dataset and they disagree: the
+  v2.0.0 record reports 2.01 TB across 165,051 files and states that "This version of the
+  dataset is no longer accessible", while the v3.0.0 record and its API metadata report
+  3.82 TB across 356,343 files. This record describes v3.0.0; the v2.0.0 figures are retained
+  only inside version_access as historical scope. Four further disagreements are left
+  unresolved rather than merged. (1) Affiliation: the FAIRhub study description gives Aaron
+  Lee's affiliation, the lead sponsor and the managing organization as "Washington University
+  in St. Louis" (ROR 01yc7t268), whereas NIH RePORTER lists the awardee organization as
+  University of Washington, the BMJ Open protocol places Aaron and Cecilia Lee at the
+  University of Washington, Seattle, and the data licence is issued by the University of
+  Washington as Licensor; both readings are recorded where they occur. (2) Licence version:
+  the v3.0.0 metadata names "AI-READI custom license v2.0" at doi.org/10.5281/zenodo.17555036,
+  but the licence text actually included in the bundle is AI-READI-LICENSE-v1.0 from Zenodo
+  record 10642459; the terms quoted in this record are from the bundled v1.0 text. (3) Target
+  enrolment: the BMJ Open protocol and the FAIRhub study description state 4,000 participants,
+  the NIH RePORTER abstract states "4,000+", and the UW IRB application states 4,600.
+  (4) Enrolment start: the BMJ Open protocol gives 18 July 2023 while the FAIRhub study
+  description gives an actual start date of 2023-07-19. Two further points: the FAIRhub
+  de-identification metadata records deIdentType "NoDeIdentification" on the grounds that no
+  identifiers were collected, while the Nature Metabolism comment states the public set is
+  stripped of PHI by the HIPAA Safe Harbor method - both statements are carried in
+  is_deidentified. Finally, the BMJ Open Table 2 arrives in the extracted text with its
+  columns split into separate runs; the analyte / unit / reference-range / rationale pairings
+  in the variables section were reconstructed from the preserved row order, which is internally
+  consistent across all four runs but is a reconstruction rather than a direct reading.
+version: 3.0.0
+doi: 10.60775/fairhub.3
+issued: '2025-11-17T00:00:00+00:00'
+publisher: https://fairhub.io/
+created_by: AI-READI Consortium
+language: en
+license: >-
+  AI-READI custom license v2.0 (https://doi.org/10.5281/zenodo.17555036), described on the
+  FAIRhub record as the "Health Data License"; the licence text included in the source bundle
+  is the earlier AI-READI-LICENSE-v1.0 University of Washington Data License Agreement
+  (https://doi.org/10.5281/zenodo.10642459).
+download_url: https://fairhub.io/datasets/3
+page: https://docs.aireadi.org/docs/3/about
+conforms_to: >-
+  Clinical Dataset Structure (CDS) v0.1.1
+  (https://cds-specification.readthedocs.io/en/v0.1.1/)
+is_tabular: false
+keywords:
+- Diabetes mellitus
+- Machine Learning
+- Artificial Intelligence
+- Electrocardiography
+- Continuous Glucose Monitoring
+- Retinal imaging
+- Eye exam
+
+distributions:
+- id: https://doi.org/10.60775/fairhub.3#dir-cardiac-ecg
+  name: cardiac_ecg
+  path: cardiac_ecg
+  bytes: 302931703
+  description: >-
+    "This directory contains electrocardiogram data collected by a 12 lead protocol (the current
+    standard), Holter monitor, or smartwatch. The terms ECG and EKG are often used
+    interchangeably." Modality subdirectory ecg_12lead, device subdirectory philips_tc30 (Philips
+    PageWriter TC30). Carries a manifest.tsv metadata file.
+- id: https://doi.org/10.60775/fairhub.3#dir-clinical-data
+  name: clinical_data
+  path: clinical_data
+  bytes: 176182781
+  description: >-
+    "This directory contains clinical data collected through REDCap, including blood/urine lab
+    values and survey data. Each CSV file in this directory is a one-to-one mapping to the OMOP CDM
+    tables." Carries a dqd_omop.json metadata file supporting analysis with the OMOP CDM Data
+    Quality Dashboard.
+- id: https://doi.org/10.60775/fairhub.3#dir-environment
+  name: environment
+  path: environment
+  bytes: 55625676514
+  description: >-
+    "This directory contains data collected through an environmental sensor device custom built for
+    the AI-READI project." Modality subdirectory environmental_sensor, device subdirectory
+    leelab_anura. Carries a manifest.tsv metadata file.
+- id: https://doi.org/10.60775/fairhub.3#dir-retinal-flio
+  name: retinal_flio
+  path: retinal_flio
+  bytes: 1069466876718
+  description: >-
+    "This directory contains data collected through fluorescence lifetime imaging ophthalmoscopy
+    (FLIO), an imaging modality for in vivo measurement of lifetimes of endogenous retinal
+    fluorophores." Modality subdirectory flio, device subdirectory heidelberg_flio. Carries a
+    manifest.tsv metadata file.
+- id: https://doi.org/10.60775/fairhub.3#dir-retinal-oct
+  name: retinal_oct
+  path: retinal_oct
+  bytes: 1317625293027
+  description: >-
+    "This directory contains data collected using optical coherence tomography (OCT), an imaging
+    method using lasers that is used for mapping subsurface structure." Modality subdirectory
+    structural_oct, with device subdirectories heidelberg_spectralis, topcon_maestro2,
+    topcon_triton and zeiss_cirrus. Carries a manifest.tsv metadata file.
+- id: https://doi.org/10.60775/fairhub.3#dir-retinal-octa
+  name: retinal_octa
+  path: retinal_octa
+  bytes: 1155908809724
+  description: >-
+    "This directory contains data collected using optical coherence tomography angiography (OCTA),
+    a non-invasive imaging technique that generates volumetric angiography images." Modality
+    subdirectories enface (2D views of the retinal layers derived from 3D volume scans, also
+    called C-scan OCT), flow_cube (blood flow in a 3D view) and segmentation (heightmaps with
+    associated layer information), each with device subdirectories heidelberg_spectralis,
+    topcon_maestro2, topcon_triton and zeiss_cirrus. Carries a manifest.tsv metadata file.
+- id: https://doi.org/10.60775/fairhub.3#dir-retinal-photography
+  name: retinal_photography
+  path: retinal_photography
+  bytes: 174381046406
+  description: >-
+    "This directory contains retinal photography data, which are 2D images. They are also referred
+    to as fundus photography." Modality subdirectories cfp (color fundus photographs; devices
+    icare_eidon, optomed_aurora, topcon_maestro2, topcon_triton), faf (fundus autofluorescence;
+    device icare_eidon) and ir (near-infrared reflectance; devices heidelberg_spectralis,
+    icare_eidon, topcon_maestro2, zeiss_cirrus). Carries a manifest.tsv metadata file.
+- id: https://doi.org/10.60775/fairhub.3#dir-wearable-activity-monitor
+  name: wearable_activity_monitor
+  path: wearable_activity_monitor
+  bytes: 38313536220
+  description: >-
+    "This directory contains data collected through a wearable fitness tracker." Modality
+    subdirectories heart_rate, oxygen_saturation, physical_activity, physical_activity_calorie,
+    respiratory_rate, sleep and stress, each with the device subdirectory garmin_vivosmart5.
+    Carries a manifest.tsv metadata file.
+- id: https://doi.org/10.60775/fairhub.3#dir-wearable-blood-glucose
+  name: wearable_blood_glucose
+  path: wearable_blood_glucose
+  bytes: 4169006971
+  description: >-
+    "This directory contains data collected through a continuous glucose monitoring (CGM) device."
+    Modality subdirectory continuous_glucose_monitoring, device subdirectory dexcom_g6. Carries a
+    manifest.tsv metadata file.
+- id: https://doi.org/10.60775/fairhub.3#dir-root-metadata
+  name: Root-level metadata files
+  path: /
+  description: >-
+    Nine dataset-level metadata files sit at the root: CHANGELOG.md, dataset_description.json,
+    dataset_structure_description.json, healthsheet.md, LICENSE.txt, participants.json,
+    participants.tsv, README.md and study_description.json.
+  source_caveats: >-
+    The file count of 9 is the number of files named in the structure description's root-level
+    metadataFileList; no size is reported for them. Both dataset-level totals reconcile to this
+    residual: the nine datatype directories account for 356,334 files, nine short of the declared
+    total of 356,343, and for 3,815,969,360,064 bytes, 419,614 bytes short of the declared
+    3,815,969,779,678.
+purposes:
+- id: https://doi.org/10.60775/fairhub.3#purpose-ai-ml-t2dm
+  name: Enable AI/ML research into type 2 diabetes and salutogenesis
+  response: >-
+    "The purpose for creating the dataset was to enable future generations of artificial
+    intelligence/machine learning (AI/ML) research to provide critical insights into type 2
+    diabetes mellitus (T2DM), including salutogenic pathways to return to health." Salutogenesis
+    here means the pathway from T2DM back to health, the inverse of studying how healthy people
+    progress to T2DM.
+- id: https://doi.org/10.60775/fairhub.3#purpose-fill-ai-ready-gap
+  name: Supply an AI-ready multimodal dataset where none existed
+  response: >-
+    "Given the complexity of T2DM, AI-based approaches may help with improving our understanding
+    but a key issue is the lack of data ready for training AI models. The AI-READI dataset is
+    intended to fill this gap." The data are stored and shared as "AI-ready", which "enables
+    immediate AI/ML research without reformatting and preprocessing".
+- id: https://doi.org/10.60775/fairhub.3#purpose-balanced-cohort
+  name: Provide a demographically and clinically balanced training cohort
+  response: >-
+    To address the inherent limitations of existing large AI/ML training sets, the cohort is
+    designed to be balanced in race/ethnicity, T2DM severity and biological sex rather than
+    matching the demographic distribution of the US population, because "Building balanced data
+    sets is critical for the development of unbiased machine learning models".
+- id: https://doi.org/10.60775/fairhub.3#purpose-blueprint
+  name: Establish a reusable blueprint for AI-ready data generation
+  response: >-
+    AI-READI "places special emphasis on establishing standards, best practices and guidelines
+    for collection, preparation and sharing of the data that can be used for future efforts to
+    develop other data sets targeted for AI/ML", following the FAIR principles, and "can be
+    viewed as a model for future efforts to develop other medical/health data sets targeted for
+    AI/ML".
+
+tasks:
+- id: https://doi.org/10.60775/fairhub.3#task-pseudotime
+  name: Pseudotime manifold analysis of disease trajectory
+  response: >-
+    "Data collection will be specifically designed to permit downstream pseudo-time manifold
+    analysis, an approach used to predict disease trajectories by collecting and learning from
+    complex, multimodal data from participants with differing disease severity (normal to
+    insulin-dependent T2DM)." The approach relies on dimensionality reduction, is agnostic to
+    existing classification criteria or biases, and has been used in developmental biology to
+    identify differentiation pathways from single-cell gene expression data.
+- id: https://doi.org/10.60775/fairhub.3#task-temporal-atlas
+  name: Reconstruction of a temporal atlas of T2DM development and reversal
+  response: >-
+    "The long-term objective for this project is to develop a foundational dataset in T2DM,
+    agnostic to existing classification criteria or biases, which can be used to reconstruct a
+    temporal atlas of T2DM development and reversal towards health (i.e., salutogenesis)."
+- id: https://doi.org/10.60775/fairhub.3#task-no-predefined-ml-task
+  name: No predefined machine-learning task shipped with the dataset
+  response: >-
+    The dataset ships with no predefined task or label: "N/A - no labels are provided. No
+    specific labeling was performed in the dataset, as the dataset is a hypothesis-agnostic
+    dataset aimed at facilitating multiple potential downstream AI/ML applications." It does
+    ship a recommended training/validation/testing split.
+
+addressing_gaps:
+- id: https://doi.org/10.60775/fairhub.3#gap-multimodal-datasets
+  name: Absence of large, high-quality, inclusive multimodal datasets
+  response: >-
+    "The ability to understand and affect the course of complex, multi-organ diseases such as
+    T2DM has been limited by a lack of well-designed, high quality, large, and inclusive
+    multimodal datasets."
+- id: https://doi.org/10.60775/fairhub.3#gap-diversity
+  name: Lack of racial and ethnic diversity in prior T2DM research
+  response: >-
+    "A meta-epidemiological review of T2DM studies published from 2000 to 2020 indicated that
+    samples lacked racial and ethnic diversity, thus making AI-READI an important step forward
+    in addressing these demographic inequities in research." The prevalence of T2DM is higher in
+    certain racial and ethnic populations and the deleterious consequences are exacerbated in
+    those populations.
+- id: https://doi.org/10.60775/fairhub.3#gap-ai-readiness
+  name: Lack of datasets that are AI ready without reprocessing
+  response: >-
+    "However, a major barrier has been the lack of diverse datasets that are AI ready for
+    training AI models, which the AI-READI project is designed to address."
+- id: https://doi.org/10.60775/fairhub.3#gap-salutogenesis
+  name: Limited understanding of salutogenesis in T2DM
+  response: >-
+    "T2DM is a growing public health threat. Yet, the current understanding of T2DM, especially
+    in the context of salutogenesis, is limited."
+
+creators:
+- id: https://aireadi.org/
+  name: AI-READI Consortium
+  description: >-
+    The dataset's declared creator, recorded in the FAIRhub dataset description with nameType
+    "Organizational". "This dataset was created by members of the AI-READI project, hereby
+    referred to as the AI-READI Consortium." The consortium spans senior, mid-career and early
+    career faculty as well as clinical research coordinators, staff and interns, and
+    "collectively cover many areas of expertise including clinical research, data collection,
+    data management, data standards, bioinformatics, team science, and ethics, among others".
+    Named consortium collaborators in the BMJ Open protocol are Amir Bahmani, Sally Baxter,
+    Edward Boyko, Christopher Chute, Aaron Cohen, Jorge Contreras, Garrison Cottrell, Virginia
+    de Sa, Jeffrey Edberg, Nicole Ehrhardt, Nicholas Evans, Irl Hirsch, Michelle Hribar,
+    Samantha Hurst, Aaron Lee, Cecilia Lee, T.Y. Alvin Liu, Bonnie Maldenado, Gerald McGwin Jr.,
+    Shannon McWeeney, Cynthia Owsley, Bhavesh Patel, Sara Singer, Michael Snyder, Bradley
+    Voytek, Joseph Yracheta and Linda Zangwill.
+  affiliations:
+  - id: https://ror.org/01yc7t268
+    name: Washington University in St. Louis
+    description: >-
+      Recorded in the FAIRhub study description as the lead sponsor and as the managing
+      organization of the dataset. See the record-level source_caveats: other sources in the
+      bundle place the lead institution at the University of Washington.
+  - id: https://ror.org/00cvxb145
+    name: University of Washington
+    description: >-
+      Data collection site (Seattle, Washington), Licensor of the AI-READI data licence, host
+      of the UW IRB that reviewed the study, and the awardee organization recorded by NIH
+      RePORTER. The UW Nutrition and Obesity Research Center performs the central clinical
+      laboratory assays.
+  - id: https://ror.org/008s83205
+    name: University of Alabama at Birmingham
+    description: >-
+      Data collection site (Birmingham, Alabama); hosts the study-wide biorepository at its
+      Center for Clinical and Translational Science and coordinates recruitment sampling.
+  - id: https://ror.org/0168r3w48
+    name: University of California, San Diego
+    description: Data collection site (San Diego, California).
+  - id: https://ror.org/00f54p054
+    name: Stanford University
+  - id: https://ror.org/00za53h95
+    name: Johns Hopkins University
+  - id: https://ror.org/009avj582
+    name: Oregon Health & Science University
+  - id: https://ror.org/0156zyn36
+    name: California Medical Innovations Institute
+    description: >-
+      Home of the FAIR Data Innovations Hub, which develops the FAIRhub platform used to
+      curate and share the dataset.
+  - id: https://ror.org/03r0ha626
+    name: University of Utah
+  - id: https://ror.org/03hamhx47
+    name: University of Massachusetts Lowell
+- id: https://orcid.org/0000-0002-7452-1648#creator
+  name: Aaron Lee
+  description: >-
+    Study Principal Investigator and responsible party, and the dataset's central contact at
+    contact@aireadi.org. Recorded with the degree MD and the title Associate Professor. Listed
+    by NIH RePORTER as principal investigator of project OT2OD032644 at the University of
+    Washington.
+  principal_investigator: https://orcid.org/0000-0002-7452-1648
+  affiliations:
+  - id: https://ror.org/01yc7t268
+    name: Washington University in St. Louis
+- id: https://orcid.org/0000-0003-1994-7213#creator
+  name: Cecilia S. Lee
+  description: >-
+    Study Principal Investigator, MD.
+  principal_investigator: https://orcid.org/0000-0003-1994-7213
+  affiliations:
+  - id: https://ror.org/01yc7t268
+    name: Washington University in St. Louis
+- id: https://orcid.org/0000-0003-4533-9334#creator
+  name: Amir Bahmani
+  description: >-
+    Study Principal Investigator, PhD.
+  principal_investigator: https://orcid.org/0000-0003-4533-9334
+  affiliations:
+  - id: https://ror.org/00f54p054
+    name: Stanford University
+- id: https://orcid.org/0000-0002-5271-7690#creator
+  name: Sally L. Baxter
+  description: >-
+    Study Principal Investigator, MD, MSc; Assistant Professor of Ophthalmology and Biomedical
+    Informatics and a co-PI at the UCSD site, reachable at s1baxter@health.ucsd.edu.
+  principal_investigator: https://orcid.org/0000-0002-5271-7690
+  affiliations:
+  - id: https://ror.org/0168r3w48
+    name: University of California, San Diego
+- id: https://orcid.org/0000-0001-5437-2545#creator
+  name: Christopher G. Chute
+  description: >-
+    Study Principal Investigator, MD, DrPH.
+  principal_investigator: https://orcid.org/0000-0001-5437-2545
+  affiliations:
+  - id: https://ror.org/00za53h95
+    name: Johns Hopkins University
+- id: https://orcid.org/0000-0002-7899-3060#creator
+  name: Jorge Contreras
+  description: >-
+    Study Principal Investigator, J.D.; lead author of the AI-READI licence terms deposited on
+    Zenodo.
+  principal_investigator: https://orcid.org/0000-0002-7899-3060
+  affiliations:
+  - id: https://ror.org/03r0ha626
+    name: University of Utah
+- id: https://orcid.org/0000-0002-3330-0224#creator
+  name: Nicholas Evans
+  description: >-
+    Study Principal Investigator, PhD.
+  principal_investigator: https://orcid.org/0000-0002-3330-0224
+  affiliations:
+  - id: https://ror.org/03hamhx47
+    name: University of Massachusetts Lowell
+- id: https://orcid.org/0000-0001-9843-2845#creator
+  name: Samantha Hurst
+  description: >-
+    Study Principal Investigator, PhD.
+  principal_investigator: https://orcid.org/0000-0001-9843-2845
+  affiliations:
+  - id: https://ror.org/0168r3w48
+    name: University of California, San Diego
+- id: https://orcid.org/0000-0003-2957-0755#creator
+  name: T. Y. Alvin Liu
+  description: >-
+    Study Principal Investigator, MD; Assistant Professor of Ophthalmology, reachable at
+    tliu25@jhmi.edu.
+  principal_investigator: https://orcid.org/0000-0003-2957-0755
+  affiliations:
+  - id: https://ror.org/00za53h95
+    name: Johns Hopkins University
+- id: https://orcid.org/0000-0001-9592-1133#creator
+  name: Gerald McGwin
+  description: >-
+    Study Principal Investigator, PhD.
+  principal_investigator: https://orcid.org/0000-0001-9592-1133
+  affiliations:
+  - id: https://ror.org/008s83205
+    name: University of Alabama at Birmingham
+- id: https://orcid.org/0000-0001-8333-6607#creator
+  name: Shannon McWeeney
+  description: >-
+    Study Principal Investigator, PhD; Professor of Medicine, School of Medicine, reachable at
+    mcweeney@ohsu.edu.
+  principal_investigator: https://orcid.org/0000-0001-8333-6607
+  affiliations:
+  - id: https://ror.org/009avj582
+    name: Oregon Health & Science University
+- id: https://orcid.org/0000-0003-3424-011X#creator
+  name: Cynthia Owsley
+  description: >-
+    Study Principal Investigator, PhD; Nathan E. Miles Endowed Chair of Ophthalmology, reachable
+    at cynthiaowsley@uabmc.edu. Guarantor and corresponding author of the BMJ Open study
+    protocol.
+  principal_investigator: https://orcid.org/0000-0003-3424-011X
+  affiliations:
+  - id: https://ror.org/008s83205
+    name: University of Alabama at Birmingham
+- id: https://orcid.org/0000-0002-0307-262X#creator
+  name: Bhavesh Patel
+  description: >-
+    Study Principal Investigator, PhD; Assistant Research Professor, reachable at
+    bpatel@calmi2.org.
+  principal_investigator: https://orcid.org/0000-0002-0307-262X
+  affiliations:
+  - id: https://ror.org/0156zyn36
+    name: California Medical Innovations Institute
+- id: https://orcid.org/0000-0003-0784-7987#creator
+  name: Michael Snyder
+  description: >-
+    Study Principal Investigator, PhD; Stanford W. Ascherman Professor in Genetics, reachable at
+    mpsnyder@stanford.edu.
+  principal_investigator: https://orcid.org/0000-0003-0784-7987
+  affiliations:
+  - id: https://ror.org/00f54p054
+    name: Stanford University
+- id: https://orcid.org/0000-0002-3374-1177#creator
+  name: Sara J. Singer
+  description: >-
+    Study Principal Investigator, MBA, PhD.
+  principal_investigator: https://orcid.org/0000-0002-3374-1177
+  affiliations:
+  - id: https://ror.org/00f54p054
+    name: Stanford University
+- id: https://orcid.org/0000-0002-1143-5224#creator
+  name: Linda M. Zangwill
+  description: >-
+    Study Principal Investigator, PhD; Professor of Ophthalmology and contact PI at the UCSD
+    site, reachable at lzangwill@health.ucsd.edu.
+  principal_investigator: https://orcid.org/0000-0002-1143-5224
+  affiliations:
+  - id: https://ror.org/0168r3w48
+    name: University of California, San Diego
+funders:
+- id: https://ror.org/01cwqze88
+  name: National Institutes of Health
+  grantor: National Institutes of Health (NIH)
+  description: >-
+    "The creation of the dataset was funded by the National Institutes of Health (NIH) through
+    their Bridge2AI Program (https://commonfund.nih.gov/bridge2ai)." The funding institution is
+    not creating or managing the dataset; that is done by the awardees.
+  grants:
+  - id: https://reporter.nih.gov/project-details/10471118
+    name: 'Bridge2AI: Salutogenesis Data Generation Project'
+    grant_number: OT2OD032644
+    description: >-
+      NIH Common Fund Bridge2AI award, application ID 10471118, project number
+      1OT2OD032644-01. Fiscal year 2022 award amount USD 5,026,499; project period
+      2022-09-01 to 2025-08-31; awardee organization recorded as University of Washington.
+      The FAIRhub metadata links the same core project number to
+      https://reporter.nih.gov/search/yatARMM-qUyKAhnQgsCTAQ/project-details/10885481.
+  - id: https://doi.org/10.60775/fairhub.3#grant-p30dk035816
+    grant_number: P30DK035816
+    description: >-
+      Acknowledged in both the BMJ Open protocol and the Nature Metabolism comment as
+      supporting this research.
+  - id: https://doi.org/10.60775/fairhub.3#grant-ul1tr003096
+    grant_number: UL1TR003096
+    description: Acknowledged in the BMJ Open protocol as supporting this research.
+- id: https://doi.org/10.60775/fairhub.3#funder-rpb
+  name: Research to Prevent Blindness
+  grantor: Research to Prevent Blindness
+  description: >-
+    Acknowledged alongside the NIH grants in the BMJ Open protocol funding statement; no grant
+    number is given.
+- id: https://doi.org/10.60775/fairhub.3#funder-microsoft
+  name: Microsoft AI for Good Lab
+  grantor: Microsoft AI for Good Lab
+  description: >-
+    In-kind support: "We thank the Microsoft AI for Good Lab for supporting the cloud services
+    needed for the project." FAIRhub is a Microsoft Azure cloud-based platform.
+- id: https://doi.org/10.60775/fairhub.3#funder-topcon
+  name: Topcon Corporation
+  grantor: Topcon Corporation (Tokyo, Japan)
+  description: >-
+    In-kind support acknowledged in the Nature Metabolism comment; loaned devices for research
+    purposes at no cost.
+- id: https://doi.org/10.60775/fairhub.3#funder-optomed
+  name: Optomed
+  grantor: Optomed (Oulu, Finland)
+  description: >-
+    In-kind support acknowledged in the Nature Metabolism comment; loaned devices for research
+    purposes at no cost.
+- id: https://doi.org/10.60775/fairhub.3#funder-icare
+  name: iCare World
+  grantor: iCare World (Raleigh, NC)
+  description: >-
+    In-kind support acknowledged in the Nature Metabolism comment; loaned devices for research
+    purposes at no cost.
+- id: https://doi.org/10.60775/fairhub.3#funder-zeiss
+  name: Carl Zeiss
+  grantor: Carl Zeiss (Oberkochen, Germany)
+  description: >-
+    In-kind support acknowledged in the Nature Metabolism comment; loaned devices for research
+    purposes at no cost.
+- id: https://doi.org/10.60775/fairhub.3#funder-heidelberg
+  name: Heidelberg Engineering
+  grantor: Heidelberg Engineering (Heidelberg, Germany)
+  description: >-
+    In-kind support acknowledged in the Nature Metabolism comment; provided research discounts on
+    study devices.
+- id: https://doi.org/10.60775/fairhub.3#funder-dexcom
+  name: Dexcom
+  grantor: Dexcom (San Diego, CA)
+  description: >-
+    In-kind support acknowledged in the Nature Metabolism comment; provided research discounts on
+    study devices.
+- id: https://doi.org/10.60775/fairhub.3#funder-garmin
+  name: Garmin
+  grantor: Garmin (Olathe, KS)
+  description: >-
+    In-kind support acknowledged in the Nature Metabolism comment; provided research discounts on
+    study devices.
+
+instances:
+- id: https://doi.org/10.60775/fairhub.3#instance-participant
+  name: Individual study participant
+  instance_type: individual study participant
+  data_topic: https://meshb.nlm.nih.gov/record/ui?ui=D003924
+  counts: 2280
+  label: false
+  label_description: >-
+    "N/A - no labels are provided. No specific labeling was performed in the dataset, as the
+    dataset is a hypothesis-agnostic dataset aimed at facilitating multiple potential downstream
+    AI/ML applications."
+  description: >-
+    "Each instance represents an individual patient." "Each instance consists of all of the data
+    available for an individual participating in the study", spanning survey data, clinical data,
+    retinal imaging data, environmental sensor data, continuous glucose monitor data and wearable
+    activity monitor data - that is, tabular data, imaging data and physiological
+    signal/waveform data. "There is no unstructured text data included in this dataset." Version
+    3.0.0 holds 2,280 instances; version 1.0.0 held 204 and version 2.0.0 held 1,067.
+  missing_information:
+  - id: https://doi.org/10.60775/fairhub.3#instance-missing-modalities
+    name: Modalities absent for some participants
+    missing:
+    - One or more data modalities for a given participant
+    why_missing:
+    - Some participants elected not to participate in some study elements
+    - >-
+      In a few cases the data collection device did not have any stored results or was
+      returned too late to retrieve the results (for example the battery died, or data was
+      lost)
+    - >-
+      In a few cases there may have been a data collision at some point in the process and
+      data has been lost
+    - >-
+      Operator-dependent imaging modalities may have been skipped when quality issues arose,
+      for example on the Heidelberg Spectralis
+
+anomalies:
+- id: https://doi.org/10.60775/fairhub.3#anomaly-survey
+  name: Skipped or incomplete survey responses
+  anomaly_details: >-
+    "In cases of survey data, skipped questions or incomplete responses are expected."
+- id: https://doi.org/10.60775/fairhub.3#anomaly-wearables
+  name: Wearable device failures
+  anomaly_details: >-
+    "In cases of using wearables, improper use, technical failure such as battery failure or
+    system malfunction are expected."
+- id: https://doi.org/10.60775/fairhub.3#anomaly-imaging
+  name: Imaging noise and acquisition failures
+  anomaly_details: >-
+    "In cases of imaging data, patient uncooperation, noise that may obscure the images and
+    technical failure such as system malfunction, and data transfer failures are expected."
+- id: https://doi.org/10.60775/fairhub.3#anomaly-optomed
+  name: Variable quality of undilated handheld fundus photography
+  anomaly_details: >-
+    Optomed Aurora images are acquired undilated with a handheld camera: "As it becomes
+    challenging to get a good view because of the patients not being dilated and the handheld
+    nature of this imaging modality, the quality of the images vary from patient to patient and
+    within the same patient."
+- id: https://doi.org/10.60775/fairhub.3#anomaly-flio-compliance
+  name: Reduced participant compliance on the final imaging modality
+  anomaly_details: >-
+    FLIO "takes longer than a usual spectralis OCT and exposes patients to uncomfortable levels
+    of light", so it is performed as the last modality of a visit; "Because of this patients may
+    not be at their best possible compliance."
+- id: https://doi.org/10.60775/fairhub.3#anomaly-operator
+  name: Operator-induced variability on manually operated devices
+  anomaly_details: >-
+    The Heidelberg Spectralis "is operated by the imaging team and is not fully automated, quality
+    issues may arise, which may lead to skipping this modality and missing data", whereas the
+    Topcon Triton and Maestro2 position automatically, "which leads to higher quality images with
+    minimal operator induced error".
+- id: https://doi.org/10.60775/fairhub.3#anomaly-no-audit
+  name: No formal external audit
+  anomaly_details: >-
+    "The dataset has not undergone any formal external audits. However, the dataset has been
+    reviewed internally by AI-READI team members for quality checks and to ensure that no
+    personally identifiable information was accidentally included."
+
+known_biases:
+- id: https://doi.org/10.60775/fairhub.3#bias-volunteer
+  name: Volunteer bias
+  bias_type: selection_bias
+  bias_description: >-
+    "Participants are volunteers; therefore, there is selection bias known as volunteer bias
+    which may limit the generalisability of the results among those who are not represented in
+    the study population."
+  mitigation_strategy: >-
+    Recruitment proceeds in waves whose composition and size are adjusted by under- and
+    oversampling groups as enrolment characteristics are monitored.
+- id: https://doi.org/10.60775/fairhub.3#bias-representation
+  name: Groups absent from the cohort
+  bias_type: representation_bias
+  bias_description: >-
+    "The study cohort may not provide a comprehensive representation of the population, as it
+    does not include other races/ethnicities such as Pacific Islanders and Native Americans."
+    Recruitment is "predominantly urban and hospital-based ... which may not fully capture
+    diverse cultural and socioeconomic backgrounds."
+  mitigation_strategy: >-
+    "Three recording sites were strategically selected to achieve diverse recruitment ... chosen
+    for geographic diversity across the United States and to ensure diverse representation across
+    various racial and ethnic groups. Individuals from all demographic backgrounds were recruited
+    at all 3 sites." The project separately engages the Native Biodata Consortium on approaches
+    for collecting comparable data within an American Indian / Alaska Native cohort.
+  affected_subsets:
+  - Pacific Islander populations
+  - Native American populations
+  - Rural and non-hospital-affiliated populations
+- id: https://doi.org/10.60775/fairhub.3#bias-interim-imbalance
+  name: Interim releases not yet balanced
+  bias_type: sampling_bias
+  bias_description: >-
+    "While the AI-READI's cross-sectional database ultimately aims to achieve balance across
+    race/ethnicity, biological sex, and diabetes presence and severity, the pilot study is not
+    balanced across these parameters." "As enrollment is ongoing, the pilot data release and
+    periodic updates to data releases may not have achieved balanced distribution across groups."
+  mitigation_strategy: >-
+    "As recruitment progresses, the composition of participants is monitored in terms of
+    diversity and inclusion and will be adjusted by under- and oversampling groups as needed."
+    The recommended validation and test splits are balanced as far as possible for sex,
+    race/ethnicity and diabetes status.
+- id: https://doi.org/10.60775/fairhub.3#bias-english
+  name: English-language eligibility requirement
+  bias_type: selection_bias
+  bias_description: >-
+    Participants "are required to speak, read and understand English". "Requiring that eligible
+    participants speak, read and understand English may have created challenges in recruiting
+    Hispanic and/or Asian persons."
+  mitigation_strategy: >-
+    An NIH supplement was submitted to fund translation of all study materials so that
+    Spanish-speaking participants who are not fluent in English can be recruited; UCSD has
+    native Spanish-speaking research staff and would use UCSD translation services for the
+    consent form if Hispanic recruitment goals were not met.
+  affected_subsets:
+  - Participants who do not read and speak English
+- id: https://doi.org/10.60775/fairhub.3#bias-recruitment-difficulty
+  name: Documented under-recruitment of specific groups in health research
+  bias_type: selection_bias
+  bias_description: >-
+    "It is a well-documented observation in health research that recruiting black men into
+    studies is more difficult than recruiting other populations, yet this population represents a
+    disproportionate percentage of burden in T2DM. Factors such as medical mistrust and fear of
+    safety stem from historical events such as the Tuskegee syphilis study." Similar trends for
+    under-recruitment and disease burden have been reported for Hispanic and Asian persons.
+  mitigation_strategy: >-
+    "Researchers have identified strategies to encourage interest among black men to participate
+    in research such as tailoring printed materials and using a personalised, participatory
+    approach to recruitment. ... If sample balancing on race/ethnicity emerges as a challenge in
+    AI-READI, we will implement new recruitment strategies to overcome the imbalance." Sites are
+    also differentially prioritised by local demographics: UW concentrates on
+    Asian>Hispanic>Black, UCSD on Hispanic>Asian>Black, and UAB on Black>Hispanic>Asian
+    participants, with all sites recruiting White participants.
+- id: https://doi.org/10.60775/fairhub.3#bias-device-heterogeneity
+  name: Device and site heterogeneity
+  bias_type: measurement_bias
+  bias_description: >-
+    Data for a single measure are captured on several different device makes and models across
+    three sites, and blood pressure and lensometer measurements in particular use different
+    instruments at different sites.
+  mitigation_strategy: >-
+    "Information on device make and model, including specific modalities like macula scans or
+    wide scans during OCT, were documented to ensure repeatability. Moreover, the study included
+    multiple devices for one measure to enhance generalizability and represent the diverse range
+    of equipment utilized in clinical settings." "Uniform data collection protocols were
+    implemented for all subjects, irrespective of their race/ethnicity, biological sex, or
+    diabetes severity, across all study sites."
+
+known_limitations:
+- id: https://doi.org/10.60775/fairhub.3#limitation-representativeness
+  name: Limited population representativeness
+  limitation_type: representativeness_limitation
+  limitation_description: >-
+    Recruitment was predominantly urban and hospital-based and the cohort omits several
+    populations, notably Pacific Islanders and Native Americans.
+  scope_impact: >-
+    "Factors influencing the generalization of derived models include the predominantly urban and
+    hospital-based recruitment, which may not fully capture diverse cultural and socioeconomic
+    backgrounds."
+- id: https://doi.org/10.60775/fairhub.3#limitation-coverage
+  name: Incomplete modality coverage per participant
+  limitation_type: coverage_limitation
+  limitation_description: >-
+    "Yes, not all modalities are available for all participants."
+  scope_impact: >-
+    Analyses requiring complete multimodal records will operate on a subset of the 2,280
+    participants.
+- id: https://doi.org/10.60775/fairhub.3#limitation-withheld-variables
+  name: Demographic and medication variables withheld from the public release
+  limitation_type: coverage_limitation
+  limitation_description: >-
+    "The data in this dataset contain no protected health information (PHI). Information related
+    to the sex and race/ethnicity of the participants as well as medication used has also been
+    removed." The public set was stripped of these "to prevent stigmatization of findings".
+  scope_impact: >-
+    Fairness and subgroup analyses cannot be performed on the public release at the individual
+    level; only the aggregate counts in the recommended-split table are available.
+  recommended_mitigation: >-
+    "Because sex, race, and ethnicity data are not being released with the public version of the
+    dataset, the project team has prepared data splits into proportions (70%/15%/15%) that can be
+    used for subsequent training/validation/testing where the validation and test sets are
+    balanced as well as possible for sex, race/ethnicity and diabetes status." The withheld
+    variables are available in the controlled-access set under a data use agreement.
+- id: https://doi.org/10.60775/fairhub.3#limitation-temporal
+  name: Cross-sectional design with a single visit per participant
+  limitation_type: temporal_limitation
+  limitation_description: >-
+    "There is currently only one visit per participant." The study is cross-sectional; a
+    longitudinal arm invites approximately 10% of the cohort back for a follow-up visit in year 4,
+    and approximately 4% of participants are expected to undergo a follow-up examination.
+  scope_impact: >-
+    Trajectory analyses must be inferred across participants of differing disease severity - the
+    pseudotime manifold approach - rather than observed within participants over time.
+- id: https://doi.org/10.60775/fairhub.3#limitation-no-labels
+  name: No labels or predefined tasks
+  limitation_type: methodological_limitation
+  limitation_description: >-
+    "N/A - no labels are provided", and "we do not have formal guidelines in place" for future
+    researchers creating new labels or defining new tasks.
+  scope_impact: >-
+    Supervised learning applications must define and derive their own targets from the released
+    variables.
+- id: https://doi.org/10.60775/fairhub.3#limitation-biorepository
+  name: Finite biorepository sample volume
+  limitation_type: scope_limitation
+  limitation_description: >-
+    "A limitation of our biorepository is that there are a finite number of samples to share with
+    scientists interested in using them in research."
+  recommended_mitigation: >-
+    "Procedures for reviewing and prioritising written requests will be developed before the
+    biorepository is complete." Biobanked samples are not part of this dataset.
+- id: https://doi.org/10.60775/fairhub.3#limitation-snellen-dropped
+  name: Snellen visual acuity variables removed in v3.0.0
+  limitation_type: integration_limitation
+  limitation_description: >-
+    "The data fields/types are largely the same as the prior version of the dataset. However, the
+    Snellen visual acuity variables were dropped in this version of the dataset, such that now
+    only logMAR visual acuity measurements are available."
+  scope_impact: >-
+    Analyses pooling v3.0.0 with earlier versions cannot rely on a common Snellen visual acuity
+    variable.
+- id: https://doi.org/10.60775/fairhub.3#limitation-raw-data
+  name: Raw pre-standardisation data not distributed
+  limitation_type: scope_limitation
+  limitation_description: >-
+    "The raw data is saved and expected to be preserved by the AI-READI project at least for the
+    duration of the project but is not anticipated to be shared outside the project team right
+    now, because it has not been mapped to standardized terminologies and because the raw data may
+    accidentally include personal health information or personally identifiable information (e.g.
+    in free text fields)."
+  recommended_mitigation: >-
+    "There is a possibility that raw data may be included in future releases of the controlled
+    access dataset."
+
+confidential_elements:
+- id: https://doi.org/10.60775/fairhub.3#confidentiality
+  name: Confidential content in the released dataset
+  confidential_elements_present: false
+  confidentiality_details: >-
+    "No, the dataset does not contain data that might be considered confidential. No personally
+    identifiable information is included in the dataset."
+
+content_warnings:
+- id: https://doi.org/10.60775/fairhub.3#content-warnings
+  name: Offensive or distressing content
+  content_warnings_present: false
+  description: >-
+    Asked whether the dataset contains data that "if viewed directly, might be offensive,
+    insulting, threatening, or might otherwise pose any safety risk (such as psychological safety
+    and anxiety)", the healthsheet answers "No."
+
+subpopulations:
+- id: https://doi.org/10.60775/fairhub.3#subpopulation-diabetes-status
+  name: Diabetes status groups
+  subpopulation_elements_present: true
+  identification: >-
+    Participants are recruited into four study groups by diabetes status: no diabetes;
+    pre-diabetes or type 2 diabetes controlled by lifestyle adjustments; type 2 diabetes
+    controlled by oral or non-insulin injectable medications; and insulin-dependent type 2
+    diabetes. Diabetes status is one of the variables the recommended splits are balanced on.
+  distribution: >-
+    Across the 2,280 participants of v3.0.0: no diabetes 776, lifestyle-controlled 560, oral or
+    non-insulin injectable 686, insulin-controlled 258. Recruitment targets approximately 1,000
+    participants in each of the four groups.
+- id: https://doi.org/10.60775/fairhub.3#subpopulation-sex-race
+  name: Sex, race and ethnicity subpopulations
+  subpopulation_elements_present: false
+  identification: >-
+    Asked "Does the dataset identify any demographic sub-populations (e.g., by age, gender, sex,
+    ethnicity)?", the healthsheet answers "No", and no regulation prevented demographic data
+    collection. Individual-level sex and race/ethnicity are removed from the public release and
+    held in the controlled-access set.
+  distribution: >-
+    Only aggregate counts accompany the release, in the recommended-split table: by race and
+    ethnicity, Hispanic 380, Asian 545, Black 519, White 836; by sex, male 951 and female 1,329;
+    mean age 60.8 +/- 11.3 years. The study aims to recruit approximately 1,000 subjects from
+    each of the White, Asian, Hispanic and Black groups, age- and sex-matched within and between
+    groups.
+  source_caveats: >-
+    The healthsheet's "No" answer and the aggregate counts published in the dataset README are
+    both reproduced here. They are not necessarily contradictory - individual-level demographic
+    labels are withheld from the public set while aggregate counts are reported - but the
+    distinction is inferred from the two statements rather than stated in either.
+
+sensitive_elements:
+- id: https://doi.org/10.60775/fairhub.3#sensitive-public
+  name: Sensitive content in the public dataset
+  sensitive_elements_present: false
+  sensitivity_details: >-
+    "No, the public dataset will not contain data that is considered sensitive."
+- id: https://doi.org/10.60775/fairhub.3#sensitive-controlled
+  name: Sensitive content in the controlled-access dataset
+  sensitive_elements_present: true
+  sensitivity_details: >-
+    "However, the controlled access dataset will contain data regarding racial and ethnic
+    origins, location (5-digit zip code), as well as motor vehicle accident reports." Elsewhere
+    the controlled-access holdings are listed as "5-digit zip code, sex, race, ethnicity, genetic
+    sequencing data, past health records, medications, and traffic and accident reports".
+
+acquisition_methods:
+- id: https://doi.org/10.60775/fairhub.3#acquisition
+  name: Mixed direct observation, self-report and derivation
+  was_directly_observed: true
+  was_reported_by_subjects: true
+  was_inferred_derived: true
+  was_validated_verified: true
+  acquisition_details: >-
+    "The acquisition of data varied based on the domain; some data were directly observable (such
+    as labs, vitals, and retinal imaging), whereas other data were reported by subjects (e.g.
+    survey responses). Verification of data entry was performed when possible (e.g.
+    cross-referencing entered medications with medications that were physically brought in or
+    photographed by each study participant)." A number of released values are calculated rather
+    than measured, including body mass index and the waist-hip ratio, calculated low-density
+    lipoprotein cholesterol, calculated total globulin, the albumin/globulin ratio and the blood
+    urea nitrogen / creatinine ratio.
+
+collection_mechanisms:
+- id: https://doi.org/10.60775/fairhub.3#mechanism-redcap
+  name: REDCap electronic data capture
+  mechanism_details: >-
+    "REDCap is used for collecting patient-reported data from questionnaires and the following
+    clinical data from the visit: medications assessment, vitals, visual acuity, contrast
+    sensitivity, monofilament test results and CBC test results." REDCap also hosts the
+    recruitment interface, the screening survey and electronic consent. Data are housed in the
+    University of Washington REDCap system.
+- id: https://doi.org/10.60775/fairhub.3#mechanism-devices
+  name: Instrumented on-site and at-home devices
+  mechanism_details: >-
+    Data are exported from the devices in their raw formats to local storage: the 12-lead ECG as
+    .xml, the MoCA Duo application as .csv (total score, section subscores, Memory Index Score
+    and task completion times), retinal imaging in device-native formats, and the at-home
+    environmental sensor, continuous glucose monitor and fitness tracker. Retinal imaging uses
+    the Optomed Aurora IQ, iCare EIDON, Heidelberg Spectralis HRA (OCT, OCTA and FLIO), Topcon
+    Maestro2 3D OCT-1, Topcon Triton DRI OCT and Zeiss Cirrus 5000 Angioplex; the ECG is recorded
+    on a Philips PageWriter TC30 Cardiograph; at-home monitoring uses a Dexcom G6 continuous
+    glucose monitor, a Garmin VivoSmart 5 physical activity monitor and a custom-designed
+    environmental sensor (the LeeLab Anura, built at the Karalis Johnson Retina Center,
+    University of Washington). Other instruments include the M&S Technologies EVA visual acuity
+    tester, the Mars letter contrast sensitivity chart (Mars Perceptrix), a Topcon KR 800
+    autorefractor/keratometer, NIDEK LM-600P and Topcon CL-200/CL-300 lensometers, OMRON HEM
+    907XL, Medline MDS4001 and Welch Allyn 6000-series blood pressure monitors, a 10 g
+    monofilament, and the MoCA Duo application on an iPad.
+- id: https://doi.org/10.60775/fairhub.3#mechanism-labs
+  name: Clinical laboratory assay
+  mechanism_details: >-
+    "Clinical Laboratory Improvement Amendments-certified laboratories local to each data
+    collection site perform complete blood count (CBC) testing on fresh whole blood samples; all
+    other lab tests are performed by the University of Washington Nutrition and Obesity Research
+    Center (NORC) testing facility using stored, frozen samples." Samples analysed by UW NORC are
+    first stored locally at UAB and UCSD at -70 degrees C, then batch-shipped to UW on dry ice
+    approximately once per quarter.
+- id: https://doi.org/10.60775/fairhub.3#mechanism-ehr
+  name: Electronic health record screening and record extraction
+  mechanism_details: >-
+    Recruitment pools "were identified by screening Electronic Health Records (EHR) for diabetes
+    and prediabetes ICD-10 codes for all patients who have had an encounter with the sites' health
+    systems within the past 2 years". The BMJ Open protocol states that "Patients with T2DM and
+    pre-diabetes are identified by screening electronic health records for ICD-10 diagnosis codes
+    R73.09 and E11.X, respectively. Patients without diabetes will not have encounters with these
+    ICD codes." The IRB application further states that medical
+    records were extracted "to obtain data on general health, eye health, medical and surgical
+    history, diabetes, medications, laboratory records, and any previous medical imaging such as
+    eye imaging", along with car accidents and traffic tickets in the last three years.
+  source_caveats: >-
+    As written, the BMJ Open protocol's "respectively" assigns ICD-10 code R73.09 to T2DM and
+    E11.X to pre-diabetes. The pairing is reproduced verbatim above and not silently reversed,
+    but the reader should note that the two codes appear to be transposed relative to their
+    conventional meanings.
+- id: https://doi.org/10.60775/fairhub.3#mechanism-validation
+  name: Validation of the collection mechanisms
+  mechanism_details: >-
+    Asked how the collection mechanisms were validated, the healthsheet answers only that "The
+    procedures for data collection and processing is available at https://docs.aireadi.org." All
+    research personnel who recruited, enrolled and collected data underwent training by the data
+    manager at UAB against a detailed Manual of Procedures; a certification process is required
+    of all coordinators, including mandatory institutional compliance training for human subject
+    research and successful administration of all protocol elements to at least three volunteer
+    practice subjects before enrolling participants. Data managers at each site oversee the
+    process.
+
+collection_timeframes:
+- id: https://doi.org/10.60775/fairhub.3#timeframe-v3
+  name: Collection window covered by version 3.0.0
+  start_date: '2023-07-19'
+  end_date: '2025-05-01'
+  timeframe_details: >-
+    "For this version of the dataset, the timeframe for data collection was July 19, 2023 to May
+    01, 2025." The FAIRhub dataset description records the same period as a "Collected" date of
+    2023-07-19/2025-05-01, and describes v3.0.0 as consisting "of data collected up through the
+    end of the second year of the study".
+- id: https://doi.org/10.60775/fairhub.3#timeframe-pilot
+  name: Pilot enrolment period
+  start_date: '2023-07-18'
+  end_date: '2023-11-30'
+  timeframe_details: >-
+    "Preliminary pilot enrolment occurred between 18 July 2023 and 30 November 2023 in order to
+    secure sufficient familiarity for all coordinators. The formal data collection process began
+    on 1 December 2023. Preliminary data from the pilot enrollment period were included in the
+    first released data set released in May 2024."
+  source_caveats: >-
+    The BMJ Open protocol gives 18 July 2023 as the enrolment start date; the FAIRhub study
+    description records an actual study start date of 2023-07-19.
+- id: https://doi.org/10.60775/fairhub.3#timeframe-study
+  name: Overall study period
+  start_date: '2023-07-19'
+  end_date: '2027-01-01'
+  timeframe_details: >-
+    "Enrolment began on 18 July 2023 and will continue until 30 November 2026." The FAIRhub study
+    description gives an actual start date of 2023-07-19 and an anticipated completion date of
+    2027-01-01, with overall status "Enrolling by invitation". "The timeline for the overall
+    project spans four years, encompassing one year dedicated to protocol development and
+    training, and years 2-4 allocated for subject recruitment and data collection. Approximately
+    4% of participants are expected to undergo a follow-up examination in Year 4." The Nature
+    Metabolism comment describes enrolment of 4,000 participants "at three study sites over 4
+    years (2022-2026)". The NIH award period recorded by RePORTER runs from 2022-09-01 to
+    2025-08-31.
+
+data_collectors:
+- id: https://doi.org/10.60775/fairhub.3#collector-crc
+  name: Clinical research coordinators
+  role: Clinical research coordinator / study coordinator
+  collector_details: >-
+    "Responsible for contacting and consenting the research participants, ushering participants
+    through the research visit, conducting study visits including collection of ophthalmologic
+    images, providing training on study procedures such as continuous glucose monitoring or
+    fitness tracker, and ensuring the return of all study materials (ex. Environmental sensor)."
+    Coordinators must complete a certification process including mandatory institutional
+    compliance training for human subject research and must successfully administer all protocol
+    elements to at least three volunteer practice subjects before enrolling participants.
+- id: https://doi.org/10.60775/fairhub.3#collector-ra
+  name: Research assistants
+  role: Research assistant
+  collector_details: >-
+    "Conduct study visits including collection of ophthalmologic images, provide training on study
+    procedures such as continuous glucose monitoring or fitness tracker, ensure the return of all
+    study materials (ex. Environmental sensor) under the direction of the study coordinator or
+    project manager; responsible for data upload and management from each clinic visit."
+- id: https://doi.org/10.60775/fairhub.3#collector-data-manager
+  name: Site data managers and database managers
+  role: Data manager / database manager
+  collector_details: >-
+    "The Data Manager at each data site is responsible for the quality control of all data before
+    uploading to FAIRhub." The database manager will "ingest data into the Redcap database and
+    extract for processing". Data managers at each site oversee the coordinator training and
+    certification process, and together with coordinators examine flagged participant records to
+    determine whether an error is likely.
+- id: https://doi.org/10.60775/fairhub.3#collector-phlebotomy
+  name: Phlebotomists and laboratory assistants
+  role: Phlebotomist / lab assistant
+  collector_details: >-
+    The phlebotomist is "responsible for blood collection from research participants" and the lab
+    assistant is "responsible for processing and shipping samples". Research study coordinators
+    who draw blood are expected to be certified phlebotomists in Washington State.
+- id: https://doi.org/10.60775/fairhub.3#collector-technical
+  name: Data science, software and cloud engineering staff
+  role: Research/data scientist, software engineer, cloud engineer
+  collector_details: >-
+    Research and data scientists and postdoctoral fellows "process data for release in database
+    and development of standards"; software engineers are "responsible for designing,
+    implementing, and testing the different data curation pipelines"; cloud engineers are
+    "responsible for cloud infrastructure customization, configuration and deployment including
+    integrating, configuring, deploying, and managing centrally provided common cloud services".
+- id: https://doi.org/10.60775/fairhub.3#collector-compensation
+  name: Compensation of the collection team
+  role: All study personnel
+  collector_details: >-
+    "Details about the AI-READI team members involved in the data collection process are available
+    at https://aireadi.org/team. Their effort was supported by the National Institutes of Health
+    award OT2OD032644 based on the percentage of effort contributed, and salaries which aligned
+    with the funding guidelines at each site."
+
+missing_data_documentation:
+- id: https://doi.org/10.60775/fairhub.3#missing-data
+  name: Missing data patterns, causes and handling
+  missing_data_patterns: >-
+    "Yes, not all modalities are available for all participants." Within surveys, "skipped
+    questions or incomplete responses are expected".
+  missing_data_causes: >-
+    "Some participants elected not to participate in some study elements. In a few cases, the data
+    collection device did not have any stored results or was returned too late to retrieve the
+    results (e.g. battery died, data was lost). In a few cases, there may have been a data
+    collision at some point in the process and data has been lost." Operator-dependent imaging may
+    also be skipped when quality is inadequate.
+  handling_strategy: >-
+    No imputation is described. Quality control at entry flagged clinical values outside expected
+    minimum/maximum ranges in REDCap for review, and records were checked for "Missing data that
+    can be directly filed from other portions of an individual's record" and for "The omission
+    and/or duplication of records". "If corrected data was available from elsewhere in the
+    respondent's answers, the error was corrected. If there was no logical or appropriate way to
+    correct the data, the Data site PI reviewed the values and made decisions about whether those
+    values should be removed from the data."
+
+raw_data_sources:
+- id: https://doi.org/10.60775/fairhub.3#raw-source-ehr
+  source_description: >-
+    Electronic health records of the three health systems (University of Washington, University of
+    California San Diego, University of Alabama at Birmingham), screened for age, diabetes status
+    and other eligibility criteria and for participant contact information.
+  source_type: Electronic health record
+  access_details: >-
+    Accessed by study teams at each site under the UW IRB approval; PHI accessed by directly
+    viewing electronic medical records. Screening data "may be retained as part of the study data
+    to facilitate future screening efforts and/or to contribute to study procedures and reduce
+    duplication efforts". Identifiers are not released in the public dataset.
+  raw_data_format: Health-system EHR query results, transferred as structured lists
+- id: https://doi.org/10.60775/fairhub.3#raw-source-dol
+  source_description: >-
+    Driving and accident records obtained from the Department of Licensing, covering car accidents
+    and traffic tickets in the last three years.
+  source_type: Government licensing authority records
+  access_details: >-
+    "Driving and accident records will be obtained from the Department of Licensing (no additional
+    approvals are required beyond the IRB approval)." Traffic and accident reports are held in the
+    controlled-access dataset only.
+- id: https://doi.org/10.60775/fairhub.3#raw-source-devices
+  source_description: >-
+    Device-native exports from the study instruments, prior to conversion into the standardised
+    formats that are distributed.
+  source_type: Instrument export
+  access_details: >-
+    "The raw data is saved and expected to be preserved by the AI-READI project at least for the
+    duration of the project but is not anticipated to be shared outside the project team right
+    now." Raw exports are written to local storage at each site before upload to FAIRhub.
+  raw_data_format: >-
+    ECG as .xml; MoCA Duo application output as .csv; Topcon Maestro2 and Triton images as .fda;
+    Heidelberg FLIO as .sdt; Garmin VivoSmart 5 as .FIT; Dexcom G6 and environmental sensor as
+    .csv; other retinal images exported in device-native raw formats, some already DICOM.
+- id: https://doi.org/10.60775/fairhub.3#raw-source-clarity
+  source_description: >-
+    Historical continuous glucose monitoring data retrieved through the Dexcom Clarity application
+    for participants already wearing a Dexcom G6 at the time of the visit.
+  source_type: Device vendor cloud application
+  access_details: >-
+    Optional and consented: "Patients who already wear Dexcom G6 sensor at the time of the visit
+    will be given an option to allow download of the previously collected glucose values for up to
+    90 days prior to the study visit", giving up to 100 days of glucose data in total. The study
+    clinic terminates data sharing after download, without disrupting sharing with any other
+    clinic.
+
+sampling_strategies:
+- id: https://doi.org/10.60775/fairhub.3#sampling-recruitment
+  name: Stratified non-probability recruitment from the health-system study base
+  is_sample: true
+  is_random: false
+  source_data: >-
+    "The study base is all patients aged >=40 years of age who had a medical encounter within each
+    health system site (UAB, UCSD, UW) between 2020 and 2025."
+  is_representative: false
+  why_not_representative: >-
+    "Building balanced data sets is critical for the development of unbiased machine learning
+    models, so rather than targeting the demographic distribution of the US population, the study
+    is triple-balanced by recruiting the following populations in equal proportions": four
+    race/ethnic groups, four categories of T2DM, and biological males and females. The FAIRhub
+    study description records the sampling method as "Non-Probability Sample".
+  strategies: >-
+    "Participants are recruited in waves to facilitate the efficient sampling of the study base.
+    The composition and size of each wave are influenced by the observed participation
+    characteristics of race/ethnicity, gender, severity of T2DM and site, according to health
+    records." UW and UCSD supply lists of potential participants identified through the EHR search
+    to UAB, which adds its own eligible patients and selects a stratified sample from the combined
+    list; OHSU generates participant-specific REDCap survey links, and Adapt Inc., an SSAE16 SOC
+    security-certified and HIPAA-compliant printing and fulfilment service, mails the recruitment
+    letters. "The aforementioned process will occur on a recursive basis with UAB coordinating the
+    selection of participants to achieve balancing of race/ethnicity, sex, and diabetes severity
+    until the recruitment goals have been achieved." Approximately 50,000 invitation letters from
+    each site are expected over the recruitment period, sent by both mail and email.
+- id: https://doi.org/10.60775/fairhub.3#sampling-release-coverage
+  name: Coverage of enrolled participants within the release
+  is_sample: false
+  source_data: >-
+    All AI-READI participants enrolled during the period covered by this release.
+  strategies: >-
+    "The dataset contains all possible instances. More specifically, the dataset contains data
+    from all participants who have been enrolled during the first year of data collection for
+    AI-READI." Asked separately what sampling strategy was used if the dataset is a sample from a
+    larger set, the healthsheet answers "N/A".
+  source_caveats: >-
+    The healthsheet answer describing full coverage says "the first year of data collection",
+    whereas the same healthsheet, the README and the FAIRhub dataset description all give the
+    v3.0.0 collection window as 19 July 2023 to 1 May 2025 and the count as 2,280 participants -
+    roughly the first two years. The "first year" wording appears to be carried over from an
+    earlier version of the answer.
+
+raw_sources:
+- id: https://doi.org/10.60775/fairhub.3#raw-data-retention
+  name: Retained raw data
+  raw_data_details: >-
+    "The raw data is saved and expected to be preserved by the AI-READI project at least for the
+    duration of the project but is not anticipated to be shared outside the project team right
+    now, because it has not been mapped to standardized terminologies and because the raw data may
+    accidentally include personal health information or personally identifiable information (e.g.
+    in free text fields). There is a possibility that raw data may be included in future releases
+    of the controlled access dataset." No access URL is provided.
+
+preprocessing_strategies:
+- id: https://doi.org/10.60775/fairhub.3#preprocessing-standards
+  name: Mapping to community data standards
+  preprocessing_details: >-
+    "Once data were sent from each of the study sites to the central project team, additional
+    processing steps were conducted in preparation for dissemination. For example, all data were
+    mapped to standardized terminologies when possible, such as the Observational Medical Outcomes
+    Partnership (OMOP) Common Data Model, a common data model for observational health data, and
+    the Digital Imaging and Communications in Medicine (DICOM), a commonly used standard for
+    medical imaging data." Per datatype directory: cardiac_ecg follows the WaveForm DataBase
+    (WFDB) standard; clinical_data follows the OMOP CDM, with each CSV file a one-to-one mapping
+    to an OMOP CDM table; environment follows the NASA Earth Science Data Systems ASCII file
+    format guidelines; retinal_flio, retinal_oct, retinal_octa and retinal_photography follow
+    DICOM; and wearable_activity_monitor and wearable_blood_glucose follow Open mHealth.
+- id: https://doi.org/10.60775/fairhub.3#preprocessing-conversion
+  name: Conversion from proprietary device formats
+  preprocessing_details: >-
+    "All participant images are exported from imaging devices in their raw format and some images
+    required conversion to a DICOM standard format prior to upload to an external AI-READI data
+    storage site." Topcon Maestro2 and Triton scans are "Exported in .fda file format; converted
+    to DICOM for the data set"; Heidelberg FLIO is "Exported in .sdt file format; converted to
+    DICOM for the data set"; Garmin VivoSmart 5 data are "Exported in .FIT file format; converted
+    to mHealth standard for the data set". "For some devices, the data are transformed from its
+    proprietary state into a standard model format prior to upload to FAIRhub."
+- id: https://doi.org/10.60775/fairhub.3#preprocessing-structure
+  name: Organisation under the Clinical Dataset Structure specification
+  preprocessing_details: >-
+    "This dataset is organized following the Clinical Dataset Structure (CDS) v0.1.1 ... data is
+    organized at the root level into one directory per datatype. Within each datatype folder,
+    there is one folder per modality. Within each modality folder, there is one folder per device
+    used to collect that modality. Within each device folder, there is one folder per participant.
+    Each datatype, modality, and device folder is named using a name that best defines it. Each
+    participant folder is named after the participant's ID number used in the study." CDS is a new
+    standard developed by the project, "a simple and intuitive way to organize clinical research
+    datasets and include structured metadata". Each datatype directory carries a manifest.tsv
+    metadata file, and the dataset root carries CHANGELOG.md, dataset_description.json,
+    dataset_structure_description.json, healthsheet.md, LICENSE.txt, participants.json,
+    participants.tsv, README.md and study_description.json.
+- id: https://doi.org/10.60775/fairhub.3#preprocessing-deidentification
+  name: Removal of identifying and sensitive variables for public release
+  preprocessing_details: >-
+    "The public set is stripped of Protected Health Information (PHI), as defined by the HIPAA
+    (Health Insurance Portability and Accountability Act) Privacy Rule via the 'Safe Harbor'
+    method, as well as information related to the sex and race/ethnicity of the participants to
+    prevent stigmatization of findings." Medication use is also removed. Asked directly whether
+    there was any pre-processing for de-identification of patients, and whether measures were
+    taken to avoid re-identification, the healthsheet leaves both answers blank.
+- id: https://doi.org/10.60775/fairhub.3#preprocessing-exclusions
+  name: No instances excluded at preprocessing
+  preprocessing_details: >-
+    "No data were excluded from the dataset at the time of preprocessing." Exclusions operate only
+    at recruitment, through the eligibility criteria: able to provide consent, aged 40 or over,
+    persons with or without type 2 diabetes, and must speak and read English; and must not be
+    pregnant, must not have gestational diabetes, must not have type 1 diabetes.
+
+cleaning_strategies:
+- id: https://doi.org/10.60775/fairhub.3#cleaning-redcap-qc
+  name: Quality control at data entry
+  cleaning_details: >-
+    "There were several quality control measures used at the time of data entry/acquisition. For
+    example, clinical data outside of expected min/max ranges were flagged in REDCap, which was
+    visible in reports viewed by clinical research coordinators (CRCs) and Data Managers. Using
+    these REDCap reports as guides, Data Managers and CRCs examined participant records and
+    determined if an error was likely. Data were checked for the following and edited if errors
+    were detected: 1. Credibility, based on range checks to determine if all responses fall within
+    a prespecified reasonable range; 2. Incorrect flow through prescribed skip patterns; 3.
+    Missing data that can be directly filed from other portions of an individual's record; 4. The
+    omission and/or duplication of records."
+- id: https://doi.org/10.60775/fairhub.3#cleaning-governance
+  name: Governance of edits
+  cleaning_details: >-
+    "Editing was only done under the guidance and approval of the site PI. If corrected data was
+    available from elsewhere in the respondent's answers, the error was corrected. If there was no
+    logical or appropriate way to correct the data, the Data site PI reviewed the values and made
+    decisions about whether those values should be removed from the data." "The Data Manager at
+    each data site is responsible for the quality control of all data before uploading to
+    FAIRhub."
+- id: https://doi.org/10.60775/fairhub.3#cleaning-dqd
+  name: OMOP data quality checks
+  cleaning_details: >-
+    The clinical_data directory ships a dqd_omop.json file which "supports OMOP CDM data quality
+    analysis using the OMOP CDM Data Quality Dashboard (DQD). The OMOP CDM DQD tool
+    (https://ohdsi.github.io/DataQualityDashboard/) runs a set of > 3500 data quality checks
+    against an OMOP CDM instance". FAIRhub also exposes a Dataset Quality Dashboard for the record.
+
+labeling_strategies:
+- id: https://doi.org/10.60775/fairhub.3#labeling
+  name: Labelling strategy
+  labeling_details: >-
+    "N/A - no labels are provided. No specific labeling was performed in the dataset, as the
+    dataset is a hypothesis-agnostic dataset aimed at facilitating multiple potential downstream
+    AI/ML applications." There is consequently no gold-standard or proxy label definition, no
+    human labelling process and no rater agreement to report, and the software question - "Is the
+    software used to preprocess/clean/label the instances available?" - is answered "N/A - no
+    labeling was performed". For future researchers defining their own labels or tasks, "we do not
+    have formal guidelines in place". Human-level performance for the applications the dataset is
+    meant to address is likewise recorded as "N/A".
+
+existing_uses:
+- id: https://doi.org/10.60775/fairhub.3#existing-uses
+  name: Prior uses of the dataset
+  description: >-
+    Asked "Has the dataset been used for any tasks already?", the healthsheet for v3.0.0 answers
+    "No". The FAIRhub record reports 24,636 views and a citation count of zero at capture. The
+    BMJ Open protocol notes only that "Those who download and use AI-READI data are encouraged to
+    publish their results in the scientific literature."
+
+use_repository:
+- id: https://doi.org/10.60775/fairhub.3#use-repository
+  name: Repository of works using the dataset
+  repository_details: >-
+    Asked "Is there a repository that links to any or all papers or systems that use the dataset?",
+    the healthsheet answers "No". FAIRhub displays "Cited by" and Dataset Impact panels on the
+    record page, but no separate registry of downstream uses is named.
+
+other_tasks:
+- id: https://doi.org/10.60775/fairhub.3#other-task-hypothesis-agnostic
+  name: Open-ended downstream AI/ML applications
+  task_details: >-
+    "The multi-modal dataset being collected is being gathered to facilitate downstream pseudotime
+    manifolds and various applications in artificial intelligence." The protocol was designed to be
+    "agnostic to hypotheses": "the team assembled a data collection protocol composed of
+    assessments from many health domains that are likely impacted by T2DM", so the dataset is
+    intended to support tasks that were not specified in advance.
+- id: https://doi.org/10.60775/fairhub.3#other-task-biorepository
+  name: Ancillary studies on the associated biorepository
+  task_details: >-
+    Biospecimens collected alongside the dataset - isolated plasma, serum, genomic DNA, buffy
+    coats, PAXgene-stabilised RNA and peripheral blood mononuclear cells - are banked at the UAB
+    Center for Clinical and Translational Science and "will be available to researchers for future
+    ancillary studies", including whole genome sequencing, proteomics and metabolomics, gene
+    expression studies, immunological studies and the generation of induced pluripotent stem cells.
+    "Biobanked samples will eventually be available to scientists according to procedures and
+    policies that are in development." These specimens are not part of this dataset.
+- id: https://doi.org/10.60775/fairhub.3#other-task-blueprint
+  name: Methodological reuse of the AI-READI approach
+  task_details: >-
+    "An additional aim of the AI-READI project is to share our blueprint for collecting and sharing
+    AI-ready datasets so that future DGPs can follow them ... including guidelines for project
+    management, as well as data collection, management and sharing", published through
+    https://zenodo.org/communities/aireadi, https://github.com/AI-READI and https://aireadi.org.
+    "After testing FAIRhub for the AI-READI dataset, we anticipate making the platform available
+    for future DGPs desiring to manage and share AI-ready clinical research datasets."
+
+future_use_impacts:
+- id: https://doi.org/10.60775/fairhub.3#future-impact-harms
+  name: Anticipated harms from future use
+  impact_details: >-
+    "No, to the extent of our knowledge, we do not currently anticipate any uses of the dataset
+    that could result in unfair treatment or harm. However, there is a theoretical risk of future
+    re-identification."
+- id: https://doi.org/10.60775/fairhub.3#future-impact-withheld-demographics
+  name: Effect of withheld demographic variables on downstream analyses
+  impact_details: >-
+    Sex and race/ethnicity are removed from the public set "to prevent stigmatization of findings",
+    so users cannot condition on or audit against those attributes at the individual level in the
+    public release. The project's response is to supply a recommended split whose validation and
+    test sets are balanced as far as possible on those attributes: "We are suggesting a split for
+    training/validation/testing models that is aimed at reducing disparities in models developed
+    using this dataset."
+- id: https://doi.org/10.60775/fairhub.3#future-impact-interim-balance
+  name: Effect of incomplete balancing in interim releases
+  impact_details: >-
+    "Of note, the overall enrollment goal is to have balanced distribution between different racial
+    groups. As enrollment is ongoing, the periodic updates to data releases may not have achieved
+    balanced distribution across groups." Users of an interim release should not assume the target
+    balance has been reached.
+- id: https://doi.org/10.60775/fairhub.3#future-impact-generalization
+  name: Factors limiting generalisation of derived models
+  impact_details: >-
+    Generalisation may be limited by the number and diversity of devices, by device-specific
+    recording characteristics, by the three recruitment sites being urban and hospital-based, and
+    by the absence of some racial and ethnic groups from the cohort. Device make, model and scan
+    protocol were documented "to ensure repeatability", and multiple devices were deliberately
+    included for a single measure "to enhance generalizability and represent the diverse range of
+    equipment utilized in clinical settings".
+
+discouraged_uses:
+- id: https://doi.org/10.60775/fairhub.3#discouraged-license
+  name: Uses restricted by the licence
+  discouragement_details: >-
+    "The AI READI dataset License imposes certain restrictions on the usage of the data. The
+    restrictions are described in the License files available at
+    https://doi.org/10.5281/zenodo.17555036." Asked whether there are tasks for which the dataset
+    should not be used, the healthsheet refers back to those licence terms.
+- id: https://doi.org/10.60775/fairhub.3#discouraged-clinical
+  name: Clinical decision-making
+  discouragement_details: >-
+    The licence states that the Licensee shall not "make clinical treatment decisions based on the
+    Data, as it is intended solely as a research resource".
+- id: https://doi.org/10.60775/fairhub.3#discouraged-non-t2dm
+  name: Research outside type 2 diabetes on the public release
+  discouragement_details: >-
+    Access to the public release requires "Agreeing to use the data only for type 2 diabetes
+    related research"; the FAIRhub consent metadata records that "The public version of the dataset
+    can only be used for type 2 diabetes related research. A private version will allow for more
+    generic use."
+
+intended_uses:
+- id: https://doi.org/10.60775/fairhub.3#intended-use
+  name: Intended uses
+  use_category: >-
+    Research use, restricted on the public release to type 2 diabetes related research
+  examples:
+  - Development of artificial intelligence and machine learning models for type 2 diabetes
+  - >-
+    Pseudotime manifold analysis to predict disease trajectories from participants of differing
+    disease severity
+  - Study of salutogenesis, the pathway from type 2 diabetes back to health
+  - >-
+    Multimodal model development combining survey, clinical, laboratory, imaging, waveform,
+    wearable and environmental data
+  - >-
+    Methodological work on making clinical research datasets FAIR and AI-ready, using the
+    dataset as a worked example
+  usage_notes: >-
+    "The multi-modal dataset being collected is being gathered to facilitate downstream pseudotime
+    manifolds and various applications in artificial intelligence." Public access requires logging
+    in through a verified ID system, agreeing to use the data only for T2DM-related research, and
+    agreeing to the licence terms; the fuller dataset requires a data use agreement. Use of the
+    dataset requires citation of the resources specified at https://docs.aireadi.org, and licensees
+    agree "to acknowledge the source and any funder of the Data in any publications reporting use
+    of the Data".
+
+prohibited_uses:
+- id: https://doi.org/10.60775/fairhub.3#prohibited-clinical-decisions
+  name: Making clinical treatment decisions from the data
+  prohibition_reason: >-
+    Licence clause 3: Licensee shall not "make clinical treatment decisions based on the Data, as
+    it is intended solely as a research resource".
+- id: https://doi.org/10.60775/fairhub.3#prohibited-reidentification
+  name: Re-identification or contact of data subjects
+  prohibition_reason: >-
+    Licence clause 3: Licensee shall not "use or attempt to use the Data, alone or in concert with
+    other information, to compromise or otherwise infringe the confidentiality of information on an
+    individual person who is the source of any Data ... and their right to privacy, to identify or
+    contact any individual Data Subject or group of Data Subjects, to extract or extrapolate any
+    identifying information about a Data Subject, to establish a particular Data Subject's
+    membership in a particular group of persons, or otherwise to cause harm or injury to any Data
+    Subject."
+- id: https://doi.org/10.60775/fairhub.3#prohibited-onward-sharing
+  name: Onward transfer of the data to unbound third parties
+  prohibition_reason: >-
+    Licence clause 2: "Licensee shall not transfer, license, sublicense, sell, assign, display,
+    share or otherwise convey any portion of the Data or any derivative work to any third party
+    other than another licensee ('Other Licensee') that is bound by the terms of an agreement with
+    Licensor on terms identical to those contained in this Agreement."
+- id: https://doi.org/10.60775/fairhub.3#prohibited-memorising-models
+  name: Releasing models without guarding against data reconstruction
+  prohibition_reason: >-
+    Licence clause 2 permits distribution of models, algorithms and programs trained on the Data
+    that do not themselves contain it, "provided that Licensee, prior to dissemination of any such
+    Models, undertakes all reasonable efforts to minimise the likelihood that Data can be
+    memorized, derived, reconstructed or reconstituted through the use or construction of such
+    Models."
+
+distribution_formats:
+- id: https://doi.org/10.60775/fairhub.3#format-dicom
+  name: DICOM
+  format: DICOM
+  media_type: application/dicom
+  download_url: https://fairhub.io/datasets/3
+  description: >-
+    Retinal photography, OCT, OCTA and FLIO images are distributed as DICOM. Some were exported
+    from the devices as DICOM and others were converted from proprietary formats (.fda, .sdt) for
+    the dataset.
+  access_urls:
+  - https://fairhub.io/datasets/3
+- id: https://doi.org/10.60775/fairhub.3#format-csv
+  name: CSV
+  format: CSV
+  media_type: text/csv
+  download_url: https://fairhub.io/datasets/3
+  description: >-
+    Clinical data are distributed as CSV files in the clinical_data directory, each a one-to-one
+    mapping to an OMOP CDM table.
+  access_urls:
+  - https://fairhub.io/datasets/3
+- id: https://doi.org/10.60775/fairhub.3#format-json
+  name: JSON
+  format: JSON
+  media_type: application/json
+  download_url: https://fairhub.io/datasets/3
+  description: >-
+    Structured metadata files are distributed as JSON, including dataset_description.json,
+    dataset_structure_description.json, study_description.json, participants.json and
+    dqd_omop.json. Open mHealth wearable data also follow a JSON-based standard.
+  access_urls:
+  - https://fairhub.io/datasets/3
+- id: https://doi.org/10.60775/fairhub.3#format-markdown
+  name: Markdown
+  format: Markdown
+  media_type: text/markdown
+  download_url: https://fairhub.io/datasets/3
+  description: >-
+    Narrative documentation files are distributed as Markdown, including README.md, CHANGELOG.md
+    and healthsheet.md.
+  access_urls:
+  - https://fairhub.io/datasets/3
+- id: https://doi.org/10.60775/fairhub.3#format-tsv
+  name: TSV
+  format: TSV
+  media_type: text/tab-separated-values
+  download_url: https://fairhub.io/datasets/3
+  description: >-
+    Tab-separated manifests are present throughout the dataset: a manifest.tsv in each datatype
+    directory and participants.tsv at the root, the latter carrying the recommended
+    training/validation/testing split assignment.
+  access_urls:
+  - https://fairhub.io/datasets/3
+  source_caveats: >-
+    TSV is not listed in the FAIRhub dataset description's declared format array
+    (application/dicom, text/markdown, text/csv, application/json), but manifest.tsv and
+    participants.tsv are named in the structure description's metadata file lists and the README.
+- id: https://doi.org/10.60775/fairhub.3#format-wfdb
+  name: WFDB
+  format: WaveForm DataBase (WFDB)
+  download_url: https://fairhub.io/datasets/3
+  description: >-
+    Electrocardiogram waveform data in the cardiac_ecg directory follow the WaveForm DataBase
+    standard, "a set of file standards designed for reading and storing physiologic signal data,
+    and associated annotations".
+  access_urls:
+  - https://fairhub.io/datasets/3
+  source_caveats: >-
+    WFDB is declared as the file format standard for cardiac_ecg in the dataset structure
+    description and README, but is not represented in the FAIRhub dataset description's declared
+    format array and no IANA media type is given for it.
+
+distribution_dates:
+- id: https://doi.org/10.60775/fairhub.3#distribution-dates
+  name: Version release dates
+  release_dates:
+  - 'Version 1.0.0 (DOI 10.60775/fairhub.1): 2024-05-03'
+  - 'Version 2.0.0 (DOI 10.60775/fairhub.2): 2024-11-08'
+  - 'Version 3.0.0 (DOI 10.60775/fairhub.3): 2025-11-17'
+  description: >-
+    "The first version of the dataset was distributed in May 2024, the second version of the
+    dataset was distributed in November 2024, and the third version of the dataset was distributed
+    in November 2025." The FAIRhub version list gives the exact dates, and the FAIRhub dataset
+    description records 2025-11-17 as the date v3.0.0 was made available. New versions are planned
+    "approximately once a year".
+
+maintainers:
+- id: https://aireadi.org/#maintainer
+  name: AI-READI team
+  role: academic_institution
+  maintainer_details: >-
+    "The AI-READI team will be supporting and maintaining the dataset. The dataset is hosted on
+    FAIRhub through Microsoft Azure." Asked how the owner, curator or manager can be contacted,
+    the healthsheet answers: "We refer to the README file included with the dataset for contact
+    information"; the README in turn directs enquiries to https://aireadi.org/contact and to the
+    study_description.json and dataset_description.json metadata files. The FAIRhub central
+    contact is Aaron Lee at contact@aireadi.org.
+
+updates:
+  id: https://doi.org/10.60775/fairhub.3#update-plan
+  name: Update and versioning plan
+  frequency: >-
+    Approximately annually; "There are plans to release new versions of the dataset approximately
+    once a year with additional data from participants who have been enrolled since the last dataset
+    version release."
+  update_details: >-
+    "The dataset gets released as static versions." "The dataset will not be updated. Rather, new
+    versions of the dataset will be released with additional instances as more study participants
+    complete the study visit." "Yes, enrollment is ongoing, and future versions of the dataset will
+    be released that will include larger numbers of subjects/patients as enrollment increases."
+    Changes between versions are documented in the CHANGELOG file included in the dataset and visible
+    at docs.aireadi.org. No mailing list or other notification channel for updates is named.
+
+retention_limit:
+  id: https://doi.org/10.60775/fairhub.3#retention
+  name: Data retention limits
+  retention_details: >-
+    "There are no limits on the retention of the data associated with the instances." Raw data is
+    "expected to be preserved by the AI-READI project at least for the duration of the project".
+
+version_access:
+  id: https://doi.org/10.60775/fairhub.3#version-access
+  name: Version history and access
+  latest_version_doi: https://doi.org/10.60775/fairhub.3
+  versions_available:
+  - 'Version 3.0.0, DOI 10.60775/fairhub.3, released 2025-11-17, 2,280 participants, 3.82 TB, 356,343
+    files'
+  - 'Version 2.0.0, DOI 10.60775/fairhub.2, released 2024-11-08, 1,067 participants, 2.01 TB, 165,051
+    files'
+  - 'Version 1.0.0, DOI 10.60775/fairhub.1, released 2024-05-03, 204 participants (pilot data collection
+    phase)'
+  version_details: >-
+    Versions are static, not dynamically updated, and one documentation set exists per version,
+    selectable from the dropdown at docs.aireadi.org. Participant counts grow across versions: 204 in
+    v1.0.0 from the pilot phase, 863 added in v2.0.0 for a total of 1,067, and 1,213 added in v3.0.0
+    for a total of 2,280. The README summarises the same progression by data-collection year, with
+    the v1.0.0 pilot processed "custom / ad hoc" and later years "automated + custom", and with data
+    types growing from 15+ by one image device in year 2 and three image devices in year 3. Data
+    fields are largely stable across versions, but the Snellen visual acuity variables were dropped
+    in v3.0.0, leaving only logMAR measurements. Earlier versions are not maintained: "N/A - as
+    mentioned in the response to question 4, the dataset will not be updated. Rather, new versions of
+    the dataset will be released with additional instances as more study participants are enrolled."
+    The FAIRhub page for v2.0.0 states "This version of the dataset is no longer accessible. Please
+    refer to the latest version." Healthsheets exist for the earlier versions, at
+    https://docs.aireadi.org/docs/1/dataset/healthsheet and
+    https://docs.aireadi.org/docs/2/dataset/healthsheet.
+
+extension_mechanism:
+  id: https://doi.org/10.60775/fairhub.3#extension
+  name: Mechanism for external contribution
+  extension_details: >-
+    "No, currently there is no mechanism for others to extend or augment the AI-READI dataset outside
+    of those who are involved in the project."
+
+ethical_reviews:
+- id: https://doi.org/10.60775/fairhub.3#ethical-review-uw-irb
+  name: University of Washington Institutional Review Board
+  reviewing_organization: University of Washington Institutional Review Board (Human Subjects 
+    Division)
+  review_details: >-
+    "AI-READI was approved by the Institutional Review Board (IRB) of the University of Washington
+    (approval number STUDY00016228), including reliance agreements with the IRBs of University of
+    Alabama at Birmingham and University of California, San Diego. Written informed consent is
+    provided by all participants." "The initial IRB approval at the University of Washington was
+    received on December 20, 2022. The initial approval letter can be found [at
+    https://docs.aireadi.org/v3/Approval_STUDY00016228_Lee_initial.pdf]. An annual renewal
+    application to the IRB about the status and progress of the study is required and due within
+    90 days of expiration." The FAIRhub study description records the human subject review status
+    as "Submitted, approved", with no data monitoring committee and no FDA-regulated drug or
+    device. The study is registered on ClinicalTrials.gov as NCT06002048. The IRB application
+    records the data security level as Level 3 and the assessed confidentiality-breach risk as
+    low.
+  contact_person: https://orcid.org/0000-0002-7452-1648
+  source_caveats: >-
+    The BMJ Open abstract attaches the identifier STUDY00016228 to "Clinicaltrials. org approval
+    number", while the same paper's Methods section attributes it to the University of Washington
+    IRB and the FAIRhub metadata gives NCT06002048 as the ClinicalTrials.gov identifier. The
+    Methods attribution is the one recorded here.
+- id: https://doi.org/10.60775/fairhub.3#ethical-review-cab
+  name: Community Advisory Board
+  reviewing_organization: AI-READI Community Advisory Board
+  review_details: >-
+    "A Community Advisory Board of 11 persons from the three sites including diversity in race and
+    ethnicity as represented in the AI-READI sample contributes to the development of the
+    protocol." "There will also be a community advisory board that evaluates the consent forms and
+    research protocols and their feedback will be considered in the modifications of the IRB as
+    needed." Feedback from this group led the study team to conclude that enrolling non-English
+    speaking participants would require translating all study materials, not only the consent
+    form.
+- id: https://doi.org/10.60775/fairhub.3#ethical-review-bioethics
+  name: Embedded ethical, legal and social implications review
+  reviewing_organization: AI-READI ethics and bioethics investigators
+  review_details: >-
+    "AI-READI aims to establish standards, best practices and guidelines for collection,
+    preparation and sharing of the data for the purposes of AI/ML, including guidance from
+    bioethicists." "To prevent such issues, ethical, legal and social implications are considered
+    at every stage of the project cycle." The project also reviewed existing documentation
+    approaches - datasheets and healthsheets - "to identify the most suitable one for biomedical
+    data", and engages the Native Biodata Consortium to evaluate data usage agreements, contract
+    negotiations, transparent access agreements and mechanisms for assured return of benefit and
+    sustainable Tribal input, control and monitoring.
+- id: https://doi.org/10.60775/fairhub.3#ethical-review-hdoc
+  name: UCSD Health Data Oversight Committee
+  reviewing_organization: University of California, San Diego Health Data Oversight Committee
+  review_details: >-
+    "UCSD has a health Data Oversight Committee (HDOC) that oversees data sharing with other
+    institutions. For sharing research data with another academic (i.e., non-profit/non-commercial)
+    institution, this is typically a straightforward process that is expedited. Approval is
+    contingent upon IRB approval and will be sought immediately after IRB approval is obtained."
+
+data_protection_impacts:
+- id: https://doi.org/10.60775/fairhub.3#dpia
+  name: Data protection impact analysis
+  impact_details: >-
+    "No, a data protection impact analysis has not been conducted."
+
+human_subject_research:
+  id: https://doi.org/10.60775/fairhub.3#human-subject-research
+  name: Human subject research status
+  involves_human_subjects: true
+  ethics_review_board: University of Washington Institutional Review Board (Human Subjects Division)
+  irb_approval:
+  - >-
+    STUDY00016228, University of Washington IRB; initial approval received 20 December 2022, with
+    annual renewal required within 90 days of expiration
+  - >-
+    Reliance agreements with the IRBs of the University of Alabama at Birmingham and the
+    University of California, San Diego
+  regulatory_compliance:
+  - >-
+    The public release is stripped of Protected Health Information as defined by the HIPAA Privacy
+    Rule via the Safe Harbor method
+  - >-
+    Licensees must comply with the data security and privacy standards established by the NIH
+    under its Genomic Data Sharing (GDS) Policy
+  - >-
+    Not an FDA-regulated drug study and not an FDA-regulated device study, per the FAIRhub study
+    description oversight module; no data monitoring committee
+  - >-
+    HIPAA authorization is obtained from subjects for all PHI accessed or collected following
+    enrolment; for PHI obtained for prescreening, the minimum-necessary, no-reuse,
+    accounting-for-disclosures and reasonable-safeguards assurances apply
+  description: >-
+    The study is an observational cohort study with a cross-sectional time perspective, described in
+    the IRB application as a "Cross-sectional and longitudinal observational study with data and
+    sample collections". Minors and pregnant women are not enrolled: pregnancy,
+    gestational diabetes and type 1 diabetes are exclusion criteria, and eligibility is restricted to
+    adults aged 40 years and older (the FAIRhub eligibility module gives a maximum age of 85 years
+    and excludes "Adults older than 85 years of age"). Biospecimen retention is recorded as "Samples
+    With DNA".
+
+informed_consent:
+- id: https://doi.org/10.60775/fairhub.3#informed-consent
+  name: Informed consent for participation and data sharing
+  consent_obtained: true
+  consent_type: >-
+    Written informed consent, obtained either as REDCap electronic consent with an electronic
+    signature before the visit or in person at the start of the visit; the study's preferred
+    method is e-consent so that surveys can be completed before the visit.
+  consent_documentation: >-
+    The approved University of Washington consent form is published at
+    https://docs.aireadi.org/v3/AI-READI%20Consent_Form_Standard_Mod17May2023_useforpilot.pdf. The
+    other clinical sites operated under IRB reliance and used the same form with minor
+    institution-specific language. Signed electronic consents are automatically emailed to
+    subjects, who may request further copies from a study coordinator at any time during the
+    study. For subjects who have difficulty viewing the consent, a study team member reads it
+    aloud; for a functionally illiterate subject, a study team member signs and notes the reason
+    in the presence of an impartial witness.
+  withdrawal_mechanism: >-
+    Participants may withdraw consent at any time and cease participation, but data already shared
+    or used remain in the dataset; this is stated in the consent document.
+  consent_scope: >-
+    The FAIRhub dataset consent metadata records consentType
+    "ConsentSpecifiedNotElsewhereCategorised" with the note that "The public version of the dataset
+    can only be used for type 2 diabetes related research. A private version will allow for more
+    generic use", and records no non-commercial, geographic, research-type, genetic-only or
+    no-methods restriction flags. Consent covers secondary use, banking and future sharing:
+    possible future uses recorded in the IRB application are "Manuscript and presentation
+    preparations, grant preparations, future research studies, future AI/ML algorithms,
+    repository/data sharing platform creations, future research using the stored specimen and
+    data", with the corresponding language included in the consent form.
+
+at_risk_populations:
+  id: https://doi.org/10.60775/fairhub.3#at-risk-populations
+  name: At-risk population involvement
+  at_risk_groups_included: false
+  source_caveats: >-
+    at_risk_groups_included is recorded as false on the basis of the stated eligibility criteria and
+    the absence of any protected population from them. The UW IRB application's questions about
+    prisoners, protected populations and recruitment of indigenous populations appear in the source
+    bundle as unfilled template text - the checkbox states did not survive extraction - so those
+    answers are not available and are not asserted here.
+  description: >-
+    No protected or vulnerable population is purposefully included. Eligibility is restricted to
+    consenting adults aged 40 and over; pregnancy, gestational diabetes and type 1 diabetes are
+    exclusion criteria; and the research does not include minors, so no parental permission or
+    assent procedures apply. The project separately engages the
+    Native Biodata Consortium as a co-learning exercise on the governance challenges of AI research
+    with American Indian and Alaska Native communities, and the NIH RePORTER abstract states that the
+    project "will also engage in a tribal consultation to address barriers and facilitators of
+    participation with the goal of collecting similar data within a Native American cohort in an
+    ethical and respectful manner"; the current cohort does not include Native American
+    participants. Accessibility measurements "were not specifically assessed",
+    though transportation assistance (rideshare services) was offered to participants who reported
+    barriers to travelling to study visits.
+
+license_and_use_terms:
+  id: https://doi.org/10.60775/fairhub.3#license-terms
+  name: AI-READI data licence and terms of use
+  data_use_permission: disease_specific_research
+  license_terms: >-
+    The FAIRhub record for v3.0.0 names the licence "AI-READI custom license v2.0" at
+    https://doi.org/10.5281/zenodo.17555036 and displays it as the "Health Data License". "This work
+    is licensed under a custom license specifically tailored to enable the reuse of the AI-READI
+    dataset (and other clinical datasets) for commercial or research purposes while putting strong
+    requirements around data usage, security, and secondary sharing to protect study participants,
+    especially when data is reused for artificial intelligence (AI) and machine learning (ML)
+    related applications." The licence text carried in the source bundle is the earlier
+    AI-READI-LICENSE-v1.0 (https://doi.org/10.5281/zenodo.10642459), a University of Washington Data
+    License Agreement whose principal terms are: a non-exclusive and non-transferable licence to
+    download, reproduce and use the Data and to create derivative works, for research and commercial
+    purposes (clause 1); no transfer, licensing, sublicensing, sale, assignment, display or sharing
+    of any portion of the Data or any derivative work with a third party other than another licensee
+    bound by identical terms, though models, algorithms and programs that do not themselves contain
+    the Data may be distributed subject to reasonable efforts to minimise memorisation or
+    reconstruction of the Data (clause 2); no clinical treatment decisions and no attempt to
+    re-identify or contact Data Subjects, plus an obligation to acknowledge the source and any funder
+    in publications (clause 3); compliance with NIH Genomic Data Sharing Policy security standards
+    (clause 4); automatic termination on breach, with deletion of all copies (clause 5); retention of
+    title and all intellectual property rights by the Licensor (clause 6); the Data provided "as is"
+    with no warranty (clause 7); liability capped in the aggregate at one US dollar (clause 8);
+    indemnification of the Licensor by the Licensee (clause 9); and compliance with all applicable
+    laws (clause 10). Accessing the dataset requires logging in through a verified ID system,
+    agreeing to use the data only for type 2 diabetes related research, and agreeing to the licence
+    terms; the FAIRhub access type is "PublicDownloadSelfAttestationRequired". The full dataset is
+    accessible only by entering into a data use agreement.
+  contact_person: https://orcid.org/0000-0002-7452-1648
+  source_caveats: >-
+    The licence version named by the v3.0.0 metadata (v2.0, Zenodo 17555036) differs from the licence
+    document included in the bundle (v1.0, Zenodo 10642459); the clause-level terms summarised here
+    are from the v1.0 text and may not reflect v2.0. The bundled v1.0 text names the University of
+    Washington as Licensor.
+
+ip_restrictions:
+  id: https://doi.org/10.60775/fairhub.3#ip-restrictions
+  name: Intellectual property restrictions
+  restrictions:
+  - >-
+    "Title to the Data, and all industrial and intellectual property rights therein, shall at all
+    times remain solely and exclusively with Licensor and its suppliers, and Licensee shall not
+    take any action inconsistent with such ownership."
+  - '"Any rights not expressly granted herein are reserved to Licensor and its suppliers."'
+  - >-
+    Asked whether any third parties have imposed IP-based or other restrictions on the data
+    associated with the instances, the healthsheet answers only "Refer to license
+    (https://doi.org/10.5281/zenodo.17555036)".
+  - >-
+    "There are no plans for the researchers involved in collecting the data set to develop any
+    commercial products or file for patents. However, the data set will be publicly available with
+    a commercial-friendly open-source license and there may be products or patents that are
+    developed from it in the future."
+
+regulatory_restrictions:
+  id: https://doi.org/10.60775/fairhub.3#regulatory-restrictions
+  name: Regulatory and compliance restrictions
+  hipaa_compliant: compliant
+  confidentiality_level: restricted
+  regulatory_restrictions:
+  - >-
+    "Licensee agrees to comply with all applicable laws, regulations and restrictions relating to
+    the distribution and use of the Data and Models."
+  - >-
+    "Licensee agrees to comply with all data security and privacy standards established by the
+    U.S. National Institutes of Health under its Genomic Data Sharing (GDS) Policy from time to
+    time", specifically the NIH Security Best Practices for Controlled-Access Data Subject to the
+    NIH GDS Policy.
+  - >-
+    Asked whether any export controls or other regulatory restrictions apply to the dataset or to
+    individual instances, the healthsheet answers only "Refer to license
+    (https://doi.org/10.5281/zenodo.17555036)".
+  other_compliance: >-
+    The public release contains no protected health information: PHI as defined by the HIPAA Privacy
+    Rule is removed by the Safe Harbor method, and the FAIRhub de-identification metadata records
+    deIdentHIPAA as true with the note that "we checked that no identifiable data per US HIPAA were
+    present in the data". Access is not unrestricted: it requires login through a verified ID system,
+    self-attestation that the data will be used only for type 2 diabetes related research, and
+    acceptance of the licence, while the fuller dataset requires a data use agreement. The study is
+    not FDA-regulated as a drug or device study.
+  description: >-
+    "The requirements for controlled access data sets are being currently developed by the Data
+    Access Committee." The IRB application likewise records that the controlled database "will require
+    data user agreement between the researchers to obtain the data and approval process developed by
+    the project committee", and that the project would "create an infrastructure to decide who is
+    allowed to request and receive the specimen for future research" from the biorepository.
+
+is_deidentified:
+  id: https://doi.org/10.60775/fairhub.3#deidentification
+  name: De-identification of the released dataset
+  identifiable_elements_present: false
+  method: >-
+    Removal of Protected Health Information as defined by the HIPAA Privacy Rule via the Safe Harbor
+    method, followed by verification that no HIPAA-identifiable data remain.
+  identifiers_removed: >-
+    Protected Health Information as defined by the HIPAA Privacy Rule, plus information related to
+    participants' sex and race/ethnicity and to medication use. Held in the controlled-access set
+    rather than the public set: 5-digit zip code, sex, race, ethnicity, genetic sequencing data, past
+    health records, medications, and traffic and accident reports.
+  deidentification_details: >-
+    "The data in this dataset contain no protected health information (PHI). Information related to
+    the sex and race/ethnicity of the participants as well as medication used has also been removed."
+    "The public set is stripped of Protected Health Information (PHI), as defined by the HIPAA
+    (Health Insurance Portability and Accountability Act) Privacy Rule via the 'Safe Harbor' method,
+    as well as information related to the sex and race/ethnicity of the participants to prevent
+    stigmatization of findings." The FAIRhub dataset description records deIdentType
+    "NoDeIdentification" with deIdentDirect true, deIdentHIPAA true, and deIdentDates,
+    deIdentNonarr and deIdentKAnon all false, and explains: "No identifiers were collected so no
+    active de-identification was necessary but we checked that no identifiable data per US HIPAA were
+    present in the data."
+  source_caveats: >-
+    The two accounts differ in framing rather than in effect: FAIRhub records the de-identification
+    type as "NoDeIdentification" on the grounds that no identifiers were collected, while the Nature
+    Metabolism comment describes the public set as actively stripped of PHI by the Safe Harbor
+    method. The IRB application meanwhile states that identifiers including name, MRN, date of birth,
+    address, phone number, driver's licence number and email are collected during the study, so the
+    "no identifiers were collected" statement applies to the released dataset rather than to the
+    study record. Both statements are reproduced above. The healthsheet questions asking directly
+    about de-identification pre-processing and about measures taken to avoid re-identification are
+    left blank.
+
+external_resources:
+- id: https://doi.org/10.60775/fairhub.3#external-documentation
+  name: AI-READI dataset documentation
+  external_resources:
+  - 'AI-READI dataset documentation: https://docs.aireadi.org'
+  - 'AI-READI project website: https://aireadi.org'
+  - 'Zenodo community of the AI-READI project: https://zenodo.org/communities/aireadi'
+  - 'GitHub organization of the AI-READI project: https://github.com/AI-READI'
+  - 'Clinical Dataset Structure specification: https://cds-specification.readthedocs.io'
+  restrictions:
+  - >-
+    None on the documentation: "The documentation is shared under the CC-BY 4.0 license, so
+    there are no restrictions associated with its use."
+  description: >-
+    "The dataset is self-contained but does rely on the dataset documentation for users requiring
+    additional information about the provenance of the dataset. The documentation is available at
+    https://docs.aireadi.org." The dataset description records both https://docs.aireadi.org/ and
+    https://aireadi.org/ as related identifiers with relation type IsDocumentedBy.
+  source_caveats: >-
+    The healthsheet question that asks whether guarantees exist that the external resources will
+    persist and whether official archival versions of the complete dataset exist is answered only
+    in respect of the documentation's licence, so neither future_guarantees nor archival is
+    populated here.
+

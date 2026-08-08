@@ -1,0 +1,377 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Every Creator object carries the person's name only inside `notes` free text (e.g. \"Eric S. Rosenthal; principal investigator of NIH award...\"). Creator declares `affiliations`, `credit_roles`, `principal_investigator` and `notes`; the bundle names six individuals and the schema digest for Creator does not declare a name field, so the person's identity has nowhere structured to go — but embedding source commentary about award numbers and leadership-team membership in the same free-text value that carries the identity conflates identity with provenance commentary. The final creators entry (\"The CHoRUS consortium comprises 60+ members across 20 different institutions\") is not a creator at all; it is a consortium-size fact and should be in `notes` at dataset level, not an entry in a multivalued Creator list."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "creators",
+      "issue": "Same defect as the full record: the seventh Creator entry is a consortium headcount statement rather than a distinct creating entity, populating a multivalued slot with a non-entity."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "file_collections",
+      "issue": "All nine FileCollection objects leave the declared FileCollection fields (`collection_type`, `file_count`, `path`, `total_bytes`, `distribution_formats`) empty and push the substantive content — access control, metadata availability, published metadata schema — into `notes` prose. The bundle supports `collection_type` for none of these directly, but it does supply per-modality format standards that were placed in `conforms_to` correctly while access-control and metadata-status facts remain undifferentiated prose. Additionally the waveform-telemetry entry's note states '23 Tb of waveform data', a dataset-level aggregate, which duplicates the figure already recorded under `instances`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_formats",
+      "issue": "Six DistributionFormat objects are emitted with only `notes` populated; `access_urls` is never used even though the bundle supplies no per-format URL, and the sixth entry describes the access route (Collaborative Cloud enclave, Azure container deployment) rather than a distribution format. Per the v2 decision rule, the access route belongs in the field it answers (license_and_use_terms / third_party_sharing), not in distribution_formats."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "distribution_formats",
+      "issue": "Identical defect carried over: the sixth entry records the enclave access route rather than a distribution format."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_dates",
+      "issue": "DistributionDate declares `release_dates`; the object populates only `notes`, and the note mixes a release-availability statement with metadata-publication status and the NIH project end date. 'As of August 2025' is the only date-like anchor the bundle offers for release, and it was not placed in `release_dates`."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "distribution_dates",
+      "issue": "Same: `release_dates` left empty while the note carries the August 2025 availability statement."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "external_resources",
+      "issue": "Fifteen ExternalResource objects are emitted with only `notes` populated. ExternalResource declares `external_resources`, `archival`, `future_guarantees`, `restrictions`; the URLs present in several notes (chorus4ai.org, github.com/chorus-ai, the webinar PDF, the NIH RePORTER page) were not placed in the declared `external_resources` field. This is the v3 defect: objects of the correct shape holding none of the structure they exist to carry."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "external_resources",
+      "issue": "Identical defect: all fifteen entries carry content in `notes` only, with declared fields unpopulated."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "license_and_use_terms",
+      "issue": "`data_use_permission` is left unpopulated although the bundle supports at least one enum value from the declared set — access is gated by a signed licensing agreement and institutional (.edu) email, which corresponds to `institution_specific` and/or `ethics_approval_required`-style gating. Given ambiguity, omission is defensible, but `contact_person` mixes three distinct contacts (two access-request addresses and a program manager) into one string where the bundle distinguishes their roles."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "license_and_use_terms.contact_person",
+      "issue": "The value embeds the parenthetical source commentary '(cmccrary@mgh.havard.edu, as printed on the project website)'. Editorial commentary about a source typo belongs in `notes`, not inside a contact identifier value."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "license_and_use_terms.contact_person",
+      "issue": "Same embedded source commentary '(… as printed on the project website)' inside the contact value."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "maintainers",
+      "issue": "Two of the three Maintainer objects repeat the '(cmccrary@mgh.havard.edu, as printed on the project website)' commentary and duplicate contact information already carried in license_and_use_terms.contact_person. The third maintainer entry ('Software package maintainers within CHoRUS; versions, maintainers and other metadata … are published on the project's package status page') is a pointer to where maintainer information lives rather than an answer to who maintains — the v2 rule directs omission over pointer values."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "maintainers",
+      "issue": "Same: third maintainer entry is a pointer to a package status page rather than a named maintainer."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "license",
+      "issue": "Omitted at dataset level, which is correct — the MIT License in the bundle governs the CHoRUS GitHub code, not the dataset. However this distinction is only implicit; the MIT fact appears solely inside external_resources notes. No unsupported claim was made, so this is an observation rather than a defect."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "splits",
+      "issue": "The full record populates `splits` with the holdout test set. The core record omits `splits` entirely and instead folds the holdout description into the dataset-level `notes` paragraph. This is an inter-record inconsistency: the same bundle fact is structurally represented in one record and reduced to prose in the other."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "notes",
+      "issue": "The core `notes` field absorbs a large block of per-modality detail (data standards, access control, metadata status for nine modalities) plus the holdout-set fact and the direct-collection fact. In the full record these are structured as `file_collections`, `splits` and `direct_collection`. If the core schema declares any of those slots, the prose collapse is a shape defect; if it does not, the content is correctly routed to `notes` per the schema digest guidance. Cannot be resolved from the digest supplied, which covers the full Dataset class only — flagged for verification against data_sheets_schema_core_all.yaml."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "Present in the full record as a DirectCollection object with `is_direct: false`; absent from the core record, where the same fact appears only as a trailing clause in dataset-level `notes` and in acquisition_methods[0].notes. Inconsistent structural treatment of a bundle-supported fact across the paired records."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "relationships",
+      "issue": "The full record carries a `relationships` object describing admission-level linkage across modalities (including the 7,642 radiology-admission figure). The core record folds this into instances[0].notes. Same inter-record inconsistency pattern."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "third_party_sharing",
+      "issue": "Present in the full record (`is_shared: true` with access-process detail); absent from the core record, where a fragment of the same content was appended to license_and_use_terms.notes. If the core schema declares third_party_sharing, this is an unjustified omission."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "variables",
+      "issue": "A single VariableMetadata object is emitted for 'Geographic distance to the nearest hospital'. The bundle mentions this only as an illustrative contextual factor the project intends data elements to feature — it is not documented as an actual named variable in the dataset. Populating `variables` from an aspirational example in the NIH abstract overstates what the bundle supports. The core record correctly omits this slot, producing an inter-record inconsistency."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "conforms_to",
+      "issue": "Set to 'OMOP Common Data Model (OHDSI)' at dataset level, but the bundle shows only five of nine modalities standardised to OMOP; the remainder conform to OHNLP, DICOM, WFDB/PhysioNet and EDF+/Persyst. A single dataset-level `conforms_to` asserting OMOP over-generalises. The per-collection `conforms_to` values are correct; the dataset-level assertion is the problem."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "conforms_to",
+      "issue": "Same over-generalisation of OMOP to the whole dataset when only five of nine modalities use it."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "status",
+      "issue": "The status value embeds a verbatim quotation of a website banner including its typographical error ('repoitory'). The status slot asks for the resource status (draft/published/deprecated per the schema description); the banner quotation is source commentary better placed in `notes`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "status",
+      "issue": "Same embedded website-banner quotation with source typo inside the status value."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "ethical_reviews",
+      "issue": "EthicalReview declares `contact_person`, which is left empty, and `reviewing_organization` is populated with 'CHoRUS Ethics pillar (Ethical and Trustworthy AI), CHoRUS consortium' — a project work-package name rather than a reviewing body. The bundle documents no IRB, ethics committee or named review organization for the dataset; it documents an ethics research pillar. Representing a project pillar as a reviewing_organization risks reading as institutional oversight that the bundle does not evidence."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "ethical_reviews",
+      "issue": "Same: a project pillar is recorded in `reviewing_organization`, where the bundle evidences no formal reviewing body."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "human_subject_research",
+      "issue": "`involves_human_subjects: true` is well supported, but `irb_approval`, `ethics_review_board` and `regulatory_compliance` are omitted — correctly, since the bundle is silent on all three. No defect; recorded for completeness of the audit."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "known_biases",
+      "issue": "A single DatasetBias with `bias_type: representation_bias` is asserted. The bundle does not state that representation bias is present in the dataset; it states that the project undertakes work to manage privacy and bias and to ensure a balanced cohort. Recording a specific bias_type from a mitigation-intent statement infers a finding the bundle does not report. The `bias_description` text is honest about this ('is treated as an explicit challenge'), but the enum assignment asserts more than the prose."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "known_biases",
+      "issue": "Identical over-assertion: `representation_bias` enum derived from a statement of mitigation intent rather than a reported bias finding."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "at_risk_populations",
+      "issue": "`at_risk_groups_included` lists PICU and NICU patients and critically ill patients. The bundle supports ICU/PICU/NICU as care settings of the released admissions; characterising these as at-risk groups is a reasonable reading, but `special_protections`, `assent_procedures` and `guardian_consent` are all empty and the bundle evidences none — so the object asserts group inclusion without any protection detail the class exists to capture."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances",
+      "issue": "instances[0].notes carries a five-sentence aggregation of counts (50,000 / 45K / 100,000 / 1.6 billion rows / 7,642 / 23 Tb / ~1,000 images) plus the release-vs-anticipated distinction. Instance declares `counts`, which is left empty. The numeric facts the bundle supplies most directly are pushed to prose while a declared numeric field goes unused."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "instances",
+      "issue": "Same: `counts` unpopulated while all count facts sit in `notes`, with the core version additionally absorbing the cross-modality linkage content."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "total_file_count / total_size_bytes",
+      "issue": "Both omitted. The bundle gives '23 Tb waveform data' and '1.6 Billion rows', neither of which is a total byte count across all collections, so omission is correct. Recorded as a verified non-defect."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "citation / doi / version / issued / download_url",
+      "issue": "All omitted. The bundle supplies no dataset DOI, no version identifier, no formal citation and no direct download URL (access is enclave-mediated). Omission is correct under the prefer-omission rule."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "collection_consents / collection_notifications / consent_revocations / informed_consent",
+      "issue": "All omitted. The bundle describes community-facing ethics focus groups and a legal framework for collecting data at scale, but states nothing about patient consent, notification or revocation for this retrospective dataset. Omission is correct; flagged because a reader may expect these for a human-subjects clinical dataset and their absence is an evidence gap in the bundle rather than a generation defect."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "anomalies / errata / missing_data_documentation / imputation_protocols",
+      "issue": "All omitted, correctly — the bundle reports no data anomalies, errata, missing-data patterns or imputation. Verified non-defect."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "discouraged_uses / prohibited_uses",
+      "issue": "Both omitted. The bundle imposes access restrictions but states no discouraged or prohibited use. Omission correct."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "retention_limit / version_access",
+      "issue": "Both omitted; the bundle is silent on retention periods and version history. Omission correct."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "The dataset-level `notes` correctly surfaces the 45K-vs-50,000 discrepancy without silently選 selecting one figure, satisfying the disagreement rule. It also correctly flags the unresolvable OMOP-schema-with-extensions table-layout ambiguity. This is exemplary handling; recorded as a positive finding."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "id",
+      "issue": "Both records use `https://chorus4ai.org/` as the dataset id. That URI is the project homepage, and it is simultaneously used as the value of `page` in both records. Using the same URI as both the dataset identifier and its landing page conflates the dataset referent with the project website. The bundle offers no dataset-specific persistent identifier, so some choice was necessary, but the collision with `page` should be noted in the reconciliation report as the chosen referent anchor."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "acquisition_methods",
+      "issue": "A single InstanceAcquisition object is emitted covering all modalities. The declared boolean fields `was_directly_observed`, `was_inferred_derived`, `was_reported_by_subjects`, `was_validated_verified` are all unpopulated although the bundle supports `was_directly_observed: true` (clinical data recorded in source systems) and `was_reported_by_subjects: false`. Declared fields left empty while content sits in `acquisition_details` prose."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "sampling_strategies",
+      "issue": "`is_sample`, `is_random`, `is_representative` and `why_not_representative` are all unpopulated. The bundle states the project aims for a balanced and diverse cohort via federated sampling, which does not settle representativeness, so omission of `is_representative` is defensible; but `is_sample: true` is clearly supported by the sampling language and was not recorded."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "machine_annotation_tools",
+      "issue": "A single MachineAnnotationTools object bundles four distinct tools (OHNLP toolkit, CTP-deid, privacy_scan_tool, DeGauss) into one object with parallel `tools` and `tool_descriptions` lists. The slot is multivalued; per the v2 rule, one object per distinct entity would better represent four separately-sourced tools. `tool_accuracy` is empty for all, correctly, as the bundle reports none."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "machine_annotation_tools",
+      "issue": "Same collapse of four distinct tools into a single MachineAnnotationTools object."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "labeling_strategies",
+      "issue": "Two LabelingStrategy objects populate only `labeling_details`; `annotations_per_item`, `annotator_demographics`, `data_annotation_platform`, `data_annotation_protocol` and `inter_annotator_agreement` are empty. The bundle supports `data_annotation_protocol` for the second entry (the clinical validation SOP in chorus-mapping) and arguably `data_annotation_platform` (the visualization and annotation environment) for the first."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "raw_data_sources",
+      "issue": "Five RawDataSource objects correctly populate the required `source_description` plus `source_type` and `raw_data_format`. `access_details` is empty throughout, correctly, since the bundle gives no per-source access route. Verified conforming."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "intended_uses",
+      "issue": "Four IntendedUse objects use `use_category` values ('Model development', 'External model validation', 'Training and education', 'Innovative data-driven research') that are free-text. The schema digest declares no enum for `use_category`, so these are permissible; recorded to confirm no undefined enum value was introduced."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "existing_uses",
+      "issue": "Two ExistingUse objects, the first carrying only `notes` ('datasets are being used for training activities and publications') with `examples` empty. That first entry is a bare assertion of use without an instance; it is bundle-supported but adds little beyond the second entry, which does carry an example."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subpopulations",
+      "issue": "`distribution` is unpopulated. The bundle gives no per-subpopulation counts (the 50,000 figure is aggregate across ICU/PICU/NICU without breakdown), so omission is correct. Verified non-defect."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "keywords",
+      "issue": "Twelve keywords, all traceable to bundle vocabulary (the NIH RePORTER preferred-terms list and modality names). No invented terms. Verified conforming."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "regulatory_restrictions",
+      "issue": "`confidentiality_level: restricted` is asserted from the enum. The bundle says every modality is under 'controlled access', which maps plausibly to `restricted` but could equally support `confidential`. `hipaa_compliant` is omitted — correct, as the bundle mentions HIPAA only as a training-curriculum topic ('HIPAA/GDPR compliance for OMOP/FHIR data' in the AI-LEARN workshop listing), which is not a statement about this dataset's compliance status. Correct restraint on hipaa_compliant; the enum choice for confidentiality_level should be flagged as a judgment call."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "regulatory_restrictions",
+      "issue": "Same judgment call on `confidentiality_level: restricted`; same correct omission of `hipaa_compliant`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "funders",
+      "issue": "A single FundingMechanism carries two grant strings ('OT2OD032701' and '1OT2OD032701-01'). These are the core project number and the project number for the same award, not two grants — the bundle identifies them as such. Listing both in `grants` may read as two funding instruments. Additionally the disclaimer sentence about NIH views is source commentary lodged in `notes` alongside award facts."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "funders",
+      "issue": "Same duplication of one award as two `grants` entries."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_by",
+      "issue": "Set to 'CHoRUS Consortium'. The bundle attributes the award organization as Massachusetts General Hospital and the network as a 20-institution consortium; 'CHoRUS Consortium' is a fair aggregate and is used consistently across both records. Verified conforming."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "is_deidentified",
+      "issue": "`method` and `deidentification_details` populated; `identifiable_elements_present` and `identifiers_removed` left empty. The bundle supports `identifiable_elements_present: true` implicitly (de-identification is in process, notes held locally), but does not enumerate identifiers removed. Partial population is defensible; the boolean omission is a minor under-fill."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "extension_mechanism",
+      "issue": "`contribution_url` correctly populated with the GitHub organization URL and `extension_details` carries the contribution routes. Verified conforming — this is the one object in the record that populates a declared structured field alongside its prose."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "updates",
+      "issue": "`frequency` is unpopulated. The bundle states sites 'provide regular status updates' but gives no cadence for dataset releases, so omission is correct. `update_details` appropriately carries the expansion plan. Verified conforming."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "use_repository",
+      "issue": "Omitted. The bundle mentions publications arising from the dataset and GitHub project tracking, but no citation index or use-tracking registry for the dataset itself. Omission correct — the GitHub task/status projects track data delivery, not dataset use, and must not be repurposed into use_repository."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "other_tasks",
+      "issue": "Omitted. The bundle's trainee use-case development could arguably support an OtherTask entry, but it is already captured under intended_uses 'Training and education'. Omission avoids duplication. Verified non-defect."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "language",
+      "issue": "Omitted from both records. The bundle notes 'working command of English' as a trainee eligibility requirement, which is a program requirement and not a statement about the dataset's language of expression. Correct restraint — this is precisely the kind of adjacent fact that must not be promoted into a dataset slot."
+    }
+  ],
+  "summary": "Both records are factually well-grounded: no claim was found that the bundle does not support, the 45K-vs-50,000 release-size disagreement is surfaced rather than silently resolved, the OMOP-schema-with-extensions table ambiguity is disclosed, and several tempting adjacent facts (MIT license as dataset license, HIPAA from a curriculum slide, English from a trainee eligibility rule) were correctly kept out. The dominant defect class is structural rather than factual: across creators, file_collections, external_resources, distribution_formats, distribution_dates, acquisition_methods, labeling_strategies and instances, objects of the correct shape are emitted with their declared fields empty while the substance sits in free-text notes — the v3 failure mode. Declared fields that the bundle clearly answers were left unpopulated: Instance.counts, InstanceAcquisition.was_directly_observed, SamplingStrategy.is_sample, DistributionDate.release_dates, ExternalResource.external_resources. Two entity-collapse issues violate the v2 one-object-per-entity rule (four annotation tools in one MachineAnnotationTools; one NIH award split across two grants strings, and conversely a consortium headcount emitted as a seventh Creator). Two values over-assert: known_biases assigns the representation_bias enum from a statement of mitigation intent rather than a reported finding, and variables (full record only) promotes an aspirational contextual factor from the NIH abstract into a documented dataset variable. Source commentary is embedded in identifier-bearing values in three places (the 'as printed on the project website' typo note inside contact_person, twice; the website banner quotation inside status, twice). Inter-record consistency is imperfect: splits, direct_collection, relationships, third_party_sharing and variables are structured in the full record but reduced to prose in the core record's notes block — pending verification of which of these the core schema actually declares, since the digest supplied covers only the full Dataset class. Finally, both records use the project homepage URI as both id and page, conflating dataset referent with landing page; the referent choice needs stating in the reconciliation report. No enum value outside the declared sets was used anywhere, and no prose was supplied where the schema requires a list."
+}

@@ -530,25 +530,58 @@ against AI-READI's baseline measures what the other 9 sources add on top of the
 healthsheet — a within-project comparison that is clean, because the corpus
 snapshot is identical apart from the input restriction.
 
-## Pending: AI-READI RO-Crate
+## Landed 2026-08-07: AI-READI RO-Crate
 
-An AI-READI crate is expected. When it lands, AI-READI gains
-`deterministic_ours` and `de_novo` (and `deterministic_upstream` if the crate
-ships `ro-crate-linkml.yaml`), making it the only project able to run every
-arm — five in total.
+The AI-READI crate arrived as a shared Drive folder ("v3-root-level-standard-team")
+and is captured at `data/ro-crate_packages/AI_READI/raw/`, with the full entry in
+`crate_manifest.yaml`. It describes dataset v3.0.0 — the same release the document
+corpus already prefers — under `ark:59853/rocrate-b2ai-aireadi-release-3-0-0`.
 
-Two things to get right at that point:
+Both predictions above held, and one thing came out differently:
 
-1. **AI-READI's de novo bundle will contain both the healthsheet and the
-   crate**, because the healthsheet is a standard corpus source. Its de novo arm
-   will therefore not be the same experiment as CHORUS's or VOICE's. Expect a
-   smaller crate delta for AI-READI, since the healthsheet may already cover
-   what the crate would add.
-2. **Run `d4d rocrate map` and re-check redundancy** as was done for the other
-   three: whether the crate's content is already present in the corpus is the
-   question that decides whether AI-READI is an informative case or another
-   near-null like CM4AI. With a healthsheet already in the corpus, near-null is
-   the more likely outcome.
+1. **No fifth arm.** The crate ships 5 root-level artifacts and **does not include
+   `ro-crate-linkml.yaml`**, exactly as VOICE does not. `deterministic_upstream`
+   therefore cannot run for AI-READI either, so AI-READI gains
+   `deterministic_ours` and `de_novo` only, and no project runs all five arms.
+2. **The redundancy check was run. Substantial, but not near-null.**
+   Measured 2026-08-07 against `AI_READI_preprocessed.txt`, sentence by
+   sentence (≥40 characters, whitespace and smart punctuation normalised):
+   **32 of 45 `rai:` sentences (71%) are already in the bundle**, because the
+   FAIRhub healthsheet (`fairhub_dataset_v3_api`) is a curated corpus source.
+   Four fields are fully redundant (`dataCollectionMissingData`,
+   `dataCollectionRawData`, `dataReleaseMaintenancePlan`, `dataUseCases`), but
+   `dataLimitations` is 64%, `dataPreprocessingProtocol` 54% and `dataBiases`
+   50% — so **roughly 29% of the crate's narrative is new to the corpus**,
+   concentrated in exactly the fields a datasheet cares most about.
+
+   Also already present: the IRB protocol id `STUDY00016228`, the named ethics
+   reviewers, the principal investigator and the licence DOI. Verified
+   crate-unique strings are three: `confidentialityLevel: HL7:2N (normal)`,
+   `dataGovernanceCommittee`, and the typed "Washington University IRB"
+   organization — the bundle carries "Washington University" six times but
+   never as the IRB.
+
+   An earlier draft of this section called the narratives "recoverable verbatim
+   or near-verbatim" and read the prediction above as confirmed. The
+   sentence-level measurement does not support that: expect a *smaller* delta
+   than CHORUS, not a null one.
+3. **The crate's contribution here is structure, not evidence** — typed governance
+   fields, booleans (`deidentified`, `fdaRegulated`, `humanSubjectResearch`), and a
+   nine-subcrate modality decomposition (ECG, OMOP/EHR, FLIO, retinal OCT, OCTA,
+   retinal photography, CGM, wearable activity, environmental sensor) referenced by
+   `hasPart` but not included in this root-level capture.
+
+This expectation about the measurement belongs here and in the manifest. It must
+**not** reach any generation prompt: an outcome expectation is excluded from both
+prompt conditions.
+
+**Ingestion blocker before any AI-READI crate arm can run:**
+`ro-crate-metadata.json` is windows-1252 encoded, not UTF-8, so it is not valid
+JSON per RFC 8259 and a UTF-8 parser fails at byte 5096. 31 bytes are affected
+(`0xa9` copyright sign, `0x92` right single quote, `0x96` en dash); it parses
+cleanly as cp1252. `raw/` is the provenance anchor and must not be repaired in
+place — the transcode belongs in `d4d rocrate normalize` and should be recorded in
+`processed/AI_READI_crate_changes.md`, as the other crates' repairs were.
 
 ## Reading the results honestly
 

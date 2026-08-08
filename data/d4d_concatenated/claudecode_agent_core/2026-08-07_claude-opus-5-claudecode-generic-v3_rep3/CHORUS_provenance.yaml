@@ -1,0 +1,119 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-08-08T00:58:16+00:00'
+run:
+  label: 2026-08-07_claude-opus-5-claudecode-generic-v3_rep3
+  project: CHORUS
+  method: claudecode_agent
+  arm: baseline
+  replicate: 3
+model:
+  generation_method: schema-grounded agentic, phase 1
+  agent_runtime: Claude Code
+  provider: Anthropic
+  model: claude-opus-5
+  reasoning_effort: high
+  mode: four-phase project agent, generic prompt
+  temperature: '0.0'
+  temperature_basis: asserted by the generating agent, not observed
+  shared_config:
+    path: .github/workflows/d4d_assistant_deterministic.config
+    name: claude-opus-5
+    temperature: 0.0
+    max_tokens: 16000
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt.md
+    sha256: 0fbc626bc3a51d74a8ba3d8e2813752f3bc5ce9366ee5f19c99089afdfd9e8dc
+    bytes: 5754
+    exists: true
+schema:
+  declared_version: 2.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: 22ffa83ce1aeb655137b12a615a755d8244b8d26868b3a67efddc86774c29937
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: 8f5889430d01e3715361bc59642b6c59a81e75100d9f7d2e92bd66bc4e7f8ec6
+  merged_schema_carries_version: true
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: 4713c948cfda83a5fc2f9c058cae849d8db6234c
+  commit_short: 4713c948
+  branch: provenance-prompt-hashes-agentic
+  dirty: true
+  dirty_file_count: 114
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+  bundle_md5: 1ce7d891fa81ad4b1f8290ddeec33461
+  bundle_bytes: 36184
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: ec2b563449bd3b0544d678fd52e65366
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CHORUS_d4d.yaml
+    bytes: 72335
+    slots: 58
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CHORUS_d4d_core.yaml
+    bytes: 66968
+    slots: 52
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CHORUS_reconciliation.md
+    bytes: 16500
+    slots: null
+unrecoverable: null
+unverified:
+- field: model.temperature
+  value: '0.0'
+  reason: the Claude Code runtime does not expose a temperature setting to the agent
+    or to this recorder; the header value restates the prompt template rather than
+    a measured parameter. A direct API run can observe it.
+notes: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CHORUS_d4d.yaml
+      md5: 6017fc209e042b2616e57b762d361998
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CHORUS_d4d_core.yaml
+      md5: f154179a46cabfb12ea7aae7e06b428e
+  recorded_by: d4d runs validate
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-08-07_claude-opus-5-claudecode-generic-v3_rep1
+    slots: 50
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-07_claude-opus-5-claudecode-generic-v3_rep2
+    slots: 53
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-07_claude-opus-5-claudecode-generic-v3_rep3
+    slots: 58
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 5
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-07-31_claude-opus-5-generic-v2_rep2

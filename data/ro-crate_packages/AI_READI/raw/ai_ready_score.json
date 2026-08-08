@@ -1,0 +1,129 @@
+{
+  "name": "AI-Ready Score for Flagship Dataset of Type 2 Diabetes from the AI-READI Project",
+  "fairness": {
+    "findable": {
+      "has_content": true,
+      "details": "Dataset has DOI: https://doi.org/10.60775/fairhub.3"
+    },
+    "accessible": {
+      "has_content": true,
+      "details": "The RO-Crate's JSON-LD metadata is machine-readable and publicly accessible by design."
+    },
+    "interoperable": {
+      "has_content": true,
+      "details": "The dataset uses the schema.org vocabulary within the RO-Crate framework and conforms to the Croissant RAI specification for interoperability."
+    },
+    "reusable": {
+      "has_content": true,
+      "details": "License: https://doi.org/10.5281/zenodo.17555036"
+    }
+  },
+  "provenance": {
+    "transparent": {
+      "has_content": false,
+      "details": "No root datasets identified. To document datasets, add entities with @type 'Dataset' to metadata graph"
+    },
+    "traceable": {
+      "has_content": false,
+      "details": "No transformation steps documented. To document workflows, add entities with @type 'Computation' or 'Experiment' to metadata graph"
+    },
+    "interpretable": {
+      "has_content": false,
+      "details": "No software documented. To document software, add entities with @type 'Software' to metadata graph"
+    },
+    "key_actors_identified": {
+      "has_content": true,
+      "details": "1 authors, Publisher: AI-READi Consortium, PI: Aaron Lee, Department of Ophthalmology, University of Washington"
+    }
+  },
+  "characterization": {
+    "semantics": {
+      "has_content": true,
+      "details": "Data is semantically described using the schema.org vocabulary within a machine-readable RO-Crate."
+    },
+    "statistics": {
+      "has_content": true,
+      "details": "Total size: 3.8 TB"
+    },
+    "standards": {
+      "has_content": false,
+      "details": "No schemas provided for datasets. To document schemas, add entities with @type 'schema' to metadata graph"
+    },
+    "potential_sources_of_bias": {
+      "has_content": true,
+      "details": "\nUniform data collection protocols were implemented for all subjects, irrespective of their race/ethnicity, biological sex, or diabetes severity, across all study sites. The selection of study sites w..."
+    },
+    "data_quality": {
+      "has_content": true,
+      "details": "Yes, not all modalities are available for all participants. Some participants elected not to participate in some study elements. In a few cases, the data collection device did not have any stored resu..."
+    }
+  },
+  "pre_model_explainability": {
+    "data_documentation_template": {
+      "has_content": true,
+      "details": "Documentation is provided via the RO-Crate's structured JSON-LD metadata, this HTML Datasheet, and Croissant RAI properties."
+    },
+    "fit_for_purpose": {
+      "has_content": true,
+      "details": "Use cases: The purpose for creating the dataset was to enable future generations of artificial intelligence/machine learning (AI/ML) research to provide critical insights into type 2 diabetes mellitus (T2DM), including salutogenic pathways to return to health. T2DM is a growing public health threat. Yet, the current understanding of T2DM, especially in the context of salutogenesis, is limited. Given the complexity of T2DM, AI-based approaches may help with improving our understanding but a key issue is the lack of data ready for training AI models. The AI-READI dataset is intended to fill this gap., Limitations: \nWhile the AI-READI's cross-sectional database ultimately aims to achieve balance across race/ethnicity, biological sex, and diabetes presence and severity, the pilot study is not balanced across these parameters.\n\nThree recording sites were strategically selected to achieve broad recruitment: the University of Alabama at Birmingham (UAB), the University of California San Diego (UCSD), and the University of Washington (UW). The sites were chosen for geographic variability across the United States and to ensure representation across various racial and ethnic groups. Individuals from all demographic backgrounds were recruited at all 3 sites. Factors influencing the generalization of derived models include the predominantly urban and hospital-based recruitment, which may not fully capture all possible cultural and socioeconomic backgrounds. The study cohort may not provide a comprehensive representation of the population, as it does not include other races/ethnicities such as Pacific Islanders and Native Americans. Information on device make and model, including specific modalities like macula scans or wide scans during OCT, were documented to ensure repeatability. Moreover, the study included multiple devices for one measure to enhance generalizability and represent the broad range of equipment utilized in clinical settings.\n\nIn cases of survey data, skipped questions or incomplete responses are expected. In cases of using wearables, improper use, technical failure such as battery failure or system malfunction are expected. In cases of imaging data, patient uncooperation, noise that may obscure the images and technical failure such as system malfunction, and data transfer failures are expected.\n"
+    },
+    "verifiable": {
+      "has_content": false,
+      "details": "No checksums available. To add checksums for verification, set 'md5' or 'sha256' in Dataset/Software/ROCrate entities"
+    }
+  },
+  "ethics": {
+    "ethically_acquired": {
+      "has_content": true,
+      "details": "Data collection: Multiple modalities of data are collected for each participant, including survey data, clinical data, retinal imaging data, environmental sensor data, continuous glucose monitor data, and wearable activity monitor data. These encompass tabular data, imaging data, and physiological signal/waveform data. There is no unstructured text data included in this dataset. The exact forms used for data collection in REDCap are available here. Furthermore, all modalities, file formats, and devices are detailed in the dataset documentation at https://docs.aireadi.org/., Human subject info: Yes"
+    },
+    "ethically_managed": {
+      "has_content": true,
+      "details": "Ethical review: Camille Nebeker, Debra Mathews, Kadija Ferryman, Nicholas Evans, Governance: AI-READi Consortium"
+    },
+    "ethically_disseminated": {
+      "has_content": true,
+      "details": "License: https://doi.org/10.5281/zenodo.17555036, Sensitive info: ['EHR', 'Wearable Monitoring', 'ECG', 'Environmental Sensor', 'Continuous glucose monitor', 'Wearable accelerometer']"
+    },
+    "secure": {
+      "has_content": true,
+      "details": "Confidentiality level: HL7:2N (normal)"
+    }
+  },
+  "sustainability": {
+    "persistent": {
+      "has_content": true,
+      "details": "Dataset has DOI: https://doi.org/10.60775/fairhub.3"
+    },
+    "domain_appropriate": {
+      "has_content": true,
+      "details": "Maintenance plan: The dataset gets released as static versions. This is the third version of the dataset and consists of data collected up through the end of the second year of the study, i.e. between July 19, 2023 and May 1st, 2025. There are plans to release new versions of the dataset approximately once a year with additional data from participants who have been enrolled since the last dataset version release."
+    },
+    "well_governed": {
+      "has_content": true,
+      "details": "Governance committee: AI-READi Consortium"
+    },
+    "associated": {
+      "has_content": true,
+      "details": "All data, software, and computations are explicitly linked within the RO-Crate's provenance graph."
+    }
+  },
+  "computability": {
+    "standardized": {
+      "has_content": false,
+      "details": "No format information available. To document file formats, set 'format' in Dataset/Software entities"
+    },
+    "computationally_accessible": {
+      "has_content": true,
+      "details": "Publisher: AI-READi Consortium"
+    },
+    "portable": {
+      "has_content": true,
+      "details": "The dataset is packaged as a self-contained RO-Crate, a standard designed for portability across systems."
+    },
+    "contextualized": {
+      "has_content": true,
+      "details": "Context is provided by the RO-Crate's graph structure and detailed in properties such as rai:dataLimitations."
+    }
+  }
+}

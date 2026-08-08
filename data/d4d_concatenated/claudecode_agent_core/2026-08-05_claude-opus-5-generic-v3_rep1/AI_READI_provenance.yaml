@@ -1,0 +1,229 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-08-06T01:10:58+00:00'
+run:
+  label: 2026-08-05_claude-opus-5-generic-v3_rep1
+  project: AI_READI
+  method: claudecode_agent
+  arm: baseline
+  replicate: 1
+model:
+  generation_method: schema-grounded API, six phases
+  agent_runtime: Claude API (direct)
+  provider: LBL CBORG (proxy to Anthropic)
+  base_url: https://api.cborg.lbl.gov
+  model: google/claude-opus-5-high
+  max_tokens_by_phase:
+    full: 64000
+    reconcile_full: 64000
+    core: 56000
+    reconcile_core: 56000
+    audit: 24000
+    report: 12000
+  temperature: null
+  temperature_basis: not applicable to this model
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt_v3.md
+    sha256: 2126da06d0834c2501c55fe9838720fe3ee33ab38c4775f2af329bc4759da45a
+    bytes: 7204
+    exists: true
+  resolved:
+    sha256: 89fd3d15b8fbabb02bc78c1fc087f8a25b94886a5717ac9333e7d7095626db51
+    bytes: 5412
+schema:
+  declared_version: 1.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: 810ae46416e126674cc39e29c65cd8617768abe6cb99e7bfcb519a696a64b434
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: cf18fa616898852bebf1ac6090e73aef340b01ab1b2b1cc8a9a5a8f4e57b5476
+  merged_schema_carries_version: true
+  digest_md5: b065e1cd28570278660301950e816ee7
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: bce1960033532e3ceb78eb292d7f5258cd3af58a
+  commit_short: bce19600
+  branch: switch-to-bare-opus5-route
+  dirty: true
+  dirty_file_count: 16
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 8aadffca28403aaa675e59b93721ea96
+  bundle_bytes: 420804
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: ec2b563449bd3b0544d678fd52e65366
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml
+    bytes: 87574
+    slots: 67
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml
+    bytes: 60722
+    slots: 54
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_reconciliation.md
+    bytes: 26874
+    slots: null
+unrecoverable: null
+unverified:
+- field: model.temperature
+  value: null
+  reason: 'google/claude-opus-5-high rejects `temperature` (400: deprecated for this
+    model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+    is not sent and does not apply. Sampling for this model family is selected by
+    model-name suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). google/claude-opus-5-high rejects `temperature`
+  (400: deprecated for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
+api_usage:
+- phase: full
+  attempt: 1
+  input_tokens: 2204
+  output_tokens: 64000
+  cache_read: 0
+  cache_write: 152657
+  max_tokens: 64000
+  stop_reason: max_tokens
+- phase: full
+  attempt: 2
+  input_tokens: 2204
+  output_tokens: 64000
+  cache_read: 0
+  cache_write: 152657
+  max_tokens: 64000
+  stop_reason: max_tokens
+- phase: full
+  attempt: 3
+  input_tokens: 2204
+  output_tokens: 56030
+  cache_read: 0
+  cache_write: 152657
+  max_tokens: 64000
+  stop_reason: end_turn
+- phase: core
+  attempt: 1
+  input_tokens: 26926
+  output_tokens: 19248
+  cache_read: 0
+  cache_write: 149662
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: audit
+  attempt: 1
+  input_tokens: 46212
+  output_tokens: 10270
+  cache_read: 0
+  cache_write: 152657
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: reconcile_full
+  attempt: 1
+  input_tokens: 37192
+  output_tokens: 39648
+  cache_read: 0
+  cache_write: 152657
+  max_tokens: 64000
+  stop_reason: end_turn
+- phase: reconcile_core
+  attempt: 1
+  input_tokens: 60886
+  output_tokens: 22167
+  cache_read: 0
+  cache_write: 149662
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: report
+  attempt: 1
+  input_tokens: 12486
+  output_tokens: 12000
+  cache_read: 0
+  cache_write: 152657
+  max_tokens: 12000
+  stop_reason: max_tokens
+- phase: report
+  attempt: 2
+  input_tokens: 12486
+  output_tokens: 12000
+  cache_read: 152657
+  cache_write: 0
+  max_tokens: 12000
+  stop_reason: max_tokens
+- phase: report
+  attempt: 3
+  input_tokens: 12486
+  output_tokens: 10482
+  cache_read: 152657
+  cache_write: 0
+  max_tokens: 12000
+  stop_reason: end_turn
+phases_skipped: null
+validation:
+  passed: false
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml
+      md5: 8e80e84224b06a9746faf4b8ede86414
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml
+      md5: 47e23602b1966ddd83e8df28eadc7509
+  recorded_by: api_runner.execute
+  problems:
+  - artifact: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml
+    class: Dataset
+    error: '[ERROR] [data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml/0]
+      ''The dataset is self-contained but relies on the dataset documentation for
+      users requiring additional information about its provenance; one documentation
+      version is maintained for each dataset version, and the documentation, project
+      website, Zenodo community and GitHub organisation are maintained by the AI-READI
+      project.'' is not of type ''array'', ''null'' in /external_resources/0/future_guarantees
+      | [ERROR] [data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml/0]
+      ''metadata'' is not of type ''array'', ''null'' in /file_collections/9/collection_type
+      | [ERROR] [data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml/0]
+      ''Washington University in St. Louis (https://ror.org/01yc7t268), as recorded
+      in the FAIRhub study metadata for v3.0.0; the NIH RePORTER record for award
+      OT2OD032644 and the Nature Metabolism comment give the University of Washington''
+      is not valid under any of the given schemas in /creators/0/affiliations/0 |
+      [ERROR] [data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml/0]
+      ''Washington University in St. Louis (https://ror.org/01yc7t268), as recorded
+      in the FAIRhub study metadata; the Nature Metabolism comment gives the University
+      of Washington'' is not valid under any of the given schemas in /creators/1/affiliations/0'
+  - artifact: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml
+    class: CoreDataset
+    error: '[ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml/0]
+      ''Washington University in St. Louis (https://ror.org/01yc7t268), as recorded
+      in the FAIRhub study metadata for v3.0.0; the NIH RePORTER record for award
+      OT2OD032644 and the Nature Metabolism comment give the University of Washington''
+      is not valid under any of the given schemas in /creators/0/affiliations/0 |
+      [ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml/0]
+      ''Washington University in St. Louis (https://ror.org/01yc7t268), as recorded
+      in the FAIRhub study metadata; the Nature Metabolism comment gives the University
+      of Washington'' is not valid under any of the given schemas in /creators/1/affiliations/0
+      | [ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml/0]
+      ''Stanford University (https://ror.org/00f54p054)'' is not valid under any of
+      the given schemas in /creators/2/affiliations/0 | [ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml/0]
+      ''University of California, San Diego (https://ror.org/0168r3w48)'' is not valid
+      under any of the given schemas in /creators/3/affiliations/0'

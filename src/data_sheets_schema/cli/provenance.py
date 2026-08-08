@@ -15,17 +15,30 @@ def provenance():
 @click.option('--method', required=True, help='e.g. claudecode_agent')
 @click.option('--label', required=True, help='run label, e.g. 2026-07-27_claude-opus-5_rep1')
 @click.option('--input-bundle', type=click.Path(), default=None)
-def record(project, method, label, input_bundle):
+@click.option('--prompt', 'prompts', multiple=True,
+              type=click.Path(exists=True, dir_okay=False),
+              help='Prompt file this run was launched with; may repeat. '
+                   'Hashed into the record.')
+def record(project, method, label, input_bundle, prompts):
     """Write a LIVE provenance record for a run just produced.
 
     Every field is observed at run time — hardware, software versions, input
     hashes. Use this from inside a generation process.
+
+    Pass --prompt for every prompt file the run consumed. Without it the
+    record's `prompts` block is null, which is what the agentic path produced
+    for its whole history while `d4d api run` hashed its prompts via
+    `prompt_paths`: the same procedure was reproducible from an API record and
+    not from a Claude Code one. A prompt is a generation input like the bundle,
+    and the prompt-condition study is precisely a comparison between prompts,
+    so a record that cannot identify its own prompt cannot be placed in it.
     """
     from data_sheets_schema.provenance import build_record, record_path_for
 
     rec = build_record(project, method, label, mode="live",
                        input_bundle=Path(input_bundle) if input_bundle else None,
-                       input_verified=True)
+                       input_verified=True,
+                       prompt_paths=[Path(p) for p in prompts] or None)
     out = rec.write(record_path_for(project, method, label))
     click.echo(f"✓ {out}")
 

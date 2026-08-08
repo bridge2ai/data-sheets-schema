@@ -1,0 +1,3402 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flagship Dataset of Type 2 Diabetes from the AI-READI Project - RO-Crate Datasheet</title>
+    <style>
+      :root {
+        --color-primary: #1f3a52;
+        --color-primary-dark: #16293a;
+        --color-accent: #2d7dd2;
+        --color-bg: #f4f6f9;
+        --color-surface: #ffffff;
+        --color-surface-alt: #f8fafc;
+        --color-border: #e3e8ee;
+        --color-text: #24323f;
+        --color-text-muted: #5d6b7a;
+        --radius: 10px;
+        --radius-sm: 6px;
+        --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.06),
+          0 1px 3px rgba(16, 24, 40, 0.1);
+        --font-sans: system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: var(--font-sans);
+        margin: 0;
+        padding: 0;
+        color: var(--color-text);
+        line-height: 1.55;
+        background-color: var(--color-bg);
+        transition: margin-left 0.3s ease-in-out;
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px 24px;
+        background-color: var(--color-surface);
+        box-shadow: var(--shadow-card);
+        transition: margin-left 0.3s ease-in-out;
+      }
+      [id] {
+        scroll-margin-top: 16px;
+      }
+
+      /* Hero header */
+      header {
+        margin-bottom: 18px;
+        padding: 26px 24px 22px;
+        border-radius: var(--radius);
+        background: linear-gradient(
+          135deg,
+          var(--color-primary-dark) 0%,
+          var(--color-primary) 55%,
+          #2a5078 100%
+        );
+        color: #fff;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      h1 {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin: 0 0 10px 0;
+        color: #fff;
+      }
+      .badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .badge {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 999px;
+        background-color: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      a.badge:hover {
+        background-color: rgba(255, 255, 255, 0.26);
+      }
+
+      h2 {
+        font-size: 19px;
+        color: var(--color-primary);
+        margin-top: 14px;
+        margin-bottom: 10px;
+        padding-left: 10px;
+        border-left: 4px solid var(--color-accent);
+        letter-spacing: -0.01em;
+      }
+      h3 {
+        font-size: 17px;
+        color: var(--color-primary);
+        margin-top: 10px;
+        margin-bottom: 6px;
+      }
+      h4 {
+        font-size: 15px;
+        color: var(--color-primary);
+        margin-top: 8px;
+        margin-bottom: 6px;
+      }
+
+      /* Card containers (shared by overview / use cases / distribution / subcrates) */
+      .summary-section,
+      .distribution-section,
+      .use-cases-section,
+      .subcrate-summary {
+        background-color: var(--color-surface);
+        padding: 16px 18px;
+        border-radius: var(--radius);
+        margin-bottom: 16px;
+        border: 1px solid var(--color-border);
+        box-shadow: var(--shadow-card);
+        break-inside: avoid;
+      }
+      .summary-row {
+        display: flex;
+        margin-bottom: 0;
+        border-bottom: 1px solid var(--color-border);
+        padding: 7px 0;
+      }
+      .summary-row:last-child {
+        border-bottom: none;
+      }
+      .summary-label {
+        width: 230px;
+        flex-shrink: 0;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--color-text-muted);
+        padding-top: 2px;
+      }
+      .summary-value {
+        flex: 1;
+      }
+      .section-header {
+        margin: 16px 0 10px 0;
+      }
+      .composition-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .composition-item {
+        background-color: var(--color-surface-alt);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        padding: 10px;
+        text-align: center;
+        width: calc(20% - 10px);
+        min-width: 120px;
+      }
+      .composition-count {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--color-primary);
+        display: block;
+        margin-bottom: 5px;
+      }
+      .composition-label {
+        color: var(--color-text-muted);
+      }
+      .subcrates-container {
+        margin-top: 15px;
+      }
+      .subcrate-metadata {
+        margin-bottom: 8px;
+      }
+      .metadata-item {
+        margin-bottom: 3px;
+        padding: 3px 0;
+        border-bottom: 1px solid var(--color-surface-alt);
+      }
+      .metadata-item:last-child {
+        border-bottom: none;
+      }
+      .metadata-label {
+        font-weight: 600;
+        color: var(--color-text-muted);
+        font-size: 13px;
+        margin-right: 10px;
+      }
+      .section-summary {
+        background-color: var(--color-surface);
+        border-radius: var(--radius-sm);
+        padding: 10px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+        border: 1px solid var(--color-border);
+      }
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 10px;
+      }
+      .summary-item {
+        margin-bottom: 8px;
+      }
+      details {
+        margin-top: 8px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        padding: 8px;
+        background-color: var(--color-surface-alt);
+      }
+      summary {
+        font-weight: 600;
+        cursor: pointer;
+        padding: 5px;
+        color: var(--color-primary);
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      .data-table th,
+      .data-table td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .data-table th {
+        background-color: var(--color-surface-alt);
+        font-weight: 600;
+        color: var(--color-primary);
+      }
+      .view-full-link {
+        margin-top: 8px;
+        text-align: right;
+      }
+      .view-full-link a {
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: var(--color-primary);
+        color: white;
+        text-decoration: none;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .view-full-link a:hover {
+        background-color: var(--color-primary-dark);
+      }
+      .distribution-item,
+      .use-cases-item {
+        margin-bottom: 0;
+        border-bottom: 1px solid var(--color-border);
+        padding: 7px 0;
+      }
+      .distribution-item:last-child,
+      .use-cases-item:last-child {
+        border-bottom: none;
+      }
+      .distribution-label,
+      .use-cases-label {
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--color-text-muted);
+        margin-bottom: 3px;
+      }
+      .publications-list {
+        margin-top: 5px;
+        padding-left: 15px;
+      }
+      .publications-list li {
+        margin-bottom: 8px;
+      }
+      .subcrate-error {
+        background-color: #fff0f0;
+        padding: 15px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 20px;
+        border: 1px solid #ffcccb;
+      }
+      .subcrate-title {
+        border-bottom: 2px solid var(--color-accent);
+        padding-bottom: 6px;
+        margin-bottom: 10px;
+        color: var(--color-primary);
+      }
+      .sidebar-dropdown {
+        border: none;
+        padding: 0;
+        margin: 0;
+        background: none;
+      }
+      .sidebar-dropdown summary {
+        padding: 12px 15px;
+        font-size: 16px;
+        color: #f1f1f1;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .sidebar-dropdown summary:hover {
+        background-color: var(--color-primary-dark);
+      }
+      .sidebar-subnav-link {
+        padding-left: 30px !important;
+        font-size: 14px !important;
+      }
+      .composition-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 8px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+      }
+      .composition-card {
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        box-shadow: var(--shadow-card);
+      }
+      .card-header {
+        background-color: var(--color-surface-alt);
+        padding: 10px 15px;
+        border-bottom: 1px solid var(--color-border);
+        display: flex;
+        align-items: center;
+      }
+      .card-icon {
+        font-size: 18px;
+        margin-right: 10px;
+      }
+      .card-title {
+        font-weight: 600;
+        color: var(--color-primary);
+        font-size: 14px;
+      }
+      .card-content {
+        padding: 8px 12px;
+      }
+      .card-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .stat-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .stat-label {
+        font-weight: 600;
+        color: var(--color-text-muted);
+        min-width: 25px;
+        margin-right: 2px;
+      }
+      .stat-value {
+        color: var(--color-text);
+      }
+      .stat-detail {
+        font-size: 0.9em;
+        color: var(--color-text-muted);
+        margin-top: 3px;
+        margin-left: 5px;
+      }
+
+      .compact-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-top: 6px;
+        margin-bottom: 6px;
+      }
+      .summary-card {
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        background-color: var(--color-surface);
+        break-inside: avoid;
+      }
+      .stat-row {
+        margin-bottom: 4px;
+        display: flex;
+        font-size: 0.95em;
+      }
+      .indent {
+        margin-left: 12px;
+        margin-bottom: 4px;
+      }
+      .small {
+        font-size: 0.9em;
+        color: var(--color-text-muted);
+      }
+      .compact-list {
+        margin: 0;
+        padding-left: 20px;
+      }
+      .compact-list li {
+        margin-bottom: 4px;
+      }
+      .subcrate-composition h4 {
+        margin-top: 8px;
+        margin-bottom: 4px;
+      }
+
+      footer {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 16px 24px;
+        font-size: 13px;
+        color: var(--color-text-muted);
+        text-align: center;
+      }
+      footer a {
+        color: var(--color-primary);
+        text-decoration: none;
+      }
+      footer a:hover {
+        text-decoration: underline;
+      }
+
+      .regulatory-section {
+        margin-top: 12px;
+        margin-bottom: 4px;
+        padding: 0;
+      }
+      .regulatory-section h3 {
+        font-size: 16px;
+        color: var(--color-primary);
+        margin-bottom: 8px;
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      .regulatory-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .regulatory-item {
+        background-color: var(--color-surface-alt);
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border);
+      }
+      .regulatory-label {
+        font-weight: 600;
+        color: var(--color-text-muted);
+        font-size: 13px;
+        margin-right: 5px;
+      }
+      .irb-detail {
+        background-color: var(--color-surface-alt);
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border);
+        margin-top: 8px;
+      }
+      .irb-org {
+        margin-top: 6px;
+      }
+      .irb-name {
+        font-weight: 600;
+        display: block;
+      }
+      .irb-contact {
+        margin-top: 4px;
+        font-size: 0.95em;
+        color: var(--color-text-muted);
+      }
+      .irb-contact > * + *::before {
+        content: " | ";
+        color: #999;
+      }
+      .irb-contact-type {
+        font-style: italic;
+      }
+      .irb-address {
+        margin-top: 4px;
+        font-size: 0.9em;
+        color: var(--color-text-muted);
+      }
+      .regulatory-exemptions {
+        background-color: var(--color-surface-alt);
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border);
+        margin-top: 8px;
+      }
+      .regulatory-exemptions p {
+        margin: 8px 0 0 0;
+        line-height: 1.5;
+      }
+
+      /* Sidebar navigation */
+      #sidebar {
+        height: 100%;
+        width: 250px;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        background-color: var(--color-primary);
+        overflow-x: hidden;
+        transition: transform 0.3s ease-in-out;
+        padding-top: 60px;
+        transform: translateX(-100%);
+      }
+      #sidebar.active {
+        transform: translateX(0);
+      }
+      #sidebar a {
+        padding: 12px 15px;
+        text-decoration: none;
+        font-size: 16px;
+        color: #f1f1f1;
+        display: block;
+        transition: 0.2s;
+      }
+      #sidebar a:hover {
+        background-color: var(--color-primary-dark);
+      }
+      #sidebar .sidebar-title {
+        padding: 10px 15px;
+        font-size: 20px;
+        color: white;
+        font-weight: 700;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+        margin-bottom: 10px;
+      }
+      #sidebar-toggle {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1001;
+        background-color: var(--color-primary);
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        cursor: pointer;
+        font-size: 18px;
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-card);
+        transition: left 0.3s ease-in-out;
+      }
+      body.sidebar-active {
+        margin-left: 250px;
+      }
+      body.sidebar-active #sidebar-toggle {
+        left: 265px;
+      }
+
+      /* Executive Summary */
+      .executive-summary-section {
+        background-color: var(--color-surface);
+        padding: 16px 18px;
+        border-radius: var(--radius);
+        margin-bottom: 16px;
+        border: 1px solid var(--color-border);
+        box-shadow: var(--shadow-card);
+        break-inside: avoid;
+      }
+      .executive-summary-section h2 {
+        margin-top: 0;
+      }
+      .summary-description {
+        font-size: 13.5px;
+        color: var(--color-text-muted);
+        margin-bottom: 12px;
+      }
+      .stat-access-data {
+        margin-top: auto;
+        padding-top: 10px;
+        text-align: left;
+      }
+      .access-data-btn {
+        display: inline-block;
+        padding: 7px 16px;
+        background-color: var(--color-accent);
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        border-radius: var(--radius-sm);
+        border: none;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      .access-data-btn:hover {
+        background-color: #2468b0;
+        color: #ffffff;
+        text-decoration: none;
+      }
+      .exec-summary-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .exec-summary-item {
+        background-color: var(--color-surface-alt);
+        padding: 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border);
+        display: flex;
+        flex-direction: column;
+      }
+      .exec-summary-label {
+        font-weight: 600;
+        color: var(--color-text-muted);
+        display: block;
+        margin-bottom: 10px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .exec-summary-item .stat-item {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 12px;
+      }
+      .stat-sub-label {
+        color: var(--color-text-muted);
+      }
+      .stat-sub-value {
+        color: var(--color-text);
+      }
+      .formats-list {
+        word-break: break-word;
+      }
+
+      /* Stat cards (big number + caption) */
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .stat-card {
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        padding: 10px 8px;
+        text-align: center;
+      }
+      .stat-number {
+        display: block;
+        font-size: 19px;
+        font-weight: 700;
+        color: var(--color-primary);
+        line-height: 1.2;
+        word-break: break-word;
+      }
+      .stat-caption {
+        display: block;
+        font-size: 11px;
+        color: var(--color-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-top: 2px;
+      }
+      .format-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 4px;
+      }
+      .chip {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-border);
+        color: var(--color-text-muted);
+        font-size: 11px;
+      }
+
+      /* AI-Ready Score: donut + bars */
+      .aiready-flex {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .aiready-donut-wrap {
+        flex-shrink: 0;
+        text-align: center;
+      }
+      .aiready-donut {
+        display: block;
+      }
+      .aiready-donut .donut-track {
+        fill: none;
+        stroke: var(--color-border);
+        stroke-width: 12;
+      }
+      .aiready-donut .donut-fill {
+        fill: none;
+        stroke-width: 12;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+      }
+      .aiready-donut .donut-text {
+        font-size: 24px;
+        font-weight: 700;
+        fill: var(--color-primary);
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+      .aiready-donut-caption {
+        font-size: 10px;
+        color: var(--color-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-top: 2px;
+      }
+      .aiready-bars {
+        margin-top: 2px;
+        flex: 1;
+        min-width: 0;
+      }
+      .aiready-bar-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+      .aiready-bar-label {
+        width: 90px;
+        font-size: 10.5px;
+        font-weight: 600;
+        color: var(--color-text-muted);
+      }
+      .aiready-bar-track {
+        flex: 1;
+        height: 8px;
+        background: var(--color-border);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .aiready-bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      .aiready-bar-score {
+        width: 34px;
+        font-size: 9.5px;
+        text-align: right;
+        color: var(--color-text-muted);
+        margin-left: 6px;
+      }
+      .view-details-link {
+        font-size: 11px;
+        font-weight: normal;
+        color: var(--color-accent);
+        text-decoration: none;
+        margin-left: 5px;
+        text-transform: none;
+        letter-spacing: normal;
+      }
+      .view-details-link:hover {
+        text-decoration: underline;
+      }
+
+      /* ---- Composition: filter toolbar + at-a-glance index ---- */
+      .dataset-index-heading {
+        margin-top: 4px;
+        margin-bottom: 2px;
+      }
+      .dataset-index-hint {
+        margin: 0 0 8px 0;
+        font-size: 12.5px;
+        color: var(--color-text-muted);
+      }
+      .dataset-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 4px 0 12px 0;
+      }
+      .dataset-filter-input {
+        flex: 1;
+        max-width: 420px;
+        padding: 8px 12px;
+        font-size: 14px;
+        font-family: var(--font-sans);
+        color: var(--color-text);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        background-color: var(--color-surface);
+      }
+      .dataset-filter-input:focus {
+        outline: none;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 3px rgba(45, 125, 210, 0.15);
+      }
+      .dataset-filter-count {
+        font-size: 12.5px;
+        color: var(--color-text-muted);
+      }
+      .dataset-index th {
+        position: sticky;
+        top: 0;
+      }
+      .dataset-index th:first-child,
+      .dataset-index td:first-child {
+        width: 28%;
+      }
+      .dataset-index-row {
+        cursor: pointer;
+      }
+      .dataset-index-row:hover {
+        background-color: var(--color-surface-alt);
+      }
+      .dataset-index td {
+        font-size: 13.5px;
+      }
+      .dataset-index-formats {
+        color: var(--color-text-muted);
+        font-size: 12.5px;
+      }
+      .dataset-jump {
+        color: var(--color-accent);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .dataset-jump:hover {
+        text-decoration: underline;
+      }
+      .dataset-no-matches {
+        color: var(--color-text-muted);
+        font-style: italic;
+        padding: 10px 0;
+      }
+
+      /* ---- Collapsible per-dataset card ---- */
+      .subcrate-card {
+        background-color: var(--color-surface);
+        padding: 0;
+        border-radius: var(--radius);
+        margin-bottom: 12px;
+        border: 1px solid var(--color-border);
+        box-shadow: var(--shadow-card);
+        break-inside: avoid;
+        scroll-margin-top: 60px;
+      }
+      .subcrate-card[open] {
+        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06),
+          0 4px 12px rgba(16, 24, 40, 0.1);
+      }
+      summary.subcrate-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+        list-style: none;
+        color: var(--color-primary);
+      }
+      summary.subcrate-head::-webkit-details-marker {
+        display: none;
+      }
+      summary.subcrate-head::before {
+        content: "\25B8"; /* ▸ */
+        flex-shrink: 0;
+        color: var(--color-text-muted);
+        font-size: 13px;
+        transition: transform 0.15s ease-in-out;
+      }
+      .subcrate-card[open] > summary.subcrate-head::before {
+        transform: rotate(90deg);
+      }
+      summary.subcrate-head:hover {
+        background-color: var(--color-surface-alt);
+        border-radius: var(--radius);
+      }
+      .subcrate-card[open] > summary.subcrate-head:hover {
+        border-radius: var(--radius) var(--radius) 0 0;
+      }
+      .subcrate-head-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--color-primary);
+      }
+      .subcrate-head-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-left: auto;
+      }
+      .chip-format {
+        background-color: var(--color-surface-alt);
+      }
+      .subcrate-body {
+        padding: 4px 16px 16px;
+        border-top: 1px solid var(--color-border);
+      }
+      /* Single-column stacked metadata (matches the original layout) */
+      .subcrate-body .subcrate-metadata {
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+      .more-meta {
+        margin-top: 8px;
+      }
+      .more-meta > summary {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--color-accent);
+      }
+
+      /* ---- Back-to-top button ---- */
+      #back-to-top {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 1001;
+        width: 42px;
+        height: 42px;
+        border: none;
+        border-radius: 50%;
+        background-color: var(--color-primary);
+        color: #fff;
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: var(--shadow-card);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+      }
+      #back-to-top.visible {
+        opacity: 0.9;
+        visibility: visible;
+      }
+      #back-to-top:hover {
+        opacity: 1;
+        background-color: var(--color-primary-dark);
+      }
+
+      /* ---- Sidebar active-section highlight (scrollspy) ---- */
+      #sidebar a.active,
+      #sidebar a.sidebar-subnav-link.active {
+        background-color: var(--color-accent);
+        color: #fff;
+      }
+
+      /* ---- Sticky Composition section header ---- */
+      #composition.section-header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background-color: var(--color-surface);
+        padding-top: 8px;
+        padding-bottom: 4px;
+      }
+
+      @media print {
+        body {
+          background-color: white;
+          margin-left: 0 !important;
+        }
+        body,
+        .container {
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
+        }
+        .container {
+          box-shadow: none;
+          max-width: 100%;
+          padding: 10px;
+        }
+        .view-full-link,
+        #sidebar,
+        #sidebar-toggle,
+        #back-to-top,
+        .dataset-toolbar {
+          display: none;
+        }
+        #composition.section-header,
+        .dataset-index th {
+          position: static;
+        }
+        .subcrate-card {
+          break-inside: avoid;
+          box-shadow: none;
+        }
+        .summary-section,
+        .distribution-section,
+        .use-cases-section,
+        .subcrate-summary,
+        .executive-summary-section,
+        .summary-card,
+        .composition-card {
+          break-inside: avoid;
+          box-shadow: none;
+        }
+        details {
+          margin-bottom: 20px;
+        }
+        details > summary {
+          list-style: none;
+        }
+        details > summary::marker,
+        details > summary::-webkit-details-marker {
+          display: none;
+        }
+        details:not([open]) > *:not(summary) {
+          display: block;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .compact-grid,
+        .regulatory-grid,
+        .exec-summary-grid {
+          grid-template-columns: 1fr;
+        }
+        .subcrate-head-chips {
+          margin-left: 0;
+        }
+        .aiready-flex {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .summary-row {
+          flex-direction: column;
+        }
+        .summary-label {
+          width: auto;
+        }
+        body.sidebar-active {
+          margin-left: 0;
+        }
+        body.sidebar-active #sidebar-toggle {
+          left: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button id="sidebar-toggle">☰</button>
+    <button id="back-to-top" title="Back to top" aria-label="Back to top">↑</button>
+
+    <nav id="sidebar">
+      <div class="sidebar-title">Navigation</div>
+      <a href="#datasheet-summary">Datasheet Summary</a>
+      <a href="#dataset-details">Release Overview</a>
+      <a href="#ai-readiness">AI Ready Information</a>
+      <details class="sidebar-dropdown">
+        <summary>Composition</summary>
+        <a href="#composition" class="sidebar-subnav-link">All Datasets</a>
+        <a href="#subcrate-1" class="sidebar-subnav-link">AI-READI ECG Subcrate</a>
+        <a href="#subcrate-2" class="sidebar-subnav-link">AI-READI EHR Subcrate</a>
+        <a href="#subcrate-3" class="sidebar-subnav-link">AI-READI FLIO Subcrate</a>
+        <a href="#subcrate-4" class="sidebar-subnav-link">AI-READI Retinal OCT Subcrate</a>
+        <a href="#subcrate-5" class="sidebar-subnav-link">AI-READI Retinal OCTA Subcrate</a>
+        <a href="#subcrate-6" class="sidebar-subnav-link">AI-READI Retinal Photography Subcrate</a>
+        <a href="#subcrate-7" class="sidebar-subnav-link">AI-READI Continuous Glucose Monitoring Subcrate</a>
+        <a href="#subcrate-8" class="sidebar-subnav-link">AI READI Wearable Activity Monitoring Subcrate</a>
+        <a href="#subcrate-9" class="sidebar-subnav-link">AI-READI Environmental Sensor Subcrate</a>
+      </details>
+    </nav>
+
+    <div class="container">
+      <header>
+        <h1 id="project-title">Flagship Dataset of Type 2 Diabetes from the AI-READI Project</h1>
+        <div class="badge-row">
+          <span class="badge">Version 3.0.0</span>
+          <a class="badge" href="https://doi.org/10.60775/fairhub.3" target="_blank" rel="noopener" title="https://doi.org/10.60775/fairhub.3">DOI ↗</a>
+          <a class="badge" href="https://doi.org/10.5281/zenodo.17555036" target="_blank" rel="noopener" title="https://doi.org/10.5281/zenodo.17555036">License ↗</a>
+          <span class="badge">3.82 TB</span>
+          <span class="badge">Released 11/17/25</span>
+        </div>
+      </header>
+
+      <!-- Executive Summary with AI-Readiness Score -->
+      <div id="datasheet-summary" class="executive-summary-section">
+    <h2>Datasheet Summary</h2>
+    <p class="summary-description">
+The Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights (AI-READI) project seeks to create a flagship ethically-sourced dataset to enable future generations of artificial intelligence/machine learning (AI/ML) research to provide critical insights into type 2 diabetes mellitus (T2DM), including salutogenic pathways to return to health. The ability to understand and affect the course of complex, multi-organ diseases such as T2DM has been limited by a lack of well-designed,... <a href="#description" style="color: var(--color-accent); font-size: 12px;">[read full description]</a></p>
+
+    <div class="exec-summary-grid">
+        <div class="exec-summary-item">
+            <span class="exec-summary-label">Dataset Statistics</span>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="stat-number">3.82 TB</span>
+                    <span class="stat-caption">Total Size</span>
+                </div>
+            </div>
+            <div class="stat-item stat-access-data">
+                <a href="https://fairhub.io/datasets/3" class="access-data-btn" target="_blank" rel="noopener">Access Data</a>
+            </div>
+        </div>
+
+        <div class="exec-summary-item aiready-item">
+            <span class="exec-summary-label">AI-Readiness Score <a href="ai_ready_score.json" class="view-details-link">(View Details)</a></span>
+            <div class="aiready-flex">
+                <div class="aiready-donut-wrap">
+                    <svg class="aiready-donut" width="108" height="108" viewBox="0 0 120 120" role="img" aria-label="Overall AI-readiness score: 78 percent">
+                        <circle class="donut-track" cx="60" cy="60" r="54"></circle>
+                        <circle class="donut-fill" cx="60" cy="60" r="54"
+                                stroke="#4CAF50"
+                                stroke-dasharray="266.7 339.3"></circle>
+                        <text class="donut-text" x="60" y="62">78%</text>
+                    </svg>
+                    <div class="aiready-donut-caption">Overall</div>
+                </div>
+                <div class="aiready-bars">
+                    <div class="aiready-bar-row">
+                        <div class="aiready-bar-label">Fairness</div>
+                        <div class="aiready-bar-track">
+                            <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                        </div>
+                        <div class="aiready-bar-score">4/4</div>
+                    </div>
+                    <div class="aiready-bar-row">
+                        <div class="aiready-bar-label">Provenance</div>
+                        <div class="aiready-bar-track">
+                            <div class="aiready-bar-fill" style="width: 25.0%; background: #FFC107;"></div>
+                        </div>
+                        <div class="aiready-bar-score">1/4</div>
+                    </div>
+                    <div class="aiready-bar-row">
+                        <div class="aiready-bar-label">Characterization</div>
+                        <div class="aiready-bar-track">
+                            <div class="aiready-bar-fill" style="width: 80.0%; background: #4CAF50;"></div>
+                        </div>
+                        <div class="aiready-bar-score">4/5</div>
+                    </div>
+                    <div class="aiready-bar-row">
+                        <div class="aiready-bar-label">Explainability</div>
+                        <div class="aiready-bar-track">
+                            <div class="aiready-bar-fill" style="width: 66.7%; background: #8BC34A;"></div>
+                        </div>
+                        <div class="aiready-bar-score">2/3</div>
+                    </div>
+                    <div class="aiready-bar-row">
+                        <div class="aiready-bar-label">Ethics</div>
+                        <div class="aiready-bar-track">
+                            <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                        </div>
+                        <div class="aiready-bar-score">4/4</div>
+                    </div>
+                    <div class="aiready-bar-row">
+                        <div class="aiready-bar-label">Sustainability</div>
+                        <div class="aiready-bar-track">
+                            <div class="aiready-bar-fill" style="width: 100.0%; background: #4CAF50;"></div>
+                        </div>
+                        <div class="aiready-bar-score">4/4</div>
+                    </div>
+                    <div class="aiready-bar-row">
+                        <div class="aiready-bar-label">Computability</div>
+                        <div class="aiready-bar-track">
+                            <div class="aiready-bar-fill" style="width: 75.0%; background: #4CAF50;"></div>
+                        </div>
+                        <div class="aiready-bar-score">3/4</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+      <div id="dataset-details"><div class="summary-section">
+  <h2>Release Overview</h2>
+  <div class="summary-row">
+    <div class="summary-label">ROCrate ID</div>
+    <div class="summary-value" id="accession">
+ ark:59853/rocrate-b2ai-aireadi-release-3-0-0     </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">DOI</div>
+    <div class="summary-value" id="doi">
+      <a href="https://doi.org/10.60775/fairhub.3" target="_blank">https://doi.org/10.60775/fairhub.3</a>
+    </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Release Date</div>
+    <div class="summary-value" id="release-date">11/17/25</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Size</div>
+    <div class="summary-value" id="content-size">3.82 TB</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Description</div>
+    <div class="summary-value" id="description">
+The Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights (AI-READI) project seeks to create a flagship ethically-sourced dataset to enable future generations of artificial intelligence/machine learning (AI/ML) research to provide critical insights into type 2 diabetes mellitus (T2DM), including salutogenic pathways to return to health. The ability to understand and affect the course of complex, multi-organ diseases such as T2DM has been limited by a lack of well-designed, high quality, large, and inclusive multimodal datasets. The AI-READI team of investigators will aim to collect a cross-sectional dataset of 4,000 people and longitudinal data from 10% of the study cohort across the US. The study cohort will be balanced for self-reported race/ethnicity, gender, and diabetes disease stage. Data collection will be specifically designed to permit downstream pseudo-time manifold analysis, an approach used to predict disease trajectories by collecting and learning from complex, multimodal data from participants with differing disease severity (normal to insulin-dependent T2DM). The long-term objective for this project is to develop a foundational dataset in T2DM, agnostic to existing classification criteria or biases, which can be used to reconstruct a temporal atlas of T2DM development and reversal towards health (i.e., salutogenesis). Data will be optimized for downstream AI/ML research and made publicly available
+
+This dataset contains data from 2280 participants that was collected between July 19, 2023 and May 01, 2025. Data from multiple modalities are included. A full list is provided in the Data Standards section below. The data in this dataset contain no protected health information (PHI). Information related to the sex and race/ethnicity of the participants as well as medication used has also been removed.
+
+The dataset contains 356,343 files and is around 3.82 TB in size.
+
+A detailed description of the dataset is available in the AI-READI documentation for v3.0.0 of the dataset at docs.aireadi.org.
+</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Authors</div>
+    <div class="summary-value" id="authors">AI-READI Consortium</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Publisher</div>
+    <div class="summary-value" id="publisher">AI-READi Consortium</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Principal Investigator</div>
+    <div class="summary-value" id="principal-investigator">
+      Aaron Lee, Department of Ophthalmology, University of Washington
+    </div>
+  </div>
+   <div class="summary-row">
+    <div class="summary-label">Data Governance Committee</div>
+    <div class="summary-value" id="data-governance">AI-READi Consortium</div>
+  </div>
+   <div class="summary-row">
+    <div class="summary-label">Ethical Review</div>
+    <div class="summary-value" id="data-governance">Camille Nebeker, Debra Mathews, Kadija Ferryman, Nicholas Evans</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Copyright</div>
+    <div class="summary-value" id="copyright">Copyright © 2026 AI-READI</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">License</div>
+    <div class="summary-value" id="license">
+      <a href="https://doi.org/10.5281/zenodo.17555036" target="_blank">https://doi.org/10.5281/zenodo.17555036</a>
+    </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Terms of Use</div>
+    <div class="summary-value" id="terms-of-use">https://fairhub.io/datasets/3/access</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">HL7 Confidentiality Level</div>
+    <div class="summary-value" id="confidentiality-level">
+      HL7:2N (normal)
+    </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Keywords</div>
+    <div class="summary-value" id="keywords">
+ diabetes mellitus,
+      Machine Learning,
+      Artificial Intelligence,
+      Electrocardiography,
+      Continuous Glucose Monitoring,
+      Retinal Imaging,
+      Eye Exam     </div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Cite As</div>
+    <div class="summary-value" id="citation">https://docs.aireadi.org</div>
+  </div>
+
+  <div class="summary-row">
+    <div class="summary-label">Funding</div>
+    <div class="summary-value" id="funding">NIH grant 1OT2OD032644 to the Bridge2AI: Salutogenesis Data Generation Project through the NIH Bridge2AI Common Fund program</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Completeness</div>
+    <div class="summary-value" id="completeness">In cases of survey data, skipped questions or incomplete responses are expected. In cases of using wearables, improper use, technical failure such as battery failure or system malfunction are expected. In cases of imaging data, patient uncooperation, noise that may obscure the images and technical failure such as system malfunction, and data transfer failures are expected.</div>
+  </div>
+  <div class="summary-row">
+    <div class="summary-label">Related Publications</div>
+    <div class="summary-value" id="related-publications">
+      <ul class="publications-list">
+        <li>AI-READI Consortium. (2024). "AI-READI: rethinking data collection, preparation and
+sharing for propelling AI-based discoveries in diabetes research and beyond."
+Nature metabolism. https://doi.org/10.1038/s42255-024-01165-x</li>
+        <li>AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the
+AI-READI Project (3.0.0) [Data set]. FAIRhub.
+https://doi.org/10.60775/fairhub.3</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="regulatory-section">
+    <h3>Human Subjects & Regulatory</h3>
+    <div class="regulatory-grid">
+      <div class="regulatory-item">
+        <span class="regulatory-label">Human Subjects Research:</span> Yes
+      </div>
+      <div class="regulatory-item">
+        <span class="regulatory-label">De-identified Samples:</span> Yes
+      </div>
+      <div class="regulatory-item">
+        <span class="regulatory-label">FDA Regulated:</span> No
+      </div>
+      <div class="regulatory-item">
+        <span class="regulatory-label">IRB Protocol ID:</span> STUDY00016228
+      </div>
+    </div>
+
+    <div class="irb-detail">
+      <span class="regulatory-label">Institutional Review Board:</span>
+      <div class="irb-org">
+        <span class="irb-name">Washington University IRB</span>
+        <div class="irb-contact">
+          <span class="irb-contact-type"
+            >IRB Reliance Team</span
+          >
+           <a href="mailto:hsdrely@uw.edu"
+            >hsdrely@uw.edu</a
+          >
+         </div>
+         <div class="irb-address">
+Human Subjects Division University of Washington 4333 Brooklyn Ave NE Box 359470,  Seattle,  WA  98195-9470 , US        </div>
+      </div>
+    </div>
+
+    <div class="regulatory-grid">
+      <div class="regulatory-item">
+        <span class="regulatory-label">Human Subjects Exemptions:</span> N/A
+      </div>
+    </div>
+  </div>
+</div></div>
+
+      <div id="ai-readiness"><div class="section-header">
+  <h2>AI Ready Details</h2>
+</div>
+<div class="use-cases-section">
+  <div class="use-cases-item">
+    <div class="use-cases-label">Intended Uses:</div>
+    <div class="use-cases-value">The purpose for creating the dataset was to enable future generations of artificial intelligence/machine learning (AI/ML) research to provide critical insights into type 2 diabetes mellitus (T2DM), including salutogenic pathways to return to health. T2DM is a growing public health threat. Yet, the current understanding of T2DM, especially in the context of salutogenesis, is limited. Given the complexity of T2DM, AI-based approaches may help with improving our understanding but a key issue is the lack of data ready for training AI models. The AI-READI dataset is intended to fill this gap.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Limitations:</div>
+    <div class="use-cases-value">While the AI-READI's cross-sectional database ultimately aims to achieve balance across race/ethnicity, biological sex, and diabetes presence and severity, the pilot study is not balanced across these parameters.
+
+Three recording sites were strategically selected to achieve broad recruitment: the University of Alabama at Birmingham (UAB), the University of California San Diego (UCSD), and the University of Washington (UW). The sites were chosen for geographic variability across the United States and to ensure representation across various racial and ethnic groups. Individuals from all demographic backgrounds were recruited at all 3 sites. Factors influencing the generalization of derived models include the predominantly urban and hospital-based recruitment, which may not fully capture all possible cultural and socioeconomic backgrounds. The study cohort may not provide a comprehensive representation of the population, as it does not include other races/ethnicities such as Pacific Islanders and Native Americans. Information on device make and model, including specific modalities like macula scans or wide scans during OCT, were documented to ensure repeatability. Moreover, the study included multiple devices for one measure to enhance generalizability and represent the broad range of equipment utilized in clinical settings.
+
+In cases of survey data, skipped questions or incomplete responses are expected. In cases of using wearables, improper use, technical failure such as battery failure or system malfunction are expected. In cases of imaging data, patient uncooperation, noise that may obscure the images and technical failure such as system malfunction, and data transfer failures are expected.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Potential Sources of Bias:</div>
+    <div class="use-cases-value">Uniform data collection protocols were implemented for all subjects, irrespective of their race/ethnicity, biological sex, or diabetes severity, across all study sites. The selection of study sites was intended to ensure varied representation and minimize the potential for sampling bias.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Maintenance Plan:</div>
+    <div class="use-cases-value">The dataset gets released as static versions. This is the third version of the dataset and consists of data collected up through the end of the second year of the study, i.e. between July 19, 2023 and May 1st, 2025. There are plans to release new versions of the dataset approximately once a year with additional data from participants who have been enrolled since the last dataset version release.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Data Collection:</div>
+    <div class="use-cases-value">Multiple modalities of data are collected for each participant, including survey data, clinical data, retinal imaging data, environmental sensor data, continuous glucose monitor data, and wearable activity monitor data. These encompass tabular data, imaging data, and physiological signal/waveform data. There is no unstructured text data included in this dataset. The exact forms used for data collection in REDCap are available here. Furthermore, all modalities, file formats, and devices are detailed in the dataset documentation at https://docs.aireadi.org/.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Data Collection Type:</div>
+    <div class="use-cases-value">Manual Human Curation</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Missing Data:</div>
+    <div class="use-cases-value">Yes, not all modalities are available for all participants. Some participants elected not to participate in some study elements. In a few cases, the data collection device did not have any stored results or was returned too late to retrieve the results (e.g. battery died, data was lost). In a few cases, there may have been a data collision at some point in the process and data has been lost.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Raw Data:</div>
+    <div class="use-cases-value">Each instance consists of all of the data available for an individual participating in the study.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Preprocessing Protocol:</div>
+    <div class="use-cases-value">There were several quality control measures used at the time of data entry/acquisition. For example, clinical data outside of expected min/max ranges were flagged in REDCap, which was visible in reports viewed by clinical research coordinators (CRCs) and Data Managers. Using these REDCap reports as guides, Data Managers and CRCs examined participant records and determined if an error was likely. Data were checked for the following and edited if errors were detected:
+
+	i. Credibility, based on range checks to determine if all responses fall within a prespecified reasonable range
+ ii. Incorrect flow through prescribed skip patterns
+	iii. Missing data that can be directly filed from other portions of an individual’ s record
+	iv. The omission and/or duplication of records
+
+Editing was only done under the guidance and approval of the site PI. If corrected data was available from elsewhere in the respondent’s answers, the error was corrected. If there was no logical or appropriate way to correct the data, the Data site PI reviewed the values and made decisions about whether those values should be removed from the data.
+
+Once data +were sent from each of the study sites to the central project team, additional processing steps were conducted in preparation for dissemination. For example, all data were mapped to standardized terminologies when possible, such as the Observational Medical Outcomes Partnership (OMOP) Common Data Model, a common data model for observational health data, and the Digital Imaging and Communications in Medicine (DICOM), a commonly used standard for medical imaging data. Details about the data processing approaches for each data domain/modality are described in the dataset documentation at https://docs.aireadi.org.</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Annotation Protocol:</div>
+    <div class="use-cases-value">N/A - no labels are provided</div>
+  </div>
+  <div class="use-cases-item">
+    <div class="use-cases-label">Personal/Sensitive Information:</div>
+    <div class="use-cases-value">EHR, Wearable Monitoring, ECG, Environmental Sensor, Continuous glucose monitor, Wearable accelerometer</div>
+  </div>
+</div></div>
+
+      <div id="composition" class="section-header">
+        <h2>Composition (Datasets 9)</h2>
+      </div>
+
+      <div class="subcrates-container">
+
+  <!-- Datasets at a glance: filter + index table -->
+  <h3 class="dataset-index-heading">Datasets at a glance</h3>
+  <p class="dataset-index-hint">
+    Select a row to jump to that dataset's full details below.
+  </p>
+  <div class="dataset-toolbar">
+    <input
+      type="search"
+      id="dataset-filter"
+      class="dataset-filter-input"
+      placeholder="Filter datasets by name, keyword or format…"
+      aria-label="Filter datasets"
+      autocomplete="off"
+    />
+    <span id="dataset-filter-count" class="dataset-filter-count"></span>
+  </div>
+
+  <table class="data-table dataset-index">
+    <thead>
+      <tr>
+        <th scope="col">Dataset</th>
+        <th scope="col">Size</th>
+        <th scope="col">Files</th>
+        <th scope="col">Computations</th>
+        <th scope="col">Schemas</th>
+        <th scope="col">Formats</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        class="dataset-index-row"
+        data-target="subcrate-1"
+        data-name="ai-readi ecg subcrate"
+        data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+        data-formats="wfdb"
+      >
+        <td>
+          <a href="#subcrate-1" class="dataset-jump">AI-READI ECG Subcrate</a>
+        </td>
+        <td>7.76 MB</td>
+        <td>2252</td>
+        <td>0</td>
+        <td>1</td>
+        <td class="dataset-index-formats">
+wfdb        </td>
+      </tr>
+      <tr
+        class="dataset-index-row"
+        data-target="subcrate-2"
+        data-name="ai-readi ehr subcrate"
+        data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+        data-formats="omop"
+      >
+        <td>
+          <a href="#subcrate-2" class="dataset-jump">AI-READI EHR Subcrate</a>
+        </td>
+        <td>168.48 MB</td>
+        <td>8</td>
+        <td>0</td>
+        <td>7</td>
+        <td class="dataset-index-formats">
+omop        </td>
+      </tr>
+      <tr
+        class="dataset-index-row"
+        data-target="subcrate-3"
+        data-name="ai-readi flio subcrate"
+        data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+        data-formats="application dicom"
+      >
+        <td>
+          <a href="#subcrate-3" class="dataset-jump">AI-READI FLIO Subcrate</a>
+        </td>
+        <td>8.80 MB</td>
+        <td>1848</td>
+        <td>0</td>
+        <td>0</td>
+        <td class="dataset-index-formats">
+application, dicom        </td>
+      </tr>
+      <tr
+        class="dataset-index-row"
+        data-target="subcrate-4"
+        data-name="ai-readi retinal oct subcrate"
+        data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+        data-formats="application dicom"
+      >
+        <td>
+          <a href="#subcrate-4" class="dataset-jump">AI-READI Retinal OCT Subcrate</a>
+        </td>
+        <td>66.45 MB</td>
+        <td>8916</td>
+        <td>1</td>
+        <td>0</td>
+        <td class="dataset-index-formats">
+application, dicom        </td>
+      </tr>
+      <tr
+        class="dataset-index-row"
+        data-target="subcrate-5"
+        data-name="ai-readi retinal octa subcrate"
+        data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+        data-formats="application dicom"
+      >
+        <td>
+          <a href="#subcrate-5" class="dataset-jump">AI-READI Retinal OCTA Subcrate</a>
+        </td>
+        <td>205.59 MB</td>
+        <td>23207</td>
+        <td>3</td>
+        <td>0</td>
+        <td class="dataset-index-formats">
+application, dicom        </td>
+      </tr>
+      <tr
+        class="dataset-index-row"
+        data-target="subcrate-6"
+        data-name="ai-readi retinal photography subcrate"
+        data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+        data-formats="application dicom"
+      >
+        <td>
+          <a href="#subcrate-6" class="dataset-jump">AI-READI Retinal Photography Subcrate</a>
+        </td>
+        <td>88.13 MB</td>
+        <td>15399</td>
+        <td>0</td>
+        <td>0</td>
+        <td class="dataset-index-formats">
+application, dicom        </td>
+      </tr>
+      <tr
+        class="dataset-index-row"
+        data-target="subcrate-7"
+        data-name="ai-readi continuous glucose monitoring subcrate"
+        data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+        data-formats="application json"
+      >
+        <td>
+          <a href="#subcrate-7" class="dataset-jump">AI-READI Continuous Glucose Monitoring Subcrate</a>
+        </td>
+        <td>7.90 MB</td>
+        <td>2246</td>
+        <td>0</td>
+        <td>0</td>
+        <td class="dataset-index-formats">
+application, json        </td>
+      </tr>
+      <tr
+        class="dataset-index-row"
+        data-target="subcrate-8"
+        data-name="ai readi wearable activity monitoring subcrate"
+        data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+        data-formats="application json"
+      >
+        <td>
+          <a href="#subcrate-8" class="dataset-jump">AI READI Wearable Activity Monitoring Subcrate</a>
+        </td>
+        <td>7.03 MB</td>
+        <td>2105</td>
+        <td>0</td>
+        <td>0</td>
+        <td class="dataset-index-formats">
+application, json        </td>
+      </tr>
+      <tr
+        class="dataset-index-row"
+        data-target="subcrate-9"
+        data-name="ai-readi environmental sensor subcrate"
+        data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+        data-formats="text csv"
+      >
+        <td>
+          <a href="#subcrate-9" class="dataset-jump">AI-READI Environmental Sensor Subcrate</a>
+        </td>
+        <td>15.88 MB</td>
+        <td>2232</td>
+        <td>0</td>
+        <td>0</td>
+        <td class="dataset-index-formats">
+text, csv        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="dataset-no-matches" class="dataset-no-matches" hidden>
+    No datasets match your filter.
+  </p>
+
+  <!-- Per-dataset collapsible cards -->
+  <details
+    class="subcrate-card"
+    id="subcrate-1"
+    data-name="ai-readi ecg subcrate"
+    data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+    data-formats="wfdb"
+  >
+    <summary class="subcrate-head">
+      <span class="subcrate-head-title">AI-READI ECG Subcrate</span>
+      <span class="subcrate-head-chips">
+<span class="chip">7.76 MB</span>        <span class="chip">2252 files</span>
+<span class="chip chip-format">wfdb</span>      </span>
+    </summary>
+
+    <div class="subcrate-body">
+      <div class="subcrate-metadata">
+        <div class="metadata-item">
+          <span class="metadata-label">ROCrate ID:</span>
+          <span class="metadata-value">
+ ark:59853/rocrate-b2ai-ai-readi-ecg           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Description:</span>
+          <span class="metadata-value">The ECG Modality of the ROCrate</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Authors:</span>
+          <span class="metadata-value">AI-READI Consortium</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Date:</span>
+          <span class="metadata-value">11/17/25</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Size:</span>
+          <span class="metadata-value">7.76 MB</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">License:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/10.5281/zenodo.17555036" target="_blank">https://doi.org/10.5281/zenodo.17555036</a>
+          </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Keywords:</span>
+          <span class="metadata-value">
+ diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal Imaging, Eye Exam           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">DOI:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/https://doi.org/10.60775/fairhub.3" target="_blank">https://doi.org/10.60775/fairhub.3</a>
+          </span>
+        </div>
+
+        <!-- Secondary metadata grouped under a nested toggle -->
+        <details class="more-meta">
+          <summary>More metadata</summary>
+          <div class="metadata-item">
+            <span class="metadata-label">Provenance ID:</span>
+            <span class="metadata-value">
+              <a href="ro-crate-prov-graph.html">ro-crate-prov-graph.html</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Copyright:</span>
+            <span class="metadata-value">Copyright © 2026 AI-READI</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Terms of Use:</span>
+            <span class="metadata-value">
+              <a href="https://fairhub.io/datasets/3/access" target="_blank">https://fairhub.io/datasets/3/access</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Funding:</span>
+            <span class="metadata-value">
+ NIH grant 1OT2OD032644 to the Bridge2AI: Salutogenesis Data Generation Project through the NIH Bridge2AI Common Fund program             </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Related Publications:</span>
+            <span class="metadata-value">
+              <ul class="compact-list">
+                <li>
+ AI-READI Consortium. (2024). "AI-READI: rethinking data collection, preparation and
+sharing for propelling AI-based discoveries in diabetes research and beyond."
+Nature metabolism. https://doi.org/10.1038/s42255-024-01165-x                 </li>
+                <li>
+ AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the
+AI-READI Project (3.0.0) [Data set]. FAIRhub.
+https://doi.org/10.60775/fairhub.3                 </li>
+              </ul>
+            </span>
+          </div>
+        </details>
+      </div>
+
+      <div class="subcrate-composition">
+        <h4>Content Summary</h4>
+        <div class="compact-grid">
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">📊</span>
+              <span class="card-title">Files (2252)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Formats: </span>
+                <span class="stat-value">wfdb (2251)</span>
+              </div>
+               <div class="stat-row">
+                <span class="stat-label">Access: </span>
+                <span class="stat-value">Available (2252)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">💻</span>
+              <span class="card-title">Software &amp; Instruments (1)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Software: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Instruments: </span>
+                <span class="stat-value">1</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">🧪</span>
+              <span class="card-title">Inputs (0)</span>
+            </div>
+            <div class="card-content">
+             </div>
+          </div>
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">⚙️</span>
+              <span class="card-title">Other Components</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Experiments: </span>
+                <span class="stat-value">1</span>
+              </div>
+              <div class="stat-row indent">
+                <span class="stat-value small">Data Collection (1)</span>
+              </div>
+               <div class="stat-row indent">
+                <span class="stat-value small">Sample <strong>&rarr;</strong> wfdb</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Computations: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Schemas: </span>
+                <span class="stat-value">1</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Other: </span>
+                <span class="stat-value">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view-full-link">
+        <a href="cardiac_ecg/ro-crate-preview.html">View Full Dataset Details</a>
+      </div>
+    </div>
+  </details>
+  <details
+    class="subcrate-card"
+    id="subcrate-2"
+    data-name="ai-readi ehr subcrate"
+    data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+    data-formats="omop"
+  >
+    <summary class="subcrate-head">
+      <span class="subcrate-head-title">AI-READI EHR Subcrate</span>
+      <span class="subcrate-head-chips">
+<span class="chip">168.48 MB</span>        <span class="chip">8 files</span>
+<span class="chip chip-format">omop</span>      </span>
+    </summary>
+
+    <div class="subcrate-body">
+      <div class="subcrate-metadata">
+        <div class="metadata-item">
+          <span class="metadata-label">ROCrate ID:</span>
+          <span class="metadata-value">
+ ark:59853/rocrate-b2ai-ai-readi-omop           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Description:</span>
+          <span class="metadata-value">Clinical data in AI-READI consists of OMOP Common Data Model–formatted health-related measurements and assessments, including lab tests, MoCA cognitive testing, monofilament testing, physical and vision assessments, and survey questionnaire results.</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Authors:</span>
+          <span class="metadata-value">AI-READI Consortium</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Date:</span>
+          <span class="metadata-value">11/17/25</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Size:</span>
+          <span class="metadata-value">168.48 MB</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">License:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/10.5281/zenodo.17555036" target="_blank">https://doi.org/10.5281/zenodo.17555036</a>
+          </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Keywords:</span>
+          <span class="metadata-value">
+ diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal Imaging, Eye Exam           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">DOI:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/https://doi.org/10.60775/fairhub.3" target="_blank">https://doi.org/10.60775/fairhub.3</a>
+          </span>
+        </div>
+
+        <!-- Secondary metadata grouped under a nested toggle -->
+        <details class="more-meta">
+          <summary>More metadata</summary>
+          <div class="metadata-item">
+            <span class="metadata-label">Provenance ID:</span>
+            <span class="metadata-value">
+              <a href="ro-crate-prov-graph.html">ro-crate-prov-graph.html</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Copyright:</span>
+            <span class="metadata-value">Copyright © 2026 AI-READI</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Terms of Use:</span>
+            <span class="metadata-value">
+              <a href="https://fairhub.io/datasets/3/access" target="_blank">https://fairhub.io/datasets/3/access</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Funding:</span>
+            <span class="metadata-value">
+ NIH grant 1OT2OD032644 to the Bridge2AI: Salutogenesis Data Generation Project through the NIH Bridge2AI Common Fund program             </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Related Publications:</span>
+            <span class="metadata-value">
+              <ul class="compact-list">
+                <li>
+ AI-READI Consortium. (2024). "AI-READI: rethinking data collection, preparation and
+sharing for propelling AI-based discoveries in diabetes research and beyond."
+Nature metabolism. https://doi.org/10.1038/s42255-024-01165-x                 </li>
+                <li>
+ AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the
+AI-READI Project (3.0.0) [Data set]. FAIRhub.
+https://doi.org/10.60775/fairhub.3                 </li>
+              </ul>
+            </span>
+          </div>
+        </details>
+      </div>
+
+      <div class="subcrate-composition">
+        <h4>Content Summary</h4>
+        <div class="compact-grid">
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">📊</span>
+              <span class="card-title">Files (8)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Formats: </span>
+                <span class="stat-value">omop (7)</span>
+              </div>
+               <div class="stat-row">
+                <span class="stat-label">Access: </span>
+                <span class="stat-value">Available (8)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">💻</span>
+              <span class="card-title">Software &amp; Instruments (0)</span>
+            </div>
+            <div class="card-content">
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">🧪</span>
+              <span class="card-title">Inputs (0)</span>
+            </div>
+            <div class="card-content">
+             </div>
+          </div>
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">⚙️</span>
+              <span class="card-title">Other Components</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Experiments: </span>
+                <span class="stat-value">0</span>
+              </div>
+               <div class="stat-row">
+                <span class="stat-label">Computations: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Schemas: </span>
+                <span class="stat-value">7</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Other: </span>
+                <span class="stat-value">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view-full-link">
+        <a href="clinical_data/ro-crate-preview.html">View Full Dataset Details</a>
+      </div>
+    </div>
+  </details>
+  <details
+    class="subcrate-card"
+    id="subcrate-3"
+    data-name="ai-readi flio subcrate"
+    data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+    data-formats="application dicom"
+  >
+    <summary class="subcrate-head">
+      <span class="subcrate-head-title">AI-READI FLIO Subcrate</span>
+      <span class="subcrate-head-chips">
+<span class="chip">8.80 MB</span>        <span class="chip">1848 files</span>
+<span class="chip chip-format">application</span><span class="chip chip-format">dicom</span>      </span>
+    </summary>
+
+    <div class="subcrate-body">
+      <div class="subcrate-metadata">
+        <div class="metadata-item">
+          <span class="metadata-label">ROCrate ID:</span>
+          <span class="metadata-value">
+ ark:59853/rocrate-b2ai-ai-readi-flio           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Description:</span>
+          <span class="metadata-value">
+FLIO stands for Fluorescence Lifetime Imaging Ophthalmoscopy, a technology used to capture and analyze fluorescence behavior in the eye over time. It is based on a concept called fluorescence decay, which refers to the process by which fluorescent molecules lose their excitation energy and return to their ground state, emitting light in the form of fluorescence. When a fluorescent molecule absorbs light energy, it becomes excited and emits light of a longer wavelength as it returns to its ground state. The time it takes for this emission to occur, along with the intensity of the emitted light, provides valuable information about the molecular environment and dynamics. Understanding fluorescence decay is crucial for interpreting FLIO data, as it informs about the lifetime and behavior of fluorescent signals within the eye.
+
+During the imaging, the FLIO device exposes retinal tissue to intermittent laser beams and records the timing and number of photons for each point after each laser pulse. This information forms a picture of how fluorescence behaves over time in different parts of the eye. When analyzing FLIO data, it is important to understand that each pixel in the image contains a curve showing how many photons arrived at different times. This photon data follows Poisson distribution. The signal-to-noise ratio varies for different aspects of the data. Additionally, unwanted signals, like background light or fluorescence from the lens, can not simply be subtracted because they are part of the same distribution as the useful data. Our FLIO scan records images using two wavelengths, short (498-560nm) and long (560-720nm), which are provided in two different .dcm files for each eye in the dataset. These wavelengths provide different penetrance into the retinal tissue and usage of short- or long-wavelength .dcm file can be based on the region and layer of interest. A common approach is analyzing each of these files separately for each subject.
+
+To get the best FLIO data, it is crucial to maximize the number of photons recorded by ensuring proper focus and avoiding unwanted signals like background light or lens fluorescence. Keeping a consistent distance between the scanner and the patient during data collection is also important for accurate results. These are particularly important when working with the data because the device is very sensitive, and several factors can induce noise in the images. The device can not handle more than 1 centimeter of movement during image acquisition.
+</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Authors:</span>
+          <span class="metadata-value">AI-READI Consortium</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Date:</span>
+          <span class="metadata-value">11/17/25</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Size:</span>
+          <span class="metadata-value">8.80 MB</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">License:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/10.5281/zenodo.17555036" target="_blank">https://doi.org/10.5281/zenodo.17555036</a>
+          </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Keywords:</span>
+          <span class="metadata-value">
+ diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal Imaging, Eye Exam           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">DOI:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/https://doi.org/10.60775/fairhub.3" target="_blank">https://doi.org/10.60775/fairhub.3</a>
+          </span>
+        </div>
+
+        <!-- Secondary metadata grouped under a nested toggle -->
+        <details class="more-meta">
+          <summary>More metadata</summary>
+          <div class="metadata-item">
+            <span class="metadata-label">Provenance ID:</span>
+            <span class="metadata-value">
+              <a href="ro-crate-prov-graph.html">ro-crate-prov-graph.html</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Copyright:</span>
+            <span class="metadata-value">Copyright © 2026 AI-READI</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Terms of Use:</span>
+            <span class="metadata-value">
+              <a href="https://fairhub.io/datasets/3/access" target="_blank">https://fairhub.io/datasets/3/access</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Funding:</span>
+            <span class="metadata-value">
+ NIH grant 1OT2OD032644 to the Bridge2AI: Salutogenesis Data Generation Project through the NIH Bridge2AI Common Fund program             </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Related Publications:</span>
+            <span class="metadata-value">
+              <ul class="compact-list">
+                <li>
+ AI-READI Consortium. (2024). "AI-READI: rethinking data collection, preparation and
+sharing for propelling AI-based discoveries in diabetes research and beyond."
+Nature metabolism. https://doi.org/10.1038/s42255-024-01165-x                 </li>
+                <li>
+ AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the
+AI-READI Project (3.0.0) [Data set]. FAIRhub.
+https://doi.org/10.60775/fairhub.3                 </li>
+              </ul>
+            </span>
+          </div>
+        </details>
+      </div>
+
+      <div class="subcrate-composition">
+        <h4>Content Summary</h4>
+        <div class="compact-grid">
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">📊</span>
+              <span class="card-title">Files (1848)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Formats: </span>
+                <span class="stat-value">application (1847), dicom (1847)</span>
+              </div>
+               <div class="stat-row">
+                <span class="stat-label">Access: </span>
+                <span class="stat-value">Available (1848)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">💻</span>
+              <span class="card-title">Software &amp; Instruments (1)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Software: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Instruments: </span>
+                <span class="stat-value">1</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">🧪</span>
+              <span class="card-title">Inputs (0)</span>
+            </div>
+            <div class="card-content">
+             </div>
+          </div>
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">⚙️</span>
+              <span class="card-title">Other Components</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Experiments: </span>
+                <span class="stat-value">1</span>
+              </div>
+              <div class="stat-row indent">
+                <span class="stat-value small">Data Collection (1)</span>
+              </div>
+               <div class="stat-row indent">
+                <span class="stat-value small">Sample <strong>&rarr;</strong> application + dicom</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Computations: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Schemas: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Other: </span>
+                <span class="stat-value">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view-full-link">
+        <a href="retinal_flio/ro-crate-preview.html">View Full Dataset Details</a>
+      </div>
+    </div>
+  </details>
+  <details
+    class="subcrate-card"
+    id="subcrate-4"
+    data-name="ai-readi retinal oct subcrate"
+    data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+    data-formats="application dicom"
+  >
+    <summary class="subcrate-head">
+      <span class="subcrate-head-title">AI-READI Retinal OCT Subcrate</span>
+      <span class="subcrate-head-chips">
+<span class="chip">66.45 MB</span>        <span class="chip">8916 files</span>
+<span class="chip">1 computations</span><span class="chip chip-format">application</span><span class="chip chip-format">dicom</span>      </span>
+    </summary>
+
+    <div class="subcrate-body">
+      <div class="subcrate-metadata">
+        <div class="metadata-item">
+          <span class="metadata-label">ROCrate ID:</span>
+          <span class="metadata-value">
+ ark:59853/rocrate-b2ai-ai-readi-retinal-oct           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Description:</span>
+          <span class="metadata-value">Optical Coherence Tomography (OCT) is a non-invasive diagnostic technique that renders an in vivo cross-sectional view of the retina. OCT utilizes a concept known as interferometry to create a cross-sectional map of the retina that is accurate to within at least 10-15 microns. This technique provides detailed, cross-sectional images of the various layers of the retina with high resolution, enabling clinicians to diagnose and monitor a wide range of retinal diseases and conditions.</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Authors:</span>
+          <span class="metadata-value">AI-READI Consortium</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Date:</span>
+          <span class="metadata-value">11/17/25</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Size:</span>
+          <span class="metadata-value">66.45 MB</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">License:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/10.5281/zenodo.17555036" target="_blank">https://doi.org/10.5281/zenodo.17555036</a>
+          </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Keywords:</span>
+          <span class="metadata-value">
+ diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal Imaging, Eye Exam           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">DOI:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/https://doi.org/10.60775/fairhub.3" target="_blank">https://doi.org/10.60775/fairhub.3</a>
+          </span>
+        </div>
+
+        <!-- Secondary metadata grouped under a nested toggle -->
+        <details class="more-meta">
+          <summary>More metadata</summary>
+          <div class="metadata-item">
+            <span class="metadata-label">Provenance ID:</span>
+            <span class="metadata-value">
+              <a href="ro-crate-prov-graph.html">ro-crate-prov-graph.html</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Copyright:</span>
+            <span class="metadata-value">Copyright © 2026 AI-READI</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Terms of Use:</span>
+            <span class="metadata-value">
+              <a href="https://fairhub.io/datasets/3/access" target="_blank">https://fairhub.io/datasets/3/access</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Funding:</span>
+            <span class="metadata-value">
+ NIH grant 1OT2OD032644 to the Bridge2AI: Salutogenesis Data Generation Project through the NIH Bridge2AI Common Fund program             </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Related Publications:</span>
+            <span class="metadata-value">
+              <ul class="compact-list">
+                <li>
+ AI-READI Consortium. (2024). "AI-READI: rethinking data collection, preparation and
+sharing for propelling AI-based discoveries in diabetes research and beyond."
+Nature metabolism. https://doi.org/10.1038/s42255-024-01165-x                 </li>
+                <li>
+ AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the
+AI-READI Project (3.0.0) [Data set]. FAIRhub.
+https://doi.org/10.60775/fairhub.3                 </li>
+              </ul>
+            </span>
+          </div>
+        </details>
+      </div>
+
+      <div class="subcrate-composition">
+        <h4>Content Summary</h4>
+        <div class="compact-grid">
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">📊</span>
+              <span class="card-title">Files (8916)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Formats: </span>
+                <span class="stat-value">application (8915), dicom (8915)</span>
+              </div>
+               <div class="stat-row">
+                <span class="stat-label">Access: </span>
+                <span class="stat-value">Available (8916)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">💻</span>
+              <span class="card-title">Software &amp; Instruments (5)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Software: </span>
+                <span class="stat-value">1</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Instruments: </span>
+                <span class="stat-value">4</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">🧪</span>
+              <span class="card-title">Inputs (0)</span>
+            </div>
+            <div class="card-content">
+             </div>
+          </div>
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">⚙️</span>
+              <span class="card-title">Other Components</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Experiments: </span>
+                <span class="stat-value">3</span>
+              </div>
+              <div class="stat-row indent">
+                <span class="stat-value small">Data Collection (3)</span>
+              </div>
+               <div class="stat-row indent">
+                <span class="stat-value small">Sample <strong>&rarr;</strong> application + dicom</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Computations: </span>
+                <span class="stat-value">1</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Schemas: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Other: </span>
+                <span class="stat-value">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view-full-link">
+        <a href="retinal_oct/ro-crate-preview.html">View Full Dataset Details</a>
+      </div>
+    </div>
+  </details>
+  <details
+    class="subcrate-card"
+    id="subcrate-5"
+    data-name="ai-readi retinal octa subcrate"
+    data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+    data-formats="application dicom"
+  >
+    <summary class="subcrate-head">
+      <span class="subcrate-head-title">AI-READI Retinal OCTA Subcrate</span>
+      <span class="subcrate-head-chips">
+<span class="chip">205.59 MB</span>        <span class="chip">23207 files</span>
+<span class="chip">3 computations</span><span class="chip chip-format">application</span><span class="chip chip-format">dicom</span>      </span>
+    </summary>
+
+    <div class="subcrate-body">
+      <div class="subcrate-metadata">
+        <div class="metadata-item">
+          <span class="metadata-label">ROCrate ID:</span>
+          <span class="metadata-value">
+ ark:59853/rocrate-b2ai-ai-readi-retinal-octa           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Description:</span>
+          <span class="metadata-value">
+Optical coherence tomography angiography (OCTA) is a non-invasive imaging modality that permits visualization of retinal and inner choroidal circulation without the need for the dye injection, based on the principle of mapping red blood cell movement over time by comparing sequential OCT sagittal scans at a given cross-section.
+
+OCT-A technology uses laser light reflectance of the surface of moving red blood cells to accurately depict vessels through different segmented areas of the eye, thus eliminating the need for intravascular dyes. The OCT scan of a patient's retina consists of multiple individual A-scans, which when compiled into a B-scan provides cross-sectional structural information. With OCT-A technology, the same tissue area is repeatedly imaged, and differences are analyzed between scans (over time), thus allowing one to detect zones containing high flow rates (i.e. with marked changes between scans) and zones with slower, or no flow at all, which will be similar among scans. The main advantages are the shorter acquisition time and that it is a non-invasive process. Fluorescein and indocyanine-green angiography require an injectable dye (which takes time to reach retinal vessels, and may be associated with systemic adverse effects and even anaphylactic reactions. One asset of this OCT-based approach is that it provides a quantitative analysis of the retinal vessels (in addition to the qualitative analysis done on standard angiography). Moreover, and contrary to the "2-D" conventional angiograms, OCT-A technology provides "3-D" imaging information of the macula and visualizes peripapillary capillaries that supply the retinal nerve fiber layer.
+</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Authors:</span>
+          <span class="metadata-value">AI-READI Consortium</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Date:</span>
+          <span class="metadata-value">11/17/25</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Size:</span>
+          <span class="metadata-value">205.59 MB</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">License:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/10.5281/zenodo.17555036" target="_blank">https://doi.org/10.5281/zenodo.17555036</a>
+          </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Keywords:</span>
+          <span class="metadata-value">
+ diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal Imaging, Eye Exam           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">DOI:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/https://doi.org/10.60775/fairhub.3" target="_blank">https://doi.org/10.60775/fairhub.3</a>
+          </span>
+        </div>
+
+        <!-- Secondary metadata grouped under a nested toggle -->
+        <details class="more-meta">
+          <summary>More metadata</summary>
+          <div class="metadata-item">
+            <span class="metadata-label">Provenance ID:</span>
+            <span class="metadata-value">
+              <a href="ro-crate-prov-graph.html">ro-crate-prov-graph.html</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Copyright:</span>
+            <span class="metadata-value">Copyright © 2026 AI-READI</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Terms of Use:</span>
+            <span class="metadata-value">
+              <a href="https://fairhub.io/datasets/3/access" target="_blank">https://fairhub.io/datasets/3/access</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Funding:</span>
+            <span class="metadata-value">
+ NIH grant 1OT2OD032644 to the Bridge2AI: Salutogenesis Data Generation Project through the NIH Bridge2AI Common Fund program             </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Related Publications:</span>
+            <span class="metadata-value">
+              <ul class="compact-list">
+                <li>
+ AI-READI Consortium. (2024). "AI-READI: rethinking data collection, preparation and
+sharing for propelling AI-based discoveries in diabetes research and beyond."
+Nature metabolism. https://doi.org/10.1038/s42255-024-01165-x                 </li>
+                <li>
+ AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the
+AI-READI Project (3.0.0) [Data set]. FAIRhub.
+https://doi.org/10.60775/fairhub.3                 </li>
+              </ul>
+            </span>
+          </div>
+        </details>
+      </div>
+
+      <div class="subcrate-composition">
+        <h4>Content Summary</h4>
+        <div class="compact-grid">
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">📊</span>
+              <span class="card-title">Files (23207)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Formats: </span>
+                <span class="stat-value">application (23206), dicom (23206)</span>
+              </div>
+               <div class="stat-row">
+                <span class="stat-label">Access: </span>
+                <span class="stat-value">Available (23207)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">💻</span>
+              <span class="card-title">Software &amp; Instruments (4)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Software: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Instruments: </span>
+                <span class="stat-value">4</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">🧪</span>
+              <span class="card-title">Inputs (0)</span>
+            </div>
+            <div class="card-content">
+             </div>
+          </div>
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">⚙️</span>
+              <span class="card-title">Other Components</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Experiments: </span>
+                <span class="stat-value">9</span>
+              </div>
+              <div class="stat-row indent">
+                <span class="stat-value small">Data Collection (9)</span>
+              </div>
+               <div class="stat-row indent">
+                <span class="stat-value small">Sample <strong>&rarr;</strong> application + dicom</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Computations: </span>
+                <span class="stat-value">3</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Schemas: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Other: </span>
+                <span class="stat-value">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view-full-link">
+        <a href="retinal_octa/ro-crate-preview.html">View Full Dataset Details</a>
+      </div>
+    </div>
+  </details>
+  <details
+    class="subcrate-card"
+    id="subcrate-6"
+    data-name="ai-readi retinal photography subcrate"
+    data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+    data-formats="application dicom"
+  >
+    <summary class="subcrate-head">
+      <span class="subcrate-head-title">AI-READI Retinal Photography Subcrate</span>
+      <span class="subcrate-head-chips">
+<span class="chip">88.13 MB</span>        <span class="chip">15399 files</span>
+<span class="chip chip-format">application</span><span class="chip chip-format">dicom</span>      </span>
+    </summary>
+
+    <div class="subcrate-body">
+      <div class="subcrate-metadata">
+        <div class="metadata-item">
+          <span class="metadata-label">ROCrate ID:</span>
+          <span class="metadata-value">
+ ark:59853/rocrate-b2ai-ai-readi-retinal-photography           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Description:</span>
+          <span class="metadata-value">Retinal photography is a non-invasive procedure that photographs the posterior segment of an eye, also known as the fundus. It provides two-dimensional images of the fundus and can be performed with different filters of different wavelengths when an eye is undilated or dilated. The main structures that can be visualized inon a fundus photo are the optic nerve, macula, retinal vasculature, and central and peripheral retina. Fundus photography is used to record the condition of these structures to document the presence of abnormalities and monitor the changes over time.</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Authors:</span>
+          <span class="metadata-value">AI-READI Consortium</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Date:</span>
+          <span class="metadata-value">11/17/25</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Size:</span>
+          <span class="metadata-value">88.13 MB</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">License:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/10.5281/zenodo.17555036" target="_blank">https://doi.org/10.5281/zenodo.17555036</a>
+          </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Keywords:</span>
+          <span class="metadata-value">
+ diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal Imaging, Eye Exam           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">DOI:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/https://doi.org/10.60775/fairhub.3" target="_blank">https://doi.org/10.60775/fairhub.3</a>
+          </span>
+        </div>
+
+        <!-- Secondary metadata grouped under a nested toggle -->
+        <details class="more-meta">
+          <summary>More metadata</summary>
+          <div class="metadata-item">
+            <span class="metadata-label">Copyright:</span>
+            <span class="metadata-value">Copyright © 2026 AI-READI</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Terms of Use:</span>
+            <span class="metadata-value">
+              <a href="https://fairhub.io/datasets/3/access" target="_blank">https://fairhub.io/datasets/3/access</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Funding:</span>
+            <span class="metadata-value">
+ NIH grant 1OT2OD032644 to the Bridge2AI: Salutogenesis Data Generation Project through the NIH Bridge2AI Common Fund program             </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Related Publications:</span>
+            <span class="metadata-value">
+              <ul class="compact-list">
+                <li>
+ AI-READI Consortium. (2024). "AI-READI: rethinking data collection, preparation and
+sharing for propelling AI-based discoveries in diabetes research and beyond."
+Nature metabolism. https://doi.org/10.1038/s42255-024-01165-x                 </li>
+                <li>
+ AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the
+AI-READI Project (3.0.0) [Data set]. FAIRhub.
+https://doi.org/10.60775/fairhub.3                 </li>
+              </ul>
+            </span>
+          </div>
+        </details>
+      </div>
+
+      <div class="subcrate-composition">
+        <h4>Content Summary</h4>
+        <div class="compact-grid">
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">📊</span>
+              <span class="card-title">Files (15399)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Formats: </span>
+                <span class="stat-value">application (15398), dicom (15398)</span>
+              </div>
+               <div class="stat-row">
+                <span class="stat-label">Access: </span>
+                <span class="stat-value">Available (15399)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">💻</span>
+              <span class="card-title">Software &amp; Instruments (4)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Software: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Instruments: </span>
+                <span class="stat-value">4</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">🧪</span>
+              <span class="card-title">Inputs (0)</span>
+            </div>
+            <div class="card-content">
+             </div>
+          </div>
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">⚙️</span>
+              <span class="card-title">Other Components</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Experiments: </span>
+                <span class="stat-value">12</span>
+              </div>
+              <div class="stat-row indent">
+                <span class="stat-value small">Data Collection (12)</span>
+              </div>
+               <div class="stat-row indent">
+                <span class="stat-value small">Sample <strong>&rarr;</strong> application + dicom</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Computations: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Schemas: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Other: </span>
+                <span class="stat-value">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view-full-link">
+        <a href="retinal_photography/ro-crate-preview.html">View Full Dataset Details</a>
+      </div>
+    </div>
+  </details>
+  <details
+    class="subcrate-card"
+    id="subcrate-7"
+    data-name="ai-readi continuous glucose monitoring subcrate"
+    data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+    data-formats="application json"
+  >
+    <summary class="subcrate-head">
+      <span class="subcrate-head-title">AI-READI Continuous Glucose Monitoring Subcrate</span>
+      <span class="subcrate-head-chips">
+<span class="chip">7.90 MB</span>        <span class="chip">2246 files</span>
+<span class="chip chip-format">application</span><span class="chip chip-format">json</span>      </span>
+    </summary>
+
+    <div class="subcrate-body">
+      <div class="subcrate-metadata">
+        <div class="metadata-item">
+          <span class="metadata-label">ROCrate ID:</span>
+          <span class="metadata-value">
+ ark:59853/rocrate-b2ai-ai-readi-wearable-blood-glucose           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Description:</span>
+          <span class="metadata-value">The Dexcom G6 is a real-time, integrated continuous glucose monitoring system (iCGM) that directly monitors blood glucose levels without requiring finger pricks. The device must be worn continuously in order to collect data day and night. A tiny filament called a glucose sensor is inserted under the skin to measure glucose levels in tissue fluid. This filament remains under the skin while it is worn. The internal sensor is connected to the transmitter that sits on top of the skin. The battery life for the transmitter is sufficient to power the system for three months. It is approximately the size of a quarter and adheres to the skin with medical tape. The Dexcom G6 Continuous Glucose Monitor (CGM) captures blood glucose readings every five minutes using this sensor. A single sensor is designed to last for a maximum of ten days, after which time the Dexcom G6 will require the insertion of a new sensor. The G6 transmitter will only save data for thirty days, therefore the data must be downloaded within thirty days from activation or all data will be lost.
+
+In the AI-READI program, we have asked the research participants to wear the Dexcom CGM for ten days concurrently with wearing the Garmin Activity Monitor and using the home environmental sensor.
+</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Authors:</span>
+          <span class="metadata-value">AI-READI Consortium</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Date:</span>
+          <span class="metadata-value">11/17/25</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Size:</span>
+          <span class="metadata-value">7.90 MB</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">License:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/10.5281/zenodo.17555036" target="_blank">https://doi.org/10.5281/zenodo.17555036</a>
+          </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Keywords:</span>
+          <span class="metadata-value">
+ diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal Imaging, Eye Exam           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">DOI:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/https://doi.org/10.60775/fairhub.3" target="_blank">https://doi.org/10.60775/fairhub.3</a>
+          </span>
+        </div>
+
+        <!-- Secondary metadata grouped under a nested toggle -->
+        <details class="more-meta">
+          <summary>More metadata</summary>
+          <div class="metadata-item">
+            <span class="metadata-label">Provenance ID:</span>
+            <span class="metadata-value">
+              <a href="ro-crate-prov-graph.html">ro-crate-prov-graph.html</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Copyright:</span>
+            <span class="metadata-value">Copyright © 2026 AI-READI</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Terms of Use:</span>
+            <span class="metadata-value">
+              <a href="https://fairhub.io/datasets/3/access" target="_blank">https://fairhub.io/datasets/3/access</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Funding:</span>
+            <span class="metadata-value">
+ NIH grant 1OT2OD032644 to the Bridge2AI: Salutogenesis Data Generation Project through the NIH Bridge2AI Common Fund program             </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Related Publications:</span>
+            <span class="metadata-value">
+              <ul class="compact-list">
+                <li>
+ AI-READI Consortium. (2024). "AI-READI: rethinking data collection, preparation and
+sharing for propelling AI-based discoveries in diabetes research and beyond."
+Nature metabolism. https://doi.org/10.1038/s42255-024-01165-x                 </li>
+                <li>
+ AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the
+AI-READI Project (3.0.0) [Data set]. FAIRhub.
+https://doi.org/10.60775/fairhub.3                 </li>
+              </ul>
+            </span>
+          </div>
+        </details>
+      </div>
+
+      <div class="subcrate-composition">
+        <h4>Content Summary</h4>
+        <div class="compact-grid">
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">📊</span>
+              <span class="card-title">Files (2246)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Formats: </span>
+                <span class="stat-value">application (2245), json (2245)</span>
+              </div>
+               <div class="stat-row">
+                <span class="stat-label">Access: </span>
+                <span class="stat-value">Available (2246)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">💻</span>
+              <span class="card-title">Software &amp; Instruments (1)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Software: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Instruments: </span>
+                <span class="stat-value">1</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">🧪</span>
+              <span class="card-title">Inputs (0)</span>
+            </div>
+            <div class="card-content">
+             </div>
+          </div>
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">⚙️</span>
+              <span class="card-title">Other Components</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Experiments: </span>
+                <span class="stat-value">1</span>
+              </div>
+              <div class="stat-row indent">
+                <span class="stat-value small">Data Collection (1)</span>
+              </div>
+               <div class="stat-row indent">
+                <span class="stat-value small">Sample <strong>&rarr;</strong> application + json</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Computations: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Schemas: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Other: </span>
+                <span class="stat-value">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view-full-link">
+        <a href="wearable_blood_glucose/ro-crate-preview.html">View Full Dataset Details</a>
+      </div>
+    </div>
+  </details>
+  <details
+    class="subcrate-card"
+    id="subcrate-8"
+    data-name="ai readi wearable activity monitoring subcrate"
+    data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+    data-formats="application json"
+  >
+    <summary class="subcrate-head">
+      <span class="subcrate-head-title">AI READI Wearable Activity Monitoring Subcrate</span>
+      <span class="subcrate-head-chips">
+<span class="chip">7.03 MB</span>        <span class="chip">2105 files</span>
+<span class="chip chip-format">application</span><span class="chip chip-format">json</span>      </span>
+    </summary>
+
+    <div class="subcrate-body">
+      <div class="subcrate-metadata">
+        <div class="metadata-item">
+          <span class="metadata-label">ROCrate ID:</span>
+          <span class="metadata-value">
+ ark:59853/rocrate-b2ai-ai-readi-wearable-activity-monitor           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Description:</span>
+          <span class="metadata-value">Activity monitoring involves the use of wearable trackers, which track metrics like heart rate, steps, calories, and active minutes, etc, creating a detailed record of their daily activity.
+
+For the AI-READI research program, the Garmin Vivosmart 5 fitness tracker was utilized for activity monitoring. Participants were advised to wear the wristwatch on their non-dominant wrist for 10 consecutive days, but they were free to choose their preferred wrist for wearing the device. Upon completion of the 10-day period, participants returned the wristwatch along with a form specifying 1) the wrist on which they wore the tracker and 2) their dominant hand. The Garmin Vivosmart 5 was worn concurrently with the continuous glucose monitoring device and the use of the home environmental sensor. The Garmin Vivosmart 5 continuously recorded data related to physical activities and sleep. There are gaps in data collection as the battery had to be charged every 2-3 days. The sampling frequency of the Fitness tracker is 5 seconds.
+</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Authors:</span>
+          <span class="metadata-value">AI-READI Consortium</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Date:</span>
+          <span class="metadata-value">11/17/25</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Size:</span>
+          <span class="metadata-value">7.03 MB</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">License:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/10.5281/zenodo.17555036" target="_blank">https://doi.org/10.5281/zenodo.17555036</a>
+          </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Keywords:</span>
+          <span class="metadata-value">
+ diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal Imaging, Eye Exam           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">DOI:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/https://doi.org/10.60775/fairhub.3" target="_blank">https://doi.org/10.60775/fairhub.3</a>
+          </span>
+        </div>
+
+        <!-- Secondary metadata grouped under a nested toggle -->
+        <details class="more-meta">
+          <summary>More metadata</summary>
+          <div class="metadata-item">
+            <span class="metadata-label">Provenance ID:</span>
+            <span class="metadata-value">
+              <a href="ro-crate-prov-graph.html">ro-crate-prov-graph.html</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Copyright:</span>
+            <span class="metadata-value">Copyright © 2026 AI-READI</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Terms of Use:</span>
+            <span class="metadata-value">
+              <a href="https://fairhub.io/datasets/3/access" target="_blank">https://fairhub.io/datasets/3/access</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Funding:</span>
+            <span class="metadata-value">
+ NIH grant 1OT2OD032644 to the Bridge2AI: Salutogenesis Data Generation Project through the NIH Bridge2AI Common Fund program             </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Related Publications:</span>
+            <span class="metadata-value">
+              <ul class="compact-list">
+                <li>
+ AI-READI Consortium. (2024). "AI-READI: rethinking data collection, preparation and
+sharing for propelling AI-based discoveries in diabetes research and beyond."
+Nature metabolism. https://doi.org/10.1038/s42255-024-01165-x                 </li>
+                <li>
+ AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the
+AI-READI Project (3.0.0) [Data set]. FAIRhub.
+https://doi.org/10.60775/fairhub.3                 </li>
+              </ul>
+            </span>
+          </div>
+        </details>
+      </div>
+
+      <div class="subcrate-composition">
+        <h4>Content Summary</h4>
+        <div class="compact-grid">
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">📊</span>
+              <span class="card-title">Files (2105)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Formats: </span>
+                <span class="stat-value">application (2104), json (2104)</span>
+              </div>
+               <div class="stat-row">
+                <span class="stat-label">Access: </span>
+                <span class="stat-value">Available (2105)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">💻</span>
+              <span class="card-title">Software &amp; Instruments (1)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Software: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Instruments: </span>
+                <span class="stat-value">1</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">🧪</span>
+              <span class="card-title">Inputs (0)</span>
+            </div>
+            <div class="card-content">
+             </div>
+          </div>
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">⚙️</span>
+              <span class="card-title">Other Components</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Experiments: </span>
+                <span class="stat-value">1</span>
+              </div>
+              <div class="stat-row indent">
+                <span class="stat-value small">Data Collection (1)</span>
+              </div>
+               <div class="stat-row indent">
+                <span class="stat-value small">Sample <strong>&rarr;</strong> application + json</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Computations: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Schemas: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Other: </span>
+                <span class="stat-value">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view-full-link">
+        <a href="wearable_activity_monitor/ro-crate-preview.html">View Full Dataset Details</a>
+      </div>
+    </div>
+  </details>
+  <details
+    class="subcrate-card"
+    id="subcrate-9"
+    data-name="ai-readi environmental sensor subcrate"
+    data-keywords="diabetes mellitus machine learning artificial intelligence electrocardiography continuous glucose monitoring retinal imaging eye exam"
+    data-formats="text csv"
+  >
+    <summary class="subcrate-head">
+      <span class="subcrate-head-title">AI-READI Environmental Sensor Subcrate</span>
+      <span class="subcrate-head-chips">
+<span class="chip">15.88 MB</span>        <span class="chip">2232 files</span>
+<span class="chip chip-format">text</span><span class="chip chip-format">csv</span>      </span>
+    </summary>
+
+    <div class="subcrate-body">
+      <div class="subcrate-metadata">
+        <div class="metadata-item">
+          <span class="metadata-label">ROCrate ID:</span>
+          <span class="metadata-value">
+ ark:59853/rocrate-b2ai-ai-readi-environmental-sensor           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Description:</span>
+          <span class="metadata-value">Environmental sensors are devices designed to detect and measure various environmental parameters such as temperature, humidity, air quality, and light intensity. Research indicates that environmental factors play a significant role in health outcomes, yet most of these studies have focused on outdoor conditions at a broad city or regional scale. They often overlook the critical aspect of the individual's home environment.
+
+In the AI-READI study, a custom-designed sensor unit (LeeLab Anura) was utilized to obtain environmental sensor data from each subject's home for a period of 10 days. Clinical research coordinators provided the subjects with the device along with take-home instructions to place the device in an area frequently used. Upon return, the subject was asked to make a note of the location of the environmental sensor. The sensor then recorded particulate matter counts (PM 1.0, 2.5, 4, and 10), temperature, relative humidity, volatile organic compounds (VOCs), nitrogen oxides (NO and NO2), and 11 multi-spectral light intensity measurements.
+</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Authors:</span>
+          <span class="metadata-value">Sally L. Baxter, Virginia R. de Sa, Kadija Ferryman, Prachee Jain, Cecilia S. Lee, Jennifer Li-Pook-Than, T. Y. Alvin Liu, Julia P. Owen, Bhavesh Patel, Qilu Yu & Linda M. Zangwill, Amir Bahmani, Sally L. Baxter, Christopher G. Chute, Jeffrey C. Edberg, Kadija Ferryman, Samantha Hurst, Hiroshi Ishikawa, Cecilia S. Lee, Aaron Y. Lee, T. Y. Alvin Liu, Gerald McGwin, Shannon McWeeney, Camille Nebeker, Cynthia Owsley, Bhavesh Patel, Sara J. Singer, Linda M. Zangwill, Riddhiman Adib, Mohammad Adibuzzaman, Arash Alavi, Catherine Ashley, Adrienne Baer, Erik Benton, Marian Blazes, Aaron Cohen, Benjamin Cordier, Katie Crist, Colleen Cuddy, Virginia R. de Sa, Aydan Gasimova, Nayoon Gim, Stephanie Hong, Prachee Jain, Trina Kim, Jennifer Li-Pook-Than, Wei-Chun Lin, Jessica Mitchell, Caitlyn Ngadisastra, Victoria Patronilo, Jamie Shaffer, Sanjay Soundarajan, Kevin Zhao, Caroline Drolet, Abigail Lucero, Dawn Matthies, Julia P. Owen, Hanna Pittock, Kate Watkins, Brittany York, Charles E. Amankwa, Monique Bangudi, Nada Haboudal, Shahin Hallaj, Anna Heinke, Lingling Huang, Fritz Gerald P. Kalaw, Apoorva Karsolia, Hadi Khazaei, Muna Mohammed, Kyongmi Simpkins, Xujing Wang, Qilu Yu</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Date:</span>
+          <span class="metadata-value">11/17/25</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Size:</span>
+          <span class="metadata-value">15.88 MB</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">License:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/10.5281/zenodo.17555036" target="_blank">https://doi.org/10.5281/zenodo.17555036</a>
+          </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Keywords:</span>
+          <span class="metadata-value">
+ diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal Imaging, Eye Exam           </span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">DOI:</span>
+          <span class="metadata-value">
+            <a href="https://doi.org/https://doi.org/10.60775/fairhub.3" target="_blank">https://doi.org/10.60775/fairhub.3</a>
+          </span>
+        </div>
+
+        <!-- Secondary metadata grouped under a nested toggle -->
+        <details class="more-meta">
+          <summary>More metadata</summary>
+          <div class="metadata-item">
+            <span class="metadata-label">Provenance ID:</span>
+            <span class="metadata-value">
+              <a href="ro-crate-prov-graph.html">ro-crate-prov-graph.html</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Copyright:</span>
+            <span class="metadata-value">Copyright Â© 2026 AI-READI</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Terms of Use:</span>
+            <span class="metadata-value">
+              <a href="https://fairhub.io/datasets/3/access" target="_blank">https://fairhub.io/datasets/3/access</a>
+            </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Funding:</span>
+            <span class="metadata-value">
+ NIH grant 1OT2OD032644 to the Bridge2AI: Salutogenesis Data Generation Project through the NIH Bridge2AI Common Fund program             </span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Related Publications:</span>
+            <span class="metadata-value">
+              <ul class="compact-list">
+                <li>
+ AI-READI Consortium. (2024). "AI-READI: rethinking data collection, preparation and
+sharing for propelling AI-based discoveries in diabetes research and beyond."
+Nature metabolism. https://doi.org/10.1038/s42255-024-01165-x                 </li>
+                <li>
+ AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the
+AI-READI Project (3.0.0) [Data set]. FAIRhub.
+https://doi.org/10.60775/fairhub.3                 </li>
+              </ul>
+            </span>
+          </div>
+        </details>
+      </div>
+
+      <div class="subcrate-composition">
+        <h4>Content Summary</h4>
+        <div class="compact-grid">
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">📊</span>
+              <span class="card-title">Files (2232)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Formats: </span>
+                <span class="stat-value">text (2231), csv (2231)</span>
+              </div>
+               <div class="stat-row">
+                <span class="stat-label">Access: </span>
+                <span class="stat-value">Available (2232)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">💻</span>
+              <span class="card-title">Software &amp; Instruments (1)</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Software: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Instruments: </span>
+                <span class="stat-value">1</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">🧪</span>
+              <span class="card-title">Inputs (0)</span>
+            </div>
+            <div class="card-content">
+             </div>
+          </div>
+          <div class="summary-card">
+            <div class="card-header">
+              <span class="card-icon">⚙️</span>
+              <span class="card-title">Other Components</span>
+            </div>
+            <div class="card-content">
+              <div class="stat-row">
+                <span class="stat-label">Experiments: </span>
+                <span class="stat-value">1</span>
+              </div>
+              <div class="stat-row indent">
+                <span class="stat-value small">Data Collection (1)</span>
+              </div>
+               <div class="stat-row indent">
+                <span class="stat-value small">Sample <strong>&rarr;</strong> text + csv</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Computations: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Schemas: </span>
+                <span class="stat-value">0</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Other: </span>
+                <span class="stat-value">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view-full-link">
+        <a href="environment/ro-crate-preview.html">View Full Dataset Details</a>
+      </div>
+    </div>
+  </details>
+ </div> <div class="section-header">
+  <h2>Distribution Information</h2>
+</div>
+<div class="distribution-section">
+  <div class="distribution-item">
+    <div class="distribution-label">Publisher:</div>
+    <div class="distribution-value">AI-READi Consortium</div>
+  </div>
+    <div class="distribution-item">
+    <div class="distribution-label">License:</div>
+    <div class="distribution-value">
+      <a href="https://doi.org/10.5281/zenodo.17555036" target="_blank">https://doi.org/10.5281/zenodo.17555036</a>
+    </div>
+  </div>
+    <div class="distribution-item">
+    <div class="distribution-label">Release Date:</div>
+    <div class="distribution-value">11/17/25</div>
+  </div>
+   <div class="distribution-item">
+    <div class="distribution-label">Version:</div>
+    <div class="distribution-value">3.0.0</div>
+  </div>
+</div>
+    </div>
+    <footer>
+      Datasheet Provenance: This datasheet and associated metadata were
+      generated by the FAIRSCAPE AI-readiness platform (Al Manir, et al. 2024,
+      BioRXiv 2024.12.23.629818;
+      <a href="https://doi.org/10.1101/2024.12.23.629818" target="_blank"
+        >https://doi.org/10.1101/2024.12.23.629818</a
+      >).
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const body = document.body;
+
+        /* --- Sidebar toggle --- */
+        const toggleBtn = document.getElementById("sidebar-toggle");
+        const sidebar = document.getElementById("sidebar");
+        if (toggleBtn && sidebar) {
+          toggleBtn.addEventListener("click", function () {
+            sidebar.classList.toggle("active");
+            body.classList.toggle("sidebar-active");
+          });
+        }
+
+        /* --- Jump to a dataset card and open it --- */
+        function openCard(id) {
+          const card = document.getElementById(id);
+          if (card && card.tagName.toLowerCase() === "details") {
+            card.open = true;
+          }
+          return card;
+        }
+        function jumpToCard(id) {
+          const card = openCard(id);
+          if (card) {
+            card.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
+        // Intercept clicks on any link/element targeting a subcrate card.
+        document.body.addEventListener("click", function (e) {
+          const link = e.target.closest('a[href^="#subcrate-"]');
+          if (link) {
+            const id = link.getAttribute("href").slice(1);
+            e.preventDefault();
+            jumpToCard(id);
+            history.replaceState(null, "", "#" + id);
+            return;
+          }
+          // Clicking anywhere on an index row jumps too.
+          const row = e.target.closest(".dataset-index-row");
+          if (row && !e.target.closest("a")) {
+            jumpToCard(row.getAttribute("data-target"));
+          }
+        });
+        // Open the right card if the page is loaded with a #subcrate-N hash.
+        if (location.hash.indexOf("#subcrate-") === 0) {
+          openCard(location.hash.slice(1));
+        }
+        window.addEventListener("hashchange", function () {
+          if (location.hash.indexOf("#subcrate-") === 0) {
+            openCard(location.hash.slice(1));
+          }
+        });
+
+        /* --- Dataset filter (index table + cards) --- */
+        const filterInput = document.getElementById("dataset-filter");
+        const countEl = document.getElementById("dataset-filter-count");
+        const noMatches = document.getElementById("dataset-no-matches");
+        if (filterInput) {
+          const rows = Array.prototype.slice.call(
+            document.querySelectorAll(".dataset-index-row")
+          );
+          const cards = Array.prototype.slice.call(
+            document.querySelectorAll(".subcrate-card")
+          );
+          const total = cards.length;
+          function matchText(el, q) {
+            return (
+              (el.getAttribute("data-name") || "").indexOf(q) !== -1 ||
+              (el.getAttribute("data-keywords") || "").indexOf(q) !== -1 ||
+              (el.getAttribute("data-formats") || "").indexOf(q) !== -1
+            );
+          }
+          function applyFilter() {
+            const q = filterInput.value.trim().toLowerCase();
+            let shown = 0;
+            rows.forEach(function (r) {
+              const ok = !q || matchText(r, q);
+              r.style.display = ok ? "" : "none";
+            });
+            cards.forEach(function (c) {
+              const ok = !q || matchText(c, q);
+              c.style.display = ok ? "" : "none";
+              if (ok) shown++;
+            });
+            if (noMatches) noMatches.hidden = shown !== 0;
+            if (countEl) {
+              countEl.textContent = q
+                ? shown + " of " + total + " datasets"
+                : "";
+            }
+          }
+          filterInput.addEventListener("input", applyFilter);
+        }
+
+        /* --- Back-to-top button --- */
+        const toTop = document.getElementById("back-to-top");
+        if (toTop) {
+          window.addEventListener("scroll", function () {
+            if (window.scrollY > 400) {
+              toTop.classList.add("visible");
+            } else {
+              toTop.classList.remove("visible");
+            }
+          });
+          toTop.addEventListener("click", function () {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+        }
+
+        /* --- Scrollspy: highlight active sidebar link --- */
+        const navLinks = Array.prototype.slice.call(
+          document.querySelectorAll('#sidebar a[href^="#"]')
+        );
+        const linkById = {};
+        navLinks.forEach(function (a) {
+          linkById[a.getAttribute("href").slice(1)] = a;
+        });
+        const watched = Object.keys(linkById)
+          .map(function (id) {
+            return document.getElementById(id);
+          })
+          .filter(Boolean);
+        if (watched.length && "IntersectionObserver" in window) {
+          let current = null;
+          const observer = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  const a = linkById[entry.target.id];
+                  if (a && a !== current) {
+                    if (current) current.classList.remove("active");
+                    a.classList.add("active");
+                    current = a;
+                  }
+                }
+              });
+            },
+            { rootMargin: "-10% 0px -80% 0px", threshold: 0 }
+          );
+          watched.forEach(function (el) {
+            observer.observe(el);
+          });
+        }
+
+        /* --- Print/PDF: force-open every collapsible, restore afterwards --- */
+        let printSnapshot = [];
+        function expandAllForPrint() {
+          printSnapshot = [];
+          document.querySelectorAll("details").forEach(function (d) {
+            printSnapshot.push([d, d.open]);
+            d.open = true;
+          });
+        }
+        function restoreAfterPrint() {
+          printSnapshot.forEach(function (pair) {
+            pair[0].open = pair[1];
+          });
+          printSnapshot = [];
+        }
+        window.addEventListener("beforeprint", expandAllForPrint);
+        window.addEventListener("afterprint", restoreAfterPrint);
+      });
+    </script>
+  </body>
+</html>
