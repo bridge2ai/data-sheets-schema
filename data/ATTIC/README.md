@@ -6,6 +6,16 @@ historical reference.
 
 ## Directory Organization
 
+### root_schema_drafts_2026-08-08/ (from repository root)
+
+Twelve `D4D_*.yaml` schema modules that had accumulated in the repository root,
+moved on 2026-08-08 under #409. Stale copies from before classes were
+redistributed between modules — each shares its `id` with the live module of
+the same name in `src/data_sheets_schema/schema/`, which is why they could not
+be left in place. Never tracked in git before this move, so they had no
+recovery path until now. See the README in that directory for the per-file
+comparison and how they got there.
+
 ### root_downloads/ (from repository root)
 
 Legacy directories moved from repository root level on 2024-12-19:
