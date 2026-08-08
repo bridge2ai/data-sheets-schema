@@ -372,20 +372,28 @@ _PRECEDES = {
 def grounded_in(kind: str, rendering: str, haystack: str) -> bool:
     """Is this rendering present as a whole token, not inside a longer one?
 
-    URLs may carry a trailing slash on either side. `normalise` strips it from
-    the claim but the bundle is normalised wholesale and keeps it, and `/`
-    continues a URL, so `(?!/)` rejected every URL a source wrote with its
-    trailing slash -- 104 values on the 2026-08-07 sweep, all of them present
-    (#404). The optional `/?` restores the symmetry that `normalise` intends.
+    A locator may carry a trailing slash on either side. `normalise` strips it
+    from the claim but the bundle is normalised wholesale and keeps it, and `/`
+    continues both a URL and a DOI, so `(?!/)` rejected every one a source
+    wrote with its trailing slash -- 104 values on the 2026-08-07 sweep, all of
+    them present (#404). The optional `/?` restores the symmetry that
+    `normalise` intends.
+
+    Applied to `doi` as well as `url`, because `normalise` ends in
+    `rstrip("/")` for every kind, so the asymmetry it creates is not specific
+    to one. No DOI in the corpus currently trips it -- 0 of 245 measured on the
+    2026-08-07 sweep -- so this half is latent, fixed because the defect is the
+    same one and finding it twice is worse than fixing it once.
 
     It does not weaken the boundary guarantee, because the guard still applies
     after it: against `example.com/a/b`, `/?` first consumes the slash and the
     lookahead rejects `b`, then backtracks to empty and the lookahead rejects
-    the slash. Both branches fail, which is the required answer.
+    the slash. Both branches fail, which is the required answer. A rendering
+    that already ends in `/` is unaffected, since `/?` may match empty.
     """
     after = _CONTINUES.get(kind, r"\w")
     before = _PRECEDES.get(kind, r"\w")
-    optional = "/?" if kind == "url" else ""
+    optional = "/?" if kind in ("url", "doi") else ""
     pat = re.compile(
         rf"(?<!{before}){re.escape(rendering)}{optional}(?!{after})")
     return bool(pat.search(haystack))

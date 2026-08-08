@@ -297,6 +297,31 @@ class TestTokenBoundaries(unittest.TestCase):
         self.assertTrue(self._grounded("url", "https://example.org/a/",
                                        "visit https://example.org/a here"))
 
+    def test_a_doi_with_a_trailing_slash_also_grounds(self):
+        """The same defect, in the kind the first fix did not cover.
+
+        `normalise` ends in `rstrip("/")` for every kind, and `_CONTINUES`
+        treats `/` as a continuation for `doi` too, so a DOI a source wrote
+        with a trailing slash was rejected exactly as a URL was. Latent rather
+        than active — 0 of 245 DOIs on the 2026-08-07 sweep trip it — but the
+        defect is the same and a latent half is how it comes back.
+        """
+        self.assertTrue(self._grounded("doi", "https://doi.org/10.1234/x",
+                                       "see https://doi.org/10.1234/x/ here"))
+        self.assertTrue(self._grounded("doi", "10.1234/x", "see 10.1234/x/ ok"))
+
+    def test_the_doi_trailing_slash_does_not_weaken_the_boundary(self):
+        self.assertFalse(self._grounded("doi", "10.1234/x", "see 10.1234/x/y"))
+        self.assertFalse(self._grounded("doi", "10.1234/x", "see 10.1234/xyz"))
+
+    def test_a_rendering_that_already_ends_in_a_slash_is_unaffected(self):
+        """`/?` may match empty, so the optional slash cannot demand a double
+        one from a caller that passes an unnormalised rendering."""
+        from data_sheets_schema.verifiable import grounded_in, normalise_bundle
+        b = normalise_bundle("see https://ex.org/a/ here")
+        self.assertTrue(grounded_in("url", "ex.org/a/", b))
+        self.assertTrue(grounded_in("url", "ex.org/a", b))
+
     def test_the_trailing_slash_does_not_weaken_the_boundary(self):
         """The optional slash must not let a URL match a longer path: against
         `example.org/a/b` both branches have to fail, the one that consumes the
