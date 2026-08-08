@@ -1,0 +1,138 @@
+﻿id: "https://w3id.org/bridge2ai/data-sheets-schema/distribution"
+name: "data-sheets-schema-distribution"
+title: "Datasheets for Datasets – Distribution Module"
+description: >
+  Subschema for distribution-related information in Datasheets for Datasets.
+  The questions in this section pertain to how the dataset is distributed,
+  including whether it will be shared with third parties, under what license,
+  and any regulatory restrictions.
+
+
+license: MIT
+see_also:
+  - "https://bridge2ai.github.io/data-sheets-schema"
+
+
+imports:
+  # Import the main schema so that we can reference DatasetProperty, etc.
+  - "https://w3id.org/bridge2ai/data-sheets-schema"
+
+
+subsets:
+  Distribution:
+    description: >
+      The questions in this section relate to how the dataset will be distributed,
+      whether it will be shared externally, any fees or licensing terms, and
+      export or regulatory restrictions that may apply.
+
+
+prefixes:
+  linkml: "https://w3id.org/linkml/"
+  d4d-distribution: "https://w3id.org/bridge2ai/data-sheets-schema/distribution#"
+
+
+default_prefix: "d4d-distribution"
+
+
+# ------------------------------------------------------------------------------
+# Classes
+# ------------------------------------------------------------------------------
+
+
+classes:
+
+
+  ThirdPartySharing:
+    description: >
+      Will the dataset be distributed to third parties outside of the entity
+      (e.g., company, institution, organization) on behalf of which the dataset
+      was created?
+    is_a: DatasetProperty
+    in_subset:
+      - Distribution
+    attributes:
+      description:
+        description: >
+          Boolean or textual explanation regarding distribution to 
+          parties external to the dataset-creating entity.
+        range: boolean
+
+
+  DistributionFormat:
+    description: >
+      How will the dataset be distributed (e.g., tarball on a website,
+      API, GitHub)?
+    is_a: DatasetProperty
+    in_subset:
+      - Distribution
+    attributes:
+      description:
+        description: "Details of the distribution channel(s) or format(s)."
+        range: string
+        multivalued: true
+
+
+  DistributionDate:
+    description: >
+      When will the dataset be distributed?
+    is_a: DatasetProperty
+    in_subset:
+      - Distribution
+    attributes:
+      description:
+        description: >
+          Dates or timeframe for dataset release. Could be a one-time release date
+          or multiple scheduled releases.
+        range: string
+        multivalued: true
+
+
+  LicenseAndUseTerms:
+    description: >
+      Will the dataset be distributed under a copyright or other intellectual
+      property license, and/or under applicable terms of use (ToU)? If so, describe
+      this license/ToU, include any fees, and provide a link or copy of relevant terms.
+    is_a: DatasetProperty
+    in_subset:
+      - Distribution
+    attributes:
+      description:
+        description: >
+          Information on licenses or terms of use, including references,
+          links, or summaries of the key terms, usage restrictions, or fees.
+        range: string
+        multivalued: true
+
+
+  IPRestrictions:
+    description: >
+      Have any third parties imposed IP-based or other restrictions on the data
+      associated with the instances? If so, describe these restrictions, referencing
+      any licenses or fees.
+    is_a: DatasetProperty
+    in_subset:
+      - Distribution
+    attributes:
+      description:
+        description: >
+          Explanation of third-party intellectual property restrictions that may
+          limit or constrain dataset distribution.
+        range: string
+        multivalued: true
+
+
+  ExportControlRegulatoryRestrictions:
+    description: >
+      Do any export controls or other regulatory restrictions apply to the dataset
+      or to individual instances? If so, describe them, referencing relevant legal
+      documentation or guidelines.
+    is_a: DatasetProperty
+    in_subset:
+      - Distribution
+    attributes:
+      description:
+        description: >
+          Details of export control or other regulatory constraints that apply
+          to distributing the dataset.
+        range: string
+        multivalued: true
