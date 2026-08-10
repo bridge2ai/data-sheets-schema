@@ -19,7 +19,13 @@ def provenance():
               type=click.Path(exists=True, dir_okay=False),
               help='Prompt file this run was launched with; may repeat. '
                    'Hashed into the record.')
-def record(project, method, label, input_bundle, prompts):
+@click.option('--prompt-text', 'prompt_text',
+              type=click.Path(exists=True, dir_okay=False),
+              help='The instruction as actually sent, e.g. from '
+                   '`d4d api render-prompt --out`. Hashed as prompts.request. '
+                   'The file is what an instruction was built from; this is '
+                   'what it became.')
+def record(project, method, label, input_bundle, prompts, prompt_text):
     """Write a LIVE provenance record for a run just produced.
 
     Every field is observed at run time — hardware, software versions, input
@@ -38,7 +44,9 @@ def record(project, method, label, input_bundle, prompts):
     rec = build_record(project, method, label, mode="live",
                        input_bundle=Path(input_bundle) if input_bundle else None,
                        input_verified=True,
-                       prompt_paths=[Path(p) for p in prompts] or None)
+                       prompt_paths=[Path(p) for p in prompts] or None,
+                       prompt_request=(Path(prompt_text).read_text(encoding="utf-8")
+                                       if prompt_text else None))
     out = rec.write(record_path_for(project, method, label))
     click.echo(f"✓ {out}")
     # Say what happened to any prior verdict. Re-recording used to delete it

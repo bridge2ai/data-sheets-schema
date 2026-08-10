@@ -134,3 +134,85 @@ class TestProvenancePromptFlag(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheRequestIsRecordedNotJustTheFile(unittest.TestCase):
+    """#419. The file is not the instruction — substitution turns one into the
+    other, and on the agentic path a human turned it into something else again.
+
+    The VOICE run of 2026-08-07 was sent a project-specific scope paragraph
+    that appears in no prompt file, while the record hashed the file and its
+    header said "identical for all projects". Recording the resolved text is
+    what makes that difference detectable instead of merely discouraged.
+    """
+
+    def setUp(self):
+        from data_sheets_schema.cli import provenance as prov_cli
+        self.cli = prov_cli.provenance
+        self.runner = CliRunner()
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.label, self.method = "2026-08-10_test_rep1", "claudecode_agent"
+        concat = self.root / "data" / "d4d_concatenated"
+        (concat / self.method / self.label).mkdir(parents=True)
+        (concat / f"{self.method}_core" / self.label).mkdir(parents=True)
+        body = yaml.safe_dump({"id": "https://example.org/x", "name": "x"})
+        (concat / self.method / self.label / "P_d4d.yaml").write_text(body)
+        (concat / f"{self.method}_core" / self.label / "P_d4d_core.yaml").write_text(body)
+        (concat / f"{self.method}_core" / self.label
+         / "P_reconciliation.md").write_text("# r\n")
+        self.bundle = self.root / "b.txt"; self.bundle.write_text("docs\n")
+        self.base = self.root / "base.md"; self.base.write_text("# base\n")
+        self.sent = self.root / "sent.txt"
+        self.sent.write_text("Generate paired records for the P project.\n")
+        self.concat = concat
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _record(self, *extra):
+        args = ["record", "--project", "P", "--method", self.method,
+                "--label", self.label, "--input-bundle", str(self.bundle), *extra]
+        cwd = os.getcwd(); os.chdir(self.root)
+        try:
+            return self.runner.invoke(self.cli, args)
+        finally:
+            os.chdir(cwd)
+
+    def _prompts(self):
+        p = (self.concat / f"{self.method}_core" / self.label
+             / "P_provenance.yaml")
+        return yaml.safe_load(p.read_text())["prompts"]
+
+    def test_the_sent_instruction_is_hashed_alongside_the_file(self):
+        import hashlib
+        r = self._record("--prompt", str(self.base),
+                         "--prompt-text", str(self.sent))
+        self.assertEqual(r.exit_code, 0, r.output)
+        pr = self._prompts()
+        self.assertEqual(1, len(pr["files"]), "the base file is still recorded")
+        self.assertEqual(
+            hashlib.sha256(self.sent.read_bytes()).hexdigest(),
+            pr["request"]["sha256"])
+        self.assertEqual(self.sent.stat().st_size, pr["request"]["bytes"])
+
+    def test_the_two_hashes_differ_which_is_the_whole_point(self):
+        r = self._record("--prompt", str(self.base),
+                         "--prompt-text", str(self.sent))
+        self.assertEqual(r.exit_code, 0, r.output)
+        pr = self._prompts()
+        self.assertNotEqual(pr["files"][0]["sha256"], pr["request"]["sha256"])
+
+    def test_without_the_flag_no_request_is_claimed(self):
+        """Absent is honest; an absent block must not be filled with the file's
+        hash, which would assert the two were the same."""
+        self._record("--prompt", str(self.base))
+        self.assertNotIn("request", self._prompts())
+
+    def test_the_request_can_be_recorded_without_a_base_file(self):
+        """An agentic run may know what it was sent and not which file it came
+        from — that is still strictly more than recording nothing."""
+        self._record("--prompt-text", str(self.sent))
+        pr = self._prompts()
+        self.assertIsNone(pr["paths"])
+        self.assertIn("request", pr)

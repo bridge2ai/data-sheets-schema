@@ -206,6 +206,18 @@ class RunSpec:
     # The GitHub assistant writes flat into data/sheets_d4dassistant. Rather than
     # two runners, the layout is a parameter — everything else is identical.
     out_dir: Path | None = None
+    # Which runtime the rendered instruction should declare. Defaults to this
+    # module's own, so the API path is unchanged. It is a parameter because the
+    # agentic path needs the same instruction rendered for `Claude Code`: the
+    # whole point of rendering is that nobody types the header by hand, and a
+    # hardcoded runtime would force exactly that (#419).
+    runtime: str = RUNTIME
+    # Likewise the provider. `provider_identity()` reports the endpoint *this
+    # process* is configured against, which is the right answer for a run this
+    # process is about to make and the wrong one for rendering an instruction
+    # another runtime will execute — it rendered "LBL CBORG (proxy to
+    # Anthropic)" into a Claude Code header, a provider that run never touches.
+    provider: str | None = None
 
     @property
     def full_path(self) -> Path:
@@ -325,8 +337,8 @@ def resolve_prompt(spec: RunSpec) -> str:
         # headed "Agent runtime: Claude Code" on "claude-opus-5[1m]" because
         # this prompt was written for the agent path and reused verbatim — the
         # artifact asserted a runtime and model it never touched.
-        "{RUNTIME}": RUNTIME,
-        "{PROVIDER}": ident["provider"] or PROVIDER,
+        "{RUNTIME}": spec.runtime,
+        "{PROVIDER}": spec.provider or ident["provider"] or PROVIDER,
         "{MODEL}": settings["name"],
         # v2 introduced `{DATE}` but nothing substituted it, so the literal
         # string reached the model. Its records carry the right date only
@@ -1654,6 +1666,10 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         spec.project, spec.method, spec.label, mode="live",
         input_bundle=spec.bundle, input_verified=True,
         prompt_paths=spec.prompt_files,
+        # The API path builds its instruction with `resolve_prompt`, so it can
+        # record exactly what it sent rather than only what it was built from
+        # (#419). `prompt_request_hash` was written for this and had no caller.
+        prompt_request=resolve_prompt(spec),
         schema_digest_md5=schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
         extra_notes=[
             (f"Generated via {RUNTIME}; temperature {settings['temperature']} "
