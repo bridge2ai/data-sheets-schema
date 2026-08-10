@@ -882,9 +882,53 @@ def verify_request(method: str, label: str, project: str,
 
     if got == req["sha256"]:
         return "match", None
+
+    # A differing hash has two causes and they are not the same finding: the
+    # instruction was edited, or the prompt file has moved since the run and
+    # re-rendering no longer reproduces what was sent. The second is ordinary
+    # evolution — v4 exists, v5 will — and reporting it as `mismatch` would make
+    # `--strict` fail every historical record the first time anyone edits a
+    # prompt. So establish which, from the file hashes the record already
+    # carries. Raised reviewing the gate.
+    drifted = _prompt_files_drifted(data)
+    if drifted is True:
+        return "unverifiable", ("the prompt file has changed since this run, so "
+                                "the instruction it produced cannot be "
+                                "re-rendered; the recorded hash still stands, "
+                                "it just cannot be re-derived here")
+    if drifted is None:
+        return "unverifiable", ("the recorded hash and a fresh render differ, "
+                                "but the record does not pin the prompt file, "
+                                "so an edited instruction cannot be told from a "
+                                "changed prompt")
     return "mismatch", (f"recorded {req['sha256'][:12]}… but the spec renders "
-                        f"{got[:12]}…; the instruction sent was not the one "
-                        "this spec produces")
+                        f"{got[:12]}… from an unchanged prompt file; the "
+                        "instruction sent was not the one this spec produces")
+
+
+def _prompt_files_drifted(record: dict) -> bool | None:
+    """Have the prompt files this record hashed changed on disk since?
+
+    True if any differs, False if all still match, None if it cannot be told —
+    no files recorded, none of them present, or an entry without a hash.
+    """
+    from data_sheets_schema.provenance import _sha256
+
+    files = (record.get("prompts") or {}).get("files") or []
+    seen = False
+    for entry in files:
+        if not isinstance(entry, dict):
+            continue
+        path, recorded = entry.get("path"), entry.get("sha256")
+        if not path or not recorded:
+            continue
+        current = _sha256(Path(path))
+        if current is None:
+            continue
+        seen = True
+        if current != recorded:
+            return True
+    return False if seen else None
 
 
 def condition_from_label(label: str) -> str | None:

@@ -42,12 +42,17 @@ class TestTheGate(unittest.TestCase):
          / f"{self.PROJECT}_provenance.yaml").write_text(
             yaml.safe_dump({"prompts": prompts}, sort_keys=False))
 
-    def _request(self, text, spec=True):
+    PROMPT = Path("src/download/prompts/d4d_generic_arm_prompt_v3.md")
+
+    def _request(self, text, spec=True, pin=True):
+        from data_sheets_schema.provenance import _sha256
         r = {"sha256": hashlib.sha256(text.encode()).hexdigest(),
              "bytes": len(text.encode())}
         if spec:
             r["spec"] = self.spec.render_spec()
-        return {"files": [], "request": r}
+        files = ([{"path": str(self.PROMPT), "sha256": _sha256(self.PROMPT)}]
+                 if pin else [])
+        return {"files": files, "request": r}
 
     def _verify(self):
         return verify_request(self.METHOD, self.LABEL, self.PROJECT, self.concat)
@@ -101,6 +106,76 @@ class TestTheGate(unittest.TestCase):
         p["request"]["spec"] = dict(p["request"]["spec"], condition="generic")
         self._write(p)
         self.assertEqual("mismatch", self._verify()[0])
+
+
+class TestAChangedPromptFileIsNotATamperedInstruction(unittest.TestCase):
+    """Raised reviewing the gate. A differing hash has two causes and they are
+    not the same finding.
+
+    The instruction may have been edited, or the prompt file may have moved
+    since the run so that re-rendering no longer reproduces what was sent. The
+    second is ordinary evolution — v4 exists, v5 will — and reporting it as
+    `mismatch` would make `--strict` fail every historical record the first time
+    anyone edited a prompt.
+    """
+
+    LABEL, METHOD, PROJECT = "2026-08-10_drift_rep1", "claudecode_agent", "VOICE"
+    PROMPT = Path("src/download/prompts/d4d_generic_arm_prompt_v3.md")
+
+    def setUp(self):
+        if not (BUNDLE.exists() and self.PROMPT.exists()):
+            self.skipTest("corpus not present")
+        self.tmp = tempfile.TemporaryDirectory()
+        self.concat = Path(self.tmp.name) / "data/d4d_concatenated"
+        (self.concat / f"{self.METHOD}_core" / self.LABEL).mkdir(parents=True)
+        self.spec = RunSpec(
+            project=self.PROJECT, arm="BASELINE (input documents only)",
+            method=self.METHOD, bundle=BUNDLE, label=self.LABEL,
+            condition="generic_v3", runtime="Claude Code", provider="Anthropic")
+        self.backup = self.PROMPT.read_bytes()
+
+    def tearDown(self):
+        self.PROMPT.write_bytes(self.backup)
+        self.tmp.cleanup()
+
+    def _write(self, text, pin=True):
+        from data_sheets_schema.provenance import _sha256
+        files = ([{"path": str(self.PROMPT), "sha256": _sha256(self.PROMPT)}]
+                 if pin else [])
+        (self.concat / f"{self.METHOD}_core" / self.LABEL
+         / f"{self.PROJECT}_provenance.yaml").write_text(yaml.safe_dump(
+            {"prompts": {"files": files, "request": {
+                "sha256": hashlib.sha256(text.encode()).hexdigest(),
+                "bytes": len(text.encode()),
+                "spec": self.spec.render_spec()}}}, sort_keys=False))
+
+    def _verify(self):
+        return verify_request(self.METHOD, self.LABEL, self.PROJECT, self.concat)
+
+    def test_an_edited_instruction_is_still_a_mismatch(self):
+        """The discrimination must not be bought by weakening the real case."""
+        self._write(self.spec.instruction + "\nEDITED\n")
+        self.assertEqual("mismatch", self._verify()[0])
+
+    def test_a_changed_prompt_file_is_unverifiable_not_a_mismatch(self):
+        self._write(self.spec.instruction)
+        self.PROMPT.write_bytes(self.backup + b"\n- a rule added later\n")
+        status, why = self._verify()
+        self.assertEqual("unverifiable", status)
+        self.assertIn("prompt file has changed", why)
+
+    def test_without_a_pinned_file_it_will_not_guess(self):
+        """If the record does not pin the prompt, an edited instruction cannot
+        be told from a changed one — say so rather than pick."""
+        self._write(self.spec.instruction + "\nEDITED\n", pin=False)
+        status, why = self._verify()
+        self.assertEqual("unverifiable", status)
+        self.assertIn("does not pin the prompt file", why)
+
+    def test_the_mismatch_message_says_the_file_was_unchanged(self):
+        """So a reader knows the verdict rests on having ruled drift out."""
+        self._write(self.spec.instruction + "\nEDITED\n")
+        self.assertIn("unchanged prompt file", self._verify()[1])
 
 
 if __name__ == "__main__":
