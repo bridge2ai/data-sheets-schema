@@ -180,3 +180,49 @@ class TestAChangedPromptFileIsNotATamperedInstruction(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestNewAgenticRunsMustRecordTheirInstruction(unittest.TestCase):
+    """#419's remaining piece. The gate was opt-in by omission: an agentic
+    launcher that simply did not pass `--prompt-text` recorded nothing, and
+    nothing said so.
+
+    Dated rather than corpus-wide, for the same reason `LIVE_REQUIRED_FROM` is:
+    158 records predate the field, and failing them retroactively would discard
+    placeable evidence to enforce a rule that postdates them.
+    """
+
+    def test_agentic_runs_after_the_cutoff_are_subject(self):
+        from data_sheets_schema.runs import requires_request
+        self.assertTrue(requires_request("2026-08-11_x_rep1", "claudecode_agent"))
+        self.assertTrue(requires_request("2026-09-01_x_rep1",
+                                         "claudecode_agent_crate"))
+
+    def test_agentic_runs_before_it_are_not(self):
+        from data_sheets_schema.runs import requires_request
+        self.assertFalse(requires_request(
+            "2026-08-07_claude-opus-5-claudecode-generic-v3_rep2",
+            "claudecode_agent"))
+
+    def test_the_api_path_is_exempt_because_it_cannot_omit_one(self):
+        """`d4d api run` builds its instruction with `resolve_prompt` and
+        records it in the same process. The asymmetry is the point."""
+        from data_sheets_schema.runs import requires_request
+        self.assertFalse(requires_request("2026-09-01_x_rep1", "rocrate_mapped"))
+        self.assertFalse(requires_request("2026-09-01_x_rep1",
+                                          "rocrate_static_map"))
+
+    def test_an_undated_label_is_subject(self):
+        """A run that cannot say when it happened is a new run for this
+        purpose; the alternative is an exemption anyone can take by accident."""
+        from data_sheets_schema.runs import requires_request
+        self.assertTrue(requires_request("no-date-here_rep1", "claudecode_agent"))
+
+    def test_the_existing_corpus_is_unaffected(self):
+        """Every record on disk predates the cutoff, so adding the rule must
+        not fail a single one."""
+        from data_sheets_schema.runs import discover, requires_request
+        subject = [r for r in discover()
+                   if not r.is_core and not r.deterministic
+                   and requires_request(r.label, r.method)]
+        self.assertEqual([], [r.label for r in subject])

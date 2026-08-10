@@ -1079,7 +1079,15 @@ def validation_block(spec: RunSpec, problems: list[dict[str, str]],
     for name, path in (("full", spec.full_path), ("core", spec.core_path)):
         artifacts[name] = {"path": str(path),
                            "md5": _md5(path) if path.exists() else None}
+    # The schema the verdict was reached against, not only the record it was
+    # reached on. "Validates" is a claim about a record *against a schema*, and
+    # pinning only the artifacts let a verdict survive a schema change that
+    # would have failed it — `validation_status` re-hashed the record, found it
+    # unchanged, and reported VALID for a check that no longer existed (#426).
+    from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA, _sha256
     block: dict[str, Any] = {"passed": not problems, "artifacts": artifacts,
+                             "schema": {"full_sha256": _sha256(FULL_SCHEMA),
+                                        "core_sha256": _sha256(CORE_SCHEMA)},
                              "recorded_by": recorded_by}
     if problems:
         block["problems"] = problems
