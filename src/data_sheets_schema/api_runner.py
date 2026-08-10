@@ -34,7 +34,7 @@ import re
 import subprocess
 import time
 from dataclasses import dataclass, field
-from functools import lru_cache
+from functools import cached_property, lru_cache
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -219,6 +219,25 @@ class RunSpec:
     # Anthropic)" into a Claude Code header, a provider that run never touches.
     provider: str | None = None
 
+    @cached_property
+    def instruction(self) -> str:
+        """The resolved instruction, rendered once per spec.
+
+        `resolve_prompt` was called at send time and again when the provenance
+        record was built after the last phase. It reads `provider_identity()`
+        and `_model_settings()`, so anything that moved in between — an edited
+        deterministic config, a changed endpoint — would have the record attest
+        a prompt that was never sent.
+
+        That is the same failure `run_date` is frozen to avoid, and the comment
+        there says so: recomputing per call "made the provenance digest, which
+        is computed after the last phase, attest a prompt that was never sent".
+        A six-phase run takes tens of minutes, which is long enough for it to
+        happen. Resolving once closes it for the whole spec rather than for one
+        field of it.
+        """
+        return resolve_prompt(self)
+
     @property
     def full_path(self) -> Path:
         if self.out_dir:
@@ -312,7 +331,7 @@ def resolved_prompt_digest(spec: RunSpec) -> dict[str, Any]:
     their recorded prompt evidence. Substitution is exactly what makes the file
     and the request different objects, so the request needs its own hash.
     """
-    text = resolve_prompt(spec)
+    text = spec.instruction
     return {"sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
             "bytes": len(text.encode("utf-8"))}
 
@@ -523,7 +542,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     # that document instead of answering: ten consecutive core-phase attempts
     # produced a mid-record fragment growing an `extension_mechanism` slot.
     parts: list[dict[str, Any]] = list(cached)
-    parts.append({"type": "text", "text": resolve_prompt(spec)})
+    parts.append({"type": "text", "text": spec.instruction})
     for name, text in carry.items():
         parts.append({"type": "text",
                       "text": f"# {name}\n\n{text}"})
@@ -1669,7 +1688,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # The API path builds its instruction with `resolve_prompt`, so it can
         # record exactly what it sent rather than only what it was built from
         # (#419). `prompt_request_hash` was written for this and had no caller.
-        prompt_request=resolve_prompt(spec),
+        prompt_request=spec.instruction,
         schema_digest_md5=schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
         extra_notes=[
             (f"Generated via {RUNTIME}; temperature {settings['temperature']} "

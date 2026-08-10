@@ -114,3 +114,39 @@ class TestTheCommand(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheInstructionIsResolvedOnce(unittest.TestCase):
+    """Raised reviewing #425.
+
+    `resolve_prompt` was called at send time and again when the provenance
+    record was built after the last phase. It reads `provider_identity()` and
+    `_model_settings()`, so anything moving in between would have the record
+    attest a prompt that was never sent — the same failure `run_date` is frozen
+    to avoid, on a six-phase run that takes tens of minutes.
+    """
+
+    def test_the_same_spec_returns_the_same_object(self):
+        s = _spec(runtime="Claude Code")
+        self.assertIs(s.instruction, s.instruction)
+
+    def test_it_does_not_re_read_the_environment(self):
+        """The record is built after the phases; if settings moved in between,
+        re-rendering would attest something else."""
+        import data_sheets_schema.api_runner as ar
+        s = _spec(runtime="Claude Code")
+        first = s.instruction
+        original = ar._model_settings
+        ar._model_settings = lambda: {"name": "SOME-OTHER-MODEL",
+                                      "temperature": 0.0}
+        try:
+            self.assertEqual(first, s.instruction)
+            self.assertNotIn("SOME-OTHER-MODEL", s.instruction)
+        finally:
+            ar._model_settings = original
+
+    def test_a_different_spec_resolves_separately(self):
+        a = _spec(runtime="Claude Code")
+        b = _spec(runtime="Codex CLI")
+        self.assertNotEqual(a.instruction, b.instruction)
+        self.assertIn("Codex CLI", b.instruction)
