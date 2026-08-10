@@ -4359,7 +4359,7 @@ Scroll Up
 
 FILE: cm4ai_org_data-releases_row11.txt
 PATH: data/preprocessed/individual/CM4AI/cm4ai_org_data-releases_row11.txt
-SIZE: 4633 bytes
+SIZE: 4299 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -4368,7 +4368,6 @@ Source ID: data_release_documentation
 Source type: documentation
 Source URL: https://cm4ai.org/data-releases/
 Raw file: data/raw/CM4AI/cm4ai_org_data-releases_row11.html
-Curation note: The page labels HIGT4C as the June 2026 release but displays June 17, 2025. Official Dataverse metadata reports publication date 2026-06-17 and version 2 release time 2026-07-15T20:28:19Z. The input sheet still selects the older K7TGEM release; the HIGT4C release itself is now captured as june_2026_dataverse_release.
 Verification URL: https://dataverse.lib.virginia.edu/api/datasets/:persistentId/?persistentId=doi:10.18130/V3/HIGT4C
 --------------------------------------------------------------------------------
 Data Releases – Cell Maps For AI (CM4AI)
@@ -4742,7 +4741,7 @@ Font Awesome
 
 FILE: dataverse_10.18130_V3_B35XWX_row16.txt
 PATH: data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_B35XWX_row16.txt
-SIZE: 28084 bytes
+SIZE: 27868 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -4751,7 +4750,6 @@ Source ID: march_2025_dataverse_release
 Source type: historical data release
 Source URL: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX
 Raw file: data/raw/CM4AI/dataverse_10.18130_V3_B35XWX_row16.html
-Curation note: Historical supplement retained because the current release page only names the March 2025 release; it does not preserve this release's DOI, file inventory, checksums, composition, or version metadata.
 --------------------------------------------------------------------------------
 Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta) - Cell Maps for Artificial Intelligence
 Skip to main content
@@ -5364,7 +5362,7 @@ Cancel
 
 FILE: dataverse_10.18130_V3_F3TD5R_row19.txt
 PATH: data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_F3TD5R_row19.txt
-SIZE: 29830 bytes
+SIZE: 29599 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -5373,7 +5371,6 @@ Source ID: june_2025_dataverse_release
 Source type: historical data release
 Source URL: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R
 Raw file: data/raw/CM4AI/dataverse_10.18130_V3_F3TD5R_row19.html
-Curation note: Historical supplement retained because the current release page only names the June 2025 release; it does not preserve this release's DOI, revision notes, file inventory, checksums, composition, or version metadata.
 --------------------------------------------------------------------------------
 Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta) - Cell Maps for Artificial Intelligence
 Skip to main content
@@ -6170,7 +6167,7 @@ Cancel
 
 FILE: dataverse_10.18130_V3_K7TGEM_row16.txt
 PATH: data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_K7TGEM_row16.txt
-SIZE: 29561 bytes
+SIZE: 29429 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -6179,7 +6176,6 @@ Source ID: october_2025_dataverse_release
 Source type: data resource
 Source URL: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/K7TGEM
 Raw file: data/raw/CM4AI/dataverse_10.18130_V3_K7TGEM_row16.html
-Curation note: Sheet-selected release, superseded upstream by the June 2026 HIGT4C release captured as june_2026_dataverse_release.
 --------------------------------------------------------------------------------
 Cell Maps for Artificial Intelligence - October 2025 Data Release (Beta) - Cell Maps for Artificial Intelligence
 Skip to main content
@@ -7006,7 +7002,7 @@ Cancel
 
 FILE: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
 PATH: data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
-SIZE: 28252 bytes
+SIZE: 27901 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -7015,7 +7011,6 @@ Source ID: june_2026_dataverse_release
 Source type: data resource
 Source URL: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C
 Raw file: data/raw/CM4AI/dataverse_10.18130_V3_HIGT4C_2026-07-24.html
-Curation note: Current CM4AI data release, DOI 10.18130/V3/HIGT4C, version 2.0, publication date 2026-06-17, version 2 released 2026-07-15T20:28:19Z, 10 files. Added because the release page and the input sheet did not supply a processed record for this release; it was previously represented only by a verification URL on data_release_documentation.
 Verification URL: https://dataverse.lib.virginia.edu/api/datasets/:persistentId/?persistentId=doi:10.18130/V3/HIGT4C
 --------------------------------------------------------------------------------
 Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta) - Cell Maps for Artificial Intelligence

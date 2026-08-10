@@ -229,7 +229,13 @@ projects:
         self.assertTrue(output.exists())
         output_text = output.read_text()
         self.assertIn("Source URL: https://example.org/docs", output_text)
-        self.assertIn("Curation note: Verified source note", output_text)
+        # #421: the curation note must NOT reach the bundle. It is manifest
+        # metadata addressed to a curator, and writing it here put
+        # conflict-resolution guidance ("prefer this over X where the two
+        # disagree") and, for AI-READI, a DOI that appears in no source
+        # document in front of the model. It stays in source_manifest.yaml.
+        self.assertNotIn("Curation note:", output_text)
+        self.assertNotIn("Verified source note", output_text)
         self.assertIn(
             "Verification URL: https://example.org/verification",
             output_text,

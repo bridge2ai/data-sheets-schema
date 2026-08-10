@@ -4,7 +4,6 @@ Source ID: fairhub_dataset_v3_api
 Source type: structured metadata
 Source URL: https://fairhub.io/api/datasets/3
 Raw file: data/raw/AI_READI/fairhub_api_dataset_3_2026-07-27.json
-Curation note: Structured metadata behind the FAIRhub record for dataset v3.0.0, served as JSON by the site's API. Added because fairhub.io is a JavaScript application whose static HTML capture (fairhub_dataset_v3) yields only ~1.3 KB; the substantive content is API-only. Both entries are retained: the HTML capture corroborates the human-facing URL and version list, this one carries the content. Sections: healthsheet (84 questions, 81 answered, covering motivation, composition, collection, preprocessing, labeling, uses, distribution, and maintenance), studyDescription, readme, datasetDescription, and datasetStructureDescription. The last of these is a file/directory inventory of roughly 48 KB and carries little descriptive content; treat it as low-value bulk rather than evidence. Note that the healthsheet is itself a datasheet-style artifact, so material drawn from it is closer to transcription than extraction; see notes/D4D_GENERATION_ARMS.md.
 Verification URL: https://doi.org/10.60775/fairhub.3
 --------------------------------------------------------------------------------
 {

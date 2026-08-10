@@ -2196,7 +2196,7 @@ Address;Affect;Artificial Intelligence;Asian;Atlases;Awareness;Behavioral;Black 
 
 FILE: docs_aireadi_org_docs-2_row10.txt
 PATH: data/preprocessed/individual/AI_READI/docs_aireadi_org_docs-2_row10.txt
-SIZE: 4983 bytes
+SIZE: 4734 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -2205,7 +2205,6 @@ Source ID: dataset_documentation
 Source type: documentation
 Source URL: https://docs.aireadi.org/docs/2/about
 Raw file: data/raw/AI_READI/docs_aireadi_org_docs-2_row10.html
-Curation note: This is the documentation for dataset v2.0.0 and is the version the input sheet selects. It is superseded upstream by the v3.0.0 documentation captured as dataset_documentation_v3; retain it only as evidence about the v2.0.0 release.
 --------------------------------------------------------------------------------
 About | Documentation for the AI-READI Dataset
 Skip to main content
@@ -2289,7 +2288,7 @@ This repository is under review for potential modification in compliance with Ad
 
 FILE: docs_aireadi_org_docs-3_2026-07-24.txt
 PATH: data/preprocessed/individual/AI_READI/docs_aireadi_org_docs-3_2026-07-24.txt
-SIZE: 4948 bytes
+SIZE: 4638 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -2298,7 +2297,6 @@ Source ID: dataset_documentation_v3
 Source type: documentation
 Source URL: https://docs.aireadi.org/docs/3/about
 Raw file: data/raw/AI_READI/docs_aireadi_org_docs-3_2026-07-24.html
-Curation note: Current dataset documentation. The docs site's version selector defaults to Dataset v3.0.0 (page last updated 2026-06-04), while the input sheet still selects the v2 documentation. Added so the corpus describes the current release; prefer this over dataset_documentation where the two disagree.
 --------------------------------------------------------------------------------
 About | Documentation for the AI-READI Dataset
 Skip to main content
@@ -2376,7 +2374,7 @@ This repository is under review for potential modification in compliance with Ad
 
 FILE: AI-READI-LICENSE-v1.0_row11.txt
 PATH: data/preprocessed/individual/AI_READI/AI-READI-LICENSE-v1.0_row11.txt
-SIZE: 9709 bytes
+SIZE: 9576 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -2385,7 +2383,6 @@ Source ID: dataset_license
 Source type: license
 Source URL: https://zenodo.org/records/10642459/files/AI-READI-LICENSE-v1.0.pdf?download=1
 Raw file: data/raw/AI_READI/AI-READI-LICENSE-v1.0_row11.pdf
-Curation note: The Zenodo record DOI is retained explicitly because an older DOI-only extraction carried this identifier separately.
 Verification URL: https://doi.org/10.5281/zenodo.10642459
 --------------------------------------------------------------------------------
 UNIVERSITY OF WASHINGTON (“Licensor”)
@@ -2530,7 +2527,7 @@ assigns.
 
 FILE: fairhub_dataset_2_row12.txt
 PATH: data/preprocessed/individual/AI_READI/fairhub_dataset_2_row12.txt
-SIZE: 2009 bytes
+SIZE: 1631 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -2539,7 +2536,6 @@ Source ID: fairhub_dataset
 Source type: data resource
 Source URL: https://fairhub.io/datasets/2
 Raw file: data/raw/AI_READI/fairhub_dataset_2_row12.html
-Curation note: FAIRhub record for dataset v2.0.0 (2.01 TB, 165,051 files) and the version the input sheet selects, in two separate cells. The page itself states "This version of the dataset is no longer accessible. Please refer to the latest version." Superseded upstream by the v3.0.0 record captured as fairhub_dataset_v3; retain it only as evidence about the v2.0.0 release.
 --------------------------------------------------------------------------------
 Flagship Dataset of Type 2 Diabetes from the AI-READI Project
 FAIRhub
@@ -2610,7 +2606,7 @@ This repository is under review for potential modification in compliance with Ad
 
 FILE: fairhub_dataset_3_2026-07-24.txt
 PATH: data/preprocessed/individual/AI_READI/fairhub_dataset_3_2026-07-24.txt
-SIZE: 2297 bytes
+SIZE: 1624 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -2619,7 +2615,6 @@ Source ID: fairhub_dataset_v3
 Source type: data resource
 Source URL: https://fairhub.io/datasets/3
 Raw file: data/raw/AI_READI/fairhub_dataset_3_2026-07-24.html
-Curation note: Current FAIRhub record, dataset v3.0.0, DOI 10.60775/fairhub.3, published 2025-11-17, 3.82 TB across 356,343 files. Added because the input sheet still selects the v2.0.0 record, which FAIRhub marks as no longer accessible; prefer this over fairhub_dataset where the two disagree. Note that FAIRhub is a JavaScript application, so static capture yields only ~1.3 KB of text; treat this source as corroborating identity, size, license, and keywords rather than as a substantive description. FAIRhub record 4 is a distinct "Mini Version" (100 participants, DOI 10.60775/fairhub.4) for pipeline development, not a version of this dataset, and was not captured.
 Verification URL: https://doi.org/10.60775/fairhub.3
 --------------------------------------------------------------------------------
 Flagship Dataset of Type 2 Diabetes from the AI-READI Project
@@ -2685,7 +2680,7 @@ This repository is under review for potential modification in compliance with Ad
 
 FILE: fairhub_api_dataset_3_2026-07-27.txt
 PATH: data/preprocessed/individual/AI_READI/fairhub_api_dataset_3_2026-07-27.txt
-SIZE: 168488 bytes
+SIZE: 167529 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -2694,7 +2689,6 @@ Source ID: fairhub_dataset_v3_api
 Source type: structured metadata
 Source URL: https://fairhub.io/api/datasets/3
 Raw file: data/raw/AI_READI/fairhub_api_dataset_3_2026-07-27.json
-Curation note: Structured metadata behind the FAIRhub record for dataset v3.0.0, served as JSON by the site's API. Added because fairhub.io is a JavaScript application whose static HTML capture (fairhub_dataset_v3) yields only ~1.3 KB; the substantive content is API-only. Both entries are retained: the HTML capture corroborates the human-facing URL and version list, this one carries the content. Sections: healthsheet (84 questions, 81 answered, covering motivation, composition, collection, preprocessing, labeling, uses, distribution, and maintenance), studyDescription, readme, datasetDescription, and datasetStructureDescription. The last of these is a file/directory inventory of roughly 48 KB and carries little descriptive content; treat it as low-value bulk rather than evidence. Note that the healthsheet is itself a datasheet-style artifact, so material drawn from it is closer to transcription than extraction; see notes/D4D_GENERATION_ARMS.md.
 Verification URL: https://doi.org/10.60775/fairhub.3
 --------------------------------------------------------------------------------
 {

@@ -194,10 +194,27 @@ def preprocess_manifest(
                     f"Source URL: {entry.get('url', '')}",
                     f"Raw file: {source_path}",
                 ]
-                if entry.get("curation_note"):
-                    metadata.append(
-                        f"Curation note: {entry['curation_note']}"
-                    )
+                # `curation_note` is deliberately NOT written here (#421).
+                #
+                # It is manifest metadata addressed to a curator, and putting it
+                # in the bundle put it in front of the model instead. Two things
+                # followed. It instructs — "prefer this over X where the two
+                # disagree", "retain it only as evidence about the v2.0.0
+                # release" — which is conflict-resolution guidance arriving
+                # through the input rather than through the prompt condition.
+                # And it asserts dataset facts: VOICE's note stated "published
+                # 2026-05-01, 833 participants", so a record could take 833 from
+                # the curator rather than from PhysioNet and still be scored
+                # grounded, because the string was in the bundle.
+                #
+                # The volume was also unequal — six notes for AI_READI against
+                # one for CHORUS — so the arm that is supposed to isolate what
+                # the documents alone support gave different editorial support
+                # per project.
+                #
+                # The notes remain in `source_manifest.yaml`, which is where the
+                # reasoning belongs and where `d4d download audit-manifest`
+                # reads it.
                 if entry.get("verification_url"):
                     metadata.append(
                         f"Verification URL: {entry['verification_url']}"
