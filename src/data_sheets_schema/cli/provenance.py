@@ -41,6 +41,17 @@ def record(project, method, label, input_bundle, prompts):
                        prompt_paths=[Path(p) for p in prompts] or None)
     out = rec.write(record_path_for(project, method, label))
     click.echo(f"✓ {out}")
+    # Say what happened to any prior verdict. Re-recording used to delete it
+    # silently and the run then failed `--strict` with "nothing to verify",
+    # while this command printed a tick and exited 0 (#396).
+    if rec.validation_carried is True:
+        click.echo("  validation: carried forward — the artifacts it names "
+                   "still hash to what it recorded")
+    elif rec.validation_carried is False:
+        click.echo("  ⚠️  validation: dropped — the artifacts changed since it "
+                   "was recorded, so the verdict is about bytes that no longer "
+                   "exist.\n      Re-run `d4d runs validate --label "
+                   f"{label} --project {project}` before `d4d runs check`.")
 
 
 @provenance.command()
