@@ -828,6 +828,51 @@ def check_replicate(method: str, config: str, new_label: str, project: str,
             "input_unverified_against": input_unknown or None}
 
 
+def condition_from_label(label: str) -> str | None:
+    """The prompt condition a label *claims*, or None if it names none.
+
+    Labels spell it with hyphens — `..._claudecode-generic-v3_rep2` — while
+    `CONDITION_PROMPTS` keys use underscores, so the two are compared in one
+    spelling. Derived from the registry rather than a hardcoded chain, for the
+    reason `condition_of` records: a written-out list knew only v1, v2 and
+    tuned, and every v3 and v4 run fell through it silently (#340).
+    """
+    from data_sheets_schema.api_runner import CONDITION_PROMPTS
+
+    hay = label.replace("_", "-").lower()
+    # Longest first: `generic` is a prefix of `generic-v3`, so a shortest-first
+    # scan would answer `generic` for every versioned label — which is exactly
+    # the mismatch this function exists to detect, reported as agreement.
+    for cond in sorted(CONDITION_PROMPTS, key=len, reverse=True):
+        if cond.replace("_", "-") in hay:
+            return cond
+    return None
+
+
+def prompt_condition_mismatch(method: str, label: str, project: str,
+                              concat_dir: Path = CONCAT_DIR) -> str | None:
+    """Whether a run's label and its hashed prompt name the same condition.
+
+    The 2026-08-07 sweep is labelled `generic-v3` and hashes
+    `d4d_generic_arm_prompt.md`, which is v1 (#420). v3 adds seven decision
+    rules over v1, so the two are different conditions and the label is the
+    only place the v3 claim exists — an assertion by whoever typed it.
+
+    Returns a description when they disagree, None when they agree or when
+    either cannot be determined. Silence on "cannot determine" is deliberate:
+    labels predating the convention name no condition, and failing them would
+    punish records for a rule that postdates them.
+    """
+    claimed = condition_from_label(label)
+    recorded = condition_of(method, label, project, concat_dir)
+    if not claimed or not recorded or claimed == recorded:
+        return None
+    from data_sheets_schema.api_runner import CONDITION_PROMPTS
+    return (f"label claims {claimed!r} but the hashed prompt is "
+            f"{recorded!r} ({CONDITION_PROMPTS[recorded].name}); "
+            "the two are different conditions")
+
+
 def condition_of(method: str, label: str, project: str,
                  concat_dir: Path = CONCAT_DIR) -> str | None:
     """The prompt condition a run recorded, read from its provenance prompts."""
