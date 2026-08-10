@@ -227,6 +227,21 @@ def validation_status(method: str, label: str, project: str,
             if ok is False:
                 return STALE
 
+    # And a verdict is about a schema. Pinning only the artifacts let one
+    # survive a schema change that would have failed it: the record was
+    # unchanged, so it reported VALID for a check that no longer existed
+    # (#426). Verdicts written before the pin carry no schema block and are
+    # left alone — absent is not stale, and failing them would discard every
+    # verdict in the corpus to enforce a rule that postdates them.
+    from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA, _sha256
+    pinned = v.get("schema")
+    if isinstance(pinned, dict):
+        for key, path in (("full_sha256", FULL_SCHEMA),
+                          ("core_sha256", CORE_SCHEMA)):
+            recorded = pinned.get(key)
+            if recorded and _sha256(path) != recorded:
+                return STALE
+
     return VALID if v["passed"] else INVALID
 
 
@@ -356,6 +371,45 @@ LIVE_REQUIRED_FROM = "2026-07-30"
 # from the requirement — an exemption anyone can take by writing one. The
 # unparseable case was already handled; this closes the parseable-nonsense case.
 EARLIEST_PLAUSIBLE_RUN = "2024-01-01"
+
+
+#: From this date an agentic run must record the instruction it was sent, not
+#: only the file it was built from. Dated rather than corpus-wide, for the same
+#: reason `LIVE_REQUIRED_FROM` is: 158 records predate the field, and failing
+#: them retroactively would discard placeable evidence to enforce a rule that
+#: postdates them (#419).
+#:
+#: Today rather than tomorrow. A cutoff set a day ahead leaves a window in
+#: which a run escapes the rule for no reason, and there was nothing to
+#: protect: no run is labelled 2026-08-10 or later, and none is in flight, so
+#: taking effect immediately fails nothing that exists.
+REQUEST_REQUIRED_FROM = "2026-08-10"
+
+
+def requires_request(label: str, method: str) -> bool:
+    """Whether this run must record the instruction it was sent.
+
+    Agentic methods only. `d4d api run` builds its instruction with
+    `resolve_prompt` and records it in the same process, so it cannot omit one;
+    the agentic path can, because the launcher is a person or another agent and
+    `--prompt-text` is a flag they may simply not pass. That asymmetry is the
+    whole reason this requirement exists on one path and not the other.
+
+    Same date-prefix rule as `requires_live`, including that an unparseable
+    label counts as subject: a run that cannot say when it happened is a new
+    run for this purpose.
+    """
+    # Every agentic layout starts with this prefix — `_crate`, `_crate_only`,
+    # `_healthsheet` and the `_core` companions are all variants of it.
+    if not method.startswith("claudecode_agent"):
+        return False
+    m = re.match(r"(\d{4}-\d{2}-\d{2})", label or "")
+    if not m:
+        return True
+    dated = m.group(1)
+    if dated < EARLIEST_PLAUSIBLE_RUN:
+        return True
+    return dated >= REQUEST_REQUIRED_FROM
 
 
 def requires_live(label: str) -> bool:

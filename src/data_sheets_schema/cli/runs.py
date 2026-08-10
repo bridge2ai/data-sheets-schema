@@ -313,6 +313,7 @@ def check_cmd(method, label, project, strict):
     from data_sheets_schema.runs import (check_provenance, discover,
                                          is_complete,
                                          prompt_condition_mismatch,
+                                         requires_request,
                                          verify_request)
 
     rows = []
@@ -336,7 +337,17 @@ def check_cmd(method, label, project, strict):
                 mismatches.append({"project": proj, "label": run.label,
                                    "reason": m})
             st, why = verify_request(run.method, run.label, proj)
-            if st in ("mismatch", "unverifiable"):
+            if st == "absent" and requires_request(run.label, run.method):
+                # Silent before the cutoff, required after it. The gate is
+                # otherwise opt-in by omission: an agentic launcher that simply
+                # does not pass --prompt-text records nothing, and nothing says
+                # so (#419).
+                requests.append({"project": proj, "label": run.label,
+                                 "status": "missing",
+                                 "reason": ("no instruction recorded; render it "
+                                            "with `d4d api render-prompt --out` "
+                                            "and pass `--prompt-text`")})
+            elif st in ("mismatch", "unverifiable"):
                 requests.append({"project": proj, "label": run.label,
                                  "status": st, "reason": why})
 
@@ -366,7 +377,8 @@ def check_cmd(method, label, project, strict):
     # detectable rather than merely discouraged. Fatal under --strict, because
     # unlike the label mismatch this is a claim about a run being made now:
     # every record carrying a request hash was written after the field existed.
-    bad_requests = [r for r in requests if r["status"] == "mismatch"]
+    bad_requests = [r for r in requests
+                    if r["status"] in ("mismatch", "missing")]
     if requests:
         click.echo(f"\n{len(requests)} run(s) whose recorded instruction could "
                    "not be confirmed against its spec:")
