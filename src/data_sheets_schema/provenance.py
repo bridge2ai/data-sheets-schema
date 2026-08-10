@@ -648,6 +648,23 @@ def build_record(project: str, method: str, label: str, *, mode: str,
             "reason": "manifest has been edited since this run",
         })
 
+    # ---- agent playbooks -------------------------------------------------
+    # Hashed only for a live record. A reconstructed one is assembled today,
+    # and today's `.claude/` content is not what a historical run followed —
+    # recording it would be the fabricated provenance claim this module's
+    # docstring forbids, in the same shape as hashing a since-refreshed bundle
+    # and attributing it to an April run. Raised reviewing #420.
+    if mode == "live":
+        playbooks = playbook_facts()
+    else:
+        playbooks = None
+        unrecoverable.append({
+            "field": "playbooks",
+            "reason": ("the instruction files a past run followed cannot be "
+                       "recovered; today's .claude/ content is not evidence "
+                       "about it"),
+        })
+
     # ---- model identity ------------------------------------------------
     model = {k.lower().replace(" ", "_"): v for k, v in header.items()
              if k in ("Generation Method", "Agent runtime", "Provider", "Model",
@@ -715,7 +732,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                 "replicate": _replicate_for(label)},
         "model": model or None,
         "prompts": prompt_facts(prompt_paths, prompt_request),
-        "playbooks": playbook_facts(),
+        "playbooks": playbooks,
         "schema": schema_facts() | (
             {"digest_md5": schema_digest_md5} if schema_digest_md5 else {}),
         "software": software_facts() if mode == "live" else {

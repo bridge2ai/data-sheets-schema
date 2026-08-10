@@ -7,6 +7,7 @@ existed — an assertion by whoever typed it, checkable by nothing.
 """
 
 import unittest
+from pathlib import Path
 
 from data_sheets_schema.runs import (condition_from_label,
                                      prompt_condition_mismatch)
@@ -99,3 +100,46 @@ class TestPlaybooksAreHashed(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPlaybooksAreNotFabricatedForOldRuns(unittest.TestCase):
+    """Raised reviewing #420, against my own change.
+
+    `playbook_facts()` was called unconditionally in `build_record`, so
+    `d4d provenance backfill` — which builds `mode="reconstructed"` records —
+    would have hashed *today's* `.claude/` content and recorded it as what a
+    historical run followed.
+
+    That is exactly the claim this module's docstring forbids: "hashing them
+    today and recording that against an April run would be a fabricated
+    provenance claim. Such fields are listed under `unrecoverable` with the
+    reason, never silently filled."
+    """
+
+    LABEL = "2026-08-07_claude-opus-5-claudecode-generic-v3_rep2"
+    BUNDLE = Path("data/preprocessed/concatenated/VOICE_preprocessed.txt")
+
+    def _record(self, mode, **kw):
+        from data_sheets_schema.provenance import build_record
+        return build_record("VOICE", "claudecode_agent", self.LABEL,
+                            mode=mode, **kw).data
+
+    def test_a_live_record_hashes_them(self):
+        if not self.BUNDLE.exists():
+            self.skipTest("bundles not present")
+        d = self._record("live", input_bundle=self.BUNDLE, input_verified=True)
+        self.assertEqual(3, len(d["playbooks"]["files"]))
+
+    def test_a_reconstructed_record_does_not(self):
+        d = self._record("reconstructed")
+        self.assertIsNone(d["playbooks"])
+
+    def test_and_says_why_rather_than_omitting_the_field(self):
+        """Absent with no reason reads as "this run had none", which is a
+        different and false claim."""
+        d = self._record("reconstructed")
+        fields = {u["field"] for u in d["unrecoverable"]}
+        self.assertIn("playbooks", fields)
+        reason = next(u["reason"] for u in d["unrecoverable"]
+                      if u["field"] == "playbooks")
+        self.assertIn("cannot be recovered", reason)
