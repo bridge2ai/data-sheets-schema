@@ -378,7 +378,12 @@ EARLIEST_PLAUSIBLE_RUN = "2024-01-01"
 #: reason `LIVE_REQUIRED_FROM` is: 158 records predate the field, and failing
 #: them retroactively would discard placeable evidence to enforce a rule that
 #: postdates them (#419).
-REQUEST_REQUIRED_FROM = "2026-08-11"
+#:
+#: Today rather than tomorrow. A cutoff set a day ahead leaves a window in
+#: which a run escapes the rule for no reason, and there was nothing to
+#: protect: no run is labelled 2026-08-10 or later, and none is in flight, so
+#: taking effect immediately fails nothing that exists.
+REQUEST_REQUIRED_FROM = "2026-08-10"
 
 
 def requires_request(label: str, method: str) -> bool:
