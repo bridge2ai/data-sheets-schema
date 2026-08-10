@@ -34,7 +34,7 @@ import re
 import subprocess
 import time
 from dataclasses import dataclass, field
-from functools import lru_cache
+from functools import cached_property, lru_cache
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -206,6 +206,37 @@ class RunSpec:
     # The GitHub assistant writes flat into data/sheets_d4dassistant. Rather than
     # two runners, the layout is a parameter — everything else is identical.
     out_dir: Path | None = None
+    # Which runtime the rendered instruction should declare. Defaults to this
+    # module's own, so the API path is unchanged. It is a parameter because the
+    # agentic path needs the same instruction rendered for `Claude Code`: the
+    # whole point of rendering is that nobody types the header by hand, and a
+    # hardcoded runtime would force exactly that (#419).
+    runtime: str = RUNTIME
+    # Likewise the provider. `provider_identity()` reports the endpoint *this
+    # process* is configured against, which is the right answer for a run this
+    # process is about to make and the wrong one for rendering an instruction
+    # another runtime will execute — it rendered "LBL CBORG (proxy to
+    # Anthropic)" into a Claude Code header, a provider that run never touches.
+    provider: str | None = None
+
+    @cached_property
+    def instruction(self) -> str:
+        """The resolved instruction, rendered once per spec.
+
+        `resolve_prompt` was called at send time and again when the provenance
+        record was built after the last phase. It reads `provider_identity()`
+        and `_model_settings()`, so anything that moved in between — an edited
+        deterministic config, a changed endpoint — would have the record attest
+        a prompt that was never sent.
+
+        That is the same failure `run_date` is frozen to avoid, and the comment
+        there says so: recomputing per call "made the provenance digest, which
+        is computed after the last phase, attest a prompt that was never sent".
+        A six-phase run takes tens of minutes, which is long enough for it to
+        happen. Resolving once closes it for the whole spec rather than for one
+        field of it.
+        """
+        return resolve_prompt(self)
 
     @property
     def full_path(self) -> Path:
@@ -300,7 +331,7 @@ def resolved_prompt_digest(spec: RunSpec) -> dict[str, Any]:
     their recorded prompt evidence. Substitution is exactly what makes the file
     and the request different objects, so the request needs its own hash.
     """
-    text = resolve_prompt(spec)
+    text = spec.instruction
     return {"sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
             "bytes": len(text.encode("utf-8"))}
 
@@ -325,8 +356,8 @@ def resolve_prompt(spec: RunSpec) -> str:
         # headed "Agent runtime: Claude Code" on "claude-opus-5[1m]" because
         # this prompt was written for the agent path and reused verbatim — the
         # artifact asserted a runtime and model it never touched.
-        "{RUNTIME}": RUNTIME,
-        "{PROVIDER}": ident["provider"] or PROVIDER,
+        "{RUNTIME}": spec.runtime,
+        "{PROVIDER}": spec.provider or ident["provider"] or PROVIDER,
         "{MODEL}": settings["name"],
         # v2 introduced `{DATE}` but nothing substituted it, so the literal
         # string reached the model. Its records carry the right date only
@@ -511,7 +542,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     # that document instead of answering: ten consecutive core-phase attempts
     # produced a mid-record fragment growing an `extension_mechanism` slot.
     parts: list[dict[str, Any]] = list(cached)
-    parts.append({"type": "text", "text": resolve_prompt(spec)})
+    parts.append({"type": "text", "text": spec.instruction})
     for name, text in carry.items():
         parts.append({"type": "text",
                       "text": f"# {name}\n\n{text}"})
@@ -1654,6 +1685,10 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         spec.project, spec.method, spec.label, mode="live",
         input_bundle=spec.bundle, input_verified=True,
         prompt_paths=spec.prompt_files,
+        # The API path builds its instruction with `resolve_prompt`, so it can
+        # record exactly what it sent rather than only what it was built from
+        # (#419). `prompt_request_hash` was written for this and had no caller.
+        prompt_request=spec.instruction,
         schema_digest_md5=schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
         extra_notes=[
             (f"Generated via {RUNTIME}; temperature {settings['temperature']} "

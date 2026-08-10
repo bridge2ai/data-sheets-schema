@@ -33,7 +33,8 @@ ARMS = {
 _CONDITIONS = sorted(CONDITION_PROMPTS)
 
 
-def _spec(project, arm, label, condition, bundle=None, out_dir=None):
+def _spec(project, arm, label, condition, bundle=None, out_dir=None,
+          runtime=None, provider=None):
     """Resolve a run spec.
 
     `project` is a free string rather than a click.Choice because the GitHub
@@ -45,10 +46,15 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None):
     display, method, pattern, manifest = ARMS[arm]
     resolved = (Path(bundle) if bundle else
                 Path("data/preprocessed/concatenated") / pattern.format(p=project))
+    kw = {}
+    if runtime:
+        kw["runtime"] = runtime
+    if provider:
+        kw["provider"] = provider
     return RunSpec(project=project, arm=display, method=method,
                    bundle=resolved, label=label, condition=condition,
                    manifest_line=manifest,
-                   out_dir=Path(out_dir) if out_dir else None)
+                   out_dir=Path(out_dir) if out_dir else None, **kw)
 
 
 def _require_bundle(spec, project, bundle):
@@ -63,6 +69,61 @@ def _require_bundle(spec, project, bundle):
 @click.group()
 def api():
     """Generate D4D records via the Anthropic API (six-phase)."""
+
+
+@api.command("render-prompt")
+@click.option("--project", required=True,
+              help="AI_READI|CHORUS|CM4AI|VOICE, or any dataset name with --bundle")
+@click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
+              show_default=True)
+@click.option("--label", required=True, help="run label")
+@click.option("--condition", type=click.Choice(_CONDITIONS), default="generic",
+              show_default=True)
+@click.option("--bundle", type=click.Path(), default=None,
+              help="explicit input bundle; required for datasets outside PROJECTS")
+@click.option("--runtime", default="Claude Code", show_default=True,
+              help="runtime the instruction should declare")
+@click.option("--provider", default="Anthropic", show_default=True)
+@click.option("--out", type=click.Path(), default=None,
+              help="write the instruction here as well as printing its digest")
+def render_prompt_cmd(project, arm, label, condition, bundle, runtime,
+                      provider, out):
+    """Render the exact instruction a run should receive, for any runtime.
+
+    The API path never types an instruction: `resolve_prompt()` builds it from
+    the spec, so the condition, the substitutions and the per-project content
+    are all functions of declared inputs. The agentic path had no way to obtain
+    that text, so its launch prompts were hand-composed — and the VOICE run of
+    2026-08-07 was sent a project-specific scope paragraph that appears in no
+    prompt file, while its provenance recorded the base file and the header
+    said "identical for all projects" (#419, #422).
+
+    Rendering closes that by construction rather than by discipline. Per-project
+    content can then only enter through `--condition tuned`, which is a declared
+    door that the record names.
+
+    The digest is of the resolved text, not the file. Substitution is what makes
+    the two different objects, which is why `prompt_request_hash` exists.
+    """
+    import hashlib
+    from data_sheets_schema.api_runner import resolve_prompt
+
+    spec = _spec(project, arm, label, condition, bundle,
+                 runtime=runtime, provider=provider)
+    _require_bundle(spec, project, bundle)
+    text = resolve_prompt(spec)
+    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+    if out:
+        Path(out).write_text(text, encoding="utf-8")
+        click.echo(f"✓ {out}", err=True)
+    click.echo(f"# rendered {condition} for {project} / {arm} / runtime={runtime}",
+               err=True)
+    click.echo(f"# sha256 {digest}  ({len(text.encode('utf-8'))} bytes)", err=True)
+    click.echo(f"# record it with: d4d provenance record ... --prompt-text <file>",
+               err=True)
+    if not out:
+        click.echo(text)
 
 
 @api.command("plan")

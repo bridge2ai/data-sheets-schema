@@ -107,25 +107,49 @@ def load_generation_config(path: Path = DETERMINISTIC_CONFIG) -> dict[str, Any]:
         return {}
 
 
-def prompt_facts(prompt_paths: list[Path] | None) -> dict[str, Any]:
-    """Hash every prompt file a run consumed.
+def prompt_facts(prompt_paths: list[Path] | None,
+                 request_text: str | None = None) -> dict[str, Any]:
+    """Hash every prompt file a run consumed, and the instruction it was sent.
 
     The prompt is a generation input as much as the bundle is, and until now it
     was the one input this record did not name. A condition whose prompt cannot
     be identified cannot be replicated — which is exactly why the 2026-07-27
     tuned prompts, written inline and never saved, are unreproducible.
+
+    **The file is not the instruction.** Substitution turns one into the other,
+    and on the agentic path a human turned it into something else again: the
+    VOICE run of 2026-08-07 was sent a project-specific scope paragraph that
+    appears in no prompt file, while this block recorded the file and the
+    record header said "identical for all projects" (#419).
+
+    So `request` records the resolved text as sent. Both are kept — knowing
+    what an instruction was built from and what it became is the useful pair,
+    and a mismatch between them is the thing worth being able to detect. The
+    text itself is not stored, only its hash and length; the point is to be
+    able to prove sameness, and a record is not an archive.
     """
     if not prompt_paths:
-        return {"paths": None,
-                "note": ("no prompt files declared; the prompt was supplied "
-                         "inline and is not recoverable from this record")}
-    out = []
-    for p in prompt_paths:
-        p = Path(p)
-        out.append({"path": str(p), "sha256": _sha256(p),
-                    "bytes": p.stat().st_size if p.exists() else None,
-                    "exists": p.exists()})
-    return {"hash_algorithm": PROMPT_HASH, "files": out}
+        facts: dict[str, Any] = {
+            "paths": None,
+            "note": ("no prompt files declared; the prompt was supplied "
+                     "inline and is not recoverable from this record")}
+    else:
+        out = []
+        for p in prompt_paths:
+            p = Path(p)
+            out.append({"path": str(p), "sha256": _sha256(p),
+                        "bytes": p.stat().st_size if p.exists() else None,
+                        "exists": p.exists()})
+        facts = {"hash_algorithm": PROMPT_HASH, "files": out}
+
+    if request_text is not None:
+        facts["request"] = {
+            "sha256": hashlib.sha256(request_text.encode("utf-8")).hexdigest(),
+            "bytes": len(request_text.encode("utf-8")),
+            "note": ("the instruction as sent, after substitution; the files "
+                     "above are what it was built from"),
+        }
+    return facts
 
 
 def _run(cmd: list[str]) -> str | None:
@@ -529,6 +553,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  input_verified: bool = False,
                  concat_dir: Path = CONCAT_DIR,
                  prompt_paths: list[Path] | None = None,
+                 prompt_request: str | None = None,
                  schema_digest_md5: str | None = None,
                  extra_notes: list[str] | None = None) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
@@ -656,7 +681,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                 "arm": _arm_for(base),
                 "replicate": _replicate_for(label)},
         "model": model or None,
-        "prompts": prompt_facts(prompt_paths),
+        "prompts": prompt_facts(prompt_paths, prompt_request),
         "schema": schema_facts() | (
             {"digest_md5": schema_digest_md5} if schema_digest_md5 else {}),
         "software": software_facts() if mode == "live" else {
