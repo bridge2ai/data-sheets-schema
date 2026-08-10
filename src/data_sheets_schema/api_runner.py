@@ -219,6 +219,21 @@ class RunSpec:
     # Anthropic)" into a Claude Code header, a provider that run never touches.
     provider: str | None = None
 
+    def render_spec(self) -> dict[str, Any]:
+        """Everything `resolve_prompt` reads, for the record to keep.
+
+        A record that stores only the resolved hash can say the instruction
+        changed but not what it should have been. Storing the spec beside it
+        lets `verify_request()` re-render and compare, which is what turns
+        "do not intervene" from a rule into something detectable (#420).
+        """
+        return {"condition": self.condition, "arm": self.arm,
+                "manifest_line": self.manifest_line, "run_date": self.run_date,
+                "runtime": self.runtime,
+                "provider": self.provider or provider_identity()["provider"]
+                or PROVIDER,
+                "bundle": str(self.bundle)}
+
     @cached_property
     def instruction(self) -> str:
         """The resolved instruction, rendered once per spec.
@@ -1689,6 +1704,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # record exactly what it sent rather than only what it was built from
         # (#419). `prompt_request_hash` was written for this and had no caller.
         prompt_request=spec.instruction,
+        prompt_request_spec=spec.render_spec(),
         schema_digest_md5=schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
         extra_notes=[
             (f"Generated via {RUNTIME}; temperature {settings['temperature']} "
