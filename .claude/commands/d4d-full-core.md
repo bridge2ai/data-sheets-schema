@@ -477,7 +477,17 @@ and it marks what it cannot recover rather than filling it in.
   closing rows were appended, and a whole series was hashed before its headers
   were edited. The API path cannot do this, because it writes provenance
   in-process after every phase; running the check gives this path the same
-  property. Re-run `d4d runs validate` and check again if anything changed.
+  property.
+
+  **Re-recording no longer discards the verdict** (#396). `provenance record`
+  used to rewrite the file from scratch and delete the `validation:` block that
+  `d4d runs validate` had written, so a re-record silently failed the gate while
+  printing a tick. It now carries the block forward when every artifact it names
+  still hashes to what it recorded, and drops it with a warning naming the
+  follow-up command when one does not. So the sequence is no longer
+  order-critical: record and validate in either order, and re-record freely.
+  Still run `d4d runs validate` once after the artifacts are final, because a
+  run that has never been validated has no verdict to carry.
 - Final summary to the user: per project, report full/core line counts as
   informational metadata, never as a quality gate, plus validation status.
 

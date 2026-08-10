@@ -307,16 +307,97 @@ def verify_entry(entry: dict[str, Any]) -> bool | None:
     return hash_file(Path(path), algo) == value
 
 
+def preservable_validation(path: Path,
+                           new_data: dict[str, Any]) -> dict[str, Any] | None:
+    """A prior `validation:` block that a re-record may keep, or None.
+
+    `record` rewrites the file from scratch while `d4d runs validate` writes the
+    verdict separately, so re-recording used to delete it and the run failed
+    `--strict` immediately with "nothing to verify" — while `record` printed a
+    tick and exited 0 (#396). Re-recording is the *correct* response to several
+    situations (a header field was added, Phase 3 corrected an artifact), so
+    this was easy to hit and looked like success.
+
+    A verdict is a claim about specific bytes, and it is still true if those
+    bytes have not changed. So the block is carried forward only when every
+    artifact it names still hashes to what it recorded. If any differs, or any
+    is missing, the verdict is about a file that no longer exists in that form
+    and is dropped — the same staleness rule `validation_status` applies.
+
+    **The schema must also be unchanged.** "Validates" is a claim about a
+    record *against a schema*, and `validation.artifacts` pins only the record.
+    `validation_status` has the same blind spot, but there it is bounded:
+    before this function existed, a re-record dropped the verdict and forced a
+    re-validation. Carrying it forward would let a verdict outlive the schema
+    it was reached against, so the record's own `schema` block is compared too
+    and any difference drops it. Raised in review of #396; the gap is #426.
+
+    Returns None when there is nothing to carry, when the caller supplied its
+    own block, when the prior one no longer describes the artifacts, or when
+    the schema has moved under it.
+    """
+    if "validation" in new_data:
+        return None                      # caller's own verdict wins
+    if not path.exists():
+        return None
+    try:
+        prior = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except Exception:                                        # noqa: BLE001
+        return None
+    if not isinstance(prior, dict):
+        return None
+    v = prior.get("validation")
+    if not isinstance(v, dict) or "passed" not in v:
+        return None
+    artifacts = v.get("artifacts")
+    if not isinstance(artifacts, dict) or not artifacts:
+        # A verdict with nothing to re-hash cannot be shown still true.
+        return None
+    for entry in artifacts.values():
+        if not isinstance(entry, dict) or verify_entry(entry) is not True:
+            return None
+
+    # Same record, same bytes, different schema is a different question.
+    def _schema_id(d: dict[str, Any]) -> tuple[Any, Any]:
+        sch = d.get("schema") or {}
+        return (sch.get("full_sha256"), sch.get("core_sha256"))
+
+    if _schema_id(prior) != _schema_id(new_data):
+        return None
+    return v
+
+
 @dataclass
 class ProvenanceRecord:
     data: dict[str, Any] = field(default_factory=dict)
 
+    #: Set by :meth:`write`. True if a prior verdict was carried forward, False
+    #: if one was found but dropped as stale, None if there was none. The CLI
+    #: reads it to say which happened, because a silently dropped verdict is
+    #: what made #396 hard to notice.
+    validation_carried: bool | None = None
+
     def write(self, path: Path) -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
+        data = dict(self.data)
+        had_prior = False
+        if "validation" not in data and path.exists():
+            try:
+                prior = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+                had_prior = isinstance(prior, dict) and isinstance(
+                    prior.get("validation"), dict)
+            except Exception:                                # noqa: BLE001
+                had_prior = False
+        carried = preservable_validation(path, data)
+        if carried is not None:
+            data["validation"] = carried
+            self.validation_carried = True
+        elif had_prior:
+            self.validation_carried = False
         path.write_text(
             "# D4D generation provenance record\n"
             f"# record_version {RECORD_VERSION} — see src/data_sheets_schema/provenance.py\n"
-            + yaml.safe_dump(self.data, sort_keys=False, allow_unicode=True),
+            + yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
             encoding="utf-8")
         return path
 
