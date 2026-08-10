@@ -1,0 +1,183 @@
+# Is the D4D pipeline generic? — audit, 2026-08-10
+
+*Findings 3, 4 and 5 have been acted on since the audit; each section says how.*
+
+The goal this audits against: a D4D pipeline applicable to many kinds of
+dataset, not one adapted to the four Bridge2AI Grand Challenges it was built on.
+
+**Verdict: the code is generic; the inputs and the launch path are not.** No
+production code branches on a GC. But three layers between the schema and the
+model carry per-GC content, and one of them is recorded nowhere.
+
+Method: static search over `src/`, the prompt files and their loader, the two
+manifests, the agentic playbooks, and the provenance of the 2026-08-07 canonical
+sweep. Each finding below states how it was checked so it can be re-checked.
+
+---
+
+## 1. Code — generic
+
+Zero project-keyed branching in the generation path:
+
+```bash
+grep -rnE "(if|elif|==|!=|in \[|in \()[^#]*['\"](AI_READI|CHORUS|CM4AI|VOICE|VOICE_PEDIATRIC)['\"]" \
+  --include=*.py src/          # → 0 hits
+```
+
+GC names occur in 103 places, and every one is a registry, a default, prose or a
+docstring. `constants/projects.py::PROJECTS` is the single legitimate list.
+Adding a sixth dataset needs no change to the generation path.
+
+Three stale spots, none of them adaptation:
+
+- `agreement.py:551 DEFAULT_PROJECTS` and `form_defects.py:149` hardcode the old
+  four, so both silently exclude `VOICE_PEDIATRIC`.
+- `download/claude_max_d4d_processor.py` holds per-GC keyword classifiers
+  (`'CM4AI': ['microscopy', 'imaging', …]`). Genuine domain adaptation, but in a
+  legacy download helper rather than the pipeline.
+
+## 2. Prompt files — generic, and the mechanism is sound
+
+Every generic prompt's **body** is free of GC and domain terms:
+
+| file | GC mentions in body | in whole file |
+|---|---|---|
+| v1, v2, v4 | 0 | 4, 9, 1 |
+| v3 | 0 | 0 |
+
+`api_runner.prompt_body()` splits on `## Prompt body` and discards everything
+above it, so the GC names in the header tables are documentation for humans and
+never reach the model. This is a good design and it is holding. The tuned prompt
+has no body marker, by design — it is assembled with a per-GC component.
+
+## 3. The launch path — where genericity actually breaks
+
+**The agentic runs are not launched from the prompt file.** They are launched
+from a hand-composed task prompt. The VOICE run under
+`2026-08-07_…generic-v3_rep2` received a block that appears in no prompt file:
+
+> CRITICAL SCOPE BOUNDARY: this run covers the adult/main Bridge2AI-Voice
+> dataset ONLY. `VOICE_PEDIATRIC` is a separate project … doing so is what
+> previously caused every VOICE replicate to fail validation (issue #292).
+
+Against the priming taxonomy in `.claude/commands/d4d-full-core.md` that is
+**factual disambiguation** (excluded from generic) plus a **quality warning**
+(discouraged even in tuned). `VOICE_PEDIATRIC_reconciliation.md` from the same
+label shows the same pattern, so it is not a one-off.
+
+Three consequences.
+
+**a) Provenance describes intent, not what was sent.** The record hashes one
+file and asserts it was the whole instruction:
+
+```yaml
+prompts:
+  files:
+    - path: src/download/prompts/d4d_generic_arm_prompt.md
+      sha256: 0fbc626b…
+      bytes: 5754
+```
+
+and the record header repeats `# Prompt: …d4d_generic_arm_prompt.md (identical
+for all projects)`. Neither is true of the text the model received.
+
+**b) The label says v3; the hashed prompt is v1.** 5754 bytes is v1. v3 adds
+seven substantive decision rules over v1 — one object per distinct entity, no
+pointers-instead-of-values, read the slot description, populate a class's
+declared fields rather than its `description`. Those reached the agent through
+`.claude/commands/d4d-agent.md` instead, and **no `.claude/` file is hashed in
+any provenance record**. So the rules that produce v3 behaviour are unversioned,
+and a run labelled `generic-v3` attests a v1 hash.
+
+**c) Nothing can detect either.** The prompt-condition tests assert that the
+*file* names no project. They cannot see the launch prompt, which is where the
+project-specific text lives.
+
+## 4. Input bundles carry human editorial content, unequally — FIXED
+
+> **Resolved by #424 (2026-08-10).** `preprocess_sources.py` no longer writes
+> `curation_note` into the bundles; the notes stay in `source_manifest.yaml`.
+> The finding is kept rather than deleted — it is what justified the change, and
+> 55 provenance records reference the pre-strip bundle hashes, mapped in
+> `source_manifest.yaml: bundle_hash_history`.
+>
+> What it caught: **4 values in the canonical sweep were grounded only by a
+> curation note, and all four are the same DOI** — `10.60775/fairhub.4`, cited
+> by AI_READI records. It names FAIRhub's "Mini Version", which appears in no
+> source document; the manifest mentions it only to say it was *not* captured.
+>
+> Still open: `verification_url` is injected by the same mechanism and was not
+> stripped. Measured at **0** values grounded only by it, so the exposure is
+> cosmetic; #427 records the decision.
+
+The BASELINE arm is "input documents only". The bundles also carry curator prose,
+injected as `Curation note:` lines into each source header:
+
+| project | sources | manual-fetch | curation notes | superseded entries |
+|---|---|---|---|---|
+| AI_READI | 10 | 0 | **6** | 2 |
+| CM4AI | 10 | 0 | **5** | 1 |
+| VOICE | 11 | 0 | 3 | 1 |
+| CHORUS | 4 | **1** | 1 | 0 |
+| VOICE_PEDIATRIC | 6 | 0 | 1 | 0 |
+
+They are not neutral labels. They instruct — *"prefer this over
+`dataset_documentation` where the two disagree"* — and they **assert dataset
+facts**: the VOICE note states *"published 2026-05-01, 833 participants"*, a
+figure a record can take from a curator rather than a source. AI_READI receives
+six such notes and CHORUS one, so the editorial support differs per GC inside
+the arm meant to isolate the documents.
+
+CHORUS also has one source marked `fetch: manual` whose note says it **cannot be
+regenerated by any command** — a single point of failure for that GC's bundle.
+
+## 5. Manual interventions in the run procedure
+
+Six, all currently correctness-critical and hand-executed:
+
+1. **Finalization order** — `provenance record` → `runs validate` →
+   `runs check`, because `provenance record` drops the `validation:` block
+   (#396). The playbook spends a paragraph on *"the order is load-bearing"*.
+2. **`--prompt` must be passed by hand**, or `prompts:` is null.
+3. **Reasoning effort** read from `$CLAUDE_EFFORT` and pasted into the header
+   (#397).
+4. **The task prompt is hand-composed per run** — the leak in §3.
+5. **The version label** is chosen by hand.
+6. **Eight bundle sources need `d4d download supplements`**; one is
+   unregenerable.
+
+Items 1–3 are removed outright by #396 and the #397–#400 cluster.
+
+> **Since the audit.** Item 1 is fixed (#423): re-recording no longer discards
+> the validation verdict, so the order-critical sequence is gone and the
+> playbook no longer prescribes it. Item 4 is addressed by #425, which adds
+> `d4d api render-prompt` — the agentic launcher renders its instruction from a
+> `RunSpec` rather than composing one by hand, and the resolved text's hash is
+> recorded as `prompts.request`. Neither path recorded that before;
+> `prompt_request_hash()` existed with no caller.
+>
+> Items 2, 3, 5 and 6 stand.
+
+## What would make it generic
+
+1. **Hash what was sent, not what was meant.** Record the launch prompt verbatim
+   (or its sha256) in `prompts.files`, alongside the `.claude/` playbooks that
+   carry decision rules. Until then the agentic arm's provenance is a statement
+   of intent.
+2. **Make label and hashed prompt agree.** A run labelled `generic-v3` should
+   hash v3. Cheap to assert in `d4d runs check`.
+3. **Move scope boundaries out of the prompt and into the bundle.** VOICE's
+   constraint is really "your bundle is the scope", which the frozen body
+   already says. If the pediatric documents are the problem, the manifest is the
+   fix, not a warning in the instruction.
+4. **Decide what curation notes are.** Either strip them from bundles — they are
+   manifest metadata, not documents — or declare them part of the input and stop
+   describing the arm as documents-only. They are currently a third thing.
+
+## Scope of this audit
+
+The agentic path was audited directly, including one run executed under it. The
+API path was audited by reading `api_runner`, so §3(a)'s severity there is
+inferred rather than observed. The §3 evidence for per-GC launch text is one
+executed run plus one reconciliation report, not all fifteen records of the
+sweep.
