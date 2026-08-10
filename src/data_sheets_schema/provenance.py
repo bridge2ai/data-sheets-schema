@@ -324,8 +324,17 @@ def preservable_validation(path: Path,
     is missing, the verdict is about a file that no longer exists in that form
     and is dropped — the same staleness rule `validation_status` applies.
 
+    **The schema must also be unchanged.** "Validates" is a claim about a
+    record *against a schema*, and `validation.artifacts` pins only the record.
+    `validation_status` has the same blind spot, but there it is bounded:
+    before this function existed, a re-record dropped the verdict and forced a
+    re-validation. Carrying it forward would let a verdict outlive the schema
+    it was reached against, so the record's own `schema` block is compared too
+    and any difference drops it. Raised in review of #396; the gap is #426.
+
     Returns None when there is nothing to carry, when the caller supplied its
-    own block, or when the prior one no longer describes the artifacts.
+    own block, when the prior one no longer describes the artifacts, or when
+    the schema has moved under it.
     """
     if "validation" in new_data:
         return None                      # caller's own verdict wins
@@ -347,6 +356,14 @@ def preservable_validation(path: Path,
     for entry in artifacts.values():
         if not isinstance(entry, dict) or verify_entry(entry) is not True:
             return None
+
+    # Same record, same bytes, different schema is a different question.
+    def _schema_id(d: dict[str, Any]) -> tuple[Any, Any]:
+        sch = d.get("schema") or {}
+        return (sch.get("full_sha256"), sch.get("core_sha256"))
+
+    if _schema_id(prior) != _schema_id(new_data):
+        return None
     return v
 
 

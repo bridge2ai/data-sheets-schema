@@ -153,3 +153,48 @@ class TestReRecordPreservesTheVerdict(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheVerdictDoesNotOutliveItsSchema(unittest.TestCase):
+    """Raised reviewing #396. "Validates" is a claim about a record *against a
+    schema*, and `validation.artifacts` pins only the record.
+
+    Before the carry-forward existed the gap was bounded: a re-record dropped
+    the verdict and forced re-validation. Carrying it would let a verdict
+    outlive the schema it was reached against, so the record's own `schema`
+    block is compared too. The underlying blind spot in `validation_status` is
+    #426.
+    """
+
+    def setUp(self):
+        from data_sheets_schema.provenance import preservable_validation
+        self.fn = preservable_validation
+        self.tmp = tempfile.TemporaryDirectory()
+        self.path = Path(self.tmp.name) / "prov.yaml"
+        self.artifact = Path(self.tmp.name) / "rec.yaml"
+        self.artifact.write_text("id: x\n")
+        self.md5 = hashlib.md5(self.artifact.read_bytes()).hexdigest()
+        self.prior = {
+            "schema": {"full_sha256": "aaa", "core_sha256": "bbb"},
+            "validation": {
+                "passed": True,
+                "artifacts": {"full": {"path": str(self.artifact),
+                                       "md5": self.md5}},
+            },
+        }
+        self.path.write_text(yaml.safe_dump(self.prior, sort_keys=False))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_same_schema_carries(self):
+        new = {"schema": {"full_sha256": "aaa", "core_sha256": "bbb"}}
+        self.assertIsNotNone(self.fn(self.path, new))
+
+    def test_a_changed_full_schema_drops_it(self):
+        new = {"schema": {"full_sha256": "CHANGED", "core_sha256": "bbb"}}
+        self.assertIsNone(self.fn(self.path, new))
+
+    def test_a_changed_core_schema_drops_it(self):
+        new = {"schema": {"full_sha256": "aaa", "core_sha256": "CHANGED"}}
+        self.assertIsNone(self.fn(self.path, new))
