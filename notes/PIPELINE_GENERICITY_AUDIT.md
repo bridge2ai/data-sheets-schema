@@ -1,5 +1,7 @@
 # Is the D4D pipeline generic? — audit, 2026-08-10
 
+*Findings 3, 4 and 5 have been acted on since the audit; each section says how.*
+
 The goal this audits against: a D4D pipeline applicable to many kinds of
 dataset, not one adapted to the four Bridge2AI Grand Challenges it was built on.
 
@@ -91,7 +93,22 @@ and a run labelled `generic-v3` attests a v1 hash.
 *file* names no project. They cannot see the launch prompt, which is where the
 project-specific text lives.
 
-## 4. Input bundles carry human editorial content, unequally
+## 4. Input bundles carry human editorial content, unequally — FIXED
+
+> **Resolved by #424 (2026-08-10).** `preprocess_sources.py` no longer writes
+> `curation_note` into the bundles; the notes stay in `source_manifest.yaml`.
+> The finding is kept rather than deleted — it is what justified the change, and
+> 55 provenance records reference the pre-strip bundle hashes, mapped in
+> `source_manifest.yaml: bundle_hash_history`.
+>
+> What it caught: **4 values in the canonical sweep were grounded only by a
+> curation note, and all four are the same DOI** — `10.60775/fairhub.4`, cited
+> by AI_READI records. It names FAIRhub's "Mini Version", which appears in no
+> source document; the manifest mentions it only to say it was *not* captured.
+>
+> Still open: `verification_url` is injected by the same mechanism and was not
+> stripped. Measured at **0** values grounded only by it, so the exposure is
+> cosmetic; #427 records the decision.
 
 The BASELINE arm is "input documents only". The bundles also carry curator prose,
 injected as `Curation note:` lines into each source header:
@@ -130,6 +147,16 @@ Six, all currently correctness-critical and hand-executed:
    unregenerable.
 
 Items 1–3 are removed outright by #396 and the #397–#400 cluster.
+
+> **Since the audit.** Item 1 is fixed (#423): re-recording no longer discards
+> the validation verdict, so the order-critical sequence is gone and the
+> playbook no longer prescribes it. Item 4 is addressed by #425, which adds
+> `d4d api render-prompt` — the agentic launcher renders its instruction from a
+> `RunSpec` rather than composing one by hand, and the resolved text's hash is
+> recorded as `prompts.request`. Neither path recorded that before;
+> `prompt_request_hash()` existed with no caller.
+>
+> Items 2, 3, 5 and 6 stand.
 
 ## What would make it generic
 
