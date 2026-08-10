@@ -310,9 +310,12 @@ def check_cmd(method, label, project, strict):
     Use `--strict` after a generation run so a missing record fails the step
     rather than being noticed later.
     """
-    from data_sheets_schema.runs import check_provenance, discover, is_complete
+    from data_sheets_schema.runs import (check_provenance, discover,
+                                         is_complete,
+                                         prompt_condition_mismatch)
 
     rows = []
+    mismatches = []
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -326,6 +329,10 @@ def check_cmd(method, label, project, strict):
             if not is_complete(run.method, run.label, proj):
                 continue
             rows.append(check_provenance(run.method, run.label, proj))
+            m = prompt_condition_mismatch(run.method, run.label, proj)
+            if m:
+                mismatches.append({"project": proj, "label": run.label,
+                                   "reason": m})
 
     failed = [r for r in rows if not r["ok"]]
     required = [r for r in rows if r["required"]]
@@ -335,6 +342,19 @@ def check_cmd(method, label, project, strict):
                f"requirement, {len(failed)} failing")
     if not failed:
         click.echo("All runs subject to the live-provenance requirement satisfy it.")
+
+    # Reported separately from the provenance verdict, and never fatal. A
+    # label naming a condition its prompt does not match is a real defect
+    # (#420) — but it is a defect in records that already exist, and failing
+    # them retroactively would block every gate on history nobody can change.
+    # Visible is the point: the 2026-08-07 sweep says `generic-v3` and hashes
+    # v1, and nothing said so for three days.
+    if mismatches:
+        click.echo(f"\n⚠️  {len(mismatches)} run(s) whose label and hashed "
+                   "prompt name different conditions (#420):")
+        for m in mismatches:
+            click.echo(f"   {m['project']:9} {m['label']:44} {m['reason']}")
+
     if strict and failed:
         raise SystemExit(1)
 

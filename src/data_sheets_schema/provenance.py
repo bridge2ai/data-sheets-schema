@@ -107,6 +107,39 @@ def load_generation_config(path: Path = DETERMINISTIC_CONFIG) -> dict[str, Any]:
         return {}
 
 
+#: Instruction files an agentic run reads for itself, rather than being sent.
+#: They carry decision rules — `d4d-agent.md` holds the slot-filling contract
+#: that produces v3 behaviour — and were hashed nowhere, so two runs following
+#: different playbook content were indistinguishable afterwards (#420).
+AGENT_PLAYBOOKS = (
+    Path(".claude/commands/d4d-full-core.md"),
+    Path(".claude/commands/d4d-agent.md"),
+    Path(".claude/agents/d4d-provenance-guard.md"),
+)
+
+
+def playbook_facts(paths: tuple[Path, ...] = AGENT_PLAYBOOKS) -> dict[str, Any]:
+    """Hash the instruction files an agentic run follows.
+
+    The launch prompt is sent to the agent; these it opens itself, because the
+    prompt's first line tells it to. They are as much a generation input as the
+    prompt is — `.claude/commands/d4d-agent.md` is where the v2/v3 slot-filling
+    rules actually reach the agentic path, mirrored there by #394 rather than
+    read from the versioned prompt file.
+
+    Recorded for every run, not just agentic ones: an API run does not read
+    them, and a record showing they were unchanged is how you can later tell
+    that it did not.
+    """
+    out = []
+    for p in paths:
+        p = Path(p)
+        out.append({"path": str(p), "sha256": _sha256(p),
+                    "bytes": p.stat().st_size if p.exists() else None,
+                    "exists": p.exists()})
+    return {"hash_algorithm": PROMPT_HASH, "files": out}
+
+
 def prompt_facts(prompt_paths: list[Path] | None,
                  request_text: str | None = None) -> dict[str, Any]:
     """Hash every prompt file a run consumed, and the instruction it was sent.
@@ -682,6 +715,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                 "replicate": _replicate_for(label)},
         "model": model or None,
         "prompts": prompt_facts(prompt_paths, prompt_request),
+        "playbooks": playbook_facts(),
         "schema": schema_facts() | (
             {"digest_md5": schema_digest_md5} if schema_digest_md5 else {}),
         "software": software_facts() if mode == "live" else {
