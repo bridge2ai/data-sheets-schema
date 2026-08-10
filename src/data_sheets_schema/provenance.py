@@ -141,7 +141,8 @@ def playbook_facts(paths: tuple[Path, ...] = AGENT_PLAYBOOKS) -> dict[str, Any]:
 
 
 def prompt_facts(prompt_paths: list[Path] | None,
-                 request_text: str | None = None) -> dict[str, Any]:
+                 request_text: str | None = None,
+                 request_spec: dict[str, Any] | None = None) -> dict[str, Any]:
     """Hash every prompt file a run consumed, and the instruction it was sent.
 
     The prompt is a generation input as much as the bundle is, and until now it
@@ -182,6 +183,13 @@ def prompt_facts(prompt_paths: list[Path] | None,
             "note": ("the instruction as sent, after substitution; the files "
                      "above are what it was built from"),
         }
+        if request_spec:
+            # Everything `resolve_prompt` reads, so the claim can be re-derived
+            # from the record alone rather than from scattered fields that were
+            # written for other purposes. `manifest_line` and `run_date` are
+            # here because nothing else records them, and both change the
+            # rendered bytes.
+            facts["request"]["spec"] = dict(request_spec)
     return facts
 
 
@@ -587,6 +595,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  concat_dir: Path = CONCAT_DIR,
                  prompt_paths: list[Path] | None = None,
                  prompt_request: str | None = None,
+                 prompt_request_spec: dict[str, Any] | None = None,
                  schema_digest_md5: str | None = None,
                  extra_notes: list[str] | None = None) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
@@ -731,7 +740,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                 "arm": _arm_for(base),
                 "replicate": _replicate_for(label)},
         "model": model or None,
-        "prompts": prompt_facts(prompt_paths, prompt_request),
+        "prompts": prompt_facts(prompt_paths, prompt_request,
+                                prompt_request_spec),
         "playbooks": playbooks,
         "schema": schema_facts() | (
             {"digest_md5": schema_digest_md5} if schema_digest_md5 else {}),

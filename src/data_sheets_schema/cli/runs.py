@@ -312,10 +312,12 @@ def check_cmd(method, label, project, strict):
     """
     from data_sheets_schema.runs import (check_provenance, discover,
                                          is_complete,
-                                         prompt_condition_mismatch)
+                                         prompt_condition_mismatch,
+                                         verify_request)
 
     rows = []
     mismatches = []
+    requests = []
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -333,6 +335,10 @@ def check_cmd(method, label, project, strict):
             if m:
                 mismatches.append({"project": proj, "label": run.label,
                                    "reason": m})
+            st, why = verify_request(run.method, run.label, proj)
+            if st in ("mismatch", "unverifiable"):
+                requests.append({"project": proj, "label": run.label,
+                                 "status": st, "reason": why})
 
     failed = [r for r in rows if not r["ok"]]
     required = [r for r in rows if r["required"]]
@@ -355,7 +361,21 @@ def check_cmd(method, label, project, strict):
         for m in mismatches:
             click.echo(f"   {m['project']:9} {m['label']:44} {m['reason']}")
 
-    if strict and failed:
+    # The render gate. A mismatch means the instruction sent was not the one
+    # the recorded spec produces — the intervention #419/#422 documented, now
+    # detectable rather than merely discouraged. Fatal under --strict, because
+    # unlike the label mismatch this is a claim about a run being made now:
+    # every record carrying a request hash was written after the field existed.
+    bad_requests = [r for r in requests if r["status"] == "mismatch"]
+    if requests:
+        click.echo(f"\n{len(requests)} run(s) whose recorded instruction could "
+                   "not be confirmed against its spec:")
+        for r in requests:
+            mark = "❌" if r["status"] == "mismatch" else "⚠️ "
+            click.echo(f"   {mark} {r['project']:9} {r['label']:44} "
+                       f"{r['status']}: {r['reason']}")
+
+    if strict and (failed or bad_requests):
         raise SystemExit(1)
 
 

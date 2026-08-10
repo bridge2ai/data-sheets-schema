@@ -828,6 +828,65 @@ def check_replicate(method: str, config: str, new_label: str, project: str,
             "input_unverified_against": input_unknown or None}
 
 
+def verify_request(method: str, label: str, project: str,
+                   concat_dir: Path = CONCAT_DIR) -> tuple[str, str | None]:
+    """Does the instruction a run recorded match what its spec renders?
+
+    The gate the whole prompt-provenance thread is for. Rendering the
+    instruction (#425) made hand-editing avoidable; this makes it *detectable*,
+    which is the difference between a convention and a control.
+
+    Four outcomes, and the two negative ones are deliberately distinct:
+
+    - ``match``       — re-rendering the recorded spec reproduces the recorded
+      hash. The run received what its spec says it should have.
+    - ``mismatch``    — it does not. Something was edited between rendering and
+      sending, or the prompt file has changed since. Either way the record's
+      condition label no longer describes what was sent.
+    - ``unverifiable`` — the record has a request hash but no spec, or the spec
+      is incomplete. Common for records written before the spec was stored.
+    - ``absent``      — no request hash at all. Every record written before
+      #425, which is all of them.
+
+    `absent` is not `mismatch`. Failing history for a field that postdates it is
+    the same error the live-provenance cutoff exists to avoid.
+    """
+    import yaml as _yaml
+    from data_sheets_schema.provenance import record_path_for
+
+    p = record_path_for(project, method, label, concat_dir)
+    if not p.exists():
+        return "absent", "no provenance record"
+    data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    req = ((data.get("prompts") or {}).get("request")) or {}
+    if not req.get("sha256"):
+        return "absent", None
+    spec_d = req.get("spec")
+    if not isinstance(spec_d, dict) or not spec_d.get("condition"):
+        return "unverifiable", "request hash recorded without the spec that produced it"
+
+    try:
+        import hashlib
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        spec = RunSpec(
+            project=project, arm=spec_d.get("arm", ""), method=method,
+            bundle=Path(spec_d.get("bundle", "")), label=label,
+            condition=spec_d["condition"],
+            manifest_line=spec_d.get("manifest_line", ""),
+            run_date=spec_d.get("run_date", ""),
+            runtime=spec_d.get("runtime", ""),
+            provider=spec_d.get("provider"))
+        got = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
+    except Exception as exc:                                 # noqa: BLE001
+        return "unverifiable", f"could not re-render: {exc}"
+
+    if got == req["sha256"]:
+        return "match", None
+    return "mismatch", (f"recorded {req['sha256'][:12]}… but the spec renders "
+                        f"{got[:12]}…; the instruction sent was not the one "
+                        "this spec produces")
+
+
 def condition_from_label(label: str) -> str | None:
     """The prompt condition a label *claims*, or None if it names none.
 
