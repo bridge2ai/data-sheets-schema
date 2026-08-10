@@ -3,7 +3,7 @@
 Open work, most blocking first. Each item states what is true now, not only what
 should happen, so an item can be checked rather than believed.
 
-Last verified: 2026-08-08.
+Last verified: 2026-08-10.
 
 ---
 
@@ -444,6 +444,51 @@ test coverage, which is how a clobbering writer survived.
 
 `make test` went from 5 failures to **1365 passed, 0 failed**, and the working
 tree from 23 untracked entries to none.
+
+---
+
+## 12. Pipeline genericity: the launch path, not the code — 2026-08-10
+
+Audited in `notes/PIPELINE_GENERICITY_AUDIT.md` (#418) against the goal of a
+pipeline applicable to many kinds of dataset.
+
+**The code is generic.** No project-keyed conditional anywhere in `src/`; all
+103 GC-name occurrences are registries, defaults or prose. Every generic
+prompt's *body* is free of GC and domain terms, and `prompt_body()` discards the
+header where the names live. A sixth dataset needs no code change.
+
+**The launch path was not.** Agentic runs are not launched from the prompt file
+— they were launched from a hand-composed task prompt, and the VOICE run of
+2026-08-07 was sent a `CRITICAL SCOPE BOUNDARY` paragraph naming the project,
+the pediatric dataset and #292. Factual disambiguation plus a quality warning,
+both excluded from the generic condition by the repository's own taxonomy, and
+invisible to the prompt-condition tests because they inspect the file rather
+than what was sent.
+
+Acted on the same day:
+
+| finding | issue | status |
+|---|---|---|
+| bundles carried curator prose, unequally per project | #421 | **fixed** (#424) |
+| re-recording discarded the validation verdict | #396 | **fixed** (#423) |
+| the launch prompt was typed, not rendered | #419, #422 | **addressed** (#425) |
+| label says `generic-v3`, provenance hashes v1 | #420 | open |
+| `verification_url` still injected; 0 values depend on it | #427 | open, cosmetic |
+| a verdict does not pin the schema it was reached against | #426 | open |
+
+**What #424 caught.** 4 values in the canonical sweep were grounded only by a
+curation note, all the same DOI — `10.60775/fairhub.4`, cited by AI_READI
+records. It names FAIRhub's "Mini Version", which appears in **no source
+document**; the manifest mentions it only to say it was *not* captured. All five
+bundle hashes changed; `source_manifest.yaml: bundle_hash_history` maps
+before/after, because 55 provenance records reference the old ones.
+
+**What is left, and it is the load-bearing one.** Rendering makes intervention
+*avoidable*, not *impossible* — nothing yet checks that an agentic record's
+`prompts.request` hash matches what its spec would render. That gate is what
+turns "do not intervene" from a rule into something detectable, and it is cheap
+now the field exists. `.claude/` playbooks still carry decision rules and are
+still hashed nowhere (#420).
 
 ---
 
