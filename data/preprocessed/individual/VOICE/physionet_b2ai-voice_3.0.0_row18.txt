@@ -4,7 +4,6 @@ Source ID: physionet_3_0_0
 Source type: data resource
 Source URL: https://physionet.org/content/b2ai-voice/3.0.0/
 Raw file: data/raw/VOICE/physionet_b2ai-voice_3.0.0_row18.html
-Curation note: Sheet-selected release, superseded upstream by PhysioNet 3.1.0 captured as physionet_3_1_0.
 --------------------------------------------------------------------------------
 Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information v3.0.0
 Menu

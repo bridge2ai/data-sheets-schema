@@ -3852,7 +3852,7 @@ Accessibility
 
 FILE: physionet_b2ai-voice_3.0.0_row18.txt
 PATH: data/preprocessed/individual/VOICE/physionet_b2ai-voice_3.0.0_row18.txt
-SIZE: 41698 bytes
+SIZE: 41591 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -3861,7 +3861,6 @@ Source ID: physionet_3_0_0
 Source type: data resource
 Source URL: https://physionet.org/content/b2ai-voice/3.0.0/
 Raw file: data/raw/VOICE/physionet_b2ai-voice_3.0.0_row18.html
-Curation note: Sheet-selected release, superseded upstream by PhysioNet 3.1.0 captured as physionet_3_1_0.
 --------------------------------------------------------------------------------
 Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information v3.0.0
 Menu
@@ -4519,7 +4518,7 @@ Accessibility
 
 FILE: physionet_b2ai-voice_3.1.0_2026-07-24.txt
 PATH: data/preprocessed/individual/VOICE/physionet_b2ai-voice_3.1.0_2026-07-24.txt
-SIZE: 43284 bytes
+SIZE: 42778 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -4528,7 +4527,6 @@ Source ID: physionet_3_1_0
 Source type: data resource
 Source URL: https://physionet.org/content/b2ai-voice/3.1.0/
 Raw file: data/raw/VOICE/physionet_b2ai-voice_3.1.0_2026-07-24.html
-Curation note: Current PhysioNet release, published 2026-05-01, 833 participants. A minor update over 3.0.0 with no new participants: additional data for some participants, repaired parquet files, new audio-quality and per-audio metadata files, back-filled validated diagnosis information, and some phenotype file and gold-standard variable renaming. Added because the input sheet stops at 3.0.0 while current VOICE documentation advertises v3.1.0; prefer this over physionet_3_0_0 where the two disagree.
 --------------------------------------------------------------------------------
 Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information v3.1.0
 Menu
@@ -5192,7 +5190,7 @@ Accessibility
 
 FILE: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt
 PATH: data/preprocessed/individual/VOICE/physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt
-SIZE: 31586 bytes
+SIZE: 30858 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -5201,7 +5199,6 @@ Source ID: physionet_pediatric_1_1_0
 Source type: data resource
 Source URL: https://physionet.org/content/b2ai-voice-pediatric/1.1.0/
 Raw file: data/raw/VOICE/physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.html
-Curation note: Current Bridge2AI-Voice pediatric release, published 2026-05-01, 300 participants aged 2-18, 23,533 derived recordings, credentialed access. This is a separate PhysioNet project from the adult b2ai-voice dataset, not a version of it; the two releases are distinct cohorts collected under a separate pediatric protocol, with pediatric participants recruited at the Hospital for Sick Children (SickKids). Raw pediatric audio is distributed via Synapse (syn73617068) rather than PhysioNet. Added because the current VOICE documentation advertises pediatric v1.1.0 alongside adult v3.1.0 while the input sheet lists no pediatric source at all. Pediatric v1.0.0 exists upstream but is superseded and was not captured.
 Verification URL: https://physionet.org/content/b2ai-voice-pediatric/
 --------------------------------------------------------------------------------
 Bridge2AI-Voice Pediatric Dataset v1.1.0

@@ -4,7 +4,6 @@ Source ID: dataset_documentation_v3
 Source type: documentation
 Source URL: https://docs.aireadi.org/docs/3/about
 Raw file: data/raw/AI_READI/docs_aireadi_org_docs-3_2026-07-24.html
-Curation note: Current dataset documentation. The docs site's version selector defaults to Dataset v3.0.0 (page last updated 2026-06-04), while the input sheet still selects the v2 documentation. Added so the corpus describes the current release; prefer this over dataset_documentation where the two disagree.
 --------------------------------------------------------------------------------
 About | Documentation for the AI-READI Dataset
 Skip to main content

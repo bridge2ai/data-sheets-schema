@@ -1112,7 +1112,7 @@ cmccrary@mgh.havard.edu
 
 FILE: github_chorus_ai_overview_2025-11-14.txt
 PATH: data/preprocessed/individual/CHORUS/github_chorus_ai_overview_2025-11-14.txt
-SIZE: 9534 bytes
+SIZE: 9270 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -1121,7 +1121,6 @@ Source ID: github_organization_overview
 Source type: historical documentation
 Source URL: https://github.com/chorus-ai#table-of-contents
 Raw file: data/raw/CHORUS/github_chorus_ai_overview_2025-11-14.pdf
-Curation note: Historical supplement retained because the current source sheet no longer lists the CHoRUS GitHub organization overview and the current project website does not preserve its repository, SOP, standards, contributor-role, and software-tooling detail.
 --------------------------------------------------------------------------------
 11/14/25, 5:25 PM
 

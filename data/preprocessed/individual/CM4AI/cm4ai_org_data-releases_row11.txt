@@ -4,7 +4,6 @@ Source ID: data_release_documentation
 Source type: documentation
 Source URL: https://cm4ai.org/data-releases/
 Raw file: data/raw/CM4AI/cm4ai_org_data-releases_row11.html
-Curation note: The page labels HIGT4C as the June 2026 release but displays June 17, 2025. Official Dataverse metadata reports publication date 2026-06-17 and version 2 release time 2026-07-15T20:28:19Z. The input sheet still selects the older K7TGEM release; the HIGT4C release itself is now captured as june_2026_dataverse_release.
 Verification URL: https://dataverse.lib.virginia.edu/api/datasets/:persistentId/?persistentId=doi:10.18130/V3/HIGT4C
 --------------------------------------------------------------------------------
 Data Releases – Cell Maps For AI (CM4AI)

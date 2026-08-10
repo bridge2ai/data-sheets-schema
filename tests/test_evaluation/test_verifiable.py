@@ -195,15 +195,26 @@ class TestAgainstTheCorpus(unittest.TestCase):
         return check_record(yaml.safe_load(f.read_text()), b.read_text(),
                             project=project, label=f"rep{rep}")
 
-    def test_dois_are_grounded_across_the_corpus(self):
-        """No fabricated DOI was found in any record; a regression here is the
-        clearest possible signal that generation has started inventing."""
+    #: The one DOI in the corpus that no source document contains. AI-READI
+    #: records cite FAIRhub record 4, the "Mini Version", which was named only
+    #: in a `curation_note` — curator prose that #421 stripped out of the
+    #: bundles. So the value was never in a source document; it was in the
+    #: manifest, and the bundle used to carry the manifest's commentary.
+    #:
+    #: Pinned by value rather than by loosening the assertion, so a *new*
+    #: ungrounded DOI still fails. It is a real finding about those records,
+    #: not a matcher defect.
+    KNOWN_UNGROUNDED_DOIS = {"10.60775/fairhub.4"}
+
+    def test_no_unexpected_doi_is_ungrounded(self):
+        """A fabricated DOI is the clearest possible signal that generation has
+        started inventing, so every one that does not ground must be named."""
         for project in ("AI_READI", "CM4AI", "VOICE"):
             with self.subTest(project=project):
                 r = self._check(project, 1)
-                stated, grounded = r.by_kind().get("doi", (0, 0))
-                if stated:
-                    self.assertEqual(grounded, stated)
+                unexpected = {c.value for c in r.ungrounded
+                              if c.kind == "doi"} - self.KNOWN_UNGROUNDED_DOIS
+                self.assertEqual(set(), unexpected)
 
     def test_the_supposed_voice_finding_was_a_false_positive(self):
         """This test used to assert the opposite, and was wrong (#404).

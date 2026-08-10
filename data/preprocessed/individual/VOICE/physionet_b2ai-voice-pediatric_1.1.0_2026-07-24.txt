@@ -4,7 +4,6 @@ Source ID: physionet_pediatric_1_1_0
 Source type: data resource
 Source URL: https://physionet.org/content/b2ai-voice-pediatric/1.1.0/
 Raw file: data/raw/VOICE/physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.html
-Curation note: Current Bridge2AI-Voice pediatric release, published 2026-05-01, 300 participants aged 2-18, 23,533 derived recordings, credentialed access. This is a separate PhysioNet project from the adult b2ai-voice dataset, not a version of it; the two releases are distinct cohorts collected under a separate pediatric protocol, with pediatric participants recruited at the Hospital for Sick Children (SickKids). Raw pediatric audio is distributed via Synapse (syn73617068) rather than PhysioNet. Added because the current VOICE documentation advertises pediatric v1.1.0 alongside adult v3.1.0 while the input sheet lists no pediatric source at all. Pediatric v1.0.0 exists upstream but is superseded and was not captured.
 Verification URL: https://physionet.org/content/b2ai-voice-pediatric/
 --------------------------------------------------------------------------------
 Bridge2AI-Voice Pediatric Dataset v1.1.0

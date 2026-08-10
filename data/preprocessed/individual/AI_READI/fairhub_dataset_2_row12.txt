@@ -4,7 +4,6 @@ Source ID: fairhub_dataset
 Source type: data resource
 Source URL: https://fairhub.io/datasets/2
 Raw file: data/raw/AI_READI/fairhub_dataset_2_row12.html
-Curation note: FAIRhub record for dataset v2.0.0 (2.01 TB, 165,051 files) and the version the input sheet selects, in two separate cells. The page itself states "This version of the dataset is no longer accessible. Please refer to the latest version." Superseded upstream by the v3.0.0 record captured as fairhub_dataset_v3; retain it only as evidence about the v2.0.0 release.
 --------------------------------------------------------------------------------
 Flagship Dataset of Type 2 Diabetes from the AI-READI Project
 FAIRhub
