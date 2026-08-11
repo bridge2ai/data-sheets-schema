@@ -45,6 +45,7 @@ from data_sheets_schema import reasoning, schema_digest
 from data_sheets_schema.provenance import (
     DETERMINISTIC_CONFIG,
     load_generation_config,
+    repo_relative,
 )
 
 PROMPTS = Path("src/download/prompts")
@@ -594,7 +595,7 @@ def plan(spec: RunSpec) -> dict[str, Any]:
         "bundle": str(spec.bundle), "bundle_bytes": spec.bundle.stat().st_size,
         "model": settings,
         "runtime": RUNTIME,
-        "prompt_files": [str(p) for p in spec.prompt_files],
+        "prompt_files": [repo_relative(p) for p in spec.prompt_files],
         "schema_digest_md5": schema_digest.fingerprint(
             schema_digest.digest_text("Dataset")),
         "phases": phases,

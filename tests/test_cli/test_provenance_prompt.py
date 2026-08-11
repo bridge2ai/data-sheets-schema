@@ -91,7 +91,11 @@ class TestProvenancePromptFlag(unittest.TestCase):
         self.assertEqual(prompts["hash_algorithm"], "sha256")
         self.assertEqual(len(prompts["files"]), 1)
         entry = prompts["files"][0]
-        self.assertEqual(entry["path"], str(self.prompt))
+        # Normalised, not verbatim (#398). These fixtures live outside the
+        # repository, so the recorded path stays absolute — but it is resolved,
+        # which on macOS turns /var/... into /private/var/... . One file must
+        # not be recordable under two strings, inside the repo or out.
+        self.assertEqual(entry["path"], str(self.prompt.resolve()))
         self.assertTrue(entry["exists"])
         self.assertEqual(entry["bytes"], self.prompt.stat().st_size)
         self.assertEqual(len(entry["sha256"]), 64)
@@ -106,7 +110,7 @@ class TestProvenancePromptFlag(unittest.TestCase):
 
         files = self._written()["prompts"]["files"]
         self.assertEqual([f["path"] for f in files],
-                         [str(self.prompt), str(second)])
+                         [str(self.prompt.resolve()), str(second.resolve())])
         # The tuned condition is prompt + component; two files that hash the
         # same would mean the component never made it into the record.
         self.assertNotEqual(files[0]["sha256"], files[1]["sha256"])
