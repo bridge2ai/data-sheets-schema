@@ -99,18 +99,40 @@ class TestCheckingARecord(unittest.TestCase):
         self.assertEqual("ok", scope.check_record(
             "AI_READI", {"id": "https://doi.org/10.60775/fairhub.2"})[0])
 
+    def test_bare_and_dx_doi_spellings_do_not_slip_through(self):
+        """#442. `uriorcurie` slots accept bare tokens (#402), so a bare DOI is
+        a form records actually take — and one the check answered `ok` for."""
+        for spelling in ("10.13026/h995-bt35",
+                         "http://dx.doi.org/10.13026/h995-bt35",
+                         "https://dx.doi.org/10.13026/h995-bt35"):
+            with self.subTest(spelling=spelling):
+                self.assertEqual(
+                    "out_of_scope",
+                    scope.check_record("VOICE", {"id": spelling})[0])
+
+    def test_an_unreadable_record_is_reported_not_raised(self):
+        """#444. One unparseable file must not abort a sweep of 329."""
+        bad = Path(tempfile.mkstemp(suffix=".yaml")[1])
+        self.addCleanup(lambda: bad.unlink(missing_ok=True))
+        bad.write_text("id: [unclosed\n")
+        status, why = scope.check_record("VOICE", bad)
+        self.assertEqual("unreadable", status)
+        self.assertIn("Error", why)
+
     def test_a_project_with_no_declaration_is_reported_not_failed(self):
         status, why = scope.check_record("NOT_A_PROJECT", {"id": "x"})
         self.assertEqual("undeclared", status)
         self.assertIn("no scope declared", why)
 
     def test_the_whole_corpus_agrees_with_the_declaration(self):
-        """171 records at the time of writing, none about the other cohort.
-        The paragraph was belt-and-braces; this is the braces."""
+        """329 records at the time of writing (full and core), none about the
+        other cohort. The paragraph was belt-and-braces; this is the braces."""
         from data_sheets_schema.api_runner import CONCAT_DIR
         bad = []
-        for rec in CONCAT_DIR.glob("*/*/*_d4d.yaml"):
-            project = rec.name.replace("_d4d.yaml", "")
+        for rec in [*CONCAT_DIR.glob("*/*/*_d4d.yaml"),
+                    *CONCAT_DIR.glob("*/*/*_d4d_core.yaml")]:
+            project = (rec.name.replace("_d4d_core.yaml", "")
+                       .replace("_d4d.yaml", ""))
             if project not in ALL_PROJECTS:
                 continue
             try:
@@ -120,6 +142,50 @@ class TestCheckingARecord(unittest.TestCase):
             if scope.check_record(project, data)[0] == "out_of_scope":
                 bad.append(str(rec))
         self.assertEqual([], bad)
+
+
+class TestTheOtherCohortAbsorbedOneLevelDown(unittest.TestCase):
+    """#441. `check_record` settles what a record is *about* and said 329 of 329
+    were fine, while 32 of them placed the pediatric release inside VOICE's own
+    resources and distribution. Not a record about the wrong dataset — a record
+    absorbing the other dataset into its own."""
+
+    def test_an_identifier_in_the_declared_slot_is_not_reported(self):
+        refs = scope.foreign_references("VOICE", {
+            "id": "https://doi.org/10.13026/37yb-1t42",
+            "related_datasets": [
+                {"target_dataset": "https://doi.org/10.13026/h995-bt35"}]})
+        self.assertEqual([], refs)
+
+    def test_an_identifier_in_the_distribution_is_reported(self):
+        refs = scope.foreign_references("VOICE", {
+            "id": "https://doi.org/10.13026/37yb-1t42",
+            "distribution_formats": [
+                {"access_urls": ["https://physionet.org/content/"
+                                 "b2ai-voice-pediatric/1.1.0/"]}]})
+        self.assertEqual(1, len(refs))
+        self.assertEqual("distribution_formats[0].access_urls[0]",
+                         refs[0]["path"])
+
+    def test_a_bare_doi_nested_deep_is_reported(self):
+        refs = scope.foreign_references("VOICE", {
+            "resources": [{"version_access":
+                           {"latest_version_doi": "10.13026/mf9s-5r03"}}]})
+        self.assertEqual(["resources[0].version_access.latest_version_doi"],
+                         [r["path"] for r in refs])
+
+    def test_a_project_with_nothing_declared_distinct_reports_nothing(self):
+        self.assertEqual([], scope.foreign_references(
+            "AI_READI", {"id": "x", "resources": [{"id": "y"}]}))
+
+    def test_it_is_reported_and_never_a_verdict(self):
+        """32 records carry these placements. Failing them would be the
+        retroactive-failure error the live-provenance cutoff exists to avoid,
+        and some placements are legitimate citations."""
+        record = {"id": "https://doi.org/10.13026/37yb-1t42",
+                  "resources": [{"id": "https://doi.org/10.13026/h995-bt35"}]}
+        self.assertEqual(("ok", None), scope.check_record("VOICE", record))
+        self.assertEqual(1, len(scope.foreign_references("VOICE", record)))
 
 
 class TestAMalformedDeclarationIsCaught(unittest.TestCase):
@@ -155,6 +221,28 @@ class TestAMalformedDeclarationIsCaught(unittest.TestCase):
                                   [{"id": "y", "in_bundle": "src_missing"}]}})
         self.assertTrue(any("no such source" in p["problem"]
                             for p in scope.check_manifest(m)))
+
+    def test_a_one_directional_declaration_is_caught(self):
+        """#443. A declaration in one direction checks in one direction: a
+        pediatric record identifying itself by the adult DOI would pass."""
+        m = self._manifest({
+            "P": {"referent_id": "x", "related_but_distinct":
+                  [{"id": "y", "manifest_key": "Q"}]},
+            "Q": {"referent_id": "y", "related_but_distinct": []},
+        })
+        # Q must exist in `projects` for the first check to stay quiet.
+        data = yaml.safe_load(m.read_text())
+        data["projects"]["Q"] = [{"id": "src_b"}]
+        m.write_text(yaml.safe_dump(data))
+        self.assertTrue(any("one direction only" in p["problem"]
+                            for p in scope.check_manifest(m)))
+
+    def test_a_related_dataset_outside_the_corpus_needs_no_back_reference(self):
+        """An upstream cohort or partner registry legitimately has no scope
+        block here, and requiring one would force fictional entries."""
+        m = self._manifest({"P": {"referent_id": "x", "related_but_distinct":
+                                  [{"id": "y", "manifest_key": None}]}})
+        self.assertEqual([], scope.check_manifest(m))
 
     def test_a_referent_that_is_also_declared_distinct_from_itself(self):
         m = self._manifest({"P": {"referent_id": "x", "related_but_distinct":

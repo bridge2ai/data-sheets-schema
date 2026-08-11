@@ -317,9 +317,16 @@ def scope_cmd(project, do_check, strict, manifest):
     bad = []
     if do_check:
         from data_sheets_schema.api_runner import CONCAT_DIR
+        from data_sheets_schema.scope import foreign_references
         checked = 0
-        for rec in sorted(CONCAT_DIR.glob("*/*/*_d4d.yaml")):
-            name = rec.name.replace("_d4d.yaml", "")
+        unreadable, absorbed = [], []
+        # Core records too. Sweeping only `*_d4d.yaml` reported 16 records
+        # where the corpus holds 32: a core record is a record, and the
+        # pediatric identifiers appear in both halves of the pair.
+        records = sorted([*CONCAT_DIR.glob("*/*/*_d4d.yaml"),
+                          *CONCAT_DIR.glob("*/*/*_d4d_core.yaml")])
+        for rec in records:
+            name = rec.name.replace("_d4d_core.yaml", "").replace("_d4d.yaml", "")
             if project and name != project:
                 continue
             if name not in scopes:
@@ -328,12 +335,36 @@ def scope_cmd(project, do_check, strict, manifest):
             status, why = check_record(name, rec, m)
             if status == "out_of_scope":
                 bad.append((rec, why))
+            elif status == "unreadable":
+                unreadable.append((rec, why))
+                continue
+            refs = foreign_references(name, rec, m)
+            if refs:
+                absorbed.append((rec, refs))
         click.echo(f"\n{checked} record(s) checked against the declaration")
         for rec, why in bad:
             click.echo(f"   ❌ {rec}\n      {why}")
         if not bad:
             click.echo("   ✓ none is about a dataset its project declares "
                        "distinct")
+        for rec, why in unreadable:
+            click.echo(f"   ⚠️  unreadable {rec}: {why}")
+
+        # Reported, never fatal (#441). `check_record` settles what a record is
+        # *about*; this is the shape one level down — the other dataset placed
+        # inside this one's resources or distribution. Citing the related
+        # dataset's page is legitimate, absorbing it is not, and the line
+        # between them is a judgement this surfaces rather than settles.
+        if absorbed:
+            n = sum(len(r) for _, r in absorbed)
+            click.echo(f"\n⚠️  {len(absorbed)} record(s), {n} value(s) place a "
+                       "related-but-distinct dataset outside its declared slot:")
+            for rec, refs in absorbed:
+                click.echo(f"   {rec}")
+                for r in refs[:4]:
+                    click.echo(f"      {r['path']} = {r['value']}")
+                if len(refs) > 4:
+                    click.echo(f"      … {len(refs) - 4} more")
         # Say what the check does not cover. A record can stay in scope by its
         # `id` and still describe the other cohort in its prose, which is what
         # #292 actually looked like; the identifier is the part a rule can

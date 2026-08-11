@@ -359,9 +359,15 @@ manifest declaration is checkable (`check_record` catches a record that
 identifies itself as a dataset its project declares distinct) and inherited by
 any project that declares one.
 
-The check reads the record's `id` only. A record can stay in scope by its
-identifier and still discuss the related dataset in prose — which is legitimate,
-and is what `related_datasets` is for.
+`--check` reports two things. The **verdict** is on the record's `id`:
+`out_of_scope` when a record identifies itself as a dataset its project declares
+distinct. Separately and never fatally, it lists values where a related-but-
+distinct dataset's identifiers appear **outside** the declared slot (#441) — 32
+records place the pediatric release inside VOICE's own `resources`,
+`distribution_formats[].access_urls` and `file_collections[].download_url`.
+Citing the related dataset's page is legitimate; absorbing it into this
+dataset's distribution is not, and the line between them is a judgement the
+check surfaces rather than settles.
 
 ## Canonical Prompt Registry
 
