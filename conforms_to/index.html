@@ -391,7 +391,7 @@
 
 
 <h1 id="slot-conforms_to">Slot: conforms_to</h1>
-<p><em>An established standard, specification, or schema to which the resource conforms.</em></p>
+<p><em>A standard or specification the <strong>dataset's own content</strong> follows — an imaging, waveform, file-layout or common-data-model standard such as DICOM, WFDB, BIDS, OMOP CDM, Open mHealth or ESDS. Not the schema this datasheet is written in: that is <code>conforms_to_schema</code>.</em></p>
 <p>URI: <a href="http://purl.org/dc/terms/conformsTo">dcterms:conformsTo</a>
 Alias: conforms_to</p>
 <!-- no inheritance hierarchy -->
@@ -407,23 +407,8 @@ Alias: conforms_to</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Information/">Information</a></td>
-<td>Grouping for datasets and data files</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td><a href="../FileCollection/">FileCollection</a></td>
+<td>A collection of files with shared characteristics (format, purpose, structure...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -432,8 +417,23 @@ Alias: conforms_to</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../File/">File</a></td>
+<td>A single file within a dataset or file collection</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Information/">Information</a></td>
+<td>Grouping for datasets and data files</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -454,7 +454,7 @@ Alias: conforms_to</p>
 <tbody>
 <tr>
 <td>d4d:docExample</td>
-<td>https://www.w3.org/TR/vocab-dcat-3/</td>
+<td>Brain Imaging Data Structure (BIDS) v1.9.0</td>
 </tr>
 </tbody>
 </table>
@@ -488,9 +488,11 @@ Alias: conforms_to</p>
 annotations:
   d4d:docExample:
     tag: d4d:docExample
-    value: https://www.w3.org/TR/vocab-dcat-3/
-description: An established standard, specification, or schema to which the resource
-  conforms.
+    value: Brain Imaging Data Structure (BIDS) v1.9.0
+description: 'A standard or specification the **dataset''s own content** follows —
+  an imaging, waveform, file-layout or common-data-model standard such as DICOM, WFDB,
+  BIDS, OMOP CDM, Open mHealth or ESDS. Not the schema this datasheet is written in:
+  that is `conforms_to_schema`.'
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: dcterms:conformsTo

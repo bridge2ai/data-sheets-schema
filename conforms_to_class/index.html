@@ -391,7 +391,7 @@
 
 
 <h1 id="slot-conforms_to_class">Slot: conforms_to_class</h1>
-<p><em>The specific class or type within a schema to which the resource conforms.</em></p>
+<p><em>The class within <code>conforms_to_schema</code> that this record instantiates — <code>Dataset</code> for a full datasheet, <code>CoreDataset</code> for a core one. Like <code>conforms_to_schema</code>, a statement about the record rather than the data.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/conformsToClass">d4d:conformsToClass</a>
 Alias: conforms_to_class</p>
 <!-- no inheritance hierarchy -->
@@ -407,23 +407,8 @@ Alias: conforms_to_class</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Information/">Information</a></td>
-<td>Grouping for datasets and data files</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td><a href="../FileCollection/">FileCollection</a></td>
+<td>A collection of files with shared characteristics (format, purpose, structure...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -432,8 +417,23 @@ Alias: conforms_to_class</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../File/">File</a></td>
+<td>A single file within a dataset or file collection</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Information/">Information</a></td>
+<td>Grouping for datasets and data files</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -493,7 +493,9 @@ annotations:
   d4d:docExample:
     tag: d4d:docExample
     value: Dataset
-description: The specific class or type within a schema to which the resource conforms.
+description: The class within `conforms_to_schema` that this record instantiates —
+  `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`,
+  a statement about the record rather than the data.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 broad_mappings:
 - dcterms:conformsTo

@@ -404,19 +404,19 @@
 <tr>
 <td><a href="../conforms_to/">conforms_to</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>An established standard, specification, or schema to which the resource confo...</td>
+<td>A standard or specification the <strong>dataset's own content</strong> follows — an imagin...</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../conforms_to_class/">conforms_to_class</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The specific class or type within a schema to which the resource conforms</td>
+<td>The class within <code>conforms_to_schema</code> that this record instantiates — `Datase...</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../conforms_to_schema/">conforms_to_schema</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The schema or data model to which the resource conforms</td>
+<td>The metadata schema <strong>this record itself</strong> is written in — normally `https://...</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
@@ -864,9 +864,11 @@ attributes:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: https://www.w3.org/TR/vocab-dcat-3/
-    description: An established standard, specification, or schema to which the resource
-      conforms.
+        value: Brain Imaging Data Structure (BIDS) v1.9.0
+    description: 'A standard or specification the **dataset''s own content** follows
+      — an imaging, waveform, file-layout or common-data-model standard such as DICOM,
+      WFDB, BIDS, OMOP CDM, Open mHealth or ESDS. Not the schema this datasheet is
+      written in: that is `conforms_to_schema`.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:conformsTo
@@ -881,8 +883,9 @@ attributes:
       d4d:docExample:
         tag: d4d:docExample
         value: Dataset
-    description: The specific class or type within a schema to which the resource
-      conforms.
+    description: The class within `conforms_to_schema` that this record instantiates
+      — `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`,
+      a statement about the record rather than the data.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     broad_mappings:
     - dcterms:conformsTo
@@ -899,7 +902,9 @@ attributes:
       d4d:docExample:
         tag: d4d:docExample
         value: https://w3id.org/bridge2ai/data-sheets-schema
-    description: The schema or data model to which the resource conforms.
+    description: The metadata schema **this record itself** is written in — normally
+      `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet,
+      not about the data it describes; a standard the *data* follows belongs in `conforms_to`.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     broad_mappings:
     - dcterms:conformsTo
