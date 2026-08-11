@@ -449,8 +449,13 @@ def check_cmd(method, label, project, strict):
             # says `match` and means it. Only the pin can tell that the file was
             # not a published version of its condition.
             cst, cwhy = canonical_prompt_status(run.method, run.label, proj)
+            # `pre_registry` is reported like `superseded` and `unpinned`,
+            # never failed: the bytes are attested by git at the run's own
+            # commit (#399), which the registry could not have pinned because
+            # it postdates the run. Failing it would make recovering honest
+            # historical evidence worse than leaving the record blank.
             if cst in ("uncanonical", "missing", "unpinned",
-                       "superseded"):
+                       "superseded", "pre_registry"):
                 uncanonical.append({"project": proj, "label": run.label,
                                     "status": cst, "reason": cwhy})
 

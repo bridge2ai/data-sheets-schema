@@ -1154,7 +1154,23 @@ def canonical_prompt_status(method: str, label: str, project: str,
     if not p.exists():
         return "absent", "no provenance record"
     data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
-    files = ((data.get("prompts") or {}).get("files")) or []
+    prompts = data.get("prompts") or {}
+
+    # A prompt recovered from git at the run's own commit (#399) is attested by
+    # a different instrument than the pin registry, and predates it. Reporting
+    # it `uncanonical` would be literally true — the registry never pinned those
+    # bytes, because it did not exist — but would put it in the same bucket as
+    # the `cp`-to-another-path bypass #436 is about, where the bytes are
+    # attested by nothing. These are checkable: `git show <commit>:<path>`
+    # reproduces the recorded hash exactly.
+    recovery = prompts.get("recovery")
+    if isinstance(recovery, dict) and recovery.get("commit"):
+        return "pre_registry", (
+            f"recovered from {recovery['commit'][:12]} as of "
+            f"{recovery.get('as_of')}; the bytes are attested by git rather "
+            "than by the pin registry, which postdates this run")
+
+    files = prompts.get("files") or []
     seen: list[tuple[str, str | None]] = []
     paths: set[str] = set()
     for entry in files:

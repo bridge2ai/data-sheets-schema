@@ -70,7 +70,11 @@ INPUT_HASH = "md5"
 HEADER_FIELDS = ("Generation Method", "Agent runtime", "Provider", "Model",
                  "Reasoning effort", "Mode", "Temperature", "Generated",
                  "Source bundle", "Source", "Source manifest", "Schema",
-                 "Prior D4D factual reuse", "Arm")
+                 "Prior D4D factual reuse", "Arm",
+                 # `Prompt` was absent, so `parse_header` silently discarded
+                 # the one field a historical prompt could be recovered from
+                 # (#399). 15 records carry it and read as carrying nothing.
+                 "Prompt", "Prompt components")
 
 
 def _md5(path: Path) -> str | None:
@@ -1207,3 +1211,130 @@ def strip_output_hashes(path: Path, *, dry_run: bool = True) -> dict[str, Any]:
     if removed and not dry_run:
         ProvenanceRecord(data=data).write(path)
     return {"path": str(path), "removed": removed, "dry_run": dry_run}
+
+
+HISTORICAL_RECOVERED = "recovered"
+HISTORICAL_NO_HEADER = "no_prompt_header"
+HISTORICAL_NO_COMMIT = "no_commit_at_or_before_run"
+HISTORICAL_ALREADY = "already_recorded"
+
+
+def _prompt_path_from_header(value: str | None) -> str | None:
+    """The path out of a `# Prompt:` header line.
+
+    Headers carry a trailing gloss — "… (identical for all projects)" — which
+    is prose about the condition, not part of the path.
+    """
+    if not value:
+        return None
+    path = value.split("(", 1)[0].strip()
+    return path or None
+
+
+def resolve_historical_prompt(project: str, method: str, label: str,
+                              concat_dir: Path = CONCAT_DIR) -> dict[str, Any]:
+    """Recover the prompt a pre-#395 agentic run consumed, as of its own commit.
+
+    `d4d provenance record --prompt` records prompts for live runs; `backfill`
+    has no equivalent, so every agentic record written before it carries
+    ``prompts: null`` (#399).
+
+    This is a resolver rather than a flag, for the reason the issue gives: the
+    honest answer differs per run, and an operator asserting a hash by hand is
+    exactly what should not be possible.
+
+    **The hash is of the bytes at the run's commit, never today's.** That is not
+    a hypothetical precaution here — `d4d_generic_arm_prompt.md` was edited on
+    2026-07-29, the day after the 15 runs that name it, and the two versions
+    differ by 16 lines:
+
+        at 2026-07-28 (what those runs read)   7e9a67f7…
+        at 2026-07-29 and today                0fbc626b…
+
+    Recording today's hash would assert that a 2026-07-28 run used a prompt
+    which did not yet exist.
+
+    Four outcomes. Only ``recovered`` carries a hash; the rest say why not,
+    because "unrecoverable" and "not looked at" must not read alike.
+    """
+    from data_sheets_schema.runs import record_path
+
+    record = record_path_for(project, method, label, concat_dir)
+    if record.exists():
+        try:
+            existing = yaml.safe_load(record.read_text(encoding="utf-8")) or {}
+        except (yaml.YAMLError, OSError, UnicodeDecodeError):
+            existing = {}
+        if existing.get("prompts"):
+            return {"status": HISTORICAL_ALREADY}
+
+    full = record_path(method, label, project, concat_dir)
+    declared = _prompt_path_from_header(parse_header(full).get("Prompt"))
+    if not declared:
+        return {"status": HISTORICAL_NO_HEADER,
+                "note": ("no `# Prompt:` header; the prompt was supplied inline "
+                         "and is not recoverable from any artefact")}
+
+    run_date = label[:10]
+    try:
+        commit = subprocess.run(
+            ["git", "log", "-1", "--format=%H",
+             f"--until={run_date} 23:59:59", "--", declared],
+            capture_output=True, text=True, check=False).stdout.strip()
+    except OSError:
+        commit = ""
+    if not commit:
+        return {"status": HISTORICAL_NO_COMMIT, "path": declared,
+                "note": (f"{declared} has no commit at or before {run_date}, so "
+                         "the bytes that run consumed cannot be recovered")}
+
+    blob = subprocess.run(["git", "show", f"{commit}:{declared}"],
+                          capture_output=True, check=False)
+    if blob.returncode != 0:
+        return {"status": HISTORICAL_NO_COMMIT, "path": declared,
+                "note": f"{declared} is absent from {commit[:12]}"}
+
+    return {"status": HISTORICAL_RECOVERED,
+            "path": repo_relative(declared),
+            "sha256": hashlib.sha256(blob.stdout).hexdigest(),
+            "bytes": len(blob.stdout),
+            "commit": commit,
+            "as_of": run_date}
+
+
+def apply_historical_prompt(project: str, method: str, label: str,
+                            concat_dir: Path = CONCAT_DIR) -> dict[str, Any] | None:
+    """Write a recovered prompt into a record that carries ``prompts: null``.
+
+    Records what was recovered *and how*: the commit, the date it was resolved
+    as of, and a note saying the hash is of the bytes at that commit rather than
+    of the file today. Without that a reader cannot tell this apart from a live
+    capture, and the two are not the same evidence.
+    """
+    resolved = resolve_historical_prompt(project, method, label, concat_dir)
+    if resolved.get("status") != HISTORICAL_RECOVERED:
+        return None
+
+    path = record_path_for(project, method, label, concat_dir)
+    text = path.read_text(encoding="utf-8")
+    preamble = "".join(itertools.takewhile(lambda ln: ln.startswith("#"),
+                                           text.splitlines(keepends=True)))
+    data = yaml.safe_load(text) or {}
+    data["prompts"] = {
+        "hash_algorithm": PROMPT_HASH,
+        "files": [{"path": resolved["path"], "sha256": resolved["sha256"],
+                   "bytes": resolved["bytes"], "exists": True}],
+        "recovery": {
+            "method": "resolved from the run's `# Prompt:` header",
+            "commit": resolved["commit"],
+            "as_of": resolved["as_of"],
+            "note": ("hash is of the bytes at that commit, not of the file "
+                     "today — this prompt was edited after the run (#399)"),
+        },
+    }
+    new = path.with_suffix(path.suffix + ".tmp")
+    new.write_text(
+        preamble + yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
+        encoding="utf-8")
+    new.replace(path)
+    return resolved

@@ -80,3 +80,16 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d_core.yaml
       sha256: b276728c59be3be492f7deecbe8b618a8d38730a02588d17451989e3dbbe8bee
   recorded_by: d4d runs validate
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt.md
+    sha256: 7e9a67f70fedd7a22b63b3d23e295f317277aa476924aff140746c33890b4ca9
+    bytes: 5269
+    exists: true
+  recovery:
+    method: resolved from the run's `# Prompt:` header
+    commit: fa90b4ec036ff62820aa6708fe130f800d5e7657
+    as_of: '2026-07-28'
+    note: hash is of the bytes at that commit, not of the file today — this prompt
+      was edited after the run (#399)
