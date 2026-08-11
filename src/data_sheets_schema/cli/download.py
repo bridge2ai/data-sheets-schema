@@ -268,3 +268,80 @@ def audit_manifest(project, manifest):
                    f"and cannot be re-fetched by any means")
     if not a['missing_raw'] and not a['missing_processed']:
         click.echo("\n✓ local corpus matches the manifest")
+
+
+@download.command('scope')
+@click.option('--project', type=click.Choice(PROJECTS),
+              help='Limit to one project (default: all)')
+@click.option('--check', 'do_check', is_flag=True,
+              help='Also check generated records against the declaration.')
+@click.option('--strict', is_flag=True,
+              help='Exit non-zero if any record is about a related-but-'
+                   'distinct dataset.')
+@click.option('--manifest', type=click.Path(exists=True),
+              default='data/preprocessed/source_manifest.yaml', show_default=True)
+def scope_cmd(project, do_check, strict, manifest):
+    """What each project's record is about, and whether the records agree.
+
+    Scope is a property of the dataset, not of the prompt (#422). The VOICE
+    launch prompt of 2026-08-07 carried a paragraph naming the project, the
+    pediatric dataset and a file not to read; declaring the same thing here
+    makes it checkable and makes every future dataset inherit the check
+    instead of needing its own paragraph.
+    """
+    require_repo_context("d4d download scope")
+    setup_repo_imports()
+    from data_sheets_schema.scope import (all_scopes, check_manifest,
+                                          check_record, related_ids)
+
+    m = Path(manifest)
+    scopes = all_scopes(m)
+    names = [project] if project else sorted(scopes)
+    for name in names:
+        s = scopes.get(name)
+        if not s:
+            click.echo(f"{name:16} no scope declared", err=True)
+            continue
+        click.echo(f"{name}")
+        click.echo(f"   about     {s.get('referent')}  <{s.get('referent_id')}>")
+        for entry in s.get("related_but_distinct") or []:
+            click.echo(f"   not about {entry.get('name')}  <{entry.get('id')}>")
+            click.echo(f"             express as `{entry.get('express_as')}`"
+                       + (f"; in this bundle as {entry['in_bundle']}"
+                          if entry.get("in_bundle") else ""))
+
+    problems = check_manifest(m)
+    for p in problems:
+        click.echo(f"❌ {p['project']:16} {p['problem']}", err=True)
+
+    bad = []
+    if do_check:
+        from data_sheets_schema.api_runner import CONCAT_DIR
+        checked = 0
+        for rec in sorted(CONCAT_DIR.glob("*/*/*_d4d.yaml")):
+            name = rec.name.replace("_d4d.yaml", "")
+            if project and name != project:
+                continue
+            if name not in scopes:
+                continue
+            checked += 1
+            status, why = check_record(name, rec, m)
+            if status == "out_of_scope":
+                bad.append((rec, why))
+        click.echo(f"\n{checked} record(s) checked against the declaration")
+        for rec, why in bad:
+            click.echo(f"   ❌ {rec}\n      {why}")
+        if not bad:
+            click.echo("   ✓ none is about a dataset its project declares "
+                       "distinct")
+        # Say what the check does not cover. A record can stay in scope by its
+        # `id` and still describe the other cohort in its prose, which is what
+        # #292 actually looked like; the identifier is the part a rule can
+        # settle, and claiming more would be the same overreach as the
+        # paragraph this replaces.
+        if any(related_ids(n, m) for n in names):
+            click.echo("   (checked on the record's `id`; prose that discusses "
+                       "a related dataset is legitimate and not inspected)")
+
+    if problems or (strict and bad):
+        sys.exit(1)

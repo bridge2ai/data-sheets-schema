@@ -64,6 +64,28 @@ neither, because a prompt written for one path was reused verbatim by another.
 - Full schema: `src/data_sheets_schema/schema/data_sheets_schema_all.yaml` (class `Dataset`)
 - Core schema: `src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml` (class `CoreDataset`)
 
+### Scope: what the record is about
+
+The bundle is the evidence. What the record is *about* is declared in the
+`scope:` block of `data/preprocessed/source_manifest.yaml` — the referent, and
+any dataset that is related to it but distinct from it, with the slot that
+carries the relation. Read it with `d4d download scope --project {PROJECT}`.
+
+**A scope constraint goes in the manifest, never in the launch text.** The VOICE
+run of 2026-08-07 was sent a paragraph naming the project, the companion
+pediatric dataset, a file not to read, and the issue number of the last time it
+went wrong (#422). It worked, and it was per-GC adaptation invisible to every
+prompt test, because it lived in the message rather than in a file. If a run
+seems to need a constraint the bundle and the manifest cannot express, that is a
+manifest bug — fix it there, where the next dataset inherits it.
+
+A bundle may legitimately contain sources *about* a related dataset: VOICE's
+does, and the manifest says so (`in_bundle: physionet_pediatric_1_1_0`).
+Represent the relation through the declared slot — `related_datasets` — rather
+than merging the two, and never as a nested object standing in for the other
+dataset's own record. `d4d download scope --check` verifies afterwards that no
+record identifies itself as a dataset its project declares distinct.
+
 ## Outputs (per project)
 
 - Full: `data/d4d_concatenated/claudecode_agent/{VERSION}/{PROJECT}_d4d.yaml`
@@ -487,6 +509,9 @@ reconciliation report rather than pinning the edit to make the check pass.
 - The core file header names both its source-document bundle and full YAML input.
 - Both headers state that prior D4D factual reuse is prohibited.
 - The provenance audit confirms that no older full/core YAML was used.
+- `d4d download scope --check --project {PROJECT}` reports the record in
+  scope: it does not identify itself as a dataset the manifest declares
+  distinct from this project.
 - The core header contains `Phase 4 reconciliation: completed`.
 - The Phase 3/4 reconciliation report is present.
 - The live provenance record is present and its `record_mode` is `live`, and it

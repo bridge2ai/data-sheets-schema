@@ -472,6 +472,7 @@ Acted on the same day:
 | bundles carried curator prose, unequally per project | #421 | **fixed** (#424) |
 | re-recording discarded the validation verdict | #396 | **fixed** (#423) |
 | the launch prompt was typed, not rendered | #419, #422 | **addressed** (#425) |
+| per-GC scope lived in the launch prompt | #422 | **closed** — declared in the manifest |
 | label says `generic-v3`, provenance hashes v1 | #420 | open |
 | `verification_url` still injected; 0 values depend on it | #427 | open, cosmetic |
 | a verdict does not pin the schema it was reached against | #426 | **fixed** |

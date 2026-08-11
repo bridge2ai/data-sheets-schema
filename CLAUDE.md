@@ -336,6 +336,33 @@ make gen-d4d-html
 make d4d-pipeline-{individual|concatenated|full}-gpt5
 ```
 
+## Dataset Scope (what a record is about)
+
+Declared per project in the `scope:` block of
+`data/preprocessed/source_manifest.yaml`, not in any prompt or launch message.
+
+```bash
+d4d download scope --project VOICE        # show the declaration
+d4d download scope --check --strict       # check every record against it
+```
+
+Each entry names the `referent_id` and any `related_but_distinct` dataset, with
+the slot that carries the relation (`express_as: related_datasets`) and, where
+the related dataset's documentation is legitimately in the bundle, the source id
+that carries it (`in_bundle`).
+
+**A scope constraint belongs in the manifest, never in the launch text** (#422).
+The VOICE run of 2026-08-07 was sent a paragraph naming the project, the
+companion pediatric dataset and a file not to read; it worked, and it was per-GC
+adaptation that no future dataset inherits and no prompt test can see. The
+manifest declaration is checkable (`check_record` catches a record that
+identifies itself as a dataset its project declares distinct) and inherited by
+any project that declares one.
+
+The check reads the record's `id` only. A record can stay in scope by its
+identifier and still discuss the related dataset in prose — which is legitimate,
+and is what `related_datasets` is for.
+
 ## Canonical Prompt Registry
 
 Each condition's prompt files are pinned by hash in

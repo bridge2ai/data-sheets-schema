@@ -51,6 +51,91 @@ bundle_hash_history:
       before: e637eb752ee8cab5f9f7a52782250469
       after: 3e5c24df7b46d97204cb007c43b99e92
 
+scope:
+  # What each project's record is *about* (#422). The bundle is the evidence;
+  # this is the referent, and it is declared here because scope is a property
+  # of the dataset rather than of the prompt.
+  #
+  # The VOICE launch prompt for the 2026-08-07 sweep carried a paragraph naming
+  # the project, the pediatric dataset, a file not to read, and the issue number
+  # of the last time it went wrong. It worked, and it was the clearest per-GC
+  # intervention in the pipeline: a quality warning, at the wrong layer, that no
+  # future dataset inherits. This block is the same statement as data, checkable
+  # by `d4d download scope --check` and inherited by every project that declares
+  # one.
+  #
+  # `referent_id` is the identifier a record of this project should carry. Where
+  # a project has no minted dataset DOI its landing page is the identifier, which
+  # is what those records already use. It is documentation, not a naming rule:
+  # nothing fails a record for citing a release DOI instead.
+  #
+  # `related_but_distinct` is the load-bearing part. An empty list means the
+  # question was asked and the answer was none.
+  #
+  # Adding this block changes the manifest's md5, which provenance records under
+  # `inputs.source_manifest`. Nothing re-verifies that field against disk, and
+  # no bundle changed: this is metadata about the selection, not part of it, and
+  # the preprocessor writes no top-level manifest key into a bundle.
+  AI_READI:
+    referent: AI-READI dataset
+    referent_id: https://doi.org/10.60775/fairhub.3
+    referent_note: >-
+      fairhub.1 and fairhub.2 are earlier releases of the same dataset, both
+      documented in the bundle, not separate datasets.
+    related_but_distinct: []
+  CHORUS:
+    referent: CHoRUS dataset
+    referent_id: https://chorus4ai.org/
+    referent_note: >-
+      No dataset DOI appears in any CHORUS source document; the project site is
+      the identifier the records themselves use.
+    related_but_distinct: []
+  CM4AI:
+    referent: CM4AI (Cell Maps for Artificial Intelligence) dataset
+    referent_id: https://cm4ai.org/
+    referent_note: >-
+      The four Dataverse releases in the bundle (B35XWX, F3TD5R, K7TGEM and the
+      June 2026 release) are releases of this dataset, not separate datasets.
+    related_but_distinct: []
+  VOICE:
+    referent: Bridge2AI-Voice dataset (adult)
+    referent_id: https://doi.org/10.13026/37yb-1t42
+    referent_note: >-
+      PhysioNet project-level DOI, recorded in the bundle as "DOI (latest
+      version)". Per-version DOIs for the same dataset: 10.13026/8xbn-nq66
+      (3.1.0), 10.13026/k81f-qr68 (3.0.0), 10.13026/249v-w155 (1.1).
+    related_but_distinct:
+      - id: https://doi.org/10.13026/mf9s-5r03
+        name: Bridge2AI-Voice Pediatric Dataset
+        also_known_as:
+          - https://doi.org/10.13026/h995-bt35
+          - https://physionet.org/content/b2ai-voice-pediatric/1.1.0/
+        manifest_key: VOICE_PEDIATRIC
+        why: >-
+          a separate PhysioNet project with its own DOI, protocol and ethics
+          approval, collected from a distinct cohort at a different site — not a
+          version of the adult dataset
+        in_bundle: physionet_pediatric_1_1_0
+        express_as: related_datasets
+  VOICE_PEDIATRIC:
+    referent: Bridge2AI-Voice Pediatric Dataset
+    referent_id: https://doi.org/10.13026/mf9s-5r03
+    referent_note: >-
+      PhysioNet project-level DOI. Release 1.1.0 is 10.13026/h995-bt35.
+    related_but_distinct:
+      - id: https://doi.org/10.13026/37yb-1t42
+        name: Bridge2AI-Voice dataset (adult)
+        also_known_as:
+          - https://doi.org/10.13026/8xbn-nq66
+          - https://doi.org/10.13026/k81f-qr68
+          - https://doi.org/10.13026/249v-w155
+        manifest_key: VOICE
+        why: >-
+          the adult cohort is a separate PhysioNet project under its own
+          protocol; the pediatric bundle shares five of its six sources with it,
+          so the overlap is in the evidence, not in the referent
+        express_as: related_datasets
+
 default_minimum_characters: 500
 
 projects:
