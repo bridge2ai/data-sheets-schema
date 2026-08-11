@@ -207,23 +207,33 @@ This section said v3 was "drafted, wired and tested but unrun", then said it had
 every run that actually hashed `d4d_generic_arm_prompt_v3.md`, against the v2
 series it would be compared with:
 
-| label | prompt | schema digest | route | coverage |
+Replicate counts are per project, measured from the provenance records.
+
+| label | prompt | schema digest | route | replicates |
 |---|---|---|---|---|
-| `2026-07-31_…generic-v2_rep{1,2,3}` | v2 | `34d24ff3` (1.0.0) | `google/claude-opus-5-high` | 4 projects × 3 |
-| `2026-08-05_…generic-v3_rep1` | v3 | `b065e1cd` (1.0.0) | `google/claude-opus-5-high` | AI_READI, CHORUS × 1 |
-| `2026-08-05_…1m-generic-v3_rep{1,2,3}` | v3 | `b065e1cd` (1.0.0) | `claude-opus-5` (1m) | AI_READI × 3, CHORUS × 1 |
-| `2026-08-06_…1m-generic-v3-schema2_rep{1,2,3}` | v3 | `583d79c1` (2.0.0) | `claude-opus-5` (1m) | AI_READI, CHORUS × 2 |
-| `2026-08-07_…claudecode-generic-v3_rep{1,2,3}` | **generic (v1)** | *none recorded* (2.0.0) | `claude-opus-5` | 5 projects × 3 |
+| `2026-07-31_…generic-v2` | v2 | `34d24ff3` (1.0.0) | `google/claude-opus-5-high` | AI_READI 3, CHORUS 3, CM4AI 3, VOICE 3 |
+| `2026-08-05_…generic-v3` | v3 | `b065e1cd` (1.0.0) | `google/claude-opus-5-high` | AI_READI 1, CHORUS 1 |
+| `2026-08-05_…1m-generic-v3` | v3 | `b065e1cd` (1.0.0) | `claude-opus-5` (1m) | AI_READI 3, CHORUS 1 |
+| `2026-08-06_…1m-generic-v3-schema2` | v3 | `583d79c1` (2.0.0) | `claude-opus-5` (1m) | AI_READI 3, CHORUS 3 |
+| `2026-08-07_…claudecode-generic-v3` | **generic (v1)** | *none recorded* (2.0.0) | `claude-opus-5` | all five, 3 each |
+
+v3 totals: **AI_READI 7, CHORUS 5, CM4AI 0, VOICE 0, VOICE_PEDIATRIC 0.**
 
 **The v2-vs-v3 comparison is not merely unwritten — it is not derivable.** Three
 independent defects, any one sufficient:
 
-1. **Coverage.** CM4AI, VOICE and VOICE_PEDIATRIC have never run under v3.
+1. **Coverage.** CM4AI, VOICE and VOICE_PEDIATRIC have never run under v3, so no
+   comparison covering the corpus is possible.
 2. **Schema confound.** Every v3 label sits on a different digest than v2's
    `34d24ff3`, and the delta includes the trap-slot work (#376, #382) that moves
    the exact defect classes `form_defects` counts.
 3. **Route confound.** Three of four v3 labels ran `claude-opus-5` (1m) where v2
    ran `google/claude-opus-5-high`.
+
+Note the shape of 2 and 3 together: the only v3 series with three replicates on
+two projects is `2026-08-06_…1m-generic-v3-schema2`, which is confounded against
+v2 on **both** axes at once. The best-powered v3 data is also the most
+confounded (#460).
 
 `notes/generic_v3_analysis_plan.md` pre-registered "same four projects, three
 replicates, same model and settings as the v1 and v2 series." No label meets it.

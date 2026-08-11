@@ -10,6 +10,12 @@ That plan is not retracted — its question is still the right *mechanism*
 question — but it cannot be answered from anything on disk, for the reasons in
 #458, and answering it would require generating a v2 arm as well.
 
+v3 coverage on disk, measured per project: **AI_READI 7 replicates, CHORUS 5,
+CM4AI 0, VOICE 0, VOICE_PEDIATRIC 0.** The only v3 series carrying three
+replicates on two projects is `2026-08-06_…1m-generic-v3-schema2`, which is
+confounded against the v2 series on both schema and route at once — so the
+best-powered v3 data is also the most confounded (#460).
+
 ## Why the pairing changed, from v2-vs-v3 to v1-vs-v3
 
 The registered plan asked for v2 against v3, because the two differ on one axis
