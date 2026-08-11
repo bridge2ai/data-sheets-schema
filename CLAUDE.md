@@ -349,14 +349,19 @@ d4d api prompts pin --file <path> --reason '<why this is the text>'
 **Editing a prompt file without rotating its pin fails
 `tests/test_prompt_registry.py` and blocks `d4d api run`.** That is deliberate:
 the edit and the declaration that it is now the condition's canonical text are
-two acts, and the second is small enough for a reviewer to read.
+two acts, and the second is small enough for a reviewer to read. Commit the
+prompt edit before pinning it — a pin records the commit it was taken at and
+offers `git show <commit>:<path>` as the audit route, so pinning uncommitted
+bytes is refused.
 
 Why it exists (#432): the render gate re-renders a record's spec and compares it
 to the recorded instruction, which catches text edited *after* rendering. Text
 edited into the prompt file *before* rendering re-renders to itself and reports
 `match`. The pin is the only value the file can be checked against. `d4d runs
-check` reports `uncanonical` — fatal under `--strict` — when a record hashes a
-prompt that was never pinned; `superseded` (pinned once, since rotated) and
+check` is fatal under `--strict` on `uncanonical` (a prompt that was never
+pinned, or a labelled condition whose record hashes no condition prompt at all —
+the `cp`-to-another-path bypass, #436) and on `missing` (a pinned path the
+record hashed nothing for). `superseded` (pinned once, since rotated) and
 `unpinned` are reported and not failed.
 
 This is not tamper-proofing. Whoever can edit a prompt can rotate its pin.

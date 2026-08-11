@@ -998,13 +998,16 @@ def canonical_prompt_status(method: str, label: str, project: str,
     that catches it: is the hash the record already carries for each prompt
     file one this repo ever declared canonical for that condition?
 
-    Five outcomes; only one is a finding:
+    Six outcomes; two are findings:
 
     - ``canonical``   — every recorded prompt hash is the current pin.
     - ``superseded``  — one or more were pinned once and have since been
       rotated. Ordinary evolution; v4 exists, v5 will.
-    - ``uncanonical`` — a hash that was never pinned. The file that produced
-      this run was not a published version of its condition.
+    - ``uncanonical`` — a hash that was never pinned, or a labelled condition
+      whose record hashes no condition prompt at all (#436). The text that
+      produced this run was not a published version of its condition.
+    - ``missing``     — a pinned path the record hashed nothing for: the run
+      named a prompt file it did not read (#437).
     - ``unpinned``    — no pin covers one of the paths. Absence of evidence.
     - ``absent``      — the record hashes no prompt file at all, which is 88 of
       the corpus and predates the pin.
@@ -1019,15 +1022,40 @@ def canonical_prompt_status(method: str, label: str, project: str,
     data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
     files = ((data.get("prompts") or {}).get("files")) or []
     seen: list[tuple[str, str | None]] = []
+    paths: set[str] = set()
     for entry in files:
         if not isinstance(entry, dict) or not entry.get("path"):
             continue
+        paths.add(_pr.normalise(entry["path"]))
         seen.append(_pr.status_of_hash(entry["path"], entry.get("sha256")))
     if not seen:
         return "absent", None
+
+    # Coverage, not just agreement (#436). The pin is keyed on the path, so a
+    # copy of a prompt at some other path is `unpinned` — reported, not fatal —
+    # and `condition_of` cannot name its condition either, because it matches on
+    # filename. Three checks, all silent, and the label still claims a
+    # condition. So: if the label claims one, the record must hash *some*
+    # pinned condition prompt.
+    #
+    # Deliberately not "the prompt of the condition the label claims". Sixteen
+    # records in the corpus are labelled `generic-v3` and hash the pinned v1 —
+    # that is #420, it is already reported by `prompt_condition_mismatch`, and
+    # it is reported and never fatal on purpose. Requiring the exact file would
+    # fail those retroactively through a side door.
+    from data_sheets_schema.api_runner import CONDITION_PROMPTS, TUNED_PROMPT
+    if condition_from_label(label):
+        known = {_pr.normalise(p) for p in
+                 (*CONDITION_PROMPTS.values(), TUNED_PROMPT)}
+        if not (paths & known):
+            return _pr.UNCANONICAL, (
+                f"the label claims condition {condition_from_label(label)!r} "
+                f"but the record hashes no condition prompt: {sorted(paths)}. "
+                "A prompt outside the registry is one nothing vouches for")
+
     # Worst-first: one uncanonical file is the verdict regardless of how many
     # of its neighbours are fine.
-    for wanted in (_pr.UNCANONICAL, _pr.UNPINNED, _pr.SUPERSEDED):
+    for wanted in (_pr.UNCANONICAL, _pr.MISSING, _pr.UNPINNED, _pr.SUPERSEDED):
         hits = [why for status, why in seen if status == wanted]
         if hits:
             return wanted, "; ".join(w for w in hits if w) or None

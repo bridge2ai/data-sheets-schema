@@ -17,9 +17,13 @@ the vocabulary to say which of four things a hash is.
   study's whole point is that they do so visibly and in order.
 - ``uncanonical`` — a hash that was never pinned. The finding: whatever
   produced it was not a published version of its condition.
-- ``unpinned``    — no pin exists for that path. Reported, never failed; the
-  registry is not required to be exhaustive and a missing pin is an absence of
-  evidence.
+- ``missing``     — pinned, but there are no bytes to check: the file has been
+  deleted, or a record named it and hashed nothing. Evidence of an absence, as
+  against the next one (#437).
+- ``unpinned``    — no pin exists for that path. Reported, never failed on the
+  record side; the registry is not required to be exhaustive and a missing pin
+  is an absence of evidence. On the working-tree side it *is* failed, because a
+  condition prompt nobody pinned is text that was never declared.
 
 **What this does not do.** The pin lives in the repo, so anyone who can edit a
 prompt file can also rotate its pin. This is not tamper-proofing and nothing
@@ -47,6 +51,10 @@ CANONICAL = "canonical"
 SUPERSEDED = "superseded"
 UNCANONICAL = "uncanonical"
 UNPINNED = "unpinned"
+# Pinned, but there are no bytes to check: the file has been deleted, or the
+# record named it and hashed nothing. Distinct from `unpinned`, which is an
+# absence of evidence — this is evidence of an absence (#437).
+MISSING = "missing"
 
 
 def sha256_of(path: Path) -> str | None:
@@ -102,7 +110,9 @@ def status_of_hash(path: str | Path, sha: str | None,
     if entry is None:
         return UNPINNED, f"no canonical hash pinned for {normalise(path)}"
     if not sha:
-        return UNPINNED, "no hash recorded to compare"
+        return MISSING, (f"{normalise(path)} is pinned, but no hash was "
+                         "recorded for it — the run named a prompt file it did "
+                         "not read")
     if sha == entry.get("sha256"):
         return CANONICAL, None
     for old in entry.get("superseded") or []:
@@ -128,7 +138,13 @@ def disk_status(path: str | Path,
     """
     sha = sha256_of(Path(path))
     if sha is None:
-        return UNPINNED, f"{normalise(path)} is not on disk"
+        # A pinned file that has been deleted is not an absence of evidence:
+        # the condition's declared text is gone, which is a stronger finding
+        # than never having pinned it (#437).
+        if entry_for(path, registry) is not None:
+            return MISSING, (f"{normalise(path)} is pinned but not on disk; "
+                             "the declared text of its condition is gone")
+        return UNPINNED, f"{normalise(path)} is neither pinned nor on disk"
     return status_of_hash(path, sha, registry)
 
 
@@ -165,13 +181,31 @@ def check_disk(paths: list[Path] | None = None,
     return rows
 
 
-def _head_commit() -> str | None:
+def _git(*args: str) -> str | None:
+    """Run a git command, or None if git cannot answer (not a repo, no git)."""
     try:
-        out = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
-                             text=True, timeout=10)
+        out = subprocess.run(["git", *args], capture_output=True, text=True,
+                             timeout=10)
     except (OSError, subprocess.SubprocessError):
         return None
-    return out.stdout.strip() or None if out.returncode == 0 else None
+    return out.stdout if out.returncode == 0 else None
+
+
+def _head_commit() -> str | None:
+    out = _git("rev-parse", "HEAD")
+    return (out or "").strip() or None
+
+
+def _is_dirty(path: Path) -> bool:
+    """Does the working tree differ from HEAD for this file?
+
+    `pinned_at_commit` is offered as the audit route — `git show <commit>:<path>`
+    should reproduce the pinned bytes. Pinning an uncommitted edit would name a
+    commit that hashes to something else, and produce the wrong answer for
+    exactly the case the registry exists to catch (#438).
+    """
+    out = _git("status", "--porcelain", "--", str(path))
+    return bool((out or "").strip())
 
 
 def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
@@ -193,6 +227,13 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
     sha = sha256_of(p)
     if sha is None:
         raise FileNotFoundError(f"{p} is not on disk; nothing to pin")
+    if _is_dirty(p):
+        raise ValueError(
+            f"{p} has uncommitted changes. Commit the prompt first, then pin "
+            "it: the pin records the commit it was taken at and offers "
+            "`git show <commit>:<path>` as the way to audit it, which is false "
+            "for bytes that are not in history (#438). A canonical text that "
+            "cannot be found in the repository's history is not canonical.")
     today = today or _dt.date.today().isoformat()
 
     data = load(registry)

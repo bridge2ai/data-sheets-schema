@@ -369,7 +369,8 @@ def prompts_check_cmd(strict):
     bad = [r for r in rows if r["status"] != pr.CANONICAL]
     for r in rows:
         mark = {"canonical": "✓", "superseded": "⚠️ ",
-                "uncanonical": "❌", "unpinned": "❌"}[r["status"]]
+                "uncanonical": "❌", "unpinned": "❌",
+                "missing": "❌"}[r["status"]]
         click.echo(f" {mark} {r['status']:12} {r['path']}")
         if r["reason"]:
             click.echo(f"       {r['reason']}")

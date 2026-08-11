@@ -79,6 +79,23 @@ class TestStatusOfARecordedHash(unittest.TestCase):
         self.assertEqual(pr.UNCANONICAL, st)
         self.assertIn("arm.md", why)
 
+    def test_a_deleted_pinned_file_is_missing_not_unpinned(self):
+        """#437. A pinned file that is gone is evidence of an absence, not an
+        absence of evidence — the condition's declared text no longer exists."""
+        self.prompt.unlink()
+        st, why = pr.disk_status(self.prompt, self.reg)
+        self.assertEqual(pr.MISSING, st)
+        self.assertIn("pinned but not on disk", why)
+
+    def test_a_pinned_path_with_no_recorded_hash_is_missing(self):
+        st, why = pr.status_of_hash(self.prompt, None, self.reg)
+        self.assertEqual(pr.MISSING, st)
+        self.assertIn("did not read", why)
+
+    def test_an_unpinned_absent_path_stays_unpinned(self):
+        st, _ = pr.disk_status(self.root / "never-existed.md", self.reg)
+        self.assertEqual(pr.UNPINNED, st)
+
 
 class TestPinning(unittest.TestCase):
     def setUp(self):
@@ -145,6 +162,49 @@ class TestPinning(unittest.TestCase):
             pr.pin(self.root / "gone.md", "why", registry=self.reg)
 
 
+class TestPinningUncommittedBytes(unittest.TestCase):
+    """#438. `pinned_at_commit` is offered as the audit route — `git show
+    <commit>:<path>` should reproduce the pinned bytes. Pinning an uncommitted
+    edit would name a commit that hashes to something else, and be wrong for
+    exactly the case the registry exists to catch."""
+
+    def setUp(self):
+        import subprocess
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.cwd = os.getcwd()
+        self.addCleanup(os.chdir, self.cwd)
+        self.addCleanup(self.tmp.cleanup)
+        os.chdir(self.root)
+
+        def git(*a):
+            subprocess.run(["git", *a], check=True, capture_output=True)
+
+        git("init", "-q")
+        git("config", "user.email", "t@example.org")
+        git("config", "user.name", "t")
+        self.prompt = Path("arm.md")
+        self.prompt.write_text("committed\n")
+        git("add", "arm.md")
+        git("commit", "-qm", "add")
+        self.reg = Path("canonical.yaml")
+
+    def test_a_clean_file_pins_and_the_commit_reproduces_it(self):
+        import subprocess
+        res = pr.pin(self.prompt, "initial", registry=self.reg)
+        commit = pr.entry_for(self.prompt, self.reg)["pinned_at_commit"]
+        blob = subprocess.run(["git", "show", f"{commit}:arm.md"],
+                              capture_output=True, check=True).stdout
+        self.assertEqual(hashlib.sha256(blob).hexdigest(), res["sha256"])
+
+    def test_an_uncommitted_edit_is_refused(self):
+        self.prompt.write_text("uncommitted edit\n")
+        with self.assertRaises(ValueError) as ctx:
+            pr.pin(self.prompt, "trying", registry=self.reg)
+        self.assertIn("Commit the prompt first", str(ctx.exception))
+        self.assertFalse(self.reg.exists(), "nothing should have been written")
+
+
 class TestTheRealRegistry(unittest.TestCase):
     """The CI gate. Editing a prompt file without rotating its pin fails here —
     which is the whole mechanism: the edit and the declaration that it is now
@@ -173,6 +233,10 @@ class TestTheRecordGate(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
         self.cwd = os.getcwd()
+        # Registered before the chdir: a setUp that raises after it would
+        # otherwise skip tearDown and leave the whole suite in a temp dir.
+        self.addCleanup(os.chdir, self.cwd)
+        self.addCleanup(self.tmp.cleanup)
         os.chdir(self.root)
         # The registry path is repo-relative, so a temp root plus chdir gives a
         # self-contained registry without patching module constants.
@@ -186,9 +250,6 @@ class TestTheRecordGate(unittest.TestCase):
         self.dir = self.concat / f"{self.method}_core" / self.label
         self.dir.mkdir(parents=True)
 
-    def tearDown(self):
-        os.chdir(self.cwd)
-        self.tmp.cleanup()
 
     def _write_record(self, files, request=None):
         rec = {"record_mode": "live", "prompts": {"hash_algorithm": "sha256",
@@ -224,6 +285,44 @@ class TestTheRecordGate(unittest.TestCase):
 
     def test_a_missing_record_is_absent(self):
         self.assertEqual("absent", self._status()[0])
+
+    def test_a_prompt_copied_to_another_path_does_not_escape_the_pin(self):
+        """#436. The pin is keyed on path, so `cp` was the whole bypass: an
+        edited copy is `unpinned` (not fatal), `condition_of` cannot name its
+        condition, and the label still claims one. Coverage closes it."""
+        evil = Path("my_prompt_copy.md")
+        evil.write_text(self.prompt.read_text() + "\nCRITICAL SCOPE BOUNDARY\n")
+        self._write_record([{"path": str(evil), "sha256": pr.sha256_of(evil)}])
+        status, why = self._status()
+        self.assertEqual(pr.UNCANONICAL, status)
+        self.assertIn("hashes no condition prompt", why)
+
+    def test_a_label_naming_no_condition_is_not_second_guessed(self):
+        """Labels predating the convention name no condition. Failing them
+        would punish history for a rule that postdates it."""
+        from data_sheets_schema.runs import canonical_prompt_status
+        label = "2026-08-10_unlabelled_rep1"
+        d = self.concat / f"{self.method}_core" / label
+        d.mkdir(parents=True)
+        evil = Path("copy.md")
+        evil.write_text("anything\n")
+        (d / "P_provenance.yaml").write_text(yaml.safe_dump(
+            {"prompts": {"files": [{"path": str(evil),
+                                    "sha256": pr.sha256_of(evil)}]}}))
+        self.assertEqual(pr.UNPINNED,
+                         canonical_prompt_status(self.method, label, "P",
+                                                 self.concat)[0])
+
+    def test_the_known_label_condition_mismatch_stays_non_fatal(self):
+        """Sixteen corpus records are labelled `generic-v3` and hash the pinned
+        v1. That is #420, reported by `prompt_condition_mismatch` and never
+        fatal on purpose — requiring the *claimed* condition's exact file would
+        fail them retroactively through a side door."""
+        v1 = Path("src/download/prompts/d4d_generic_arm_prompt.md")
+        v1.write_text("# v1\n\n## Prompt body\nolder.\n")
+        pr.pin(v1, "v1", today="2026-08-10")
+        self._write_record([{"path": str(v1), "sha256": pr.sha256_of(v1)}])
+        self.assertEqual((pr.CANONICAL, None), self._status())
 
     def test_the_pre_render_edit_the_render_gate_cannot_see(self):
         """#432's reproduction, both gates side by side.
@@ -297,6 +396,8 @@ class TestTheCLI(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
         self.cwd = os.getcwd()
+        self.addCleanup(os.chdir, self.cwd)
+        self.addCleanup(self.tmp.cleanup)
         os.chdir(self.root)
         self.prompt = Path("src/download/prompts/d4d_generic_arm_prompt.md")
         self.prompt.parent.mkdir(parents=True)
@@ -306,9 +407,6 @@ class TestTheCLI(unittest.TestCase):
             p.write_text(f"# {name}\n\n## Prompt body\nbody\n")
         self.prompt.with_name("d4d_tuned_arm_prompt.md").write_text("# tuned\n")
 
-    def tearDown(self):
-        os.chdir(self.cwd)
-        self.tmp.cleanup()
 
     def _run(self, *args):
         from click.testing import CliRunner

@@ -358,7 +358,8 @@ def check_cmd(method, label, project, strict):
             # says `match` and means it. Only the pin can tell that the file was
             # not a published version of its condition.
             cst, cwhy = canonical_prompt_status(run.method, run.label, proj)
-            if cst in ("uncanonical", "unpinned", "superseded"):
+            if cst in ("uncanonical", "missing", "unpinned",
+                       "superseded"):
                 uncanonical.append({"project": proj, "label": run.label,
                                     "status": cst, "reason": cwhy})
 
@@ -398,16 +399,19 @@ def check_cmd(method, label, project, strict):
             click.echo(f"   {mark} {r['project']:9} {r['label']:44} "
                        f"{r['status']}: {r['reason']}")
 
-    # Fatal only for `uncanonical`: a run whose prompt file was never a
-    # published version of its condition. `superseded` is a condition that has
-    # moved on since, `unpinned` is a file the registry does not cover — both
-    # are worth seeing and neither is a defect in the run.
-    never_pinned = [r for r in uncanonical if r["status"] == "uncanonical"]
+    # Fatal for `uncanonical` — a run whose prompt was never a published
+    # version of its condition — and for `missing`, a run that named a pinned
+    # prompt file and hashed nothing for it. `superseded` is a condition that
+    # has moved on since, `unpinned` is a file the registry does not cover;
+    # both are worth seeing and neither is a defect in the run.
+    never_pinned = [r for r in uncanonical
+                    if r["status"] in ("uncanonical", "missing")]
     if uncanonical:
         click.echo(f"\n{len(uncanonical)} run(s) whose prompt files are not the "
                    "current canonical text of their condition (#432):")
         for r in uncanonical:
-            mark = "❌" if r["status"] == "uncanonical" else "⚠️ "
+            mark = ("❌" if r["status"] in ("uncanonical", "missing")
+                    else "⚠️ ")
             click.echo(f"   {mark} {r['project']:9} {r['label']:44} "
                        f"{r['status']}: {r['reason']}")
 
