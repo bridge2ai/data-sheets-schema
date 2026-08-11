@@ -486,6 +486,35 @@ def check_cmd(method, label, project, strict):
         for field, n in unobserved.most_common():
             click.echo(f"     {field:28} {n}")
 
+    # Bundle drift (#452). The mirror of `audit-bundles` one layer up: that asks
+    # whether a derived bundle still matches what its inputs produce, this asks
+    # whether a record's *declared input* still matches what the record
+    # consumed. Reported, never fatal, for the same reason as the counter above
+    # — a drifted record is still usable, it just cannot be re-derived from the
+    # path it names, and a gate would collapse that distinction.
+    from data_sheets_schema.runs import (
+        BUNDLE_ABSENT, BUNDLE_CURRENT, BUNDLE_DRIFTED, BUNDLE_UNRECORDED,
+        bundle_drift_detail,
+    )
+    drift: collections.Counter = collections.Counter()
+    drifted_bundles: collections.Counter = collections.Counter()
+    for r in rows:
+        st, _why, declared = bundle_drift_detail(
+            r["method"], r["label"], r["project"])
+        drift[st] += 1
+        if st in (BUNDLE_DRIFTED, BUNDLE_ABSENT):
+            drifted_bundles[Path(declared).name if declared else "unknown"] += 1
+
+    stale = drift[BUNDLE_DRIFTED] + drift[BUNDLE_ABSENT]
+    if stale:
+        click.echo(f"\nⓘ  {stale} record(s) name an input bundle whose bytes "
+                   f"have since changed ({drift[BUNDLE_CURRENT]} still match, "
+                   f"{drift[BUNDLE_UNRECORDED]} record no hash):")
+        for name, n in drifted_bundles.most_common():
+            click.echo(f"     {name:44} {n}")
+        click.echo("   Each record correctly states the bytes it consumed; the "
+                   "path no longer resolves to them.")
+
     # Reported separately from the provenance verdict, and never fatal. A
     # label naming a condition its prompt does not match is a real defect
     # (#420) — but it is a defect in records that already exist, and failing

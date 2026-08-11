@@ -985,6 +985,84 @@ def _prompt_files_drifted(record: dict) -> bool | None:
     return False if seen else None
 
 
+BUNDLE_CURRENT, BUNDLE_DRIFTED = "current", "drifted"
+BUNDLE_ABSENT, BUNDLE_UNRECORDED = "absent", "unrecorded"
+
+
+def bundle_drift(method: str, label: str, project: str,
+                 concat_dir: Path = CONCAT_DIR) -> tuple[str, str | None]:
+    """Does the file at ``inputs.bundle_path`` still hash to ``bundle_md5``? (#452)
+
+    A record pins the md5 of the bytes it consumed and asserts ``hash_basis:
+    verified identical to the bytes consumed``. Nothing ever re-checked that
+    against the file. The record is not wrong — it correctly states what *it*
+    read — but the path it names no longer resolves to those bytes, so anyone
+    re-reading a record's declared input reads something else.
+
+    This is the mirror of ``d4d download audit-bundles`` (#446), one layer up.
+    That command asks whether a derived bundle still matches what its inputs
+    produce; this asks whether a *record's* declared input still matches what
+    the record consumed. #421 caused most of the current drift by stripping
+    curator notes and #445 added to it by stripping ``verification_url``. Both
+    strips were correct. The defect is that the corpus absorbed a corpus-wide
+    input change with no report.
+
+    Four outcomes, kept distinct because they license different actions:
+
+    - ``current``    — the file still hashes to what the record pinned.
+    - ``drifted``    — it does not. The record stays usable and stops being
+      re-derivable from the path it names.
+    - ``absent``     — the path no longer exists at all.
+    - ``unrecorded`` — no ``bundle_md5``, so there is nothing to compare. A
+      different claim from ``current`` and never counted as one.
+
+    Scope note. Callers iterating ``discover()`` see 158 runs against 162
+    provenance records on disk. The four extra are the ``guarded-union``
+    derived merges, which are not runs and which declare ``bundle_md5``
+    not-applicable by design (§3) — a derived record consumes replicates, not a
+    bundle, so it has no input that could drift. All four fall in
+    ``unrecorded``, which is why the drifted and current counts are unaffected
+    by the difference and only the ``unrecorded`` denominator moves (82 here
+    against the 86 counted over every record in #452).
+    """
+    status, reason, _declared = bundle_drift_detail(method, label, project,
+                                                    concat_dir)
+    return status, reason
+
+
+def bundle_drift_detail(method: str, label: str, project: str,
+                        concat_dir: Path = CONCAT_DIR
+                        ) -> tuple[str, str | None, str | None]:
+    """``bundle_drift``, plus the path the record declared.
+
+    Separate so a caller grouping drift *by bundle* does not have to re-read
+    the provenance record or parse the path back out of a human-readable
+    reason string.
+    """
+    import hashlib
+
+    from data_sheets_schema.provenance import record_path_for
+    path = record_path_for(project, method, label, concat_dir)
+    if not path.exists():
+        return BUNDLE_UNRECORDED, "no provenance record", None
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    inputs = data.get("inputs") or {}
+    recorded = inputs.get("bundle_md5")
+    declared = inputs.get("bundle_path")
+    if not recorded or not declared:
+        return BUNDLE_UNRECORDED, "no bundle hash recorded", declared
+
+    bundle = Path(declared)
+    if not bundle.exists():
+        return BUNDLE_ABSENT, f"{declared} does not exist", declared
+
+    current = hashlib.md5(bundle.read_bytes()).hexdigest()
+    if current == recorded:
+        return BUNDLE_CURRENT, None, declared
+    return BUNDLE_DRIFTED, (f"{declared} now hashes {current[:8]}, "
+                            f"record pinned {recorded[:8]}"), declared
+
+
 def canonical_prompt_status(method: str, label: str, project: str,
                             concat_dir: Path = CONCAT_DIR
                             ) -> tuple[str, str | None]:
