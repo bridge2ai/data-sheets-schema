@@ -64,10 +64,20 @@ classes:
 
       unit:
         description: >-
-          The unit of measurement for the variable, preferably using QUDT units
-          (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter,
-          qudt:DegreeCelsius.
-        range: uriorcurie
+          The unit of measurement for the variable, written as the source
+          states it — `mg/dL`, `mm Hg`, `%`, `logMAR`, `beats per minute`. A
+          QUDT term (http://qudt.org/vocab/unit/, e.g. `qudt:Kilogram`) is
+          welcome where the source gives one, but is not required and is not
+          the usual case.
+        # Ranged `string`, not `uriorcurie` (#456). The old range declared this
+        # a term slot and no record ever treated it as one: all 148 values in
+        # the corpus are conventional unit symbols and *none* is an IRI or a
+        # CURIE. That is not data entry to be corrected — a clinical source
+        # writes `mg/dL`, and demanding a term would either lose the value or
+        # invent a mapping the source does not make. `string` admits both
+        # spellings, so a QUDT CURIE still fits where one is genuinely
+        # available.
+        range: string
         slot_uri: qudt:unit
         exact_mappings:
           - qudt:hasUnit
