@@ -302,15 +302,58 @@ across schemas — but it means the scoring cost is for 30 records, not 15.
 
 ## Cost
 
-Thirty agentic generations (5 projects × 3 replicates × 2 arms) on the Claude
-Code path: no API spend for generation. Then fitness scoring of all 30 records
-and sub-type classification of whatever form failures they produce — this part
-is paid, and is roughly double what a single-arm comparison would cost, for the
-cache reason above.
+⚠️ **Corrected after the runtime moved to the API path.** This section read "no
+API spend for generation", which was true of the agentic path this plan
+originally specified and is not true of the one it now specifies (#479). The
+generation is the expensive part, not the scoring.
+
+Measured with `d4d api batch --dry-run`, which calls nothing:
+
+| arm | runs | input tokens (uncached) |
+|---|---|---|
+| v1 (`generic`) | 15 | ~13,535,730 |
+| v3 (`generic_v3`) | 15 | ~13,566,231 |
+| **total** | **30** | **~27.1M** |
+
+Per run, by project — the spread is the bundle, and CM4AI and VOICE dominate:
+
+```
+AI_READI          ~ 486,000     CM4AI            ~1,050,640
+CHORUS            ~ 199,637     VOICE            ~1,212,190
+VOICE_PEDIATRIC   ~ 706,578
+```
+
+Uncached is the pessimistic figure: each run's phases 2–6 reuse a cached prefix
+(`cached blocks=2` per phase), so the billed input is materially lower. Output
+tokens are extra and are not estimable in advance — and `max_tokens` must be
+sized for the reasoning rather than the answer, since a call can spend its
+whole budget thinking and return empty text.
+
+Then fitness scoring of all 30 records and sub-type classification of whatever
+form failures they produce, which is roughly double a single-arm comparison for
+the cache reason above.
+
+**This is a spend decision and belongs to whoever owns the budget.** The figure
+is here so it can be made on a number rather than an impression.
 
 **Canary before fan-out.** One run — one project, one replicate, one arm —
 executed end to end through the same launcher, and its outputs verified present
-and non-empty on disk, before any of the remaining 29 are launched.
+and non-empty on disk, before any of the remaining 29 are launched. CHORUS is
+the natural canary: at ~200K tokens it is the cheapest of the five and
+exercises the identical six-phase path.
+
+**Free checks already exhausted** (2026-08-11), per the standing canary rule
+that dry runs come before paid ones:
+
+- `d4d api plan` renders every phase for all 10 project × condition
+  combinations without error and without calling anything;
+- each plan names the expected prompt (`d4d_generic_arm_prompt_v3.md` for the
+  v3 arm) and the current schema digest `488bd7321fe5`;
+- `d4d api batch --dry-run` costs both arms in full.
+
+What those cannot exercise is the live call: credentials in the launching
+shell, rate limits under concurrency, and whether anything is actually written
+to disk. That is what the canary is for.
 
 ## What is no longer a precondition
 

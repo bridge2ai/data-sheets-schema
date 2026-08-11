@@ -295,6 +295,18 @@ canonical set needs replacing regardless (#454), and a fresh arm also clears the
 bundle drift on all five canonical records (#452). It answers replicate variance
 and corpus currency, not prompt promotion, and the two must not be conflated.
 
+**Staged and costed, not run.** Every free check is exhausted: `d4d api plan`
+renders all 10 project × condition combinations without error, each naming the
+expected prompt and the current digest `488bd7321fe5`, and `d4d api batch
+--dry-run` costs both arms at **~27.1M uncached input tokens** (v1 13.5M, v3
+13.6M; CM4AI and VOICE dominate at ~1.05M and ~1.21M per run, CHORUS cheapest at
+~200K). Phases 2–6 reuse a cached prefix, so billed input is materially lower;
+output tokens are extra.
+
+What remains is a spend decision. CHORUS is the natural canary — cheapest of the
+five, identical six-phase path — and the standing rule is one run verified on
+disk before any of the remaining 29.
+
 **No longer preconditions.** #385 and #380 were listed as pre-sweep decisions.
 Re-measured across the corpus, neither gates the run: the canonical agentic
 series is 971 `description` to 7 `notes` with 276 `source_caveats`, 692/692
