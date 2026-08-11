@@ -3,7 +3,7 @@
 Open work, most blocking first. Each item states what is true now, not only what
 should happen, so an item can be checked rather than believed.
 
-Last verified: 2026-08-10.
+Last verified: 2026-08-11.
 
 ---
 
@@ -199,24 +199,51 @@ not sampling noise.
 The rules are still **not** in the playbook, so a run today gets v1 behaviour
 unless it explicitly selects a condition.
 
-### v3 has run (2026-08-05 → 2026-08-07)
+### v3 has run — but on two projects, and never comparably (#458)
 
-This section said v3 was "drafted, wired and tested but unrun". That is no
-longer true — `src/download/prompts/d4d_generic_arm_prompt_v3.md` has 20 runs
-across four labels:
+This section said v3 was "drafted, wired and tested but unrun", then said it had
+"20 runs across four labels". Both were wrong. Fifteen of those twenty are the
+2026-08-07 sweep, which hashed the **generic** prompt, not v3 (#454). Here is
+every run that actually hashed `d4d_generic_arm_prompt_v3.md`, against the v2
+series it would be compared with:
 
-| label | what it was |
-|---|---|
-| `2026-08-05_claude-opus-5-generic-v3_rep1`, `…-1m-generic-v3_rep{1,2,3}` | first v3 passes, AI_READI + CHORUS |
-| `2026-08-06_…-1m-generic-v3-schema2_rep{1,2,3}` | schema-2 series, with the trap-slot and repair work below |
-| `2026-08-07_claude-opus-5-claudecode-generic-v3_rep{1,2,3}` | the five-project sweep; **canonical set** |
+| label | prompt | schema digest | route | coverage |
+|---|---|---|---|---|
+| `2026-07-31_…generic-v2_rep{1,2,3}` | v2 | `34d24ff3` (1.0.0) | `google/claude-opus-5-high` | 4 projects × 3 |
+| `2026-08-05_…generic-v3_rep1` | v3 | `b065e1cd` (1.0.0) | `google/claude-opus-5-high` | AI_READI, CHORUS × 1 |
+| `2026-08-05_…1m-generic-v3_rep{1,2,3}` | v3 | `b065e1cd` (1.0.0) | `claude-opus-5` (1m) | AI_READI × 3, CHORUS × 1 |
+| `2026-08-06_…1m-generic-v3-schema2_rep{1,2,3}` | v3 | `583d79c1` (2.0.0) | `claude-opus-5` (1m) | AI_READI, CHORUS × 2 |
+| `2026-08-07_…claudecode-generic-v3_rep{1,2,3}` | **generic (v1)** | *none recorded* (2.0.0) | `claude-opus-5` | 5 projects × 3 |
 
-**Still open, and this is the actionable part:** the v2-vs-v3 comparison the
-promotion decision rests on has not been written up. `notes/generic_v2_results.md`
-exists for v1→v2; there is no v3 equivalent, and the hollow-object regression
-rule 1 introduced has not been re-measured under v3. Until that is done the
-playbook keeps v1 behaviour by default, which is the safe state but not a
-decision.
+**The v2-vs-v3 comparison is not merely unwritten — it is not derivable.** Three
+independent defects, any one sufficient:
+
+1. **Coverage.** CM4AI, VOICE and VOICE_PEDIATRIC have never run under v3.
+2. **Schema confound.** Every v3 label sits on a different digest than v2's
+   `34d24ff3`, and the delta includes the trap-slot work (#376, #382) that moves
+   the exact defect classes `form_defects` counts.
+3. **Route confound.** Three of four v3 labels ran `claude-opus-5` (1m) where v2
+   ran `google/claude-opus-5-high`.
+
+`notes/generic_v3_analysis_plan.md` pre-registered "same four projects, three
+replicates, same model and settings as the v1 and v2 series." No label meets it.
+
+**The instrument already enforced this**, which is why it went unnoticed: all
+1441 cached fitness judgements are keyed `(34d24ff3, google/claude-opus-5-high)`,
+so no v3 record was ever a cache hit and no arms were silently mixed. What the
+guard could not do is announce that the arm it protected had never been
+generated — an absent cache entry and an absent run look identical.
+
+**Decided, 2026-08-11: generate both arms fresh.** v1 and v3, five projects ×
+three replicates = 30 runs, at today's digest `e802cdc3`, on the agentic path,
+with instructions rendered rather than typed. Registered in
+`notes/generic_v1_v3_analysis_plan.md` before any run. The pairing is v1-vs-v3
+rather than v2-vs-v3 because v1 is the playbook default, so that is the
+comparison the promotion decision rests on; the mechanism question (does rule 4
+alone do what it says?) stays open and needs a v2 arm at the same digest.
+
+Until those runs land the playbook keeps v1 behaviour by default, which is the
+safe state but not a decision.
 
 Guards in place:
 
@@ -341,6 +368,17 @@ broke nothing; the four-project list in 26 files is prose, not logic.
   2026-08-04). VOICE is no longer the gap; `d4d runs canonical` marks
   AI_READI, CHORUS, CM4AI, VOICE and VOICE_PEDIATRIC, all from the 2026-08-07
   label.
+
+  ⚠️ **That label is the one #454 is about.** It ran the generic prompt under a
+  `generic-v3` name, carries no recorded instruction (it predates #419), and its
+  launch text was not uniform — VOICE and VOICE_PEDIATRIC got a scope paragraph
+  the other three projects did not. The records are internally honest: every
+  header names `d4d_generic_arm_prompt.md` and says "generic prompt", so only the
+  directory label misstates the condition. Within-project replicate variance
+  still stands on this set; cross-condition claims do not. It is being superseded
+  by the fresh v1 arm in §6, after which these records are annotated and kept as
+  historical rather than renamed — renaming 30 records, their provenance paths
+  and five canonical marks would assert a uniformity that does not hold.
 
 - **Whether `VOICE` becomes `VOICE_main` — decided: no.** Attempted and reverted.
   The path moves were clean (567 files, no clashes), but the content rewrite
@@ -473,7 +511,8 @@ Acted on the same day:
 | re-recording discarded the validation verdict | #396 | **fixed** (#423) |
 | the launch prompt was typed, not rendered | #419, #422 | **addressed** (#425) |
 | per-GC scope lived in the launch prompt | #422 | **closed** — declared in the manifest |
-| label says `generic-v3`, provenance hashes v1 | #420 | open |
+| label says `generic-v3`, provenance hashes v1 | #420, #454 | check landed; records superseded by §6's fresh v1 arm |
+| v3 never ran on 3 of 5 projects; every v3 label confounded | #458 | open — gates §6 |
 | `verification_url` still injected; 0 values depend on it | #427 | open, cosmetic |
 | a verdict does not pin the schema it was reached against | #426 | **fixed** |
 | the render gate cannot see an edit made *before* rendering | #432 | **closed** |
