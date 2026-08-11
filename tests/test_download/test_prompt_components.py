@@ -24,13 +24,13 @@ COMPONENTS = PROMPTS / "components"
 # #298 made it a project, so a guard that reads as covering every
 # project covered four of five (#467).
 #
-# Widening it immediately found the gap the narrowing had hidden:
-# VOICE_PEDIATRIC has no component file, so the `tuned` condition cannot be run
-# for it (#478). Authoring one is content and a judgement call — it must state
-# what distinguishes the pediatric cohort without importing adult-cohort facts —
-# so the gap is pinned by name rather than papered over. The other four projects
-# stay guarded, and this list may only shrink.
-WITHOUT_COMPONENT = {"VOICE_PEDIATRIC"}
+# Widening it immediately found the gap the narrowing had hidden: VOICE_PEDIATRIC
+# had no component file, so the `tuned` condition could not be run for it (#478).
+# Filled — the set is now empty and every project is guarded. Kept as a named set
+# rather than deleted, because the README makes "no legitimate component" a valid
+# outcome: such a project would get an *empty block*, which is a different state
+# from a missing file and belongs here rather than as a silent absence.
+WITHOUT_COMPONENT: set[str] = set()
 COMPONENT_PROJECTS = tuple(p for p in PROJECTS if p not in WITHOUT_COMPONENT)
 
 ALLOWED_TYPES = {"fact", "decision-rule", "referent-pin"}
@@ -150,6 +150,59 @@ class TestTunedPromptIsGenericPlusBlock(unittest.TestCase):
     def test_frames_components_as_input_claims_not_output_targets(self):
         text = flat(TUNED.read_text(encoding="utf-8"))
         self.assertIn("nothing about what the output should contain", text)
+
+
+class TestTunedRendersForEveryProject(unittest.TestCase):
+    """The tuned condition must be runnable for every project (#478).
+
+    File existence is not the property that matters — reaching the instruction
+    is. VOICE_PEDIATRIC had no component, so `--condition tuned` could not be
+    rendered for it at all, and nothing said so because the only check declared
+    its own project list.
+    """
+
+    def _render(self, project):
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        bundle = Path(f"data/preprocessed/concatenated/{project}_preprocessed.txt")
+        if not bundle.exists():
+            self.skipTest(f"{project} bundle not present")
+        return resolve_prompt(RunSpec(
+            project=project, arm="BASELINE (input documents only)",
+            method="claudecode_agent", bundle=bundle, label="L",
+            condition="tuned", runtime="Claude API (direct)",
+            provider="Anthropic"))
+
+    def test_every_project_renders_under_tuned(self):
+        for project in PROJECTS:
+            with self.subTest(project=project):
+                self.assertTrue(self._render(project).strip())
+
+    def test_the_component_body_reaches_the_instruction(self):
+        """Substituted in, not merely present on disk."""
+        for project in COMPONENT_PROJECTS:
+            with self.subTest(project=project):
+                rendered = flat(self._render(project))
+                component = flat(body(COMPONENTS / f"{project}.md"))
+                probe = next((ln for ln in component.split(".")
+                              if len(ln.strip()) > 40), None)
+                self.assertIsNotNone(probe, f"{project}.md has no prose to probe")
+                self.assertIn(probe.strip()[:60], rendered)
+
+    def test_tuned_is_longer_than_generic_where_a_component_exists(self):
+        """A component that renders to nothing would pass every other check."""
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        for project in COMPONENT_PROJECTS:
+            with self.subTest(project=project):
+                bundle = Path(f"data/preprocessed/concatenated/"
+                              f"{project}_preprocessed.txt")
+                if not bundle.exists():
+                    self.skipTest(f"{project} bundle not present")
+                generic = resolve_prompt(RunSpec(
+                    project=project, arm="BASELINE (input documents only)",
+                    method="claudecode_agent", bundle=bundle, label="L",
+                    condition="generic", runtime="Claude API (direct)",
+                    provider="Anthropic"))
+                self.assertGreater(len(self._render(project)), len(generic))
 
 
 if __name__ == "__main__":

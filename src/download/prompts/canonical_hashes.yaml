@@ -42,6 +42,16 @@ files:
       recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
       retroactively.'
     sha256: 07b59ca750a1d24ef7c7eb42d310fbfa064ddf300b4cd118383aaaebb9074186
+  src/download/prompts/components/VOICE_PEDIATRIC.md:
+    bytes: 1887
+    pinned_at_commit: 5f1ab65796518f355eec7b5bb1afc8822a79640e
+    pinned_on: '2026-08-11'
+    reason: "First canonical text for the pediatric tuned condition (#478). States the adult\
+      \ figures present in the pediatric bundle \u2014 833 instances against this dataset's\
+      \ 300 participants \u2014 so each is attributed to the cohort its source names. Mirrors\
+      \ the VOICE cohort fact, which is the study's largest measured single effect. The referent\
+      \ is left to the manifest scope declaration rather than restated here (#422)."
+    sha256: b7db067c2852b57287cb68bd1fd4f3bfc229496cc2a4bd33065bb9558a35b215
   src/download/prompts/d4d_generic_arm_prompt.md:
     bytes: 5754
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
