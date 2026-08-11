@@ -1246,21 +1246,21 @@
                     ]
                 },
                 "conforms_to": {
-                    "description": "An established standard, specification, or schema to which the resource conforms.",
+                    "description": "A standard or specification the **dataset's own content** follows \u2014 an imaging, waveform, file-layout or common-data-model standard such as DICOM, WFDB, BIDS, OMOP CDM, Open mHealth or ESDS. Not the schema this datasheet is written in: that is `conforms_to_schema`.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
-                    "description": "The specific class or type within a schema to which the resource conforms.",
+                    "description": "The class within `conforms_to_schema` that this record instantiates \u2014 `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`, a statement about the record rather than the data.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
-                    "description": "The schema or data model to which the resource conforms.",
+                    "description": "The metadata schema **this record itself** is written in \u2014 normally `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet, not about the data it describes; a standard the *data* follows belongs in `conforms_to`.",
                     "type": [
                         "string",
                         "null"
@@ -2184,21 +2184,21 @@
                     ]
                 },
                 "conforms_to": {
-                    "description": "An established standard, specification, or schema to which the resource conforms.",
+                    "description": "A standard or specification the **dataset's own content** follows \u2014 an imaging, waveform, file-layout or common-data-model standard such as DICOM, WFDB, BIDS, OMOP CDM, Open mHealth or ESDS. Not the schema this datasheet is written in: that is `conforms_to_schema`.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
-                    "description": "The specific class or type within a schema to which the resource conforms.",
+                    "description": "The class within `conforms_to_schema` that this record instantiates \u2014 `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`, a statement about the record rather than the data.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
-                    "description": "The schema or data model to which the resource conforms.",
+                    "description": "The metadata schema **this record itself** is written in \u2014 normally `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet, not about the data it describes; a standard the *data* follows belongs in `conforms_to`.",
                     "type": [
                         "string",
                         "null"
@@ -3042,21 +3042,21 @@
                     "description": "Compression format used, if any (e.g., gzip, bzip2, zip)."
                 },
                 "conforms_to": {
-                    "description": "An established standard, specification, or schema to which the resource conforms.",
+                    "description": "A standard or specification the **dataset's own content** follows \u2014 an imaging, waveform, file-layout or common-data-model standard such as DICOM, WFDB, BIDS, OMOP CDM, Open mHealth or ESDS. Not the schema this datasheet is written in: that is `conforms_to_schema`.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
-                    "description": "The specific class or type within a schema to which the resource conforms.",
+                    "description": "The class within `conforms_to_schema` that this record instantiates \u2014 `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`, a statement about the record rather than the data.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
-                    "description": "The schema or data model to which the resource conforms.",
+                    "description": "The metadata schema **this record itself** is written in \u2014 normally `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet, not about the data it describes; a standard the *data* follows belongs in `conforms_to`.",
                     "type": [
                         "string",
                         "null"
@@ -4340,21 +4340,21 @@
                     "description": "Compression format used, if any (e.g., gzip, bzip2, zip)."
                 },
                 "conforms_to": {
-                    "description": "An established standard, specification, or schema to which the resource conforms.",
+                    "description": "A standard or specification the **dataset's own content** follows \u2014 an imaging, waveform, file-layout or common-data-model standard such as DICOM, WFDB, BIDS, OMOP CDM, Open mHealth or ESDS. Not the schema this datasheet is written in: that is `conforms_to_schema`.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
-                    "description": "The specific class or type within a schema to which the resource conforms.",
+                    "description": "The class within `conforms_to_schema` that this record instantiates \u2014 `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`, a statement about the record rather than the data.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
-                    "description": "The schema or data model to which the resource conforms.",
+                    "description": "The metadata schema **this record itself** is written in \u2014 normally `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet, not about the data it describes; a standard the *data* follows belongs in `conforms_to`.",
                     "type": [
                         "string",
                         "null"
@@ -4582,21 +4582,21 @@
                     "description": "Compression format if the collection is packaged as a compressed archive (e.g., gzip, zip, bzip2). Omit this field for uncompressed collections or purely logical groupings."
                 },
                 "conforms_to": {
-                    "description": "An established standard, specification, or schema to which the resource conforms.",
+                    "description": "A standard or specification the **dataset's own content** follows \u2014 an imaging, waveform, file-layout or common-data-model standard such as DICOM, WFDB, BIDS, OMOP CDM, Open mHealth or ESDS. Not the schema this datasheet is written in: that is `conforms_to_schema`.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
-                    "description": "The specific class or type within a schema to which the resource conforms.",
+                    "description": "The class within `conforms_to_schema` that this record instantiates \u2014 `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`, a statement about the record rather than the data.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
-                    "description": "The schema or data model to which the resource conforms.",
+                    "description": "The metadata schema **this record itself** is written in \u2014 normally `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet, not about the data it describes; a standard the *data* follows belongs in `conforms_to`.",
                     "type": [
                         "string",
                         "null"
@@ -5465,21 +5465,21 @@
                     "description": "Compression format used, if any (e.g., gzip, bzip2, zip)."
                 },
                 "conforms_to": {
-                    "description": "An established standard, specification, or schema to which the resource conforms.",
+                    "description": "A standard or specification the **dataset's own content** follows \u2014 an imaging, waveform, file-layout or common-data-model standard such as DICOM, WFDB, BIDS, OMOP CDM, Open mHealth or ESDS. Not the schema this datasheet is written in: that is `conforms_to_schema`.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
-                    "description": "The specific class or type within a schema to which the resource conforms.",
+                    "description": "The class within `conforms_to_schema` that this record instantiates \u2014 `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`, a statement about the record rather than the data.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
-                    "description": "The schema or data model to which the resource conforms.",
+                    "description": "The metadata schema **this record itself** is written in \u2014 normally `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet, not about the data it describes; a standard the *data* follows belongs in `conforms_to`.",
                     "type": [
                         "string",
                         "null"
@@ -8164,21 +8164,21 @@
             "description": "Compression format used, if any (e.g., gzip, bzip2, zip)."
         },
         "conforms_to": {
-            "description": "An established standard, specification, or schema to which the resource conforms.",
+            "description": "A standard or specification the **dataset's own content** follows \u2014 an imaging, waveform, file-layout or common-data-model standard such as DICOM, WFDB, BIDS, OMOP CDM, Open mHealth or ESDS. Not the schema this datasheet is written in: that is `conforms_to_schema`.",
             "type": [
                 "string",
                 "null"
             ]
         },
         "conforms_to_class": {
-            "description": "The specific class or type within a schema to which the resource conforms.",
+            "description": "The class within `conforms_to_schema` that this record instantiates \u2014 `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`, a statement about the record rather than the data.",
             "type": [
                 "string",
                 "null"
             ]
         },
         "conforms_to_schema": {
-            "description": "The schema or data model to which the resource conforms.",
+            "description": "The metadata schema **this record itself** is written in \u2014 normally `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet, not about the data it describes; a standard the *data* follows belongs in `conforms_to`.",
             "type": [
                 "string",
                 "null"
