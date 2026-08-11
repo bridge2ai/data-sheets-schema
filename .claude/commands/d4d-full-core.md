@@ -495,9 +495,19 @@ exists to prevent.
 
 **The prompt is an input like the bundle.** `--prompt` may repeat; pass every
 file the condition is built from. `--prompt-text` takes the instruction as
-actually sent — render it with `d4d api render-prompt --condition {CONDITION}
---out <file>` rather than retyping it, so the text and its hash come from the
-same place. From 2026-08-10 a run without a recorded instruction fails
+actually sent — render it with
+
+```bash
+d4d prompt render --project {PROJECT} --label {LABEL} \
+                  --condition {CONDITION} --runtime 'Claude Code' --out <file>
+```
+
+rather than retyping it, so the text and its hash come from the same place.
+
+`d4d prompt render` is the same command as `d4d api render-prompt` (#428). The
+top-level spelling exists because this path is not the API path, and a launcher
+following this playbook has no reason to look under a group named for the
+runtime it is not using. From 2026-08-10 a run without a recorded instruction fails
 `d4d runs check --strict` (#419): the gate was otherwise opt-in by omission,
 since a launcher that simply passes neither flag records nothing and nothing
 says so.
