@@ -466,6 +466,26 @@ d4d provenance reasoning --method claudecode_agent --label 2026-07-29_...
 d4d provenance reasoning --path some/log.jsonl
 ```
 
+⚠️ **The agentic path produces no reasoning log at all, and that is a runtime
+limit rather than a gap** (#400). A Claude Code subagent has no access to its
+own token accounting. Writing a log carrying only the effort level would be
+worse than writing none: `d4d provenance reasoning` would then report something
+that looks comparable with the API path's and is not.
+
+So the command distinguishes three empty cases rather than printing one message
+for all of them — currently **96 runs whose runtime cannot capture, 6 predating
+capture (before 2026-07-31), 0 missing**:
+
+| status | meaning |
+|---|---|
+| `runtime_cannot_capture` | agentic run; no log can exist |
+| `capture_postdates_run` | API run before capture; unrecoverable |
+| `missing` | API run after capture with no log — a **defect**, not a limit |
+
+**Any comparison of reasoning spend between the arms is one-sided.** A run with
+no log has not spent zero reasoning; it has no measurement. Do not average the
+two, and do not read an absent figure for the agentic arm as a low one.
+
 ⚠️ **Through CBORG the reasoning text is not available.** Verified 2026-07-29 on
 `google/claude-opus-5-high`: the thinking block arrives with a valid
 `signature` and `thinking: ''`, both streaming and non-streaming, and the stream

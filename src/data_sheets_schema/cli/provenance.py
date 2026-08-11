@@ -155,6 +155,10 @@ def reasoning_cmd(method, project, label, path):
         logs = [_Path(path)]
     else:
         for run in discover():
+            # `discover` yields the full and _core methods as separate runs
+            # over one reasoning log, so counting both doubles every figure.
+            if run.is_core or run.deterministic:
+                continue
             if method and run.method != method:
                 continue
             if label and run.label != label:
@@ -165,12 +169,54 @@ def reasoning_cmd(method, project, label, path):
                 logs.append(CONCAT_DIR / f"{run.method}_core" / run.label /
                             f"{proj}_reasoning.jsonl")
 
+    # Classify the runs that produced no log, rather than printing one message
+    # for three different situations (#400).
+    import collections as _collections
+
+    import yaml as _yaml
+
+    from data_sheets_schema import reasoning as _r
+    from data_sheets_schema.provenance import record_path_for
+    why: _collections.Counter = _collections.Counter()
+    for candidate in logs:
+        proj = candidate.name.replace("_reasoning.jsonl", "")
+        run_label = candidate.parent.name
+        base = candidate.parent.parent.name
+        runtime = None
+        rec = record_path_for(proj, base, run_label)
+        if rec.exists():
+            try:
+                data = _yaml.safe_load(rec.read_text(encoding="utf-8")) or {}
+                runtime = (data.get("model") or {}).get("agent_runtime")
+            except (_yaml.YAMLError, OSError, UnicodeDecodeError):
+                runtime = None
+        why[_r.log_status(runtime, run_label, candidate.exists())] += 1
+
     logs = [p for p in logs if p.exists()]
     if not logs:
-        click.echo("No reasoning logs found. They are written by `d4d api run`; "
-                   "runs generated before reasoning capture have none, and that "
-                   "is unrecoverable rather than unverified.")
+        click.echo("No reasoning logs found for the selection.")
+        if why[_r.NO_LOG_RUNTIME]:
+            click.echo(f"   {why[_r.NO_LOG_RUNTIME]} run(s): the Claude Code "
+                       "runtime cannot produce one — a subagent has no access "
+                       "to its own token accounting. Not a gap to fill: a log "
+                       "carrying only the effort level would look comparable "
+                       "with the API path's and would not be (#400).")
+        if why[_r.NO_LOG_PREDATES]:
+            click.echo(f"   {why[_r.NO_LOG_PREDATES]} run(s): predate reasoning "
+                       f"capture ({_r.CAPTURE_FROM}). Unrecoverable rather "
+                       "than unverified.")
+        if why[_r.NO_LOG_MISSING]:
+            click.echo(f"   ⚠️  {why[_r.NO_LOG_MISSING]} run(s): an API run "
+                       "after capture existed, with no log. That is a defect, "
+                       "not a limitation.")
         return
+    if why[_r.NO_LOG_RUNTIME] or why[_r.NO_LOG_PREDATES] or why[_r.NO_LOG_MISSING]:
+        click.echo(f"{len(logs)} log(s); "
+                   f"{why[_r.NO_LOG_RUNTIME]} run(s) whose runtime cannot "
+                   f"capture, {why[_r.NO_LOG_PREDATES]} predating capture, "
+                   f"{why[_r.NO_LOG_MISSING]} missing.")
+        click.echo("   A run with no log has not spent zero reasoning; it has "
+                   "no measurement. Do not average the two (#400).\n")
 
     total: list[dict] = []
     for p in sorted(logs):
