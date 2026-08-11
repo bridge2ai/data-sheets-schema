@@ -245,6 +245,53 @@ def validation_status(method: str, label: str, project: str,
     return VALID if v["passed"] else INVALID
 
 
+VERDICT_PINNED, VERDICT_UNPINNED, VERDICT_ABSENT = "pinned", "unpinned", "absent"
+
+
+def verdict_schema_pin(method: str, label: str, project: str,
+                       concat_dir: Path = CONCAT_DIR) -> str:
+    """Does this run's verdict say which schema it was reached against? (#433)
+
+    `validation_status` returns STALE when a pinned schema has moved, and
+    leaves an unpinned verdict alone — absent is not stale, and failing every
+    verdict written before the pin existed would discard evidence rather than
+    check it.
+
+    The cost of that correct choice is that `VALID` means two different things
+    depending on when it was written, and nothing distinguishes them without
+    reading the YAML. `d4d runs validate` will not close the gap on its own:
+    it skips a run already VALID, which is the whole point of caching a
+    verdict.
+
+    So this reports rather than repairs. Three outcomes:
+
+    - ``pinned``   — the verdict names the schema, and a schema change makes
+      it STALE.
+    - ``unpinned`` — a verdict exists and names no schema. It is not wrong; it
+      is unfalsifiable by a schema change.
+    - ``absent``   — no verdict at all, which is a different gap and counted
+      separately so the two cannot be confused.
+    """
+    import yaml as _yaml
+
+    from data_sheets_schema.provenance import record_path_for
+    path = record_path_for(project, method, label, concat_dir)
+    if not path.exists():
+        return VERDICT_ABSENT
+    try:
+        data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except (_yaml.YAMLError, OSError, UnicodeDecodeError):
+        return VERDICT_ABSENT
+    verdict = data.get("validation")
+    if not isinstance(verdict, dict) or "passed" not in verdict:
+        return VERDICT_ABSENT
+    pinned = verdict.get("schema")
+    if isinstance(pinned, dict) and any(
+            pinned.get(k) for k in ("full_sha256", "core_sha256")):
+        return VERDICT_PINNED
+    return VERDICT_UNPINNED
+
+
 class AmbiguousCanonical(RuntimeError):
     """A project carries a canonical mark under more than one configuration."""
 
