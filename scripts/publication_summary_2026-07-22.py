@@ -47,11 +47,40 @@ def pick_pct(score):
     return score.get("normalized_percentage", score.get("percentage"))
 
 
+#: Emitted into every generated report, not only the two headline summaries.
+#: The per-rubric reports carry the most citable form of the figures — a bare
+#: method x project table — and carried no indication of what they scored, so
+#: they were the easiest thing in the directory to quote as current (#286).
+#: Written by the generator rather than added by hand so a regeneration cannot
+#: drop it, which is how `d4d runs archive` deleted the ATTIC rationale (#412).
+HISTORICAL_BANNER = [
+    "> ⚠️  **Historical. These figures score records the study has since "
+    "excluded.**",
+    ">",
+    "> The inputs were "
+    "`data/d4d_concatenated/claudecode_agent/2026-04-10_sonnet-4.6/` and the",
+    "> flat pre-run-label layout. That label was archived as **unattestable** "
+    "by",
+    "> `d4d runs archive --unattested` — its bundles were first committed "
+    "after the",
+    "> runs executed, so the bytes those runs consumed cannot be verified. The "
+    "records",
+    "> survive under `data/ATTIC/d4d_concatenated_archived/`, so every number "
+    "here",
+    "> remains traceable to its input; none of it describes the current corpus.",
+    ">",
+    "> Do not cite these as current results. See #286.",
+    "",
+]
+
+
 def per_rubric_report(rubric, scores):
     methods = sorted({m for (_, m) in scores.keys()})
     lines = [
-        f"# {rubric} Evaluation Summary (Publication Run {RUN_DATE})",
+        f"# [HISTORICAL] {rubric} Evaluation Summary "
+        f"(Publication Run {RUN_DATE})",
         "",
+        *HISTORICAL_BANNER,
         f"Rubric: `{rubric}` | Run: `{RUN_DATE}` | Model: `claude-sonnet-4-5-20250929`",
         "",
         "## Overall Scores by Method × Project",
