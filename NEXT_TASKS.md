@@ -257,7 +257,7 @@ guard could not do is announce that the arm it protected had never been
 generated — an absent cache entry and an absent run look identical.
 
 **Decided, 2026-08-11: generate both arms fresh.** v1 and v3, five projects ×
-three replicates = 30 runs, at today's digest `e802cdc3`, with instructions
+three replicates = 30 runs, at today's digest `488bd732`, with instructions
 rendered rather than typed. Registered in
 `notes/generic_v1_v3_analysis_plan.md` before any run. The pairing is v1-vs-v3
 rather than v2-vs-v3 because v1 is the playbook default, so that is the
@@ -464,7 +464,7 @@ because they were generic.
   and five canonical marks would assert a uniformity that does not hold.
 
   **That supersession has not happened yet.** The fresh arm is decided and
-  pre-registered (§6), not generated; `e802cdc3` appears in no record and no
+  pre-registered (§6), not generated; `488bd732` appears in no record and no
   judgement. Until it does, these remain the canonical records and the caveat
   above is the whole of the mitigation.
 

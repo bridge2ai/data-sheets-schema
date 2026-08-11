@@ -80,6 +80,15 @@ classes:
       - encoding
       - compression
       - media_type
+      # `format` is ranged on FormatEnum, whose members are file
+      # serializations — CSV, JSON, ZIP. A *data standard* such as DICOM, WFDB,
+      # OMOP CDM or BIDS is a different concept, and had no slot here at all,
+      # so the single most interoperability-relevant fact about a distribution
+      # could not reach the exchange layer (#403). AI_READI's phase 4 handled
+      # that correctly — it left `format` unset rather than coerce a wrong enum
+      # member — but the loss was created by the schema, not by the evidence,
+      # and took a paragraph of reconciliation prose to explain.
+      - conforms_to
 
   # ---------------------------------------------------------------------------
   # CoreDatasetCollection — tree root for core exchange datasheets

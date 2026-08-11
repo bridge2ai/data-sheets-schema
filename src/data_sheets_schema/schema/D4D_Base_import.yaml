@@ -471,14 +471,30 @@ slots:
     annotations:
       "d4d:docExample": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
+  # The three `conforms_to*` slots describe two different things, and their
+  # descriptions did not say so (#403). Read as near-synonyms, records put
+  # every data standard into the shortest name: 8 distinct standards across 4
+  # of 5 projects in `conforms_to`, while `conforms_to_schema` — "The schema or
+  # data model to which the resource conforms" — sat empty in all five. When
+  # two slots are near-synonyms and neither is constrained, records pick the
+  # shorter name. The intent was already visible in the docExamples; only the
+  # prose was ambiguous.
   conforms_to:
-    description: An established standard, specification, or schema to which the resource conforms.
+    description: >-
+      A standard or specification the **dataset's own content** follows — an
+      imaging, waveform, file-layout or common-data-model standard such as
+      DICOM, WFDB, BIDS, OMOP CDM, Open mHealth or ESDS. Not the schema this
+      datasheet is written in: that is `conforms_to_schema`.
     slot_uri: dcterms:conformsTo
     annotations:
-      "d4d:docExample": "https://www.w3.org/TR/vocab-dcat-3/"
+      "d4d:docExample": "Brain Imaging Data Structure (BIDS) v1.9.0"
 
   conforms_to_schema:
-    description: The schema or data model to which the resource conforms.
+    description: >-
+      The metadata schema **this record itself** is written in — normally
+      `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the
+      datasheet, not about the data it describes; a standard the *data* follows
+      belongs in `conforms_to`.
     slot_uri: d4d:conformsToSchema
     broad_mappings:
       - dcterms:conformsTo
@@ -486,7 +502,10 @@ slots:
       "d4d:docExample": "https://w3id.org/bridge2ai/data-sheets-schema"
 
   conforms_to_class:
-    description: The specific class or type within a schema to which the resource conforms.
+    description: >-
+      The class within `conforms_to_schema` that this record instantiates —
+      `Dataset` for a full datasheet, `CoreDataset` for a core one. Like
+      `conforms_to_schema`, a statement about the record rather than the data.
     slot_uri: d4d:conformsToClass
     broad_mappings:
       - dcterms:conformsTo

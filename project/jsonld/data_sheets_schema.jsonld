@@ -2320,11 +2320,11 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "https://www.w3.org/TR/vocab-dcat-3/",
+          "value": "Brain Imaging Data Structure (BIDS) v1.9.0",
           "@type": "Annotation"
         }
       ],
-      "description": "An established standard, specification, or schema to which the resource conforms.",
+      "description": "A standard or specification the **dataset's own content** follows \u2014 an imaging, waveform, file-layout or common-data-model standard such as DICOM, WFDB, BIDS, OMOP CDM, Open mHealth or ESDS. Not the schema this datasheet is written in: that is `conforms_to_schema`.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/dc/terms/conformsTo"
@@ -2347,7 +2347,7 @@
           "@type": "Annotation"
         }
       ],
-      "description": "The schema or data model to which the resource conforms.",
+      "description": "The metadata schema **this record itself** is written in \u2014 normally `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet, not about the data it describes; a standard the *data* follows belongs in `conforms_to`.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/conformsToSchema"
@@ -2373,7 +2373,7 @@
           "@type": "Annotation"
         }
       ],
-      "description": "The specific class or type within a schema to which the resource conforms.",
+      "description": "The class within `conforms_to_schema` that this record instantiates \u2014 `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`, a statement about the record rather than the data.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/conformsToClass"
@@ -13873,7 +13873,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-08-06T12:37:37",
   "source_file_size": 32488,
-  "generation_date": "2026-08-11T12:44:46",
+  "generation_date": "2026-08-11T16:12:43",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

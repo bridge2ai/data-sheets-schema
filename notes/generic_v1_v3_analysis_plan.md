@@ -32,7 +32,14 @@ today's schema, and nothing in this plan produces one.
 
 ## Why both arms must be generated fresh
 
-The `Dataset` schema digest today is `e802cdc3`. No run on disk carries it:
+The `Dataset` schema digest today is `488bd732`. No run on disk carries it:
+
+⚠️ **This pin moves whenever the schema does, and it has moved twice since this
+plan was registered** — `e802cdc3` → `488bd732`, when #403 rewrote three slot
+descriptions. That is the pin working: the digest renders descriptions, so a
+change to what a slot *means* is a change the comparison must not straddle.
+Re-check it immediately before generating, and if it has moved again, generate
+both arms after the move rather than one either side of it.
 
 | series | digest | declared |
 |---|---|---|
@@ -40,7 +47,7 @@ The `Dataset` schema digest today is `e802cdc3`. No run on disk carries it:
 | v3, `2026-08-05` | `b065e1cd` | 1.0.0 |
 | v3, `2026-08-06` schema-2 | `583d79c1` | 2.0.0 |
 | `2026-08-07` sweep (v1, mislabelled — #454) | *none recorded* | 2.0.0 |
-| **this comparison** | **`e802cdc3`** | 2.0.0 |
+| **this comparison** | **`488bd732`** | 2.0.0 |
 
 The schema deltas between these are not cosmetic: they include the trap-slot
 work (#376 scalarized the narrative family, #382 made `Organization.id`
@@ -49,7 +56,7 @@ counts. A hollow-object count is not comparable across them.
 
 The 2026-08-07 sweep is a v1 arm at declared 2.0.0 and was considered as the
 baseline. It is rejected on two grounds, either sufficient: it records no schema
-digest, so it cannot be shown to sit at `e802cdc3`; and per #454 its launch text
+digest, so it cannot be shown to sit at `488bd732`; and per #454 its launch text
 was not uniform — VOICE and VOICE_PEDIATRIC received a scope paragraph the other
 three projects did not, so two of five projects would compare against a
 different condition than the other three.
@@ -64,7 +71,7 @@ different condition than the other three.
 | replicates | 3 |
 | runs | 15 per arm, **30 total** |
 | runtime | **Claude API (direct)** — see the amendment below |
-| schema | `e802cdc3`, declared 2.0.0 |
+| schema | `488bd732`, declared 2.0.0 |
 | instruction | rendered by `d4d api render-prompt`, never typed (#425) |
 | scope | from `source_manifest.yaml`, never from launch text (#422) |
 
@@ -153,7 +160,7 @@ averaged together in the write-up.
 
 **The agentic sweep is still worth running, for a different question.** The
 canonical set needs replacing regardless (#454): a correctly-labelled,
-instruction-recorded, manifest-scoped v1 arm at `e802cdc3`, which also clears
+instruction-recorded, manifest-scoped v1 arm at `488bd732`, which also clears
 the bundle drift on all five canonical records (#452). It answers replicate
 variance and corpus currency — not prompt promotion. Those are two runs of 15,
 not one run of 30, and they should not be conflated in the write-up.
@@ -239,7 +246,7 @@ this plan:
 
    The separate-cache-file workaround is therefore **no longer required**.
    Classifying the new arms into the shared cache is safe: their entries carry
-   `e802cdc3`, the v1→v2 entries carry `34d24ff3`, and `_load` filters on it, so
+   `488bd732`, the v1→v2 entries carry `34d24ff3`, and `_load` filters on it, so
    the two cannot be mixed and the published table still rebuilds offline at
    zero cost.
 
@@ -289,7 +296,7 @@ both and explains why they differ.
 
 ⚠️ **No cached judgement is reusable here.** All 1441 existing fitness
 judgements are keyed `(34d24ff3, google/claude-opus-5-high)`. Every record in
-this comparison sits at `e802cdc3`, so both arms need judging from scratch. This
+this comparison sits at `488bd732`, so both arms need judging from scratch. This
 is the guard working as designed — the cache key is what prevents a silent mix
 across schemas — but it means the scoring cost is for 30 records, not 15.
 
@@ -327,7 +334,7 @@ run.**
 ## What this does not settle
 
 - The mechanism question (v2 against v3, isolating rule 4). Needs a v2 arm at
-  `e802cdc3`.
+  `488bd732`.
 - Whether the promotion generalises beyond five projects. #169 established that
   between-project variance (sd 10.9) swamps between-config effects at this
   sample size; five projects, two of which share a source corpus
