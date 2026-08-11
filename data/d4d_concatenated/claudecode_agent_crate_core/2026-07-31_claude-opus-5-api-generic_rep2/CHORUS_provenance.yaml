@@ -25,6 +25,9 @@ model:
     report: 12000
   temperature: null
   temperature_basis: not applicable to this model
+  reasoning_effort: high
+  reasoning_effort_basis: read from the model route; the provider exposes effort as
+    a model-name suffix, not a parameter
 prompts:
   hash_algorithm: sha256
   files:

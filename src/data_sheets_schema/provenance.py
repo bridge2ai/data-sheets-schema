@@ -21,6 +21,7 @@ with the reason, never silently filled.
 from __future__ import annotations
 
 import hashlib
+import itertools
 import os
 import platform
 import subprocess
@@ -223,6 +224,76 @@ def _effort_from_route(model_name: str | None) -> tuple[str | None, str | None]:
             return effort, ("read from the model route; the provider exposes "
                             "effort as a model-name suffix, not a parameter")
     return None, None
+
+
+def observed_effort_gap(path: Path) -> dict[str, Any] | None:
+    """Could this record carry an effort its own route already names? (#448)
+
+    `_effort_from_route` only runs when a record is *built*, so 49 records
+    written before it existed name `google/claude-opus-5-high` and carry no
+    `reasoning_effort`. The information was in the route all along; nothing read
+    it. They are not wrong today — an absent field is the honest state — but
+    they are less placeable than they need to be, and #400 wants exactly this
+    field to compare the agentic and API arms on reasoning spend.
+
+    Returns None when there is nothing to do, which covers three distinct
+    situations that must not be conflated:
+
+    - the route names no effort (`claude-opus-5`, `claude-opus-5[1m]`). Not
+      "default" — a route on which no ladder was offered, which stays a gap.
+    - the record already carries an effort.
+    - there is no model block to read.
+
+    Returns a dict describing the change otherwise. Never writes: a pass that
+    rewrites 49 records should be a deliberate, reviewable commit rather than a
+    side effect of some other command.
+    """
+    if not path.exists():
+        return None
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError:
+        return None
+    model = data.get("model")
+    if not isinstance(model, dict):
+        return None
+    if model.get("reasoning_effort"):
+        return None
+    effort, basis = _effort_from_route(model.get("model"))
+    if not effort:
+        return None
+    return {"path": path, "route": model.get("model"),
+            "effort": effort, "basis": basis}
+
+
+def apply_observed_effort(path: Path) -> dict[str, Any] | None:
+    """Write the route-derived effort into a record that lacks it (#448).
+
+    Rewrites only `model.reasoning_effort` and `model.reasoning_effort_basis`,
+    and only where `observed_effort_gap` says the route names an effort the
+    record does not carry.
+
+    The value is **observed**, not asserted: it is read off the route the record
+    itself already records, so it is not new evidence and does not belong in
+    `unverified`. That is the whole reason this pass is safe to run in bulk —
+    it adds no claim the record was not already making, it makes an existing
+    one legible.
+    """
+    change = observed_effort_gap(path)
+    if change is None:
+        return None
+    text = path.read_text(encoding="utf-8")
+    # Preserve the leading comment block verbatim. It carries record_version and
+    # a pointer to this module, and safe_dump would silently drop it.
+    preamble = "".join(itertools.takewhile(lambda ln: ln.startswith("#"),
+                                           text.splitlines(keepends=True)))
+    data = yaml.safe_load(text) or {}
+    data["model"]["reasoning_effort"] = change["effort"]
+    data["model"]["reasoning_effort_basis"] = change["basis"]
+    path.write_text(
+        preamble + yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
+        encoding="utf-8")
+    return change
 
 
 def parse_header(path: Path) -> dict[str, str]:
