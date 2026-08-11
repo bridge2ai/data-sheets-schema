@@ -433,7 +433,10 @@ prompt header (#397). No generic prompt names it, so records made before this
 simply lacked it — 12 of the 2026-08 API runs. Three sources, in order:
 
 1. the model route, where the provider expresses effort as a name suffix
-   (`google/claude-opus-5-high`) — recorded as observed;
+   (`google/claude-opus-5-high`) — recorded as observed. `d4d provenance
+   backfill-effort` applies this retroactively; it reports by default and
+   writes only under `--execute`, and has already populated the 49 records
+   whose route named an effort they did not carry (#448);
 2. `d4d provenance record --reasoning-effort <x>` — recorded as asserted by the
    launcher, and still listed under `unverified`;
 3. nothing — the field is left absent and the gap is named.

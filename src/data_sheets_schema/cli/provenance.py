@@ -197,3 +197,66 @@ def reasoning_cmd(method, project, label, path):
         click.echo("\nNo reasoning text was available in any entry. The blocks "
                    "are signed but empty — the endpoint strips the plaintext. "
                    "Runs made directly against the Anthropic API capture it.")
+
+
+@provenance.command("backfill-effort")
+@click.option('--execute', is_flag=True,
+              help='write the records; without it this reports and changes nothing')
+@click.option('--method', default=None, help='restrict to one method directory')
+@click.option('--label', default=None, help='restrict to one run label')
+def backfill_effort(execute, method, label):
+    """Record the reasoning effort a run's own model route already names (#448).
+
+    `_effort_from_route` runs only when a record is built, so records written
+    before it existed name `google/claude-opus-5-high` and carry no
+    `reasoning_effort`. The information was in the route all along; nothing read
+    it.
+
+    This adds no claim the record was not already making — the route is in the
+    record, and the effort is read off it — so the value is recorded as
+    **observed** and does not enter `unverified`. That is what makes a bulk pass
+    defensible here and not, say, for temperature.
+
+    Reports by default and writes only under --execute, because rewriting
+    records should be a deliberate reviewable commit rather than a side effect.
+    """
+    from pathlib import Path
+
+    from data_sheets_schema.provenance import (
+        CONCAT_DIR, apply_observed_effort, observed_effort_gap,
+    )
+
+    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    if method:
+        base = method[:-5] if method.endswith("_core") else method
+        paths = [p for p in paths if p.parts[-3] == f"{base}_core"]
+    if label:
+        paths = [p for p in paths if p.parts[-2] == label]
+
+    gaps = [g for g in (observed_effort_gap(Path(p)) for p in paths) if g]
+    if not gaps:
+        click.echo(f"{len(paths)} record(s) examined; none has an effort its "
+                   "route names but it does not carry.")
+        return
+
+    by_route: dict[str, int] = {}
+    for g in gaps:
+        by_route[f"{g['route']} -> {g['effort']}"] = (
+            by_route.get(f"{g['route']} -> {g['effort']}", 0) + 1)
+
+    verb = "updating" if execute else "would update"
+    click.echo(f"{len(paths)} record(s) examined, {len(gaps)} {verb}:")
+    for route, n in sorted(by_route.items()):
+        click.echo(f"   {route:44} {n}")
+
+    if not execute:
+        click.echo("\nNothing written. Re-run with --execute to apply.")
+        return
+
+    written = 0
+    for g in gaps:
+        if apply_observed_effort(g["path"]) is not None:
+            written += 1
+    click.echo(f"\n{written} record(s) updated. The value is observed — read "
+               "from the route the record already carried — so it is not "
+               "listed under `unverified`.")
