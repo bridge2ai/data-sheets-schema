@@ -65,6 +65,97 @@ def telemetry_cmd(label_prefix, method, output, findings_path, do_validate):
         click.echo("✓ report validates against d4d_run_telemetry.yaml")
 
 
+@runs.command("identifiers")
+@click.option("--label", default=None, help="limit to one run label")
+@click.option("--method", default=None, help="limit to one method directory")
+@click.option("-o", "--output", type=click.Path(), default=None,
+              help="write the full per-record report here as YAML")
+@click.option("--show", default=8, type=int, show_default=True,
+              help="list up to N offending values per affected record")
+@click.option("--strict", is_flag=True,
+              help="exit non-zero if any identifier cannot be resolved")
+def identifiers_cmd(label, method, output, show, strict):
+    """Audit identifier syntax across records — the trap the validator misses (#402).
+
+    `trap-inventory` mines validation failures. This is its complement, and the
+    defect it finds is the more dangerous kind because it passes: `uriorcurie`
+    declares no pattern, so LinkML renders it `{"type": ["string","null"]}` and
+    a bare token like `funder_nih` validates exactly as cleanly as a ROR IRI.
+
+    Nothing is repaired here. Adding the pattern would invalidate values in
+    records already committed — the right end state, and a migration rather
+    than a flag flip. Naming what is out there comes first.
+    """
+    import sys
+    import yaml as _yaml
+
+    from data_sheets_schema import identifiers as ident
+    from data_sheets_schema.runs import CONCAT_DIR
+
+    root = CONCAT_DIR
+    if method:
+        root = root / method
+    report = ident.audit(root=root)
+    if label:
+        # Recompute rather than filter in place: the headline must describe
+        # exactly the records it is printed above. `slots_audited` describes
+        # the schema, not the selection, so it is carried across rather than
+        # recomputed — dropping it made the header claim only `id` was checked
+        # while the by-slot line below it named others.
+        audited = report.get("slots_audited")
+        report = ident.summarize(
+            [r for r in report["records"] if f"/{label}/" in r["path"]],
+            report["prefixes_declared"], report.get("unreadable"))
+        report["slots_audited"] = audited
+
+    rows = [r for r in report["records"] if r["offenders"]]
+    slots = report.get("slots_audited") or ["id"]
+    click.echo(f"🔍 {len(report['records'])} record(s), "
+               f"{report['identifiers']} identifier(s), "
+               f"{report['prefixes_declared']} declared prefix(es)")
+    click.echo(f"   slots with range uriorcurie: {', '.join(slots)}")
+    c = report["counts"]
+    click.echo(f"   {c[ident.URI]:>6}  absolute IRI")
+    click.echo(f"   {c[ident.CURIE_DECLARED]:>6}  CURIE on a declared prefix")
+    click.echo(f"   {c[ident.CURIE_UNDECLARED]:>6}  CURIE on an undeclared prefix")
+    click.echo(f"   {c[ident.BARE]:>6}  bare token — neither IRI nor CURIE")
+
+    if report["unresolvable"]:
+        click.echo(f"\n⚠️  {report['unresolvable']} identifier(s) "
+                   f"({report['unresolvable_share']:.0%}) across {len(rows)} "
+                   "record(s) resolve to nothing:")
+        by_slot = report.get("unresolvable_by_slot") or {}
+        if by_slot:
+            click.echo("   by slot: " + ", ".join(f"{s} {n}"
+                                                  for s, n in by_slot.items()))
+        for r in rows:
+            name = Path(r["path"]).name
+            click.echo(f"   {name}  ({len(r['offenders'])} of {r['total']}, "
+                       f"mostly {r['dominant']})")
+            for o in r["offenders"][:show]:
+                click.echo(f"       {o['slot_path']:44} {o['value'][:48]}")
+            if len(r["offenders"]) > show:
+                # Never a silent cap: a truncated list that does not say it was
+                # truncated reads as the whole finding.
+                click.echo(f"       … {len(r['offenders']) - show} more "
+                           "(raise --show, or use -o for the full report)")
+    else:
+        click.echo("\n✓ every identifier is an IRI or a CURIE on a declared prefix")
+
+    if report.get("unreadable"):
+        click.echo(f"\n·  {len(report['unreadable'])} record(s) could not be parsed")
+
+    if output:
+        out = Path(output)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(_yaml.safe_dump(report, sort_keys=False,
+                                       allow_unicode=True), encoding="utf-8")
+        click.echo(f"\n✓ full report -> {out}")
+
+    if strict and report["unresolvable"]:
+        sys.exit(1)
+
+
 @runs.command("trap-inventory")
 @click.option("-o", "--output", type=click.Path(),
               default="data/run_telemetry/trap_slot_inventory.yaml",
