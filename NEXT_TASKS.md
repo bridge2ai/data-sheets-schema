@@ -257,12 +257,50 @@ guard could not do is announce that the arm it protected had never been
 generated — an absent cache entry and an absent run look identical.
 
 **Decided, 2026-08-11: generate both arms fresh.** v1 and v3, five projects ×
-three replicates = 30 runs, at today's digest `e802cdc3`, on the agentic path,
-with instructions rendered rather than typed. Registered in
+three replicates = 30 runs, at today's digest `e802cdc3`, with instructions
+rendered rather than typed. Registered in
 `notes/generic_v1_v3_analysis_plan.md` before any run. The pairing is v1-vs-v3
 rather than v2-vs-v3 because v1 is the playbook default, so that is the
 comparison the promotion decision rests on; the mechanism question (does rule 4
 alone do what it says?) stays open and needs a v2 arm at the same digest.
+
+**Amended the same day, before any run: on the API path, not the agentic one
+(#479, corrected by #481).** On the agentic path the prompt version is not the
+operative variable. Four series predating #394's playbook parity sit at 94–100%
+affiliation population under **v1** prompts, so the comparison there would
+measure ≈0 for a reason unrelated to the rules — most likely the mandatory
+`linkml-validate`-and-iterate step, which converges on schema-valid structured
+output whatever the prompt says.
+
+| runtime | series | with affiliations |
+|---|---|---|
+| Claude Code | `2026-07-27`, `07-28` ×3, `08-07` | **94–100%** |
+| Claude API | `2026-07-29`, `07-31` ×2, `08-02` (v1/v2) | **0%** |
+| Claude API | `2026-08-05` (v3, schema 1.0.0) | **69–100%** |
+| Claude API | `2026-08-06` (v3, schema 2.0.0) | **0%** |
+
+The API path is where the prompt is the only channel carrying these rules, where
+the effect is already visible, and where v1/v2/v3 were originally measured — so
+the result is comparable with `notes/generic_v2_results.md`.
+
+⚠️ **v3's API-path win does not survive schema 2.0.0, and the run is at 2.0.0.**
+Same prompt one day apart: `{name, affiliations: [...]}` at schema 1.0.0 becomes
+`{notes: '...'}` at 2.0.0. Registered as an explicit prediction in the plan
+rather than left to be discovered, and scored two ways — *populated* versus
+*well-formed* — because the 2026-08-05 run is 100% populated with bare strings
+while the agentic runs carry `Organization` objects with ROR ids.
+
+**The agentic v1 arm is still worth running, for a different question**: the
+canonical set needs replacing regardless (#454), and a fresh arm also clears the
+bundle drift on all five canonical records (#452). It answers replicate variance
+and corpus currency, not prompt promotion, and the two must not be conflated.
+
+**No longer preconditions.** #385 and #380 were listed as pre-sweep decisions.
+Re-measured across the corpus, neither gates the run: the canonical agentic
+series is 971 `description` to 7 `notes` with 276 `source_caveats`, 692/692
+creators carry `name` and 674 carry `affiliations` as `Organization` objects
+with ROR ids, and every invented key #380 catalogued except `grant` and
+`representation` is now a declared slot — neither of which appears at all.
 
 Until those runs land the playbook keeps v1 behaviour by default, which is the
 safe state but not a decision.

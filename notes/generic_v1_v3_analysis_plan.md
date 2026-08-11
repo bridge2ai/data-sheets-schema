@@ -63,7 +63,7 @@ different condition than the other three.
 | projects | AI_READI, CHORUS, CM4AI, VOICE, VOICE_PEDIATRIC |
 | replicates | 3 |
 | runs | 15 per arm, **30 total** |
-| runtime | Claude Code, agentic four-phase (`claudecode_agent`) |
+| runtime | **Claude API (direct)** — see the amendment below |
 | schema | `e802cdc3`, declared 2.0.0 |
 | instruction | rendered by `d4d api render-prompt`, never typed (#425) |
 | scope | from `source_manifest.yaml`, never from launch text (#422) |
@@ -72,6 +72,91 @@ Both arms are rendered through the same code path with only `--condition`
 differing, so the two instructions are byte-identical outside the condition
 block. That is what the 2026-08-07 sweep could not claim and is the point of
 regenerating the baseline rather than reusing it.
+
+### ⚠️ Amendment, before any run: the runtime changed from agentic to API (#479)
+
+This plan originally specified the Claude Code agentic path. **On that path the
+comparison cannot answer its own question**, because the rules v3 adds to the
+*prompt* are already in the *playbook* both arms read —
+`.claude/commands/d4d-agent.md:133-145`, added by #394 on 2026-08-07:
+
+> a class's structured slots first — `name`, `id`, `affiliations`, `grants` and
+> kin must not sit empty while their content sits in prose — then `description`
+> … then `notes` only for content `description` cannot hold. […] Never restate a
+> sibling slot's value, and never invent a key.
+
+That is the substance of v2's rule 1, v3's rule 4 and #385's fix. The agentic
+launch instruction's first lines tell the agent to open the playbook, so both
+arms would receive the rules regardless of `--condition`.
+
+⚠️ **The playbook is not the cause, though** (#481). The agentic path was
+already producing structured creators long before #394. Affiliation population
+by runtime and era:
+
+| runtime | era | series | with affiliations |
+|---|---|---|---|
+| Claude Code | pre-#394 | `2026-07-27_claude-opus-5` | 139/143 = **97%** |
+| Claude Code | pre-#394 | `2026-07-28_…-generic` (v1) | 150/158 = **94%** |
+| Claude Code | pre-#394 | `2026-07-28_…-programme-deprimed` | 104/104 = **100%** |
+| Claude Code | post-#394 | `2026-08-07_…` (v1 prompt) | 211/213 = **99%** |
+| Claude API | pre-#394 | `2026-07-29`, `2026-07-31` ×2, `2026-08-02` | **0%** |
+| Claude API | pre-#394 | `2026-08-05_…-generic-v3` | 23/23 = **100%** |
+| Claude API | pre-#394 | `2026-08-05_…-1m-generic-v3` | 46/66 = **69%** |
+| Claude API | pre-#394 | `2026-08-06_…-generic-v3-schema2` | 0/76 = **0%** |
+
+Four pre-#394 agentic series sit at 94–100% under **v1** prompts. So the path,
+not the prompt and not the playbook, is the operative variable — most likely the
+mandatory `linkml-validate`-and-iterate step (`d4d-agent.md` step 9,
+NON-SKIPPABLE), which converges on schema-valid structured output whatever the
+prompt says. The conclusion is unchanged and better supported: a v1-vs-v3
+comparison on that path measures ≈0 for a reason that has nothing to do with the
+rules.
+
+So the promotion decision moves to the **API path**, where the prompt is the
+only channel carrying these rules and where the effect is already visible: v1
+and v2 at 0%, v3 at 69–100%. That path is also where v1, v2 and v3 were
+originally measured, so the result is comparable with
+`notes/generic_v2_results.md` rather than a new baseline.
+
+⚠️ **But v3's API win does not survive schema 2.0.0, and this run is at 2.0.0.**
+The three v3 API series decompose cleanly, because each step changes exactly one
+thing:
+
+| series | route | schema | affiliations |
+|---|---|---|---|
+| `2026-08-05_…-generic-v3` | `google/claude-opus-5-high` | `b065e1cd` (1.0.0) | **100%** |
+| `2026-08-05_…-1m-generic-v3` | `claude-opus-5` | `b065e1cd` (1.0.0) | **69%** |
+| `2026-08-06_…-1m-generic-v3-schema2` | `claude-opus-5` | `583d79c1` (2.0.0) | **0%** |
+
+The first step holds the schema and changes the route: 100% → 69% is a **route**
+effect. The second holds the route and changes the schema: **69% → 0% is a
+schema effect**, and it is the one that matters here, because this run is at
+2.0.0. It is a single series and should be treated as a strong prior rather than
+a measurement, but the variable is isolated.
+
+The same CHORUS creator, either side of that second step:
+
+```yaml
+# 2026-08-05, schema 1.0.0
+{name: 'Eric S. Rosenthal', affiliations: ['Massachusetts General Hospital'], …}
+
+# 2026-08-06, schema 2.0.0
+{notes: 'Eric S. Rosenthal, contact principal investigator of NIH ReP…', …}
+```
+
+This is registered as prediction 5 below rather than left to be discovered.
+
+Note also that the 2026-08-05 affiliations are **bare strings**, while the
+agentic 97% figures are well-formed `Organization` objects carrying ROR ids.
+"Populated" and "well-formed" are different measurements and must not be
+averaged together in the write-up.
+
+**The agentic sweep is still worth running, for a different question.** The
+canonical set needs replacing regardless (#454): a correctly-labelled,
+instruction-recorded, manifest-scoped v1 arm at `e802cdc3`, which also clears
+the bundle drift on all five canonical records (#452). It answers replicate
+variance and corpus currency — not prompt promotion. Those are two runs of 15,
+not one run of 30, and they should not be conflated in the write-up.
 
 ## Prediction, registered
 
@@ -100,6 +185,21 @@ Prediction 4 is the weakest and is registered as such: it is the one place this
 comparison should reproduce a known result rather than produce a new one, so a
 *failure* there is evidence about the instrument or the schema change, not about
 the prompt.
+
+5. **Structured-slot population under v3 recovers at schema 2.0.0.** Registered
+   because the only evidence on disk says it will not: v3 took API-path
+   affiliations from 0% to 69–100% at schema 1.0.0 and back to 0% at 2.0.0
+   (#481), and this run is at 2.0.0. If it stays at 0%, the finding is about the
+   *schema*, not the prompt — the trap-slot work (#376, #382) changed what a
+   `Creator` looks like and v3's rule 4 no longer reaches it — and the promotion
+   decision should be deferred until that is understood rather than read as v3
+   failing.
+
+   Scored two ways, kept separate: **populated** (the slot is non-empty) and
+   **well-formed** (the value matches the declared range — `Organization`
+   objects, not bare strings). The 2026-08-05 run is 100% populated and 0%
+   well-formed; the agentic runs are both. Averaging them would hide exactly the
+   difference rule 4 is about.
 
 ## What would count as failure
 
@@ -187,6 +287,25 @@ cache reason above.
 **Canary before fan-out.** One run — one project, one replicate, one arm —
 executed end to end through the same launcher, and its outputs verified present
 and non-empty on disk, before any of the remaining 29 are launched.
+
+## What is no longer a precondition
+
+`#385` (prose defaulting to `notes`; structured slots bypassed) and `#380`
+(undeclared-key inventions) were both listed as pre-sweep decisions, on the
+grounds that they change instructions and so must be settled before a sweep or
+the sweep is spent twice. **Re-measured across the corpus, neither gates this
+run.**
+
+- **#385 mode 1**: the canonical agentic series is 971 `description` against 7
+  `notes`, with 276 `source_caveats` — the channel mode 3 asked for. The 4:1
+  misuse this issue was filed on is 1:311 in the current arm.
+- **#385 mode 2**: on the agentic path, 692 of 692 creators carry `name` and 674
+  carry `affiliations` as well-formed `Organization` objects with ROR ids. It is
+  the API path that still bypasses them, which is the subject of #479 and is
+  precisely why the promotion decision belongs there.
+- **#380**: of the invented keys catalogued, all but `grant` and `representation`
+  are now declared slots (#388, #381), and neither of those two appears in the
+  canonical sweep at all.
 
 ## What this does not settle
 
