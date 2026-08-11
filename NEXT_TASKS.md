@@ -265,21 +265,30 @@ comparison the promotion decision rests on; the mechanism question (does rule 4
 alone do what it says?) stays open and needs a v2 arm at the same digest.
 
 **Amended the same day, before any run: on the API path, not the agentic one
-(#479).** The rules v3 adds to the prompt are already in the playbook the
-agentic path reads — `.claude/commands/d4d-agent.md:133-145`, added by #394 —
-so both arms would receive them regardless of `--condition` and the comparison
-would measure ≈0 for the wrong reason. The demonstration is on disk: the
-2026-08-07 sweep ran **v1** agentically and produced v3-quality structure.
-Grouped by runtime, over identical creator counts:
+(#479, corrected by #481).** On the agentic path the prompt version is not the
+operative variable. Four series predating #394's playbook parity sit at 94–100%
+affiliation population under **v1** prompts, so the comparison there would
+measure ≈0 for a reason unrelated to the rules — most likely the mandatory
+`linkml-validate`-and-iterate step, which converges on schema-valid structured
+output whatever the prompt says.
 
-| runtime | creators | with `name` | with `affiliations` | using `notes` |
-|---|---|---|---|---|
-| Claude Code (agentic) | 692 | 692 (100%) | 674 (97%) | 0 |
-| Claude API (direct) | 692 | 274 (39%) | 69 (9%) | 76 |
+| runtime | series | with affiliations |
+|---|---|---|
+| Claude Code | `2026-07-27`, `07-28` ×3, `08-07` | **94–100%** |
+| Claude API | `2026-07-29`, `07-31` ×2, `08-02` (v1/v2) | **0%** |
+| Claude API | `2026-08-05` (v3, schema 1.0.0) | **69–100%** |
+| Claude API | `2026-08-06` (v3, schema 2.0.0) | **0%** |
 
 The API path is where the prompt is the only channel carrying these rules, where
-the defect is live, and where v1/v2/v3 were originally measured — so the result
-is comparable with `notes/generic_v2_results.md`.
+the effect is already visible, and where v1/v2/v3 were originally measured — so
+the result is comparable with `notes/generic_v2_results.md`.
+
+⚠️ **v3's API-path win does not survive schema 2.0.0, and the run is at 2.0.0.**
+Same prompt one day apart: `{name, affiliations: [...]}` at schema 1.0.0 becomes
+`{notes: '...'}` at 2.0.0. Registered as an explicit prediction in the plan
+rather than left to be discovered, and scored two ways — *populated* versus
+*well-formed* — because the 2026-08-05 run is 100% populated with bare strings
+while the agentic runs carry `Organization` objects with ROR ids.
 
 **The agentic v1 arm is still worth running, for a different question**: the
 canonical set needs replacing regardless (#454), and a fresh arm also clears the
