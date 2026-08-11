@@ -43,6 +43,8 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+import copy
+
 import yaml
 
 REGISTRY = Path("src/download/prompts/canonical_hashes.yaml")
@@ -84,11 +86,42 @@ def normalise(path: str | Path) -> str:
     return p.as_posix()
 
 
+#: Parsed registries, keyed on (path, mtime_ns, size) — see `load` (#439).
+_REGISTRY_CACHE: dict[tuple[str, int, int], dict[str, Any]] = {}
+
+
+def _empty() -> dict[str, Any]:
+    return {"hash_algorithm": "sha256", "files": {}}
+
+
 def load(registry: Path = REGISTRY) -> dict[str, Any]:
-    if not Path(registry).exists():
-        return {"hash_algorithm": "sha256", "files": {}}
-    return yaml.safe_load(Path(registry).read_text(encoding="utf-8")) or {
-        "hash_algorithm": "sha256", "files": {}}
+    """The pin registry, parsed once per (path, mtime, size) (#439).
+
+    `entry_for` and `status_of_hash` each call this, and a corpus check calls
+    them once per record: 163 lookups re-parsed the file 239 times.
+
+    Cached, unlike the deliberately un-memoised `bundle_drift` (#469), and the
+    difference is what the reader is *for*. `bundle_drift` exists to notice
+    that a file's bytes changed, so a cache would defeat it. Nothing here is
+    watching the registry for change — it is a checked-in declaration, read to
+    compare *other* files against. Keyed on mtime and size so a rotation is
+    picked up anyway, and `pin` clears the cache outright so a write is visible
+    within the same tick, which mtime granularity alone would not guarantee.
+
+    A copy is returned. Callers that mutated the result would otherwise be
+    editing every later caller's view of the file.
+    """
+    path = Path(registry)
+    try:
+        stat = path.stat()
+    except OSError:
+        return _empty()
+    key = (str(path.resolve()), stat.st_mtime_ns, stat.st_size)
+    hit = _REGISTRY_CACHE.get(key)
+    if hit is None:
+        hit = yaml.safe_load(path.read_text(encoding="utf-8")) or _empty()
+        _REGISTRY_CACHE[key] = hit
+    return copy.deepcopy(hit)
 
 
 def pins(registry: Path = REGISTRY) -> dict[str, dict]:
@@ -260,6 +293,10 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
     Path(registry).write_text(
         _HEADER + yaml.safe_dump(data, sort_keys=True, width=88),
         encoding="utf-8")
+    # Cleared outright rather than relying on the mtime key: a rotation
+    # followed by a read within the same filesystem tick would otherwise serve
+    # the pre-rotation pins, and a pin nobody can see is worse than no cache.
+    _REGISTRY_CACHE.clear()
     return {"path": key, "status": "pinned" if prev else "added",
             "sha256": sha, "previous": (prev or {}).get("sha256")}
 
