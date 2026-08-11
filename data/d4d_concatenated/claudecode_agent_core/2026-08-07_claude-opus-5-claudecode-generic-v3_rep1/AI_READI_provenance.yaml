@@ -24,6 +24,7 @@ model:
     name: claude-opus-5
     temperature: 0.0
     max_tokens: 16000
+  reasoning_effort_basis: asserted by the generating agent, not observed
 prompts:
   hash_algorithm: sha256
   files:
@@ -86,6 +87,11 @@ unverified:
   reason: the Claude Code runtime does not expose a temperature setting to the agent
     or to this recorder; the header value restates the prompt template rather than
     a measured parameter. A direct API run can observe it.
+- field: model.reasoning_effort
+  value: high
+  reason: 'recorded from the generation header; the basis field postdates this run,
+    so nothing observed the value at the time. The runtime does expose CLAUDE_EFFORT,
+    so it is confirmable in principle but was not confirmed here (#449, #470).'
 notes: null
 validation:
   passed: true

@@ -441,7 +441,9 @@ simply lacked it — 12 of the 2026-08 API runs. Three sources, in order:
    launcher, and still listed under `unverified`;
 3. nothing — the field is left absent and the gap is named.
 
-Never write "default", "unspecified" or a guess. A run that did not choose an
+Never write "default", "unspecified" or a guess — `d4d provenance
+backfill-effort-basis` removes such a value and names the gap it leaves, rather
+than relabelling it (#470). A run that did not choose an
 effort is a different claim from a run whose effort is unknown, and neither is
 a run at high. The fix lives in the recorder because adding a header line to a
 generic prompt would re-baseline that condition for every project and require a
