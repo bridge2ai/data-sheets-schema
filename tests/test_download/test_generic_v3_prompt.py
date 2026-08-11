@@ -19,8 +19,12 @@ from data_sheets_schema.api_runner import (
     condition_delta,
     prompt_body,
 )
+from data_sheets_schema.constants import PROJECTS
 
-PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
+# PROJECTS is imported, not restated. A four-project literal here made
+# the per-project assertions below exclude VOICE_PEDIATRIC from the day
+# #298 made it a project, so a guard that reads as covering every
+# project covered four of five (#467).
 MARK_START = "--- ADDED IN v3 ---"
 MARK_END = "--- END ADDED IN v3 ---"
 
