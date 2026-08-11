@@ -24,13 +24,13 @@ COMPONENTS = PROMPTS / "components"
 # #298 made it a project, so a guard that reads as covering every
 # project covered four of five (#467).
 #
-# Widening it immediately found the gap the narrowing had hidden:
-# VOICE_PEDIATRIC has no component file, so the `tuned` condition cannot be run
-# for it (#478). Authoring one is content and a judgement call — it must state
-# what distinguishes the pediatric cohort without importing adult-cohort facts —
-# so the gap is pinned by name rather than papered over. The other four projects
-# stay guarded, and this list may only shrink.
-WITHOUT_COMPONENT = {"VOICE_PEDIATRIC"}
+# Widening it immediately found the gap the narrowing had hidden: VOICE_PEDIATRIC
+# had no component file, so the `tuned` condition could not be run for it (#478).
+# Filled — the set is now empty and every project is guarded. Kept as a named set
+# rather than deleted, because the README makes "no legitimate component" a valid
+# outcome: such a project would get an *empty block*, which is a different state
+# from a missing file and belongs here rather than as a silent absence.
+WITHOUT_COMPONENT: set[str] = set()
 COMPONENT_PROJECTS = tuple(p for p in PROJECTS if p not in WITHOUT_COMPONENT)
 
 ALLOWED_TYPES = {"fact", "decision-rule", "referent-pin"}
