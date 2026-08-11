@@ -260,3 +260,68 @@ def backfill_effort(execute, method, label):
     click.echo(f"\n{written} record(s) updated. The value is observed — read "
                "from the route the record already carried — so it is not "
                "listed under `unverified`.")
+
+
+@provenance.command("backfill-effort-basis")
+@click.option('--execute', is_flag=True,
+              help='write the records; without it this reports and changes nothing')
+@click.option('--label', default=None, help='restrict to one run label')
+def backfill_effort_basis(execute, label):
+    """Say where each recorded reasoning effort came from (#470).
+
+    Every honestly-derived effort carries a basis — read from the route,
+    observed against CLAUDE_EFFORT, or asserted by the generating agent. A value
+    with no basis cannot be placed on that ladder, and anything grouping runs by
+    effort reads it as a third condition alongside `high` and absent.
+
+    Two actions, reported separately because they are opposite:
+
+    \b
+      record_basis      the value is real and stays; the basis is added
+      drop_placeholder  the value names no effort ('default') and is removed
+
+    The second is a deletion. It is never bundled into the first's count, and it
+    writes an `unverified` entry naming the gap it leaves.
+    """
+    from pathlib import Path
+
+    from data_sheets_schema.provenance import (
+        CONCAT_DIR, apply_effort_basis, effort_basis_gap,
+    )
+
+    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    if label:
+        paths = [p for p in paths if p.parts[-2] == label]
+
+    gaps = [g for g in (effort_basis_gap(Path(p)) for p in paths) if g]
+    if not gaps:
+        click.echo(f"{len(paths)} record(s) examined; every recorded effort "
+                   "already says where it came from.")
+        return
+
+    by_action: dict[str, list] = {}
+    for g in gaps:
+        by_action.setdefault(g["action"], []).append(g)
+
+    verb = "applying" if execute else "would apply"
+    click.echo(f"{len(paths)} record(s) examined, {len(gaps)} {verb}:")
+    for action, items in sorted(by_action.items()):
+        routes = sorted({str(i["route"]) for i in items})
+        click.echo(f"   {action:18} {len(items):3}   "
+                   f"effort={sorted({str(i['effort']) for i in items})}   "
+                   f"route={routes}")
+
+    if not execute:
+        click.echo("\nNothing written. Re-run with --execute to apply.")
+        return
+
+    counts: dict[str, int] = {}
+    for g in gaps:
+        applied = apply_effort_basis(g["path"])
+        if applied:
+            counts[applied["action"]] = counts.get(applied["action"], 0) + 1
+    for action, n in sorted(counts.items()):
+        click.echo(f"\n{n} record(s): {action}")
+    if counts.get("drop_placeholder"):
+        click.echo("   A value was removed, not corrected. Each such record now "
+                   "names the gap under `unverified`.")

@@ -15,7 +15,6 @@ model:
   agent_runtime: Claude Code
   provider: Anthropic
   model: claude-opus-5[1m]
-  reasoning_effort: default
   mode: four-phase project agent
   temperature: '0.0'
 schema:
@@ -75,3 +74,9 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep1/VOICE_d4d_core.yaml
       sha256: 7d689413e4c5a095de6e996b16d6f6fbcdb41f2e736bf1d65ca599d92f97eaa2
   recorded_by: d4d runs validate
+unverified:
+- field: model.reasoning_effort
+  value: null
+  reason: 'the record carried ''default'', which names no effort; the route ''claude-opus-5[1m]''
+    exposes no effort ladder, so nothing was chosen. Removed rather than kept: a run
+    that did not choose an effort is a different claim from one at any level (#470).'

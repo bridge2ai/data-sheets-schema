@@ -311,6 +311,110 @@ def apply_observed_effort(path: Path) -> dict[str, Any] | None:
     return change
 
 
+#: Values that name no effort. CLAUDE.md forbids writing any of them: "a run
+#: that did not choose an effort is a different claim from a run whose effort is
+#: unknown, and neither is a run at high." The correct state is an absent field
+#: and a named gap.
+PLACEHOLDER_EFFORTS = {"default", "unspecified", "n/a", "none", "unknown"}
+
+
+def effort_basis_gap(path: Path) -> dict[str, Any] | None:
+    """Does this record state an effort without saying where it came from? (#470)
+
+    Every honestly-derived effort carries a `reasoning_effort_basis` — read from
+    the route, observed against `CLAUDE_EFFORT`, or asserted by the generating
+    agent. A value with no basis cannot be placed on that ladder, and anything
+    grouping runs by effort reads it as a third condition.
+
+    Two distinct defects, returned with different `action`s because they need
+    opposite fixes:
+
+    - ``record_basis`` — the value is a real ladder value with no basis. The
+      2026-08-07 sweep's 15 records are this: their header says `high`, the
+      runtime does expose `CLAUDE_EFFORT` (#449), and the basis field simply
+      postdates them. The value stays; what is added is where it came from.
+    - ``drop_placeholder`` — the value is one of `PLACEHOLDER_EFFORTS`, which
+      names no effort at all. The value goes and the gap is named. This is a
+      deletion, so it is reported separately and never bundled with the above.
+    """
+    if not path.exists():
+        return None
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except (yaml.YAMLError, OSError, UnicodeDecodeError):
+        return None
+    model = data.get("model")
+    if not isinstance(model, dict):
+        return None
+    effort = model.get("reasoning_effort")
+    if not effort or str(effort).strip().lower() == "not applicable":
+        return None
+    if model.get("reasoning_effort_basis"):
+        return None
+
+    value = str(effort).strip().lower()
+    if value in PLACEHOLDER_EFFORTS:
+        return {"path": path, "action": "drop_placeholder", "effort": effort,
+                "route": model.get("model")}
+    return {"path": path, "action": "record_basis", "effort": effort,
+            "route": model.get("model")}
+
+
+def apply_effort_basis(path: Path) -> dict[str, Any] | None:
+    """Record the missing basis, or drop the placeholder that names none (#470).
+
+    The basis written for a surviving value is the same string `build_record`
+    writes in the same situation — "asserted by the generating agent, not
+    observed" — because that is exactly what is known: the header carries the
+    value and nothing here observed it. Claiming more would be the fabrication
+    the recorder exists to prevent.
+    """
+    change = effort_basis_gap(path)
+    if change is None:
+        return None
+    text = path.read_text(encoding="utf-8")
+    preamble = "".join(itertools.takewhile(lambda ln: ln.startswith("#"),
+                                           text.splitlines(keepends=True)))
+    data = yaml.safe_load(text) or {}
+    model = data["model"]
+    unverified = data.setdefault("unverified", []) or []
+    if not isinstance(unverified, list):
+        unverified = []
+
+    if change["action"] == "drop_placeholder":
+        dropped = model.pop("reasoning_effort")
+        model.pop("reasoning_effort_basis", None)
+        unverified.append({
+            "field": "model.reasoning_effort",
+            "value": None,
+            "reason": (f"the record carried {dropped!r}, which names no effort; "
+                       f"the route {change['route'] or 'unknown'!r} exposes no "
+                       "effort ladder, so nothing was chosen. Removed rather "
+                       "than kept: a run that did not choose an effort is a "
+                       "different claim from one at any level (#470)."),
+        })
+    else:
+        model["reasoning_effort_basis"] = (
+            "asserted by the generating agent, not observed")
+        unverified.append({
+            "field": "model.reasoning_effort",
+            "value": model["reasoning_effort"],
+            "reason": ("recorded from the generation header; the basis field "
+                       "postdates this run, so nothing observed the value at "
+                       "the time. The runtime does expose CLAUDE_EFFORT, so it "
+                       "is confirmable in principle but was not confirmed here "
+                       "(#449, #470)."),
+        })
+
+    data["unverified"] = unverified
+    new = path.with_suffix(path.suffix + ".tmp")
+    new.write_text(
+        preamble + yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
+        encoding="utf-8")
+    new.replace(path)
+    return change
+
+
 def parse_header(path: Path) -> dict[str, str]:
     out: dict[str, str] = {}
     if not path.exists():

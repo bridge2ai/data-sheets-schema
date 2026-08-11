@@ -17,7 +17,9 @@ from pathlib import Path
 import yaml
 
 from data_sheets_schema.provenance import (
+    apply_effort_basis,
     apply_observed_effort,
+    effort_basis_gap,
     observed_effort_gap,
 )
 
@@ -204,11 +206,30 @@ class TestAgainstTheRealCorpus(unittest.TestCase):
             if not model.get("reasoning_effort_basis"):
                 without_basis.append(str(p))
 
-        self.assertLessEqual(
-            len(without_basis), 17,
-            "a new record carries an effort with no basis; every effort must "
-            "say whether it was read from the route, asserted by the launcher, "
-            "or observed from the runtime (#397, #470)")
+        self.assertEqual(
+            without_basis, [],
+            "a record carries an effort with no basis; every effort must say "
+            "whether it was read from the route, asserted by the generating "
+            "agent, or observed from the runtime (#397, #470)")
+
+    def test_no_record_states_an_effort_that_names_none(self):
+        """`default` and kin are forbidden values, not null (#470).
+
+        Anything grouping runs by effort reads them as a third condition
+        alongside `high` and absent. Two records carried `default`; the value
+        was removed rather than corrected, because a run that did not choose an
+        effort is a different claim from one at any level.
+        """
+        from data_sheets_schema.provenance import PLACEHOLDER_EFFORTS
+
+        offenders = []
+        for p in Path("data/d4d_concatenated").glob(
+                "*_core/*/*_provenance.yaml"):
+            data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+            effort = (data.get("model") or {}).get("reasoning_effort")
+            if effort and str(effort).strip().lower() in PLACEHOLDER_EFFORTS:
+                offenders.append((str(p), effort))
+        self.assertEqual(offenders, [])
 
     def test_the_backfilled_records_all_carry_their_basis(self):
         """The 49 this pass wrote are the well-formed case, asserted as such."""
@@ -223,3 +244,104 @@ class TestAgainstTheRealCorpus(unittest.TestCase):
                               model.get("reasoning_effort_basis") or "", str(p))
                 n += 1
         self.assertEqual(n, 49)
+
+
+class TestEffortBasis(unittest.TestCase):
+    """Every recorded effort must say where it came from (#470).
+
+    A value with no basis cannot be placed on the ladder #397 defines — route
+    (observed), launcher/agent (asserted), or absent (gap named) — and anything
+    grouping runs by effort reads it as a third condition.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.path = Path(self.tmp.name) / "X_provenance.yaml"
+
+    def _write(self, model, unverified=None):
+        data = {"record_version": 1, "model": model,
+                "unverified": unverified if unverified is not None else []}
+        self.path.write_text(
+            PREAMBLE + yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+
+    def _load(self):
+        return yaml.safe_load(self.path.read_text(encoding="utf-8"))
+
+    def test_a_real_value_without_a_basis_gets_one(self):
+        self._write({"model": "claude-opus-5", "reasoning_effort": "high"})
+        change = apply_effort_basis(self.path)
+        self.assertEqual(change["action"], "record_basis")
+        model = self._load()["model"]
+        self.assertEqual(model["reasoning_effort"], "high")
+        self.assertIn("asserted by the generating agent",
+                      model["reasoning_effort_basis"])
+
+    def test_recording_a_basis_keeps_the_value(self):
+        """The value is right; only its provenance was missing."""
+        self._write({"model": "claude-opus-5", "reasoning_effort": "high"})
+        apply_effort_basis(self.path)
+        self.assertEqual(self._load()["model"]["reasoning_effort"], "high")
+
+    def test_a_placeholder_is_removed_not_relabelled(self):
+        """`default` names no effort, so no basis can be honest about it."""
+        self._write({"model": "claude-opus-5[1m]", "reasoning_effort": "default"})
+        change = apply_effort_basis(self.path)
+        self.assertEqual(change["action"], "drop_placeholder")
+        model = self._load()["model"]
+        self.assertNotIn("reasoning_effort", model)
+        self.assertNotIn("reasoning_effort_basis", model)
+
+    def test_a_dropped_placeholder_names_the_gap(self):
+        """Deleting a value silently would be worse than keeping it."""
+        self._write({"model": "claude-opus-5[1m]", "reasoning_effort": "default"})
+        apply_effort_basis(self.path)
+        entries = [e for e in self._load()["unverified"]
+                   if e["field"] == "model.reasoning_effort"]
+        self.assertEqual(len(entries), 1)
+        self.assertIsNone(entries[0]["value"])
+        self.assertIn("names no effort", entries[0]["reason"])
+
+    def test_every_placeholder_spelling_is_caught(self):
+        for value in ("default", "unspecified", "n/a", "none", "unknown",
+                      "DEFAULT", " Default "):
+            with self.subTest(value=value):
+                self._write({"model": "m", "reasoning_effort": value})
+                self.assertEqual(effort_basis_gap(self.path)["action"],
+                                 "drop_placeholder")
+
+    def test_an_existing_basis_is_left_alone(self):
+        self._write({"model": "m", "reasoning_effort": "high",
+                     "reasoning_effort_basis": "read from the model route"})
+        self.assertIsNone(effort_basis_gap(self.path))
+        self.assertIsNone(apply_effort_basis(self.path))
+
+    def test_not_applicable_is_not_a_gap(self):
+        """A run that declares the field inapplicable has already answered."""
+        self._write({"model": "m", "reasoning_effort": "not applicable"})
+        self.assertIsNone(effort_basis_gap(self.path))
+
+    def test_an_absent_effort_is_not_a_gap(self):
+        """Absent is the honest state for a route with no ladder."""
+        self._write({"model": "claude-opus-5"})
+        self.assertIsNone(effort_basis_gap(self.path))
+
+    def test_applying_twice_is_a_no_op(self):
+        self._write({"model": "m", "reasoning_effort": "high"})
+        self.assertIsNotNone(apply_effort_basis(self.path))
+        first = self.path.read_text(encoding="utf-8")
+        self.assertIsNone(apply_effort_basis(self.path))
+        self.assertEqual(self.path.read_text(encoding="utf-8"), first)
+
+    def test_existing_unverified_entries_survive(self):
+        self._write({"model": "m", "reasoning_effort": "high"},
+                    unverified=[{"field": "model.temperature", "value": None,
+                                 "reason": "pre-existing"}])
+        apply_effort_basis(self.path)
+        fields = [e["field"] for e in self._load()["unverified"]]
+        self.assertIn("model.temperature", fields)
+        self.assertIn("model.reasoning_effort", fields)
+
+    def test_unreadable_records_are_skipped_not_raised(self):
+        self.path.write_bytes(b"\xff\xfe bad")
+        self.assertIsNone(effort_basis_gap(self.path))
