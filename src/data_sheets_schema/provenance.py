@@ -201,6 +201,30 @@ def _run(cmd: list[str]) -> str | None:
         return None
 
 
+_EFFORT_LADDER = ("minimal", "low", "medium", "high")
+
+
+def _effort_from_route(model_name: str | None) -> tuple[str | None, str | None]:
+    """Reasoning effort read off the model route, where the route carries it.
+
+    CBORG exposes effort as a model-name suffix rather than a parameter, because
+    this family rejects `temperature` outright — `google/claude-opus-5-high` is
+    the high-effort route and `claude-opus-5` is the same model with no ladder
+    on offer. The route is therefore evidence about effort, and it is the only
+    evidence either path currently produces.
+
+    Returns (effort, basis), or (None, None) when the route names none. A route
+    without a suffix is not "default": it is a route on which no effort was
+    selected, which `build_record` reports as a gap rather than a value.
+    """
+    name = (model_name or "").strip().lower()
+    for effort in _EFFORT_LADDER:
+        if name.endswith(f"-{effort}"):
+            return effort, ("read from the model route; the provider exposes "
+                            "effort as a model-name suffix, not a parameter")
+    return None, None
+
+
 def parse_header(path: Path) -> dict[str, str]:
     out: dict[str, str] = {}
     if not path.exists():
@@ -597,6 +621,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  prompt_request: str | None = None,
                  prompt_request_spec: dict[str, Any] | None = None,
                  schema_digest_md5: str | None = None,
+                 reasoning_effort: str | None = None,
                  extra_notes: list[str] | None = None) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
 
@@ -699,6 +724,54 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                        "value restates the prompt template rather than a "
                        "measured parameter. A direct API run can observe it."),
         })
+
+    # Reasoning effort (#397). No generic prompt names it — `{EFFORT}` appears
+    # in none of v1-v4 — so `parse_header` finds nothing and 12 of the 2026-08
+    # API records carry no effort at all. The three agentic sweeps that do have
+    # it got it because a launch message said to write it by hand, which is the
+    # out-of-band intervention #419/#422 exist to remove.
+    #
+    # Fixed here rather than in the prompt on purpose: adding a header line to
+    # v3 would change its bytes, re-baseline the condition for every project,
+    # and now require a pin rotation (#432). The recorder can establish the same
+    # fact without touching a frozen baseline.
+    #
+    # Never write "default", "unspecified" or "n/a" as a value. Where no effort
+    # can be established the field stays absent and the gap is named in
+    # `unverified`, because a run that did not choose an effort is a different
+    # claim from a run whose effort is unknown.
+    if not model.get("reasoning_effort"):
+        derived, basis = _effort_from_route(model.get("model"))
+        if derived:
+            model["reasoning_effort"] = derived
+            model["reasoning_effort_basis"] = basis
+        elif reasoning_effort:
+            model["reasoning_effort"] = reasoning_effort
+            model["reasoning_effort_basis"] = (
+                "asserted by the launcher via --reasoning-effort, not observed")
+            unverified.append({
+                "field": "model.reasoning_effort",
+                "value": reasoning_effort,
+                "reason": ("supplied on the command line; neither the record "
+                           "header nor the model route carries it, so nothing "
+                           "here observed it"),
+            })
+        else:
+            unverified.append({
+                "field": "model.reasoning_effort",
+                "value": None,
+                "reason": (f"no effort is recorded: the header carries none and "
+                           f"the route {model.get('model') or 'unknown'!r} "
+                           "exposes no effort ladder, so the provider default "
+                           "applied. That is not a value this run chose, and it "
+                           "is not comparable with a run that named one."),
+            })
+    elif (model.get("agent_runtime") or "").strip().lower() == "claude code":
+        # Same standing as the temperature it sits beside: written because a
+        # human told the agent to write it, not read from anything the runtime
+        # exposes.
+        model.setdefault("reasoning_effort_basis",
+                         "asserted by the generating agent, not observed")
 
     cfg = load_generation_config()
     declared = (cfg.get("model") or {}) if isinstance(cfg, dict) else {}

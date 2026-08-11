@@ -215,10 +215,22 @@ def preprocess_manifest(
                 # The notes remain in `source_manifest.yaml`, which is where the
                 # reasoning belongs and where `d4d download audit-manifest`
                 # reads it.
-                if entry.get("verification_url"):
-                    metadata.append(
-                        f"Verification URL: {entry['verification_url']}"
-                    )
+                # Neither is `verification_url` (#427). #421 stripped the notes
+                # and left this behind, so curator-authored metadata was still
+                # reaching the model: 7 lines across four of the five bundles,
+                # unequally — three for AI_READI, none for CHORUS.
+                #
+                # It is the same kind of statement as the note. The URL is a
+                # curator's record of where a capture was checked against
+                # upstream, and it is not in the source document; a record can
+                # cite it and still be scored grounded, because the string is in
+                # the bundle. AI_READI's `10.60775/fairhub.4` reached four
+                # values that way through the note (#424) — the mechanism is the
+                # channel, not the field.
+                #
+                # `verification_url` stays in the manifest, which is where a
+                # curator reads it and where `d4d download audit-manifest`
+                # looks.
                 metadata.extend(["-" * 80, ""])
                 destination_path.write_text(
                     "\n".join(metadata) + text + "\n",

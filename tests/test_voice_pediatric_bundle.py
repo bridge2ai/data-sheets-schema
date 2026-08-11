@@ -22,11 +22,14 @@ CONCAT = REPO / "data" / "preprocessed" / "concatenated"
 
 #: What the 49 runs subject to the live-provenance rule recorded for the VOICE
 #: bundle. Renaming or rebuilding it would invalidate their attestation.
-#: The VOICE bundle as it stands. Changed by #421, which stripped curator
-#: prose out of the bundles; the previous value is kept beside it because 9
-#: runs recorded it in `inputs.bundle_md5` and a hash with no name is
-#: indistinguishable from a corrupted one.
-VOICE_BUNDLE_MD5 = "3e5c24df7b46d97204cb007c43b99e92"
+#: The VOICE bundle as it stands. Changed twice, both times to take curator
+#: text out of it: #421 removed `curation_note`, #427 removed
+#: `verification_url`. Superseded values are kept beside it because runs
+#: recorded them in `inputs.bundle_md5`, and a hash with no name is
+#: indistinguishable from a corrupted one. `source_manifest.yaml`'s
+#: `bundle_hash_history` carries the same mapping for all five projects.
+VOICE_BUNDLE_MD5 = "dcd717170da6762569c0b4eeafc1c3d2"
+VOICE_BUNDLE_MD5_PRE_427 = "3e5c24df7b46d97204cb007c43b99e92"
 VOICE_BUNDLE_MD5_PRE_421 = "e637eb752ee8cab5f9f7a52782250469"
 
 
@@ -88,12 +91,24 @@ class TestTheBundles(unittest.TestCase):
         self.assertEqual(self._md5(CONCAT / "VOICE_preprocessed.txt"),
                          VOICE_BUNDLE_MD5)
 
-    def test_the_pre_strip_hash_is_recorded_not_forgotten(self):
-        """9 runs record the old hash. Keeping it here is what lets someone
-        reading those records tell "consumed the pre-#421 bundle" from
-        "consumed something unidentifiable"."""
-        self.assertNotEqual(VOICE_BUNDLE_MD5, VOICE_BUNDLE_MD5_PRE_421)
-        self.assertEqual(32, len(VOICE_BUNDLE_MD5_PRE_421))
+    def test_every_pre_strip_hash_is_recorded_not_forgotten(self):
+        """9 runs record the pre-#421 hash. Keeping the superseded values here
+        is what lets someone reading those records tell "consumed the pre-#421
+        bundle" from "consumed something unidentifiable"."""
+        supers = {VOICE_BUNDLE_MD5_PRE_421, VOICE_BUNDLE_MD5_PRE_427}
+        self.assertNotIn(VOICE_BUNDLE_MD5, supers)
+        self.assertEqual(2, len(supers))
+        for h in supers:
+            self.assertEqual(32, len(h))
+
+    def test_the_manifest_history_agrees_with_these_constants(self):
+        """Two places record the same mapping; if they disagree, the one a
+        reader happens to open is a coin toss."""
+        events = yaml.safe_load(MANIFEST.read_text())["bundle_hash_history"]["events"]
+        by_issue = {e["issue"]: e["projects"]["VOICE"] for e in events}
+        self.assertEqual(VOICE_BUNDLE_MD5_PRE_421, by_issue[421]["before"])
+        self.assertEqual(VOICE_BUNDLE_MD5_PRE_427, by_issue[427]["before"])
+        self.assertEqual(VOICE_BUNDLE_MD5, by_issue[427]["after"])
 
     def test_the_pediatric_bundle_exists_and_is_smaller(self):
         ped = CONCAT / "VOICE_PEDIATRIC_preprocessed.txt"

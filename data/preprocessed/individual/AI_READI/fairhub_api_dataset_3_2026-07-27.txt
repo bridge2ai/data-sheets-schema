@@ -4,7 +4,6 @@ Source ID: fairhub_dataset_v3_api
 Source type: structured metadata
 Source URL: https://fairhub.io/api/datasets/3
 Raw file: data/raw/AI_READI/fairhub_api_dataset_3_2026-07-27.json
-Verification URL: https://doi.org/10.60775/fairhub.3
 --------------------------------------------------------------------------------
 {
   "id": "3",
