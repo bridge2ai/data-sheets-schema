@@ -330,6 +330,26 @@ def _append_resource_projection_errors(
             )
 
 
+def _nested_resources(
+    collections: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    """Every `File` nested under a collection's `resources` (#401).
+
+    Flattened across collections rather than searched per collection, because
+    a core distribution names the file, not the collection it sits in — and
+    `_related_match` already refuses an ambiguous match, so two files sharing
+    an id anywhere in the record are reported rather than silently resolved to
+    whichever came first.
+    """
+    out: list[Mapping[str, Any]] = []
+    for collection in collections:
+        resources = collection.get("resources")
+        if not isinstance(resources, list):
+            continue
+        out.extend(item for item in resources if isinstance(item, Mapping))
+    return out
+
+
 def _related_match(
     distribution: Mapping[str, Any],
     collections: Sequence[Mapping[str, Any]],
@@ -381,7 +401,9 @@ def _append_distribution_relation_issues(
     mapping_collections = [
         item for item in collections if isinstance(item, Mapping)
     ]
+    nested_files = _nested_resources(mapping_collections)
     matched = 0
+    matched_nested = 0
     unmatched = []
     for index, distribution in enumerate(distributions):
         if not isinstance(distribution, Mapping):
@@ -396,10 +418,32 @@ def _append_distribution_relation_issues(
         collection, match_basis = _related_match(
             distribution, mapping_collections
         )
+        level = "collection"
+        if collection is None and match_basis is None:
+            # Only on a *clean* miss. `_related_match` returns
+            # (None, "ambiguous <key>") when two collections share an
+            # identifier, which is a data defect; descending past it and
+            # finding one nested file would report a tidy resource-level match
+            # and delete the ambiguity from the output (#474). That would make
+            # the defect less visible than before this change, inverting what
+            # #401 is for.
+            #
+            # Descend into each collection's nested `resources` (#401).
+            # `FileCollection` is collection-level — total_bytes, file_count,
+            # collection_type — while `CoreDistribution` is file-level — bytes,
+            # hash, md5, sha256, path, media_type. So a core record that
+            # enumerates one distribution per *file* is doing the correct
+            # thing, and matching only at the top level reported all 12 of
+            # VOICE_PEDIATRIC's as unmatched when every one matched a nested
+            # File by id, with name, path and bytes agreeing and zero conflicts.
+            collection, match_basis = _related_match(distribution, nested_files)
+            level = "resource"
         if collection is None:
             unmatched.append(index)
             continue
         matched += 1
+        if level == "resource":
+            matched_nested += 1
         relation_path = f"$.distributions[{index}]"
         for field_name in ("path", "compression"):
             if (
@@ -418,10 +462,14 @@ def _append_distribution_relation_issues(
                         ),
                     )
                 )
+        # A collection carries `total_bytes`; a nested File carries `bytes`.
+        # Comparing a file-level size against a collection total would be a
+        # category error, so the counterpart field follows the match level.
+        size_field = "total_bytes" if level == "collection" else "bytes"
         if (
             "bytes" in distribution
-            and "total_bytes" in collection
-            and distribution["bytes"] != collection["total_bytes"]
+            and size_field in collection
+            and distribution["bytes"] != collection[size_field]
         ):
             report.errors.append(
                 ConsistencyIssue(
@@ -429,20 +477,23 @@ def _append_distribution_relation_issues(
                     path=f"{relation_path}.bytes",
                     message=(
                         "value conflicts with matched "
-                        "file_collection.total_bytes: "
-                        f"full={collection['total_bytes']!r}, "
+                        f"file_collection.{size_field}: "
+                        f"full={collection[size_field]!r}, "
                         f"core={distribution['bytes']!r}"
                     ),
                 )
             )
 
+    at_collection = matched - matched_nested
     report.warnings.append(
         ConsistencyIssue(
             code="semantic-review-required",
             path="$.file_collections <-> $.distributions",
             message=(
                 "Phase 4 must semantically review related distribution "
-                f"content; deterministic matches={matched}, "
+                f"content; deterministic matches={matched} "
+                f"({at_collection} at collection level, "
+                f"{matched_nested} at nested resource level), "
                 f"unmatched core distributions={unmatched}"
             ),
         )

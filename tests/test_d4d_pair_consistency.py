@@ -181,6 +181,201 @@ class TestD4DPairConsistency(unittest.TestCase):
             {issue.code for issue in report.errors},
         )
 
+    # --- nested resource matching (#401) -------------------------------
+    #
+    # `FileCollection` is collection-level (total_bytes, file_count,
+    # collection_type, nested resources); `CoreDistribution` is file-level
+    # (bytes, hash, md5, sha256, path, media_type). A core record that
+    # enumerates one distribution per file is therefore doing the correct
+    # thing, and matching only at the top level reported all 12 of
+    # VOICE_PEDIATRIC's as unmatched while every one matched a nested File.
+
+    def _nested_pair(self, *, core_bytes=10, core_path="data/a.csv"):
+        full = {
+            "id": "https://example.org/dataset",
+            "file_collections": [
+                {
+                    "id": "https://example.org/collection",
+                    "name": "Collection",
+                    "total_bytes": 100,
+                    "resources": [
+                        {
+                            "id": "https://example.org/file-a",
+                            "name": "a.csv",
+                            "path": "data/a.csv",
+                            "bytes": 10,
+                        }
+                    ],
+                }
+            ],
+        }
+        core = {
+            "id": "https://example.org/dataset",
+            "distributions": [
+                {
+                    "id": "https://example.org/file-a",
+                    "name": "a.csv",
+                    "path": core_path,
+                    "bytes": core_bytes,
+                }
+            ],
+        }
+        return full, core
+
+    def _relation_warning(self, report):
+        for issue in report.warnings:
+            if issue.path == "$.file_collections <-> $.distributions":
+                return issue.message
+        self.fail("no distribution relation warning emitted")
+
+    def test_a_file_level_distribution_matches_a_nested_resource(self):
+        full, core = self._nested_pair()
+        report = validate_pair_data(full, core, self.pair_schema)
+        message = self._relation_warning(report)
+        self.assertIn("unmatched core distributions=[]", message)
+        self.assertIn("1 at nested resource level", message)
+        self.assertIn("0 at collection level", message)
+
+    def test_a_nested_match_is_not_an_error(self):
+        """The record was correct; only the instrument disagreed."""
+        full, core = self._nested_pair()
+        report = validate_pair_data(full, core, self.pair_schema)
+        self.assertEqual(
+            [i for i in report.errors
+             if i.code == "distribution-related-content"], [])
+
+    def test_bytes_is_compared_against_the_nested_file_not_the_total(self):
+        """A file size against a collection total is a category error.
+
+        The nested File is 10 bytes and its collection is 100. Comparing the
+        core distribution's 10 against 100 would report a conflict on a record
+        that agrees exactly.
+        """
+        full, core = self._nested_pair(core_bytes=10)
+        report = validate_pair_data(full, core, self.pair_schema)
+        self.assertEqual(
+            [i for i in report.errors
+             if i.code == "distribution-related-content"], [])
+
+    def test_a_real_conflict_against_a_nested_file_is_still_caught(self):
+        """Descending must not turn the check off."""
+        full, core = self._nested_pair(core_bytes=999, core_path="wrong/")
+        report = validate_pair_data(full, core, self.pair_schema)
+        codes = {i.code for i in report.errors}
+        self.assertIn("distribution-related-content", codes)
+
+    def test_collection_level_matching_still_wins_and_is_reported_as_such(self):
+        """The pre-existing behaviour, unchanged and now labelled."""
+        full = {
+            "id": "https://example.org/dataset",
+            "file_collections": [
+                {"id": "https://example.org/files", "name": "Files",
+                 "total_bytes": 100},
+            ],
+        }
+        core = {
+            "id": "https://example.org/dataset",
+            "distributions": [
+                {"id": "https://example.org/files", "name": "Files",
+                 "bytes": 100},
+            ],
+        }
+        report = validate_pair_data(full, core, self.pair_schema)
+        message = self._relation_warning(report)
+        self.assertIn("1 at collection level", message)
+        self.assertIn("0 at nested resource level", message)
+
+    def test_a_genuinely_absent_distribution_is_still_unmatched(self):
+        """The signal the fix exists to make meaningful.
+
+        Before #401 this warning looked identical to the benign nested case,
+        so the alarming reading was routine. It must survive.
+        """
+        full = {
+            "id": "https://example.org/dataset",
+            "file_collections": [
+                {"id": "https://example.org/collection", "name": "C",
+                 "resources": [{"id": "https://example.org/file-a",
+                                "name": "a.csv"}]},
+            ],
+        }
+        core = {
+            "id": "https://example.org/dataset",
+            "distributions": [
+                {"id": "https://example.org/nowhere", "name": "ghost.csv"},
+            ],
+        }
+        report = validate_pair_data(full, core, self.pair_schema)
+        self.assertIn("unmatched core distributions=[0]",
+                      self._relation_warning(report))
+
+    def test_an_id_duplicated_across_collections_is_not_resolved_silently(self):
+        """Ambiguity is reported, not settled by iteration order."""
+        full = {
+            "id": "https://example.org/dataset",
+            "file_collections": [
+                {"id": "https://example.org/c1", "name": "C1",
+                 "resources": [{"id": "https://example.org/dup", "name": "x"}]},
+                {"id": "https://example.org/c2", "name": "C2",
+                 "resources": [{"id": "https://example.org/dup", "name": "y"}]},
+            ],
+        }
+        core = {
+            "id": "https://example.org/dataset",
+            "distributions": [
+                {"id": "https://example.org/dup", "name": "z"},
+            ],
+        }
+        report = validate_pair_data(full, core, self.pair_schema)
+        self.assertIn("unmatched core distributions=[0]",
+                      self._relation_warning(report))
+
+    def test_an_ambiguous_collection_match_is_not_rescued_by_descending(self):
+        """Two collections sharing an id is a defect; descending would hide it.
+
+        `_related_match` reports ambiguity distinctly from absence. If the
+        descent treated them alike, this record would report a tidy
+        `1 at nested resource level` match and the duplicate collection id
+        would vanish from the output — less visible than before #401, which
+        exists to make `unmatched` mean what it says (#474).
+        """
+        full = {
+            "id": "https://example.org/dataset",
+            "file_collections": [
+                {"id": "https://example.org/dup", "name": "C1",
+                 "resources": [{"id": "https://example.org/dup",
+                                "name": "nested"}]},
+                {"id": "https://example.org/dup", "name": "C2"},
+            ],
+        }
+        core = {
+            "id": "https://example.org/dataset",
+            "distributions": [
+                {"id": "https://example.org/dup", "name": "d"},
+            ],
+        }
+        report = validate_pair_data(full, core, self.pair_schema)
+        message = self._relation_warning(report)
+        self.assertIn("unmatched core distributions=[0]", message)
+        self.assertIn("0 at nested resource level", message)
+
+    def test_a_collection_without_resources_is_handled(self):
+        full = {
+            "id": "https://example.org/dataset",
+            "file_collections": [
+                {"id": "https://example.org/c", "name": "C"},
+                {"id": "https://example.org/c2", "name": "C2",
+                 "resources": "not a list"},
+            ],
+        }
+        core = {
+            "id": "https://example.org/dataset",
+            "distributions": [{"id": "https://example.org/x", "name": "x"}],
+        }
+        report = validate_pair_data(full, core, self.pair_schema)
+        self.assertIn("unmatched core distributions=[0]",
+                      self._relation_warning(report))
+
     def test_synchronize_core_uses_full_as_canonical_content(self):
         full = {
             "id": "https://example.org/dataset",
