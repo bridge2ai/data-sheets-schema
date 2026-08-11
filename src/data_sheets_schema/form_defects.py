@@ -9,17 +9,17 @@ worse, while underneath:
                     free-text `description`                   8 → 50
 
 The rule eliminated the defect it named and produced a different one wearing the
-same label.
+same label. One `form` class covering two failures made a real improvement read
+as a regression, and the note's conclusion was that any future comparison on
+this axis has to split them. This module is that split.
 
-Those are this module's own classifier output, folded — see `folded()`; a value
-classified `both` counts toward each named subtype. Earlier revisions of this
-docstring carried 27 → 0 and 2 → 33, which are the *manual read* from
+Those figures are this module's own classifier output, folded — see `folded()`;
+a value classified `both` counts toward each named subtype. Earlier revisions of
+this docstring carried 27 → 0 and 2 → 33, which are the *manual read* from
 `notes/form_defect_split_2026-08-03.md` that the classifier superseded (#461).
 The note keeps both and explains the gap: a human reading judge reasons in bulk
 retreats to "unclear" (37 in `other`) where a judge asked one question per value
-does not (12). The manual read is why this module exists; it is not its output. One `form` class covering two failures made a real improvement read
-as a regression, and the note's conclusion was that any future comparison on
-this axis has to split them. This module is that split.
+does not (12). The manual read is why this module exists; it is not its output.
 
 **It does not re-judge fitness.** Editing `FITNESS_SYSTEM` would be the obvious
 way to add sub-types and would invalidate all 1441 cached fitness judgements —
@@ -43,6 +43,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator
 
+from data_sheets_schema.constants import PROJECTS
 from data_sheets_schema.agreement import (
     DEFAULT_CONFIGS,
     DEFAULT_ROOT,
@@ -148,13 +149,22 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
     return out
 
 
-def _value_index(root: Path, method: str,
-                 configs: dict[str, str]) -> dict[tuple[str, str], set[str]]:
-    """(slot, canonical value) -> the configs that produced it."""
+def _value_index(root: Path, method: str, configs: dict[str, str],
+                 projects: tuple[str, ...] = tuple(PROJECTS),
+                 ) -> dict[tuple[str, str], set[str]]:
+    """(slot, canonical value) -> the configs that produced it.
+
+    The project list comes from `PROJECTS`, not a literal. A project missing
+    here is not an error anyone sees: its values match nothing, `attribute`
+    assigns `config = ""`, and every failure from it lands in the
+    `unattributed` column looking like a data problem rather than a project the
+    index never opened. `VOICE_PEDIATRIC` was absent from the literal from #298
+    until #463, and stayed quiet only because nothing from it had been scored.
+    """
     index: dict[tuple[str, str], set[str]] = collections.defaultdict(set)
     for cfg, label in configs.items():
         tag = cfg.split()[0]
-        for project in ("AI_READI", "CHORUS", "CM4AI", "VOICE"):
+        for project in projects:
             for record in load_replicates(root, method, label, project).values():
                 for slot, value in record.items():
                     index[(slot, json.dumps(value, sort_keys=True))].add(tag)

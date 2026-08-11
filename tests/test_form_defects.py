@@ -126,6 +126,40 @@ class TestTable(unittest.TestCase):
         self.assertEqual(set(counts), set(SUBTYPES))
 
 
+class TestIndexCoversEveryProject(unittest.TestCase):
+    """A project the index never opens becomes an `unattributed` column (#463).
+
+    `attribute` assigns `config = ""` to any value it cannot match, and nothing
+    distinguishes "this value came from a project we did not look at" from
+    "this value matched no record". VOICE_PEDIATRIC was missing from a
+    hardcoded literal from #298 onward and stayed quiet only because nothing
+    from it had been fitness-scored yet.
+    """
+
+    def test_the_default_project_list_is_the_registry(self):
+        import inspect
+
+        from data_sheets_schema.constants import PROJECTS
+        from data_sheets_schema.form_defects import _value_index
+
+        default = inspect.signature(_value_index).parameters["projects"].default
+        self.assertEqual(tuple(default), tuple(PROJECTS))
+
+    def test_voice_pediatric_is_covered(self):
+        """Named explicitly: it is the project the literal actually omitted."""
+        from data_sheets_schema.constants import PROJECTS
+        from data_sheets_schema.form_defects import _value_index
+
+        default = inspect_default_projects(_value_index)
+        self.assertIn("VOICE_PEDIATRIC", default)
+        self.assertIn("VOICE_PEDIATRIC", PROJECTS)
+
+
+def inspect_default_projects(fn):
+    import inspect
+    return tuple(inspect.signature(fn).parameters["projects"].default)
+
+
 class TestDefaultInstrument(unittest.TestCase):
     """The cache names the instrument; the live config pin does not (#462).
 
