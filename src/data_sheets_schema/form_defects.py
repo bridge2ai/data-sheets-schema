@@ -4,14 +4,22 @@
 said and the instrument could not show it. Form failures went 50 → 56, apparently
 worse, while underneath:
 
-    collapsed cardinality — several entities in one object   27 → 0
+    collapsed cardinality — several entities in one object   42 → 7
     hollow object — one object per entity, all content in
-                    free-text `description`                   2 → 33
+                    free-text `description`                   8 → 50
 
 The rule eliminated the defect it named and produced a different one wearing the
 same label. One `form` class covering two failures made a real improvement read
 as a regression, and the note's conclusion was that any future comparison on
 this axis has to split them. This module is that split.
+
+Those figures are this module's own classifier output, folded — see `folded()`;
+a value classified `both` counts toward each named subtype. Earlier revisions of
+this docstring carried 27 → 0 and 2 → 33, which are the *manual read* from
+`notes/form_defect_split_2026-08-03.md` that the classifier superseded (#461).
+The note keeps both and explains the gap: a human reading judge reasons in bulk
+retreats to "unclear" (37 in `other`) where a judge asked one question per value
+does not (12). The manual read is why this module exists; it is not its output.
 
 **It does not re-judge fitness.** Editing `FITNESS_SYSTEM` would be the obvious
 way to add sub-types and would invalidate all 1441 cached fitness judgements —
@@ -35,6 +43,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator
 
+from data_sheets_schema.constants import PROJECTS
 from data_sheets_schema.agreement import (
     DEFAULT_CONFIGS,
     DEFAULT_ROOT,
@@ -140,13 +149,22 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
     return out
 
 
-def _value_index(root: Path, method: str,
-                 configs: dict[str, str]) -> dict[tuple[str, str], set[str]]:
-    """(slot, canonical value) -> the configs that produced it."""
+def _value_index(root: Path, method: str, configs: dict[str, str],
+                 projects: tuple[str, ...] = tuple(PROJECTS),
+                 ) -> dict[tuple[str, str], set[str]]:
+    """(slot, canonical value) -> the configs that produced it.
+
+    The project list comes from `PROJECTS`, not a literal. A project missing
+    here is not an error anyone sees: its values match nothing, `attribute`
+    assigns `config = ""`, and every failure from it lands in the
+    `unattributed` column looking like a data problem rather than a project the
+    index never opened. `VOICE_PEDIATRIC` was absent from the literal from #298
+    until #463, and stayed quiet only because nothing from it had been scored.
+    """
     index: dict[tuple[str, str], set[str]] = collections.defaultdict(set)
     for cfg, label in configs.items():
         tag = cfg.split()[0]
-        for project in ("AI_READI", "CHORUS", "CM4AI", "VOICE"):
+        for project in projects:
             for record in load_replicates(root, method, label, project).values():
                 for slot, value in record.items():
                     index[(slot, json.dumps(value, sort_keys=True))].add(tag)
@@ -175,6 +193,29 @@ def attribute(failures: list[FormFailure], *, root: Path = DEFAULT_ROOT,
     return failures
 
 
+class PooledInstruments(ValueError):
+    """The cache records more than one model for the current rubric.
+
+    Distinguished from "records none" because the two need opposite responses:
+    an empty cache has nothing to reproduce and may fall back to the live pin,
+    while a pooled one must refuse. Falling back there picks whichever entries
+    happen to match the pin and silently reports a partial table (#464).
+    """
+
+
+def recorded_models(cache_path: Path) -> set[str]:
+    """Every model the cache records for the current rubric."""
+    models: set[str] = set()
+    for line in Path(cache_path).read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        entry = json.loads(line)
+        if entry.get("rubric") == _digest(FORM_SUBTYPE_SYSTEM):
+            models.add(entry.get("model", ""))
+    models.discard("")
+    return models
+
+
 def recorded_model(cache_path: Path) -> str:
     """The one model the cached subtype judgements were made under.
 
@@ -185,14 +226,11 @@ def recorded_model(cache_path: Path) -> str:
     current rubric — zero means there is nothing to reproduce, two means two
     instruments are pooled and neither table can be trusted (#277).
     """
-    models: set[str] = set()
-    for line in Path(cache_path).read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        entry = json.loads(line)
-        if entry.get("rubric") == _digest(FORM_SUBTYPE_SYSTEM):
-            models.add(entry.get("model", ""))
-    models.discard("")
+    models = recorded_models(cache_path)
+    if len(models) > 1:
+        raise PooledInstruments(
+            f"{cache_path} records {len(models)} models for the current "
+            f"rubric ({sorted(models)}); a reproduction needs exactly one.")
     if len(models) != 1:
         raise ValueError(
             f"{cache_path} records {len(models)} models for the current "
@@ -218,9 +256,35 @@ class FormSubtypeClassifier:
     @property
     def model(self) -> str:
         if self._model is None:
-            from data_sheets_schema.api_runner import _model_settings
-            self._model = _model_settings()["name"]
+            self._model = self._default_model()
         return self._model
+
+    def _default_model(self) -> str:
+        """The instrument the cache records, falling back to the live pin.
+
+        Deferring to the pin unconditionally is what #462 was: the pin moved
+        from `google/claude-opus-5-high` to `claude-opus-5`, every model-scoped
+        entry fell out of scope, and all 106 cached labels became invisible.
+        Offline that fails loudly; online it silently spends 106 calls and
+        appends a second instrument to the cache, after which `recorded_model`
+        refuses the file and the v1->v2 baseline cannot be reproduced at all.
+
+        The cache is therefore consulted first. A cache that records *two*
+        models propagates `PooledInstruments` rather than falling back: there
+        is no correct instrument to choose, and picking the pin would load only
+        the entries that happen to match it and report a partial table as if it
+        were whole (#464). Only "nothing recorded" and "unreadable" fall
+        through, because in neither case is there an instrument to prefer.
+        """
+        if self.cache_path and Path(self.cache_path).exists():
+            try:
+                return recorded_model(self.cache_path)
+            except PooledInstruments:
+                raise
+            except (ValueError, OSError):
+                pass          # nothing recorded, or unreadable — fall through
+        from data_sheets_schema.api_runner import _model_settings
+        return _model_settings()["name"]
 
     def _load(self) -> None:
         if not self.cache_path or not self.cache_path.exists():
@@ -317,6 +381,34 @@ def table(classified: list[tuple[FormFailure, str, str]]) -> dict[str, dict[str,
     return {s: dict(c) for s, c in counts.items()}
 
 
+#: The two named subtypes, each folded to include the `both` bucket. A value
+#: classified `both` exhibits *each* defect, so it counts once toward each —
+#: which is why these two figures legitimately sum to more than the total.
+FOLDED_SUBTYPES = ("collapsed_cardinality", "hollow_object")
+
+
+def folded(counts: dict[str, dict[str, int]]) -> dict[str, dict[str, int]]:
+    """Fold `both` into each named subtype — the repo's reporting convention.
+
+    Every headline figure quoted for the v1→v2 comparison is folded this way
+    (collapsed cardinality 34 + 8 = 42 -> 2 + 5 = 7; hollow object 0 + 8 = 8 ->
+    45 + 5 = 50). The convention lived only in the prose of
+    `notes/form_defect_split_2026-08-03.md`, so an arm counted from the raw
+    `table()` compared against a baseline short by the whole `both` bucket —
+    larger than several of the effects being claimed (#461).
+
+    Reported alongside the raw table rather than replacing it: `both` is a real
+    classification and collapsing it away would hide how often the two defects
+    co-occur.
+    """
+    out: dict[str, dict[str, int]] = {}
+    for subtype in FOLDED_SUBTYPES:
+        merged = collections.Counter(counts.get(subtype, {}))
+        merged.update(counts.get("both", {}))
+        out[subtype] = dict(merged)
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--judgement-cache", type=Path, default=JUDGEMENT_CACHE)
@@ -326,15 +418,53 @@ def main(argv: list[str] | None = None) -> int:
                         help="fail instead of making a paid call")
     parser.add_argument("--limit", type=int, default=None,
                         help="classify only the first N (for a canary)")
+    parser.add_argument("--model", default=None,
+                        help="re-classify under a named instrument instead of "
+                             "the one the cache records; a stated act, since "
+                             "it pools two instruments in one file (#462)")
+    parser.add_argument("--allow-pooled-cache", action="store_true",
+                        help="permit --model to write a second instrument into "
+                             "a cache that already records another (#464)")
+    parser.add_argument("--config", action="append", metavar="TAG=LABEL",
+                        help="arm to attribute against, repeatable; defaults to "
+                             "the historical v1/v2 labels. Required for any "
+                             "other arm — attribution is by matching values "
+                             "back against records, so an unlisted label's "
+                             "failures all read as `unattributed` (#466)")
     args = parser.parse_args(argv)
 
-    failures = attribute(load_form_failures(args.judgement_cache))
+    configs = None
+    if args.config:
+        configs = {}
+        for item in args.config:
+            if "=" not in item:
+                parser.error(f"--config expects TAG=LABEL, got {item!r}")
+            tag, label = item.split("=", 1)
+            configs[tag.strip()] = label.strip()
+
+    if args.model and not args.offline and args.cache.exists():
+        already = recorded_models(args.cache) - {args.model}
+        if already and not args.allow_pooled_cache:
+            print(f"refusing to pool instruments: {args.cache} already records "
+                  f"{sorted(already)} for this rubric, and --model "
+                  f"{args.model} would append a second.\n"
+                  f"  Write elsewhere with --cache <path>, or state the intent "
+                  f"with --allow-pooled-cache.\n"
+                  f"  A pooled cache makes recorded_model refuse the file, so "
+                  f"the existing table stops being reproducible (#277, #464).",
+                  file=sys.stderr)
+            return 2
+
+    failures = attribute(load_form_failures(args.judgement_cache),
+                         configs=configs)
     if args.limit:
         failures = failures[:args.limit]
     print(f"{len(failures)} form failure(s) loaded", file=sys.stderr)
 
     classifier = FormSubtypeClassifier(cache_path=args.cache,
+                                       model=args.model,
                                        offline=args.offline)
+    print(f"instrument: {classifier.model}", file=sys.stderr)
     classified = classify(failures, classifier)
     counts = table(classified)
 
@@ -348,6 +478,15 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{'total':<{width}} "
           + " ".join(f"{sum(counts[s].get(c, 0) for s in SUBTYPES):>6}"
                      for c in configs))
+
+    merged = folded(counts)
+    print(f"\nfolded — `both` counted toward each named subtype (#461);"
+          f" these do not sum to the total above")
+    for subtype in FOLDED_SUBTYPES:
+        row = merged[subtype]
+        print(f"{subtype:<{width}} "
+              + " ".join(f"{row.get(c, 0):>6}" for c in configs))
+
     print(f"\n{classifier.calls} call(s), {classifier.memo_hits} cached",
           file=sys.stderr)
     return 0

@@ -206,8 +206,11 @@ agreement between prompt configurations, and no number of replicates fixes that
 
 It does not say v2 failed. The registered v2 experiment was about *fitness*
 failures, and there the effect was large and consistent: 131 → 87 defective
-fields, falling in all four projects, with the targeted defect eliminated 27 → 0
-(`notes/generic_v2_results.md`).
+fields, falling in all four projects, with the targeted defect all but
+eliminated — **42 → 7**, −83% (`notes/generic_v2_results.md`; the classifier
+figure, folding `both` into each named subtype). This note originally read
+"eliminated 27 → 0", the manual read the classifier superseded the following
+day; the substantive point is unchanged and the direction is the same (#461).
 
 So the two quantities behave differently. Fitness moved enough to measure with
 four projects; agreement did not. That is worth stating precisely, because "the

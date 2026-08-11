@@ -1,5 +1,19 @@
 # generic-v2: results, against the plan registered before the runs
 
+> ⚠️ **The form sub-type figures here are the manual read, superseded on
+> 2026-08-03** by the classifier in `src/data_sheets_schema/form_defects.py`.
+> Where this note says collapsed cardinality 27 → 0 and hollow object 2 → 33,
+> the measurement is **42 → 7** and **8 → 50** (classifier, folding the `both`
+> bucket into each named subtype — see `folded()`). `notes/form_defect_split_
+> 2026-08-03.md` keeps both and explains the gap as boundary-drawing: reading
+> judge reasons in bulk retreats to "unclear" (37 in `other`) where a judge
+> asked one question per value does not (12).
+>
+> Left as written rather than restated. This note is the record of what was
+> concluded before the classifier existed, and the hand read is why it was
+> built. Everything else here — the fitness totals, the per-project
+> breakdown, the method check — is unaffected (#461).
+
 Companion to `notes/generic_v2_analysis_plan.md`. Every number below comes from
 the same fitness rubric, model and schema as the v1 baseline — the judgement
 cache is keyed on `(axis, model, rubric, corpus, schema)` and the context

@@ -3,7 +3,7 @@
 Open work, most blocking first. Each item states what is true now, not only what
 should happen, so an item can be checked rather than believed.
 
-Last verified: 2026-08-10.
+Last verified: 2026-08-11.
 
 ---
 
@@ -184,11 +184,23 @@ It validated on the headline, and the breakdown says to read that carefully:
 | target | 41 → 16 | −61% |
 | **form** | **50 → 56** | **worse** |
 
-Rule 1 eliminated the defect it named — collapsed cardinality **27 → 0** — and
-produced a different one under the same label: **hollow objects 2 → 33**, one
-object per entity exactly as instructed, with everything crammed into free-text
-`description` while `name`, `id`, `affiliations`, `start_date`, `end_date` go
-unused. `collection_timeframes` newly fails form in all four projects;
+Rule 1 eliminated the defect it named — collapsed cardinality **42 → 7**, −83% —
+and produced a different one under the same label: **hollow objects 8 → 50**,
+one object per entity exactly as instructed, with everything crammed into
+free-text `description` while `name`, `id`, `affiliations`, `start_date`,
+`end_date` go unused.
+
+⚠️ These are the **classifier** figures from
+`notes/form_defect_split_2026-08-03.md`, and they **include the `both` bucket**
+(collapsed cardinality 34 + 8 = 42 → 2 + 5 = 7; hollow object 0 + 8 = 8 →
+45 + 5 = 50). An arm counted excluding `both` compares against a baseline of 34,
+not 42, and is wrong by more than several of the effects being claimed (#461).
+
+Earlier revisions of this section quoted **27 → 0** and **2 → 33**. Those are
+the note's *manual read*, which the classifier superseded — the note keeps both
+and explains the difference as boundary-drawing, the human retreating to
+"unclear" (37 in `other`) where a judge asked one question per value does not
+(12). The manual read is why the split was built; it is not the measurement. `collection_timeframes` newly fails form in all four projects;
 `creators`, `distribution_formats`, `distribution_dates` in three. Systematic,
 not sampling noise.
 
@@ -199,24 +211,61 @@ not sampling noise.
 The rules are still **not** in the playbook, so a run today gets v1 behaviour
 unless it explicitly selects a condition.
 
-### v3 has run (2026-08-05 → 2026-08-07)
+### v3 has run — but on two projects, and never comparably (#458)
 
-This section said v3 was "drafted, wired and tested but unrun". That is no
-longer true — `src/download/prompts/d4d_generic_arm_prompt_v3.md` has 20 runs
-across four labels:
+This section said v3 was "drafted, wired and tested but unrun", then said it had
+"20 runs across four labels". Both were wrong. Fifteen of those twenty are the
+2026-08-07 sweep, which hashed the **generic** prompt, not v3 (#454). Here is
+every run that actually hashed `d4d_generic_arm_prompt_v3.md`, against the v2
+series it would be compared with:
 
-| label | what it was |
-|---|---|
-| `2026-08-05_claude-opus-5-generic-v3_rep1`, `…-1m-generic-v3_rep{1,2,3}` | first v3 passes, AI_READI + CHORUS |
-| `2026-08-06_…-1m-generic-v3-schema2_rep{1,2,3}` | schema-2 series, with the trap-slot and repair work below |
-| `2026-08-07_claude-opus-5-claudecode-generic-v3_rep{1,2,3}` | the five-project sweep; **canonical set** |
+Replicate counts are per project, measured from the provenance records.
 
-**Still open, and this is the actionable part:** the v2-vs-v3 comparison the
-promotion decision rests on has not been written up. `notes/generic_v2_results.md`
-exists for v1→v2; there is no v3 equivalent, and the hollow-object regression
-rule 1 introduced has not been re-measured under v3. Until that is done the
-playbook keeps v1 behaviour by default, which is the safe state but not a
-decision.
+| label | prompt | schema digest | route | replicates |
+|---|---|---|---|---|
+| `2026-07-31_…generic-v2` | v2 | `34d24ff3` (1.0.0) | `google/claude-opus-5-high` | AI_READI 3, CHORUS 3, CM4AI 3, VOICE 3 |
+| `2026-08-05_…generic-v3` | v3 | `b065e1cd` (1.0.0) | `google/claude-opus-5-high` | AI_READI 1, CHORUS 1 |
+| `2026-08-05_…1m-generic-v3` | v3 | `b065e1cd` (1.0.0) | `claude-opus-5` (1m) | AI_READI 3, CHORUS 1 |
+| `2026-08-06_…1m-generic-v3-schema2` | v3 | `583d79c1` (2.0.0) | `claude-opus-5` (1m) | AI_READI 3, CHORUS 3 |
+| `2026-08-07_…claudecode-generic-v3` | **generic (v1)** | *none recorded* (2.0.0) | `claude-opus-5` | all five, 3 each |
+
+v3 totals: **AI_READI 7, CHORUS 5, CM4AI 0, VOICE 0, VOICE_PEDIATRIC 0.**
+
+**The v2-vs-v3 comparison is not merely unwritten — it is not derivable.** Three
+independent defects, any one sufficient:
+
+1. **Coverage.** CM4AI, VOICE and VOICE_PEDIATRIC have never run under v3, so no
+   comparison covering the corpus is possible.
+2. **Schema confound.** Every v3 label sits on a different digest than v2's
+   `34d24ff3`, and the delta includes the trap-slot work (#376, #382) that moves
+   the exact defect classes `form_defects` counts.
+3. **Route confound.** Three of four v3 labels ran `claude-opus-5` (1m) where v2
+   ran `google/claude-opus-5-high`.
+
+Note the shape of 2 and 3 together: the only v3 series with three replicates on
+two projects is `2026-08-06_…1m-generic-v3-schema2`, which is confounded against
+v2 on **both** axes at once. The best-powered v3 data is also the most
+confounded (#460).
+
+`notes/generic_v3_analysis_plan.md` pre-registered "same four projects, three
+replicates, same model and settings as the v1 and v2 series." No label meets it.
+
+**The instrument already enforced this**, which is why it went unnoticed: all
+1441 cached fitness judgements are keyed `(34d24ff3, google/claude-opus-5-high)`,
+so no v3 record was ever a cache hit and no arms were silently mixed. What the
+guard could not do is announce that the arm it protected had never been
+generated — an absent cache entry and an absent run look identical.
+
+**Decided, 2026-08-11: generate both arms fresh.** v1 and v3, five projects ×
+three replicates = 30 runs, at today's digest `e802cdc3`, on the agentic path,
+with instructions rendered rather than typed. Registered in
+`notes/generic_v1_v3_analysis_plan.md` before any run. The pairing is v1-vs-v3
+rather than v2-vs-v3 because v1 is the playbook default, so that is the
+comparison the promotion decision rests on; the mechanism question (does rule 4
+alone do what it says?) stays open and needs a v2 arm at the same digest.
+
+Until those runs land the playbook keeps v1 behaviour by default, which is the
+safe state but not a decision.
 
 Guards in place:
 
@@ -224,7 +273,9 @@ Guards in place:
   measured against.
 - Tests assert v2 differs from v1 *only* within the marked block, that the block
   names no project, dataset identifier or quantity, and that every project
-  receives byte-identical text after mechanical substitution.
+  receives byte-identical text after mechanical substitution — **for the four
+  projects the test hardcodes.** VOICE_PEDIATRIC is not among them, so the
+  byte-identity guarantee is unasserted for the fifth project (#467).
 - The prediction is deliberately absent from the prompt. Written there it would
   instruct the model to produce the result the run is meant to test, which the
   priming taxonomy excludes from both arms.
@@ -307,7 +358,18 @@ which is why no VOICE replicate validated (#292).
 
 **Done:** the registry, the shared-corpus declaration, and the schema correction
 that made the nested form wrong rather than ambiguous. Adding the fifth project
-broke nothing; the four-project list in 26 files is prose, not logic.
+broke nothing *visible*, and the four-project list is prose in most of the 26
+files that carry it.
+
+⚠️ **Not in all of them.** `form_defects._value_index` hardcoded the four as a
+runtime list, so any VOICE_PEDIATRIC failure would have attributed as
+`unattributed` — silently, since nothing distinguishes "a project we did not
+open" from "a value that matched nothing". Fixed to read `PROJECTS` (#463).
+Two four-project literals are still live and are *not* prose:
+`agreement.DEFAULT_PROJECTS`, and the byte-identity assertion in
+`tests/test_download/test_generic_v2_prompt.py` (#467). "Broke nothing" held
+because nothing from the fifth project had reached those code paths yet, not
+because they were generic.
 
 **Not done, and each needs a decision:**
 
@@ -326,8 +388,13 @@ broke nothing; the four-project list in 26 files is prose, not logic.
   a test pins it.
 - **A generation run — done.** Both projects were generated in the 2026-08-07
   five-project sweep (`2026-08-07_claude-opus-5-claudecode-generic-v3_rep{1,2,3}`,
-  PR #395), under v3. `VOICE_PEDIATRIC` was generated from its own 204 KB bundle
-  as its own project, which is what the fork was for.
+  PR #395). `VOICE_PEDIATRIC` was generated from its own 204 KB bundle as its
+  own project, which is what the fork was for.
+
+  ⚠️ **Not "under v3", despite the label.** That sweep hashed
+  `d4d_generic_arm_prompt.md` — the plain generic prompt (#454, and see §6).
+  The run is fine for what this section claims about it; the condition name is
+  not.
 
   **#292 is closed.** All three VOICE replicates validate; `d4d evaluate
   related-datasets` reports 0 defects across the canonical set; and VOICE
@@ -341,6 +408,22 @@ broke nothing; the four-project list in 26 files is prose, not logic.
   2026-08-04). VOICE is no longer the gap; `d4d runs canonical` marks
   AI_READI, CHORUS, CM4AI, VOICE and VOICE_PEDIATRIC, all from the 2026-08-07
   label.
+
+  ⚠️ **That label is the one #454 is about.** It ran the generic prompt under a
+  `generic-v3` name, carries no recorded instruction (it predates #419), and its
+  launch text was not uniform — VOICE and VOICE_PEDIATRIC got a scope paragraph
+  the other three projects did not. The records are internally honest: every
+  header names `d4d_generic_arm_prompt.md` and says "generic prompt", so only the
+  directory label misstates the condition. Within-project replicate variance
+  still stands on this set; cross-condition claims do not. It is being superseded
+  by the fresh v1 arm in §6, after which these records are annotated and kept as
+  historical rather than renamed — renaming 30 records, their provenance paths
+  and five canonical marks would assert a uniformity that does not hold.
+
+  **That supersession has not happened yet.** The fresh arm is decided and
+  pre-registered (§6), not generated; `e802cdc3` appears in no record and no
+  judgement. Until it does, these remain the canonical records and the caveat
+  above is the whole of the mitigation.
 
 - **Whether `VOICE` becomes `VOICE_main` — decided: no.** Attempted and reverted.
   The path moves were clean (567 files, no clashes), but the content rewrite
@@ -473,7 +556,8 @@ Acted on the same day:
 | re-recording discarded the validation verdict | #396 | **fixed** (#423) |
 | the launch prompt was typed, not rendered | #419, #422 | **addressed** (#425) |
 | per-GC scope lived in the launch prompt | #422 | **closed** — declared in the manifest |
-| label says `generic-v3`, provenance hashes v1 | #420 | open |
+| label says `generic-v3`, provenance hashes v1 | #420, #454 | check landed; records **not yet** superseded — §6's fresh v1 arm is decided, not run |
+| v3 never ran on 3 of 5 projects; every v3 label confounded | #458 | open — gates §6 |
 | `verification_url` still injected; 0 values depend on it | #427 | open, cosmetic |
 | a verdict does not pin the schema it was reached against | #426 | **fixed** |
 | the render gate cannot see an edit made *before* rendering | #432 | **closed** |
