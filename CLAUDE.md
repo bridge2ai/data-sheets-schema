@@ -344,7 +344,15 @@ Declared per project in the `scope:` block of
 ```bash
 d4d download scope --project VOICE        # show the declaration
 d4d download scope --check --strict       # check every record against it
+d4d download audit-bundles --strict       # are the derived bundles current?
 ```
+
+`audit-bundles` rebuilds each derived bundle into a temp file and compares
+(#446). Not mtime: `crate_only` and `healthsheet_only` are legitimately older
+than the document bundles because they do not derive from them. The crate
+bundles embed the document bundle verbatim, and after #421 stripped curator
+prose they were not rebuilt — so the de novo arm read 9 curation notes the
+baseline arm no longer saw, for a day, with nothing to detect it.
 
 Each entry names the `referent_id` and any `related_but_distinct` dataset, with
 the slot that carries the relation (`express_as: related_datasets`) and, where

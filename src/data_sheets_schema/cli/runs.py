@@ -363,6 +363,23 @@ def check_cmd(method, label, project, strict):
                 uncanonical.append({"project": proj, "label": run.label,
                                     "status": cst, "reason": cwhy})
 
+    # Values recorded but not observed (#447). Every record has carried this
+    # list since temperature got a basis, and no command read it — so the
+    # honest gap-naming landed in a field nobody sees. Counted, never fatal:
+    # the point of the list is that these values are usable *with* a caveat,
+    # and a gate would collapse that back into a binary.
+    import collections
+    import yaml as _yaml
+    from data_sheets_schema.provenance import record_path_for
+    unobserved: collections.Counter = collections.Counter()
+    for r in rows:
+        p = record_path_for(r["project"], r["method"], r["label"])
+        if not p.exists():
+            continue
+        data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        for entry in data.get("unverified") or []:
+            unobserved[entry.get("field") or "unnamed"] += 1
+
     failed = [r for r in rows if not r["ok"]]
     required = [r for r in rows if r["required"]]
     for r in failed:
@@ -371,6 +388,12 @@ def check_cmd(method, label, project, strict):
                f"requirement, {len(failed)} failing")
     if not failed:
         click.echo("All runs subject to the live-provenance requirement satisfy it.")
+
+    if unobserved:
+        click.echo(f"\nⓘ  {sum(unobserved.values())} value(s) across these runs "
+                   "were recorded but not observed:")
+        for field, n in unobserved.most_common():
+            click.echo(f"     {field:28} {n}")
 
     # Reported separately from the provenance verdict, and never fatal. A
     # label naming a condition its prompt does not match is a real defect

@@ -581,11 +581,18 @@ def build_crate_bundle(
     project: str,
     packages_dir: Path = PACKAGES_DIR,
     docs_dir: Path = DOCS_BUNDLE_DIR,
+    out_path: Path | None = None,
 ) -> tuple[Path, list[str], list[str]]:
     """Write ``{PROJECT}_preprocessed_with_crate.txt`` for the de novo fork.
 
     The docs bundle verbatim, plus a crate-evidence section built only from
     artifacts on the include list. Returns (path, included, withheld).
+
+    `out_path` redirects the write, so staleness can be checked by rebuilding
+    into a temporary file and comparing (#446). Embedding the docs bundle
+    verbatim is what made these go stale: #421 stripped the document bundles
+    and nothing rebuilt these, so the de novo arm read curator prose the
+    baseline arm no longer saw, for a day, undetected.
     """
     project_dir = packages_dir / project
     processed = project_dir / "processed"
@@ -655,7 +662,8 @@ def build_crate_bundle(
             f"SIZE: {len(text):,} characters\n{'-' * 80}\n{text}\n"
         )
 
-    out = docs_dir / f"{project}{BUNDLE_SUFFIX}"
+    out = out_path or (docs_dir / f"{project}{BUNDLE_SUFFIX}")
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(header) + "".join(parts), encoding="utf-8")
     return out, [n for n, _, _ in included], withheld
 

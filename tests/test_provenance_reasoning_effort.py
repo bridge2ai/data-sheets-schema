@@ -216,3 +216,67 @@ class TestTheCLIFlag(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTheGapIsVisibleFromTheCommandLine(unittest.TestCase):
+    """#447. Every record has carried an `unverified` list since temperature
+    got a basis, and no command read it — so naming the effort gap honestly
+    would have landed in a field nobody sees."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.cwd = os.getcwd()
+        self.addCleanup(os.chdir, self.cwd)
+        self.addCleanup(self.tmp.cleanup)
+        os.chdir(self.root)
+        # Dated before REQUEST_REQUIRED_FROM on purpose: a later label would
+        # fail `--strict` on the missing instruction (#419), which is correct
+        # and would hide what this class is testing.
+        self.label, self.method = "2026-08-09_test_rep1", "claudecode_agent"
+        concat = Path("data/d4d_concatenated")
+        full = concat / self.method / self.label
+        core = concat / f"{self.method}_core" / self.label
+        full.mkdir(parents=True)
+        core.mkdir(parents=True)
+        body = yaml.safe_dump({"id": "https://example.org/x", "name": "x"})
+        head = header("claude-opus-5", "Claude Code")
+        (full / "P_d4d.yaml").write_text(head + body)
+        (core / "P_d4d_core.yaml").write_text(head + body)
+        (core / "P_reconciliation.md").write_text("# r\n")
+        Path("b.txt").write_text("docs\n")
+
+        rec = provenance.build_record(
+            "P", self.method, self.label, mode="live",
+            input_bundle=Path("b.txt"), input_verified=True, concat_dir=concat)
+        rec.write(provenance.record_path_for("P", self.method, self.label,
+                                             concat))
+
+    def _check(self, *args):
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.runs import runs
+        return CliRunner().invoke(runs, ["check", *args])
+
+    def test_the_count_is_reported(self):
+        r = self._check()
+        self.assertEqual(0, r.exit_code, r.output)
+        self.assertIn("recorded but not observed", r.output)
+        self.assertIn("model.reasoning_effort", r.output)
+
+    def test_it_is_never_the_reason_a_run_fails(self):
+        """These values are usable *with* a caveat, so counting them must not
+        gate anything — that would collapse the caveat back into the binary the
+        list exists to avoid.
+
+        This fixture does fail `--strict`, for an unrelated and correct reason:
+        it has never been validated, so #396's gate fires. The claim under test
+        is that no failure line is about an unobserved value.
+        """
+        r = self._check("--strict")
+        failures = [ln for ln in r.output.splitlines() if "❌" in ln]
+        self.assertTrue(failures, r.output)
+        for line in failures:
+            self.assertIn("nothing to verify", line)
+            self.assertNotIn("not observed", line)
+            self.assertNotIn("reasoning_effort", line)
+        self.assertIn("recorded but not observed", r.output)
