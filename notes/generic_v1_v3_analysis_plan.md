@@ -229,14 +229,31 @@ this plan:
    — or worse, to an old arm, where an identical slot/value happens to occur in
    both. Pass the new labels explicitly (`--config v1=<label> --config
    v3=<label>`).
-2. **The sub-type cache key is `(slot, value)` only** — no schema, unlike the
-   fitness cache which is keyed on it. So an identical slot/value under
-   `e802cdc3` silently reuses a label judged against the *old* slot
-   specification. That matters precisely here, because this plan's own argument
-   is that the schema change moves the form classes: `Organization.id` becoming
-   optional changes whether a given object is hollow. Classify the new arms
-   into a **separate cache file** (`--cache <path>`) rather than the shared one,
-   until the key carries the schema (#465).
+2. ~~**The sub-type cache key is `(slot, value)` only**~~ — **fixed (#465).**
+   The key now carries the schema digest, as the fitness cache always did, so a
+   label judged against the old slot specification cannot answer for the new
+   one. The 106 legacy entries are stamped `34d24ff3`, which is recoverable
+   rather than assumed: every fitness judgement they classify is keyed to that
+   digest, and a failure cannot be classified against a schema its own
+   judgement was not made under.
+
+   The separate-cache-file workaround is therefore **no longer required**.
+   Classifying the new arms into the shared cache is safe: their entries carry
+   `e802cdc3`, the v1→v2 entries carry `34d24ff3`, and `_load` filters on it, so
+   the two cannot be mixed and the published table still rebuilds offline at
+   zero cost.
+
+   How the schema is resolved when the caller does not say (#483):
+
+   - **one schema recorded** → that one, regardless of the working tree. This
+     is the frozen case and is what keeps the published table reproducible
+     after someone edits a slot description.
+   - **several recorded, one of them live** → the live one. Two schemas in a
+     cache is the expected end state rather than an error — every entry is
+     correctly scoped — and the schema the caller is working at is the
+     principled choice. Unlike two *models*, where neither table can be
+     trusted (#277), there is a right answer here.
+   - **several, none live** → refuse, naming the candidates. Pass `--schema`.
 
 The fitness rubric and the sub-type rubric are unchanged, so labels stay valid
 for their own key — but "their own key" does not include the schema, which is
