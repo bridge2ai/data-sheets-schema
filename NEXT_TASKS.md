@@ -257,12 +257,41 @@ guard could not do is announce that the arm it protected had never been
 generated — an absent cache entry and an absent run look identical.
 
 **Decided, 2026-08-11: generate both arms fresh.** v1 and v3, five projects ×
-three replicates = 30 runs, at today's digest `e802cdc3`, on the agentic path,
-with instructions rendered rather than typed. Registered in
+three replicates = 30 runs, at today's digest `e802cdc3`, with instructions
+rendered rather than typed. Registered in
 `notes/generic_v1_v3_analysis_plan.md` before any run. The pairing is v1-vs-v3
 rather than v2-vs-v3 because v1 is the playbook default, so that is the
 comparison the promotion decision rests on; the mechanism question (does rule 4
 alone do what it says?) stays open and needs a v2 arm at the same digest.
+
+**Amended the same day, before any run: on the API path, not the agentic one
+(#479).** The rules v3 adds to the prompt are already in the playbook the
+agentic path reads — `.claude/commands/d4d-agent.md:133-145`, added by #394 —
+so both arms would receive them regardless of `--condition` and the comparison
+would measure ≈0 for the wrong reason. The demonstration is on disk: the
+2026-08-07 sweep ran **v1** agentically and produced v3-quality structure.
+Grouped by runtime, over identical creator counts:
+
+| runtime | creators | with `name` | with `affiliations` | using `notes` |
+|---|---|---|---|---|
+| Claude Code (agentic) | 692 | 692 (100%) | 674 (97%) | 0 |
+| Claude API (direct) | 692 | 274 (39%) | 69 (9%) | 76 |
+
+The API path is where the prompt is the only channel carrying these rules, where
+the defect is live, and where v1/v2/v3 were originally measured — so the result
+is comparable with `notes/generic_v2_results.md`.
+
+**The agentic v1 arm is still worth running, for a different question**: the
+canonical set needs replacing regardless (#454), and a fresh arm also clears the
+bundle drift on all five canonical records (#452). It answers replicate variance
+and corpus currency, not prompt promotion, and the two must not be conflated.
+
+**No longer preconditions.** #385 and #380 were listed as pre-sweep decisions.
+Re-measured across the corpus, neither gates the run: the canonical agentic
+series is 971 `description` to 7 `notes` with 276 `source_caveats`, 692/692
+creators carry `name` and 674 carry `affiliations` as `Organization` objects
+with ROR ids, and every invented key #380 catalogued except `grant` and
+`representation` is now a declared slot — neither of which appears at all.
 
 Until those runs land the playbook keeps v1 behaviour by default, which is the
 safe state but not a decision.

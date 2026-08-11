@@ -63,7 +63,7 @@ different condition than the other three.
 | projects | AI_READI, CHORUS, CM4AI, VOICE, VOICE_PEDIATRIC |
 | replicates | 3 |
 | runs | 15 per arm, **30 total** |
-| runtime | Claude Code, agentic four-phase (`claudecode_agent`) |
+| runtime | **Claude API (direct)** — see the amendment below |
 | schema | `e802cdc3`, declared 2.0.0 |
 | instruction | rendered by `d4d api render-prompt`, never typed (#425) |
 | scope | from `source_manifest.yaml`, never from launch text (#422) |
@@ -72,6 +72,47 @@ Both arms are rendered through the same code path with only `--condition`
 differing, so the two instructions are byte-identical outside the condition
 block. That is what the 2026-08-07 sweep could not claim and is the point of
 regenerating the baseline rather than reusing it.
+
+### ⚠️ Amendment, before any run: the runtime changed from agentic to API (#479)
+
+This plan originally specified the Claude Code agentic path. **On that path the
+comparison cannot answer its own question**, because the rules v3 adds to the
+*prompt* are already in the *playbook* both arms read —
+`.claude/commands/d4d-agent.md:133-145`, added by #394 on 2026-08-07:
+
+> a class's structured slots first — `name`, `id`, `affiliations`, `grants` and
+> kin must not sit empty while their content sits in prose — then `description`
+> … then `notes` only for content `description` cannot hold. […] Never restate a
+> sibling slot's value, and never invent a key.
+
+That is the substance of v2's rule 1, v3's rule 4 and #385's fix. The agentic
+launch instruction's first lines tell the agent to open the playbook, so both
+arms would receive the rules regardless of `--condition`.
+
+The evidence is already on disk. The 2026-08-07 sweep ran the **v1** prompt
+agentically, after #394 landed the same day. Grouped by runtime — both paths
+happen to have exactly 692 creators:
+
+| runtime | creators | with `name` | with `affiliations` | using `notes` |
+|---|---|---|---|---|
+| Claude Code (agentic) | 692 | 692 (100%) | 674 (97%) | 0 |
+| Claude API (direct) | 692 | 274 (39%) | 69 (9%) | 76 |
+
+A v1 prompt on the agentic path already produces v3-quality structure. Running
+v1-against-v3 there would measure ≈0, and the honest reading would be "both arms
+had the rules", not "the rules do nothing".
+
+So the promotion decision moves to the **API path**, where the prompt is the
+only channel carrying these rules and where the defect is live. That path is
+also where v1, v2 and v3 were originally measured, so the result is comparable
+with `notes/generic_v2_results.md` rather than a new baseline.
+
+**The agentic sweep is still worth running, for a different question.** The
+canonical set needs replacing regardless (#454): a correctly-labelled,
+instruction-recorded, manifest-scoped v1 arm at `e802cdc3`, which also clears
+the bundle drift on all five canonical records (#452). It answers replicate
+variance and corpus currency — not prompt promotion. Those are two runs of 15,
+not one run of 30, and they should not be conflated in the write-up.
 
 ## Prediction, registered
 
@@ -187,6 +228,25 @@ cache reason above.
 **Canary before fan-out.** One run — one project, one replicate, one arm —
 executed end to end through the same launcher, and its outputs verified present
 and non-empty on disk, before any of the remaining 29 are launched.
+
+## What is no longer a precondition
+
+`#385` (prose defaulting to `notes`; structured slots bypassed) and `#380`
+(undeclared-key inventions) were both listed as pre-sweep decisions, on the
+grounds that they change instructions and so must be settled before a sweep or
+the sweep is spent twice. **Re-measured across the corpus, neither gates this
+run.**
+
+- **#385 mode 1**: the canonical agentic series is 971 `description` against 7
+  `notes`, with 276 `source_caveats` — the channel mode 3 asked for. The 4:1
+  misuse this issue was filed on is 1:311 in the current arm.
+- **#385 mode 2**: on the agentic path, 692 of 692 creators carry `name` and 674
+  carry `affiliations` as well-formed `Organization` objects with ROR ids. It is
+  the API path that still bypasses them, which is the subject of #479 and is
+  precisely why the promotion decision belongs there.
+- **#380**: of the invented keys catalogued, all but `grant` and `representation`
+  are now declared slots (#388, #381), and neither of those two appears in the
+  canonical sweep at all.
 
 ## What this does not settle
 
