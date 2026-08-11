@@ -218,9 +218,30 @@ class FormSubtypeClassifier:
     @property
     def model(self) -> str:
         if self._model is None:
-            from data_sheets_schema.api_runner import _model_settings
-            self._model = _model_settings()["name"]
+            self._model = self._default_model()
         return self._model
+
+    def _default_model(self) -> str:
+        """The instrument the cache records, falling back to the live pin.
+
+        Deferring to the pin unconditionally is what #462 was: the pin moved
+        from `google/claude-opus-5-high` to `claude-opus-5`, every model-scoped
+        entry fell out of scope, and all 106 cached labels became invisible.
+        Offline that fails loudly; online it silently spends 106 calls and
+        appends a second instrument to the cache, after which `recorded_model`
+        refuses the file and the v1->v2 baseline cannot be reproduced at all.
+
+        The cache is therefore consulted first. A cache recording two models
+        already fails `recorded_model`, and that error is more useful here than
+        a silent third.
+        """
+        if self.cache_path and Path(self.cache_path).exists():
+            try:
+                return recorded_model(self.cache_path)
+            except (ValueError, OSError):
+                pass          # empty, unreadable, or already pooled — fall through
+        from data_sheets_schema.api_runner import _model_settings
+        return _model_settings()["name"]
 
     def _load(self) -> None:
         if not self.cache_path or not self.cache_path.exists():
@@ -354,6 +375,10 @@ def main(argv: list[str] | None = None) -> int:
                         help="fail instead of making a paid call")
     parser.add_argument("--limit", type=int, default=None,
                         help="classify only the first N (for a canary)")
+    parser.add_argument("--model", default=None,
+                        help="re-classify under a named instrument instead of "
+                             "the one the cache records; a stated act, since "
+                             "it pools two instruments in one file (#462)")
     args = parser.parse_args(argv)
 
     failures = attribute(load_form_failures(args.judgement_cache))
@@ -362,7 +387,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{len(failures)} form failure(s) loaded", file=sys.stderr)
 
     classifier = FormSubtypeClassifier(cache_path=args.cache,
+                                       model=args.model,
                                        offline=args.offline)
+    print(f"instrument: {classifier.model}", file=sys.stderr)
     classified = classify(failures, classifier)
     counts = table(classified)
 

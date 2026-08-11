@@ -18,6 +18,7 @@ from data_sheets_schema.form_defects import (
     FormSubtypeClassifier,
     _parse_subtype,
     attribute,
+    classify,
     folded,
     load_form_failures,
     recorded_model,
@@ -125,6 +126,71 @@ class TestTable(unittest.TestCase):
         self.assertEqual(set(counts), set(SUBTYPES))
 
 
+class TestDefaultInstrument(unittest.TestCase):
+    """The cache names the instrument; the live config pin does not (#462).
+
+    The pin moved from `google/claude-opus-5-high` to `claude-opus-5` and every
+    model-scoped entry fell out of scope at once — 106 of 106 cached labels
+    invisible, an offline rebuild broken, and an online rebuild about to append
+    a second instrument to the same file.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.path = Path(self.tmp.name) / "subtypes.jsonl"
+        self.addCleanup(self.tmp.cleanup)
+
+    def _write(self, model, key="k1"):
+        self.path.write_text(json.dumps({
+            "rubric": _digest(FORM_SUBTYPE_SYSTEM), "model": model,
+            "chars": 4000, "key": key, "slot": "s",
+            "subtype": "hollow_object", "reason": ""}) + "\n", encoding="utf-8")
+
+    def test_the_recorded_instrument_wins_over_the_live_pin(self):
+        self._write("google/claude-opus-5-high")
+        classifier = FormSubtypeClassifier(cache_path=self.path, offline=True)
+        self.assertEqual(classifier.model, "google/claude-opus-5-high")
+
+    def test_the_entries_are_actually_loaded(self):
+        """The model resolving right is only useful if the memo fills."""
+        self._write("google/claude-opus-5-high")
+        classifier = FormSubtypeClassifier(cache_path=self.path, offline=True)
+        self.assertEqual(len(classifier._memo), 1)
+
+    def test_an_explicit_model_still_overrides(self):
+        """Re-classifying under a new instrument stays possible, and stated."""
+        self._write("google/claude-opus-5-high")
+        classifier = FormSubtypeClassifier(cache_path=self.path,
+                                           model="claude-opus-5", offline=True)
+        self.assertEqual(classifier.model, "claude-opus-5")
+        self.assertEqual(len(classifier._memo), 0)
+
+    def test_a_missing_cache_falls_back_to_the_pin(self):
+        """Nothing recorded means nothing to reproduce; the pin is all there is."""
+        classifier = FormSubtypeClassifier(
+            cache_path=Path(self.tmp.name) / "absent.jsonl", offline=True)
+        self.assertIsInstance(classifier.model, str)
+        self.assertTrue(classifier.model)
+
+    def test_a_pooled_cache_does_not_crash_construction(self):
+        """Two instruments already fails recorded_model; don't add a third path.
+
+        Construction falls back rather than raising, so the pooled-cache error
+        surfaces from `recorded_model` where it is explained, not from an
+        unrelated constructor.
+        """
+        self.path.write_text("\n".join(
+            json.dumps({"rubric": _digest(FORM_SUBTYPE_SYSTEM), "model": m,
+                        "chars": 4000, "key": f"k{i}", "slot": "s",
+                        "subtype": "other", "reason": ""})
+            for i, m in enumerate(["a-model", "b-model"])) + "\n",
+            encoding="utf-8")
+        classifier = FormSubtypeClassifier(cache_path=self.path, offline=True)
+        self.assertTrue(classifier.model)
+        with self.assertRaises(ValueError):
+            recorded_model(self.path)
+
+
 class TestFolded(unittest.TestCase):
     """`both` counts toward each named subtype — the reporting convention.
 
@@ -219,6 +285,39 @@ class TestAgainstTheRealCache(unittest.TestCase):
             counts[failure.config] = counts.get(failure.config, 0) + 1
         self.assertEqual(counts, {"v1": 50, "v2": 56})
         self.assertEqual(len(failures), 106)
+
+    def test_the_published_split_rebuilds_offline_at_zero_cost(self):
+        """The v1->v2 table reproduces from cache, with no paid call (#462).
+
+        This is the property that broke: the classifier resolved the live pin
+        rather than the instrument the cache records, so all 106 labels were
+        invisible and this rebuild raised OfflineCacheMiss. It asserts the two
+        published headline figures as well as the raw table, because the
+        headlines fold the `both` bucket and nothing else pins them (#461).
+        """
+        cache = SUBTYPE_CACHE / "form_subtypes.jsonl"
+        if not cache.exists():
+            self.skipTest("subtype cache not present")
+        classifier = FormSubtypeClassifier(cache_path=cache, offline=True)
+        classified = classify(attribute(load_form_failures(JUDGEMENTS)),
+                              classifier)
+        self.assertEqual(classifier.calls, 0, "an offline rebuild paid for a call")
+
+        # A config with no failures of a subtype is absent from the row rather
+        # than present at 0 — table() counts, it does not tabulate a grid — so
+        # read through .get the way the report does.
+        def cell(rows, subtype, config):
+            return rows[subtype].get(config, 0)
+
+        counts = table(classified)
+        self.assertEqual(
+            [cell(counts, s, c) for s in SUBTYPES for c in ("v1", "v2")],
+            [34, 2, 0, 45, 8, 5, 8, 4])
+
+        merged = folded(counts)
+        self.assertEqual(
+            [cell(merged, s, c) for s in FOLDED_SUBTYPES for c in ("v1", "v2")],
+            [42, 7, 8, 50])
 
     def test_the_real_cache_holds_exactly_one_rubric_and_model(self):
         """#277 — the premise this module rests on, asserted.
