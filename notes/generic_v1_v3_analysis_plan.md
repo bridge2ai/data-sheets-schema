@@ -119,8 +119,22 @@ originally measured, so the result is comparable with
 `notes/generic_v2_results.md` rather than a new baseline.
 
 ⚠️ **But v3's API win does not survive schema 2.0.0, and this run is at 2.0.0.**
-`2026-08-06_…-generic-v3-schema2` is the same v3 prompt one day later at schema
-`583d79c1`, back to 0%. The same CHORUS creator, either side:
+The three v3 API series decompose cleanly, because each step changes exactly one
+thing:
+
+| series | route | schema | affiliations |
+|---|---|---|---|
+| `2026-08-05_…-generic-v3` | `google/claude-opus-5-high` | `b065e1cd` (1.0.0) | **100%** |
+| `2026-08-05_…-1m-generic-v3` | `claude-opus-5` | `b065e1cd` (1.0.0) | **69%** |
+| `2026-08-06_…-1m-generic-v3-schema2` | `claude-opus-5` | `583d79c1` (2.0.0) | **0%** |
+
+The first step holds the schema and changes the route: 100% → 69% is a **route**
+effect. The second holds the route and changes the schema: **69% → 0% is a
+schema effect**, and it is the one that matters here, because this run is at
+2.0.0. It is a single series and should be treated as a strong prior rather than
+a measurement, but the variable is isolated.
+
+The same CHORUS creator, either side of that second step:
 
 ```yaml
 # 2026-08-05, schema 1.0.0
