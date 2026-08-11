@@ -57,6 +57,30 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
                    out_dir=Path(out_dir) if out_dir else None, **kw)
 
 
+def _require_canonical_prompts(spec):
+    """Refuse to spend money under a prompt file nobody declared (#432).
+
+    Checked before the cost confirmation, because the cheapest place to catch
+    an undeclared prompt is before it has produced a record that then has to be
+    argued about. There is no override flag: declaring the text is one command
+    and leaves the dated line that makes the condition auditable, which is the
+    entire mechanism. A new prompt version is *meant* to stop here once.
+    """
+    from data_sheets_schema import prompt_registry as pr
+
+    bad = [(p, pr.disk_status(p)) for p in spec.prompt_files]
+    bad = [(p, why) for p, (st, why) in bad if st != pr.CANONICAL]
+    if not bad:
+        return
+    lines = "\n".join(f"   {pr.normalise(p)}: {why}" for p, why in bad)
+    raise click.ClickException(
+        f"prompt file(s) not at their canonical hash for condition "
+        f"{spec.condition!r}:\n{lines}\n"
+        "Declare the text with `d4d api prompts pin --file <path> --reason "
+        "'<why>'`, then re-run. A run under an undeclared prompt cannot be "
+        "placed in the study.")
+
+
 def _require_bundle(spec, project, bundle):
     if bundle is None and project not in PROJECTS:
         raise click.ClickException(
@@ -106,11 +130,24 @@ def render_prompt_cmd(project, arm, label, condition, bundle, runtime,
     the two different objects, which is why `prompt_request_hash` exists.
     """
     import hashlib
+    from data_sheets_schema import prompt_registry as pr
     from data_sheets_schema.api_runner import resolve_prompt
 
     spec = _spec(project, arm, label, condition, bundle,
                  runtime=runtime, provider=provider)
     _require_bundle(spec, project, bundle)
+
+    # Warned, not refused. Rendering is free and reading the text of a draft
+    # condition is a legitimate reason to be here; `d4d api run` refuses and
+    # `d4d runs check` fails, so the fatal gates sit where a claim is made
+    # rather than where text is inspected. But this is the agentic path's
+    # launch point, and an edit made before rendering is invisible downstream
+    # by construction (#432) — so it has to be said here.
+    for f in spec.prompt_files:
+        st, why = pr.disk_status(f)
+        if st != pr.CANONICAL:
+            click.echo(f"# ⚠️  {st}: {why}", err=True)
+
     text = resolve_prompt(spec)
     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
 
@@ -182,6 +219,7 @@ def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
     from data_sheets_schema.api_runner import execute, plan
     spec = _spec(project, arm, label, condition, bundle, out_dir)
     _require_bundle(spec, project, bundle)
+    _require_canonical_prompts(spec)
     if spec.full_path.exists():
         raise click.ClickException(
             f"{spec.full_path} already exists; a run label is never reused")
@@ -247,6 +285,7 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
             if not s.bundle.exists():
                 raise click.ClickException(
                     f"bundle not found for {p}: {s.bundle}")
+            _require_canonical_prompts(s)
             specs.append(s)
 
     plans = [plan(s) for s in specs]
@@ -302,3 +341,66 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
         click.echo(f"   {p} {lbl}: {err[:90]}")
     if failed:
         sys.exit(1)
+
+
+@api.group("prompts")
+def prompts_group():
+    """The canonical prompt registry — what each condition's text is (#432)."""
+
+
+@prompts_group.command("check")
+@click.option("--strict", is_flag=True,
+              help="Exit non-zero if any prompt file differs from its pin.")
+def prompts_check_cmd(strict):
+    """Check the prompt files on disk against their canonical hashes.
+
+    The repo-state half of #432. `d4d runs check` asks the same question of
+    records; this asks it of the working tree, so an undeclared edit is caught
+    before it produces a run rather than after.
+    """
+    from data_sheets_schema import prompt_registry as pr
+
+    rows = pr.check_disk()
+    # Every state other than `canonical` fails here, `unpinned` included. The
+    # record gate treats an unpinned path as absence of evidence, because a
+    # record may legitimately name a prompt the registry does not cover; the
+    # working tree has no such excuse. A condition prompt nobody pinned is
+    # text that was never declared, which is the hole (#432), not a gap in it.
+    bad = [r for r in rows if r["status"] != pr.CANONICAL]
+    for r in rows:
+        mark = {"canonical": "✓", "superseded": "⚠️ ",
+                "uncanonical": "❌", "unpinned": "❌"}[r["status"]]
+        click.echo(f" {mark} {r['status']:12} {r['path']}")
+        if r["reason"]:
+            click.echo(f"       {r['reason']}")
+    click.echo(f"\n{len(rows)} prompt file(s), {len(bad)} not at their pin")
+    if bad:
+        click.echo("Declare them with `d4d api prompts pin --file <path> "
+                   "--reason '<why this is the condition's text>'`. Editing a "
+                   "prompt without rotating its pin, or adding one without a "
+                   "pin at all, is what this command is for.")
+    if strict and bad:
+        sys.exit(1)
+
+
+@prompts_group.command("pin")
+@click.option("--file", "path", required=True,
+              type=click.Path(exists=True, dir_okay=False))
+@click.option("--reason", required=True,
+              help="Why this text is now canonical for its condition.")
+def prompts_pin_cmd(path, reason):
+    """Declare a prompt file's current bytes canonical, retiring the old pin.
+
+    The previous hash is kept, not dropped: records written under it stay
+    `superseded` rather than turning `uncanonical` the moment a prompt moves.
+    """
+    from data_sheets_schema import prompt_registry as pr
+
+    res = pr.pin(path, reason)
+    if res["status"] == "unchanged":
+        click.echo(f"already pinned at {res['sha256'][:12]}… — nothing to do")
+        return
+    click.echo(f"✓ {res['path']} pinned at {res['sha256'][:12]}…")
+    if res.get("previous"):
+        click.echo(f"  previous {res['previous'][:12]}… kept as superseded, so "
+                   "runs made under it still verify")

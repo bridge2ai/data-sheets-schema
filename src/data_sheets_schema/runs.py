@@ -985,6 +985,55 @@ def _prompt_files_drifted(record: dict) -> bool | None:
     return False if seen else None
 
 
+def canonical_prompt_status(method: str, label: str, project: str,
+                            concat_dir: Path = CONCAT_DIR
+                            ) -> tuple[str, str | None]:
+    """Were the prompt files this run consumed published versions of their
+    condition? (#432)
+
+    The third comparison. `verify_request` re-renders the recorded spec and
+    compares it to the recorded instruction, which proves they agree *as the
+    files stand now* — so an instruction edited into the prompt file before
+    rendering re-renders to itself and reports `match`. This asks the question
+    that catches it: is the hash the record already carries for each prompt
+    file one this repo ever declared canonical for that condition?
+
+    Five outcomes; only one is a finding:
+
+    - ``canonical``   — every recorded prompt hash is the current pin.
+    - ``superseded``  — one or more were pinned once and have since been
+      rotated. Ordinary evolution; v4 exists, v5 will.
+    - ``uncanonical`` — a hash that was never pinned. The file that produced
+      this run was not a published version of its condition.
+    - ``unpinned``    — no pin covers one of the paths. Absence of evidence.
+    - ``absent``      — the record hashes no prompt file at all, which is 88 of
+      the corpus and predates the pin.
+    """
+    import yaml as _yaml
+    from data_sheets_schema import prompt_registry as _pr
+    from data_sheets_schema.provenance import record_path_for
+
+    p = record_path_for(project, method, label, concat_dir)
+    if not p.exists():
+        return "absent", "no provenance record"
+    data = _yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    files = ((data.get("prompts") or {}).get("files")) or []
+    seen: list[tuple[str, str | None]] = []
+    for entry in files:
+        if not isinstance(entry, dict) or not entry.get("path"):
+            continue
+        seen.append(_pr.status_of_hash(entry["path"], entry.get("sha256")))
+    if not seen:
+        return "absent", None
+    # Worst-first: one uncanonical file is the verdict regardless of how many
+    # of its neighbours are fine.
+    for wanted in (_pr.UNCANONICAL, _pr.UNPINNED, _pr.SUPERSEDED):
+        hits = [why for status, why in seen if status == wanted]
+        if hits:
+            return wanted, "; ".join(w for w in hits if w) or None
+    return _pr.CANONICAL, None
+
+
 def condition_from_label(label: str) -> str | None:
     """The prompt condition a label *claims*, or None if it names none.
 

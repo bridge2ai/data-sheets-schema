@@ -310,7 +310,8 @@ def check_cmd(method, label, project, strict):
     Use `--strict` after a generation run so a missing record fails the step
     rather than being noticed later.
     """
-    from data_sheets_schema.runs import (check_provenance, discover,
+    from data_sheets_schema.runs import (canonical_prompt_status,
+                                         check_provenance, discover,
                                          is_complete,
                                          prompt_condition_mismatch,
                                          requires_request,
@@ -319,6 +320,7 @@ def check_cmd(method, label, project, strict):
     rows = []
     mismatches = []
     requests = []
+    uncanonical = []
     for run in discover():
         if run.is_core or run.deterministic:
             continue
@@ -350,6 +352,15 @@ def check_cmd(method, label, project, strict):
             elif st in ("mismatch", "unverifiable"):
                 requests.append({"project": proj, "label": run.label,
                                  "status": st, "reason": why})
+
+            # The third comparison (#432). A prompt file edited before the
+            # instruction was rendered re-renders to itself, so `verify_request`
+            # says `match` and means it. Only the pin can tell that the file was
+            # not a published version of its condition.
+            cst, cwhy = canonical_prompt_status(run.method, run.label, proj)
+            if cst in ("uncanonical", "unpinned", "superseded"):
+                uncanonical.append({"project": proj, "label": run.label,
+                                    "status": cst, "reason": cwhy})
 
     failed = [r for r in rows if not r["ok"]]
     required = [r for r in rows if r["required"]]
@@ -387,7 +398,20 @@ def check_cmd(method, label, project, strict):
             click.echo(f"   {mark} {r['project']:9} {r['label']:44} "
                        f"{r['status']}: {r['reason']}")
 
-    if strict and (failed or bad_requests):
+    # Fatal only for `uncanonical`: a run whose prompt file was never a
+    # published version of its condition. `superseded` is a condition that has
+    # moved on since, `unpinned` is a file the registry does not cover — both
+    # are worth seeing and neither is a defect in the run.
+    never_pinned = [r for r in uncanonical if r["status"] == "uncanonical"]
+    if uncanonical:
+        click.echo(f"\n{len(uncanonical)} run(s) whose prompt files are not the "
+                   "current canonical text of their condition (#432):")
+        for r in uncanonical:
+            mark = "❌" if r["status"] == "uncanonical" else "⚠️ "
+            click.echo(f"   {mark} {r['project']:9} {r['label']:44} "
+                       f"{r['status']}: {r['reason']}")
+
+    if strict and (failed or bad_requests or never_pinned):
         raise SystemExit(1)
 
 

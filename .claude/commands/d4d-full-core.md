@@ -442,7 +442,9 @@ After Phase 4 validates, emit a machine-readable provenance record:
 ```bash
 poetry run d4d provenance record \
   --project {PROJECT} --method {METHOD} --label {VERSION} \
-  --input-bundle {EXACT INPUT BUNDLE PATH}
+  --input-bundle {EXACT INPUT BUNDLE PATH} \
+  --prompt {EACH PROMPT FILE THE RUN CONSUMED} \
+  --prompt-text {THE INSTRUCTION AS SENT}
 ```
 
 Writes `{METHOD}_core/{VERSION}/{PROJECT}_provenance.yaml` capturing schema
@@ -454,6 +456,24 @@ if the input bundle is unreadable, because a run that cannot identify its own
 input has not produced reproducible output. Do not substitute a reconstructed
 record — `d4d provenance backfill` exists only for runs that predate this step,
 and it marks what it cannot recover rather than filling it in.
+
+**The prompt is an input like the bundle.** `--prompt` may repeat; pass every
+file the condition is built from. `--prompt-text` takes the instruction as
+actually sent — render it with `d4d api render-prompt --condition {CONDITION}
+--out <file>` rather than retyping it, so the text and its hash come from the
+same place. From 2026-08-10 a run without a recorded instruction fails
+`d4d runs check --strict` (#419): the gate was otherwise opt-in by omission,
+since a launcher that simply passes neither flag records nothing and nothing
+says so.
+
+Recording the file is not the same as vouching for it. A paragraph edited into
+a prompt file *before* rendering re-renders to itself, so the render gate
+reports `match` about an instruction nobody published (#432). What catches that
+is the canonical pin: `d4d api prompts check` compares each condition's prompt
+against the hash this repo declared for it, and `d4d runs check` compares the
+hash in the record. If either reports `uncanonical`, the run was made under
+text that is not a published version of its condition — say so in the
+reconciliation report rather than pinning the edit to make the check pass.
 
 ## Completion criteria (per project)
 
@@ -469,7 +489,8 @@ and it marks what it cannot recover rather than filling it in.
 - The provenance audit confirms that no older full/core YAML was used.
 - The core header contains `Phase 4 reconciliation: completed`.
 - The Phase 3/4 reconciliation report is present.
-- The live provenance record is present and its `record_mode` is `live`.
+- The live provenance record is present and its `record_mode` is `live`, and it
+  names both the prompt files and the instruction as sent.
 - `d4d runs check --strict` passes for the run. **Recording provenance is not the
   same as recording it correctly.** This path writes provenance as a step
   separate from writing the artifacts, so a record can pin a state the files

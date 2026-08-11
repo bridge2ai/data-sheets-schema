@@ -49,6 +49,19 @@ def record(project, method, label, input_bundle, prompts, prompt_text):
                                        if prompt_text else None))
     out = rec.write(record_path_for(project, method, label))
     click.echo(f"✓ {out}")
+
+    # Say it here, but do not refuse. Recording an uncanonical prompt is the
+    # honest act — it is what puts the evidence in the record for `d4d runs
+    # check` to fail on (#432). Refusing would reward not recording at all,
+    # which is the state this whole thread has been climbing out of.
+    from data_sheets_schema import prompt_registry as _pr
+    for p in prompts:
+        st, why = _pr.disk_status(p)
+        if st != _pr.CANONICAL:
+            click.echo(f"  ⚠️  prompt {st}: {why}")
+            click.echo("      This is recorded, and `d4d runs check` reports "
+                       "it. If the text is intentional, declare it with "
+                       "`d4d api prompts pin`.")
     # Say what happened to any prior verdict. Re-recording used to delete it
     # silently and the run then failed `--strict` with "nothing to verify",
     # while this command printed a tick and exited 0 (#396).

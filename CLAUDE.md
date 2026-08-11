@@ -336,6 +336,31 @@ make gen-d4d-html
 make d4d-pipeline-{individual|concatenated|full}-gpt5
 ```
 
+## Canonical Prompt Registry
+
+Each condition's prompt files are pinned by hash in
+`src/download/prompts/canonical_hashes.yaml`.
+
+```bash
+d4d api prompts check --strict          # working tree vs the pins (CI gate)
+d4d api prompts pin --file <path> --reason '<why this is the text>'
+```
+
+**Editing a prompt file without rotating its pin fails
+`tests/test_prompt_registry.py` and blocks `d4d api run`.** That is deliberate:
+the edit and the declaration that it is now the condition's canonical text are
+two acts, and the second is small enough for a reviewer to read.
+
+Why it exists (#432): the render gate re-renders a record's spec and compares it
+to the recorded instruction, which catches text edited *after* rendering. Text
+edited into the prompt file *before* rendering re-renders to itself and reports
+`match`. The pin is the only value the file can be checked against. `d4d runs
+check` reports `uncanonical` — fatal under `--strict` — when a record hashes a
+prompt that was never pinned; `superseded` (pinned once, since rotated) and
+`unpinned` are reported and not failed.
+
+This is not tamper-proofing. Whoever can edit a prompt can rotate its pin.
+
 ## Model Reasoning Capture
 
 Each API generation phase and each evidence-scoring judgement writes a
