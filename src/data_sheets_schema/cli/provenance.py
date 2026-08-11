@@ -371,3 +371,63 @@ def backfill_effort_basis(execute, label):
     if counts.get("drop_placeholder"):
         click.echo("   A value was removed, not corrected. Each such record now "
                    "names the gap under `unverified`.")
+
+
+@provenance.command("backfill-prompts")
+@click.option('--execute', is_flag=True,
+              help='write the records; without it this reports and changes nothing')
+@click.option('--label', default=None, help='restrict to one run label')
+def backfill_prompts(execute, label):
+    """Recover prompts for historical runs, as of each run's own commit (#399).
+
+    A resolver, not a --prompt flag. The honest answer differs per run, so an
+    operator asserting a hash by hand is exactly what must not be possible.
+
+    \b
+      recovered                    the header names a file; bytes taken at the
+                                   run's commit
+      no_prompt_header             supplied inline, never saved — stays null
+      no_commit_at_or_before_run   the file did not exist yet
+      already_recorded             left alone
+
+    The hash is of the bytes at the run's commit, never today's:
+    `d4d_generic_arm_prompt.md` was edited the day after the runs that name it,
+    so today's hash would assert they used a prompt that did not yet exist.
+    """
+    from data_sheets_schema.provenance import (
+        HISTORICAL_RECOVERED, apply_historical_prompt, resolve_historical_prompt,
+    )
+    from data_sheets_schema.runs import discover, is_complete
+
+    targets = []
+    for run in discover():
+        if run.is_core or run.deterministic:
+            continue
+        if label and run.label != label:
+            continue
+        for proj in run.projects:
+            if not is_complete(run.method, run.label, proj):
+                continue
+            targets.append((proj, run.method, run.label))
+
+    outcomes = {}
+    for proj, method, lab in targets:
+        r = resolve_historical_prompt(proj, method, lab)
+        outcomes.setdefault(r["status"], []).append((proj, method, lab, r))
+
+    verb = "recovering" if execute else "would recover"
+    for status, items in sorted(outcomes.items()):
+        click.echo(f"   {status:28} {len(items):4}")
+    recoverable = outcomes.get(HISTORICAL_RECOVERED, [])
+    if not recoverable:
+        click.echo("\nNothing to recover.")
+        return
+    commits = sorted({i[3]['commit'][:12] for i in recoverable})
+    click.echo(f"\n{len(recoverable)} record(s) {verb}, from commit(s) "
+               f"{', '.join(commits)}")
+    if not execute:
+        click.echo("Nothing written. Re-run with --execute to apply.")
+        return
+    n = sum(1 for proj, method, lab, _ in recoverable
+            if apply_historical_prompt(proj, method, lab) is not None)
+    click.echo(f"{n} record(s) updated, each naming the commit its hash is of.")

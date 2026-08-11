@@ -421,8 +421,19 @@ edited into the prompt file *before* rendering re-renders to itself and reports
 check` is fatal under `--strict` on `uncanonical` (a prompt that was never
 pinned, or a labelled condition whose record hashes no condition prompt at all —
 the `cp`-to-another-path bypass, #436) and on `missing` (a pinned path the
-record hashed nothing for). `superseded` (pinned once, since rotated) and
-`unpinned` are reported and not failed.
+record hashed nothing for). `superseded` (pinned once, since rotated),
+`unpinned`, and `pre_registry` are reported and not failed.
+
+`pre_registry` is a prompt recovered from git at the run's own commit
+(`d4d provenance backfill-prompts`, #399). Those bytes are attested by a
+different instrument than the registry and predate it, so calling them
+`uncanonical` would put honest recovered evidence in the same bucket as the
+`cp`-to-another-path bypass, where the bytes are attested by nothing. Every
+recovered hash is reproducible with `git show <commit>:<path>`, and a test
+asserts it. **The hash is of the bytes at that commit, never today's** —
+`d4d_generic_arm_prompt.md` was edited the day after the 15 runs that name it,
+16 lines apart, so today's hash would assert they used a prompt that did not
+yet exist.
 
 This is not tamper-proofing. Whoever can edit a prompt can rotate its pin.
 
