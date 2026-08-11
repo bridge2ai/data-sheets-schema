@@ -59,29 +59,63 @@ class TestClassify(unittest.TestCase):
         self.assertEqual(ident.URI,
                          ident.classify("  https://ror.org/x  ", PREFIXES))
 
+    def test_a_prefix_with_no_reference_identifies_nothing(self):
+        """`d4d:` expands to the namespace itself. Accepting it would pass a
+        value that names no entity."""
+        self.assertEqual(ident.BARE, ident.classify("d4d:", PREFIXES))
 
-class TestWalkIds(unittest.TestCase):
+    def test_the_values_that_prompted_this(self):
+        """Real values from the corpus, in slots ranged `uriorcurie`."""
+        for v in ("%", "years", "PhysioNet", "10.60775/fairhub.3",
+                  "Type 2 diabetes mellitus and associated health outcomes"):
+            with self.subTest(v=v):
+                self.assertIn(ident.classify(v, PREFIXES), ident.UNRESOLVABLE)
+
+
+class TestWalkIdentifiers(unittest.TestCase):
+    SLOTS = {"id", "publisher", "unit", "latest_version_doi"}
+
+    def _paths(self, doc):
+        return [p for p, _, _ in ident.walk_identifiers(doc, self.SLOTS)]
+
     def test_nested_ids_are_found_at_every_depth(self):
         doc = {"id": "top",
                "funders": [{"id": "funder_nih"}],
                "file_collections": [
                    {"id": "fc", "resources": [{"id": "file_a"},
                                               {"id": "file_b"}]}]}
-        found = dict(ident.walk_ids(doc))
+        found = set(self._paths(doc))
         self.assertIn("$.id", found)
         self.assertIn("$.funders[].id", found)
         self.assertIn("$.file_collections[].resources[].id", found)
+
+    def test_slots_other_than_id_are_audited(self):
+        """`id` is one of six uriorcurie slots and not the worst: `unit` holds
+        `%`, `publisher` holds bare names. Auditing only `id` would report a
+        clean `unit` that has never held an identifier."""
+        doc = {"unit": "%", "publisher": "PhysioNet",
+               "latest_version_doi": "10.60775/fairhub.3"}
+        found = {slot for _, slot, _ in ident.walk_identifiers(doc, self.SLOTS)}
+        self.assertEqual({"unit", "publisher", "latest_version_doi"}, found)
+
+    def test_a_multivalued_identifier_slot_yields_each_value(self):
+        doc = {"publisher": ["PhysioNet", "https://ror.org/x"]}
+        vals = [v for _, _, v in ident.walk_identifiers(doc, self.SLOTS)]
+        self.assertEqual(["PhysioNet", "https://ror.org/x"], vals)
 
     def test_list_positions_collapse_so_one_slot_is_one_finding(self):
         """12 bad ids in one list is one defect, not twelve — the same
         normalisation `trap_inventory` applies, for the same reason."""
         doc = {"purposes": [{"id": "a"}, {"id": "b"}, {"id": "c"}]}
-        paths = [p for p, _ in ident.walk_ids(doc)]
-        self.assertEqual(["$.purposes[].id"] * 3, paths)
+        self.assertEqual(["$.purposes[].id"] * 3, self._paths(doc))
 
     def test_a_non_string_or_empty_id_is_not_reported_as_an_identifier(self):
         doc = {"id": None, "a": {"id": ""}, "b": {"id": 7}}
-        self.assertEqual([], list(ident.walk_ids(doc)))
+        self.assertEqual([], self._paths(doc))
+
+    def test_a_slot_not_ranged_uriorcurie_is_left_alone(self):
+        doc = {"description": "a sentence that is not an identifier"}
+        self.assertEqual([], self._paths(doc))
 
 
 class TestAudit(unittest.TestCase):
@@ -89,9 +123,31 @@ class TestAudit(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
+        # A real LinkML schema, not a prefixes-only stub: `audit` derives the
+        # slot set from it, so the fixture has to be loadable and has to
+        # declare a slot ranged `uriorcurie` other than `id` — otherwise the
+        # tests would pass against a scan that only ever looked at `id`.
         self.schema = self.root / "schema.yaml"
-        self.schema.write_text(yaml.safe_dump(
-            {"prefixes": {p: f"https://example.org/{p}/" for p in PREFIXES}}))
+        self.schema.write_text(yaml.safe_dump({
+            "id": "https://example.org/test",
+            "name": "test_schema",
+            "prefixes": {p: f"https://example.org/{p}/" for p in PREFIXES},
+            "default_range": "string",
+            "slots": {
+                "id": {"range": "uriorcurie", "identifier": True},
+                "publisher": {"range": "uriorcurie"},
+                "funders": {"range": "Thing", "multivalued": True,
+                            "inlined_as_list": True},
+                "x": {"range": "Thing", "multivalued": True,
+                      "inlined_as_list": True},
+                "description": {"range": "string"},
+            },
+            "classes": {
+                "Thing": {"slots": ["id", "publisher", "description"]},
+                "Dataset": {"slots": ["id", "publisher", "funders", "x",
+                                      "description"]},
+            },
+        }))
 
     def _record(self, rel: str, doc: dict):
         p = self.root / rel
@@ -126,6 +182,30 @@ class TestAudit(unittest.TestCase):
                             {"id": "oops"}]})
         rep = ident.audit(self.root, self.schema)
         self.assertEqual(ident.CURIE_DECLARED, rep["records"][0]["dominant"])
+
+    def test_the_slot_set_is_derived_from_the_schema_not_hardcoded(self):
+        rep = ident.audit(self.root, self.schema)
+        self.assertIn("publisher", rep["slots_audited"])
+        self.assertIn("id", rep["slots_audited"])
+
+    def test_a_bad_value_in_a_non_id_slot_is_caught(self):
+        """The version that only walked `id` reported this record clean, while
+        `publisher: PhysioNet` sat in a slot ranged `uriorcurie`."""
+        self._record("m/lbl/P_d4d.yaml",
+                     {"id": "https://doi.org/10.1/x",
+                      "publisher": "PhysioNet"})
+        rep = ident.audit(self.root, self.schema)
+        self.assertEqual(1, rep["unresolvable"])
+        self.assertEqual({"publisher": 1}, rep["unresolvable_by_slot"])
+
+    def test_offenders_are_grouped_by_slot(self):
+        self._record("m/lbl/P_d4d.yaml",
+                     {"id": "bare_one",
+                      "publisher": "PhysioNet",
+                      "funders": [{"id": "bare_two"}]})
+        rep = ident.audit(self.root, self.schema)
+        self.assertEqual({"id": 2, "publisher": 1},
+                         rep["unresolvable_by_slot"])
 
     def test_core_records_are_scanned_too(self):
         self._record("m_core/lbl/P_d4d_core.yaml", {"id": "bare"})

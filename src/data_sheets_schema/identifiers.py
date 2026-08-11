@@ -42,8 +42,10 @@ _ABSOLUTE = re.compile(r"^[A-Za-z][A-Za-z0-9+.\-]*://")
 
 #: `prefix:reference`. The prefix must be declared in the schema for the CURIE
 #: to expand, so an undeclared prefix is reported separately from a declared
-#: one: it is well-formed and still unresolvable.
-_CURIE = re.compile(r"^([A-Za-z_][A-Za-z0-9._\-]*):(\S*)$")
+#: one: it is well-formed and still unresolvable. The reference is `\S+`, not
+#: `\S*`: `d4d:` expands to the namespace itself and identifies nothing, so
+#: accepting it would pass a value that names no entity.
+_CURIE = re.compile(r"^([A-Za-z_][A-Za-z0-9._\-]*):(\S+)$")
 
 URI = "uri"
 CURIE_DECLARED = "curie_declared"
@@ -78,36 +80,70 @@ def classify(value: str, prefixes: set[str]) -> str:
     return BARE
 
 
-def walk_ids(node: Any, path: str = "$") -> Iterator[tuple[str, str]]:
-    """Every `id` value in a parsed record, with the path that carries it.
+def uriorcurie_slots(schema_path: Path = FULL_SCHEMA) -> set[str]:
+    """Every slot whose *induced* range is `uriorcurie`, from the schema.
+
+    Derived rather than hardcoded to `id`, because `id` is one of six and the
+    other five hold the worse values: `unit` is 148 for 148 unresolvable
+    (`%`, `years`), `publisher` carries bare names like `PhysioNet`,
+    `latest_version_doi` carries bare DOIs, and `data_substrate` and
+    `data_topic` carry whole prose sentences. An audit that checked only `id`
+    would report a clean `unit` slot that has never once held an identifier.
+
+    Induced, not declared, so a `slot_usage` narrowing some other slot to
+    `uriorcurie` is picked up without anyone remembering to add it here.
+    """
+    from linkml_runtime import SchemaView
+
+    sv = SchemaView(str(schema_path))
+    found: set[str] = set()
+    for class_name in sv.all_classes():
+        for slot_name in sv.class_slots(class_name, attributes=True):
+            try:
+                slot = sv.induced_slot(slot_name, class_name)
+            except Exception:  # noqa: BLE001 — a slot that will not resolve
+                continue       # is not evidence about identifier syntax
+            if str(slot.range) == "uriorcurie":
+                found.add(slot_name)
+    return found
+
+
+def walk_identifiers(node: Any, slots: set[str],
+                     path: str = "$") -> Iterator[tuple[str, str, str]]:
+    """Every identifier-ranged value in a record, as (path, slot, value).
 
     Indices are normalised to `[]` so occurrences aggregate by slot rather than
     by position — the same normalisation `trap_inventory` applies, for the same
     reason: 12 bad ids in one list is one defect, not twelve.
     """
     if isinstance(node, dict):
-        raw = node.get("id")
-        if isinstance(raw, str) and raw.strip():
-            yield f"{path}.id", raw
         for key, child in node.items():
-            if key != "id":
-                yield from walk_ids(child, f"{path}.{key}")
+            here = f"{path}.{key}"
+            if key in slots:
+                for value in (child if isinstance(child, list) else [child]):
+                    if isinstance(value, str) and value.strip():
+                        yield here, key, value
+            # Recurse regardless: an identifier-ranged key may itself hold an
+            # inlined object elsewhere in the tree, and a nested `id` under a
+            # `publisher` object is still an identifier.
+            yield from walk_identifiers(child, slots, here)
     elif isinstance(node, list):
         for item in node:
-            yield from walk_ids(item, f"{path}[]")
+            yield from walk_identifiers(item, slots, f"{path}[]")
 
 
-def audit_record(path: Path, prefixes: set[str]) -> dict[str, Any]:
-    """Classify every identifier in one record."""
+def audit_record(path: Path, prefixes: set[str],
+                 slots: set[str] | None = None) -> dict[str, Any]:
+    """Classify every identifier-ranged value in one record."""
     doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     counts = {URI: 0, CURIE_DECLARED: 0, CURIE_UNDECLARED: 0, BARE: 0}
     offenders: list[dict[str, str]] = []
-    for slot_path, value in walk_ids(doc):
+    for slot_path, slot, value in walk_identifiers(doc, slots or {"id"}):
         kind = classify(value, prefixes)
         counts[kind] += 1
         if kind in UNRESOLVABLE:
-            offenders.append({"slot_path": slot_path, "value": value,
-                              "kind": kind})
+            offenders.append({"slot_path": slot_path, "slot": slot,
+                              "value": value, "kind": kind})
     total = sum(counts.values())
     return {"path": str(path), "total": total, "counts": counts,
             "offenders": offenders,
@@ -134,6 +170,14 @@ def summarize(records: list[dict[str, Any]], prefixes_declared: int,
             totals[kind] += n
     total = sum(totals.values())
     unresolvable = sum(totals[k] for k in UNRESOLVABLE)
+    # Per-slot, because the remedies are not the same size. A slot that is
+    # wholly unresolvable is a modelling error — `unit` was ranged
+    # `uriorcurie` and only ever holds `%` — while a slot that is mostly fine
+    # with a few strays is a data-entry problem.
+    by_slot: dict[str, int] = {}
+    for rec in records:
+        for off in rec["offenders"]:
+            by_slot[off.get("slot", "id")] = by_slot.get(off.get("slot", "id"), 0) + 1
     return {
         "records_scanned": len(records),
         "records_with_unresolvable_ids": len([r for r in records
@@ -142,6 +186,8 @@ def summarize(records: list[dict[str, Any]], prefixes_declared: int,
         "counts": totals,
         "unresolvable": unresolvable,
         "unresolvable_share": (unresolvable / total) if total else 0.0,
+        "unresolvable_by_slot": dict(sorted(by_slot.items(),
+                                            key=lambda kv: -kv[1])),
         "prefixes_declared": prefixes_declared,
         "records": records,
         "unreadable": unreadable or None,
@@ -157,6 +203,7 @@ def audit(root: Path = CONCAT_DIR, schema_path: Path = FULL_SCHEMA,
     a figure meant to describe the live corpus.
     """
     prefixes = declared_prefixes(schema_path)
+    slots = uriorcurie_slots(schema_path)
     files = sorted(p for p in root.rglob("*_d4d.yaml")
                    if include_archived or "ATTIC" not in p.parts)
     files += sorted(p for p in root.rglob("*_d4d_core.yaml")
@@ -166,9 +213,11 @@ def audit(root: Path = CONCAT_DIR, schema_path: Path = FULL_SCHEMA,
     unreadable: list[dict[str, str]] = []
     for f in files:
         try:
-            records.append(audit_record(f, prefixes))
+            records.append(audit_record(f, prefixes, slots))
         except Exception as exc:  # noqa: BLE001 — a record that will not parse
             unreadable.append({"path": str(f),                # is a finding too
                                "error": f"{type(exc).__name__}: {exc}"})
 
-    return summarize(records, len(prefixes), unreadable)
+    report = summarize(records, len(prefixes), unreadable)
+    report["slots_audited"] = sorted(slots)
+    return report

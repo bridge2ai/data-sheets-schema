@@ -98,15 +98,22 @@ def identifiers_cmd(label, method, output, show, strict):
     report = ident.audit(root=root)
     if label:
         # Recompute rather than filter in place: the headline must describe
-        # exactly the records it is printed above.
+        # exactly the records it is printed above. `slots_audited` describes
+        # the schema, not the selection, so it is carried across rather than
+        # recomputed — dropping it made the header claim only `id` was checked
+        # while the by-slot line below it named others.
+        audited = report.get("slots_audited")
         report = ident.summarize(
             [r for r in report["records"] if f"/{label}/" in r["path"]],
             report["prefixes_declared"], report.get("unreadable"))
+        report["slots_audited"] = audited
 
     rows = [r for r in report["records"] if r["offenders"]]
+    slots = report.get("slots_audited") or ["id"]
     click.echo(f"🔍 {len(report['records'])} record(s), "
                f"{report['identifiers']} identifier(s), "
                f"{report['prefixes_declared']} declared prefix(es)")
+    click.echo(f"   slots with range uriorcurie: {', '.join(slots)}")
     c = report["counts"]
     click.echo(f"   {c[ident.URI]:>6}  absolute IRI")
     click.echo(f"   {c[ident.CURIE_DECLARED]:>6}  CURIE on a declared prefix")
@@ -117,6 +124,10 @@ def identifiers_cmd(label, method, output, show, strict):
         click.echo(f"\n⚠️  {report['unresolvable']} identifier(s) "
                    f"({report['unresolvable_share']:.0%}) across {len(rows)} "
                    "record(s) resolve to nothing:")
+        by_slot = report.get("unresolvable_by_slot") or {}
+        if by_slot:
+            click.echo("   by slot: " + ", ".join(f"{s} {n}"
+                                                  for s, n in by_slot.items()))
         for r in rows:
             name = Path(r["path"]).name
             click.echo(f"   {name}  ({len(r['offenders'])} of {r['total']}, "
