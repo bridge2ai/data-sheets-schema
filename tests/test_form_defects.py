@@ -394,6 +394,51 @@ class TestSchemaScoping(unittest.TestCase):
             c.schema,
             schema_digest.fingerprint(schema_digest.digest_text("Dataset")))
 
+    def _two_schemas(self, a, b):
+        self.path.write_text("\n".join(
+            json.dumps({"rubric": _digest(FORM_SUBTYPE_SYSTEM), "model": "m",
+                        "chars": 4000, "key": f"k{i}", "slot": "s",
+                        "subtype": "other", "reason": "", "schema": sc})
+            for i, sc in enumerate([a, b])) + "\n", encoding="utf-8")
+
+    def test_an_accumulating_cache_prefers_the_live_schema(self):
+        """Two schemas is the expected end state, not an error (#483).
+
+        Unlike two *models*, where neither table can be trusted (#277), every
+        entry here is correctly scoped and a cache legitimately accumulates
+        labels across schema versions — that is what keying on schema is for.
+        The principled default is the schema the caller is working at.
+        """
+        from data_sheets_schema import schema_digest
+        live = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+        self._two_schemas("34d24ff30fb6ad0f10d82af09ddc1fba", live)
+        c = FormSubtypeClassifier(cache_path=self.path, model="m", offline=True)
+        self.assertEqual(c.schema, live)
+        self.assertEqual(len(c._memo), 1, "loaded labels from the wrong schema")
+
+    def test_a_single_schema_cache_still_pins_regardless_of_the_live_one(self):
+        """The frozen case must not depend on the working tree.
+
+        This is what keeps the published v1->v2 table reproducible after
+        someone edits a slot description.
+        """
+        self._write("34d24ff30fb6ad0f10d82af09ddc1fba")
+        c = FormSubtypeClassifier(cache_path=self.path, model="m", offline=True)
+        self.assertEqual(c.schema, "34d24ff30fb6ad0f10d82af09ddc1fba")
+
+    def test_several_schemas_none_live_refuses_rather_than_guessing(self):
+        self._two_schemas("aaaa1111", "bbbb2222")
+        with self.assertRaises(PooledInstruments):
+            FormSubtypeClassifier(cache_path=self.path, model="m",
+                                  offline=True).schema
+
+    def test_an_explicit_schema_settles_it(self):
+        self._two_schemas("aaaa1111", "bbbb2222")
+        c = FormSubtypeClassifier(cache_path=self.path, model="m",
+                                  schema="bbbb2222", offline=True)
+        self.assertEqual(c.schema, "bbbb2222")
+        self.assertEqual(len(c._memo), 1)
+
     def test_two_schemas_in_one_cache_refuse(self):
         self.path.write_text("\n".join(
             json.dumps({"rubric": _digest(FORM_SUBTYPE_SYSTEM), "model": "m",

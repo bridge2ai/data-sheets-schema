@@ -237,13 +237,23 @@ this plan:
    digest, and a failure cannot be classified against a schema its own
    judgement was not made under.
 
-   The separate-cache-file workaround is therefore **no longer required**,
-   though it remains harmless. Classifying the new arms into the shared cache
-   is now safe: their entries carry `e802cdc3` and the v1→v2 entries carry
-   `34d24ff3`, so the two cannot be mixed and the published table still rebuilds
-   offline at zero cost. The classifier resolves its schema from the cache for
-   reproduction and from the live schema for an empty one, mirroring how it
-   resolves the model (#462).
+   The separate-cache-file workaround is therefore **no longer required**.
+   Classifying the new arms into the shared cache is safe: their entries carry
+   `e802cdc3`, the v1→v2 entries carry `34d24ff3`, and `_load` filters on it, so
+   the two cannot be mixed and the published table still rebuilds offline at
+   zero cost.
+
+   How the schema is resolved when the caller does not say (#483):
+
+   - **one schema recorded** → that one, regardless of the working tree. This
+     is the frozen case and is what keeps the published table reproducible
+     after someone edits a slot description.
+   - **several recorded, one of them live** → the live one. Two schemas in a
+     cache is the expected end state rather than an error — every entry is
+     correctly scoped — and the schema the caller is working at is the
+     principled choice. Unlike two *models*, where neither table can be
+     trusted (#277), there is a right answer here.
+   - **several, none live** → refuse, naming the candidates. Pass `--schema`.
 
 The fitness rubric and the sub-type rubric are unchanged, so labels stay valid
 for their own key — but "their own key" does not include the schema, which is

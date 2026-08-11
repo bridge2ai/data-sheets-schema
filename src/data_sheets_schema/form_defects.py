@@ -380,15 +380,32 @@ class FormSubtypeClassifier:
         the analysis plan tells a new arm to use — has nothing to reproduce and
         correctly takes the live schema.
         """
-        if self.cache_path and Path(self.cache_path).exists():
-            try:
-                return recorded_schema(self.cache_path)
-            except PooledInstruments:
-                raise
-            except (ValueError, OSError):
-                pass
         from data_sheets_schema import schema_digest
-        return schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+        live = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+        if not (self.cache_path and Path(self.cache_path).exists()):
+            return live
+        try:
+            recorded = recorded_schemas(self.cache_path)
+        except OSError:
+            return live
+        if len(recorded) == 1:
+            # The frozen case. Pin what the cache records regardless of the
+            # working tree — this is what keeps the published table
+            # reproducible after a slot description is edited.
+            return recorded.pop()
+        if not recorded:
+            return live
+        # More than one, which for schemas is the expected end state rather
+        # than an error: every entry is correctly scoped and a cache
+        # legitimately accumulates labels across schema versions. Unlike two
+        # *models* (#277), there is a principled choice — the schema the caller
+        # is actually working at (#483).
+        if live in recorded:
+            return live
+        raise PooledInstruments(
+            f"{self.cache_path} records {len(recorded)} schemas "
+            f"({sorted(recorded)}) and none is the live schema {live}; "
+            f"pass an explicit schema to say which is meant.")
 
     def _save(self, key: str, slot: str, subtype: str, reason: str) -> None:
         if not self.cache_path:
@@ -518,6 +535,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--allow-pooled-cache", action="store_true",
                         help="permit --model to write a second instrument into "
                              "a cache that already records another (#464)")
+    parser.add_argument("--schema", default=None,
+                        help="schema digest to scope labels to; defaults to "
+                             "the one the cache records, or the live schema "
+                             "for a new cache (#465)")
     parser.add_argument("--config", action="append", metavar="TAG=LABEL",
                         help="arm to attribute against, repeatable; defaults to "
                              "the historical v1/v2 labels. Required for any "
@@ -556,8 +577,10 @@ def main(argv: list[str] | None = None) -> int:
 
     classifier = FormSubtypeClassifier(cache_path=args.cache,
                                        model=args.model,
+                                       schema=args.schema,
                                        offline=args.offline)
-    print(f"instrument: {classifier.model}", file=sys.stderr)
+    print(f"instrument: {classifier.model}  schema: {classifier.schema[:8]}",
+          file=sys.stderr)
     classified = classify(failures, classifier)
     counts = table(classified)
 
