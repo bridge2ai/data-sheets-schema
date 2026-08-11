@@ -548,6 +548,21 @@ def compare_records(records: dict[str, dict[str, Any]], *,
 DEFAULT_METHOD = "claudecode_agent"
 DEFAULT_CONFIGS = {"v1  (2026-07-28 generic)": "2026-07-28_claude-opus-5-generic",
                    "v2  (2026-07-31 generic-v2)": "2026-07-31_claude-opus-5-generic-v2"}
+#: Four, not `PROJECTS`, and deliberately so (#467). This is the project set
+#: §7's published agreement figures were computed over — 261/540 shared slots,
+#: 48.3%, and the between-config effect of −2.9 against a per-project delta sd
+#: of 10.9. Widening the default would silently change what a bare invocation
+#: reports against what was published, which is a decision about the figures
+#: rather than a lint fix.
+#:
+#: VOICE_PEDIATRIC is reachable with `--projects`; it is excluded from the
+#: default because it and VOICE share a source corpus, so counting them as two
+#: samples overstates the independent n that §7's power argument rests on. See
+#: `SHARED_CORPUS_GROUPS`.
+#:
+#: Unlike `form_defects._value_index`, whose omission of the fifth project was
+#: an oversight that silently produced an `unattributed` column, an absent
+#: project here is visible: it simply has no row.
 DEFAULT_PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
 DEFAULT_ROOT = Path("data/d4d_concatenated")
 DEFAULT_CACHE = Path("data/evaluation_llm/agreement_cache")

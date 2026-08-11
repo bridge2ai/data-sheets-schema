@@ -13,12 +13,25 @@ These tests are cheap and catch that.
 import re
 import unittest
 from pathlib import Path
+from data_sheets_schema.constants import PROJECTS
 
 PROMPTS = Path("src/download/prompts")
 GENERIC = PROMPTS / "d4d_generic_arm_prompt.md"
 TUNED = PROMPTS / "d4d_tuned_arm_prompt.md"
 COMPONENTS = PROMPTS / "components"
-PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
+# PROJECTS is imported, not restated. A four-project literal here made
+# the per-project assertions below exclude VOICE_PEDIATRIC from the day
+# #298 made it a project, so a guard that reads as covering every
+# project covered four of five (#467).
+#
+# Widening it immediately found the gap the narrowing had hidden:
+# VOICE_PEDIATRIC has no component file, so the `tuned` condition cannot be run
+# for it (#478). Authoring one is content and a judgement call — it must state
+# what distinguishes the pediatric cohort without importing adult-cohort facts —
+# so the gap is pinned by name rather than papered over. The other four projects
+# stay guarded, and this list may only shrink.
+WITHOUT_COMPONENT = {"VOICE_PEDIATRIC"}
+COMPONENT_PROJECTS = tuple(p for p in PROJECTS if p not in WITHOUT_COMPONENT)
 
 ALLOWED_TYPES = {"fact", "decision-rule", "referent-pin"}
 HEADING = re.compile(r"^##\s+([a-z-]+)\s*$", re.MULTILINE)
@@ -74,19 +87,23 @@ class TestGenericPromptIsGeneric(unittest.TestCase):
 
 class TestComponentFiles(unittest.TestCase):
     def test_every_project_has_a_component_file(self):
-        for p in PROJECTS:
-            self.assertTrue((COMPONENTS / f"{p}.md").exists(),
-                            f"missing component file for {p}")
+        missing = [p for p in PROJECTS
+                   if not (COMPONENTS / f"{p}.md").exists()]
+        self.assertEqual(
+            set(missing), WITHOUT_COMPONENT,
+            "the set of projects without a component file has changed; a new "
+            "gap must be filed like #478, and a filled one removed from "
+            "WITHOUT_COMPONENT")
 
     def test_only_permitted_component_types_are_declared(self):
-        for p in PROJECTS:
+        for p in COMPONENT_PROJECTS:
             for kind in HEADING.findall((COMPONENTS / f"{p}.md").read_text("utf-8")):
                 self.assertIn(kind, ALLOWED_TYPES,
                               f"{p}.md declares disallowed component {kind!r}")
 
     def test_expectation_components_are_absent(self):
         """The one category with measured harm must not reappear."""
-        for p in PROJECTS:
+        for p in COMPONENT_PROJECTS:
             text = (COMPONENTS / f"{p}.md").read_text("utf-8")
             self.assertNotIn("## expectation", text,
                              f"{p}.md declares an expectation component")
@@ -96,7 +113,7 @@ class TestComponentFiles(unittest.TestCase):
         banned = ("expected to be", "should be largely", "sparse output",
                   "do not manufacture", "is the correct result",
                   "target slot", "aim for")
-        for p in PROJECTS:
+        for p in COMPONENT_PROJECTS:
             text = (COMPONENTS / f"{p}.md").read_text("utf-8").lower()
             for phrase in banned:
                 self.assertNotIn(phrase, text,
