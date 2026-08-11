@@ -1,4 +1,6 @@
-# rubric10 scores — publication exemplar run 2026-07-22 (claude-fable-5)
+# [HISTORICAL] rubric10 scores — publication exemplar run 2026-07-22 (claude-fable-5)
+# These score the archived 2026-04-10_sonnet-4.6 label, set aside
+# as unattestable. Do not cite as current. See #286.
 
 [claudecode]
   AI_READI   34/50  (68.0%)
