@@ -330,6 +330,35 @@ class TestD4DPairConsistency(unittest.TestCase):
         self.assertIn("unmatched core distributions=[0]",
                       self._relation_warning(report))
 
+    def test_an_ambiguous_collection_match_is_not_rescued_by_descending(self):
+        """Two collections sharing an id is a defect; descending would hide it.
+
+        `_related_match` reports ambiguity distinctly from absence. If the
+        descent treated them alike, this record would report a tidy
+        `1 at nested resource level` match and the duplicate collection id
+        would vanish from the output — less visible than before #401, which
+        exists to make `unmatched` mean what it says (#474).
+        """
+        full = {
+            "id": "https://example.org/dataset",
+            "file_collections": [
+                {"id": "https://example.org/dup", "name": "C1",
+                 "resources": [{"id": "https://example.org/dup",
+                                "name": "nested"}]},
+                {"id": "https://example.org/dup", "name": "C2"},
+            ],
+        }
+        core = {
+            "id": "https://example.org/dataset",
+            "distributions": [
+                {"id": "https://example.org/dup", "name": "d"},
+            ],
+        }
+        report = validate_pair_data(full, core, self.pair_schema)
+        message = self._relation_warning(report)
+        self.assertIn("unmatched core distributions=[0]", message)
+        self.assertIn("0 at nested resource level", message)
+
     def test_a_collection_without_resources_is_handled(self):
         full = {
             "id": "https://example.org/dataset",

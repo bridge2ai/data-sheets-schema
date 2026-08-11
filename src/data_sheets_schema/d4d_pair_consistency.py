@@ -419,7 +419,15 @@ def _append_distribution_relation_issues(
             distribution, mapping_collections
         )
         level = "collection"
-        if collection is None:
+        if collection is None and match_basis is None:
+            # Only on a *clean* miss. `_related_match` returns
+            # (None, "ambiguous <key>") when two collections share an
+            # identifier, which is a data defect; descending past it and
+            # finding one nested file would report a tidy resource-level match
+            # and delete the ambiguity from the output (#474). That would make
+            # the defect less visible than before this change, inverting what
+            # #401 is for.
+            #
             # Descend into each collection's nested `resources` (#401).
             # `FileCollection` is collection-level — total_bytes, file_count,
             # collection_type — while `CoreDistribution` is file-level — bytes,
