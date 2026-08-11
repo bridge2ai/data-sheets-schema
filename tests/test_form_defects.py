@@ -7,6 +7,8 @@ against the committed cache, where a miss raises rather than billing.
 import json
 import tempfile
 import unittest
+
+import yaml
 from pathlib import Path
 
 from data_sheets_schema.agreement import OfflineCacheMiss, _digest
@@ -16,14 +18,20 @@ from data_sheets_schema.form_defects import (
     SUBTYPES,
     FormFailure,
     FormSubtypeClassifier,
+    PooledInstruments,
     _parse_subtype,
+    _value_index,
     attribute,
     classify,
     folded,
     load_form_failures,
+    main,
     recorded_model,
+    recorded_models,
     table,
 )
+
+from data_sheets_schema.constants import PROJECTS
 
 REPO = Path(__file__).resolve().parents[1]
 JUDGEMENTS = REPO / "data" / "evaluation_llm" / "judgement_cache"
@@ -136,28 +144,52 @@ class TestIndexCoversEveryProject(unittest.TestCase):
     from it had been fitness-scored yet.
     """
 
-    def test_the_default_project_list_is_the_registry(self):
-        import inspect
+    def _corpus(self, root, project, slot, value, label="lbl", rep=1):
+        """One record on disk, in the layout load_replicates expects."""
+        d = root / "claudecode_agent" / f"{label}_rep{rep}"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / f"{project}_d4d.yaml").write_text(
+            yaml.safe_dump({slot: value}), encoding="utf-8")
 
-        from data_sheets_schema.constants import PROJECTS
-        from data_sheets_schema.form_defects import _value_index
+    def test_a_value_from_every_registered_project_is_attributed(self):
+        """Behavioural: index a record per project, attribute a failure from each.
 
-        default = inspect.signature(_value_index).parameters["projects"].default
-        self.assertEqual(tuple(default), tuple(PROJECTS))
+        The earlier version of this test compared `_value_index`'s default
+        argument against PROJECTS, which would pass unchanged if the function
+        ignored the argument entirely.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for i, project in enumerate(PROJECTS):
+                self._corpus(root, project, "creators", [f"value-{i}"])
 
-    def test_voice_pediatric_is_covered(self):
-        """Named explicitly: it is the project the literal actually omitted."""
-        from data_sheets_schema.constants import PROJECTS
-        from data_sheets_schema.form_defects import _value_index
+            failures = [FormFailure(project, "creators",
+                                    json.dumps([f"value-{i}"]), "", 0.5)
+                        for i, project in enumerate(PROJECTS)]
+            attribute(failures, root=root, configs={"v1": "lbl"})
 
-        default = inspect_default_projects(_value_index)
-        self.assertIn("VOICE_PEDIATRIC", default)
-        self.assertIn("VOICE_PEDIATRIC", PROJECTS)
+            unattributed = [f.project for f in failures if not f.config]
+            self.assertEqual(unattributed, [],
+                             "a registered project was not indexed")
 
+    def test_voice_pediatric_specifically_attributes(self):
+        """The project the hardcoded literal actually omitted (#463)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._corpus(root, "VOICE_PEDIATRIC", "creators", ["pediatric"])
+            failure = FormFailure("VOICE_PEDIATRIC", "creators",
+                                  json.dumps(["pediatric"]), "", 0.5)
+            attribute([failure], root=root, configs={"v1": "lbl"})
+            self.assertEqual(failure.config, "v1")
 
-def inspect_default_projects(fn):
-    import inspect
-    return tuple(inspect.signature(fn).parameters["projects"].default)
+    def test_a_project_left_out_of_the_list_goes_unattributed(self):
+        """The failure mode itself, so the guard is known to be able to fire."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._corpus(root, "VOICE_PEDIATRIC", "creators", ["pediatric"])
+            index = _value_index(root, "claudecode_agent", {"v1": "lbl"},
+                                 projects=("AI_READI",))
+            self.assertEqual(index, {})
 
 
 class TestDefaultInstrument(unittest.TestCase):
@@ -206,21 +238,76 @@ class TestDefaultInstrument(unittest.TestCase):
         self.assertIsInstance(classifier.model, str)
         self.assertTrue(classifier.model)
 
-    def test_a_pooled_cache_does_not_crash_construction(self):
-        """Two instruments already fails recorded_model; don't add a third path.
-
-        Construction falls back rather than raising, so the pooled-cache error
-        surfaces from `recorded_model` where it is explained, not from an
-        unrelated constructor.
-        """
+    def _pool(self):
         self.path.write_text("\n".join(
             json.dumps({"rubric": _digest(FORM_SUBTYPE_SYSTEM), "model": m,
                         "chars": 4000, "key": f"k{i}", "slot": "s",
                         "subtype": "other", "reason": ""})
             for i, m in enumerate(["a-model", "b-model"])) + "\n",
             encoding="utf-8")
-        classifier = FormSubtypeClassifier(cache_path=self.path, offline=True)
-        self.assertTrue(classifier.model)
+
+    def test_a_pooled_cache_refuses_rather_than_choosing(self):
+        """Falling back to the pin here reports a partial table as whole (#464).
+
+        An earlier version asserted that construction *succeeded* on a pooled
+        cache, on the reasoning that `recorded_model` would surface the error
+        where it is explained. Nothing on the production path calls
+        `recorded_model`, so that reasoning encoded the defect as the expected
+        behaviour: the run would load only the entries matching whichever model
+        the live pin happened to name, and print their counts as the table.
+        """
+        self._pool()
+        with self.assertRaises(PooledInstruments):
+            FormSubtypeClassifier(cache_path=self.path, offline=True).model
+
+    def test_an_explicit_model_still_works_on_a_pooled_cache(self):
+        """Refusal is about *choosing* an instrument, not about using a named one.
+
+        Someone repairing a pooled cache has to be able to address one arm of
+        it; what they may not do is have the tool pick for them.
+        """
+        self._pool()
+        classifier = FormSubtypeClassifier(cache_path=self.path,
+                                           model="a-model", offline=True)
+        self.assertEqual(classifier.model, "a-model")
+        self.assertEqual(len(classifier._memo), 1)
+
+    def test_recorded_models_reports_every_instrument(self):
+        self._pool()
+        self.assertEqual(recorded_models(self.path), {"a-model", "b-model"})
+
+    def test_main_refuses_to_pool_a_second_instrument(self):
+        """--model on a cache recording another must not silently append (#464).
+
+        The write is what does the damage: once two models are in one file,
+        `recorded_model` refuses it and the published table stops being
+        reproducible. Checked before any judgement work, so the refusal costs
+        nothing and cannot half-write.
+        """
+        self._write("a-model")
+        code = main(["--cache", str(self.path), "--model", "b-model",
+                     "--judgement-cache", str(Path(self.tmp.name) / "none")])
+        self.assertEqual(code, 2)
+        self.assertEqual(recorded_models(self.path), {"a-model"})
+
+    def test_main_allows_pooling_when_it_is_stated(self):
+        """The escape hatch exists; it just has to be asked for."""
+        self._write("a-model")
+        code = main(["--cache", str(self.path), "--model", "b-model",
+                     "--allow-pooled-cache",
+                     "--judgement-cache", str(Path(self.tmp.name) / "none")])
+        self.assertNotEqual(code, 2)
+
+    def test_main_does_not_refuse_the_model_already_recorded(self):
+        """Naming the instrument the cache already holds is not pooling."""
+        self._write("a-model")
+        code = main(["--cache", str(self.path), "--model", "a-model",
+                     "--judgement-cache", str(Path(self.tmp.name) / "none")])
+        self.assertNotEqual(code, 2)
+
+    def test_pooled_instruments_is_a_value_error(self):
+        """Existing `except ValueError` handlers keep working."""
+        self._pool()
         with self.assertRaises(ValueError):
             recorded_model(self.path)
 

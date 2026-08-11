@@ -193,6 +193,29 @@ def attribute(failures: list[FormFailure], *, root: Path = DEFAULT_ROOT,
     return failures
 
 
+class PooledInstruments(ValueError):
+    """The cache records more than one model for the current rubric.
+
+    Distinguished from "records none" because the two need opposite responses:
+    an empty cache has nothing to reproduce and may fall back to the live pin,
+    while a pooled one must refuse. Falling back there picks whichever entries
+    happen to match the pin and silently reports a partial table (#464).
+    """
+
+
+def recorded_models(cache_path: Path) -> set[str]:
+    """Every model the cache records for the current rubric."""
+    models: set[str] = set()
+    for line in Path(cache_path).read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        entry = json.loads(line)
+        if entry.get("rubric") == _digest(FORM_SUBTYPE_SYSTEM):
+            models.add(entry.get("model", ""))
+    models.discard("")
+    return models
+
+
 def recorded_model(cache_path: Path) -> str:
     """The one model the cached subtype judgements were made under.
 
@@ -203,14 +226,11 @@ def recorded_model(cache_path: Path) -> str:
     current rubric — zero means there is nothing to reproduce, two means two
     instruments are pooled and neither table can be trusted (#277).
     """
-    models: set[str] = set()
-    for line in Path(cache_path).read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        entry = json.loads(line)
-        if entry.get("rubric") == _digest(FORM_SUBTYPE_SYSTEM):
-            models.add(entry.get("model", ""))
-    models.discard("")
+    models = recorded_models(cache_path)
+    if len(models) > 1:
+        raise PooledInstruments(
+            f"{cache_path} records {len(models)} models for the current "
+            f"rubric ({sorted(models)}); a reproduction needs exactly one.")
     if len(models) != 1:
         raise ValueError(
             f"{cache_path} records {len(models)} models for the current "
@@ -249,15 +269,20 @@ class FormSubtypeClassifier:
         appends a second instrument to the cache, after which `recorded_model`
         refuses the file and the v1->v2 baseline cannot be reproduced at all.
 
-        The cache is therefore consulted first. A cache recording two models
-        already fails `recorded_model`, and that error is more useful here than
-        a silent third.
+        The cache is therefore consulted first. A cache that records *two*
+        models propagates `PooledInstruments` rather than falling back: there
+        is no correct instrument to choose, and picking the pin would load only
+        the entries that happen to match it and report a partial table as if it
+        were whole (#464). Only "nothing recorded" and "unreadable" fall
+        through, because in neither case is there an instrument to prefer.
         """
         if self.cache_path and Path(self.cache_path).exists():
             try:
                 return recorded_model(self.cache_path)
+            except PooledInstruments:
+                raise
             except (ValueError, OSError):
-                pass          # empty, unreadable, or already pooled — fall through
+                pass          # nothing recorded, or unreadable — fall through
         from data_sheets_schema.api_runner import _model_settings
         return _model_settings()["name"]
 
@@ -397,9 +422,41 @@ def main(argv: list[str] | None = None) -> int:
                         help="re-classify under a named instrument instead of "
                              "the one the cache records; a stated act, since "
                              "it pools two instruments in one file (#462)")
+    parser.add_argument("--allow-pooled-cache", action="store_true",
+                        help="permit --model to write a second instrument into "
+                             "a cache that already records another (#464)")
+    parser.add_argument("--config", action="append", metavar="TAG=LABEL",
+                        help="arm to attribute against, repeatable; defaults to "
+                             "the historical v1/v2 labels. Required for any "
+                             "other arm — attribution is by matching values "
+                             "back against records, so an unlisted label's "
+                             "failures all read as `unattributed` (#466)")
     args = parser.parse_args(argv)
 
-    failures = attribute(load_form_failures(args.judgement_cache))
+    configs = None
+    if args.config:
+        configs = {}
+        for item in args.config:
+            if "=" not in item:
+                parser.error(f"--config expects TAG=LABEL, got {item!r}")
+            tag, label = item.split("=", 1)
+            configs[tag.strip()] = label.strip()
+
+    if args.model and not args.offline and args.cache.exists():
+        already = recorded_models(args.cache) - {args.model}
+        if already and not args.allow_pooled_cache:
+            print(f"refusing to pool instruments: {args.cache} already records "
+                  f"{sorted(already)} for this rubric, and --model "
+                  f"{args.model} would append a second.\n"
+                  f"  Write elsewhere with --cache <path>, or state the intent "
+                  f"with --allow-pooled-cache.\n"
+                  f"  A pooled cache makes recorded_model refuse the file, so "
+                  f"the existing table stops being reproducible (#277, #464).",
+                  file=sys.stderr)
+            return 2
+
+    failures = attribute(load_form_failures(args.judgement_cache),
+                         configs=configs)
     if args.limit:
         failures = failures[:args.limit]
     print(f"{len(failures)} form failure(s) loaded", file=sys.stderr)

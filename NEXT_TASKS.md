@@ -273,7 +273,9 @@ Guards in place:
   measured against.
 - Tests assert v2 differs from v1 *only* within the marked block, that the block
   names no project, dataset identifier or quantity, and that every project
-  receives byte-identical text after mechanical substitution.
+  receives byte-identical text after mechanical substitution — **for the four
+  projects the test hardcodes.** VOICE_PEDIATRIC is not among them, so the
+  byte-identity guarantee is unasserted for the fifth project (#467).
 - The prediction is deliberately absent from the prompt. Written there it would
   instruct the model to produce the result the run is meant to test, which the
   priming taxonomy excludes from both arms.
@@ -356,7 +358,18 @@ which is why no VOICE replicate validated (#292).
 
 **Done:** the registry, the shared-corpus declaration, and the schema correction
 that made the nested form wrong rather than ambiguous. Adding the fifth project
-broke nothing; the four-project list in 26 files is prose, not logic.
+broke nothing *visible*, and the four-project list is prose in most of the 26
+files that carry it.
+
+⚠️ **Not in all of them.** `form_defects._value_index` hardcoded the four as a
+runtime list, so any VOICE_PEDIATRIC failure would have attributed as
+`unattributed` — silently, since nothing distinguishes "a project we did not
+open" from "a value that matched nothing". Fixed to read `PROJECTS` (#463).
+Two four-project literals are still live and are *not* prose:
+`agreement.DEFAULT_PROJECTS`, and the byte-identity assertion in
+`tests/test_download/test_generic_v2_prompt.py` (#467). "Broke nothing" held
+because nothing from the fifth project had reached those code paths yet, not
+because they were generic.
 
 **Not done, and each needs a decision:**
 
@@ -375,8 +388,13 @@ broke nothing; the four-project list in 26 files is prose, not logic.
   a test pins it.
 - **A generation run — done.** Both projects were generated in the 2026-08-07
   five-project sweep (`2026-08-07_claude-opus-5-claudecode-generic-v3_rep{1,2,3}`,
-  PR #395), under v3. `VOICE_PEDIATRIC` was generated from its own 204 KB bundle
-  as its own project, which is what the fork was for.
+  PR #395). `VOICE_PEDIATRIC` was generated from its own 204 KB bundle as its
+  own project, which is what the fork was for.
+
+  ⚠️ **Not "under v3", despite the label.** That sweep hashed
+  `d4d_generic_arm_prompt.md` — the plain generic prompt (#454, and see §6).
+  The run is fine for what this section claims about it; the condition name is
+  not.
 
   **#292 is closed.** All three VOICE replicates validate; `d4d evaluate
   related-datasets` reports 0 defects across the canonical set; and VOICE
@@ -401,6 +419,11 @@ broke nothing; the four-project list in 26 files is prose, not logic.
   by the fresh v1 arm in §6, after which these records are annotated and kept as
   historical rather than renamed — renaming 30 records, their provenance paths
   and five canonical marks would assert a uniformity that does not hold.
+
+  **That supersession has not happened yet.** The fresh arm is decided and
+  pre-registered (§6), not generated; `e802cdc3` appears in no record and no
+  judgement. Until it does, these remain the canonical records and the caveat
+  above is the whole of the mitigation.
 
 - **Whether `VOICE` becomes `VOICE_main` — decided: no.** Attempted and reverted.
   The path moves were clean (567 files, no clashes), but the content rewrite
@@ -533,7 +556,7 @@ Acted on the same day:
 | re-recording discarded the validation verdict | #396 | **fixed** (#423) |
 | the launch prompt was typed, not rendered | #419, #422 | **addressed** (#425) |
 | per-GC scope lived in the launch prompt | #422 | **closed** — declared in the manifest |
-| label says `generic-v3`, provenance hashes v1 | #420, #454 | check landed; records superseded by §6's fresh v1 arm |
+| label says `generic-v3`, provenance hashes v1 | #420, #454 | check landed; records **not yet** superseded — §6's fresh v1 arm is decided, not run |
 | v3 never ran on 3 of 5 projects; every v3 label confounded | #458 | open — gates §6 |
 | `verification_url` still injected; 0 values depend on it | #427 | open, cosmetic |
 | a verdict does not pin the schema it was reached against | #426 | **fixed** |

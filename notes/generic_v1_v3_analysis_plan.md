@@ -81,9 +81,18 @@ Against the v1 arm, under v3:
    only rule that does. This is the outcome that would justify promotion.
 2. **Collapsed cardinality falls.** v3 contains v2's rule 1, and v1 contains no
    cardinality rule. The v1→v2 measurement put this at 42 → 7 (−83%).
-3. **The `form` total falls.** It is the sum of 1 and 2, both predicted down.
-   This is the figure that moved the *wrong way* on v1→v2 (50 → 56) while both
-   its components were changing, which is why the split had to come first.
+3. **The `form` total falls.** This is the figure that moved the *wrong way* on
+   v1→v2 (50 → 56) while both its components were changing, which is why the
+   split had to come first.
+
+   ⚠️ The total is **not** the sum of predictions 1 and 2, in either direction.
+   It also counts `other`, which neither rule addresses; and the two folded
+   figures overlap, because a value classified `both` counts toward each. So
+   the total can rise while both folded counts fall — `other` growing, or
+   `both` growing — and predictions 1–3 can come apart without any of them
+   being wrong. **Report all four raw buckets alongside the folded pair**, and
+   treat a total that moves against its components as a finding about where the
+   defects went rather than as a contradiction.
 4. **Substance and target fall**, roughly as they did on v1→v2 (−62%, −61%).
    v3 carries v2's rules 2 and 3 unchanged.
 
@@ -108,8 +117,30 @@ the prompt.
 ## How it will be measured
 
 Fitness scoring, then `python -m data_sheets_schema.form_defects` for the
-sub-type breakdown. Neither rubric is edited, so cached labels stay valid *for
-their own key*.
+sub-type breakdown. Neither rubric is edited.
+
+⚠️ **Two instrument constraints have to be handled before this command can
+produce the comparison** — neither is optional, and both were found reviewing
+this plan:
+
+1. **`attribute()` is wired to the historical v1/v2 labels.** Its `configs`
+   default is `DEFAULT_CONFIGS`, naming the 2026-07-28 and 2026-07-31 runs. Run
+   bare against the new arms, every fresh failure attributes as `unattributed`
+   — or worse, to an old arm, where an identical slot/value happens to occur in
+   both. Pass the new labels explicitly (`--config v1=<label> --config
+   v3=<label>`).
+2. **The sub-type cache key is `(slot, value)` only** — no schema, unlike the
+   fitness cache which is keyed on it. So an identical slot/value under
+   `e802cdc3` silently reuses a label judged against the *old* slot
+   specification. That matters precisely here, because this plan's own argument
+   is that the schema change moves the form classes: `Organization.id` becoming
+   optional changes whether a given object is hollow. Classify the new arms
+   into a **separate cache file** (`--cache <path>`) rather than the shared one,
+   until the key carries the schema (#465).
+
+The fitness rubric and the sub-type rubric are unchanged, so labels stay valid
+for their own key — but "their own key" does not include the schema, which is
+the whole of constraint 2.
 
 ### Counting convention — fixed here so the arms are comparable
 
@@ -123,7 +154,8 @@ collapsed cardinality:  34 + 8 = 42  →  2 + 5 = 7
 hollow object:           0 + 8 =  8  → 45 + 5 = 50
 ```
 
-This convention is stated nowhere else in the repo (#461) and is not optional
+The convention was stated nowhere in the repo when this plan was written; it is
+now implemented as `folded()` and printed by the CLI (#461). It is not optional
 here: counted *excluding* `both`, the v1 collapsed-cardinality baseline is 34
 rather than 42, and the arms differ by the size of that bucket — 8 values on v1,
 5 on v2 — which is larger than several of the effects this comparison is trying
