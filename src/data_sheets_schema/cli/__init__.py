@@ -18,7 +18,7 @@ def cli():
     pass
 
 # Import and register subcommands
-from . import download, evaluate, utils, rocrate, schema, render, healthsheet, runs, provenance, api, enrich
+from . import download, evaluate, utils, rocrate, schema, render, healthsheet, runs, provenance, api, enrich, prompt
 
 cli.add_command(download.download)
 cli.add_command(evaluate.evaluate)
@@ -31,6 +31,7 @@ cli.add_command(provenance.provenance)
 cli.add_command(schema.schema)
 cli.add_command(render.render)
 cli.add_command(api.api)
+cli.add_command(prompt.prompt)
 
 if __name__ == "__main__":
     cli()
