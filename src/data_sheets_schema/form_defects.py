@@ -4,12 +4,20 @@
 said and the instrument could not show it. Form failures went 50 → 56, apparently
 worse, while underneath:
 
-    collapsed cardinality — several entities in one object   27 → 0
+    collapsed cardinality — several entities in one object   42 → 7
     hollow object — one object per entity, all content in
-                    free-text `description`                   2 → 33
+                    free-text `description`                   8 → 50
 
 The rule eliminated the defect it named and produced a different one wearing the
-same label. One `form` class covering two failures made a real improvement read
+same label.
+
+Those are this module's own classifier output, folded — see `folded()`; a value
+classified `both` counts toward each named subtype. Earlier revisions of this
+docstring carried 27 → 0 and 2 → 33, which are the *manual read* from
+`notes/form_defect_split_2026-08-03.md` that the classifier superseded (#461).
+The note keeps both and explains the gap: a human reading judge reasons in bulk
+retreats to "unclear" (37 in `other`) where a judge asked one question per value
+does not (12). The manual read is why this module exists; it is not its output. One `form` class covering two failures made a real improvement read
 as a regression, and the note's conclusion was that any future comparison on
 this axis has to split them. This module is that split.
 
