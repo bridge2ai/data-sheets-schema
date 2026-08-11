@@ -31,6 +31,31 @@ def _run(*args):
     return CliRunner().invoke(download, ["audit-bundles", *args])
 
 
+def _crate_inputs_complete(project: str = "CM4AI") -> bool:
+    """Can this checkout rebuild the crate bundle at all?
+
+    Part of the crate package is gitignored (`data/ro-crate_packages/*/crate/`),
+    so a clean clone rebuilds the de novo bundle from fewer artifacts than it
+    was built from — CI reported it stale on all three Pythons before the audit
+    learned to tell the two apart (#453). Tests about crate staleness are
+    meaningless where the inputs are absent, so they skip rather than assert
+    something the environment cannot support.
+    """
+    import tempfile
+    from data_sheets_schema.cli.download import _crate_evidence_in
+    from data_sheets_schema.rocrate_normalize import build_crate_bundle
+    bundle = CONCAT / f"{project}_preprocessed_with_crate.txt"
+    if not bundle.exists():
+        return False
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            _, included, _ = build_crate_bundle(
+                project, out_path=Path(tmp) / "x.txt")
+    except Exception:                                          # noqa: BLE001
+        return False
+    return not (_crate_evidence_in(bundle) - set(included))
+
+
 @unittest.skipUnless(CONCAT.is_dir(), "corpus not present")
 class TestTheAuditOverTheRealCorpus(unittest.TestCase):
     """Runs against the real bundles, and restores anything it touches."""
@@ -53,6 +78,8 @@ class TestTheAuditOverTheRealCorpus(unittest.TestCase):
         self.assertIn("CM4AI_preprocessed.txt", r.output)
         self.assertIn("d4d download concatenate --project CM4AI", r.output)
 
+    @unittest.skipUnless(_crate_inputs_complete(),
+                         "crate inputs are gitignored and absent here (#453)")
     def test_the_crate_bundle_is_reported_when_the_document_bundle_moves(self):
         """The propagation failure itself: editing the document bundle makes
         the crate bundle stale, because the crate bundle embeds it."""
@@ -106,6 +133,33 @@ class TestTheBuildersAreDeterministic(unittest.TestCase):
             build_crate_bundle("CM4AI", out_path=Path(tmp) / "x.txt")
         self.assertEqual(before, _md5(real))
 
+
+
+@unittest.skipUnless(CONCAT.is_dir(), "corpus not present")
+class TestAnIncompleteCheckoutIsNotStaleness(unittest.TestCase):
+    """#453. Part of the crate package is gitignored, so a clean clone rebuilds
+    the de novo bundle from fewer artifacts. That is a fact about the checkout,
+    not about the bundle, and reporting it as `stale` sent three CI jobs red
+    over a file that was current."""
+
+    def test_the_two_are_reported_differently(self):
+        r = _run("--strict")
+        if _crate_inputs_complete():
+            self.assertEqual(0, r.exit_code, r.output)
+            self.assertNotIn("missing crate artifacts", r.output)
+        else:
+            # The clean-clone case: named, not failed.
+            self.assertEqual(0, r.exit_code, r.output)
+            self.assertIn("missing crate artifacts", r.output)
+
+    def test_the_header_names_what_the_bundle_was_built_from(self):
+        """The comparison only works because the bundle records its own inputs;
+        without that, "fewer inputs" and "different output" are the same
+        observation."""
+        from data_sheets_schema.cli.download import _crate_evidence_in
+        bundle = CONCAT / "CM4AI_preprocessed_with_crate.txt"
+        self.assertIn("CM4AI_crate_metadata_reduced.json",
+                      _crate_evidence_in(bundle))
 
 if __name__ == "__main__":
     unittest.main()

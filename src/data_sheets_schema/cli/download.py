@@ -449,11 +449,25 @@ def audit_bundles(project, strict, manifest):
                 try:
                     out = tmp / f"{name}_with_crate.txt"
                     with contextlib.redirect_stdout(io.StringIO()):
-                        build_crate_bundle(name, out_path=out)
+                        _, included, _ = build_crate_bundle(name, out_path=out)
+                    # Compare inputs before comparing bytes. Part of the crate
+                    # package is gitignored, so a clean checkout rebuilds from
+                    # fewer artifacts and the bundle would read `stale` when
+                    # what is actually incomplete is the checkout. The bundle
+                    # header lists what it was built from, so the two are
+                    # directly comparable (#449).
+                    was = _crate_evidence_in(crate)
+                    missing = was - set(included)
+                    if missing:
+                        unchecked.append((
+                            crate,
+                            "this checkout is missing crate artifacts the "
+                            f"bundle was built from: {', '.join(sorted(missing))}"))
+                        continue
                     checked += 1
                     if md5(out) != md5(crate):
                         stale.append((crate, f'd4d rocrate bundle --project {name}'))
-                except (FileNotFoundError, Exception) as exc:  # noqa: BLE001
+                except Exception as exc:                       # noqa: BLE001
                     unchecked.append((crate, f'{type(exc).__name__}: {exc}'))
 
             # Named, not silently skipped: a bundle with no registered rebuild
@@ -473,3 +487,27 @@ def audit_bundles(project, strict, manifest):
         click.echo(f"   ·  unchecked {path.name}: {why}")
     if strict and stale:
         sys.exit(1)
+
+
+def _crate_evidence_in(bundle: Path) -> set[str]:
+    """The artifact names a crate bundle's own header says it was built from.
+
+    `build_crate_bundle` writes a `CRATE EVIDENCE INCLUDED` block listing each
+    file as `  + name — description`. Reading it back is what lets the audit
+    tell "this bundle is out of date" from "this checkout has fewer inputs than
+    the machine that built it" — two findings that look identical if only the
+    bytes are compared.
+    """
+    names: set[str] = set()
+    inside = False
+    for line in bundle.read_text(encoding="utf-8", errors="ignore").splitlines():
+        if line.startswith("CRATE EVIDENCE INCLUDED"):
+            inside = True
+            continue
+        if inside:
+            if line.startswith("CRATE ARTIFACTS WITHHELD"):
+                break
+            stripped = line.strip()
+            if stripped.startswith("+ "):
+                names.add(stripped[2:].split(" — ")[0].strip())
+    return names
