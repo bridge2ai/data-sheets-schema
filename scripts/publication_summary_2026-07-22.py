@@ -107,7 +107,13 @@ def per_rubric_report(rubric, scores):
         lines.append("| " + " | ".join(row) + " |")
     lines.append("")
 
-    txt = [f"# {rubric} scores — publication run {RUN_DATE}", ""]
+    # Plain text gets the same warning in its own comment style. The .tsv
+    # sibling has carried TSV_BANNER since #286 was filed and this did not, so
+    # the most machine-greppable form was the one left unmarked (#476).
+    txt = [f"# [HISTORICAL] {rubric} scores — publication run {RUN_DATE}",
+           "# These score the archived 2026-04-10_sonnet-4.6 label, set aside",
+           "# as unattestable. Do not cite as current. See #286.",
+           ""]
     for m in methods:
         txt.append(f"[{m}]")
         for p in PROJECTS:
@@ -125,8 +131,9 @@ def per_rubric_report(rubric, scores):
 def publication_table(all_scores):
     """Headline table: rows = projects, columns = 4 rubrics × 2 variants."""
     lines = [
-        f"# D4D Publication Summary — Rerun {RUN_DATE}",
+        f"# [HISTORICAL] D4D Publication Summary — Rerun {RUN_DATE}",
         "",
+        *HISTORICAL_BANNER,
         "Final claudecode_agent scores across the four rubrics for both full D4D and",
         "D4D-core outputs, per Grand Challenge project. All 32 evaluations produced by",
         "the four `d4d-rubric*` agents at git commit `0e19e85f` (PR #154 merged).",
