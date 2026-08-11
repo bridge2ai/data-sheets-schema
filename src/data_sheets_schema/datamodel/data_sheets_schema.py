@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-08-07T11:17:43
+# Generation date: 2026-08-11T12:44:48
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2770,7 +2770,7 @@ class VariableMetadata(DatasetProperty):
 
     variable_name: str = None
     data_type: Optional[Union[str, "VariableTypeEnum"]] = None
-    unit: Optional[Union[str, URIorCURIE]] = None
+    unit: Optional[str] = None
     missing_value_code: Optional[Union[str, list[str]]] = empty_list()
     minimum_value: Optional[float] = None
     maximum_value: Optional[float] = None
@@ -2792,8 +2792,8 @@ class VariableMetadata(DatasetProperty):
         if self.data_type is not None and not isinstance(self.data_type, VariableTypeEnum):
             self.data_type = VariableTypeEnum(self.data_type)
 
-        if self.unit is not None and not isinstance(self.unit, URIorCURIE):
-            self.unit = URIorCURIE(self.unit)
+        if self.unit is not None and not isinstance(self.unit, str):
+            self.unit = str(self.unit)
 
         if not isinstance(self.missing_value_code, list):
             self.missing_value_code = [self.missing_value_code] if self.missing_value_code is not None else []
@@ -4875,7 +4875,7 @@ slots.variableMetadata__data_type = Slot(uri=SCHEMA.DataType, name="variableMeta
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__data_type, domain=None, range=Optional[Union[str, "VariableTypeEnum"]])
 
 slots.variableMetadata__unit = Slot(uri=QUDT.unit, name="variableMetadata__unit", curie=QUDT.curie('unit'),
-                   model_uri=DATA_SHEETS_SCHEMA.variableMetadata__unit, domain=None, range=Optional[Union[str, URIorCURIE]])
+                   model_uri=DATA_SHEETS_SCHEMA.variableMetadata__unit, domain=None, range=Optional[str])
 
 slots.variableMetadata__missing_value_code = Slot(uri=D4D.missingValueCode, name="variableMetadata__missing_value_code", curie=D4D.curie('missingValueCode'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__missing_value_code, domain=None, range=Optional[Union[str, list[str]]])

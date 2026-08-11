@@ -5743,14 +5743,14 @@
                     ]
                 },
                 "data_substrate": {
-                    "description": "Type of data (e.g., raw text, images) from Bridge2AI standards.\n",
+                    "description": "Type of data (e.g., raw text, images) as a term from the Bridge2AI standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no registry term fits, prefer omission here and describe it there.\n",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "data_topic": {
-                    "description": "General topic of each instance (e.g., from Bridge2AI standards).\n",
+                    "description": "General topic of each instance, as an ontology term \u2014 records use GO, MeSH, EFO and NCIT IRIs as well as Bridge2AI standards terms. Where no term is found, prefer omission over a prose topic.\n",
                     "type": [
                         "string",
                         "null"
@@ -8018,7 +8018,7 @@
                     ]
                 },
                 "unit": {
-                    "description": "The unit of measurement for the variable, preferably using QUDT units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.",
+                    "description": "The unit of measurement for the variable, written as the source states it \u2014 `mg/dL`, `mm Hg`, `%`, `logMAR`, `beats per minute`. A QUDT term (http://qudt.org/vocab/unit/, e.g. `qudt:Kilogram`) is welcome where the source gives one, but is not required and is not the usual case.",
                     "type": [
                         "string",
                         "null"

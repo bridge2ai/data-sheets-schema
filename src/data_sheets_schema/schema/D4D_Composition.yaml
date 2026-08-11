@@ -49,7 +49,15 @@ classes:
     attributes:
       data_topic:
         description: >
-          General topic of each instance (e.g., from Bridge2AI standards).
+          General topic of each instance, as an ontology term — records use
+          GO, MeSH, EFO and NCIT IRIs as well as Bridge2AI standards terms.
+          Where no term is found, prefer omission over a prose topic.
+        # Range kept `uriorcurie` (#456), and here the evidence is positive
+        # rather than merely structural: half the values in the corpus already
+        # *are* ontology IRIs — GO_0008104, MeSH D003924, EFO_0008860,
+        # NCIT_C18469. The vocabulary exists and is reachable, so the 22 prose
+        # values are data entry falling back, not a range that fails to
+        # describe the slot.
         range: uriorcurie
         values_from:
           - B2AI_TOPIC
@@ -67,7 +75,20 @@ classes:
           "d4d:docExample": "medical imaging studies"
       data_substrate:
         description: >
-          Type of data (e.g., raw text, images) from Bridge2AI standards.
+          Type of data (e.g., raw text, images) as a term from the Bridge2AI
+          standards registry. A *term*, not a description: prose characterising
+          the instances — "multimodal per-participant records comprising
+          tabular survey and clinical data" — belongs in `instance_type`, which
+          is ranged `string` for exactly that. Where no registry term fits,
+          prefer omission here and describe it there.
+        # Range deliberately kept `uriorcurie` (#456). All 22 unresolvable
+        # values are prose, but the remedy is not to widen the range: the
+        # schema already provides `instance_type` as the prose home, so this is
+        # content landing in the wrong slot rather than a slot whose range is
+        # wrong. Widening it would delete the distinction between a controlled
+        # term and a description, which is the whole point of `values_from`.
+        # Contrast `unit`, where no vocabulary was ever in use and the range
+        # genuinely did not describe the slot.
         range: uriorcurie
         values_from:
           - B2AI_SUBSTRATE
