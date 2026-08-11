@@ -3,6 +3,12 @@
 import click
 from pathlib import Path
 
+#: The effort ladder, duplicated here so the CLI keeps its lazy imports and
+#: does not pull in `provenance` just to build a decorator. It is the same
+#: vocabulary `_effort_from_route` matches routes against, and
+#: `test_effort_ladder_matches_the_recorder` fails if the two drift apart.
+EFFORT_CHOICES = ("minimal", "low", "medium", "high")
+
 
 @click.group()
 def provenance():
@@ -25,7 +31,18 @@ def provenance():
                    '`d4d api render-prompt --out`. Hashed as prompts.request. '
                    'The file is what an instruction was built from; this is '
                    'what it became.')
-def record(project, method, label, input_bundle, prompts, prompt_text):
+@click.option('--reasoning-effort', 'reasoning_effort', default=None,
+              type=click.Choice(EFFORT_CHOICES),
+              help='Reasoning effort this run was launched at, where the '
+                   'runtime does not expose it. Recorded as asserted, not '
+                   'observed. Omit it rather than guessing: an absent effort '
+                   'is reported as a gap, and "default" is not a value — the '
+                   'choice list refuses it rather than trusting the reader '
+                   '(#450), because `PLACEHOLDER_VALUES` in runs.py would '
+                   'discard it downstream and the record and the analysis '
+                   'would then disagree.')
+def record(project, method, label, input_bundle, prompts, prompt_text,
+           reasoning_effort):
     """Write a LIVE provenance record for a run just produced.
 
     Every field is observed at run time — hardware, software versions, input
@@ -46,7 +63,8 @@ def record(project, method, label, input_bundle, prompts, prompt_text):
                        input_verified=True,
                        prompt_paths=[Path(p) for p in prompts] or None,
                        prompt_request=(Path(prompt_text).read_text(encoding="utf-8")
-                                       if prompt_text else None))
+                                       if prompt_text else None),
+                       reasoning_effort=reasoning_effort)
     out = rec.write(record_path_for(project, method, label))
     click.echo(f"✓ {out}")
 

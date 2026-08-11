@@ -2374,7 +2374,7 @@ This repository is under review for potential modification in compliance with Ad
 
 FILE: AI-READI-LICENSE-v1.0_row11.txt
 PATH: data/preprocessed/individual/AI_READI/AI-READI-LICENSE-v1.0_row11.txt
-SIZE: 9576 bytes
+SIZE: 9518 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -2383,7 +2383,6 @@ Source ID: dataset_license
 Source type: license
 Source URL: https://zenodo.org/records/10642459/files/AI-READI-LICENSE-v1.0.pdf?download=1
 Raw file: data/raw/AI_READI/AI-READI-LICENSE-v1.0_row11.pdf
-Verification URL: https://doi.org/10.5281/zenodo.10642459
 --------------------------------------------------------------------------------
 UNIVERSITY OF WASHINGTON (“Licensor”)
 
@@ -2606,7 +2605,7 @@ This repository is under review for potential modification in compliance with Ad
 
 FILE: fairhub_dataset_3_2026-07-24.txt
 PATH: data/preprocessed/individual/AI_READI/fairhub_dataset_3_2026-07-24.txt
-SIZE: 1624 bytes
+SIZE: 1571 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -2615,7 +2614,6 @@ Source ID: fairhub_dataset_v3
 Source type: data resource
 Source URL: https://fairhub.io/datasets/3
 Raw file: data/raw/AI_READI/fairhub_dataset_3_2026-07-24.html
-Verification URL: https://doi.org/10.60775/fairhub.3
 --------------------------------------------------------------------------------
 Flagship Dataset of Type 2 Diabetes from the AI-READI Project
 FAIRhub
@@ -2680,7 +2678,7 @@ This repository is under review for potential modification in compliance with Ad
 
 FILE: fairhub_api_dataset_3_2026-07-27.txt
 PATH: data/preprocessed/individual/AI_READI/fairhub_api_dataset_3_2026-07-27.txt
-SIZE: 167529 bytes
+SIZE: 167476 bytes
 --------------------------------------------------------------------------------
 
 SOURCE METADATA
@@ -2689,7 +2687,6 @@ Source ID: fairhub_dataset_v3_api
 Source type: structured metadata
 Source URL: https://fairhub.io/api/datasets/3
 Raw file: data/raw/AI_READI/fairhub_api_dataset_3_2026-07-27.json
-Verification URL: https://doi.org/10.60775/fairhub.3
 --------------------------------------------------------------------------------
 {
   "id": "3",

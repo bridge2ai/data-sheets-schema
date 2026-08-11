@@ -376,3 +376,138 @@ def scope_cmd(project, do_check, strict, manifest):
 
     if problems or (strict and bad):
         sys.exit(1)
+
+
+@download.command('audit-bundles')
+@click.option('--project', type=click.Choice(PROJECTS),
+              help='Limit to one project (default: all)')
+@click.option('--strict', is_flag=True,
+              help='Exit non-zero if any derived bundle is stale.')
+@click.option('--manifest', type=click.Path(exists=True),
+              default='data/preprocessed/source_manifest.yaml', show_default=True)
+def audit_bundles(project, strict, manifest):
+    """Rebuild every derived bundle into a temp file and compare it to disk.
+
+    A bundle derived from something that changed is stale, and until now
+    nothing said so. #421 stripped curator prose out of the document bundles;
+    the crate bundles embed those verbatim and were not rebuilt, so for a day
+    the de novo arm read 9 curation notes the baseline arm no longer saw, and
+    the two arms were described everywhere as the same corpus (#446).
+
+    Rebuild-and-compare rather than mtime: `crate_only` and `healthsheet_only`
+    are legitimately older than the document bundles because they do not derive
+    from them, so an mtime rule would report three false positives today. Every
+    builder is deterministic, so a difference is staleness and never noise.
+    """
+    require_repo_context("d4d download audit-bundles")
+    setup_repo_imports()
+    import contextlib
+    import hashlib
+    import io
+    import tempfile
+
+    from data_sheets_schema.rocrate_normalize import build_crate_bundle
+
+    concat = Path('data/preprocessed/concatenated')
+    targets = [project] if project else list(PROJECTS)
+    md5 = lambda p: hashlib.md5(p.read_bytes()).hexdigest()  # noqa: E731
+
+    stale, checked, unchecked = [], 0, []
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        for name in targets:
+            # Document bundle: re-concatenate from the individual files the
+            # manifest selects, honouring the source-dir override that lets
+            # VOICE_PEDIATRIC read VOICE's directory (#302).
+            current = concat / f"{name}_preprocessed.txt"
+            if current.exists():
+                declared = (yaml.safe_load(Path(manifest).read_text(encoding="utf-8"))
+                            or {}).get("projects", {}).get(f"{name}_source_dir")
+                src = Path(declared) if declared else Path(
+                    'data/preprocessed/individual') / name
+                out = tmp / f"{name}_preprocessed.txt"
+                from src.download.concatenate_documents import main as concat_main
+                argv = sys.argv
+                sys.argv = ['concatenate_documents.py', '-i', str(src),
+                            '-o', str(out), '-e', '.txt',
+                            '--manifest', manifest, '--project', name]
+                try:
+                    # The builders narrate; this command's own output is the
+                    # verdict, and 60 lines of progress before it hides that.
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        concat_main()
+                finally:
+                    sys.argv = argv
+                checked += 1
+                if out.exists() and md5(out) != md5(current):
+                    stale.append((current, 'd4d download concatenate '
+                                           f'--project {name}'))
+
+            # Crate-augmented bundle: only where a normalized crate exists.
+            crate = concat / f"{name}_preprocessed_with_crate.txt"
+            if crate.exists():
+                try:
+                    out = tmp / f"{name}_with_crate.txt"
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        _, included, _ = build_crate_bundle(name, out_path=out)
+                    # Compare inputs before comparing bytes. Part of the crate
+                    # package is gitignored, so a clean checkout rebuilds from
+                    # fewer artifacts and the bundle would read `stale` when
+                    # what is actually incomplete is the checkout. The bundle
+                    # header lists what it was built from, so the two are
+                    # directly comparable (#449).
+                    was = _crate_evidence_in(crate)
+                    missing = was - set(included)
+                    if missing:
+                        unchecked.append((
+                            crate,
+                            "this checkout is missing crate artifacts the "
+                            f"bundle was built from: {', '.join(sorted(missing))}"))
+                        continue
+                    checked += 1
+                    if md5(out) != md5(crate):
+                        stale.append((crate, f'd4d rocrate bundle --project {name}'))
+                except Exception as exc:                       # noqa: BLE001
+                    unchecked.append((crate, f'{type(exc).__name__}: {exc}'))
+
+            # Named, not silently skipped: a bundle with no registered rebuild
+            # route cannot be checked, and that is a gap in this command rather
+            # than evidence the file is current.
+            for suffix in ('_crate_only.txt', '_healthsheet_only.txt'):
+                other = concat / f"{name}{suffix}"
+                if other.exists():
+                    unchecked.append((other, 'no rebuild route registered here'))
+
+    click.echo(f"📦 {checked} derived bundle(s) rebuilt and compared")
+    for path, cmd in stale:
+        click.echo(f"   ❌ stale  {path}\n      rebuild: {cmd}")
+    if not stale:
+        click.echo("   ✓ every rebuildable bundle matches what its inputs produce")
+    for path, why in unchecked:
+        click.echo(f"   ·  unchecked {path.name}: {why}")
+    if strict and stale:
+        sys.exit(1)
+
+
+def _crate_evidence_in(bundle: Path) -> set[str]:
+    """The artifact names a crate bundle's own header says it was built from.
+
+    `build_crate_bundle` writes a `CRATE EVIDENCE INCLUDED` block listing each
+    file as `  + name — description`. Reading it back is what lets the audit
+    tell "this bundle is out of date" from "this checkout has fewer inputs than
+    the machine that built it" — two findings that look identical if only the
+    bytes are compared.
+    """
+    names: set[str] = set()
+    inside = False
+    for line in bundle.read_text(encoding="utf-8", errors="ignore").splitlines():
+        if line.startswith("CRATE EVIDENCE INCLUDED"):
+            inside = True
+            continue
+        if inside:
+            if line.startswith("CRATE ARTIFACTS WITHHELD"):
+                break
+            stripped = line.strip()
+            if stripped.startswith("+ "):
+                names.add(stripped[2:].split(" — ")[0].strip())
+    return names

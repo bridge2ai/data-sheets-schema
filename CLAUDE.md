@@ -344,7 +344,15 @@ Declared per project in the `scope:` block of
 ```bash
 d4d download scope --project VOICE        # show the declaration
 d4d download scope --check --strict       # check every record against it
+d4d download audit-bundles --strict       # are the derived bundles current?
 ```
+
+`audit-bundles` rebuilds each derived bundle into a temp file and compares
+(#446). Not mtime: `crate_only` and `healthsheet_only` are legitimately older
+than the document bundles because they do not derive from them. The crate
+bundles embed the document bundle verbatim, and after #421 stripped curator
+prose they were not rebuilt — so the de novo arm read 9 curation notes the
+baseline arm no longer saw, for a day, with nothing to detect it.
 
 Each entry names the `referent_id` and any `related_but_distinct` dataset, with
 the slot that carries the relation (`express_as: related_datasets`) and, where
@@ -400,6 +408,23 @@ record hashed nothing for). `superseded` (pinned once, since rotated) and
 This is not tamper-proofing. Whoever can edit a prompt can rotate its pin.
 
 ## Model Reasoning Capture
+
+**Reasoning effort** is established by the provenance recorder, not by the
+prompt header (#397). No generic prompt names it, so records made before this
+simply lacked it — 12 of the 2026-08 API runs. Three sources, in order:
+
+1. the model route, where the provider expresses effort as a name suffix
+   (`google/claude-opus-5-high`) — recorded as observed;
+2. `d4d provenance record --reasoning-effort <x>` — recorded as asserted by the
+   launcher, and still listed under `unverified`;
+3. nothing — the field is left absent and the gap is named.
+
+Never write "default", "unspecified" or a guess. A run that did not choose an
+effort is a different claim from a run whose effort is unknown, and neither is
+a run at high. The fix lives in the recorder because adding a header line to a
+generic prompt would re-baseline that condition for every project and require a
+pin rotation.
+
 
 Each API generation phase and each evidence-scoring judgement writes a
 structured reasoning record beside the run's provenance:

@@ -466,7 +466,8 @@ poetry run d4d provenance record \
   --project {PROJECT} --method {METHOD} --label {VERSION} \
   --input-bundle {EXACT INPUT BUNDLE PATH} \
   --prompt {EACH PROMPT FILE THE RUN CONSUMED} \
-  --prompt-text {THE INSTRUCTION AS SENT}
+  --prompt-text {THE INSTRUCTION AS SENT} \
+  --reasoning-effort {EFFORT, ONLY IF YOU KNOW IT}
 ```
 
 Writes `{METHOD}_core/{VERSION}/{PROJECT}_provenance.yaml` capturing schema
@@ -478,6 +479,19 @@ if the input bundle is unreadable, because a run that cannot identify its own
 input has not produced reproducible output. Do not substitute a reconstructed
 record — `d4d provenance backfill` exists only for runs that predate this step,
 and it marks what it cannot recover rather than filling it in.
+
+**Reasoning effort is established by the recorder, not by the header** (#397).
+Where the model route carries it — the provider exposes effort as a model-name
+suffix — it is read from there and marked observed. Where it does not, pass
+`--reasoning-effort` *only if you actually know what the run was launched at*;
+it is then recorded as asserted by the launcher. If you do not know, omit it:
+the recorder writes no value and names the gap, which is the honest outcome.
+**Never write "default", "n/a", "unspecified" or a guess** — a run that did not
+choose an effort is a different claim from a run whose effort is unknown, and
+neither is a run at high. Do not add a `# Reasoning effort:` line to the header
+unless the prompt's header block asks for one; the header is defined by the
+prompt condition, and adding to it by hand is the intervention this playbook
+exists to prevent.
 
 **The prompt is an input like the bundle.** `--prompt` may repeat; pass every
 file the condition is built from. `--prompt-text` takes the instruction as

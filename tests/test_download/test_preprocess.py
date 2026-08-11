@@ -236,10 +236,13 @@ projects:
         # document in front of the model. It stays in source_manifest.yaml.
         self.assertNotIn("Curation note:", output_text)
         self.assertNotIn("Verified source note", output_text)
-        self.assertIn(
-            "Verification URL: https://example.org/verification",
-            output_text,
-        )
+        # Nor the verification URL (#427). #421 removed the note and left this
+        # behind, so curator text was still reaching the model — 7 lines across
+        # four of the five bundles, three of them AI_READI's and none CHORUS's.
+        # It records where a curator checked a capture against upstream and
+        # appears in no source document, so a record could cite it and still be
+        # scored grounded. It stays in source_manifest.yaml.
+        self.assertNotIn("Verification URL:", output_text)
         self.assertNotIn(" \n", output_text)
         self.assertNotIn(" \t", output_text)
         self.assertEqual(
