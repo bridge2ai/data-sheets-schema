@@ -24,6 +24,7 @@ import hashlib
 import itertools
 import os
 import platform
+import re
 import subprocess
 import sys
 from dataclasses import asdict, dataclass, field
@@ -1338,3 +1339,51 @@ def apply_historical_prompt(project: str, method: str, label: str,
         encoding="utf-8")
     new.replace(path)
     return resolved
+
+
+_PLAYBOOK_REF = re.compile(r"\.claude/[A-Za-z0-9_/.-]*\.md")
+
+#: Where the reference chain starts. The launch instruction's first lines name
+#: the guard and the playbook; everything else is reached from those.
+PLAYBOOK_ROOTS = (Path("src/download/prompts/d4d_generic_arm_prompt.md"),)
+
+
+def referenced_playbooks(roots: tuple[Path, ...] = PLAYBOOK_ROOTS
+                         ) -> tuple[Path, ...]:
+    """Every `.claude/*.md` reachable from the launch instruction (#431).
+
+    `AGENT_PLAYBOOKS` is a claim about which files carry decision rules, and it
+    was maintained by hand with nothing checking it against the tree. Two
+    failures follow. A **renamed** playbook silently becomes `exists: false`,
+    so the record attests that a file the agent actually read was absent. A
+    **new** playbook is invisible: add a fourth instruction file, tell the
+    agent to read it, and no record mentions it.
+
+    Both are the original problem one level up — instructions reaching the
+    model through files nobody tracks — which is what hashing playbooks exists
+    to stop.
+
+    Derived by following references rather than globbing `.claude/`: a glob
+    would hash files no run reads, and a record's playbook list would then
+    change whenever an unrelated command was added. The prompt body names the
+    guard and the playbook; the playbook names the agent file. That closure is
+    the set, and a test asserts `AGENT_PLAYBOOKS` equals it.
+
+    Sorted for determinism — a record's playbook list must not depend on
+    filesystem or traversal order.
+    """
+    seen: set[str] = set()
+    queue = [Path(r) for r in roots]
+    while queue:
+        current = queue.pop()
+        if not current.exists():
+            continue
+        try:
+            text = current.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for ref in _PLAYBOOK_REF.findall(text):
+            if ref not in seen:
+                seen.add(ref)
+                queue.append(Path(ref))
+    return tuple(Path(p) for p in sorted(seen))
