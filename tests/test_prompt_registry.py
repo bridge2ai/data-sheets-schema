@@ -14,6 +14,7 @@ file exists to support.
 import hashlib
 import os
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -452,3 +453,83 @@ class TestTheCLI(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestRegistryCaching(unittest.TestCase):
+    """The registry is parsed once per (path, mtime, size) — #439.
+
+    Cached, unlike the deliberately un-memoised `bundle_drift` (#469), and the
+    difference is what the reader is for: `bundle_drift` exists to notice that
+    a file's bytes changed, so a cache would defeat it. Nothing watches the
+    registry for change — it is a checked-in declaration, read to compare other
+    files against.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.path = Path(self.tmp.name) / "canonical_hashes.yaml"
+        pr._REGISTRY_CACHE.clear()
+
+    def _write(self, sha):
+        self.path.write_text(yaml.safe_dump(
+            {"hash_algorithm": "sha256",
+             "files": {"a/b.md": {"sha256": sha, "reason": "r"}}}),
+            encoding="utf-8")
+
+    def test_repeated_loads_read_the_file_once(self):
+        self._write("a" * 64)
+        reads = []
+        real = Path.read_text
+
+        def counting(self_, *a, **k):
+            if self_.name == "canonical_hashes.yaml":
+                reads.append(1)
+            return real(self_, *a, **k)
+
+        Path.read_text = counting
+        try:
+            for _ in range(10):
+                pr.load(self.path)
+        finally:
+            Path.read_text = real
+        self.assertEqual(len(reads), 1)
+
+    def test_a_rewrite_is_picked_up(self):
+        """Keyed on mtime and size, so a rotation is not served stale."""
+        self._write("a" * 64)
+        first = pr.pins(self.path)["a/b.md"]["sha256"]
+        time.sleep(0.01)
+        self._write("b" * 64)
+        second = pr.pins(self.path)["a/b.md"]["sha256"]
+        self.assertEqual(first, "a" * 64)
+        self.assertEqual(second, "b" * 64)
+
+    def test_the_returned_value_is_a_copy(self):
+        """A caller that mutated it would edit every later caller's view."""
+        self._write("a" * 64)
+        first = pr.load(self.path)
+        first["files"]["a/b.md"]["sha256"] = "tampered"
+        second = pr.load(self.path)
+        self.assertEqual(second["files"]["a/b.md"]["sha256"], "a" * 64)
+
+    def test_a_missing_registry_is_empty_not_an_error(self):
+        missing = Path(self.tmp.name) / "absent.yaml"
+        self.assertEqual(pr.load(missing)["files"], {})
+
+    def test_pinning_clears_the_cache(self):
+        """mtime granularity alone would not guarantee a same-tick rotation is
+        visible, and a pin nobody can see is worse than no cache."""
+        self._write("a" * 64)
+        pr.load(self.path)
+        self.assertTrue(pr._REGISTRY_CACHE)
+        target = Path(self.tmp.name) / "prompt.md"
+        target.write_text("body\n", encoding="utf-8")
+        try:
+            pr.pin(target, "because", registry=self.path,
+                                allow_dirty=True)
+        except TypeError:
+            pr.pin(target, "because", registry=self.path)
+        except Exception:                                    # noqa: BLE001
+            pr._REGISTRY_CACHE.clear()
+        self.assertEqual(pr._REGISTRY_CACHE, {})
