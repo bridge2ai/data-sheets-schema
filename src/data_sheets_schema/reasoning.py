@@ -162,3 +162,44 @@ def summarise(entries: list[dict[str, Any]]) -> dict[str, Any]:
         "truncated": sum(1 for e in entries
                          if e.get("stop_reason") == "max_tokens"),
     }
+
+
+#: The first run whose phases wrote a reasoning log. Runs before this date are
+#: missing one because capture postdates them — a different claim from a run
+#: whose runtime cannot produce one, and from a run that should have written one
+#: and did not.
+CAPTURE_FROM = "2026-07-31"
+
+NO_LOG_RUNTIME = "runtime_cannot_capture"
+NO_LOG_PREDATES = "capture_postdates_run"
+NO_LOG_MISSING = "missing"
+HAS_LOG = "present"
+
+
+def log_status(runtime: str | None, label: str, log_exists: bool) -> str:
+    """Why does this run have no reasoning log? (#400)
+
+    `d4d provenance reasoning` printed one message for every empty case, which
+    conflated three different situations. They are not interchangeable:
+
+    - ``runtime_cannot_capture`` — a Claude Code agentic run. The subagent has
+      no access to its own token accounting, so no log can exist. Writing one
+      carrying only the effort level would be *worse* than writing none: it
+      would look comparable with the API path's and would not be, which is the
+      substitution #400 argues against.
+    - ``capture_postdates_run`` — an API run from before ``CAPTURE_FROM``.
+      Unrecoverable, and nobody's fault.
+    - ``missing`` — an API run from after capture existed, with no log. That is
+      a defect rather than a limitation, and is the only one of the three worth
+      chasing.
+
+    The distinction matters wherever arms are compared: a missing reasoning
+    figure for the agentic arm must not be read as zero spend.
+    """
+    if log_exists:
+        return HAS_LOG
+    if (runtime or "").strip().lower() == "claude code":
+        return NO_LOG_RUNTIME
+    if label[:10] < CAPTURE_FROM:
+        return NO_LOG_PREDATES
+    return NO_LOG_MISSING
