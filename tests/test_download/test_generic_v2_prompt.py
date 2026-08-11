@@ -13,8 +13,14 @@ from pathlib import Path
 from data_sheets_schema.api_runner import (
     GENERIC_PROMPT, GENERIC_PROMPT_V2, RunSpec, prompt_body, resolve_prompt,
 )
+from data_sheets_schema.constants import PROJECTS
 
-PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
+# PROJECTS is imported, not restated. This file previously shadowed it with a
+# four-project literal, so the assertion "every project receives identical
+# text" excluded VOICE_PEDIATRIC from the day it became a project (#298) — a
+# guard whose stated scope was wider than its actual scope, in exactly the area
+# #419 and #422 were about. A fifth project now fails this file rather than
+# passing it by omission (#467).
 MARK_START = "--- ADDED IN v2 ---"
 MARK_END = "--- END ADDED IN v2 ---"
 
