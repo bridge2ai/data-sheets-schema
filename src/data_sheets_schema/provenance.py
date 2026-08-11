@@ -119,6 +119,41 @@ AGENT_PLAYBOOKS = (
 )
 
 
+def repo_relative(path: Path | str) -> str:
+    """A path as this repository names it, whatever the caller passed (#398).
+
+    Every other path-like field in a record is repo-relative by construction —
+    `inputs.bundle_path`, `schema.full_path`, `outputs.*.path` — because they
+    are built from module constants. Prompt paths came from the command line
+    and were recorded verbatim, so the same file recorded as
+    `src/download/prompts/d4d_generic_arm_prompt.md` and as
+    `/Users/…/data-sheets-schema/src/download/prompts/d4d_generic_arm_prompt.md`
+    describes one condition under two strings. The sha256 still matches, so
+    integrity is unaffected — but anything grouping runs *by prompt path* sees
+    two conditions where there is one, and the absolute form leaks a local
+    filesystem layout into a checked-in artifact.
+
+    A path outside the repository keeps its absolute form: rewriting it would
+    assert a location that does not exist here, which is worse than a long
+    string. Callers can tell the two apart because only the latter is absolute.
+
+    Resolved either way, not just when it turns out to be inside. Resolving one
+    branch and not the other would leave the same class of defect in place for
+    outside paths — `/var/…` and `/private/var/…` are one file on macOS — and a
+    function that normalises inconsistently is harder to reason about than one
+    that does not normalise at all.
+    """
+    p = Path(path)
+    try:
+        resolved = p.resolve()
+    except OSError:
+        return str(p)
+    try:
+        return str(resolved.relative_to(Path(__file__).resolve().parents[2]))
+    except (ValueError, OSError):
+        return str(resolved)
+
+
 def playbook_facts(paths: tuple[Path, ...] = AGENT_PLAYBOOKS) -> dict[str, Any]:
     """Hash the instruction files an agentic run follows.
 
@@ -135,7 +170,7 @@ def playbook_facts(paths: tuple[Path, ...] = AGENT_PLAYBOOKS) -> dict[str, Any]:
     out = []
     for p in paths:
         p = Path(p)
-        out.append({"path": str(p), "sha256": _sha256(p),
+        out.append({"path": repo_relative(p), "sha256": _sha256(p),
                     "bytes": p.stat().st_size if p.exists() else None,
                     "exists": p.exists()})
     return {"hash_algorithm": PROMPT_HASH, "files": out}
@@ -172,7 +207,7 @@ def prompt_facts(prompt_paths: list[Path] | None,
         out = []
         for p in prompt_paths:
             p = Path(p)
-            out.append({"path": str(p), "sha256": _sha256(p),
+            out.append({"path": repo_relative(p), "sha256": _sha256(p),
                         "bytes": p.stat().st_size if p.exists() else None,
                         "exists": p.exists()})
         facts = {"hash_algorithm": PROMPT_HASH, "files": out}
