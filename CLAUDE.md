@@ -354,6 +354,25 @@ bundles embed the document bundle verbatim, and after #421 stripped curator
 prose they were not rebuilt — so the de novo arm read 9 curation notes the
 baseline arm no longer saw, for a day, with nothing to detect it.
 
+**One layer up, `d4d runs check` reports bundle drift** (#452): does the file at
+a record's `inputs.bundle_path` still hash to the `bundle_md5` that record
+pinned? Currently **64 records drifted, 12 current, 82 with no hash recorded**.
+
+The two checks are mirror images. `audit-bundles` asks whether a *bundle* still
+matches what its inputs produce; this asks whether a *record's declared input*
+still matches what that record consumed. A drifted record is not wrong — it
+correctly states the bytes it read — but the path it names no longer resolves
+to them, so anyone re-reading its declared input reads something else.
+
+Reported and never fatal, for the same reason as the unobserved-values counter
+(#447): these records stay usable, they just cannot be re-derived from the path
+they name. #421 caused most of the drift by stripping curator notes and #445
+added to it by stripping `verification_url`; **both strips were correct**. The
+defect was that the corpus absorbed a corpus-wide input change with no report.
+
+Derived records (`record_mode: derived`) are out of scope by construction: they
+consume replicates rather than a bundle and declare `bundle_md5` not-applicable.
+
 Each entry names the `referent_id` and any `related_but_distinct` dataset, with
 the slot that carries the relation (`express_as: related_datasets`) and, where
 the related dataset's documentation is legitimately in the bundle, the source id

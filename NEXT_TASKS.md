@@ -384,8 +384,13 @@ because they were generic.
   including them would import adult facts into a pediatric datasheet, which is
   the failure the fitness axis calls `target`.
 
-  The VOICE bundle is byte-identical (md5 `e637eb75`, what 49 runs attest), and
-  a test pins it.
+  The VOICE bundle was byte-identical across the fork at md5 `e637eb75`, which
+  49 runs attest. **It is now `dcd71717`** — #421 stripped curator prose from
+  every bundle after those runs. `tests/test_voice_pediatric_bundle.py` pins
+  both, current and `_PRE_421`, so the transition is recorded rather than
+  overwritten. The sentence here previously named only `e637eb75` as the
+  bundle's hash, which stopped being true when the strip landed and was found
+  by the drift check below (#452).
 - **A generation run — done.** Both projects were generated in the 2026-08-07
   five-project sweep (`2026-08-07_claude-opus-5-claudecode-generic-v3_rep{1,2,3}`,
   PR #395). `VOICE_PEDIATRIC` was generated from its own 204 KB bundle as its
@@ -424,6 +429,23 @@ because they were generic.
   pre-registered (§6), not generated; `e802cdc3` appears in no record and no
   judgement. Until it does, these remain the canonical records and the caveat
   above is the whole of the mitigation.
+
+  ⚠️ **All five canonical records are also bundle-drifted** (#452). Every one
+  pins a bundle md5 the file no longer has:
+
+  | project | pinned | now |
+  |---|---|---|
+  | AI_READI | `8aadffca` | `20150c10` |
+  | CHORUS | `1ce7d891` | `9b2ef4b6` |
+  | CM4AI | `3694e188` | `1dfd34e5` |
+  | VOICE | `e637eb75` | `dcd71717` |
+  | VOICE_PEDIATRIC | `327c2920` | `008212ac` |
+
+  Caused by #421 and #445, both correct strips. The records remain accurate
+  about what they read; what no longer holds is that re-reading their declared
+  inputs reproduces it. So the canonical set carries two independent caveats —
+  a label that names the wrong condition, and inputs that cannot be re-fetched
+  — and the fresh arm in §6 clears both at once.
 
 - **Whether `VOICE` becomes `VOICE_main` — decided: no.** Attempted and reverted.
   The path moves were clean (567 files, no clashes), but the content rewrite
