@@ -384,7 +384,7 @@
 
 
 <h1 id="slot-data_substrate">Slot: data_substrate</h1>
-<p><em>Type of data (e.g., raw text, images) from Bridge2AI standards.</em></p>
+<p><em>Type of data (e.g., raw text, images) as a term from the Bridge2AI standards registry. A <em>term</em>, not a description: prose characterising the instances — "multimodal per-participant records comprising tabular survey and clinical data" — belongs in <code>instance_type</code>, which is ranged <code>string</code> for exactly that. Where no registry term fits, prefer omission here and describe it there.</em></p>
 <p>__</p>
 <p>URI: <a href="http://purl.org/dc/terms/type">dcterms:type</a>
 Alias: data_substrate</p>
@@ -439,7 +439,11 @@ Alias: data_substrate</p>
 <details>
 
 <pre><code class="language-yaml">name: data_substrate
-description: 'Type of data (e.g., raw text, images) from Bridge2AI standards.
+description: 'Type of data (e.g., raw text, images) as a term from the Bridge2AI standards
+  registry. A *term*, not a description: prose characterising the instances — &quot;multimodal
+  per-participant records comprising tabular survey and clinical data&quot; — belongs in
+  `instance_type`, which is ranged `string` for exactly that. Where no registry term
+  fits, prefer omission here and describe it there.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema

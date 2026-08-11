@@ -391,7 +391,7 @@
 
 
 <h1 id="slot-unit">Slot: unit</h1>
-<p><em>The unit of measurement for the variable, preferably using QUDT units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.</em></p>
+<p><em>The unit of measurement for the variable, written as the source states it — <code>mg/dL</code>, <code>mm Hg</code>, <code>%</code>, <code>logMAR</code>, <code>beats per minute</code>. A QUDT term (http://qudt.org/vocab/unit/, e.g. <code>qudt:Kilogram</code>) is welcome where the source gives one, but is not required and is not the usual case.</em></p>
 <p>URI: <a href="http://qudt.org/schema/qudt/unit">qudt:unit</a>
 Alias: unit</p>
 <!-- no inheritance hierarchy -->
@@ -415,7 +415,7 @@ Alias: unit</p>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>Range: <a href="../Uriorcurie/">Uriorcurie</a></li>
+<li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
 <h3 id="annotations">Annotations</h3>
@@ -468,8 +468,10 @@ annotations:
   d4d:docExample:
     tag: d4d:docExample
     value: '%'
-description: 'The unit of measurement for the variable, preferably using QUDT units
-  (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.'
+description: The unit of measurement for the variable, written as the source states
+  it — `mg/dL`, `mm Hg`, `%`, `logMAR`, `beats per minute`. A QUDT term (http://qudt.org/vocab/unit/,
+  e.g. `qudt:Kilogram`) is welcome where the source gives one, but is not required
+  and is not the usual case.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 exact_mappings:
 - qudt:hasUnit
@@ -480,7 +482,7 @@ alias: unit
 owner: VariableMetadata
 domain_of:
 - VariableMetadata
-range: uriorcurie
+range: string
 
 </code></pre>
 

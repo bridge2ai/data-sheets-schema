@@ -325,8 +325,8 @@
 </tr>
 <tr>
 <td><a href="../unit/">unit</a></td>
-<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>The unit of measurement for the variable, preferably using QUDT units (http:/...</td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>The unit of measurement for the variable, written as the source states it — `...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -539,8 +539,10 @@ attributes:
       d4d:docExample:
         tag: d4d:docExample
         value: '%'
-    description: 'The unit of measurement for the variable, preferably using QUDT
-      units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.'
+    description: The unit of measurement for the variable, written as the source states
+      it — `mg/dL`, `mm Hg`, `%`, `logMAR`, `beats per minute`. A QUDT term (http://qudt.org/vocab/unit/,
+      e.g. `qudt:Kilogram`) is welcome where the source gives one, but is not required
+      and is not the usual case.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     exact_mappings:
     - qudt:hasUnit
@@ -549,7 +551,7 @@ attributes:
     slot_uri: qudt:unit
     domain_of:
     - VariableMetadata
-    range: uriorcurie
+    range: string
   missing_value_code:
     name: missing_value_code
     annotations:
@@ -747,8 +749,10 @@ attributes:
       d4d:docExample:
         tag: d4d:docExample
         value: '%'
-    description: 'The unit of measurement for the variable, preferably using QUDT
-      units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.'
+    description: The unit of measurement for the variable, written as the source states
+      it — `mg/dL`, `mm Hg`, `%`, `logMAR`, `beats per minute`. A QUDT term (http://qudt.org/vocab/unit/,
+      e.g. `qudt:Kilogram`) is welcome where the source gives one, but is not required
+      and is not the usual case.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     exact_mappings:
     - qudt:hasUnit
@@ -759,7 +763,7 @@ attributes:
     owner: VariableMetadata
     domain_of:
     - VariableMetadata
-    range: uriorcurie
+    range: string
   missing_value_code:
     name: missing_value_code
     annotations:
