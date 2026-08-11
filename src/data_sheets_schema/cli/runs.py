@@ -505,6 +505,25 @@ def check_cmd(method, label, project, strict):
         if st in (BUNDLE_DRIFTED, BUNDLE_ABSENT):
             drifted_bundles[Path(declared).name if declared else "unknown"] += 1
 
+    # Verdict schema pins (#433). `validation_status` leaves an unpinned
+    # verdict alone, correctly — but that means VALID means two things
+    # depending on when it was written, and `d4d runs validate` will not close
+    # the gap because it skips a run already VALID. Counted so the gap is a
+    # number someone can watch shrink rather than a property nobody can see.
+    from data_sheets_schema.runs import (
+        VERDICT_ABSENT, VERDICT_PINNED, VERDICT_UNPINNED, verdict_schema_pin,
+    )
+    pins: collections.Counter = collections.Counter()
+    for r in rows:
+        pins[verdict_schema_pin(r["method"], r["label"], r["project"])] += 1
+
+    if pins[VERDICT_UNPINNED]:
+        click.echo(f"\nⓘ  {pins[VERDICT_UNPINNED]} verdict(s) name no schema "
+                   f"({pins[VERDICT_PINNED]} pinned, {pins[VERDICT_ABSENT]} "
+                   "have no verdict at all).")
+        click.echo("   An unpinned verdict is not wrong; it is unfalsifiable "
+                   "by a schema change, so it cannot go STALE.")
+
     stale = drift[BUNDLE_DRIFTED] + drift[BUNDLE_ABSENT]
     if stale:
         click.echo(f"\nⓘ  {stale} record(s) name an input bundle whose bytes "
