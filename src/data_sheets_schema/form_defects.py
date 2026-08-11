@@ -63,6 +63,15 @@ VALUE_CHARS = 100_000
 
 SUBTYPES = ("collapsed_cardinality", "hollow_object", "both", "other")
 
+#: The schema every pre-#465 sub-type label was judged against. Not a guess: the
+#: labels classify the 106 form failures in the fitness cache, every one of which
+#: is keyed `schema=34d24ff30fb6ad0f10d82af09ddc1fba`, and a failure cannot be
+#: classified against a schema its own fitness judgement was not made under.
+#: Entries written before the `schema` field existed carry none, and are honoured
+#: only when the live schema is this one — so they expire the moment the schema
+#: moves rather than silently answering for it.
+LEGACY_SCHEMA = "34d24ff30fb6ad0f10d82af09ddc1fba"
+
 FORM_SUBTYPE_SYSTEM = """\
 A value has already been judged to fail on FORM — it does not match the range
 or cardinality its field declares. You are not re-judging that. You are saying
@@ -216,6 +225,40 @@ def recorded_models(cache_path: Path) -> set[str]:
     return models
 
 
+def recorded_schemas(cache_path: Path) -> set[str]:
+    """Every schema digest the cache records for the current rubric (#465)."""
+    out: set[str] = set()
+    for line in Path(cache_path).read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        entry = json.loads(line)
+        if entry.get("rubric") == _digest(FORM_SUBTYPE_SYSTEM):
+            out.add(entry.get("schema") or LEGACY_SCHEMA)
+    return out
+
+
+def recorded_schema(cache_path: Path) -> str:
+    """The one schema the cached labels were judged against.
+
+    Same contract as `recorded_model`, and for the same reason: reproducing a
+    frozen table must run on the instrument the cache records, not on whatever
+    the working tree happens to hold. The schema moved `34d24ff3` -> `e802cdc3`
+    while these labels sat unchanged, and without this the published v1->v2
+    split stops rebuilding offline the moment anyone edits a slot description.
+
+    An entry written before the field existed counts as `LEGACY_SCHEMA`, which
+    is recoverable rather than assumed — see that constant.
+    """
+    schemas = recorded_schemas(cache_path)
+    if len(schemas) > 1:
+        raise PooledInstruments(
+            f"{cache_path} records {len(schemas)} schemas for the current "
+            f"rubric ({sorted(schemas)}); a reproduction needs exactly one.")
+    if len(schemas) != 1:
+        raise ValueError(f"{cache_path} records no schema for the current rubric")
+    return schemas.pop()
+
+
 def recorded_model(cache_path: Path) -> str:
     """The one model the cached subtype judgements were made under.
 
@@ -243,8 +286,9 @@ class FormSubtypeClassifier:
 
     def __init__(self, client=None, model: str | None = None,
                  max_tokens: int = 8000, cache_path: Path | None = None,
-                 offline: bool = False):
+                 offline: bool = False, schema: str | None = None):
         self._client, self._model = client, model
+        self._schema = schema
         self.max_tokens = max_tokens
         self.cache_path = Path(cache_path) if cache_path else None
         self.offline = offline
@@ -293,10 +337,58 @@ class FormSubtypeClassifier:
             if not line.strip():
                 continue
             entry = json.loads(line)
-            if (entry.get("rubric") == _digest(FORM_SUBTYPE_SYSTEM)
-                    and entry.get("model") == self.model):
-                self._memo[entry["key"]] = (entry["subtype"],
-                                            entry.get("reason", ""))
+            if (entry.get("rubric") != _digest(FORM_SUBTYPE_SYSTEM)
+                    or entry.get("model") != self.model):
+                continue
+            # Scoped on schema as well (#465). An entry written before this
+            # field existed carries none; it is admitted only when the live
+            # schema is the one it was demonstrably judged against, which
+            # `stamp_legacy_schema` records rather than assumes.
+            recorded = entry.get("schema")
+            if recorded is not None and recorded != self.schema:
+                continue
+            if recorded is None and self.schema != LEGACY_SCHEMA:
+                continue
+            self._memo[entry["key"]] = (entry["subtype"],
+                                        entry.get("reason", ""))
+
+    @property
+    def schema(self) -> str:
+        """The schema digest the labels are scoped to (#465).
+
+        The classifier's question — does this value populate the fields its
+        declared range declares? — is asked with `slot_spec()` in the prompt,
+        and `slot_spec` renders the *live* schema. So a label is a function of
+        the schema, exactly as a fitness judgement is, and the fitness cache is
+        keyed on it for that reason.
+
+        This cache was not. `Organization.id` becoming optional (#382) can turn
+        a hollow object into a well-formed one without changing a byte of the
+        value, so an unscoped key returns a verdict reached against a
+        specification that no longer exists.
+        """
+        if self._schema is None:
+            self._schema = self._default_schema()
+        return self._schema
+
+    def _default_schema(self) -> str:
+        """The schema the cache records, falling back to the live one.
+
+        Cache first, exactly as for the model (#462). A populated cache is a
+        frozen measurement and reproducing it must not depend on the working
+        tree; an empty one — which is what `--cache <new path>` gives, and what
+        the analysis plan tells a new arm to use — has nothing to reproduce and
+        correctly takes the live schema.
+        """
+        if self.cache_path and Path(self.cache_path).exists():
+            try:
+                return recorded_schema(self.cache_path)
+            except PooledInstruments:
+                raise
+            except (ValueError, OSError):
+                pass
+        from data_sheets_schema import schema_digest
+        return schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
 
     def _save(self, key: str, slot: str, subtype: str, reason: str) -> None:
         if not self.cache_path:
@@ -305,6 +397,7 @@ class FormSubtypeClassifier:
         with self.cache_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"rubric": _digest(FORM_SUBTYPE_SYSTEM),
                                  "model": self.model, "chars": VALUE_CHARS,
+                                 "schema": self.schema,
                                  "key": key, "slot": slot,
                                  "subtype": subtype, "reason": reason}) + "\n")
 

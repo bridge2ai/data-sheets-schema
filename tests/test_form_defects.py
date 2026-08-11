@@ -17,6 +17,7 @@ from data_sheets_schema.form_defects import (
     FORM_SUBTYPE_SYSTEM,
     SUBTYPES,
     FormFailure,
+    LEGACY_SCHEMA,
     FormSubtypeClassifier,
     PooledInstruments,
     _parse_subtype,
@@ -28,6 +29,7 @@ from data_sheets_schema.form_defects import (
     main,
     recorded_model,
     recorded_models,
+    recorded_schema,
     table,
 )
 
@@ -310,6 +312,97 @@ class TestDefaultInstrument(unittest.TestCase):
         self._pool()
         with self.assertRaises(ValueError):
             recorded_model(self.path)
+
+
+class TestSchemaScoping(unittest.TestCase):
+    """A sub-type label is a function of the schema, so the key must carry it.
+
+    `slot_spec()` renders the live schema into the classifier prompt, and the
+    question is "does this value populate the fields its declared range
+    declares?". `Organization.id` becoming optional (#382) can turn a hollow
+    object into a well-formed one without changing a byte of the value — so an
+    unscoped key returns a verdict reached against a specification that no
+    longer exists (#465).
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.path = Path(self.tmp.name) / "subtypes.jsonl"
+
+    def _write(self, schema, key="k1", model="m"):
+        entry = {"rubric": _digest(FORM_SUBTYPE_SYSTEM), "model": model,
+                 "chars": 4000, "key": key, "slot": "s",
+                 "subtype": "hollow_object", "reason": ""}
+        if schema is not None:
+            entry["schema"] = schema
+        self.path.write_text(json.dumps(entry) + "\n", encoding="utf-8")
+
+    def test_a_label_from_another_schema_is_not_reused(self):
+        self._write("aaaa1111")
+        c = FormSubtypeClassifier(cache_path=self.path, model="m",
+                                  schema="bbbb2222", offline=True)
+        self.assertEqual(len(c._memo), 0)
+
+    def test_a_label_from_the_same_schema_is_reused(self):
+        self._write("aaaa1111")
+        c = FormSubtypeClassifier(cache_path=self.path, model="m",
+                                  schema="aaaa1111", offline=True)
+        self.assertEqual(len(c._memo), 1)
+
+    def test_the_schema_is_recorded_on_write(self):
+        c = FormSubtypeClassifier(cache_path=self.path, model="m",
+                                  schema="cccc3333")
+        c._save("k", "s", "both", "r")
+        written = json.loads(self.path.read_text().splitlines()[0])
+        self.assertEqual(written["schema"], "cccc3333")
+
+    def test_a_pre_465_entry_is_honoured_only_at_the_legacy_schema(self):
+        """Entries written before the field existed carry no schema.
+
+        They are admitted at LEGACY_SCHEMA — recoverable, not assumed: every
+        fitness judgement they classify is keyed to that digest, and a failure
+        cannot be classified against a schema its own judgement was not made
+        under. At any other schema they expire rather than answer for it.
+        """
+        self._write(None)
+        at_legacy = FormSubtypeClassifier(cache_path=self.path, model="m",
+                                          schema=LEGACY_SCHEMA, offline=True)
+        self.assertEqual(len(at_legacy._memo), 1)
+        elsewhere = FormSubtypeClassifier(cache_path=self.path, model="m",
+                                          schema="e802cdc3", offline=True)
+        self.assertEqual(len(elsewhere._memo), 0)
+
+    def test_the_cache_pins_the_schema_for_reproduction(self):
+        """Same contract as recorded_model: reproduce on the recorded instrument.
+
+        Without this the published v1->v2 split stops rebuilding offline the
+        moment anyone edits a slot description, because the live digest moves
+        and every label falls out of scope.
+        """
+        self._write("aaaa1111")
+        c = FormSubtypeClassifier(cache_path=self.path, model="m", offline=True)
+        self.assertEqual(c.schema, "aaaa1111")
+        self.assertEqual(len(c._memo), 1)
+
+    def test_an_empty_cache_takes_the_live_schema(self):
+        """What `--cache <new path>` gives a new arm: nothing to reproduce."""
+        c = FormSubtypeClassifier(cache_path=Path(self.tmp.name) / "new.jsonl",
+                                  model="m", offline=True)
+        from data_sheets_schema import schema_digest
+        self.assertEqual(
+            c.schema,
+            schema_digest.fingerprint(schema_digest.digest_text("Dataset")))
+
+    def test_two_schemas_in_one_cache_refuse(self):
+        self.path.write_text("\n".join(
+            json.dumps({"rubric": _digest(FORM_SUBTYPE_SYSTEM), "model": "m",
+                        "chars": 4000, "key": f"k{i}", "slot": "s",
+                        "subtype": "other", "reason": "", "schema": sc})
+            for i, sc in enumerate(["aaaa1111", "bbbb2222"])) + "\n",
+            encoding="utf-8")
+        with self.assertRaises(PooledInstruments):
+            recorded_schema(self.path)
 
 
 class TestFolded(unittest.TestCase):
