@@ -317,6 +317,34 @@ def table(classified: list[tuple[FormFailure, str, str]]) -> dict[str, dict[str,
     return {s: dict(c) for s, c in counts.items()}
 
 
+#: The two named subtypes, each folded to include the `both` bucket. A value
+#: classified `both` exhibits *each* defect, so it counts once toward each —
+#: which is why these two figures legitimately sum to more than the total.
+FOLDED_SUBTYPES = ("collapsed_cardinality", "hollow_object")
+
+
+def folded(counts: dict[str, dict[str, int]]) -> dict[str, dict[str, int]]:
+    """Fold `both` into each named subtype — the repo's reporting convention.
+
+    Every headline figure quoted for the v1→v2 comparison is folded this way
+    (collapsed cardinality 34 + 8 = 42 -> 2 + 5 = 7; hollow object 0 + 8 = 8 ->
+    45 + 5 = 50). The convention lived only in the prose of
+    `notes/form_defect_split_2026-08-03.md`, so an arm counted from the raw
+    `table()` compared against a baseline short by the whole `both` bucket —
+    larger than several of the effects being claimed (#461).
+
+    Reported alongside the raw table rather than replacing it: `both` is a real
+    classification and collapsing it away would hide how often the two defects
+    co-occur.
+    """
+    out: dict[str, dict[str, int]] = {}
+    for subtype in FOLDED_SUBTYPES:
+        merged = collections.Counter(counts.get(subtype, {}))
+        merged.update(counts.get("both", {}))
+        out[subtype] = dict(merged)
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--judgement-cache", type=Path, default=JUDGEMENT_CACHE)
@@ -348,6 +376,15 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{'total':<{width}} "
           + " ".join(f"{sum(counts[s].get(c, 0) for s in SUBTYPES):>6}"
                      for c in configs))
+
+    merged = folded(counts)
+    print(f"\nfolded — `both` counted toward each named subtype (#461);"
+          f" these do not sum to the total above")
+    for subtype in FOLDED_SUBTYPES:
+        row = merged[subtype]
+        print(f"{subtype:<{width}} "
+              + " ".join(f"{row.get(c, 0):>6}" for c in configs))
+
     print(f"\n{classifier.calls} call(s), {classifier.memo_hits} cached",
           file=sys.stderr)
     return 0

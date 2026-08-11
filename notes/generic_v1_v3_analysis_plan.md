@@ -80,7 +80,7 @@ Against the v1 arm, under v3:
 1. **Hollow objects fall.** v3's rule 4 names this defect directly and is the
    only rule that does. This is the outcome that would justify promotion.
 2. **Collapsed cardinality falls.** v3 contains v2's rule 1, and v1 contains no
-   cardinality rule. The v1→v2 measurement put this at 42 → 7.
+   cardinality rule. The v1→v2 measurement put this at 42 → 7 (−83%).
 3. **The `form` total falls.** It is the sum of 1 and 2, both predicted down.
    This is the figure that moved the *wrong way* on v1→v2 (50 → 56) while both
    its components were changing, which is why the split had to come first.
@@ -110,6 +110,33 @@ the prompt.
 Fitness scoring, then `python -m data_sheets_schema.form_defects` for the
 sub-type breakdown. Neither rubric is edited, so cached labels stay valid *for
 their own key*.
+
+### Counting convention — fixed here so the arms are comparable
+
+`form_defects` classifies each form failure into `collapsed cardinality`,
+`hollow object`, `both`, or `other`. **Subtype totals fold the `both` bucket
+into each of the two named subtypes**, which is how the v1→v2 headline figures
+were derived:
+
+```
+collapsed cardinality:  34 + 8 = 42  →  2 + 5 = 7
+hollow object:           0 + 8 =  8  → 45 + 5 = 50
+```
+
+This convention is stated nowhere else in the repo (#461) and is not optional
+here: counted *excluding* `both`, the v1 collapsed-cardinality baseline is 34
+rather than 42, and the arms differ by the size of that bucket — 8 values on v1,
+5 on v2 — which is larger than several of the effects this comparison is trying
+to see.
+
+The v1 arm generated here supplies its own baseline, so the v1→v2 numbers above
+are context rather than the comparison. They are quoted to fix the *convention*,
+not the values.
+
+Two further figures in circulation are the **manual read** (collapsed
+cardinality 27 → 0, hollow object 2 → 33) that the classifier superseded. Do not
+mix them with classifier output; `notes/form_defect_split_2026-08-03.md` keeps
+both and explains why they differ.
 
 ⚠️ **No cached judgement is reusable here.** All 1441 existing fitness
 judgements are keyed `(34d24ff3, google/claude-opus-5-high)`. Every record in

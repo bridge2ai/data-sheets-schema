@@ -11,12 +11,14 @@ from pathlib import Path
 
 from data_sheets_schema.agreement import OfflineCacheMiss, _digest
 from data_sheets_schema.form_defects import (
+    FOLDED_SUBTYPES,
     FORM_SUBTYPE_SYSTEM,
     SUBTYPES,
     FormFailure,
     FormSubtypeClassifier,
     _parse_subtype,
     attribute,
+    folded,
     load_form_failures,
     recorded_model,
     table,
@@ -121,6 +123,85 @@ class TestTable(unittest.TestCase):
         """A missing row and a zero row read differently."""
         counts = table([])
         self.assertEqual(set(counts), set(SUBTYPES))
+
+
+class TestFolded(unittest.TestCase):
+    """`both` counts toward each named subtype — the reporting convention.
+
+    It lived only in the prose of `notes/form_defect_split_2026-08-03.md`, so an
+    arm counted from the raw table compared against a baseline short by the
+    whole `both` bucket (#461).
+    """
+
+    def test_both_counts_toward_each_named_subtype(self):
+        counts = {
+            "collapsed_cardinality": {"v1": 34, "v2": 2},
+            "hollow_object": {"v1": 0, "v2": 45},
+            "both": {"v1": 8, "v2": 5},
+            "other": {"v1": 8, "v2": 4},
+        }
+        merged = folded(counts)
+        self.assertEqual(merged["collapsed_cardinality"], {"v1": 42, "v2": 7})
+        self.assertEqual(merged["hollow_object"], {"v1": 8, "v2": 50})
+
+    def test_the_published_headline_figures_are_reproduced(self):
+        """42 -> 7 and 8 -> 50 are what the note reports; pin them to the code.
+
+        Neither figure appears in either of the note's own tables, because both
+        fold `both` in. Anyone re-deriving them from the raw table gets 34 -> 2
+        and 0 -> 45 and a comparison wrong by the size of that bucket.
+        """
+        counts = {
+            "collapsed_cardinality": {"v1": 34, "v2": 2},
+            "hollow_object": {"v1": 0, "v2": 45},
+            "both": {"v1": 8, "v2": 5},
+            "other": {"v1": 8, "v2": 4},
+        }
+        merged = folded(counts)
+        self.assertEqual(
+            (merged["collapsed_cardinality"]["v1"],
+             merged["collapsed_cardinality"]["v2"]), (42, 7))
+        self.assertEqual(
+            (merged["hollow_object"]["v1"], merged["hollow_object"]["v2"]),
+            (8, 50))
+
+    def test_folded_subtypes_may_exceed_the_total(self):
+        """A `both` value exhibits each defect, so it is counted twice on purpose.
+
+        Asserted rather than left implicit: a reader who checks the folded rows
+        against the total and finds them larger should find that documented as
+        intent, not discover it as a suspected double-count.
+        """
+        counts = {
+            "collapsed_cardinality": {"v1": 1},
+            "hollow_object": {"v1": 1},
+            "both": {"v1": 10},
+            "other": {"v1": 0},
+        }
+        merged = folded(counts)
+        total = sum(v.get("v1", 0) for v in counts.values())
+        folded_sum = sum(merged[s].get("v1", 0) for s in FOLDED_SUBTYPES)
+        self.assertEqual(total, 12)
+        self.assertEqual(folded_sum, 22)
+        self.assertGreater(folded_sum, total)
+
+    def test_a_missing_both_bucket_is_not_an_error(self):
+        merged = folded({"collapsed_cardinality": {"v1": 3},
+                         "hollow_object": {"v1": 1}})
+        self.assertEqual(merged["collapsed_cardinality"], {"v1": 3})
+        self.assertEqual(merged["hollow_object"], {"v1": 1})
+
+    def test_folding_does_not_mutate_the_raw_counts(self):
+        """The raw table stays reportable — `both` is a real classification."""
+        counts = {
+            "collapsed_cardinality": {"v1": 34},
+            "hollow_object": {"v1": 0},
+            "both": {"v1": 8},
+            "other": {"v1": 8},
+        }
+        folded(counts)
+        self.assertEqual(counts["collapsed_cardinality"], {"v1": 34})
+        self.assertEqual(counts["both"], {"v1": 8})
 
 
 @unittest.skipUnless(JUDGEMENTS.exists(), "judgement cache not present")

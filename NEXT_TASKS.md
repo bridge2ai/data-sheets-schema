@@ -184,11 +184,23 @@ It validated on the headline, and the breakdown says to read that carefully:
 | target | 41 → 16 | −61% |
 | **form** | **50 → 56** | **worse** |
 
-Rule 1 eliminated the defect it named — collapsed cardinality **27 → 0** — and
-produced a different one under the same label: **hollow objects 2 → 33**, one
-object per entity exactly as instructed, with everything crammed into free-text
-`description` while `name`, `id`, `affiliations`, `start_date`, `end_date` go
-unused. `collection_timeframes` newly fails form in all four projects;
+Rule 1 eliminated the defect it named — collapsed cardinality **42 → 7**, −83% —
+and produced a different one under the same label: **hollow objects 8 → 50**,
+one object per entity exactly as instructed, with everything crammed into
+free-text `description` while `name`, `id`, `affiliations`, `start_date`,
+`end_date` go unused.
+
+⚠️ These are the **classifier** figures from
+`notes/form_defect_split_2026-08-03.md`, and they **include the `both` bucket**
+(collapsed cardinality 34 + 8 = 42 → 2 + 5 = 7; hollow object 0 + 8 = 8 →
+45 + 5 = 50). An arm counted excluding `both` compares against a baseline of 34,
+not 42, and is wrong by more than several of the effects being claimed (#461).
+
+Earlier revisions of this section quoted **27 → 0** and **2 → 33**. Those are
+the note's *manual read*, which the classifier superseded — the note keeps both
+and explains the difference as boundary-drawing, the human retreating to
+"unclear" (37 in `other`) where a judge asked one question per value does not
+(12). The manual read is why the split was built; it is not the measurement. `collection_timeframes` newly fails form in all four projects;
 `creators`, `distribution_formats`, `distribution_dates` in three. Systematic,
 not sampling noise.
 
