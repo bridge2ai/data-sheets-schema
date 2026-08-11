@@ -3,6 +3,12 @@
 import click
 from pathlib import Path
 
+#: The effort ladder, duplicated here so the CLI keeps its lazy imports and
+#: does not pull in `provenance` just to build a decorator. It is the same
+#: vocabulary `_effort_from_route` matches routes against, and
+#: `test_effort_ladder_matches_the_recorder` fails if the two drift apart.
+EFFORT_CHOICES = ("minimal", "low", "medium", "high")
+
 
 @click.group()
 def provenance():
@@ -26,10 +32,15 @@ def provenance():
                    'The file is what an instruction was built from; this is '
                    'what it became.')
 @click.option('--reasoning-effort', 'reasoning_effort', default=None,
+              type=click.Choice(EFFORT_CHOICES),
               help='Reasoning effort this run was launched at, where the '
                    'runtime does not expose it. Recorded as asserted, not '
                    'observed. Omit it rather than guessing: an absent effort '
-                   'is reported as a gap, and "default" is not a value.')
+                   'is reported as a gap, and "default" is not a value — the '
+                   'choice list refuses it rather than trusting the reader '
+                   '(#450), because `PLACEHOLDER_VALUES` in runs.py would '
+                   'discard it downstream and the record and the analysis '
+                   'would then disagree.')
 def record(project, method, label, input_bundle, prompts, prompt_text,
            reasoning_effort):
     """Write a LIVE provenance record for a run just produced.

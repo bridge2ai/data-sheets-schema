@@ -742,6 +742,18 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # claim from a run whose effort is unknown.
     if not model.get("reasoning_effort"):
         derived, basis = _effort_from_route(model.get("model"))
+        if derived and reasoning_effort and derived != reasoning_effort:
+            # Keep the route — it is evidence and the flag is a claim — but do
+            # not erase the disagreement (#451). Either the run was launched
+            # against a route the operator did not intend, or the operator's
+            # account of the run is wrong; both are worth catching, and a
+            # silent preference reports neither. Same shape as the model
+            # mismatch note below.
+            notes.append(
+                f"Reasoning effort mismatch: the route {model.get('model')!r} "
+                f"names {derived!r} while the launcher passed "
+                f"{reasoning_effort!r}. The route is recorded; the launcher's "
+                "value is not what this run ran at.")
         if derived:
             model["reasoning_effort"] = derived
             model["reasoning_effort_basis"] = basis
@@ -767,11 +779,38 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                            "is not comparable with a run that named one."),
             })
     elif (model.get("agent_runtime") or "").strip().lower() == "claude code":
-        # Same standing as the temperature it sits beside: written because a
-        # human told the agent to write it, not read from anything the runtime
-        # exposes.
-        model.setdefault("reasoning_effort_basis",
-                         "asserted by the generating agent, not observed")
+        # Not the same standing as the temperature it sits beside (#449). The
+        # Claude Code runtime exposes no temperature knob, so that header value
+        # can only ever be a restatement of the prompt template. It *does*
+        # expose reasoning effort, as `CLAUDE_EFFORT` — the 2026-08-07 sweep's
+        # agents were told where to read the value, not what value to write.
+        #
+        # Corroborate rather than substitute. `d4d provenance record` can be
+        # run from a different session than the one that generated the record,
+        # and reading the variable unconditionally would assert the recording
+        # session's effort as the generating run's. So the environment can only
+        # confirm a header value, never supply or overwrite one.
+        env_effort = (os.environ.get("CLAUDE_EFFORT") or "").strip().lower()
+        header_effort = str(model["reasoning_effort"]).strip().lower()
+        if env_effort and env_effort == header_effort:
+            model.setdefault("reasoning_effort_basis",
+                             "observed: matches CLAUDE_EFFORT in the recording "
+                             "runtime, which is where the generating agent read it")
+        elif env_effort:
+            model.setdefault("reasoning_effort_basis",
+                             "asserted by the generating agent, not observed")
+            unverified.append({
+                "field": "model.reasoning_effort",
+                "value": model["reasoning_effort"],
+                "reason": (f"the header says {header_effort!r} while "
+                           f"CLAUDE_EFFORT reads {env_effort!r} here. Those "
+                           "disagree, but this recorder may be a different "
+                           "session than the one that generated the record, so "
+                           "the environment does not settle it."),
+            })
+        else:
+            model.setdefault("reasoning_effort_basis",
+                             "asserted by the generating agent, not observed")
 
     cfg = load_generation_config()
     declared = (cfg.get("model") or {}) if isinstance(cfg, dict) else {}

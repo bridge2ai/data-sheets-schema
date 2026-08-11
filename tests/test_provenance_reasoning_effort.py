@@ -21,6 +21,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import yaml
 
@@ -145,15 +146,58 @@ class TestWhatTheRecordSays(unittest.TestCase):
         data = self._record(reasoning_effort="low")
         self.assertEqual("high", data["model"]["reasoning_effort"])
 
-    def test_a_header_value_from_claude_code_is_marked_asserted(self):
-        """The 2026-08-07 sweep's `high` came from a human instruction, exactly
-        as its temperature did. Same standing, same label."""
+    def test_the_flag_disagreeing_with_the_route_is_recorded_not_erased(self):
+        """Keeping the route silently would hide the more interesting fact:
+        somebody believed this run ran at an effort it did not run at (#451)."""
+        self._write("google/claude-opus-5-high")
+        data = self._record(reasoning_effort="low")
+        self.assertEqual("high", data["model"]["reasoning_effort"])
+        notes = " ".join(data.get("notes") or [])
+        self.assertIn("Reasoning effort mismatch", notes)
+        self.assertIn("'high'", notes)
+        self.assertIn("'low'", notes)
+
+    def test_an_agreeing_flag_produces_no_mismatch_note(self):
+        self._write("google/claude-opus-5-high")
+        data = self._record(reasoning_effort="high")
+        self.assertNotIn("Reasoning effort mismatch",
+                         " ".join(data.get("notes") or []))
+
+    def test_claude_code_effort_is_asserted_when_the_environment_is_silent(self):
+        """With no `CLAUDE_EFFORT` to corroborate it, a header value is only a
+        restatement of whatever the agent was told to write."""
         self._write("claude-opus-5", runtime="Claude Code", effort="high")
-        model = self._record()["model"]
+        with mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("CLAUDE_EFFORT", None)
+            model = self._record()["model"]
         self.assertEqual("high", model["reasoning_effort"])
         self.assertEqual("asserted by the generating agent, not observed",
                          model["reasoning_effort_basis"])
-        self.assertEqual([], self._gap(self._record()))
+
+    def test_claude_code_effort_is_observed_when_the_environment_agrees(self):
+        """The runtime *does* expose effort (#449). Where the header and
+        `CLAUDE_EFFORT` agree, the value was read rather than asserted — unlike
+        the temperature beside it, which the runtime exposes no knob for."""
+        self._write("claude-opus-5", runtime="Claude Code", effort="high")
+        with mock.patch.dict(os.environ, {"CLAUDE_EFFORT": "high"}):
+            data = self._record()
+        self.assertEqual("high", data["model"]["reasoning_effort"])
+        self.assertIn("observed", data["model"]["reasoning_effort_basis"])
+        self.assertIn("CLAUDE_EFFORT", data["model"]["reasoning_effort_basis"])
+        self.assertEqual([], self._gap(data))
+
+    def test_a_disagreeing_environment_does_not_settle_it_either_way(self):
+        """The recorder may be a different session than the generator, so a
+        mismatch is reported and neither value is overwritten."""
+        self._write("claude-opus-5", runtime="Claude Code", effort="high")
+        with mock.patch.dict(os.environ, {"CLAUDE_EFFORT": "low"}):
+            data = self._record()
+        self.assertEqual("high", data["model"]["reasoning_effort"])
+        self.assertEqual("asserted by the generating agent, not observed",
+                         data["model"]["reasoning_effort_basis"])
+        gap = self._gap(data)
+        self.assertEqual(1, len(gap))
+        self.assertIn("disagree", gap[0]["reason"])
 
     def test_the_gap_does_not_change_attestation(self):
         """Reporting a gap must not retroactively downgrade runs. Effort is not
@@ -213,9 +257,27 @@ class TestTheCLIFlag(unittest.TestCase):
         self.assertTrue(any(u.get("field") == "model.reasoning_effort"
                             for u in data.get("unverified") or []))
 
+    def test_the_placeholder_values_the_help_forbids_are_refused(self):
+        """The help said "default" is not a value and nothing enforced it
+        (#450). A record carrying it would disagree with
+        `procedure_fingerprint`, which discards exactly these strings."""
+        for banned in ("default", "n/a", "unspecified", "not applicable"):
+            with self.subTest(banned=banned):
+                r = self._run("--reasoning-effort", banned)
+                self.assertNotEqual(0, r.exit_code)
+                self.assertFalse(self.out.exists(),
+                                 "a refused effort must not write a record")
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_a_misspelled_effort_is_refused_rather_than_recorded(self):
+        r = self._run("--reasoning-effort", "hgih")
+        self.assertNotEqual(0, r.exit_code)
+
+    def test_effort_ladder_matches_the_recorder(self):
+        """The CLI duplicates the ladder to keep its imports lazy. If the two
+        drift, the flag and the route parser accept different vocabularies."""
+        from data_sheets_schema.cli.provenance import EFFORT_CHOICES
+        self.assertEqual(tuple(provenance._EFFORT_LADDER),
+                         tuple(EFFORT_CHOICES))
 
 
 class TestTheGapIsVisibleFromTheCommandLine(unittest.TestCase):
@@ -280,3 +342,7 @@ class TestTheGapIsVisibleFromTheCommandLine(unittest.TestCase):
             self.assertNotIn("not observed", line)
             self.assertNotIn("reasoning_effort", line)
         self.assertIn("recorded but not observed", r.output)
+
+
+if __name__ == "__main__":
+    unittest.main()
