@@ -474,7 +474,8 @@ Acted on the same day:
 | the launch prompt was typed, not rendered | #419, #422 | **addressed** (#425) |
 | label says `generic-v3`, provenance hashes v1 | #420 | open |
 | `verification_url` still injected; 0 values depend on it | #427 | open, cosmetic |
-| a verdict does not pin the schema it was reached against | #426 | open |
+| a verdict does not pin the schema it was reached against | #426 | **fixed** |
+| the render gate cannot see an edit made *before* rendering | #432 | **closed** |
 
 **What #424 caught.** 4 values in the canonical sweep were grounded only by a
 curation note, all the same DOI — `10.60775/fairhub.4`, cited by AI_READI
@@ -483,12 +484,18 @@ document**; the manifest mentions it only to say it was *not* captured. All five
 bundle hashes changed; `source_manifest.yaml: bundle_hash_history` maps
 before/after, because 55 provenance records reference the old ones.
 
-**What is left, and it is the load-bearing one.** Rendering makes intervention
-*avoidable*, not *impossible* — nothing yet checks that an agentic record's
-`prompts.request` hash matches what its spec would render. That gate is what
-turns "do not intervene" from a rule into something detectable, and it is cheap
-now the field exists. `.claude/` playbooks still carry decision rules and are
-still hashed nowhere (#420).
+**What was left, and is now built.** Rendering made intervention *avoidable*;
+the render gate (#429) made an instruction edited after rendering *detectable*;
+the canonical prompt registry (#432) closes the remaining direction — an edit
+made to the prompt file *before* rendering, which re-renders to itself and
+reports `match`. Three comparisons now: the recorded instruction, a fresh
+render, and the hash this repo declared for that condition
+(`src/download/prompts/canonical_hashes.yaml`).
+
+The registry is not tamper-proofing and does not claim to be — anyone who can
+edit a prompt can rotate its pin. What it buys is that the two are separate,
+deliberate acts, and a rotation leaves a dated line with a stated reason in a
+small file, rather than a paragraph inside a 200-line prompt.
 
 ---
 

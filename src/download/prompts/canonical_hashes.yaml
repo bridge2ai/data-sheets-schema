@@ -1,0 +1,85 @@
+# Canonical hashes for the prompt files the study's conditions are defined by.
+#
+# Written by `d4d api prompts pin`, read by `d4d api prompts check` (the repo
+# gate) and by `d4d runs check` (the record gate). See
+# src/data_sheets_schema/prompt_registry.py for what each status means and,
+# just as importantly, what this file does not prove.
+#
+# Editing a prompt file without rotating its pin fails
+# tests/test_prompt_registry.py. That is the point: the edit and the
+# declaration that it is the new canonical text are two acts, and the second
+# one is small enough to read.
+files:
+  src/download/prompts/components/AI_READI.md:
+    bytes: 1203
+    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
+    pinned_on: '2026-08-10'
+    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
+      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+      retroactively.'
+    sha256: 553f8d5b6a713d5e919fa33677c4d2bfeb209cd486a75db91851728f49c7b030
+  src/download/prompts/components/CHORUS.md:
+    bytes: 1233
+    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
+    pinned_on: '2026-08-10'
+    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
+      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+      retroactively.'
+    sha256: f697cd7d78c2de0e88519e5d80894a35a6f3388042500ed60c567fd4b6fe61a2
+  src/download/prompts/components/CM4AI.md:
+    bytes: 1165
+    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
+    pinned_on: '2026-08-10'
+    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
+      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+      retroactively.'
+    sha256: 849d68be5654ead54d5be8fad3646bbd809616f6d4abef0b2be78eae08ddcb79
+  src/download/prompts/components/VOICE.md:
+    bytes: 1294
+    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
+    pinned_on: '2026-08-10'
+    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
+      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+      retroactively.'
+    sha256: 07b59ca750a1d24ef7c7eb42d310fbfa064ddf300b4cd118383aaaebb9074186
+  src/download/prompts/d4d_generic_arm_prompt.md:
+    bytes: 5754
+    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
+    pinned_on: '2026-08-10'
+    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
+      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+      retroactively.'
+    sha256: 0fbc626bc3a51d74a8ba3d8e2813752f3bc5ce9366ee5f19c99089afdfd9e8dc
+  src/download/prompts/d4d_generic_arm_prompt_v2.md:
+    bytes: 9110
+    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
+    pinned_on: '2026-08-10'
+    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
+      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+      retroactively.'
+    sha256: 4780613475ef2a629f98b69a934228b58eccd5fe93915fcd259a62cff6583de6
+  src/download/prompts/d4d_generic_arm_prompt_v3.md:
+    bytes: 7204
+    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
+    pinned_on: '2026-08-10'
+    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
+      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+      retroactively.'
+    sha256: 2126da06d0834c2501c55fe9838720fe3ee33ab38c4775f2af329bc4759da45a
+  src/download/prompts/d4d_generic_arm_prompt_v4.md:
+    bytes: 7670
+    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
+    pinned_on: '2026-08-10'
+    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
+      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+      retroactively.'
+    sha256: a47e61b52c05a0aa81c2a8629be551942ab2e6e24a39d11dc75ba96ef5b3482a
+  src/download/prompts/d4d_tuned_arm_prompt.md:
+    bytes: 2877
+    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
+    pinned_on: '2026-08-10'
+    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
+      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+      retroactively.'
+    sha256: 41dd2fd7e970abb0c54419b067d36bd77fdf1360dc17888ccb09f79f0d4f32c0
+hash_algorithm: sha256
