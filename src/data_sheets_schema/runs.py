@@ -1039,6 +1039,15 @@ def bundle_drift_detail(method: str, label: str, project: str,
     the provenance record or parse the path back out of a human-readable
     reason string.
     """
+    # Deliberately un-memoised (#469). Hashing once per record rather than once
+    # per bundle is ~20x redundant — 158 records against 12 distinct bundles —
+    # and costs 0.77s for a full sweep. A path-keyed cache would report
+    # `current` for a file that drifted after its first read, which is the exact
+    # failure this function exists to detect; `(path, size, mtime_ns)` narrows
+    # that window without closing it, since a same-size edit within one
+    # filesystem tick is both plausible for generated bundles and silent. If the
+    # corpus ever makes this cost real, scope a cache to a single sweep and pass
+    # it in, so it cannot outlive the invocation that built it.
     import hashlib
 
     from data_sheets_schema.provenance import record_path_for

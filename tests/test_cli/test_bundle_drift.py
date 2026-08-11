@@ -69,6 +69,20 @@ class TestBundleDrift(unittest.TestCase):
         self.assertEqual(status, BUNDLE_DRIFTED)
         self.assertIn("now hashes", reason)
 
+    def test_a_change_after_a_first_read_is_still_detected(self):
+        """Guards the decision not to memoise the hash (#469).
+
+        The obvious optimisation is to cache the md5 by path — 158 records hash
+        12 distinct bundles. A path-keyed cache would answer `current` here on
+        the second call, which is precisely the drift the function exists to
+        detect. Two calls either side of an edit, so the guard fires if anyone
+        adds one.
+        """
+        self._write(content=b"before")
+        self.assertEqual(self._status()[0], BUNDLE_CURRENT)
+        self.bundle.write_bytes(b"after!")          # same length, new bytes
+        self.assertEqual(self._status()[0], BUNDLE_DRIFTED)
+
     def test_a_single_byte_is_enough(self):
         """Not a heuristic — the record pins an md5, so any edit drifts it."""
         self._write(content=b"aaaa")
