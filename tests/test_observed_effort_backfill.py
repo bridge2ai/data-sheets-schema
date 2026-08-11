@@ -125,6 +125,36 @@ class TestObservedEffortBackfill(unittest.TestCase):
         self.path.write_text("this: [is: not: valid", encoding="utf-8")
         self.assertIsNone(observed_effort_gap(self.path))
 
+    def test_undecodable_bytes_are_skipped_too(self):
+        """A different code path from bad YAML, and only one was covered (#472).
+
+        `read_text` raises UnicodeDecodeError before the parser is reached, so
+        a `except yaml.YAMLError` guard lets it through and the sweep dies on
+        record N of 162 — under --execute, partway through writing.
+        """
+        self.path.write_bytes(b"\xff\xfe\x00 model: not utf-8")
+        self.assertIsNone(observed_effort_gap(self.path))
+
+    def test_an_unreadable_path_is_skipped(self):
+        """A directory where a file is expected raises OSError, not YAMLError."""
+        directory = Path(self.tmp.name) / "a_directory.yaml"
+        directory.mkdir()
+        self.assertIsNone(observed_effort_gap(directory))
+
+    def test_the_write_leaves_no_temp_file_behind(self):
+        """Atomic via rename, so a record is its old bytes or its new ones.
+
+        Unlike `Record.write`, which creates a record for a run that just
+        happened, this mutates records that already exist and are attested — a
+        truncated write here destroys provenance rather than failing to add it.
+        """
+        self._write({"model": "google/claude-opus-5-high"})
+        apply_observed_effort(self.path)
+        strays = [p.name for p in Path(self.tmp.name).iterdir()
+                  if p.name != self.path.name]
+        self.assertEqual(strays, [])
+        self.assertEqual(self._load()["model"]["reasoning_effort"], "high")
+
     def test_applying_twice_is_a_no_op(self):
         self._write({"model": "google/claude-opus-5-high"})
         self.assertIsNotNone(apply_observed_effort(self.path))

@@ -252,7 +252,13 @@ def observed_effort_gap(path: Path) -> dict[str, Any] | None:
         return None
     try:
         data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    except yaml.YAMLError:
+    except (yaml.YAMLError, OSError, UnicodeDecodeError):
+        # All three, not just YAMLError (#472). This runs once per record over
+        # 162 records, so one unreadable file aborting the pass is the failure
+        # #444 fixed for the scope sweep — and it is worse under --execute,
+        # which writes as it goes and would stop partway with no report of
+        # where. `read_text` raises OSError and UnicodeDecodeError, neither of
+        # which YAMLError covers.
         return None
     model = data.get("model")
     if not isinstance(model, dict):
@@ -290,9 +296,18 @@ def apply_observed_effort(path: Path) -> dict[str, Any] | None:
     data = yaml.safe_load(text) or {}
     data["model"]["reasoning_effort"] = change["effort"]
     data["model"]["reasoning_effort_basis"] = change["basis"]
-    path.write_text(
+
+    # Written atomically, unlike `Record.write`, and the difference is the
+    # point: that method creates a record for a run that just happened, so a
+    # failed write loses something not yet relied on. This mutates 49 records
+    # that already exist and are already attested — a truncated write here
+    # destroys provenance rather than failing to add it. Rename is atomic
+    # within a filesystem, so a record is either its old bytes or its new ones.
+    new = path.with_suffix(path.suffix + ".tmp")
+    new.write_text(
         preamble + yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
         encoding="utf-8")
+    new.replace(path)
     return change
 
 
