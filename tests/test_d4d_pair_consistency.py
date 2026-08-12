@@ -41,13 +41,24 @@ class TestD4DPairConsistency(unittest.TestCase):
     #: Went 76 -> 78 when `notes` and `source_caveats` were added to the base
     #: class in f192c34f (#385). Both are genuinely shared and genuinely
     #: identical, so the count was stale rather than the schema wrong.
+    #:
+    #: Went 78 -> 80 when `data_governance` and `related_datasets` reached
+    #: `CoreDataset` (#510). Identity is the right relation for both: they
+    #: state the same fact in either record, so a full/core pair disagreeing
+    #: about who runs the access committee is a defect and not a projection.
+    #:
+    #: Went 80 -> 78 when `conforms_to_class` and `conforms_to_schema` became
+    #: per-record slots (#499). They describe the record rather than the
+    #: dataset, so their correct values *differ* between a pair — identity
+    #: made them unrepresentable. `conforms_to` stays here: a standard the
+    #: data follows is a fact about the data and is the same in both.
     EXPECTED_IDENTITY_SLOTS = (
     'acquisition_methods', 'addressing_gaps', 'annotation_analyses',
     'anomalies', 'at_risk_populations', 'cleaning_strategies',
     'collection_mechanisms', 'collection_timeframes', 'compression',
-    'confidential_elements', 'conforms_to', 'conforms_to_class',
-    'conforms_to_schema', 'content_warnings', 'created_by',
-    'created_on', 'creators', 'data_collectors',
+    'confidential_elements', 'conforms_to',
+    'content_warnings', 'created_by',
+    'created_on', 'creators', 'data_collectors', 'data_governance',
     'data_protection_impacts', 'description', 'discouraged_uses',
     'distribution_dates', 'distribution_formats', 'doi',
     'download_url', 'errata', 'ethical_reviews', 'existing_uses',
@@ -62,7 +73,8 @@ class TestD4DPairConsistency(unittest.TestCase):
     'missing_data_documentation', 'modified_by', 'name', 'notes',
     'other_tasks', 'page', 'preprocessing_strategies',
     'prohibited_uses', 'publisher', 'purposes', 'raw_data_sources',
-    'raw_sources', 'regulatory_restrictions', 'retention_limit',
+    'raw_sources', 'regulatory_restrictions', 'related_datasets',
+    'retention_limit',
     'sampling_strategies', 'sensitive_elements', 'source_caveats',
     'status', 'subpopulations', 'tasks', 'title', 'updates',
     'use_repository', 'version', 'version_access',

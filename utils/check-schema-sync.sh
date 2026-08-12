@@ -54,17 +54,31 @@ SOURCE_TIME=$(stat -f %m "$SOURCE_SCHEMA" 2>/dev/null || stat -c %Y "$SOURCE_SCH
 MERGED_TIME=$(stat -f %m "$MERGED_SCHEMA" 2>/dev/null || stat -c %Y "$MERGED_SCHEMA" 2>/dev/null || echo 0)
 PYTHON_TIME=$(stat -f %m "$PYTHON_MODEL" 2>/dev/null || stat -c %Y "$PYTHON_MODEL" 2>/dev/null || echo 0)
 
-# Check if module files are newer than source schema
+# Check if module files are newer than source schema.
+#
+# The module list comes from the source schema's own `imports:` block, not from
+# a glob over D4D_*.yaml. The glob was over-broad: `D4D_Core.yaml` matches it
+# and is *not* imported by data_sheets_schema.yaml — it belongs to the core
+# exchange schema. So editing a core-only module reported the full merged
+# schema out of date, and regenerating to satisfy that produced ~2200 lines of
+# OWL re-serialization and two changed timestamps, with no semantic change
+# (#518). A churn commit is not a harmless one: it hides the real diff.
+#
+# Deriving the list means it cannot drift from what is actually imported. A new
+# module added to `imports:` is covered the day it is added.
 MODULES_DIR="src/data_sheets_schema/schema"
 NEWEST_MODULE_TIME=0
 if [[ -d "$MODULES_DIR" ]]; then
-    while IFS= read -r -d '' module_file; do
+    while IFS= read -r module_name; do
+        module_file="$MODULES_DIR/${module_name}.yaml"
+        [[ -f "$module_file" ]] || continue
         MODULE_TIME=$(stat -f %m "$module_file" 2>/dev/null || stat -c %Y "$module_file" 2>/dev/null || echo 0)
         if [[ $MODULE_TIME -gt $NEWEST_MODULE_TIME ]]; then
             NEWEST_MODULE_TIME=$MODULE_TIME
             NEWEST_MODULE="$module_file"
         fi
-    done < <(find "$MODULES_DIR" -name "D4D_*.yaml" -print0)
+    done < <(sed -n '/^imports:/,/^[a-z#]/p' "$SOURCE_SCHEMA" \
+             | sed -n 's/^[[:space:]]*-[[:space:]]*\(D4D_[A-Za-z_]*\)[[:space:]]*$/\1/p')
 fi
 
 # Use the newest timestamp between source and modules

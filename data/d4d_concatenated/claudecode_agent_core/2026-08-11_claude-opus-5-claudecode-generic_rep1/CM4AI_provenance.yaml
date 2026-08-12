@@ -130,6 +130,6 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/CM4AI_d4d_core.yaml
       md5: 1afef4d05562622097d4e577b3bb4648
   schema:
-    full_sha256: a392c073f2de00293702c7d31e6e1899f550d9b4bed2f01126630c25989da94b
-    core_sha256: 985460b61d58cf747fd67016bc0656fa204250fdd02ca69a8d638e45a22fcc6b
+    full_sha256: 060d9f542f817e291a5557e758715687b985a584df8d2fc74d2bfc99f857f9de
+    core_sha256: 4b725d5da4694a66326acf3f488c8c8c0042b2c5d5d81019ac5525f54bf511c0
   recorded_by: d4d runs validate
