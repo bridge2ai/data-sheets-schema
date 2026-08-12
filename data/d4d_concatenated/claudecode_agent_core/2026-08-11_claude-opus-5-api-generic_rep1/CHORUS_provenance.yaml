@@ -266,9 +266,9 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml
       md5: 57d52aa67e15baf249e791cd1ce32481
   schema:
-    full_sha256: fc7295126c21c63abcda4163cea6984b615c6ddab17a639658ded2d2f3b63faa
+    full_sha256: a392c073f2de00293702c7d31e6e1899f550d9b4bed2f01126630c25989da94b
     core_sha256: 985460b61d58cf747fd67016bc0656fa204250fdd02ca69a8d638e45a22fcc6b
-  recorded_by: api_runner.execute
+  recorded_by: d4d runs validate
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_audit.json
   sha256: f89cb85fa0cb927b50792c4e30f19e2d55826034f2e0f988ec61fff03a7c295a

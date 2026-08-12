@@ -112,9 +112,10 @@ creators:
       - project_administration
       - funding_acquisition
     notes: >-
-      Affiliations: University of Washington, Seattle, Washington, USA; Washington University in St.
-      Louis. Named Study Principal Investigator and central contact of record in the FAIRhub study
+      Named Study Principal Investigator and central contact of record in the FAIRhub study
       description; contact e-mail leeay@uw.edu. Principal investigator of NIH project OT2OD032644.
+      Affiliations: University of Washington, Seattle, Washington, USA; Washington University in
+      St. Louis.
     source_caveats: >-
       The FAIRhub study_description gives the affiliation as Washington University in St. Louis
       (ROR 01yc7t268); the Nature Metabolism author list, the NIH RePORTER record and the UW IRB
@@ -124,8 +125,8 @@ creators:
       - conceptualization
       - supervision
     notes: >-
-      Affiliations: University of Washington, Seattle, Washington, USA; Washington University in St.
-      Louis. Named Study Principal Investigator in the FAIRhub study description.
+      Named Study Principal Investigator in the FAIRhub study description. Affiliations: University
+      of Washington, Seattle, Washington, USA; Washington University in St. Louis.
     source_caveats: >-
       As for Aaron Lee, the FAIRhub study_description gives Washington University in St. Louis while
       the Nature Metabolism author list and BMJ Open protocol place her at the University of
@@ -135,144 +136,144 @@ creators:
       - conceptualization
       - supervision
     notes: >-
-      Affiliation: University of California San Diego, La Jolla, California, USA. Named Study
-      Principal Investigator; identified as contact PI at UCSD in the IRB application.
+      Named Study Principal Investigator; identified as contact PI at UCSD in the IRB application.
+      Affiliation: University of California San Diego, La Jolla, California, USA.
   - principal_investigator: Sally L. Baxter
     credit_roles:
       - conceptualization
       - investigation
     notes: >-
-      Affiliation: University of California San Diego, La Jolla, California, USA. Named Study
-      Principal Investigator; co-PI at UCSD per the IRB application.
+      Named Study Principal Investigator; co-PI at UCSD per the IRB application. Affiliation:
+      University of California San Diego, La Jolla, California, USA.
   - principal_investigator: Cynthia Owsley
     credit_roles:
       - conceptualization
       - methodology
       - writing_original_draft
     notes: >-
-      Affiliation: University of Alabama at Birmingham, Birmingham, Alabama, USA. Named Study
-      Principal Investigator; guarantor and corresponding author of the BMJ Open study protocol
-      publication.
+      Named Study Principal Investigator; guarantor and corresponding author of the BMJ Open study
+      protocol publication. Affiliation: University of Alabama at Birmingham, Birmingham, Alabama,
+      USA.
   - principal_investigator: Gerald McGwin
     credit_roles:
       - methodology
       - formal_analysis
     notes: >-
-      Affiliation: University of Alabama at Birmingham, Birmingham, Alabama, USA. Named Study
-      Principal Investigator.
+      Named Study Principal Investigator. Affiliation: University of Alabama at Birmingham,
+      Birmingham, Alabama, USA.
   - principal_investigator: Jeffrey C. Edberg
     credit_roles:
       - resources
       - investigation
     notes: >-
-      Affiliation: University of Alabama at Birmingham, Birmingham, Alabama, USA. Named Study
-      Principal Investigator; associated with the biorepository at the UAB Center for Clinical and
-      Translational Science.
+      Named Study Principal Investigator; associated with the biorepository at the UAB Center for
+      Clinical and Translational Science. Affiliation: University of Alabama at Birmingham,
+      Birmingham, Alabama, USA.
   - principal_investigator: Amir Bahmani
     credit_roles:
       - software
       - data_curation
     notes: >-
-      Affiliation: Stanford University, Stanford, California, USA. Named Study Principal
-      Investigator.
+      Named Study Principal Investigator. Affiliation: Stanford University, Stanford, California,
+      USA.
   - principal_investigator: Michael Snyder
     credit_roles:
       - conceptualization
     notes: >-
-      Affiliation: Stanford University, Stanford, California, USA. Named Study Principal
-      Investigator.
+      Named Study Principal Investigator. Affiliation: Stanford University, Stanford, California,
+      USA.
   - principal_investigator: Sara J. Singer
     credit_roles:
       - methodology
     notes: >-
-      Affiliation: Stanford University, Stanford, California, USA. Named Study Principal
-      Investigator; associated with the project's team science strand.
+      Named Study Principal Investigator; associated with the project's team science strand.
+      Affiliation: Stanford University, Stanford, California, USA.
   - principal_investigator: Christopher G. Chute
     credit_roles:
       - data_curation
       - methodology
     notes: >-
-      Affiliation: Johns Hopkins University, Baltimore, Maryland, USA. Named Study Principal
-      Investigator; associated with data standards and common data models.
+      Named Study Principal Investigator; associated with data standards and common data models.
+      Affiliation: Johns Hopkins University, Baltimore, Maryland, USA.
   - principal_investigator: T. Y. Alvin Liu
     credit_roles:
       - investigation
     notes: >-
-      Affiliation: Johns Hopkins University, Baltimore, Maryland, USA. Named Study Principal
-      Investigator.
+      Named Study Principal Investigator. Affiliation: Johns Hopkins University, Baltimore,
+      Maryland, USA.
   - principal_investigator: Kadija Ferryman
     credit_roles:
       - writing_review_editing
     notes: >-
-      Affiliation: Johns Hopkins University, Baltimore, Maryland, USA. Listed on the Nature
-      Metabolism Writing Committee and among the Principal Investigators; associated with the
-      project's ethics strand.
+      Listed on the Nature Metabolism Writing Committee and among the Principal Investigators;
+      associated with the project's ethics strand. Affiliation: Johns Hopkins University, Baltimore,
+      Maryland, USA.
   - principal_investigator: Shannon McWeeney
     credit_roles:
       - data_curation
       - formal_analysis
     notes: >-
-      Affiliation: Oregon Health & Science University, Portland, Oregon, USA. Named Study Principal
-      Investigator.
+      Named Study Principal Investigator. Affiliation: Oregon Health & Science University, Portland,
+      Oregon, USA.
   - principal_investigator: Hiroshi Ishikawa
     credit_roles:
       - investigation
     notes: >-
-      Affiliation: University of Washington, Seattle, Washington, USA. Listed among the Principal
-      Investigators in the Nature Metabolism consortium author list.
+      Listed among the Principal Investigators in the Nature Metabolism consortium author list.
+      Affiliation: University of Washington, Seattle, Washington, USA.
   - principal_investigator: Samantha Hurst
     credit_roles:
       - investigation
     notes: >-
-      Affiliation: University of California San Diego, La Jolla, California, USA. Named Study
-      Principal Investigator.
+      Named Study Principal Investigator. Affiliation: University of California San Diego, La Jolla,
+      California, USA.
   - principal_investigator: Camille Nebeker
     credit_roles:
       - methodology
     notes: >-
-      Affiliation: University of California San Diego, La Jolla, California, USA. Listed among the
-      Principal Investigators in the Nature Metabolism consortium author list; associated with the
-      project's research ethics strand.
+      Listed among the Principal Investigators in the Nature Metabolism consortium author list;
+      associated with the project's research ethics strand. Affiliation: University of California
+      San Diego, La Jolla, California, USA.
   - principal_investigator: Bhavesh Patel
     credit_roles:
       - software
       - data_curation
     notes: >-
-      Affiliation: FAIR Data Innovations Hub, California Medical Innovations Institute, San Diego,
-      California, USA. Named Study Principal Investigator; associated with the FAIRhub platform and
-      the project's data standards work.
+      Named Study Principal Investigator; associated with the FAIRhub platform and the project's
+      data standards work. Affiliation: FAIR Data Innovations Hub, California Medical Innovations
+      Institute, San Diego, California, USA.
   - principal_investigator: Jorge Contreras
     credit_roles:
       - resources
     notes: >-
-      Affiliation: University of Utah, Salt Lake City, Utah, USA. Named Study Principal
-      Investigator; first author of the Zenodo record setting out the licence terms for reusing the
-      AI-READI dataset.
+      Named Study Principal Investigator; first author of the Zenodo record setting out the licence
+      terms for reusing the AI-READI dataset. Affiliation: University of Utah, Salt Lake City, Utah,
+      USA.
   - principal_investigator: Nicholas Evans
     credit_roles:
       - methodology
     notes: >-
-      Affiliation: University of Massachusetts Lowell, Lowell, Massachusetts, USA. Named Study
-      Principal Investigator; associated with the project's ethics strand.
+      Named Study Principal Investigator; associated with the project's ethics strand. Affiliation:
+      University of Massachusetts Lowell, Lowell, Massachusetts, USA.
   - principal_investigator: AI-READI Consortium
     notes: >-
-      Affiliations: University of Washington; University of California San Diego; University of
-      Alabama at Birmingham; Johns Hopkins University; Stanford University; Oregon Health & Science
-      University; California Medical Innovations Institute. The sole creator of record in the
-      FAIRhub DataCite metadata, with nameType "Organizational". The individual investigators in the
-      preceding entries are drawn from the Nature Metabolism consortium author list, the BMJ Open
-      collaborator list and the FAIRhub study_description overall officials list, none of which is
-      presented in the bundle as the dataset's creator statement.
+      The sole creator of record in the FAIRhub DataCite metadata, with nameType "Organizational".
+      The individual investigators in the preceding entries are drawn from the Nature Metabolism
+      consortium author list, the BMJ Open collaborator list and the FAIRhub study_description
+      overall officials list, none of which is presented in the bundle as the dataset's creator
+      statement. Affiliations: University of Washington; University of California San Diego;
+      University of Alabama at Birmingham; Johns Hopkins University; Stanford University; Oregon
+      Health & Science University; California Medical Innovations Institute.
 
 funders:
   - grantor: National Institutes of Health (ROR https://ror.org/01cwqze88), NIH Common Fund Bridge2AI program
     notes: >-
-      Grant numbers: OT2OD032644, P30DK035816, UL1TR003096. OT2OD032644 is titled "Bridge2AI:
-      Salutogenesis Data Generation Project", awarded to the University of Washington with Aaron Lee
-      as principal investigator; NIH RePORTER records application ID 10471118, project number
-      1OT2OD032644-01, fiscal year 2022, award amount USD 5,026,499 and a project period of
-      2022-09-01 to 2025-08-31. P30DK035816 is cited in both the BMJ Open and Nature Metabolism
-      acknowledgements; UL1TR003096 appears only in the BMJ Open funding statement.
+      OT2OD032644 is titled "Bridge2AI: Salutogenesis Data Generation Project", awarded to the
+      University of Washington with Aaron Lee as principal investigator; NIH RePORTER records
+      application ID 10471118, project number 1OT2OD032644-01, fiscal year 2022, award amount USD
+      5,026,499 and a project period of 2022-09-01 to 2025-08-31. P30DK035816 is cited in both the
+      BMJ Open and Nature Metabolism acknowledgements; UL1TR003096 appears only in the BMJ Open
+      funding statement.
     source_caveats: >-
       The FAIRhub metadata cites only OT2OD032644 and links it to NIH RePORTER project 10885481; the
       README links the same core award to project 10471118.
@@ -426,6 +427,14 @@ instances:
       No explicit label or target is associated with any data instance. The healthsheet records "N/A
       - no labels are provided" for every labelling question, because the dataset is
       hypothesis-agnostic and intended to support multiple downstream AI/ML applications.
+    missing_information:
+      - missing_data_patterns: Not all modalities are available for all participants.
+      - missing_data_causes: Some participants elected not to take part in some study elements.
+      - missing_data_causes: >-
+          In a few cases the data collection device had no stored results or was returned too late to
+          retrieve results, for example because the battery died or data was lost.
+      - missing_data_causes: In a few cases a data collision at some point in the process caused data loss.
+      - missing_data_patterns: Survey data may contain skipped questions or incomplete responses.
     notes: >-
       Each instance comprises all data available for one individual participating in the study,
       spanning tabular, imaging and physiological signal/waveform data. There is no unstructured
@@ -437,13 +446,6 @@ instances:
       10 percent of the cohort (about 4 percent of participants according to the FAIRhub
       healthsheet) for a follow-up examination in year 4 of the project, which would create
       within-participant longitudinal relationships in a future release.
-
-      Information missing from instances: not all modalities are available for all participants;
-      some participants elected not to take part in some study elements; in a few cases the data
-      collection device had no stored results or was returned too late to retrieve results, for
-      example because the battery died or data was lost; in a few cases a data collision at some
-      point in the process caused data loss; and survey data may contain skipped questions or
-      incomplete responses.
 
 subpopulations:
   - identification: >-
@@ -896,9 +898,7 @@ known_biases:
       including this one, may not have achieved the intended balanced distribution across groups.
     affected_subsets:
       - All strata
-      - >-
-        observed counts in v3.0.0 are unequal (for example 836 white versus 380 Hispanic
-        participants)
+      - observed counts in v3.0.0 are unequal (for example 836 white versus 380 Hispanic participants)
     mitigation_strategy: >-
       Adaptive wave-based recruitment; a recommended train/validation/test split in which the
       validation and test sets are balanced by construction across race/ethnicity and sex.
@@ -1035,12 +1035,11 @@ human_subject_research:
       "Submitted, approved" and no Data Monitoring Committee. Licensees must comply with NIH Genomic
       Data Sharing Policy security best practices. The study is an observational cohort study with a
       cross-sectional time perspective.
-  special_populations:
-    - >-
-      No protected or vulnerable populations are purposefully included. Participants are adults aged
-      40 years and older; no minors are enrolled. Pregnancy, gestational diabetes and type 1 diabetes
-      are exclusionary, and the FAIRhub eligibility module excludes adults older than 85 years, so
-      pregnant people and children are excluded rather than protected within the cohort.
+  special_populations: >-
+    No protected or vulnerable populations are purposefully included. Participants are adults aged
+    40 years and older; no minors are enrolled. Pregnancy, gestational diabetes and type 1 diabetes
+    are exclusionary, and the FAIRhub eligibility module excludes adults older than 85 years, so
+    pregnant people and children are excluded rather than protected within the cohort.
   source_caveats: >-
     The BMJ Open abstract labels STUDY00016228 a "Clinicaltrials.org approval number", whereas the
     body of the same paper and the IRB documentation identify it as the University of Washington
@@ -1185,11 +1184,10 @@ regulatory_restrictions:
       The healthsheet answers the export control and regulatory restriction question by referring to
       the licence.
     - >-
-      Licensees must comply with all data security and privacy standards established by the NIH
-      under its Genomic Data Sharing Policy, currently the NIH Security Best Practices for
-      Controlled-Access Data Subject to the NIH GDS Policy, and with all applicable laws,
-      regulations and restrictions relating to distribution and use of the data and of models built
-      from it.
+      Licensees must comply with all data security and privacy standards established by the NIH under
+      its Genomic Data Sharing Policy, currently the NIH Security Best Practices for
+      Controlled-Access Data Subject to the NIH GDS Policy, and with all applicable laws, regulations
+      and restrictions relating to distribution and use of the data and of models built from it.
   other_compliance: >-
     Access requires login through a verified ID system, self-attestation that the data will be used
     only for type 2 diabetes related research, and agreement to the licence terms. The full dataset,
@@ -1281,7 +1279,8 @@ external_resources:
       - >-
         The dataset is described as self-contained but relying on the documentation site for users
         who need additional provenance information.
-      - The documentation is shared under CC-BY 4.0, so no restrictions apply to its use.
+      - >-
+        The documentation is shared under CC-BY 4.0, so no restrictions apply to its use.
     future_guarantees: >-
       No guarantee of persistence is given for any external resource. FAIRhub notes on both the
       dataset landing page and the documentation site that the repository is under review for
