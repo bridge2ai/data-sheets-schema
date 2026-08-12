@@ -548,6 +548,34 @@ def check_cmd(method, label, project, strict):
         click.echo("   Each record correctly names the schema it saw. Slot "
                    "counts across the split are not like-for-like.")
 
+    # Playbook drift (#525). The same question as bundle drift, asked of the
+    # declared *instructions* rather than the declared input — the playbook is
+    # where the uniform decision rules live, so editing one changes the method
+    # for every run that follows and left every earlier record attesting to
+    # bytes that no longer exist. Reported, never fatal: playbooks are meant to
+    # evolve, and a gate would make every improvement a corpus-wide failure.
+    from data_sheets_schema.runs import (
+        PLAYBOOK_ABSENT, PLAYBOOK_CURRENT, PLAYBOOK_DRIFTED,
+        PLAYBOOK_UNRECORDED, playbook_drift,
+    )
+    books: collections.Counter = collections.Counter()
+    book_detail: collections.Counter = collections.Counter()
+    for r in rows:
+        st, why = playbook_drift(r["method"], r["label"], r["project"])
+        books[st] += 1
+        if st in (PLAYBOOK_DRIFTED, PLAYBOOK_ABSENT) and why:
+            book_detail[why] += 1
+
+    moved = books[PLAYBOOK_DRIFTED] + books[PLAYBOOK_ABSENT]
+    if moved:
+        click.echo(f"\nⓘ  {moved} record(s) read a playbook whose bytes have "
+                   f"since changed ({books[PLAYBOOK_CURRENT]} still match, "
+                   f"{books[PLAYBOOK_UNRECORDED]} record no playbook hash):")
+        for why, n in book_detail.most_common(6):
+            click.echo(f"     {why[:66]:66} {n}")
+        click.echo("   The decision rules live in these files, so a record "
+                   "that names them cannot be re-derived from them.")
+
     stale = drift[BUNDLE_DRIFTED] + drift[BUNDLE_ABSENT]
     if stale:
         click.echo(f"\nⓘ  {stale} record(s) name an input bundle whose bytes "

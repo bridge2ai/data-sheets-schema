@@ -1172,6 +1172,71 @@ def bundle_drift_detail(method: str, label: str, project: str,
                             f"record pinned {recorded[:8]}"), declared
 
 
+PLAYBOOK_CURRENT, PLAYBOOK_DRIFTED = "current", "drifted"
+PLAYBOOK_ABSENT, PLAYBOOK_UNRECORDED = "absent", "unrecorded"
+
+
+def playbook_drift(method: str, label: str, project: str,
+                   concat_dir: Path = CONCAT_DIR
+                   ) -> tuple[str, str | None]:
+    """Do the playbooks this run read still hash to what it recorded? (#525)
+
+    `bundle_drift` asks this of a record's declared *input*. This asks it of the
+    declared *instructions*, which nothing asked before — every agentic record
+    hashes its playbooks and no command ever compared them to the files again.
+
+    That matters because the playbook is where the uniform decision rules live:
+    prefer omission over inference, represent disagreement rather than selecting
+    one source, one referent per `Dataset`. A playbook edit is a change to the
+    method exactly as a prompt edit is, and prompt edits are guarded three ways
+    while playbook edits were guarded by none.
+
+    Reported, never fatal, for the same reason as bundle drift: a drifted record
+    is still valid evidence of what was generated, it simply can no longer be
+    re-derived from the files it names. Playbooks are also *expected* to evolve
+    — a gate would turn every improvement to the method into a corpus-wide
+    failure, which is why this is not prompt-style pinning.
+    """
+    import hashlib
+
+    from data_sheets_schema.provenance import record_path_for
+    path = record_path_for(project, method, label, concat_dir)
+    if not path.exists():
+        return PLAYBOOK_UNRECORDED, "no provenance record"
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    block = data.get("playbooks") or {}
+    files = block.get("files") if isinstance(block, dict) else None
+    if not files:
+        return PLAYBOOK_UNRECORDED, "no playbook hashes recorded"
+
+    algorithm = (block.get("hash_algorithm") or "sha256").lower()
+    drifted, missing = [], []
+    for entry in files:
+        if not isinstance(entry, dict):
+            continue
+        declared, recorded = entry.get("path"), entry.get(algorithm)
+        if not declared or not recorded:
+            continue
+        playbook = Path(declared)
+        if not playbook.exists():
+            # Distinguished from drift: a renamed or deleted playbook is a
+            # different diagnosis from an edited one, and #431 was filed
+            # because a rename silently became `exists: false` in the record.
+            missing.append(declared)
+            continue
+        digest = (hashlib.sha256 if algorithm == "sha256" else hashlib.md5)(
+            playbook.read_bytes()).hexdigest()
+        if digest != recorded:
+            drifted.append(f"{Path(declared).name} "
+                           f"({recorded[:8]} -> {digest[:8]})")
+
+    if missing:
+        return PLAYBOOK_ABSENT, f"no longer present: {', '.join(missing)}"
+    if drifted:
+        return PLAYBOOK_DRIFTED, "; ".join(drifted)
+    return PLAYBOOK_CURRENT, None
+
+
 def canonical_prompt_status(method: str, label: str, project: str,
                             concat_dir: Path = CONCAT_DIR
                             ) -> tuple[str, str | None]:
