@@ -731,6 +731,23 @@ def slot_spec(slot: str, class_name: str = "Dataset",
         if nested.optional:
             lines.append(f"`{sd.range}` also accepts: "
                          f"{', '.join(nested.optional)}")
+        # The ranges of those attributes, without which "a wrong range" — one
+        # of the two defects FORM_SUBTYPE_SYSTEM asks the judge to separate —
+        # cannot be assessed below the top level (#486).
+        #
+        # Only non-string ranges: `string` is the default, so naming it adds
+        # prompt length and no information, while `uriorcurie` is where a
+        # plausible-looking value is the wrong kind. `unit: mg/dL` reads as a
+        # perfectly good value until you know `unit` is declared `uriorcurie`.
+        typed = {k: v for k, v in sorted(nested.ranges.items())
+                 if v not in ("string", "string[]")}
+        if typed:
+            lines.append(
+                f"`{sd.range}` attribute ranges: "
+                + ", ".join(f"{k} → {v}" for k, v in typed.items()))
+            lines.append(
+                "A value of the wrong kind for its declared range is a form "
+                "failure even when it reads well.")
     return "\n".join(lines)
 
 

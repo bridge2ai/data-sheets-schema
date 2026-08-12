@@ -91,6 +91,14 @@ class NestedClass:
     # model cannot choose from a list it has never been shown.
     enums: dict[str, list[str]] = field(default_factory=dict)
     enums_truncated: dict[str, int] = field(default_factory=dict)
+    # Declared range of each nested attribute (#486). Names alone let a judge
+    # assess *hollowness* — content in prose while structured keys sit empty —
+    # and not *range conformance*, because "a wrong range" cannot be seen
+    # without the range. `unit: mg/dL` under a `uriorcurie` declaration was
+    # invisible to the fitness axis for exactly this reason; `d4d runs
+    # identifiers` found those values only because it reads the schema itself
+    # rather than asking a judge.
+    ranges: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -169,8 +177,12 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
         req, opt = [], []
         enums: dict[str, list[str]] = {}
         enums_truncated: dict[str, int] = {}
+        ranges: dict[str, str] = {}
         for sub in sv.class_induced_slots(rng):
             (req if sub.required else opt).append(str(sub.name))
+            if sub.range:
+                ranges[str(sub.name)] = (
+                    f"{sub.range}[]" if sub.multivalued else str(sub.range))
             sub_enum = sv.get_enum(sub.range) if sub.range else None
             if sub_enum is not None:
                 values = list((sub_enum.permissible_values or {}).keys())
@@ -181,7 +193,8 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
         if req or opt:
             digest.nested.append(NestedClass(
                 name=rng, required=sorted(req), optional=sorted(opt),
-                enums=enums, enums_truncated=enums_truncated))
+                enums=enums, enums_truncated=enums_truncated,
+                ranges=ranges))
     digest.nested.sort(key=lambda n: n.name)
     return digest
 
@@ -251,6 +264,27 @@ def render(digest: ClassDigest) -> str:
                     over = len(optional) - MAX_OPTIONAL_SHOWN
                     tail = f" (+{over} more)" if over > 0 else ""
                     lines.append(f"    - also accepts: {shown}{tail}")
+            # Ranges of nested attributes, for the same reason the enums are
+            # here: the top-level listing never reaches them (#486).
+            #
+            # Only non-string ranges are shown. `string` is the schema's
+            # default_range, so naming it costs digest size and tells a reader
+            # nothing — while `uriorcurie`, `integer` and a class range are
+            # exactly where a plausible-looking value can be the wrong kind.
+            # `unit: mg/dL` is a correct-looking string under a `uriorcurie`
+            # declaration, and it was invisible to the fitness judge because the
+            # judge was shown the name and not the range.
+            typed = {k: v for k, v in n.ranges.items()
+                     if v not in ("string", "string[]")
+                     and k not in UNIVERSAL_ATTRIBUTES
+                     and k not in n.enums}
+            if typed:
+                shown = ", ".join(f"`{k}`: {v}" for k, v in
+                                  sorted(typed.items())[:MAX_OPTIONAL_SHOWN])
+                over = len(typed) - MAX_OPTIONAL_SHOWN
+                tail = f" (+{over} more)" if over > 0 else ""
+                lines.append(f"    - ranges: {shown}{tail}")
+
             # A controlled vocabulary on a nested slot has to be shown here or
             # nowhere: the top-level listing never reaches it.
             for slot_name, values in sorted(n.enums.items()):
