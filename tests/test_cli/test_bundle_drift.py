@@ -165,5 +165,13 @@ class TestAgainstTheRealCorpus(unittest.TestCase):
                     continue
                 counts[bundle_drift(run.method, run.label, project)[0]] += 1
 
+        # 64 drifted is the figure #452 was filed on and must not grow
+        # silently: it can only change when the corpus absorbs another
+        # input change, which is the event this check exists to report.
         self.assertEqual(counts[BUNDLE_DRIFTED] + counts[BUNDLE_ABSENT], 64)
-        self.assertEqual(counts[BUNDLE_CURRENT], 12)
+        # `current` grows as fresh runs land — 12 when filed, 14 after the
+        # 2026-08-11 canaries, which are drift-free by construction. Asserted
+        # as a floor rather than a fixed number so a new run does not fail the
+        # test, while a *drop* still would: that would mean a bundle moved
+        # under records that were current.
+        self.assertGreaterEqual(counts[BUNDLE_CURRENT], 12)

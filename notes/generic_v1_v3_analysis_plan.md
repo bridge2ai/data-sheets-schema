@@ -342,6 +342,14 @@ and non-empty on disk, before any of the remaining 29 are launched. CHORUS is
 the natural canary: at ~200K tokens it is the cheapest of the five and
 exercises the identical six-phase path.
 
+**The launcher records provenance, not the agent** (#497). The agentic prompt
+templates the `d4d provenance record` line, so the new `--condition` /`--arm` /
+`--runtime` flags cannot be added there without editing the prompt files —
+which would rotate their pins and, for v1, redefine the baseline §6 forbids
+touching. The agent therefore generates and validates; the launcher records,
+passing the spec it rendered from. Verified on the canary: the render gate
+reports `match` rather than `unverifiable`, and the schema digest is present.
+
 **Free checks already exhausted** (2026-08-11), per the standing canary rule
 that dry runs come before paid ones:
 
