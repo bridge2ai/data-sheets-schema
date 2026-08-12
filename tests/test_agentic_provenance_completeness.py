@@ -90,3 +90,68 @@ class TestTheCanaryRecordIsComplete(unittest.TestCase):
         self.assertEqual(
             bundle_drift("claudecode_agent", CANARY, "CHORUS")[0],
             BUNDLE_CURRENT)
+
+
+class TestArmSpelling(unittest.TestCase):
+    """`--arm` must mean the same thing in both commands (#500).
+
+    `render-prompt` substitutes `ARMS[arm][0]` — the display name. A record
+    storing the *token* produces a spec that can never re-render to what was
+    sent, and the gate then reports `mismatch` while explicitly exonerating an
+    unchanged prompt file. Introduced by #497 and caught during the sweep,
+    where it produced a transient false failure.
+    """
+
+    def test_the_option_is_the_same_choice_render_prompt_offers(self):
+        from data_sheets_schema.cli.api import ARMS
+
+        out = subprocess.run(
+            ["poetry", "run", "d4d", "provenance", "record", "--help"],
+            capture_output=True, text=True, check=False).stdout
+        for arm in ARMS:
+            with self.subTest(arm=arm):
+                self.assertIn(arm, out)
+
+    def test_the_token_expands_to_the_display_name(self):
+        """The expansion itself, so a table change cannot silently desync."""
+        from data_sheets_schema.cli.api import ARMS
+
+        self.assertEqual(ARMS["baseline"][0], "BASELINE (input documents only)")
+
+    def test_the_two_spellings_render_differently(self):
+        """If they ever rendered the same, this whole guard would be vacuous."""
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.cli.api import ARMS
+
+        bundle = Path("data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+        if not bundle.exists():
+            self.skipTest("bundle absent")
+
+        def render(arm):
+            return resolve_prompt(RunSpec(
+                project="CHORUS", arm=arm, method="claudecode_agent",
+                bundle=bundle, label="2026-08-11_x_rep1", condition="generic",
+                runtime="Claude Code", provider="Anthropic"))
+
+        self.assertNotEqual(render("baseline"), render(ARMS["baseline"][0]))
+
+
+@unittest.skipUnless(RECORD.exists(), "canary record absent")
+class TestTheSweepPassesItsOwnGate(unittest.TestCase):
+    def test_every_agentic_rep1_record_matches(self):
+        """The five records of the fresh v1 arm, recorded with the plain
+        `--arm baseline` default a launcher would actually type."""
+        from data_sheets_schema.runs import verify_request
+
+        label = "2026-08-11_claude-opus-5-claudecode-generic_rep1"
+        bad = []
+        for project in ("AI_READI", "CHORUS", "CM4AI", "VOICE",
+                        "VOICE_PEDIATRIC"):
+            record = Path("data/d4d_concatenated/claudecode_agent_core") / \
+                label / f"{project}_provenance.yaml"
+            if not record.exists():
+                continue
+            status, why = verify_request("claudecode_agent", label, project)
+            if status != "match":
+                bad.append(f"{project}: {status} — {why}")
+        self.assertEqual(bad, [])
