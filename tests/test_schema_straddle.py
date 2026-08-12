@@ -11,6 +11,7 @@ looked between them.
 """
 
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -28,7 +29,73 @@ def _rows(labels, projects=PROJECTS, method="claudecode_agent"):
             for l in labels for p in projects]
 
 
+class TestTheLogicOnFixtures(unittest.TestCase):
+    """The same properties on synthetic records, so they are still checked
+    where the corpus is absent — a shallow CI checkout, or after the arm is
+    eventually archived. The real-arm tests below are the ones that show the
+    check fires on the records that defeated every other check; these are the
+    ones that keep working when it does not."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.dir = Path(self.tmp.name)
+
+    def _record(self, label, project, digest):
+        path = self.dir / "m_core" / label / f"{project}_provenance.yaml"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        body = {"schema": {"digest_md5": digest}} if digest else {"schema": {}}
+        path.write_text(yaml.safe_dump(body), encoding="utf-8")
+        return {"method": "m", "label": label, "project": project}
+
+    def test_two_digests_in_one_series_is_a_straddle(self):
+        rows = [self._record("s_rep1", "P", "aaa"),
+                self._record("s_rep2", "P", "bbb")]
+        found = schema_straddle(rows, self.dir)
+        self.assertEqual(sorted(found["m/s"]), ["aaa", "bbb"])
+
+    def test_one_digest_is_not(self):
+        rows = [self._record("s_rep1", "P", "aaa"),
+                self._record("s_rep2", "P", "aaa")]
+        self.assertEqual(schema_straddle(rows, self.dir), {})
+
+    def test_two_series_do_not_contaminate_each_other(self):
+        """Different configs legitimately sit at different schemas — that is
+        ordinary evolution, and reporting it would fire on the whole corpus."""
+        rows = [self._record("one_rep1", "P", "aaa"),
+                self._record("two_rep1", "P", "bbb")]
+        self.assertEqual(schema_straddle(rows, self.dir), {})
+
+    def test_a_missing_digest_does_not_manufacture_a_straddle(self):
+        rows = [self._record("s_rep1", "P", "aaa"),
+                self._record("s_rep2", "P", None)]
+        self.assertEqual(schema_straddle(rows, self.dir), {})
+
+    def test_a_straddle_across_projects_of_one_series_is_reported_once(self):
+        """The series is the unit, not the project: an arm generated across a
+        schema change is one event however many projects it covers."""
+        rows = [self._record("s_rep1", "P", "aaa"),
+                self._record("s_rep1", "Q", "aaa"),
+                self._record("s_rep2", "P", "bbb"),
+                self._record("s_rep2", "Q", "bbb")]
+        found = schema_straddle(rows, self.dir)
+        self.assertEqual(list(found), ["m/s"])
+        self.assertEqual(found["m/s"]["aaa"], ["s_rep1"],
+                         "labels are deduplicated across projects")
+
+    def test_a_missing_record_is_not_fatal(self):
+        rows = [{"method": "m", "label": "s_rep1", "project": "GONE"},
+                self._record("s_rep2", "P", "bbb")]
+        self.assertEqual(schema_straddle(rows, self.dir), {})
+
+
+@unittest.skipUnless((CORE / f"{ARM}_rep1").exists(), "arm absent")
 class TestDetection(unittest.TestCase):
+    """Driven by the real arm rather than fixtures, so the detection is
+    demonstrated on the records that defeated every other check. That makes
+    the arm a precondition: without it `generation_digest` returns None for
+    every row and these would pass by finding nothing."""
+
     def test_a_series_on_one_schema_is_not_reported(self):
         """The false-positive direction. Every other series in the corpus is
         homogeneous, and a check that flagged them would be ignored."""
