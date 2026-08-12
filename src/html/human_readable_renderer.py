@@ -769,7 +769,8 @@ class HumanReadableRenderer:
         # Fallback to filename-based title with underscores replaced by spaces
         return fallback_title.replace('_', ' ')
     
-    def render_to_html(self, data, title, css_file="datasheet-common.css"):
+    def render_to_html(self, data, title, css_file="datasheet-common.css",
+                       provenance=None, unverified=None):
         """Render data to human-readable HTML using external CSS"""
         
         # Extract actual title from data, fall back to filename-based title
@@ -828,6 +829,32 @@ class HumanReadableRenderer:
         </div>
     {% endif %}
     
+    {% if provenance %}
+    <div class="section">
+        <div class="section-header">How this datasheet was generated</div>
+        <div class="section-content">
+            <p>This record was produced by an automated pipeline. The fields
+            below come from its provenance record, which is kept as a separate
+            file because embedding it would not validate against the schema.</p>
+            <table class="provenance">
+            {% for label, value in provenance %}
+                <tr><th>{{ label }}</th><td>{{ value }}</td></tr>
+            {% endfor %}
+            </table>
+            {% if unverified %}
+            <p><strong>Recorded but not observed.</strong> The run states these
+            values and nothing measured them, so they are reported rather than
+            relied on:</p>
+            <ul>
+            {% for field, reason in unverified %}
+                <li><code>{{ field }}</code> — {{ reason }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
     <div class="timestamp">
         Generated on {{ timestamp }} using Bridge2AI Data Sheets Schema
     </div>
@@ -847,6 +874,8 @@ class HumanReadableRenderer:
             categorized_data=categorized_data,
             sections=self.d4d_sections,
             css_file=css_file,
+            provenance=provenance,
+            unverified=unverified,
             timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
 
@@ -855,6 +884,73 @@ def get_default_css_source():
     """Return the canonical stylesheet path for human-readable HTML output."""
     return Path(__file__).parent / "output" / "datasheet-common.css"
 
+
+
+def provenance_for(record_path):
+    """The generation provenance beside a datasheet, ready to render (#505).
+
+    Camille Nebeker's review asked whether a metadata record exists for the
+    generation process — input docs, model, parameters, reproducibility
+    context. It does, and has since #353: every run writes one. The review's
+    other instinct was right too, that appending it to the D4D might break
+    LinkML, which is exactly why it is a separate file.
+
+    So the gap was never capture. It was that a reviewer reading a datasheet
+    had no way to reach it: a sibling directory, a filename they have no reason
+    to guess, and a run-label scheme they would have to already know.
+
+    Returns (rows, unverified) or (None, None) when no record is found — an
+    absent record is reported by omitting the section rather than by rendering
+    an empty one, because a datasheet with no provenance and one whose
+    provenance failed to load should not look alike.
+    """
+    import yaml as _yaml
+
+    record = Path(record_path)
+    # A datasheet lives in {method}/{label}/{P}_d4d.yaml; its provenance lives
+    # in {method}_core/{label}/{P}_provenance.yaml.
+    stem = record.stem.replace("_d4d_core", "").replace("_d4d", "")
+    label_dir = record.parent
+    method_dir = label_dir.parent
+    core = method_dir.parent / (method_dir.name.removesuffix("_core") + "_core")
+    candidate = core / label_dir.name / f"{stem}_provenance.yaml"
+    if not candidate.exists():
+        return None, None
+    try:
+        data = _yaml.safe_load(candidate.read_text(encoding="utf-8")) or {}
+    except Exception:                                        # noqa: BLE001
+        return None, None
+
+    model = data.get("model") or {}
+    inputs = data.get("inputs") or {}
+    schema = data.get("schema") or {}
+    prompts = data.get("prompts") or {}
+    run = data.get("run") or {}
+
+    rows = [
+        ("Generated", data.get("record_generated_at")),
+        ("Run label", run.get("label")),
+        ("Provenance mode", data.get("record_mode")),
+        ("Model", model.get("model")),
+        ("Runtime", model.get("agent_runtime")),
+        ("Provider", model.get("provider")),
+        ("Temperature", model.get("temperature")),
+        ("Reasoning effort", model.get("reasoning_effort")),
+        ("Input bundle", inputs.get("bundle_path")),
+        ("Input bundle md5", inputs.get("bundle_md5")),
+        ("Source manifest", (inputs.get("source_manifest") or {}).get("path")),
+        ("Schema digest", schema.get("digest_md5")),
+        ("Prompt files", ", ".join(
+            f.get("path", "") for f in (prompts.get("files") or [])) or None),
+        ("Validated", (data.get("validation") or {}).get("passed")),
+        ("Provenance record", str(candidate)),
+    ]
+    rows = [(k, v) for k, v in rows if v not in (None, "", [])]
+
+    unverified = [(e.get("field"), e.get("reason"))
+                  for e in (data.get("unverified") or [])
+                  if isinstance(e, dict) and e.get("field")]
+    return rows, unverified
 
 def render_yaml_file(input_file, output_file):
     """Render a single YAML file to a single HTML file and copy the stylesheet."""
@@ -876,7 +972,10 @@ def render_yaml_file(input_file, output_file):
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     css_name = "datasheet-common.css"
-    html_content = renderer.render_to_html(data, base_name, css_file=css_name)
+    rows, unverified = provenance_for(input_path)
+    html_content = renderer.render_to_html(data, base_name, css_file=css_name,
+                                           provenance=rows,
+                                           unverified=unverified)
 
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
