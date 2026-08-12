@@ -401,6 +401,27 @@ check surfaces rather than settles.
 Each condition's prompt files are pinned by hash in
 `src/download/prompts/canonical_hashes.yaml`.
 
+### Stopping a sweep
+
+A running `d4d api batch` **cannot be found by name** — a console-script entry
+point runs as `python -c import sys; …` and carries none of its own name, so
+`pgrep -f "d4d api"` returns nothing while the sweep is still spending. On
+2026-08-11 that cost roughly two hours of unobserved generation after the batch
+was reported stopped (#513).
+
+```bash
+d4d api status                          # which sweeps are running, and their pids
+d4d api stop --label-prefix <prefix>    # stop one; --force for SIGKILL
+```
+
+A sweep writes a lock under `data/.run_locks/` naming its pid, label and
+projects, and **refuses to start while a live lock holds the same prefix** —
+two batches writing one label directory produce a record that is a mixture of
+both runs with provenance describing neither. Stopping is safe: each run
+resumes from its progress file, so the cost is the unfinished phases of the
+current run. `status` reports a stale lock rather than deleting it, because a
+lock outliving its process is evidence a sweep died without cleaning up.
+
 ```bash
 d4d api prompts check --strict          # working tree vs the pins (CI gate)
 d4d api prompts pin --file <path> --reason '<why this is the text>'

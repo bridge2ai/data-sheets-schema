@@ -302,6 +302,17 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
         click.echo("aborted")
         return
 
+    # Claim the label prefix before spending anything (#513). Two batches
+    # writing the same label directories is not a tolerable race: each writes
+    # phase snapshots and a progress file under the same names, so the
+    # survivor's record can be a mixture of both runs while its provenance
+    # describes neither. That happened on 2026-08-11.
+    from data_sheets_schema import run_lock
+    try:
+        lock_path = run_lock.acquire(label_prefix, names)
+    except run_lock.AlreadyRunning as exc:
+        raise click.ClickException(str(exc)) from exc
+
     ok, failed, spent_in, spent_out = [], [], 0, 0
     for i, s in enumerate(specs, 1):
         click.echo(f"\n[{i}/{len(specs)}] {s.project} {s.label}")
@@ -335,12 +346,75 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
                 click.echo("stopping; re-run to resume unfinished phases", err=True)
                 break
 
+    # Released even when the sweep failed or was interrupted mid-loop: a lock
+    # outliving its process would make the next attempt refuse to start, which
+    # turns a crash into a permanent block. `live()` also checks the pid, so a
+    # lock left by a hard kill is recognised as stale rather than believed.
+    run_lock.release(lock_path)
+
     click.echo(f"\n{len(ok)} succeeded, {len(failed)} failed")
     click.echo(f"tokens: {spent_in:,} in, {spent_out:,} out")
     for p, lbl, err in failed:
         click.echo(f"   {p} {lbl}: {err[:90]}")
     if failed:
         sys.exit(1)
+
+
+@api.command("status")
+def api_status_cmd():
+    """Which sweeps are running, and under what pid (#513).
+
+    Exists because a batch cannot be found by name: a console-script entry
+    point runs as `python -c import sys; …`, so `pgrep -f "d4d api"` returns
+    nothing while the sweep is still spending. The lock is the answer that
+    string matching cannot give.
+    """
+    from data_sheets_schema import run_lock
+
+    running = run_lock.live()
+    stale = run_lock.stale()
+    if not running and not stale:
+        click.echo("No sweep is running.")
+        return
+    for lock in running:
+        click.echo(f"▶  pid {lock.pid}  {lock.label_prefix}  "
+                   f"since {lock.started}  ({', '.join(lock.projects)})")
+    for lock in stale:
+        click.echo(f"·  stale lock for {lock.label_prefix} (pid {lock.pid} is "
+                   f"gone) — a sweep died without releasing it: {lock.path}")
+    if running:
+        click.echo("\nStop one with `d4d api stop --label-prefix <prefix>`.")
+
+
+@api.command("stop")
+@click.option("--label-prefix", required=True)
+@click.option("--force", is_flag=True, help="SIGKILL instead of SIGTERM")
+def api_stop_cmd(label_prefix, force):
+    """Stop a running sweep by the label it holds (#513).
+
+    Stopping mid-run is safe: each run resumes from its progress file, so the
+    cost of stopping is the unfinished phases of the current run and nothing
+    more. What is *not* safe is believing a sweep has stopped when it has not,
+    which is what this command exists to prevent.
+    """
+    import signal as _signal
+
+    from data_sheets_schema import run_lock
+
+    matches = [l for l in run_lock.live() if l.label_prefix == label_prefix]
+    if not matches:
+        click.echo(f"No running sweep holds {label_prefix!r}.")
+        stale = [l for l in run_lock.stale() if l.label_prefix == label_prefix]
+        if stale:
+            click.echo("A stale lock exists; its process is already gone.")
+        return
+    for lock in matches:
+        sig = _signal.SIGKILL if force else _signal.SIGTERM
+        sent = run_lock.stop(lock, sig)
+        click.echo(f"{'signalled' if sent else 'could not signal'} pid "
+                   f"{lock.pid} ({'KILL' if force else 'TERM'})")
+    click.echo("Re-run `d4d api status` to confirm it is gone — a signal sent "
+               "is not a process stopped.")
 
 
 @api.group("prompts")
