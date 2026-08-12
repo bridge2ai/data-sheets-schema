@@ -130,8 +130,8 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep2/CM4AI_d4d_core.yaml
       md5: 67384e7d32a1740264d74ee6ed79c501
   schema:
-    full_sha256: 060d9f542f817e291a5557e758715687b985a584df8d2fc74d2bfc99f857f9de
-    core_sha256: 4b725d5da4694a66326acf3f488c8c8c0042b2c5d5d81019ac5525f54bf511c0
+    full_sha256: da5ad57b5db9e0b832ad2ae4c048550601b213b69f5d786b768adcbb7287cc88
+    core_sha256: 9b3fbe3bb8fdc01792ee41dd9db75cbef3c5ea40fdc1d90d5fce037951ad154f
   recorded_by: d4d runs validate
 canonical:
   criterion: full and core both validate against the current schema, then most slots,

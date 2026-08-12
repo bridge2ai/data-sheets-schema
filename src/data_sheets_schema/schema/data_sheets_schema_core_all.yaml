@@ -36888,8 +36888,22 @@ classes:
         inlined_as_list: true
   HumanSubjectCompensation:
     name: HumanSubjectCompensation
-    description: 'Information about compensation or incentives provided to human research
-      participants.
+    description: 'What participants received, and — where the sources describe one
+      — how that was structured to keep them enrolled.
+
+      Two different claims live here and must not be conflated (#504). **Compensation**
+      is payment for time and burden: what was provided, of what type, of what value.
+      **Retention incentives** are structure designed to prevent attrition — escalating
+      amounts, completion bonuses, payments tied to later visits. The ethical reading
+      of the two differs, which is why an Ethics and Privacy review asked for the
+      distinction: "$40 then $80" reported as compensation says something different
+      from the same figures reported as a retention design.
+
+      Record the incentive slots only where a source describes the structure or its
+      purpose. Most sources describe payments and say nothing about retention intent,
+      and an escalating schedule is not by itself evidence that retention was the
+      goal. Inferring one from the other is the failure the evidence boundary exists
+      to prevent.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
@@ -36948,6 +36962,61 @@ classes:
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
         slot_uri: d4d:compensationRationale
         alias: compensation_rationale
+        owner: HumanSubjectCompensation
+        domain_of:
+        - HumanSubjectCompensation
+        range: string
+      retention_incentives:
+        name: retention_incentives
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: Payment rises across the four annual visits, with a completion
+              bonus at year four, described in the protocol as designed to reduce
+              loss to follow-up.
+        description: 'Where the sources describe it, how the incentive structure was
+          designed to keep participants enrolled across the study — escalating amounts,
+          completion bonuses, payments tied to later visits or to returning after
+          a gap.
+
+          Distinct from `compensation_type` and `compensation_amount`, which record
+          what was provided. State this only where a source describes the structure.
+          An escalating payment schedule is not by itself evidence that retention
+          was its purpose; report the schedule under the compensation slots and leave
+          this absent.
+
+          ⚠️ **"Retention" here means keeping participants enrolled, never keeping
+          data.** How long the data is kept belongs in `retention_limit`, which is
+          a different slot about a different subject. The word is treacherous in this
+          corpus: across all five project bundles nearly every occurrence of "retention"
+          is about data or specimen retention — "limits on the retention of the data",
+          "bioSpecRetention", "records retention requirements" — and none so far describes
+          an incentive structure. An empty slot is the correct outcome for those sources.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:retentionIncentiveStructure
+        alias: retention_incentives
+        owner: HumanSubjectCompensation
+        domain_of:
+        - HumanSubjectCompensation
+        range: string
+      retention_incentive_rationale:
+        name: retention_incentive_rationale
+        description: 'The stated reason for structuring incentives to support retention,
+          where a source gives one — an attrition rate the design responds to, an
+          IRB condition, or a documented equity concern about who can afford to stay
+          enrolled.
+
+          Separate from `retention_incentives` (the structure) for the same reason
+          `compensation_rationale` is separate from `compensation_amount`: what was
+          done and why it was done are different claims, and sources frequently give
+          one without the other.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:retentionIncentiveRationale
+        alias: retention_incentive_rationale
         owner: HumanSubjectCompensation
         domain_of:
         - HumanSubjectCompensation
