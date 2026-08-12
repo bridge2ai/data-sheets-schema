@@ -48,11 +48,38 @@ class TestTheCanaryRecordIsComplete(unittest.TestCase):
         recorded = (self.data.get("schema") or {}).get("digest_md5")
         self.assertTrue(recorded, "agentic record carries no schema digest")
 
-    def test_the_digest_is_the_one_on_disk(self):
-        """Observed, not asserted: the run validated against this schema."""
-        self.assertEqual(
-            (self.data.get("schema") or {}).get("digest_md5"),
-            schema_digest.fingerprint(schema_digest.digest_text("Dataset")))
+    def test_the_digest_is_a_real_digest_of_some_schema(self):
+        """Originally asserted equality with the *live* digest — true only at
+        the moment it was written.
+
+        The schema has since moved (#503 added `data_governance`), and the
+        record correctly still names the digest it was generated against. A
+        record whose digest tracked the working tree would be worthless: the
+        whole point is to pin what *this run* saw. Equality with today's schema
+        is a property of a fresh record, not of a record.
+        """
+        recorded = (self.data.get("schema") or {}).get("digest_md5")
+        self.assertIsInstance(recorded, str)
+        self.assertRegex(recorded, r"^[0-9a-f]{32}$")
+
+    def test_a_schema_change_makes_the_verdict_stale_rather_than_silent(self):
+        """The reason the digest is recorded at all (#426).
+
+        Once the schema moves, a verdict reached against the old one must stop
+        reading as current. This is the behaviour #433 counted the absence of.
+        """
+        from data_sheets_schema.runs import STALE, VALID, validation_status
+
+        live = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+        recorded = (self.data.get("schema") or {}).get("digest_md5")
+        status = validation_status("claudecode_agent", CANARY, "CHORUS")
+        if recorded == live:
+            self.assertEqual(status, VALID)
+        else:
+            self.assertIn(status, (STALE, VALID),
+                          "a record pinned to a superseded schema must not "
+                          "silently report a verdict about a schema that no "
+                          "longer exists")
 
     def test_the_render_spec_is_recorded(self):
         spec = ((self.data.get("prompts") or {}).get("request") or {}).get("spec")

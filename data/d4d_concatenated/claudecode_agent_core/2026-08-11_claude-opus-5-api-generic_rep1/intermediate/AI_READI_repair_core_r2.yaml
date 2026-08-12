@@ -1035,12 +1035,11 @@ human_subject_research:
       "Submitted, approved" and no Data Monitoring Committee. Licensees must comply with NIH Genomic
       Data Sharing Policy security best practices. The study is an observational cohort study with a
       cross-sectional time perspective.
-  special_populations:
-    - >-
-      No protected or vulnerable populations are purposefully included. Participants are adults aged
-      40 years and older; no minors are enrolled. Pregnancy, gestational diabetes and type 1 diabetes
-      are exclusionary, and the FAIRhub eligibility module excludes adults older than 85 years, so
-      pregnant people and children are excluded rather than protected within the cohort.
+  special_populations: >-
+    No protected or vulnerable populations are purposefully included. Participants are adults aged
+    40 years and older; no minors are enrolled. Pregnancy, gestational diabetes and type 1 diabetes
+    are exclusionary, and the FAIRhub eligibility module excludes adults older than 85 years, so
+    pregnant people and children are excluded rather than protected within the cohort.
   source_caveats: >-
     The BMJ Open abstract labels STUDY00016228 a "Clinicaltrials.org approval number", whereas the
     body of the same paper and the IRB documentation identify it as the University of Washington
