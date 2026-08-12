@@ -169,6 +169,20 @@ def in_identifiers(record: dict) -> list[Occurrence]:
     Structural rather than stylistic: an id is a token other records and
     mappings may key on, so it cannot be fixed by a later copy-edit. The
     2026-08-11 arm carries `aireadi:external-training-programme`.
+
+    ⚠️ **Does not distinguish a minted id from one copied out of a source**,
+    and the rule adopted for #502 turns on exactly that: an id *you* mint
+    follows house style, an id taken from a crate or a DOI keeps the source's
+    spelling. All 8 hits in the canonical set are minted — descriptive
+    fragments like `#instance-programme-aggregate` — so the distinction has not
+    yet mattered, but a real identifier containing `licence` would be a false
+    positive here.
+
+    One case is already mixed: `https://doi.org/10.60775/fairhub.3
+    #limitation-enrolment-incomplete` is a real DOI with a minted fragment. The
+    whole id is flagged, and the finding is still correct because the offending
+    span is the minted part. Distinguishing them properly needs the id's
+    provenance, which the record does not carry.
     """
     out: list[Occurrence] = []
     for slot, text in _walk_leaf(record, None):

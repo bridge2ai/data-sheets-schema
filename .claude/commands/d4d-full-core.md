@@ -216,9 +216,27 @@ to every project. Enforce them whether or not a prompt file was used to launch:
 - There is no target slot count, no expected density, and no expected
   relationship to any other arm or project. Apply your own judgment about what
   the evidence supports.
+- **Write generated prose in American English** — `program`, `organization`,
+  `analyze`, `license`, `center`, `labeling`, `enrollment`. This is house style
+  for the text *you* compose, and it applies to identifiers you mint as well as
+  to descriptions.
 
-The last rule is the load-bearing one: it is what makes a slot count an
-observation rather than a target.
+  Three carve-outs, and they are not optional:
+
+  - **Quoted source text keeps its original spelling.** Changing a quotation to
+    match house style corrupts evidence, which is the one thing the provenance
+    guard exists to prevent. The bundles contain `licence` 13 times and
+    `programme` 6.
+  - **Proper nouns keep their spelling** — "Wellcome Trust Sanger Centre",
+    "Medical Research Council Programme Grant". A name is not prose.
+  - **Identifiers copied from a source keep the source's spelling.** An id you
+    take from a crate or a DOI is a token, not a sentence. Only ids *you* mint
+    follow house style.
+
+The rule about there being no target slot count is the load-bearing one: it is
+what makes a slot count an observation rather than a target. Named rather than
+referred to by position, so inserting a rule cannot silently point this sentence
+at a different one.
 
 ### Recording the condition
 
