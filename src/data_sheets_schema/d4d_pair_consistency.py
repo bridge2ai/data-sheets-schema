@@ -70,6 +70,7 @@ class PairConsistencyReport:
 
     identity_slots: Tuple[str, ...]
     projected_slots: Tuple[str, ...]
+    per_record_slots: Tuple[str, ...] = ()
     errors: List[ConsistencyIssue] = field(default_factory=list)
     warnings: List[ConsistencyIssue] = field(default_factory=list)
 
@@ -83,6 +84,10 @@ class PairConsistencyReport:
             "identity_slot_count": len(self.identity_slots),
             "identity_slots": list(self.identity_slots),
             "projected_slots": list(self.projected_slots),
+            # Named, not merely excluded (#499). An exemption nobody is told
+            # about reads as a slot that was checked and agreed, which is the
+            # opposite of what happened.
+            "per_record_slots": list(self.per_record_slots),
             "errors": [asdict(issue) for issue in self.errors],
             "warnings": [asdict(issue) for issue in self.warnings],
         }
@@ -563,6 +568,7 @@ def validate_pair_data(
     report = PairConsistencyReport(
         identity_slots=pair_schema.identity_slots,
         projected_slots=pair_schema.projected_slots,
+        per_record_slots=pair_schema.per_record_slots,
     )
     _append_identity_errors(
         report,
@@ -751,7 +757,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         status = "PASS" if report.passed else "FAIL"
         print(
             f"{status}: {len(report.identity_slots)} schema-identical slots; "
-            f"projected slots={list(report.projected_slots)}"
+            f"projected slots={list(report.projected_slots)}; "
+            f"per-record slots (exempt, must differ)="
+            f"{list(report.per_record_slots)}"
         )
         for issue in report.errors:
             print(f"ERROR [{issue.code}] {issue.path}: {issue.message}")

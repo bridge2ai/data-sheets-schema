@@ -143,3 +143,27 @@ class TestTheExemptionDoesNotLeak(unittest.TestCase):
         for i, a in enumerate(buckets):
             for b in buckets[i + 1:]:
                 self.assertEqual(a & b, set())
+
+
+class TestTheExemptionIsVisible(unittest.TestCase):
+    """An exemption nobody is told about reads as a slot that was checked and
+    agreed — the opposite of what happened. Found reviewing this change: the
+    report named identity and projected slots and silently dropped the third
+    category, so a passing pair looked fully verified."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.pair = load_pair_schema(FULL, CORE)
+
+    def test_the_report_names_the_exempt_slots(self):
+        full, core = _pair()
+        data = validate_pair_data(full, core, self.pair).to_dict()
+        self.assertEqual(sorted(data["per_record_slots"]), sorted(PER_RECORD))
+
+    def test_a_passing_pair_still_names_them(self):
+        """The case that matters. On failure someone reads the output anyway;
+        on success this is the only thing that says two slots went unchecked."""
+        full, core = _pair()
+        report = validate_pair_data(full, core, self.pair)
+        self.assertTrue(report.passed)
+        self.assertEqual(sorted(report.per_record_slots), sorted(PER_RECORD))
