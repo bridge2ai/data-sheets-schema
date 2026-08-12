@@ -1,0 +1,155 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-08-12T06:41:38+00:00'
+run:
+  label: 2026-08-11_claude-opus-5-claudecode-generic_rep2
+  project: VOICE
+  method: claudecode_agent
+  arm: baseline
+  replicate: 2
+model:
+  generation_method: schema-grounded agentic, phase 1
+  agent_runtime: Claude Code
+  provider: Anthropic
+  model: claude-opus-5
+  mode: four-phase project agent, generic prompt
+  temperature: '0.0'
+  temperature_basis: asserted by the generating agent, not observed
+  shared_config:
+    path: .github/workflows/d4d_assistant_deterministic.config
+    name: claude-opus-5
+    temperature: 0.0
+    max_tokens: 16000
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt.md
+    sha256: 0fbc626bc3a51d74a8ba3d8e2813752f3bc5ce9366ee5f19c99089afdfd9e8dc
+    bytes: 5754
+    exists: true
+  request:
+    sha256: d0715c74c3e463265f63415ad3389e331e185f6be3d2cd0be2f72bb0f0d3bc76
+    bytes: 4032
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      condition: generic
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: data/preprocessed/source_manifest.yaml'
+      run_date: '2026-08-12'
+      runtime: Claude Code
+      provider: Anthropic
+      bundle: data/preprocessed/concatenated/VOICE_preprocessed.txt
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: c1e03a0bf4c3e6c5f42b4a8530669dfde610e82073de54904b06937df78644b3
+    bytes: 29298
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: 6041074a92d780a12d2ed799b8643c2046bd99a7f2684cedac3cd23d2a27e807
+    bytes: 11042
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: bdf977ec5680904c65fa03903ef3a5c568c1dfc400c38bf75aebbec57cead198
+    bytes: 5862
+    exists: true
+schema:
+  declared_version: 2.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: a392c073f2de00293702c7d31e6e1899f550d9b4bed2f01126630c25989da94b
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: 985460b61d58cf747fd67016bc0656fa204250fdd02ca69a8d638e45a22fcc6b
+  merged_schema_carries_version: true
+  digest_md5: 659aae6723e54b88911b04cd0dbf651c
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: a48dcab27d4bbe9d4e8b8d3def7a3b2b4c6d5e61
+  commit_short: a48dcab2
+  branch: main
+  dirty: true
+  dirty_file_count: 3
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+  bundle_md5: dcd717170da6762569c0b4eeafc1c3d2
+  bundle_bytes: 376295
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: 30517167a2d2a0d5b568fc4b22cb5d6a
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/VOICE_d4d.yaml
+    bytes: 96077
+    slots: 82
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep2/VOICE_d4d_core.yaml
+    bytes: 74389
+    slots: 69
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep2/VOICE_reconciliation.md
+    bytes: 22967
+    slots: null
+unrecoverable: null
+unverified:
+- field: model.temperature
+  value: '0.0'
+  reason: the Claude Code runtime does not expose a temperature setting to the agent
+    or to this recorder; the header value restates the prompt template rather than
+    a measured parameter. A direct API run can observe it.
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''claude-opus-5''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+notes: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/VOICE_d4d.yaml
+      md5: 4055e19d3aca3ee01726e0ec91bf327f
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep2/VOICE_d4d_core.yaml
+      md5: 81cdfa0b72a0ed18c08eb8a3ae5901a8
+  schema:
+    full_sha256: a392c073f2de00293702c7d31e6e1899f550d9b4bed2f01126630c25989da94b
+    core_sha256: 985460b61d58cf747fd67016bc0656fa204250fdd02ca69a8d638e45a22fcc6b
+  recorded_by: d4d runs validate
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-08-11_claude-opus-5-claudecode-generic_rep1
+    slots: 81
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-11_claude-opus-5-claudecode-generic_rep2
+    slots: 82
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-11_claude-opus-5-claudecode-generic_rep3
+    slots: 82
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 0
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-07_claude-opus-5-claudecode-generic-v3_rep2
