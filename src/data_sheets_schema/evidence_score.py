@@ -739,15 +739,19 @@ def slot_spec(slot: str, class_name: str = "Dataset",
         # prompt length and no information, while `uriorcurie` is where a
         # plausible-looking value is the wrong kind. `unit: mg/dL` reads as a
         # perfectly good value until you know `unit` is declared `uriorcurie`.
-        typed = {k: v for k, v in sorted(nested.ranges.items())
-                 if v not in ("string", "string[]")}
+        # Universal ranges once, then the ones specific to this class — the
+        # same split the digest render uses, from the same constants, so the
+        # judge's question and the cache key cannot drift apart.
+        lines.append(f"On every `{sd.range}` object: "
+                     f"{schema_digest.UNIVERSAL_RANGES}")
+        typed = schema_digest.shown_ranges(nested)
         if typed:
             lines.append(
                 f"`{sd.range}` attribute ranges: "
                 + ", ".join(f"{k} → {v}" for k, v in typed.items()))
-            lines.append(
-                "A value of the wrong kind for its declared range is a form "
-                "failure even when it reads well.")
+        lines.append(
+            "A value of the wrong kind for its declared range is a form "
+            "failure even when it reads well.")
     return "\n".join(lines)
 
 

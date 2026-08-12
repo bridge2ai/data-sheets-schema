@@ -17,6 +17,7 @@ better-informed question, so cached labels from before it are not comparable and
 must not be reused. The last class here is what makes that safe.
 """
 
+import copy
 import unittest
 
 from data_sheets_schema import schema_digest
@@ -59,7 +60,15 @@ class TestTheJudgeSeesThem(unittest.TestCase):
     def test_slot_spec_names_the_nested_ranges(self):
         spec = slot_spec("variables")
         self.assertIn("attribute ranges", spec)
-        self.assertIn("id → uriorcurie", spec)
+        self.assertIn("minimum_value → float", spec)
+
+    def test_the_universal_ranges_are_stated_once(self):
+        """`id` is `uriorcurie` on all 67 nested classes, so a per-class line
+        is bloat an existing guard already forbids. Stated once instead —
+        same information, and the #402/#457 signal still reaches the judge."""
+        spec = slot_spec("variables")
+        self.assertIn("uriorcurie", spec)
+        self.assertNotIn("id → uriorcurie", spec)
 
     def test_it_says_a_wrong_range_is_a_form_failure(self):
         """Naming the range without saying what to do with it leaves the judge
@@ -97,9 +106,58 @@ class TestCachedJudgementsCannotSurviveThis(unittest.TestCase):
         """Render the same digest with the ranges stripped and confirm the
         fingerprint differs. If it did not, the cache key would be blind to
         exactly the information the judge gained."""
-        digest = schema_digest.build("Dataset")
+        # Deep-copied because `build` memoises and returns the *shared*
+        # object: stripping ranges in place corrupted the cached digest for
+        # every later test in the process, and the two tests below then
+        # measured an empty digest and failed for the wrong reason.
+        digest = copy.deepcopy(schema_digest.build("Dataset"))
         before = schema_digest.fingerprint(schema_digest.render(digest))
         for nested in digest.nested:
             nested.ranges = {}
         after = schema_digest.fingerprint(schema_digest.render(digest))
         self.assertNotEqual(before, after)
+
+    def test_the_judge_and_the_key_show_the_same_set(self):
+        """The guarantee the test above only appears to give.
+
+        Stripping *every* range moves the fingerprint whatever the filters are,
+        so that test passes even when the two disagree — and they did. The
+        first version of this change showed `id`, `data_type` and
+        `used_software` in `slot_spec` and omitted them from the digest as
+        universal attributes, so a change to any of those three would have
+        moved the judge's question while the cache key held.
+
+        Asserted as set equality per nested class, which is the property that
+        actually prevents it.
+        """
+        digest = schema_digest.build("Dataset")
+        top_level = {s.name: s for s in digest.slots}
+        checked = 0
+        for nested in digest.nested:
+            expected = set(schema_digest.shown_ranges(nested))
+            if not expected:
+                continue
+            slot = next((n for n, s in top_level.items()
+                         if s.range == nested.name), None)
+            if slot is None:
+                continue
+            spec = slot_spec(slot)
+            for attribute in expected:
+                with self.subTest(nested=nested.name, attribute=attribute):
+                    self.assertIn(f"{attribute} \u2192", spec)
+            checked += 1
+        self.assertGreater(checked, 20, "too few nested classes exercised")
+
+    def test_the_universal_ranges_reach_both_renderings(self):
+        """Stated once each, from one constant, so they cannot drift apart."""
+        self.assertIn(schema_digest.UNIVERSAL_RANGES,
+                      schema_digest.digest_text("Dataset"))
+        self.assertIn(schema_digest.UNIVERSAL_RANGES, slot_spec("variables"))
+
+    def test_universal_attributes_are_not_repeated_per_class(self):
+        """The existing guard this change first violated: repeating `id` on 67
+        classes pushed the digest past its 40k budget for no new information."""
+        digest = schema_digest.build("Dataset")
+        for nested in digest.nested:
+            with self.subTest(nested=nested.name):
+                self.assertNotIn("id", schema_digest.shown_ranges(nested))

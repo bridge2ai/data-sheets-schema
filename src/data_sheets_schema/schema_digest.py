@@ -101,6 +101,43 @@ class NestedClass:
     ranges: dict[str, str] = field(default_factory=dict)
 
 
+#: Ranges that hold on essentially every object range, stated once rather than
+#: repeated 67 times (#486). `id` is `uriorcurie` on all 67 nested classes and
+#: `used_software` is `Software[]` on 64 — so a per-class line would be bloat
+#: that an existing guard already forbids, while the information itself is the
+#: most valuable here: `id → uriorcurie` is the whole #402/#457 family, and a
+#: bare token validates exactly as cleanly as a ROR IRI.
+UNIVERSAL_RANGES = "`id` is `uriorcurie`; `used_software` is `Software[]`"
+
+
+def shown_ranges(nested: "NestedClass") -> dict[str, str]:
+    """The nested attribute ranges rendered to a reader — digest and judge alike.
+
+    **One function so the two cannot diverge (#486).** The digest render and
+    `slot_spec` originally applied different filters: `slot_spec` showed
+    `id`, `data_type` and `used_software` while the digest omitted them as
+    universal attributes. The fitness cache keys on the digest fingerprint, so
+    a change to any of those three would have moved the judge's question while
+    leaving the key unchanged — cached labels answering a worse-informed
+    question, silently, which is the #465 failure this was meant to prevent.
+
+    `string` is excluded because it is the schema's `default_range`: naming it
+    costs size and carries no information. Enum-ranged attributes are excluded
+    because their permitted values are rendered separately and in more detail.
+
+    Universal attributes are excluded and stated once as `UNIVERSAL_RANGES`
+    instead. Repeating them per class is what `test_universal_attributes_are_
+    not_repeated_on_every_class` already forbids, and the first version of this
+    change reintroduced them 67 times and pushed the digest past its size
+    budget. Saying `id → uriorcurie` once is strictly better than saying it 67
+    times: same information, no bloat, and one place to keep the judge's view
+    and the cache key in step.
+    """
+    return {k: v for k, v in sorted(nested.ranges.items())
+            if v not in ("string", "string[]") and k not in nested.enums
+            and k not in UNIVERSAL_ATTRIBUTES}
+
+
 @dataclass
 class ClassDigest:
     class_name: str
@@ -232,6 +269,9 @@ def render(digest: ClassDigest) -> str:
             "objects). Any listed **required** key must be present on every such "
             "object, or the record fails validation.",
             "",
+            f"On every object below: {UNIVERSAL_RANGES}. A value of the wrong "
+            "kind for its declared range is a defect even when it reads well.",
+            "",
         ]
         top_level = {s.name for s in digest.slots}
         for n in digest.nested:
@@ -274,10 +314,7 @@ def render(digest: ClassDigest) -> str:
             # `unit: mg/dL` is a correct-looking string under a `uriorcurie`
             # declaration, and it was invisible to the fitness judge because the
             # judge was shown the name and not the range.
-            typed = {k: v for k, v in n.ranges.items()
-                     if v not in ("string", "string[]")
-                     and k not in UNIVERSAL_ATTRIBUTES
-                     and k not in n.enums}
+            typed = shown_ranges(n)
             if typed:
                 shown = ", ".join(f"`{k}`: {v}" for k, v in
                                   sorted(typed.items())[:MAX_OPTIONAL_SHOWN])
