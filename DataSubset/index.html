@@ -421,6 +421,17 @@
 
 
 
+      DataSubset : data_governance
+
+
+
+
+
+        DataSubset --&gt; "0..1" DataGovernance : data_governance
+        click DataGovernance href "../DataGovernance/"
+
+
+
       DataSubset : data_protection_impacts
 
 
@@ -1431,6 +1442,12 @@
 <td><a href="../regulatory_restrictions/">regulatory_restrictions</a></td>
 <td>0..1 <br/> <a href="../ExportControlRegulatoryRestrictions/">ExportControlRegulatoryRestrictions</a></td>
 <td>Regulatory and export control restrictions applicable to the dataset</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../data_governance/">data_governance</a></td>
+<td>0..1 <br/> <a href="../DataGovernance/">DataGovernance</a></td>
+<td>Who decides who may use this dataset, and how</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -2691,6 +2708,27 @@ attributes:
     - Dataset
     - ExportControlRegulatoryRestrictions
     range: ExportControlRegulatoryRestrictions
+    inlined: true
+  data_governance:
+    name: data_governance
+    description: 'Who decides who may use this dataset, and how. DataGovernance object
+      from the Data Governance module describing the access committee, its membership
+      and contacts, the review process, and who remains accountable for the data over
+      time.
+
+      Distinct from `license_and_use_terms` (the terms) and `regulatory_restrictions`
+      (the regulations): this is the people and the process that apply them. Added
+      because `Dataset` previously had no governance slot at all, so a data access
+      committee could only be named by nesting its chair inside an export-control
+      statement (#503).'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:dataGovernance
+    alias: data_governance
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: DataGovernance
     inlined: true
   maintainers:
     name: maintainers

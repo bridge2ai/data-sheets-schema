@@ -681,7 +681,17 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/access_decision_timeframe/</loc>
+         <lastmod>2026-08-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/access_details/</loc>
+         <lastmod>2026-08-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/access_review_process/</loc>
          <lastmod>2026-08-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -692,6 +702,11 @@
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/access_urls/</loc>
+         <lastmod>2026-08-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/accountable_organization/</loc>
          <lastmod>2026-08-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -767,6 +782,11 @@
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/anonymization_method/</loc>
+         <lastmod>2026-08-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/appeal_process/</loc>
          <lastmod>2026-08-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -877,6 +897,21 @@
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/comment_prefix/</loc>
+         <lastmod>2026-08-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/committee_contact/</loc>
+         <lastmod>2026-08-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/committee_members/</loc>
+         <lastmod>2026-08-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/committee_name/</loc>
          <lastmod>2026-08-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -1062,6 +1097,11 @@
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/data_collectors/</loc>
+         <lastmod>2026-08-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/data_governance/</loc>
          <lastmod>2026-08-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -2037,6 +2077,11 @@
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/status/</loc>
+         <lastmod>2026-08-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/stewardship_roles/</loc>
          <lastmod>2026-08-12</lastmod>
          <changefreq>daily</changefreq>
     </url>

@@ -384,7 +384,7 @@
 
 
 <h1 id="slot-governance_committee_contact">Slot: governance_committee_contact</h1>
-<p><em>Contact person for data governance committee. This person can answer questions about data governance policies, access procedures, and oversight mechanisms.</em></p>
+<p><em>DEPRECATED — use <code>DataGovernance.committee_contact</code> (#503). Kept so the records that already populate it stay valid; a governance contact is not an export-control fact and should not have to be nested inside one to be stated.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/governanceContactPoint">d4d:governanceContactPoint</a>
 Alias: governance_committee_contact</p>
 <!-- no inheritance hierarchy -->
@@ -442,8 +442,9 @@ Alias: governance_committee_contact</p>
 <details>
 
 <pre><code class="language-yaml">name: governance_committee_contact
-description: Contact person for data governance committee. This person can answer
-  questions about data governance policies, access procedures, and oversight mechanisms.
+description: DEPRECATED — use `DataGovernance.committee_contact` (#503). Kept so the
+  records that already populate it stay valid; a governance contact is not an export-control
+  fact and should not have to be nested inside one to be stated.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 broad_mappings:
 - schema:contactPoint

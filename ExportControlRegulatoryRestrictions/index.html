@@ -339,7 +339,7 @@
 <tr>
 <td><a href="../governance_committee_contact/">governance_committee_contact</a></td>
 <td>0..1 <br/> <a href="../Person/">Person</a></td>
-<td>Contact person for data governance committee</td>
+<td>DEPRECATED — use `DataGovernance</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -499,8 +499,10 @@ attributes:
     range: ConfidentialityLevelEnum
   governance_committee_contact:
     name: governance_committee_contact
-    description: Contact person for data governance committee. This person can answer
-      questions about data governance policies, access procedures, and oversight mechanisms.
+    description: DEPRECATED — use `DataGovernance.committee_contact` (#503). Kept
+      so the records that already populate it stay valid; a governance contact is
+      not an export-control fact and should not have to be nested inside one to be
+      stated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     broad_mappings:
     - schema:contactPoint
@@ -588,8 +590,10 @@ attributes:
     range: ConfidentialityLevelEnum
   governance_committee_contact:
     name: governance_committee_contact
-    description: Contact person for data governance committee. This person can answer
-      questions about data governance policies, access procedures, and oversight mechanisms.
+    description: DEPRECATED — use `DataGovernance.committee_contact` (#503). Kept
+      so the records that already populate it stay valid; a governance contact is
+      not an export-control fact and should not have to be nested inside one to be
+      stated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     broad_mappings:
     - schema:contactPoint
