@@ -1676,6 +1676,9 @@ slots:
       d4d:docExample:
         tag: d4d:docExample
         value: https://w3id.org/bridge2ai/data-sheets-schema
+      d4d:perRecord:
+        tag: d4d:perRecord
+        value: true
     description: The metadata schema **this record itself** is written in — normally
       `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet,
       not about the data it describes; a standard the *data* follows belongs in `conforms_to`.
@@ -1692,6 +1695,9 @@ slots:
       d4d:docExample:
         tag: d4d:docExample
         value: Dataset
+      d4d:perRecord:
+        tag: d4d:perRecord
+        value: true
     description: The class within `conforms_to_schema` that this record instantiates
       — `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`,
       a statement about the record rather than the data.
@@ -4001,6 +4007,9 @@ classes:
           d4d:docExample:
             tag: d4d:docExample
             value: Dataset
+          d4d:perRecord:
+            tag: d4d:perRecord
+            value: true
         description: The class within `conforms_to_schema` that this record instantiates
           — `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`,
           a statement about the record rather than the data.
@@ -4020,6 +4029,9 @@ classes:
           d4d:docExample:
             tag: d4d:docExample
             value: https://w3id.org/bridge2ai/data-sheets-schema
+          d4d:perRecord:
+            tag: d4d:perRecord
+            value: true
         description: The metadata schema **this record itself** is written in — normally
           `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet,
           not about the data it describes; a standard the *data* follows belongs in
@@ -41785,6 +41797,9 @@ classes:
           d4d:docExample:
             tag: d4d:docExample
             value: Dataset
+          d4d:perRecord:
+            tag: d4d:perRecord
+            value: true
         description: The class within `conforms_to_schema` that this record instantiates
           — `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`,
           a statement about the record rather than the data.
@@ -41804,6 +41819,9 @@ classes:
           d4d:docExample:
             tag: d4d:docExample
             value: https://w3id.org/bridge2ai/data-sheets-schema
+          d4d:perRecord:
+            tag: d4d:perRecord
+            value: true
         description: The metadata schema **this record itself** is written in — normally
           `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet,
           not about the data it describes; a standard the *data* follows belongs in
@@ -43397,6 +43415,9 @@ classes:
           d4d:docExample:
             tag: d4d:docExample
             value: Dataset
+          d4d:perRecord:
+            tag: d4d:perRecord
+            value: true
         description: The class within `conforms_to_schema` that this record instantiates
           — `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`,
           a statement about the record rather than the data.
@@ -43416,6 +43437,9 @@ classes:
           d4d:docExample:
             tag: d4d:docExample
             value: https://w3id.org/bridge2ai/data-sheets-schema
+          d4d:perRecord:
+            tag: d4d:perRecord
+            value: true
         description: The metadata schema **this record itself** is written in — normally
           `https://w3id.org/bridge2ai/data-sheets-schema`. A statement about the datasheet,
           not about the data it describes; a standard the *data* follows belongs in

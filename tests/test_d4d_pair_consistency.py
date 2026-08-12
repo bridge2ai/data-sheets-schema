@@ -46,12 +46,18 @@ class TestD4DPairConsistency(unittest.TestCase):
     #: `CoreDataset` (#510). Identity is the right relation for both: they
     #: state the same fact in either record, so a full/core pair disagreeing
     #: about who runs the access committee is a defect and not a projection.
+    #:
+    #: Went 80 -> 78 when `conforms_to_class` and `conforms_to_schema` became
+    #: per-record slots (#499). They describe the record rather than the
+    #: dataset, so their correct values *differ* between a pair — identity
+    #: made them unrepresentable. `conforms_to` stays here: a standard the
+    #: data follows is a fact about the data and is the same in both.
     EXPECTED_IDENTITY_SLOTS = (
     'acquisition_methods', 'addressing_gaps', 'annotation_analyses',
     'anomalies', 'at_risk_populations', 'cleaning_strategies',
     'collection_mechanisms', 'collection_timeframes', 'compression',
-    'confidential_elements', 'conforms_to', 'conforms_to_class',
-    'conforms_to_schema', 'content_warnings', 'created_by',
+    'confidential_elements', 'conforms_to',
+    'content_warnings', 'created_by',
     'created_on', 'creators', 'data_collectors', 'data_governance',
     'data_protection_impacts', 'description', 'discouraged_uses',
     'distribution_dates', 'distribution_formats', 'doi',

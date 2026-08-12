@@ -203,7 +203,20 @@ gen-examples:
 .PHONY: full-schema
 full-schema: $(SOURCE_SCHEMA_ALL)
 
-$(SOURCE_SCHEMA_ALL):
+# Prerequisites are the source schema and every module it imports. Without
+# them this rule had none at all, so it fired only when the merged file was
+# missing and `make full-schema` was a silent no-op on an existing one — which
+# is why `regen-all` has to `rm -f` the target first. Combined with #518 that
+# made a closed loop: `check-sync` reported the merged schema stale and told
+# you to run `make full-schema`, which did nothing, so it stayed stale (#521).
+#
+# The module list is derived, not written out, so a module added to the source
+# schema's `imports:` is a prerequisite the day it is added.
+SCHEMA_IMPORTS = $(addprefix $(SOURCE_SCHEMA_DIR),$(addsuffix .yaml,$(shell \
+	sed -n '/^imports:/,/^[a-z\#]/p' $(SOURCE_SCHEMA_PATH) | \
+	sed -n 's/^[[:space:]]*-[[:space:]]*\(D4D_[A-Za-z_]*\)[[:space:]]*$$/\1/p')))
+
+$(SOURCE_SCHEMA_ALL): $(SOURCE_SCHEMA_PATH) $(SCHEMA_IMPORTS)
 	@echo "Generating D4D-Full schema with merged imports..."
 	$(RUN) gen-linkml -o $@ -f 'yaml' $(SOURCE_SCHEMA_PATH)
 	@echo '---' | cat - $@ > $@.tmp && mv $@.tmp $@
@@ -370,7 +383,16 @@ SSSOM_STRUCTURAL = data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.t
 
 gen-core-schema: $(D4D_CORE_SCHEMA_ALL) ## Generate merged core exchange schema (data_sheets_schema_core_all.yaml)
 
-$(D4D_CORE_SCHEMA_ALL): $(D4D_CORE_SCHEMA) src/data_sheets_schema/schema/D4D_Core.yaml
+# Same derivation as SCHEMA_IMPORTS, over D4D_Core's own imports. Listing only
+# D4D_Core.yaml missed every module it imports: editing D4D_Base_import.yaml
+# left the merged core schema stale with make reporting nothing to be done
+# (#521). D4D_Core and the full schema import overlapping but not identical
+# module sets, so this is derived separately rather than shared.
+CORE_SCHEMA_IMPORTS = $(addprefix $(SOURCE_SCHEMA_DIR),$(addsuffix .yaml,$(shell \
+	sed -n '/^imports:/,/^[a-z\#]/p' $(SOURCE_SCHEMA_DIR)D4D_Core.yaml | \
+	sed -n 's/^[[:space:]]*-[[:space:]]*\(D4D_[A-Za-z_]*\)[[:space:]]*$$/\1/p')))
+
+$(D4D_CORE_SCHEMA_ALL): $(D4D_CORE_SCHEMA) $(SOURCE_SCHEMA_DIR)D4D_Core.yaml $(CORE_SCHEMA_IMPORTS)
 	@echo "Generating merged core exchange schema..."
 	$(RUN) gen-linkml -o $(D4D_CORE_SCHEMA_ALL) -f yaml $(D4D_CORE_SCHEMA)
 	@echo "✓ Core schema: $(D4D_CORE_SCHEMA_ALL)"

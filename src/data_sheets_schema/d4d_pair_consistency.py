@@ -31,6 +31,19 @@ CORE_CLASS = "CoreDataset"
 PHASE4_HEADER = "# Phase 4 reconciliation: completed"
 
 
+#: Annotation marking a slot as describing *the record* rather than the dataset
+#: (#499). Such a slot's correct value necessarily differs between a full and a
+#: core record — `conforms_to_class` is `Dataset` in one and `CoreDataset` in
+#: the other — so strict identity makes it unrepresentable: any honest value
+#: fails the pair check, and `--sync-core` would copy full's value into core and
+#: write a false claim about what the core record instantiates.
+#:
+#: Read from the schema rather than hardcoded here, so the category is visible
+#: where the slots are defined and a new one is covered by declaring it. A
+#: hardcoded name list is the hand-maintained-list problem #431 removed.
+PER_RECORD_ANNOTATION = "d4d:perRecord"
+
+
 @dataclass(frozen=True)
 class PairSchema:
     """Schema-derived rules for comparing a full/core pair."""
@@ -39,6 +52,7 @@ class PairSchema:
     core_view: SchemaView
     identity_slots: Tuple[str, ...]
     projected_slots: Tuple[str, ...]
+    per_record_slots: Tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -91,6 +105,36 @@ def _slot_value_signature(slot: SlotDefinition) -> Tuple[Any, ...]:
     )
 
 
+def _is_per_record(slot: SlotDefinition) -> bool:
+    """Is this slot annotated as describing the record rather than the dataset?
+
+    Subscript access, not `.get`: LinkML surfaces `annotations` as a
+    `jsonasobj2.JsonObj`, which has no `.get`. The first version of this called
+    it inside `except AttributeError: return False`, so every slot silently
+    read as unmarked and the annotation did nothing — a check that cannot fail
+    is worse than no check, because the schema then claims a guarantee that is
+    not enforced. The except clause here is narrow and re-raises nothing else.
+
+    Tolerant about the value's form, because it may arrive as an `Annotation`
+    object, a plain string or a bool depending on how the schema was loaded.
+    Anything falsy or the literal string `false` is not a marking — present and
+    set to false must not silently mean the same as present and set to true.
+    """
+    annotations = getattr(slot, "annotations", None)
+    if annotations is None:
+        return False
+    try:
+        entry = annotations[PER_RECORD_ANNOTATION]
+    except (KeyError, TypeError):
+        return False
+    if entry is None:
+        return False
+    value = getattr(entry, "value", entry)
+    if isinstance(value, str):
+        return value.strip().lower() not in ("", "false", "no", "0")
+    return bool(value)
+
+
 def load_pair_schema(
     full_schema: Path = DEFAULT_FULL_SCHEMA,
     core_schema: Path = DEFAULT_CORE_SCHEMA,
@@ -108,8 +152,16 @@ def load_pair_schema(
 
     identity_slots = []
     projected_slots = []
+    per_record_slots = []
     for name in sorted(full_slots.keys() & core_slots.keys()):
-        if _slot_value_signature(full_slots[name]) == _slot_value_signature(
+        # Checked before the signature comparison, because a per-record slot
+        # has an *identical* signature — that is precisely why it fell into
+        # strict identity and became unrepresentable. Signature equality is
+        # the right test for whether two slots hold the same shape, and the
+        # wrong test for whether they hold the same fact.
+        if _is_per_record(full_slots[name]) or _is_per_record(core_slots[name]):
+            per_record_slots.append(name)
+        elif _slot_value_signature(full_slots[name]) == _slot_value_signature(
             core_slots[name]
         ):
             identity_slots.append(name)
@@ -121,6 +173,7 @@ def load_pair_schema(
         core_view=core_view,
         identity_slots=tuple(identity_slots),
         projected_slots=tuple(projected_slots),
+        per_record_slots=tuple(per_record_slots),
     )
 
 

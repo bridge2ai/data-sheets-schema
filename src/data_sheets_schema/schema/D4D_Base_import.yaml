@@ -500,6 +500,10 @@ slots:
       - dcterms:conformsTo
     annotations:
       "d4d:docExample": "https://w3id.org/bridge2ai/data-sheets-schema"
+      # Describes the record, so a full/core pair must state it *differently*
+      # and strict identity made it unrepresentable — any honest value failed
+      # the pair check and `--sync-core` copied full's value into core (#499).
+      "d4d:perRecord": true
 
   conforms_to_class:
     description: >-
@@ -511,6 +515,9 @@ slots:
       - dcterms:conformsTo
     annotations:
       "d4d:docExample": "Dataset"
+      # `Dataset` in a full record and `CoreDataset` in a core one — the
+      # clearest case of a slot whose correct values differ by record (#499).
+      "d4d:perRecord": true
 
   license:
     description: The legal license under which the resource is made available (e.g., "MIT", "CC-BY-4.0").

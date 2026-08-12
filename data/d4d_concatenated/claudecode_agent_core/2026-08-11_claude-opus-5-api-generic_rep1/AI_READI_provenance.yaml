@@ -304,8 +304,8 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/AI_READI_d4d_core.yaml
       md5: 19f4a17c60311d6bbc32fd06d266a76c
   schema:
-    full_sha256: a392c073f2de00293702c7d31e6e1899f550d9b4bed2f01126630c25989da94b
-    core_sha256: de0438d7df6b4b4e64abfde16e729531bc9c4fc72328872d84bc8b7dcad4db25
+    full_sha256: 060d9f542f817e291a5557e758715687b985a584df8d2fc74d2bfc99f857f9de
+    core_sha256: 4b725d5da4694a66326acf3f488c8c8c0042b2c5d5d81019ac5525f54bf511c0
   recorded_by: d4d runs validate
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/AI_READI_audit.json
