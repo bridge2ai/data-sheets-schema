@@ -140,3 +140,36 @@ class TestItIsReportedNotEnforced(unittest.TestCase):
         if result.returncode != 0:
             self.skipTest("command unavailable here")
         self.assertIn("reported, not failed", result.stdout)
+
+
+class TestTheRateIsReportedWithItsThreshold(unittest.TestCase):
+    """Found reviewing this change. The headline swings 2.1% (exact match) to
+    12.0% (0.6 -> 0.5) on the same corpus, so a rate quoted without its
+    threshold is unfalsifiable and invites comparison against a future figure
+    computed differently."""
+
+    def test_the_threshold_changes_the_count(self):
+        """The premise. If these ever agreed, the measure would have stopped
+        depending on the parameter and this guard would be vacuous."""
+        record = {"is_deidentified": LONG, "preprocessing_strategies": PARA}
+        loose = red.summarize(record, threshold=0.5)["prose_restatements"]
+        strict = red.summarize(record, threshold=1.0)["prose_restatements"]
+        self.assertGreater(loose, strict)
+
+    def test_the_command_prints_the_threshold(self):
+        result = subprocess.run(
+            ["poetry", "run", "d4d", "runs", "redundancy"],
+            capture_output=True, text=True, check=False)
+        if result.returncode != 0:
+            self.skipTest("command unavailable here")
+        self.assertIn(f"threshold {red.THRESHOLD}", result.stdout)
+
+    def test_an_overridden_threshold_is_the_one_reported(self):
+        """Printing the default while having used an override would be worse
+        than printing nothing."""
+        result = subprocess.run(
+            ["poetry", "run", "d4d", "runs", "redundancy", "--threshold", "0.9"],
+            capture_output=True, text=True, check=False)
+        if result.returncode != 0:
+            self.skipTest("command unavailable here")
+        self.assertIn("threshold 0.9", result.stdout)

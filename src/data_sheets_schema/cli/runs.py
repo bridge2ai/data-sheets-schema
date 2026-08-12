@@ -1203,8 +1203,13 @@ def redundancy_cmd(method, label, project, threshold, show):
         click.echo(f"{proj:17}{s['sentences']:>10}{s['prose_restatements']:>10}"
                    f"{s['rate']:>7.1%}{s['structural_restatements']:>12}")
     rate = (total_prose / total_sentences) if total_sentences else 0.0
+    used = red.THRESHOLD if threshold is None else threshold
+    # The threshold is printed with the rate because the rate is meaningless
+    # without it: on the canonical set the same corpus reads 2.1% at exact
+    # match and 12.0% at 0.5. A figure quoted bare invites comparison against
+    # a future figure computed differently.
     click.echo(f"\n{total_prose} prose restatement(s) across {total_sentences} "
-               f"sentences — {rate:.1%}")
+               f"sentences — {rate:.1%} at threshold {used}")
     # Named separately rather than folded in: a URL beside its format, or a
     # nested sub-resource repeating its parent's title, is correct. Including
     # it would overstate the figure by about a third.

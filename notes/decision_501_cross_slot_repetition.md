@@ -33,6 +33,30 @@ word Jaccard ≥ 0.6:
 Between 4.9% and 9.0% across five projects, so this is uniform behaviour rather
 than one project's quirk, and any rule would have moved every record.
 
+### The headline depends on the threshold, and the threshold is a judgement
+
+Same corpus, same code, varying only what counts as "the same statement":
+
+| threshold | restatements | rate |
+|---|---|---|
+| 0.5 | 191 | 12.0% |
+| **0.6** | **116** | **7.3%** |
+| 0.7 | 79 | 5.0% |
+| 0.8 | 60 | 3.8% |
+| 0.9 | 44 | 2.8% |
+| 1.0 (exact) | 34 | 2.1% |
+
+**7.3% is not a property of the corpus; it is a property of the corpus at 0.6.**
+0.6 was chosen by inspection against the Safe Harbor family, which sits at
+0.6–0.8 while unrelated sentences in the same record sit below 0.35 — so it is
+the point that separates the known case from the known non-cases, on one
+family, in one record.
+
+The decision does not rest on the exact figure: repetition is either the right
+product or it is not, and it is uniform at every threshold. But any future
+comparison must use the same threshold, which is why `d4d runs redundancy`
+prints it beside the rate.
+
 Two corrections came out of measuring rather than assuming:
 
 - **They are paraphrases, not copies.** "removed from", "stripped from",
