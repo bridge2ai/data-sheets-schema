@@ -1,0 +1,155 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "resources",
+      "issue": "The core record uses `resources` (range Dataset, requiring `id`) for the nine modalities, while the full record uses `file_collections` (range FileCollection). The core schema `data_sheets_schema_core_all.yaml` / class `CoreDataset` was not read during generation, so it is unverified that `resources` exists on CoreDataset, that its range admits an object with `id`/`name`/`description`/`conforms_to`, and that `conforms_to` is available on the nested class. The accompanying note asserts a constraint about a `distributions` slot and its enumerated format/media_type values that is not attested by anything in the supplied schema digest or the declared bundle. This is an unverified structural claim carried in a factual slot."
+    },
+    {
+      "severity": "high",
+      "record": "both",
+      "slot": "id",
+      "issue": "`id` is set to `https://chorus4ai.org/`, which the bundle identifies as the project website (source URL for the project_documentation file), not as an identifier for the dataset. The same URI is also used as `page`, so the record asserts that the dataset and its landing page are the same entity. The nested modality identifiers (`https://chorus4ai.org/dataset#demographics` etc.) are constructed URIs that appear nowhere in the bundle."
+    },
+    {
+      "severity": "high",
+      "record": "both",
+      "slot": "creators[].principal_investigator",
+      "issue": "Five of six Creator objects (Bihorac, Jiang, Strekalova, Rashidi, Kwong) populate `principal_investigator` although the bundle lists them only under the heading 'Bridge2AI CHoRUS Leadership Team' in the webinar deck. Only Rosenthal is designated 'Principal investigator' by NIH RePORTER. The slot's own source_caveats concedes this, but the value asserted remains unsupported: leadership-team membership is not evidence of PI status. The full record's own caveat and the value it annotates are in direct tension."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "file_collections[].conforms_to",
+      "issue": "Several `conforms_to` values embed editorial commentary rather than naming a standard: 'OMOP Common Data Model, with schema extensions', 'WFDB, with an extended PhysioNet schema', 'EDF+ and Persyst (open source schemas)'. Per the digest, `conforms_to` names a standard the content follows; qualifying prose belongs in `notes` or `source_caveats`. The same defect is mirrored in the core record's `resources[].conforms_to`."
+    },
+    {
+      "severity": "high",
+      "record": "both",
+      "slot": "conforms_to",
+      "issue": "The top-level `conforms_to` is a multi-sentence prose paragraph enumerating six standards with parenthetical scope qualifiers, not a standard identifier. The slot range is a single string naming a standard; the record should either name one governing standard or carry the enumeration in per-collection `conforms_to` values (which it already does) with the top-level slot naming the primary CDM."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "instances[].counts",
+      "issue": "`counts: 50000` selects one of two conflicting bundle figures (chorus4ai.org '50,000 Patient admissions' vs. webinar 'over 45K unique admissions' as of August 2025) and elevates it to the sole asserted value. The instruction requires representing what the evidence states rather than silently selecting one; the conflict is disclosed in source_caveats but the numeric slot still resolves the disagreement without warrant, and the webinar figure is the more recent of the two."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "created_by",
+      "issue": "'CHoRUS Consortium (Patient-Focused Collaborative Hospital Repository Uniting Standards)' embeds an explanatory gloss inside an identifier-style value. The bundle uses 'CHoRUS Consortium' as a heading on chorus4ai.org; the parenthetical expansion is editorial."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators[].affiliations",
+      "issue": "The affiliation 'UTHealth Houston' is transcribed from the webinar leadership slide, but the same document elsewhere renders the institution as 'University of Texas Health Science Center, Houston, TX'. Not an error, but the record silently normalises across two source renderings without noting it. Lower severity: both forms are present in the bundle."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "ethical_reviews[].contact_person",
+      "issue": "The value bundles a name, title, institution and a known-defective email address into a single free-text string, and repeats the typo disclosure in an adjacent source_caveats. Ciera McCrary is identified in the bundle as 'Program Manager' under 'Contact Us' on chorus4ai.org, with no stated connection to ethical review. Attaching her as the ethical-review contact is an inference the bundle does not support."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "machine_annotation_tools[].tools",
+      "issue": "'CTP-deid' is listed with the description 'A de-identification component within the CHoRUS GitHub organization'. The bundle shows only a repository name 'CTP-deid Public' with zero stars, no language, and no description; the characterisation as a de-identification component is inferred from the repository name alone. The entry's own source_caveats acknowledges the tools are not annotators, which raises the question of whether this slot is the right home for them at all."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "`confidentiality_level: restricted` is explicitly labelled in its own source_caveats as inferred rather than stated. Per the omission-over-inference rule, an enum value that the bundle does not assert should be omitted; the supporting facts (uniform 'Controlled' access marking, signed licensing agreement) are already captured in license_and_use_terms and confidential_elements."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "known_biases",
+      "issue": "Both DatasetBias entries carry source_caveats conceding that no bias audit, fairness evaluation, or measured imbalance is reported, and that the entries record the project's stated concern or network composition rather than a finding. These are project intentions and structural facts recast as documented biases; the bundle supports neither `bias_type` assignment as a characterisation of the data."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "splits",
+      "issue": "The holdout test set is recorded as a Splits object although the bundle describes it only as a future deliverable ('will also provision a holdout test set', 'sequestering holdout datasets'), with no size, sampling frame, or availability — as the entry's own source_caveats states. Recording an unrealised plan as a dataset split overstates the evidence. The core record omits `splits` and instead folds the holdout into `tasks`, so the two records also disagree on where this fact lives."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "subpopulations[].identification",
+      "issue": "The value asserts that 'social determinants of health together with contextual factors such as geographic distance to the nearest hospital are project deliverables' as part of subpopulation identification. Project deliverables are not present subpopulation identifiers; this conflates planned data elements with realised ones and duplicates content already in purposes and preprocessing_strategies."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "status",
+      "issue": "The value is a composite analytical statement ('Active data generation project ... partial dataset released ... still being acquired as of the August 2025 status snapshot') rather than a status token of the kind the digest illustrates (draft, published, deprecated). Much of its content duplicates description and updates."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "was_derived_from",
+      "issue": "The digest describes `was_derived_from` as 'a resource from which this resource was derived'. The value is an enumerated prose inventory of four source-system classes across 14 hospitals, duplicating raw_data_sources in full. Singular-resource slot carrying list content."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_timeframes",
+      "issue": "In the core record `start_date`/`end_date` are populated with the award period 2022-09-01 / 2026-11-30 — dates the entry's own source_caveats states are 'the funded project period and a reporting snapshot, not the encounter dates of the data'. Populating collection-timeframe date fields with award dates asserts a collection window the bundle does not establish. The full record omits these date keys, so the two records are inconsistent on the same fact."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "acquisition_methods[].was_directly_observed",
+      "issue": "`was_directly_observed: true` is asserted for retrospective extraction of pre-existing hospital records. Nothing in the bundle indicates observation by the dataset creators; the data were recorded during routine care by third parties. The core record compounds this by merging the DirectCollection content (which the full record keeps in `direct_collection`) into the same object, so the two records structure the identical fact differently."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "Present in the full record, absent from the core record, with its content relocated into acquisition_methods[0].acquisition_details and its source_caveats reattached there. If `direct_collection` exists on CoreDataset this is an unnecessary divergence; if it does not, the omission is correct but undocumented. Unverifiable without reading the core schema."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "third_party_sharing",
+      "issue": "Present in the full record as a ThirdPartySharing object with `is_shared: true`; in the core record its content is dissolved into license_and_use_terms.license_terms prose. The structured boolean is lost and the reconciliation is undocumented in either record."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "keywords",
+      "issue": "Identical fourteen-item keyword list in both records, of which 'AI-ready dataset', 'equitable AI', 'multimodal data' and 'social determinants of health' derive from the bundle's own preferred-terms and titles, but 'intensive care unit', 'physiologic waveforms' and 'medical imaging' are paraphrases rather than bundle terms. Minor: keywords are conventionally editorial, but the bundle supplies an explicit 'Preferred terms' list that was not used as the source."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "notes",
+      "issue": "The `notes` value describes a banner on the project website concerning the site's own availability. The digest restricts `notes` to residual dataset content that description cannot hold; a caveat about the trustworthiness and persistence of a source document is source commentary and belongs in `source_caveats`, where a duplicate mention already appears under external_resources."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "total_size_bytes",
+      "issue": "Omitted, with the omission justified in source_caveats on the grounds that '23 Tb' is ambiguous between terabyte and terabit. The justification is sound and the omission correct; flagged only because the same reasoning was not applied consistently to `counts: 50000`, where a comparable source ambiguity was resolved rather than omitted."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license",
+      "issue": "Omitted at top level while license_and_use_terms.source_caveats records that the chorus-ai GitHub organization is MIT-licensed and Chorus_SOP is Apache-2.0. The omission is defensible (those licenses cover software, not data) and the reasoning is disclosed, but the bundle's explicit 'This project is licensed under the MIT License' statement is thereby represented only inside a caveat rather than any structured slot."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "language",
+      "issue": "Not populated. The bundle states 'Working command of English' as a trainee requirement and all documentation is English, but no statement is made about the language of the dataset content itself. Omission is correct; noted for completeness of the audit."
+    }
+  ],
+  "summary": "Both records are broadly faithful to the declared bundle and disclose their conflicts openly, but the audit surfaces three classes of defect. First, unverified structure: the core record's use of `resources` for the nine modalities, and its accompanying assertion about a `distributions` slot with enumerated format values, rest on a core schema that was never read; the full record's parallel use of `file_collections` cannot be reconciled against it. Second, inference presented as fact: five of six creators are given `principal_investigator` despite the bundle naming only Rosenthal; `confidentiality_level: restricted`, `was_directly_observed: true`, the core record's award-period collection dates, both `known_biases` entries, and the full record's `splits` entry are each contradicted or hedged by their own adjacent source_caveats, which is the signature of a value that should have been omitted. Third, shape violations: `conforms_to` at top level and in every nested collection carries prose qualifiers rather than standard names; `was_derived_from` carries an enumeration into a singular slot; `ethical_reviews[].contact_person` bundles name, title, institution and a defective email into one string; `status` and `notes` carry analytical and source commentary respectively. A single-value defect deserves separate mention: `counts: 50000` silently resolves a documented conflict with the more recent 'over 45K' figure, in the same record that correctly omits `total_size_bytes` on ambiguity grounds — the two decisions apply opposite standards to comparable evidence. Cross-record consistency is imperfect: `direct_collection`, `third_party_sharing`, and `splits` appear in the full record but are dissolved into other slots in the core record without documentation, and the holdout test set is a `Splits` object in one and a `tasks` entry in the other. The `id` in both records is the project homepage URI, doubling as `page`, and the nested modality URIs are fabricated. No slot value was found that the bundle contradicts outright."
+}

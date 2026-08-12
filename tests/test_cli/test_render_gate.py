@@ -218,11 +218,28 @@ class TestNewAgenticRunsMustRecordTheirInstruction(unittest.TestCase):
         from data_sheets_schema.runs import requires_request
         self.assertTrue(requires_request("no-date-here_rep1", "claudecode_agent"))
 
-    def test_the_existing_corpus_is_unaffected(self):
-        """Every record on disk predates the cutoff, so adding the rule must
-        not fail a single one."""
-        from data_sheets_schema.runs import discover, requires_request
-        subject = [r for r in discover()
-                   if not r.is_core and not r.deterministic
-                   and requires_request(r.label, r.method)]
-        self.assertEqual([], [r.label for r in subject])
+    def test_every_subject_run_satisfies_the_rule(self):
+        """Originally: "every record on disk predates the cutoff, so adding the
+        rule must not fail a single one." That was true when written and is a
+        transient fact about the corpus — the 2026-08-11 canaries postdate the
+        cutoff and are correctly subject.
+
+        The durable property is stronger, and is what the gate is for: every
+        run that *is* subject records an instruction the gate can confirm. A
+        run subject to the rule and failing it is the defect; a run subject to
+        it and passing is the rule working.
+        """
+        from data_sheets_schema.runs import (
+            discover, requires_request, verify_request,
+        )
+        failures = []
+        for run in discover():
+            if run.is_core or run.deterministic:
+                continue
+            if not requires_request(run.label, run.method):
+                continue
+            for project in run.projects:
+                status, why = verify_request(run.method, run.label, project)
+                if status in ("mismatch", "missing"):
+                    failures.append(f"{run.label}/{project}: {status} — {why}")
+        self.assertEqual(failures, [])

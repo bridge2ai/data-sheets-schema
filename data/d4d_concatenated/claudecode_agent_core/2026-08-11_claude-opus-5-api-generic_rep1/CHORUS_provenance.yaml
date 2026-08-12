@@ -1,0 +1,292 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-08-12T00:22:12+00:00'
+run:
+  label: 2026-08-11_claude-opus-5-api-generic_rep1
+  project: CHORUS
+  method: claudecode_agent
+  arm: baseline
+  replicate: 1
+model:
+  generation_method: schema-grounded API, six phases
+  agent_runtime: Claude API (direct)
+  provider: LBL CBORG (proxy to Anthropic)
+  base_url: https://api.cborg.lbl.gov
+  model: claude-opus-5
+  max_tokens_by_phase:
+    full: 96000
+    reconcile_full: 96000
+    repair_full: 96000
+    core: 56000
+    reconcile_core: 56000
+    repair_core: 56000
+    audit: 24000
+    report: 24000
+  temperature: null
+  temperature_basis: not applicable to this model
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt.md
+    sha256: 0fbc626bc3a51d74a8ba3d8e2813752f3bc5ce9366ee5f19c99089afdfd9e8dc
+    bytes: 5754
+    exists: true
+  request:
+    sha256: 876ca8a9765bf7405b850091eb02a17b2dd5909e5fb93db9e47ff172fffa5e0d
+    bytes: 4035
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      condition: generic
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: data/preprocessed/source_manifest.yaml'
+      run_date: '2026-08-12'
+      runtime: Claude API (direct)
+      provider: LBL CBORG (proxy to Anthropic)
+      bundle: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+  resolved:
+    sha256: 876ca8a9765bf7405b850091eb02a17b2dd5909e5fb93db9e47ff172fffa5e0d
+    bytes: 4035
+  assembly:
+    sha256: 77331f08a663e5b975fc75ffe580f58785416c86dfb96c3f05ac65cbe2ff16bf
+    layout: schema digest, input bundle, arm prompt, carried artifacts, phase instruction
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: c1e03a0bf4c3e6c5f42b4a8530669dfde610e82073de54904b06937df78644b3
+    bytes: 29298
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: 6041074a92d780a12d2ed799b8643c2046bd99a7f2684cedac3cd23d2a27e807
+    bytes: 11042
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: bdf977ec5680904c65fa03903ef3a5c568c1dfc400c38bf75aebbec57cead198
+    bytes: 5862
+    exists: true
+schema:
+  declared_version: 2.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: fc7295126c21c63abcda4163cea6984b615c6ddab17a639658ded2d2f3b63faa
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: 985460b61d58cf747fd67016bc0656fa204250fdd02ca69a8d638e45a22fcc6b
+  merged_schema_carries_version: true
+  digest_md5: 488bd7321fe53258fef23d0619b2a61c
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: a78c886629deb24ef68a58d225773ddf15cee61f
+  commit_short: a78c8866
+  branch: main
+  dirty: true
+  dirty_file_count: 3
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+  bundle_md5: 9b2ef4b65d67957f79362266cab0bc7a
+  bundle_bytes: 35920
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: 30517167a2d2a0d5b568fc4b22cb5d6a
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml
+    bytes: 39451
+    slots: 49
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml
+    bytes: 39608
+    slots: 47
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_reconciliation.md
+    bytes: 15518
+    slots: null
+unrecoverable: null
+unverified:
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''claude-opus-5''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+- field: model.temperature
+  value: null
+  reason: 'claude-opus-5 rejects `temperature` (400: deprecated for this model), so
+    the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config is not
+    sent and does not apply. Sampling for this model family is selected by model-name
+    suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). claude-opus-5 rejects `temperature` (400: deprecated
+  for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
+api_usage:
+- phase: full
+  attempt: 1
+  started_at: '2026-08-12T00:04:41+00:00'
+  seconds: 421.971
+  input_tokens: 1929
+  output_tokens: 36061
+  cache_read: 0
+  cache_write: 25382
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: core
+  attempt: 1
+  started_at: '2026-08-12T00:11:47+00:00'
+  seconds: 135.764
+  input_tokens: 15266
+  output_tokens: 14714
+  cache_read: 0
+  cache_write: 22259
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: audit
+  attempt: 1
+  started_at: '2026-08-12T00:14:03+00:00'
+  seconds: 65.598
+  input_tokens: 28684
+  output_tokens: 5005
+  cache_read: 0
+  cache_write: 25382
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: reconcile_full
+  attempt: 1
+  started_at: '2026-08-12T00:15:09+00:00'
+  seconds: 186.491
+  input_tokens: 20246
+  output_tokens: 18111
+  cache_read: 25382
+  cache_write: 0
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: reconcile_core
+  attempt: 1
+  started_at: '2026-08-12T00:18:15+00:00'
+  seconds: 160.449
+  input_tokens: 33489
+  output_tokens: 16368
+  cache_read: 0
+  cache_write: 22259
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: report
+  attempt: 1
+  started_at: '2026-08-12T00:20:56+00:00'
+  seconds: 75.966
+  input_tokens: 6781
+  output_tokens: 6072
+  cache_read: 0
+  cache_write: 25382
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: repair_full
+  attempt: 1
+  started_at: '2026-08-12T00:22:19+00:00'
+  seconds: 155.203
+  input_tokens: 15318
+  output_tokens: 15895
+  cache_read: 0
+  cache_write: 11724
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: repair_full
+  attempt: 2
+  started_at: '2026-08-12T00:24:57+00:00'
+  seconds: 131.809
+  input_tokens: 13491
+  output_tokens: 13991
+  cache_read: 11724
+  cache_write: 0
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: repair_core
+  attempt: 1
+  started_at: '2026-08-12T00:27:14+00:00'
+  seconds: 178.771
+  input_tokens: 15412
+  output_tokens: 17910
+  cache_read: 0
+  cache_write: 8601
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: repair_core
+  attempt: 2
+  started_at: '2026-08-12T00:30:15+00:00'
+  seconds: 134.688
+  input_tokens: 13685
+  output_tokens: 14411
+  cache_read: 8601
+  cache_write: 0
+  max_tokens: 56000
+  stop_reason: end_turn
+phases_skipped: null
+repair:
+- phase: repair_full
+  round: 1
+  outcome: applied
+  findings: 14
+- phase: repair_full
+  round: 2
+  outcome: applied
+  findings: 1
+- phase: repair_core
+  round: 1
+  outcome: applied
+  findings: 14
+- phase: repair_core
+  round: 2
+  outcome: applied
+  findings: 1
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml
+      md5: 203e1ea304068551b53f934459caed97
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml
+      md5: 57d52aa67e15baf249e791cd1ce32481
+  schema:
+    full_sha256: fc7295126c21c63abcda4163cea6984b615c6ddab17a639658ded2d2f3b63faa
+    core_sha256: 985460b61d58cf747fd67016bc0656fa204250fdd02ca69a8d638e45a22fcc6b
+  recorded_by: api_runner.execute
+intermediates:
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_audit.json
+  sha256: f89cb85fa0cb927b50792c4e30f19e2d55826034f2e0f988ec61fff03a7c295a
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_core.yaml
+  sha256: d1afdcc803f987c9d7fca9bc33a43a2dc782b2a3451f68c6ede2bf71ec78d405
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_full.yaml
+  sha256: 1433be2460f29cf49d5a134e38c98e3d33ad9a1d3b01d19586fc979edb94ba11
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_reconcile_core.yaml
+  sha256: ad901f6fade377abef172720f47a0687b9e759eb3a1ca38276c7c9f40c81f969
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_reconcile_full.yaml
+  sha256: a482cf702690acf1eba93fc0bdb88d61df5a58252d99e906acfba162d43f7274
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_repair_core_r1.yaml
+  sha256: 10a833a4a41b07662f8fb613f6178d2a422b052bcd615ef99b6b885751749b7d
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_repair_core_r2.yaml
+  sha256: 6091d2babc55aa93d35716fcd6286029a2679fc123c03ae381019d03dd7f865d
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_repair_full_r1.yaml
+  sha256: edaa673bc966711e98df4b286e02fc854302b9d02bfe6bde345be82334afaa3a
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_repair_full_r2.yaml
+  sha256: 20135183c05e6c30b109b83275c3ee14969711ba2be3e982be35bb0536db86cc
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_report.md
+  sha256: 46b7fe889e5a91f590b7c235b3c1736ea80877d08c60669e207476e87e5e5c72

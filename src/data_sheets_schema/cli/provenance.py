@@ -31,6 +31,20 @@ def provenance():
                    '`d4d api render-prompt --out`. Hashed as prompts.request. '
                    'The file is what an instruction was built from; this is '
                    'what it became.')
+@click.option('--condition', default=None,
+              help='Condition the instruction was rendered under. With --arm '
+                   'and --runtime this reconstructs the render spec, so the '
+                   'render gate can re-render and compare instead of reporting '
+                   '`unverifiable` (#497).')
+@click.option('--arm', default='baseline', show_default=True,
+              help='Arm the instruction was rendered for; part of the spec.')
+@click.option('--runtime', default=None,
+              help='Runtime the instruction declared, e.g. "Claude Code".')
+@click.option('--provider', default=None, help='Provider the spec declared.')
+@click.option('--bundle-for-spec', 'bundle_for_spec', default=None,
+              type=click.Path(),
+              help='Bundle the instruction was rendered against, when it '
+                   'differs from --input-bundle.')
 @click.option('--reasoning-effort', 'reasoning_effort', default=None,
               type=click.Choice(EFFORT_CHOICES),
               help='Reasoning effort this run was launched at, where the '
@@ -42,6 +56,7 @@ def provenance():
                    'discard it downstream and the record and the analysis '
                    'would then disagree.')
 def record(project, method, label, input_bundle, prompts, prompt_text,
+           condition, arm, runtime, provider, bundle_for_spec,
            reasoning_effort):
     """Write a LIVE provenance record for a run just produced.
 
@@ -56,7 +71,29 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     and the prompt-condition study is precisely a comparison between prompts,
     so a record that cannot identify its own prompt cannot be placed in it.
     """
+    from data_sheets_schema import schema_digest
     from data_sheets_schema.provenance import build_record, record_path_for
+
+    # The schema is on disk and the run has just been validated against it, so
+    # the digest is observed rather than asserted. `d4d api run` has always
+    # recorded it and this path never could, which left the agentic arm off the
+    # axis the whole prompt comparison is stratified by — and unable to go
+    # STALE when the schema moves (#426, #433, #497).
+    digest = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+
+    # Reconstruct the render spec, so the gate can re-render and compare rather
+    # than reporting `unverifiable`. Only when the caller says which condition
+    # was rendered: guessing it would assert a condition the run may not have
+    # used, which is the failure the gate exists to catch.
+    spec = None
+    if condition:
+        from data_sheets_schema.api_runner import RunSpec
+        bundle = bundle_for_spec or input_bundle
+        spec = RunSpec(
+            project=project, arm=arm, method=method,
+            bundle=Path(bundle) if bundle else None, label=label,
+            condition=condition, runtime=runtime, provider=provider,
+        ).render_spec()
 
     rec = build_record(project, method, label, mode="live",
                        input_bundle=Path(input_bundle) if input_bundle else None,
@@ -64,6 +101,8 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        prompt_paths=[Path(p) for p in prompts] or None,
                        prompt_request=(Path(prompt_text).read_text(encoding="utf-8")
                                        if prompt_text else None),
+                       prompt_request_spec=spec,
+                       schema_digest_md5=digest,
                        reasoning_effort=reasoning_effort)
     out = rec.write(record_path_for(project, method, label))
     click.echo(f"✓ {out}")
