@@ -382,10 +382,43 @@ run.**
   are now declared slots (#388, #381), and neither of those two appears in the
   canonical sweep at all.
 
+## Amendment, 2026-08-12: the agentic v1 arm straddled the pin (#517)
+
+The instruction two sections up — *"if it has moved again, generate both arms
+after the move rather than one either side of it"* — was not followed. It moved
+during the arm, and nothing stopped the arm.
+
+The agentic v1 arm of 2026-08-11 sits either side of `488bd732` → `659aae67`,
+which #503 produced by adding `data_governance`:
+
+| replicate | digest | `data_governance` populated |
+|---|---|---|
+| rep1 | `488bd732` | 0 of 5 projects |
+| rep2, rep3 | `659aae67` | 5 of 5 projects each |
+
+rep1 could not populate a class that did not exist when it ran. So a slot-count
+difference between rep1 and the others is partly a schema change, and the arm's
+within-project variance is not a clean replicate estimate: mean sd 2.81 raw,
+2.67 with the forced slot removed. The adjustment is crude — it assumes the
+class contributes exactly one top-level slot and changed nothing about how a run
+allocated facts elsewhere, which is unmeasured.
+
+**Consequences for this plan.** The `488bd732` pin above is now wrong for 10 of
+the 15 agentic records and for the schema as it stands. The API arms, which are
+what §6's promotion decision actually turns on, have two valid runs and are
+stopped; when they resume they must be generated entirely at one digest, and
+`d4d runs check` now reports a straddled series so this is visible rather than
+inferred after the fact.
+
+The warning was written into this plan and still did not fire, because a plan
+is read once and a sweep runs unattended. That is the argument for the check
+being in `runs check` rather than in prose.
+
 ## What this does not settle
 
 - The mechanism question (v2 against v3, isolating rule 4). Needs a v2 arm at
-  `488bd732`.
+  whichever digest the other arms are generated at — `488bd732` when this was
+  written, `659aae67` as of 2026-08-12.
 - Whether the promotion generalises beyond five projects. #169 established that
   between-project variance (sd 10.9) swamps between-config effects at this
   sample size; five projects, two of which share a source corpus

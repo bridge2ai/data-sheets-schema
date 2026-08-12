@@ -529,6 +529,25 @@ def check_cmd(method, label, project, strict):
         click.echo("   An unpinned verdict is not wrong; it is unfalsifiable "
                    "by a schema change, so it cannot go STALE.")
 
+    # Replicates generated against different schemas (#517). Every other check
+    # here reads one record; this one only exists between records, which is
+    # why the 2026-08-11 arm passed --strict with a schema change in the
+    # middle of it. Reported for the whole corpus rather than the filtered
+    # selection would be misleading, so it uses the same rows as everything
+    # else: narrow the filter and you narrow what can be compared.
+    from data_sheets_schema.runs import schema_straddle
+    straddled = schema_straddle(rows)
+    if straddled:
+        click.echo(f"\n⚠️  {len(straddled)} replicate series generated against "
+                   "more than one schema:")
+        for series, by_digest in sorted(straddled.items()):
+            click.echo(f"   {series}")
+            for digest, labels in sorted(by_digest.items()):
+                reps = ", ".join(l.rsplit("_", 1)[-1] for l in labels)
+                click.echo(f"     {digest[:8]}  {reps}")
+        click.echo("   Each record correctly names the schema it saw. Slot "
+                   "counts across the split are not like-for-like.")
+
     stale = drift[BUNDLE_DRIFTED] + drift[BUNDLE_ABSENT]
     if stale:
         click.echo(f"\nⓘ  {stale} record(s) name an input bundle whose bytes "
