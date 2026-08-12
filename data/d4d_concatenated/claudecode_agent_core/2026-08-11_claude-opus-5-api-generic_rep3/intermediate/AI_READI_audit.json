@@ -1,0 +1,119 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "Slot `distributions` is not present in the supplied schema digest for CoreDataset/Dataset. The digest defines `distribution_formats`, `file_collections`, `download_url`, `total_file_count`, and `total_size_bytes`, but no slot named `distributions`. The keys used inside it (`path`, `bytes`, `format`, `media_type`, `conforms_to`, `notes`) are also not a defined object range for any such slot; `path` and `total_bytes` exist only on FileCollection, and FileCollection requires `id`, which is absent from every entry. This block will fail validation or be silently dropped. The per-directory facts (file counts, byte sizes, standards) are bundle-supported and should have been expressed as `file_collections` entries with `id`, mirroring the full record."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "annotation_analyses",
+      "issue": "Fabricated-by-inference content. The bundle states only that no labelling was performed (healthsheet 'Labeling' section answers 'N/A'). The bundle nowhere makes an assertion about annotation quality, inter-annotator agreement, or disagreement analysis. Constructing an `annotation_analyses` object solely to record the non-existence of annotation is an invention of a record where the evidence supports omission. Prefer omission over inference."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "machine_annotation_tools",
+      "issue": "Fabricated-by-inference content. The bundle contains no statement about automated annotation tools; healthsheet labeling Q5 answers 'N/A - no labeling was performed'. The value repurposes preprocessing and format-conversion facts (already correctly recorded under `preprocessing_strategies` and `cleaning_strategies`) into a MachineAnnotationTools object that the bundle does not support. This also duplicates the same facts across three slots."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "imputation_protocols",
+      "issue": "Fabricated-by-inference content. `imputation_method: 'None. No imputation of missing values is reported'` asserts a protocol object where the bundle records no imputation protocol at all. Absence of evidence is being encoded as a positive slot value. The substantive handling statement is already correctly held in `missing_data_documentation.handling_strategy`."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "errata",
+      "issue": "Fabricated-by-inference content. The healthsheet erratum question has an empty response. The record converts that silence into an Erratum object whose `erratum_details` states that no erratum is identified, and then adds a `source_caveats` conceding the value is not an assertion. An unanswered question is grounds for omitting the slot, not for populating it with a negation."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "raw_data_sources",
+      "issue": "Third entry ('Motor vehicle traffic and accident records covering the three years preceding the study visit') overstates the bundle. The IRB protocol states records will be collected on car accidents and traffic tickets in the last 3 years and that driving records will be obtained from the Department of Licensing; the healthsheet and README list 'traffic and accident reports' among controlled-access items. Characterising this as a distinct raw data source of the released dataset, with a three-year window attached, blends IRB-planned collection with released-dataset composition. The window is IRB-plan language, not a property of the v3.0.0 release."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "`publisher: https://fairhub.io` — the bundle gives publisherName 'FAIRhub' with no URI. The slot range is uriorcurie so a URI is structurally acceptable, but the specific URI https://fairhub.io is supplied by the agent rather than by the bundle's publisher field (it appears elsewhere as the platform URL). Minor unsupported specificity in an identifier-typed slot. Same issue in the core record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[0].affiliations",
+      "issue": "Source commentary embedded inside an affiliation value: 'Washington University in St. Louis (as recorded in FAIRhub study metadata)'. The parenthetical is a trust annotation about provenance and belongs in `source_caveats` (where the same conflict is already documented at record level), not inside the affiliation string. Same defect in the core record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "license",
+      "issue": "Source commentary/URL embedded inside a name-typed value: 'AI-READI custom license v2.0 (https://doi.org/10.5281/zenodo.17555036)'. The bundle's rightsName is 'AI-READI custom license v2.0' and rightsURI is the DOI, which are separate fields; the URI belongs in `license_and_use_terms` (where it already appears) rather than concatenated into the license name. Same defect in the core record."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "subpopulations[0].notes",
+      "issue": "The full recommended-split table (train/val/test counts by race, sex and diabetes status) is carried in `subpopulations[0].notes` in the core record. The schema digest defines a `splits` slot (range Splits, with `split_details`) which is present in the core record's inventory and is the fitting home for this content; the full record correctly uses it. Placing structured split content in a `notes` field when a fitting structured slot exists violates the structured-slots-first ordering."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "splits",
+      "issue": "Omission the bundle clearly supports and that the full record populates. The README publishes an explicit recommended 70/15/15 train/validation/test split with per-stratum counts, and the healthsheet states this split is new in v3.0.0. `splits` is available in the core inventory but is unpopulated, with the content displaced into `subpopulations[0].notes`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "relationships",
+      "issue": "Omission relative to the full record and to available evidence. The healthsheet composition Q8 explicitly addresses relationships between instances ('all instances are part of the same prospective data generation project... currently only one visit per participant'). The full record captures this in `relationships`; the core record folds it into `instances[0].notes` instead, again preferring a notes field over the fitting structured slot."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "related_datasets",
+      "issue": "Omission of a clearly supported and structurally available slot. The bundle establishes typed relationships to versions 1.0.0 and 2.0.0 (is_new_version_of), to docs.aireadi.org (is_documented_by, explicitly declared as relationType 'IsDocumentedBy' in the FAIRhub relatedIdentifier list), and to the two publications. The full record encodes these in `related_datasets` with schema-valid relationship_type values; the core record demotes them to free text inside `external_resources[0].notes`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "collection_consents / collection_notifications / consent_revocations / participant_compensation / participant_privacy",
+      "issue": "Five distinct Ethics-module slots populated in the full record are collapsed into `informed_consent[0]` fields and notes in the core record (notification into `consent_scope`, revocation into `withdrawal_mechanism`, compensation into `notes`). Compensation in particular is bundle-rich (USD 200, paid ≥2 weeks post-visit, not prorated, travel reimbursed) and has a dedicated `participant_compensation` slot with matching keys. If these slots exist in the core inventory this is misplacement; if they do not, the caveat is only that the digest supplied does not distinguish core from full inventories, so this cannot be fully adjudicated from the digest alone."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[0].sampling_strategies",
+      "issue": "Instance defines a `sampling_strategies` key in its accepted-keys list; the record leaves it unused while duplicating no content — acceptable — but note the top-level `sampling_strategies` and the healthsheet's own contradiction (dataset 'contains all possible instances' vs FAIRhub 'Non-Probability Sample') is handled only by a source_caveat. Both readings are preserved, so this is compliant, but the boolean fields `is_sample: true` and `is_random: false` are the agent's adjudication of that contradiction rather than a bundle statement; the bundle asserts non-probability sampling in one place and all-possible-instances in another. Booleans force a resolution the evidence does not cleanly supply."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "conforms_to",
+      "issue": "Value is a semicolon-delimited prose list of six standards in a single string. The slot range is a scalar string so this does not fail validation, but the concatenation is prose where the per-directory `file_collections[].conforms_to` values already carry the standards individually. Acceptable but not clean. Same in the core record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "citation",
+      "issue": "The bundle provides no formatted citation; docs.aireadi.org/docs/3/citation is referenced but its content is not in the bundle. The `citation` value is therefore an agent-composed narrative ('The dataset is attributed to the AI-READI Consortium and published by FAIRhub with DOI 10.60775/fairhub.3 (2025)') assembled from separate metadata fields rather than a citation the bundle supplies. Defensible as assembly of bundle facts, but it presents as a recommended citation string that no source states."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_on / issued",
+      "issue": "Both set to 2025-11-17T00:00:00Z. The bundle's `created_at` for dataset 3 is a Unix timestamp 1763366400 and the dateType 'Available' value is 2025-11-17; treating the availability date as the creation date is an equation the bundle does not make. Low impact, but `created_on` is not independently evidenced."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "human_subject_research.special_populations",
+      "issue": "The maximum age of 85 is drawn from the FAIRhub eligibilityModule and the IRB exclusion criteria, but the healthsheet's own eligibility answer (preprocessing Q4 and inclusion Q3) lists only '≥ 40 years old' with no upper bound. The record notes the FAIRhub provenance inline, which is appropriate, but the same 85-year ceiling is restated in `known_limitations` coverage_limitation without the qualifying attribution, presenting a contested bound as settled in one of the two places it appears."
+    }
+  ],
+  "summary": "Both records are substantially well grounded: the full record's coverage of purposes, sampling, biases, limitations, licensing, ethics and per-directory file collections tracks the bundle closely, and the acronym conflict, the Washington University / University of Washington discrepancy, the 4,000 vs 4,600 enrolment discrepancy and the two licence versions are all surfaced as source_caveats rather than silently resolved. The dominant defect class is in the core record, where four slots (annotation_analyses, machine_annotation_tools, imputation_protocols, errata) are populated purely to assert the non-existence of the thing they describe — inference from silence, where omission is the correct answer — and one slot (distributions) is not defined in the schema digest at all and carries FileCollection-shaped objects missing the required id, so it will not validate. A secondary pattern in the core record is displacement: splits, relationships and related_datasets content is real and bundle-supported but is carried in notes fields instead of the fitting structured slots that the full record uses correctly. Minor cross-cutting issues include provenance commentary embedded inside an affiliation value and a URI concatenated into a license name in both records. Recommended remediation before reconciliation: delete the four negation-only core slots, convert core distributions into file_collections with ids, promote splits/relationships/related_datasets out of notes, and move the parenthetical affiliation and licence-URI commentary into source_caveats and license_and_use_terms respectively."
+}

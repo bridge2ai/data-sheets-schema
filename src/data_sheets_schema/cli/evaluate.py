@@ -263,3 +263,73 @@ def related_datasets_cmd(records, project):
     if total:
         raise SystemExit(1)
 
+
+
+@evaluate.command("spelling")
+@click.option('--method', default='claudecode_agent', show_default=True)
+@click.option('--label', default=None, help='restrict to one run label')
+@click.option('--project', default=None)
+@click.option('--show-quoted', is_flag=True,
+              help='also list occurrences that appear verbatim in the bundle')
+def spelling_cmd(method, label, project, show_quoted):
+    """British spellings in generated prose, excluding quoted source text (#502).
+
+    A find-and-replace would be wrong: the bundles themselves contain `licence`
+    13 times and `programme` 6, so rewriting every occurrence would silently
+    alter what a source said. An occurrence is treated as quoted when a window
+    of surrounding text appears verbatim in the run's declared bundle.
+
+    Conservative in the direction of silence. A false "quoted" merely fails to
+    report; a false "generated" would invite someone to edit evidence.
+    """
+    from pathlib import Path as _Path
+
+    import yaml as _yaml
+
+    from data_sheets_schema.runs import discover, record_path
+    from data_sheets_schema.spelling import in_identifiers, occurrences
+    from data_sheets_schema.verifiable import declared_bundle
+
+    generated = quoted = 0
+    ident: list = []
+    for run in discover():
+        if run.is_core or run.deterministic:
+            continue
+        if method and run.method != method:
+            continue
+        if label and run.label != label:
+            continue
+        for proj in run.projects:
+            if project and proj != project:
+                continue
+            path = record_path(run.method, run.label, proj)
+            if not path.exists():
+                continue
+            try:
+                data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            except Exception:                                # noqa: BLE001
+                continue
+            bundle = declared_bundle(run.method, run.label, proj)
+            text = (_Path(bundle).read_text(errors="ignore")
+                    if bundle and _Path(bundle).exists() else None)
+            occ = occurrences(data, text)
+            here = [o for o in occ if not o.quoted]
+            quoted += len(occ) - len(here)
+            if here:
+                click.echo(f"\n{proj}  {run.label}"
+                           + ("" if text else "   ⚠️  bundle not identified, so "
+                              "nothing could be shown to be quoted"))
+                for o in here:
+                    click.echo(f"   {o.slot:26} {o.word:14} -> {o.suggestion}")
+                    click.echo(f"      …{o.context[:100]}…")
+                generated += len(here)
+            ident.extend((proj, run.label, o) for o in in_identifiers(data))
+
+    click.echo(f"\n{generated} occurrence(s) in generated prose, "
+               f"{quoted} in text quoted from a bundle (left alone).")
+    if ident:
+        click.echo(f"\n⚠️  {len(ident)} inside an `id`, which is structural "
+                   "rather than stylistic — an identifier other records may "
+                   "key on cannot be fixed by a later copy-edit:")
+        for proj, lab, o in ident:
+            click.echo(f"   {proj:16} {o.context}")
