@@ -1141,3 +1141,93 @@ def select_cmd(method, project, config, allow_unverified, execute):
                    "what replaced it.")
     click.echo("All replicates kept — this marks one, it does not move or "
                "delete anything.")
+
+
+@runs.command("redundancy")
+@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("--label", default=None,
+              help="one run label; default is each project's canonical record")
+@click.option("--project", default=None)
+@click.option("--threshold", default=None, type=float,
+              help="content-word overlap above which two sentences are the "
+                   "same statement (default 0.6)")
+@click.option("--show", default=3, type=int, show_default=True,
+              help="example restatements to print per project")
+def redundancy_cmd(method, label, project, threshold, show):
+    """How often one fact is stated in more than one slot (#501).
+
+    Reported, never fatal. The repetition is **intended**: the decision on #501
+    was that a reader who opens one slot must get an answer there rather than a
+    pointer elsewhere, so per-slot completeness wins and the document reads
+    repetitively as the price.
+
+    This exists so the rate can be watched. It sat at 7.4% of sentences across
+    the canonical set when that was decided; a later arm at 30% would mean
+    something changed that nobody chose.
+    """
+    from pathlib import Path as _Path
+
+    from data_sheets_schema import redundancy as red
+    from data_sheets_schema.constants import PROJECTS
+    from data_sheets_schema.runs import CONCAT_DIR, canonical_runs
+
+    kwargs = {} if threshold is None else {"threshold": threshold}
+    if label:
+        targets = {p: label for p in ([project] if project else PROJECTS)}
+    else:
+        targets = {p: info["label"] for p, info in canonical_runs().items()
+                   if not project or p == project}
+        if not targets:
+            raise click.ClickException(
+                "no canonical records; pass --label, or run "
+                "`d4d runs select --execute`")
+
+    total_sentences = total_prose = total_structural = 0
+    rows = []
+    for proj, lab in sorted(targets.items()):
+        path = _Path(CONCAT_DIR) / method / lab / f"{proj}_d4d.yaml"
+        if not path.exists():
+            continue
+        summary = red.summarize(red.load(path), **kwargs)
+        rows.append((proj, lab, summary))
+        total_sentences += summary["sentences"]
+        total_prose += summary["prose_restatements"]
+        total_structural += summary["structural_restatements"]
+
+    if not rows:
+        raise click.ClickException("no records found for that selection")
+
+    click.echo(f"{'project':17}{'sentences':>10}{'restated':>10}{'rate':>8}"
+               f"{'structural':>12}")
+    for proj, _lab, s in rows:
+        click.echo(f"{proj:17}{s['sentences']:>10}{s['prose_restatements']:>10}"
+                   f"{s['rate']:>7.1%}{s['structural_restatements']:>12}")
+    rate = (total_prose / total_sentences) if total_sentences else 0.0
+    used = red.THRESHOLD if threshold is None else threshold
+    # The threshold is printed with the rate because the rate is meaningless
+    # without it: on the canonical set the same corpus reads 2.1% at exact
+    # match and 12.0% at 0.5. A figure quoted bare invites comparison against
+    # a future figure computed differently.
+    click.echo(f"\n{total_prose} prose restatement(s) across {total_sentences} "
+               f"sentences — {rate:.1%} at threshold {used}")
+    # Named separately rather than folded in: a URL beside its format, or a
+    # nested sub-resource repeating its parent's title, is correct. Including
+    # it would overstate the figure by about a third.
+    click.echo(f"{total_structural} further pair(s) are structural (a URL or a "
+               "nested resource) and are not redundancy.")
+
+    for proj, _lab, s in rows:
+        if not s["restatements"]:
+            continue
+        click.echo(f"\n{proj} — {len(s['slots_involved'])} slots involved:")
+        for r in sorted(s["restatements"],
+                        key=lambda x: -x.similarity)[:show]:
+            click.echo(f"   {r.similarity:.2f}  {r.slot_a} | {r.slot_b}")
+            click.echo(f"          {r.text_a[:96]}")
+            click.echo(f"          {r.text_b[:96]}")
+        if len(s["restatements"]) > show:
+            click.echo(f"   … {len(s['restatements']) - show} more "
+                       "(raise --show)")
+
+    click.echo("\nThis is reported, not failed: per-slot completeness is the "
+               "decision on #501, and the repetition is its accepted cost.")
