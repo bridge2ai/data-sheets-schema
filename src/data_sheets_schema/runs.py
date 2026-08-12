@@ -245,6 +245,59 @@ def validation_status(method: str, label: str, project: str,
     return VALID if v["passed"] else INVALID
 
 
+def generation_digest(method: str, label: str, project: str,
+                      concat_dir: Path = CONCAT_DIR) -> str | None:
+    """The schema digest this run was *generated* against, or None.
+
+    Distinct from `validation.schema`, which pins the schema a verdict was
+    *reached* against. The two legitimately differ: validation is a later act,
+    so a record generated before a schema change and validated after it names
+    one digest here and the current schema there. That is not a discrepancy —
+    it is the only way to state both facts.
+    """
+    from data_sheets_schema.provenance import record_path_for
+    path = record_path_for(project, method, label, concat_dir)
+    if not path.exists():
+        return None
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return ((data.get("schema") or {}).get("digest_md5")) or None
+
+
+def schema_straddle(rows: list[dict], concat_dir: Path = CONCAT_DIR
+                    ) -> dict[str, dict[str, list[str]]]:
+    """Replicate series whose members were generated against different schemas.
+
+    A cross-record property, which is why nothing caught it (#517): every
+    record of the 2026-08-11 v1 arm is individually sound and `check --strict`
+    exits 0 on all fifteen, because each correctly names the schema it saw.
+    The defect only exists between records — rep1 predates #503 and cannot
+    populate a class that did not exist yet, so a slot-count difference that
+    reads as replicate variance is partly a schema change.
+
+    Reported, never fatal. A straddled series is usable if it is known to be
+    straddled and misleading if it is not, and that distinction is what a
+    warning preserves and a gate would collapse.
+
+    Returns ``{series: {digest: [labels]}}`` for series with more than one
+    digest. Records carrying no digest are ignored rather than counted as a
+    distinct value: absent is not a different schema, it is no claim.
+    """
+    import collections
+    seen: dict[str, dict[str, set]] = collections.defaultdict(
+        lambda: collections.defaultdict(set))
+    for r in rows:
+        digest = generation_digest(r["method"], r["label"], r["project"],
+                                   concat_dir)
+        if not digest:
+            continue
+        m = REPLICATE_RE.match(r["label"])
+        if not m:
+            continue
+        seen[f"{r['method']}/{m.group('config')}"][digest].add(r["label"])
+    return {series: {d: sorted(labels) for d, labels in by_digest.items()}
+            for series, by_digest in seen.items() if len(by_digest) > 1}
+
+
 VERDICT_PINNED, VERDICT_UNPINNED, VERDICT_ABSENT = "pinned", "unpinned", "absent"
 
 
