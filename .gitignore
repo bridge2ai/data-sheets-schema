@@ -190,3 +190,6 @@ data/poster_assets/
 
 # Resume scaffolding for `d4d api` runs — deleted on success, never a record.
 *_api_progress.json
+
+# Run locks for in-flight API sweeps (#513) — process state, not artifacts
+data/.run_locks/
