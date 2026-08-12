@@ -131,5 +131,5 @@ validation:
       md5: cc5bea839075f00de433612a313f358a
   schema:
     full_sha256: a392c073f2de00293702c7d31e6e1899f550d9b4bed2f01126630c25989da94b
-    core_sha256: 985460b61d58cf747fd67016bc0656fa204250fdd02ca69a8d638e45a22fcc6b
+    core_sha256: de0438d7df6b4b4e64abfde16e729531bc9c4fc72328872d84bc8b7dcad4db25
   recorded_by: d4d runs validate

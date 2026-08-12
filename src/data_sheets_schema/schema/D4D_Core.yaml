@@ -652,6 +652,23 @@ classes:
         broad_mappings:
           - schema:conditionsOfAccess
 
+      data_governance:
+        description: >-
+          Who decides who may use this dataset, and how. The access committee,
+          its membership and contacts, the review process, and who remains
+          accountable for the data over time.
+
+          Distinct from `license_and_use_terms` (the terms) and
+          `regulatory_restrictions` (the regulations): this is the people and
+          the process that apply them. Core carried the other two and not this
+          one, so the exchange layer could say what a licence permits and which
+          regulations apply but not who to ask for access (#510).
+        range: DataGovernance
+        inlined: true
+        slot_uri: d4d:dataGovernance
+        broad_mappings:
+          - schema:conditionsOfAccess
+
       # -----------------------------------------------------------------------
       # Group 3 — simple flags and scalar fields on Dataset
       # -----------------------------------------------------------------------
@@ -697,6 +714,27 @@ classes:
         slot_uri: schema:relatedLink
         broad_mappings:
           - schema:relatedLink
+
+      related_datasets:
+        description: >-
+          Datasets related to this one, each with a typed relationship
+          (supplements, derives from, is version of, and kin). Use
+          DatasetRelationship to state the relationship type rather than
+          implying it from placement.
+
+          This is the slot `source_manifest.yaml` names in `express_as` for a
+          related-but-distinct dataset, so a core record could not express its
+          own declared scope relation: VOICE_PEDIATRIC could be in scope by
+          `id` while a core-only reader had no way to see the distinct adult
+          dataset (#510). Citing a related dataset here is what keeps it out of
+          `resources` and `distribution_formats`, where it would be absorbed
+          into this dataset's own distribution (#441).
+        range: DatasetRelationship
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: schema:isRelatedTo
+        broad_mappings:
+          - schema:isRelatedTo
 
       resources:
         description: >-
