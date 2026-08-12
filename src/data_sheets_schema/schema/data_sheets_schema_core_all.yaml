@@ -36985,6 +36985,14 @@ classes:
           was its purpose; report the schedule under the compensation slots and leave
           this absent.
 
+          ⚠️ **"Retention" here means keeping participants enrolled, never keeping
+          data.** How long the data is kept belongs in `retention_limit`, which is
+          a different slot about a different subject. The word is treacherous in this
+          corpus: across all five project bundles nearly every occurrence of "retention"
+          is about data or specimen retention — "limits on the retention of the data",
+          "bioSpecRetention", "records retention requirements" — and none so far describes
+          an incentive structure. An empty slot is the correct outcome for those sources.
+
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
         slot_uri: d4d:retentionIncentiveStructure

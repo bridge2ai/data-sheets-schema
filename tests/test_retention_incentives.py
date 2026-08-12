@@ -110,3 +110,44 @@ class TestTheChangeIsAdditive(unittest.TestCase):
                 self.assertFalse(getattr(slots[slot], "deprecated", None),
                                  "compensation is still the right slot when "
                                  "the source reports only a payment")
+
+
+class TestItDoesNotCollideWithDataRetention(unittest.TestCase):
+    """`retention_limit` already exists and means how long the *data* is kept.
+
+    Found reviewing this change. Across all five project bundles nearly every
+    occurrence of "retention" is about data or specimen retention — "limits on
+    the retention of the data", "bioSpecRetention", "records retention
+    requirements". A run meeting `retention_incentives` with those sources in
+    context has an obvious wrong place to put them, and #403 recorded what
+    happens next: when two slots are near-synonyms and neither is constrained,
+    records pick one at random.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.view = SchemaView(str(FULL))
+        cls.slots = {s.name: s for s in
+                     cls.view.class_induced_slots("HumanSubjectCompensation")}
+
+    def test_both_slots_still_exist_separately(self):
+        dataset = {s.name for s in self.view.class_induced_slots("Dataset")}
+        self.assertIn("retention_limit", dataset)
+        self.assertIn("retention_incentives", self.slots)
+
+    def test_the_description_disambiguates_them_by_name(self):
+        """By name, not by implication — a reader resolving an ambiguity needs
+        to be told which other slot to use, not merely that this is not it."""
+        text = self.slots["retention_incentives"].description
+        self.assertIn("retention_limit", text)
+
+    def test_it_says_which_sense_of_retention_is_meant(self):
+        text = self.slots["retention_incentives"].description.lower()
+        self.assertIn("participants enrolled", text)
+        self.assertIn("never", text)
+
+    def test_it_says_an_empty_slot_is_correct(self):
+        """Otherwise a reviewer reads five empty slots as a generation failure
+        and someone 'fixes' it by filling them from data-retention text."""
+        text = self.slots["retention_incentives"].description
+        self.assertIn("empty slot is the correct outcome", text)

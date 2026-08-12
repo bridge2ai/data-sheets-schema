@@ -215,6 +215,16 @@ classes:
           the structure. An escalating payment schedule is not by itself
           evidence that retention was its purpose; report the schedule under
           the compensation slots and leave this absent.
+
+          ⚠️ **"Retention" here means keeping participants enrolled, never
+          keeping data.** How long the data is kept belongs in
+          `retention_limit`, which is a different slot about a different
+          subject. The word is treacherous in this corpus: across all five
+          project bundles nearly every occurrence of "retention" is about data
+          or specimen retention — "limits on the retention of the data",
+          "bioSpecRetention", "records retention requirements" — and none so
+          far describes an incentive structure. An empty slot is the correct
+          outcome for those sources.
         slot_uri: d4d:retentionIncentiveStructure
         range: string
         annotations:

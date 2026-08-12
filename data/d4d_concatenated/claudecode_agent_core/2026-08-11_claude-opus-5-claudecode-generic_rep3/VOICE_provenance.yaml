@@ -130,6 +130,6 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep3/VOICE_d4d_core.yaml
       md5: a25640d2448384452c46bd5bec04ca2e
   schema:
-    full_sha256: f223e4bf11641452c706a28dd6dce3423d6c24d1f6e749a58bfa0726b0e7dc87
-    core_sha256: 3a660827ea17d6a8972899aeeb3843b0051ec5b0c0ef12456f1c0735c13ff43d
+    full_sha256: da5ad57b5db9e0b832ad2ae4c048550601b213b69f5d786b768adcbb7287cc88
+    core_sha256: 9b3fbe3bb8fdc01792ee41dd9db75cbef3c5ea40fdc1d90d5fce037951ad154f
   recorded_by: d4d runs validate
