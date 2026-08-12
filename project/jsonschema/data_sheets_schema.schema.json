@@ -1059,6 +1059,125 @@
             "title": "DataCollector",
             "type": "object"
         },
+        "DataGovernance": {
+            "additionalProperties": false,
+            "description": "Who decides who may use this dataset, and how? Covers the body responsible for access decisions \u2014 commonly a Data Access Committee \u2014 its membership and contacts, the process it follows, and who remains accountable for the data over time.\nDistinct from `LicenseAndUseTerms`, which states the terms, and from `ExportControlRegulatoryRestrictions`, which states the regulations. This class is about the people and the process that apply them.",
+            "properties": {
+                "access_decision_timeframe": {
+                    "description": "Stated turnaround for an access decision, as the source gives it. Free text rather than a duration, because sources state this as prose (\"within 30 days\", \"at the next quarterly meeting\").",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "access_review_process": {
+                    "description": "How an access request is reviewed and decided: who submits, what is required of them, who reviews, and on what criteria.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "accountable_organization": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/Organization"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "The organization accountable for the dataset over time, including after the funding period ends. Frequently different from the organization that created it."
+                },
+                "appeal_process": {
+                    "description": "What recourse an applicant has if access is refused or revoked.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "committee_contact": {
+                    "description": "Contact point for the governance committee \u2014 the person or address that answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "committee_members": {
+                    "description": "Members of the governance or data access committee. One entry per person; do not collapse several members into one. Record only members the sources name \u2014 committee membership is frequently undisclosed, and an absent list is a correct answer.",
+                    "items": {
+                        "$ref": "#/$defs/Person"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "committee_name": {
+                    "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"AI-READI Data Access Committee\", \"DACO\").",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_caveats": {
+                    "description": "Commentary on the evidence behind this object's values \u2014 source conflicts, what a value was transcribed from, questions the source material leaves unanswered (#385). A trust annotation about the sibling slots, not dataset content: content belongs in the structured slots, description or notes.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "stewardship_roles": {
+                    "description": "Named stewardship or custodianship roles for the data, distinct from its creators \u2014 who holds continuing responsibility for it, and for what.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "title": "DataGovernance",
+            "type": "object"
+        },
         "DataProtectionImpact": {
             "additionalProperties": false,
             "description": "Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, and any supporting documentation.",
@@ -1320,6 +1439,17 @@
                         "array",
                         "null"
                     ]
+                },
+                "data_governance": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/DataGovernance"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Who decides who may use this dataset, and how. DataGovernance object from the Data Governance module describing the access committee, its membership and contacts, the review process, and who remains accountable for the data over time.\nDistinct from `license_and_use_terms` (the terms) and `regulatory_restrictions` (the regulations): this is the people and the process that apply them. Added because `Dataset` previously had no governance slot at all, so a data access committee could only be named by nesting its chair inside an export-control statement (#503)."
                 },
                 "data_protection_impacts": {
                     "description": "Data protection impact assessments (DPIAs) conducted for the dataset. List of DataProtectionImpact objects from the Ethics module documenting privacy risk assessments and mitigation measures.",
@@ -2258,6 +2388,17 @@
                         "array",
                         "null"
                     ]
+                },
+                "data_governance": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/DataGovernance"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Who decides who may use this dataset, and how. DataGovernance object from the Data Governance module describing the access committee, its membership and contacts, the review process, and who remains accountable for the data over time.\nDistinct from `license_and_use_terms` (the terms) and `regulatory_restrictions` (the regulations): this is the people and the process that apply them. Added because `Dataset` previously had no governance slot at all, so a data access committee could only be named by nesting its chair inside an export-control statement (#503)."
                 },
                 "data_protection_impacts": {
                     "description": "Data protection impact assessments (DPIAs) conducted for the dataset. List of DataProtectionImpact objects from the Ethics module documenting privacy risk assessments and mitigation measures.",
@@ -4101,7 +4242,7 @@
                     ]
                 },
                 "governance_committee_contact": {
-                    "description": "Contact person for data governance committee. This person can answer questions about data governance policies, access procedures, and oversight mechanisms.",
+                    "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept so the records that already populate it stay valid; a governance contact is not an export-control fact and should not have to be nested inside one to be stated.",
                     "type": [
                         "string",
                         "null"

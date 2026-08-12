@@ -1,0 +1,191 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "`distributions` is not a slot in the CoreDataset/Dataset inventory supplied in the schema digest. The digest defines `file_collections` (range FileCollection, required key `id`) and `distribution_formats` (range DistributionFormat) for per-file-group and per-format information. The keys used inside the core `distributions` entries (`path`, `bytes`, `conforms_to`, `format`, `media_type`, `notes`, `source_caveats`) also do not correspond to any single declared object range: FileCollection uses `total_bytes` and `file_count`, not `bytes`. This block will fail validation against the core schema unless `distributions` happens to exist in the core schema with exactly these keys, which the supplied digest does not support. Recommend re-expressing as `file_collections` mirroring the full record."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "id",
+      "issue": "`id` is set to `https://doi.org/10.60775/fairhub.3` while `doi` is set to `10.60775/fairhub.3`. This is internally consistent but the DataSubset ids derived from it (`https://doi.org/10.60775/fairhub.3#split-train` etc.) and the FileCollection ids (`https://doi.org/10.60775/fairhub.3#cardiac_ecg` etc.) are fabricated fragment identifiers that appear nowhere in the bundle. The bundle supplies no identifiers for splits or directories beyond directory names. These are synthetic constructions rather than transcribed facts."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections[9].file_count",
+      "issue": "`file_count: 9` for the root-metadata collection is stated in the record's own source_caveats to be inferred, not transcribed. The bundle enumerates nine metadataFileList entries at root but never states a root-level file count. Inference is flagged, which is correct practice, but the value is presented in a numeric slot as though counted."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators",
+      "issue": "Creator entries embed role commentary inside the `principal_investigator` value, e.g. 'Aaron Y. Lee (Study Principal Investigator; contact e-mail leeay@uw.edu)', 'Cynthia Owsley (Study Principal Investigator; guarantor and corresponding author of the study protocol publication)', 'AI-READI Consortium (organizational creator of record in the FAIRhub DataCite metadata)'. Per the stated shape rule, source commentary should not be embedded in a name value; it belongs in the entry's `notes` or `source_caveats`."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "funders[0].grants",
+      "issue": "The first grants list element is a multi-clause prose sentence ('OT2OD032644 — Bridge2AI: Salutogenesis Data Generation Project (awarded to the University of Washington, fiscal year 2022, award amount USD 5,026,499, project period 2022-09-01 to 2025-08-31; application ID 10471118, project number 1OT2OD032644-01)') rather than a grant identifier. The subsequent elements ('P30DK035816', 'UL1TR003096') are bare identifiers, so the list is internally inconsistent in shape. Award amount, period and application ID belong in `notes`."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "distribution_dates[0].release_dates",
+      "issue": "Each `release_dates` list element is a prose sentence bundling date, version, DOI, participant count and accessibility status ('2024-11-08 — version 2.0.0, DOI 10.60775/fairhub.2, 1,067 participants, no longer accessible') rather than a date. Version and DOI facts are already carried in `version_access` and `related_datasets`; the narrative belongs in the entry `notes`."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "distribution_formats[0].format",
+      "issue": "`format` holds a multi-clause prose paragraph enumerating six formats with parenthetical scope annotations rather than a format value; `media_type` holds four comma-joined media types in a single string. Both slots are singular-valued per the digest, so the enumeration should be split across multiple DistributionFormat entries."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "conforms_to",
+      "issue": "`conforms_to` holds a multi-standard prose paragraph mapping seven standards to nine directories. The digest describes this slot as naming a standard the dataset's content follows, singular. The per-directory standard assignments are already correctly carried on each file_collection; the top-level value should name the governing standard (CDS v0.1.1) with the breakdown moved to notes."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "citation / license_and_use_terms",
+      "issue": "Full record `citation` states that citation instructions are not reproduced in the source and then supplies constructed DataCite-style components. The digest describes `citation` as a recommended citation in DataCite or BibTeX format. The bundle genuinely does not contain a citation string, so the honest action is omission of the slot with the pointer moved to notes or source_caveats; as written the slot's value is commentary about the slot's own emptiness. Core record omits `citation` entirely, so the two records diverge on this point."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "variables",
+      "issue": "The full record carries 39 VariableMetadata entries drawn from BMJ Open Tables 2 and 4, the healthsheet device section and the imaging protocol; the core record omits `variables` entirely. `variables` is a declared slot in the inventory. If it exists in the core schema this is an unjustified omission of well-supported evidence; if it does not, the divergence should be recorded in the reconciliation report rather than left silent."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "splits / subsets",
+      "issue": "The full record carries a `splits` entry and three `subsets` DataSubset entries for train/validation/test. The core record carries neither, relegating the same split facts to a paragraph in the free-text `notes`. Structured slots should be preferred over notes where the schema provides them (the digest's notes guidance is explicit that notes is for residual content only, after every fitting slot is used)."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "relationships / related_datasets / total_file_count / total_size_bytes",
+      "issue": "Four well-supported full-record slots are dropped from the core record without the omission being justified: `relationships` (single visit per participant, all instances from one project), `related_datasets` (six typed relationships to prior versions, documentation sites and the two publications), `total_file_count` (356343) and `total_size_bytes` (3815969779678). The instance-relationship fact survives only as a trailing clause in `instances[0].notes`, and the version relationships only as prose in `version_access` and `external_resources`."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "publisher",
+      "issue": "`publisher` has range uriorcurie and is set to `https://fairhub.io/`. The bundle gives publisherName 'FAIRhub' as a name, not a URI. The URI substitution is a reasonable resolution but is an inference not stated in the bundle; the FAIRhub root URL is the platform homepage, not a declared publisher identifier."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "created_by",
+      "issue": "`created_by: AI-READI Consortium` duplicates the organizational entry already present in `creators`. Not incorrect, but redundant across two slots."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "keywords",
+      "issue": "The keyword list merges the seven FAIRhub `subject` values with three study-level `keywordList` values (Type 2 Diabetes, Data Sharing, Exploratory Data Collection) and one term, 'Salutogenesis', that appears nowhere in either keyword list in the bundle. 'Salutogenesis' is pervasive in the bundle's prose but is not a declared keyword of the dataset; adding it to a keyword slot asserts metadata the source does not carry."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "known_biases[4]",
+      "issue": "The PBMC/PAXgene shipping-delay entry is classed as a `measurement_bias` of the dataset, but its own `notes` concede it affects the biorepository rather than the released dataset. Biospecimen handling is not part of the v3.0.0 release. This is a bias of a companion resource being asserted as a bias of the record's referent."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "sensitive_elements[1]",
+      "issue": "Same referent problem as above: `sensitive_elements_present: true` is asserted for the UAB biorepository, whose contents are not part of the released dataset. The entry's own notes acknowledge this. Setting the boolean true on the dataset record for a resource outside the dataset conflicts with the sibling entry setting it false."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "is_deidentified.identifiable_elements_present / identifiers_removed",
+      "issue": "Core sets `identifiable_elements_present: false` and populates `identifiers_removed`; full omits both. The two records make different assertions about the same slot from the same evidence. Additionally the bundle's own flag reads 'NoDeIdentification' with deIdentDirect true, which the record's source_caveats correctly flags as ambiguous — asserting a boolean false against ambiguous evidence is stronger than the source supports."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "regulatory_restrictions.hipaa_compliant",
+      "issue": "Set to `compliant`. The bundle states the public set was stripped of PHI via Safe Harbor and that the team verified no HIPAA-identifiable data were present, but no source in the bundle makes a formal HIPAA compliance determination or uses the word 'compliant' of the dataset. The enum value asserts a certification the evidence does not state."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "Set to `restricted`. The bundle nowhere assigns a confidentiality level. The public release is downloadable after self-attestation and the controlled set requires a DUA; 'restricted' is a defensible summary of the tiered arrangement but is an inference, not a transcription, and is unflagged."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license_and_use_terms.data_use_permission",
+      "issue": "Set to `disease_specific_research`, which fits the 'type 2 diabetes related research' attestation for the public set. However the same licence permits commercial use, and the enum also offers `no_restriction` and related values; the single enum cannot represent the tiered public/controlled split, and the record does not note that the chosen value describes only the public tier."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license_and_use_terms.license_terms",
+      "issue": "The clause-level summary is drawn from licence v1.0 while the record's `license` field names v2.0. The source_caveats flags this honestly, but the effect is that the most detailed licence content in the record describes a superseded document. Consider foregrounding that the v2.0 text is unavailable rather than presenting v1.0 clauses as the operative terms."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "existing_uses[0].examples",
+      "issue": "The single `examples` element is a negative statement ('None recorded. The healthsheet ... answers \"No\" ...') rather than an example of a use. A slot whose semantics are 'list of known existing uses' should be omitted when there are none, with the negative finding recorded in `notes`."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[0].counts",
+      "issue": "`counts: 2280` is the participant count. The digest gives no unit semantics for `counts`, and the dataset also has well-supported counts at other granularities (356,343 files). Not an error, but the participant/file distinction rests entirely on `instance_type` prose."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "human_subject_research.special_populations",
+      "issue": "The value describes exclusion criteria (pregnancy, gestational diabetes, T1DM, age >85, no minors) rather than special populations included in the research. The slot semantics in the digest are 'special_populations' as a characteristic of the enrolled cohort; the record uses it to record who was excluded."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "at_risk_populations / participant_privacy / participant_compensation",
+      "issue": "Full record populates `participant_privacy` and `participant_compensation`; core drops `participant_privacy` entirely and relegates compensation to a `notes` paragraph. Both are well-supported by the bundle (privacy techniques, watermarking, tiered release; USD 200 stipend, payment timing, transport reimbursement). The core omissions are unjustified given the digest provides the slots."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_notifications / collection_consents / consent_revocations",
+      "issue": "Full record carries these as three separate structured entries; core folds all three into `informed_consent[0].notes` and `withdrawal_mechanism`. Same evidence, different structural placement across the paired records, with the core version preferring prose over available structured slots."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "version",
+      "issue": "`version: \"3.0.0\"` is correct for the referent chosen, but the record simultaneously carries v1.0.0 and v2.0.0 participant counts, DOIs and dates across `version_access`, `related_datasets`, `distribution_dates` and `updates`. The referent choice is consistent, but a reader must work to see that all size, count and split figures apply to v3.0.0 only."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "notes",
+      "issue": "The `notes` block carries substantial content that has fitting structured slots: the biorepository description overlaps `sensitive_elements` and could sit in `external_resources` or a `resources` entry; the return-of-results narrative has no home but the participant-compensation paragraph in core duplicates what the full record puts in `participant_compensation`. Per the digest, notes is for residual content only after every fitting slot is used."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "source_caveats (top level)",
+      "issue": "The top-level `source_caveats` correctly flags the Washington University in St. Louis vs University of Washington conflict, but the record then silently resolves it in favour of UW throughout `creators` and `human_subject_research` without the resolution being stated as a choice. The guard requires representing what the evidence states rather than silently selecting one; the caveat notes the conflict but the body of the record presents only one side."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets[*].description",
+      "issue": "DataSubset entries carry only `id`, `name`, `description` and `is_data_split`. The split composition (counts by race/ethnicity, sex, diabetes status, mean age) is packed into prose inside `description` rather than expressed through `subpopulations` on each subset, which the DataSubset range permits since it accepts the same slots as the top-level listing."
+    }
+  ],
+  "summary": "Both records are densely evidenced and stay close to the bundle; the great majority of factual content is transcribed rather than inferred, and the record's own source_caveats already flag the four principal source conflicts (WashU vs UW, 4000 vs 4600 target enrolment, Equitable vs Exploratory acronym, 356343 vs 356334 file-count sum). Two findings are high severity. First, the core record's `distributions` block does not correspond to any slot or object range in the supplied schema digest and uses key names (`bytes`) that no declared range accepts; it should be re-expressed as `file_collections` as the full record does, and will likely fail core validation as written. Second, the fragment identifiers minted for subsets and file collections (`...#split-train`, `...#cardiac_ecg`) are synthetic and appear nowhere in the bundle. The dominant systematic issue across both records is shape: prose is repeatedly placed in slots that call for atomic values — role and contact commentary inside `principal_investigator` names, an award-metadata sentence inside a `grants` list, version/DOI/count narratives inside `release_dates`, a six-format paragraph inside a singular `format`, and a seven-standard mapping inside a singular `conforms_to`. The second systematic issue is unjustified divergence between the paired records: the core record drops `variables`, `splits`, `subsets`, `relationships`, `related_datasets`, `participant_privacy`, `total_file_count` and `total_size_bytes` while carrying the same underlying facts as free prose in `notes`, contradicting the digest's instruction that notes hold only residual content. A small number of values assert more than the bundle states — `hipaa_compliant: compliant`, `confidentiality_level: restricted`, `identifiable_elements_present: false` against an ambiguous source flag, and the keyword 'Salutogenesis' which appears in no keyword list — and two entries (the PBMC shipping delay as a dataset bias, the biorepository as a sensitive element) attribute properties of the companion biorepository to the released dataset. Recommended remediation order: fix the core `distributions` block; split prose out of atomic-valued slots into notes; restore the structured slots the core record dropped or justify each omission in the reconciliation report; soften or drop the four over-asserted values; and either drop the synthetic fragment ids or document them as record-local constructions."
+}

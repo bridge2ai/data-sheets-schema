@@ -3,10 +3,10 @@
 record_version: 1
 record_type: d4d_generation_provenance
 record_mode: live
-record_generated_at: '2026-08-12T00:51:54+00:00'
+record_generated_at: '2026-08-12T02:00:33+00:00'
 run:
   label: 2026-08-11_claude-opus-5-claudecode-generic_rep1
-  project: CHORUS
+  project: VOICE
   method: claudecode_agent
   arm: baseline
   replicate: 1
@@ -31,8 +31,8 @@ prompts:
     bytes: 5754
     exists: true
   request:
-    sha256: 87a4bb7a3b073406551482a48769d0024aeb64d41e37dea3a44d0071fb945e84
-    bytes: 4041
+    sha256: f7314c24cc3088ff75119af0524c6c954cb635d454e920fda219dc6c0f1c32c4
+    bytes: 4032
     note: the instruction as sent, after substitution; the files above are what it
       was built from
     spec:
@@ -42,7 +42,7 @@ prompts:
       run_date: '2026-08-12'
       runtime: Claude Code
       provider: Anthropic
-      bundle: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+      bundle: data/preprocessed/concatenated/VOICE_preprocessed.txt
 playbooks:
   hash_algorithm: sha256
   files:
@@ -73,11 +73,11 @@ software:
   linkml_runtime: 1.9.4
   python: 3.13.12
 repo:
-  commit: a78c886629deb24ef68a58d225773ddf15cee61f
-  commit_short: a78c8866
-  branch: close-agentic-provenance-gaps
+  commit: bf5091c0a946c943000f263e677f1387521720a6
+  commit_short: bf5091c0
+  branch: close-500-arm-spelling
   dirty: true
-  dirty_file_count: 6
+  dirty_file_count: 31
 system:
   platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
   machine: arm64
@@ -87,25 +87,25 @@ system:
   cpu_brand: Apple M1 Max
   memory_bytes: 68719476736
 inputs:
-  bundle_path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
-  bundle_md5: 9b2ef4b65d67957f79362266cab0bc7a
-  bundle_bytes: 35920
+  bundle_path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+  bundle_md5: dcd717170da6762569c0b4eeafc1c3d2
+  bundle_bytes: 376295
   hash_basis: verified identical to the bytes consumed
   source_manifest:
     path: data/preprocessed/source_manifest.yaml
     md5: 30517167a2d2a0d5b568fc4b22cb5d6a
 outputs:
   full:
-    path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/CHORUS_d4d.yaml
-    bytes: 49519
-    slots: 50
+    path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_d4d.yaml
+    bytes: 130204
+    slots: 81
   core:
-    path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/CHORUS_d4d_core.yaml
-    bytes: 43713
-    slots: 45
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_d4d_core.yaml
+    bytes: 108665
+    slots: 69
   report:
-    path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/CHORUS_reconciliation.md
-    bytes: 17069
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_reconciliation.md
+    bytes: 27464
     slots: null
 unrecoverable: null
 unverified:
@@ -124,11 +124,11 @@ validation:
   passed: true
   artifacts:
     full:
-      path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/CHORUS_d4d.yaml
-      md5: bba5d14877944e254f5a9a84786ce2dc
+      path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_d4d.yaml
+      md5: 6e8c6b94117e0cfc183ce9cd7e6dad9a
     core:
-      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/CHORUS_d4d_core.yaml
-      md5: cc5bea839075f00de433612a313f358a
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_d4d_core.yaml
+      md5: d5dfd18340393dfd485b22c888d33010
   schema:
     full_sha256: a392c073f2de00293702c7d31e6e1899f550d9b4bed2f01126630c25989da94b
     core_sha256: 985460b61d58cf747fd67016bc0656fa204250fdd02ca69a8d638e45a22fcc6b

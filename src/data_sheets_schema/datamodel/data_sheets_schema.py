@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-08-11T16:12:45
+# Generation date: 2026-08-11T20:04:27
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -528,6 +528,7 @@ class Dataset(Information):
     license_and_use_terms: Optional[Union[dict, "LicenseAndUseTerms"]] = None
     ip_restrictions: Optional[Union[dict, "IPRestrictions"]] = None
     regulatory_restrictions: Optional[Union[dict, "ExportControlRegulatoryRestrictions"]] = None
+    data_governance: Optional[Union[dict, "DataGovernance"]] = None
     maintainers: Optional[Union[Union[dict, "Maintainer"], list[Union[dict, "Maintainer"]]]] = empty_list()
     errata: Optional[Union[Union[dict, "Erratum"], list[Union[dict, "Erratum"]]]] = empty_list()
     updates: Optional[Union[dict, "UpdatePlan"]] = None
@@ -769,6 +770,9 @@ class Dataset(Information):
 
         if self.regulatory_restrictions is not None and not isinstance(self.regulatory_restrictions, ExportControlRegulatoryRestrictions):
             self.regulatory_restrictions = ExportControlRegulatoryRestrictions(**as_dict(self.regulatory_restrictions))
+
+        if self.data_governance is not None and not isinstance(self.data_governance, DataGovernance):
+            self.data_governance = DataGovernance(**as_dict(self.data_governance))
 
         if not isinstance(self.maintainers, list):
             self.maintainers = [self.maintainers] if self.maintainers is not None else []
@@ -2756,6 +2760,59 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
 
 
 @dataclass(repr=False)
+class DataGovernance(DatasetProperty):
+    """
+    Who decides who may use this dataset, and how? Covers the body responsible for access decisions — commonly a Data
+    Access Committee — its membership and contacts, the process it follows, and who remains accountable for the data
+    over time.
+    Distinct from `LicenseAndUseTerms`, which states the terms, and from `ExportControlRegulatoryRestrictions`, which
+    states the regulations. This class is about the people and the process that apply them.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = D4D["DataGovernance"]
+    class_class_curie: ClassVar[str] = "d4d:DataGovernance"
+    class_name: ClassVar[str] = "DataGovernance"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DataGovernance
+
+    committee_name: Optional[str] = None
+    committee_members: Optional[Union[dict[Union[str, PersonId], Union[dict, Person]], list[Union[dict, Person]]]] = empty_dict()
+    committee_contact: Optional[Union[str, PersonId]] = None
+    access_review_process: Optional[str] = None
+    access_decision_timeframe: Optional[str] = None
+    appeal_process: Optional[str] = None
+    stewardship_roles: Optional[Union[str, list[str]]] = empty_list()
+    accountable_organization: Optional[Union[dict, Organization]] = None
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if self.committee_name is not None and not isinstance(self.committee_name, str):
+            self.committee_name = str(self.committee_name)
+
+        self._normalize_inlined_as_list(slot_name="committee_members", slot_type=Person, key_name="id", keyed=True)
+
+        if self.committee_contact is not None and not isinstance(self.committee_contact, PersonId):
+            self.committee_contact = PersonId(self.committee_contact)
+
+        if self.access_review_process is not None and not isinstance(self.access_review_process, str):
+            self.access_review_process = str(self.access_review_process)
+
+        if self.access_decision_timeframe is not None and not isinstance(self.access_decision_timeframe, str):
+            self.access_decision_timeframe = str(self.access_decision_timeframe)
+
+        if self.appeal_process is not None and not isinstance(self.appeal_process, str):
+            self.appeal_process = str(self.appeal_process)
+
+        if not isinstance(self.stewardship_roles, list):
+            self.stewardship_roles = [self.stewardship_roles] if self.stewardship_roles is not None else []
+        self.stewardship_roles = [v if isinstance(v, str) else str(v) for v in self.stewardship_roles]
+
+        if self.accountable_organization is not None and not isinstance(self.accountable_organization, Organization):
+            self.accountable_organization = Organization(**as_dict(self.accountable_organization))
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
 class VariableMetadata(DatasetProperty):
     """
     Metadata describing an individual variable, field, or column in a dataset. Variables may represent measurements,
@@ -4231,6 +4288,9 @@ slots.dataset__ip_restrictions = Slot(uri=D4D.ipRestrictions, name="dataset__ip_
 slots.dataset__regulatory_restrictions = Slot(uri=D4D.regulatoryRestrictions, name="dataset__regulatory_restrictions", curie=D4D.curie('regulatoryRestrictions'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__regulatory_restrictions, domain=None, range=Optional[Union[dict, ExportControlRegulatoryRestrictions]])
 
+slots.dataset__data_governance = Slot(uri=D4D.dataGovernance, name="dataset__data_governance", curie=D4D.curie('dataGovernance'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__data_governance, domain=None, range=Optional[Union[dict, DataGovernance]])
+
 slots.dataset__maintainers = Slot(uri=D4D.maintainers, name="dataset__maintainers", curie=D4D.curie('maintainers'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__maintainers, domain=None, range=Optional[Union[Union[dict, Maintainer], list[Union[dict, Maintainer]]]])
 
@@ -4867,6 +4927,30 @@ slots.exportControlRegulatoryRestrictions__confidentiality_level = Slot(uri=D4D.
 
 slots.exportControlRegulatoryRestrictions__governance_committee_contact = Slot(uri=D4D.governanceContactPoint, name="exportControlRegulatoryRestrictions__governance_committee_contact", curie=D4D.curie('governanceContactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__governance_committee_contact, domain=None, range=Optional[Union[str, PersonId]])
+
+slots.dataGovernance__committee_name = Slot(uri=D4D.governanceCommitteeName, name="dataGovernance__committee_name", curie=D4D.curie('governanceCommitteeName'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataGovernance__committee_name, domain=None, range=Optional[str])
+
+slots.dataGovernance__committee_members = Slot(uri=D4D.governanceCommitteeMember, name="dataGovernance__committee_members", curie=D4D.curie('governanceCommitteeMember'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataGovernance__committee_members, domain=None, range=Optional[Union[dict[Union[str, PersonId], Union[dict, Person]], list[Union[dict, Person]]]])
+
+slots.dataGovernance__committee_contact = Slot(uri=D4D.governanceContactPoint, name="dataGovernance__committee_contact", curie=D4D.curie('governanceContactPoint'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataGovernance__committee_contact, domain=None, range=Optional[Union[str, PersonId]])
+
+slots.dataGovernance__access_review_process = Slot(uri=D4D.accessReviewProcess, name="dataGovernance__access_review_process", curie=D4D.curie('accessReviewProcess'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataGovernance__access_review_process, domain=None, range=Optional[str])
+
+slots.dataGovernance__access_decision_timeframe = Slot(uri=D4D.accessDecisionTimeframe, name="dataGovernance__access_decision_timeframe", curie=D4D.curie('accessDecisionTimeframe'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataGovernance__access_decision_timeframe, domain=None, range=Optional[str])
+
+slots.dataGovernance__appeal_process = Slot(uri=D4D.appealProcess, name="dataGovernance__appeal_process", curie=D4D.curie('appealProcess'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataGovernance__appeal_process, domain=None, range=Optional[str])
+
+slots.dataGovernance__stewardship_roles = Slot(uri=D4D.stewardshipRole, name="dataGovernance__stewardship_roles", curie=D4D.curie('stewardshipRole'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataGovernance__stewardship_roles, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.dataGovernance__accountable_organization = Slot(uri=D4D.accountableOrganization, name="dataGovernance__accountable_organization", curie=D4D.curie('accountableOrganization'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataGovernance__accountable_organization, domain=None, range=Optional[Union[dict, Organization]])
 
 slots.variableMetadata__variable_name = Slot(uri=D4D.variableName, name="variableMetadata__variable_name", curie=D4D.curie('variableName'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__variable_name, domain=None, range=str)
