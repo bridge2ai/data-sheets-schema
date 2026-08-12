@@ -43,7 +43,7 @@
   - Notes: slot_uri mapping: rai:dataAnnotationPlatform
 
 
-## STRUCTURAL Mappings (146)
+## STRUCTURAL Mappings (148)
 
 - **Purpose.name** → **name**
   - Confidence: 1.0
@@ -95,5 +95,5 @@
   - Type compatible: True
   - Notes: Mapped via DatasetProperty hierarchy from FundingMechanism
 
-... and 136 more
+... and 138 more
 

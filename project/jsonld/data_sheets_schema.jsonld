@@ -3750,6 +3750,23 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "dataset__data_governance",
+      "description": "Who decides who may use this dataset, and how. DataGovernance object from the Data Governance module describing the access committee, its membership and contacts, the review process, and who remains accountable for the data over time.\nDistinct from `license_and_use_terms` (the terms) and `regulatory_restrictions` (the regulations): this is the people and the process that apply them. Added because `Dataset` previously had no governance slot at all, so a data access committee could only be named by nesting its chair inside an export-control statement (#503).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/dataGovernance"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/dataGovernance",
+      "alias": "data_governance",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "DataGovernance",
+      "inlined": true,
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "dataset__maintainers",
       "description": "Individuals or organizations responsible for maintaining the dataset. List of Maintainer objects from the Maintenance module describing maintenance contacts, roles, and support channels.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
@@ -8016,7 +8033,7 @@
     },
     {
       "name": "exportControlRegulatoryRestrictions__governance_committee_contact",
-      "description": "Contact person for data governance committee. This person can answer questions about data governance policies, access procedures, and oversight mechanisms.",
+      "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept so the records that already populate it stay valid; a governance contact is not an export-control fact and should not have to be nested inside one to be stated.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/governanceContactPoint"
@@ -8031,6 +8048,156 @@
         "ExportControlRegulatoryRestrictions"
       ],
       "range": "Person",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataGovernance__committee_name",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Bridge2AI-Voice Data Access Committee (DACO)",
+          "@type": "Annotation"
+        }
+      ],
+      "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"AI-READI Data Access Committee\", \"DACO\").",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/governanceCommitteeName"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/governanceCommitteeName",
+      "alias": "committee_name",
+      "owner": "DataGovernance",
+      "domain_of": [
+        "DataGovernance"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataGovernance__committee_members",
+      "description": "Members of the governance or data access committee. One entry per person; do not collapse several members into one. Record only members the sources name \u2014 committee membership is frequently undisclosed, and an absent list is a correct answer.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/governanceCommitteeMember"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/governanceCommitteeMember",
+      "alias": "committee_members",
+      "owner": "DataGovernance",
+      "domain_of": [
+        "DataGovernance"
+      ],
+      "range": "Person",
+      "multivalued": true,
+      "inlined": true,
+      "inlined_as_list": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataGovernance__committee_contact",
+      "description": "Contact point for the governance committee \u2014 the person or address that answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/governanceContactPoint"
+      ],
+      "broad_mappings": [
+        "http://schema.org/contactPoint"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/governanceContactPoint",
+      "alias": "committee_contact",
+      "owner": "DataGovernance",
+      "domain_of": [
+        "DataGovernance"
+      ],
+      "range": "Person",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataGovernance__access_review_process",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Requests are submitted through the portal with a research plan and institutional signature, and reviewed at the committee's monthly meeting.",
+          "@type": "Annotation"
+        }
+      ],
+      "description": "How an access request is reviewed and decided: who submits, what is required of them, who reviews, and on what criteria.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/accessReviewProcess"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/accessReviewProcess",
+      "alias": "access_review_process",
+      "owner": "DataGovernance",
+      "domain_of": [
+        "DataGovernance"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataGovernance__access_decision_timeframe",
+      "description": "Stated turnaround for an access decision, as the source gives it. Free text rather than a duration, because sources state this as prose (\"within 30 days\", \"at the next quarterly meeting\").",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/accessDecisionTimeframe"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/accessDecisionTimeframe",
+      "alias": "access_decision_timeframe",
+      "owner": "DataGovernance",
+      "domain_of": [
+        "DataGovernance"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataGovernance__appeal_process",
+      "description": "What recourse an applicant has if access is refused or revoked.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/appealProcess"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/appealProcess",
+      "alias": "appeal_process",
+      "owner": "DataGovernance",
+      "domain_of": [
+        "DataGovernance"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataGovernance__stewardship_roles",
+      "description": "Named stewardship or custodianship roles for the data, distinct from its creators \u2014 who holds continuing responsibility for it, and for what.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/stewardshipRole"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/stewardshipRole",
+      "alias": "stewardship_roles",
+      "owner": "DataGovernance",
+      "domain_of": [
+        "DataGovernance"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataGovernance__accountable_organization",
+      "description": "The organization accountable for the dataset over time, including after the funding period ends. Frequently different from the organization that created it.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/accountableOrganization"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/accountableOrganization",
+      "alias": "accountable_organization",
+      "owner": "DataGovernance",
+      "domain_of": [
+        "DataGovernance"
+      ],
+      "range": "Organization",
+      "inlined": true,
       "@type": "SlotDefinition"
     },
     {
@@ -8773,6 +8940,7 @@
         "dataset__license_and_use_terms",
         "dataset__ip_restrictions",
         "dataset__regulatory_restrictions",
+        "dataset__data_governance",
         "dataset__maintainers",
         "dataset__errata",
         "dataset__updates",
@@ -9309,6 +9477,14 @@
           "@type": "SlotDefinition"
         },
         {
+          "name": "data_governance",
+          "description": "Who decides who may use this dataset, and how. DataGovernance object from the Data Governance module describing the access committee, its membership and contacts, the review process, and who remains accountable for the data over time.\nDistinct from `license_and_use_terms` (the terms) and `regulatory_restrictions` (the regulations): this is the people and the process that apply them. Added because `Dataset` previously had no governance slot at all, so a data access committee could only be named by nesting its chair inside an export-control statement (#503).",
+          "slot_uri": "d4d:dataGovernance",
+          "range": "DataGovernance",
+          "inlined": true,
+          "@type": "SlotDefinition"
+        },
+        {
           "name": "maintainers",
           "description": "Individuals or organizations responsible for maintaining the dataset. List of Maintainer objects from the Maintenance module describing maintenance contacts, roles, and support channels.",
           "slot_uri": "d4d:maintainers",
@@ -9511,6 +9687,7 @@
         "dataset__license_and_use_terms",
         "dataset__ip_restrictions",
         "dataset__regulatory_restrictions",
+        "dataset__data_governance",
         "dataset__maintainers",
         "dataset__errata",
         "dataset__updates",
@@ -13473,7 +13650,7 @@
         },
         {
           "name": "governance_committee_contact",
-          "description": "Contact person for data governance committee. This person can answer questions about data governance policies, access procedures, and oversight mechanisms.",
+          "description": "DEPRECATED \u2014 use `DataGovernance.committee_contact` (#503). Kept so the records that already populate it stay valid; a governance contact is not an export-control fact and should not have to be nested inside one to be stated.",
           "broad_mappings": [
             "schema:contactPoint"
           ],
@@ -13483,6 +13660,114 @@
         }
       ],
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#ExportControlRegulatoryRestrictions",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "DataGovernance",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#DataGovernance",
+      "description": "Who decides who may use this dataset, and how? Covers the body responsible for access decisions \u2014 commonly a Data Access Committee \u2014 its membership and contacts, the process it follows, and who remains accountable for the data over time.\nDistinct from `LicenseAndUseTerms`, which states the terms, and from `ExportControlRegulatoryRestrictions`, which states the regulations. This class is about the people and the process that apply them.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "d4d:DataGovernance"
+      ],
+      "is_a": "DatasetProperty",
+      "slots": [
+        "datasetProperty__id",
+        "datasetProperty__name",
+        "datasetProperty__description",
+        "datasetProperty__notes",
+        "datasetProperty__source_caveats",
+        "datasetProperty__used_software",
+        "dataGovernance__committee_name",
+        "dataGovernance__committee_members",
+        "dataGovernance__committee_contact",
+        "dataGovernance__access_review_process",
+        "dataGovernance__access_decision_timeframe",
+        "dataGovernance__appeal_process",
+        "dataGovernance__stewardship_roles",
+        "dataGovernance__accountable_organization"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "committee_name",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Bridge2AI-Voice Data Access Committee (DACO)",
+              "@type": "Annotation"
+            }
+          ],
+          "description": "Name of the body responsible for access decisions, as the source states it (e.g. \"AI-READI Data Access Committee\", \"DACO\").",
+          "slot_uri": "d4d:governanceCommitteeName",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "committee_members",
+          "description": "Members of the governance or data access committee. One entry per person; do not collapse several members into one. Record only members the sources name \u2014 committee membership is frequently undisclosed, and an absent list is a correct answer.",
+          "slot_uri": "d4d:governanceCommitteeMember",
+          "range": "Person",
+          "multivalued": true,
+          "inlined_as_list": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "committee_contact",
+          "description": "Contact point for the governance committee \u2014 the person or address that answers questions about access policy, procedure and oversight. Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.",
+          "broad_mappings": [
+            "schema:contactPoint"
+          ],
+          "slot_uri": "d4d:governanceContactPoint",
+          "range": "Person",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "access_review_process",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Requests are submitted through the portal with a research plan and institutional signature, and reviewed at the committee's monthly meeting.",
+              "@type": "Annotation"
+            }
+          ],
+          "description": "How an access request is reviewed and decided: who submits, what is required of them, who reviews, and on what criteria.",
+          "slot_uri": "d4d:accessReviewProcess",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "access_decision_timeframe",
+          "description": "Stated turnaround for an access decision, as the source gives it. Free text rather than a duration, because sources state this as prose (\"within 30 days\", \"at the next quarterly meeting\").",
+          "slot_uri": "d4d:accessDecisionTimeframe",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "appeal_process",
+          "description": "What recourse an applicant has if access is refused or revoked.",
+          "slot_uri": "d4d:appealProcess",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "stewardship_roles",
+          "description": "Named stewardship or custodianship roles for the data, distinct from its creators \u2014 who holds continuing responsibility for it, and for what.",
+          "slot_uri": "d4d:stewardshipRole",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "accountable_organization",
+          "description": "The organization accountable for the dataset over time, including after the funding period ends. Frequently different from the organization that created it.",
+          "slot_uri": "d4d:accountableOrganization",
+          "range": "Organization",
+          "inlined": true,
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DataGovernance",
       "@type": "ClassDefinition"
     },
     {
@@ -13871,9 +14156,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-08-06T12:37:37",
-  "source_file_size": 32488,
-  "generation_date": "2026-08-11T16:12:43",
+  "source_file_date": "2026-08-11T20:04:03",
+  "source_file_size": 33278,
+  "generation_date": "2026-08-11T20:04:25",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
