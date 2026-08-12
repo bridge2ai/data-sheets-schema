@@ -144,13 +144,110 @@ classes:
         range: ConfidentialityLevelEnum
       governance_committee_contact:
         description: >-
-          Contact person for data governance committee. This person can answer
-          questions about data governance policies, access procedures, and
-          oversight mechanisms.
+          DEPRECATED — use `DataGovernance.committee_contact` (#503). Kept so
+          the records that already populate it stay valid; a governance contact
+          is not an export-control fact and should not have to be nested inside
+          one to be stated.
         range: Person
         slot_uri: d4d:governanceContactPoint
         broad_mappings:
           - schema:contactPoint
+
+
+  # ---------------------------------------------------------------------------
+  # Governance and stewardship (#503)
+  #
+  # This module was named for data governance and declared only
+  # LicenseAndUseTerms, IPRestrictions and ExportControlRegulatoryRestrictions
+  # — licensing, IP and export control. `Dataset` had no governance or
+  # stewardship slot at all, and the single relevant field sat on the
+  # export-control class, so naming a data access committee chair required
+  # nesting that person inside a statement about export regulations. Two
+  # records in the 2026-08-11 arm do exactly that.
+  #
+  # Raised in Camille Nebeker's review as "thin on Governance and Stewardship
+  # details including DAC members and contacts". The content was thin because
+  # there was almost nowhere to put it: a run cannot be thorough about a
+  # committee's membership or review process when no field accepts either.
+  # ---------------------------------------------------------------------------
+  DataGovernance:
+    description: >
+      Who decides who may use this dataset, and how? Covers the body
+      responsible for access decisions — commonly a Data Access Committee —
+      its membership and contacts, the process it follows, and who remains
+      accountable for the data over time.
+
+      Distinct from `LicenseAndUseTerms`, which states the terms, and from
+      `ExportControlRegulatoryRestrictions`, which states the regulations. This
+      class is about the people and the process that apply them.
+    is_a: DatasetProperty
+    class_uri: d4d:DataGovernance
+    attributes:
+      committee_name:
+        description: >-
+          Name of the body responsible for access decisions, as the source
+          states it (e.g. "AI-READI Data Access Committee", "DACO").
+        range: string
+        slot_uri: d4d:governanceCommitteeName
+        annotations:
+          "d4d:docExample": "Bridge2AI-Voice Data Access Committee (DACO)"
+      committee_members:
+        description: >-
+          Members of the governance or data access committee. One entry per
+          person; do not collapse several members into one. Record only members
+          the sources name — committee membership is frequently undisclosed,
+          and an absent list is a correct answer.
+        range: Person
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: d4d:governanceCommitteeMember
+      committee_contact:
+        description: >-
+          Contact point for the governance committee — the person or address
+          that answers questions about access policy, procedure and oversight.
+          Replaces `ExportControlRegulatoryRestrictions.governance_committee_contact`.
+        range: Person
+        slot_uri: d4d:governanceContactPoint
+        broad_mappings:
+          - schema:contactPoint
+      access_review_process:
+        description: >-
+          How an access request is reviewed and decided: who submits, what is
+          required of them, who reviews, and on what criteria.
+        range: string
+        slot_uri: d4d:accessReviewProcess
+        annotations:
+          "d4d:docExample": >-
+            Requests are submitted through the portal with a research plan and
+            institutional signature, and reviewed at the committee's monthly meeting.
+      access_decision_timeframe:
+        description: >-
+          Stated turnaround for an access decision, as the source gives it.
+          Free text rather than a duration, because sources state this as
+          prose ("within 30 days", "at the next quarterly meeting").
+        range: string
+        slot_uri: d4d:accessDecisionTimeframe
+      appeal_process:
+        description: >-
+          What recourse an applicant has if access is refused or revoked.
+        range: string
+        slot_uri: d4d:appealProcess
+      stewardship_roles:
+        description: >-
+          Named stewardship or custodianship roles for the data, distinct from
+          its creators — who holds continuing responsibility for it, and for
+          what.
+        range: string
+        multivalued: true
+        slot_uri: d4d:stewardshipRole
+      accountable_organization:
+        description: >-
+          The organization accountable for the dataset over time, including
+          after the funding period ends. Frequently different from the
+          organization that created it.
+        range: Organization
+        inlined: true
+        slot_uri: d4d:accountableOrganization
 
 
 enums:

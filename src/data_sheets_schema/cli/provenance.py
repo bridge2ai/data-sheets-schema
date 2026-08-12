@@ -1,6 +1,8 @@
 """Provenance commands for the D4D CLI."""
 
 import click
+
+from data_sheets_schema.cli.api import ARMS as _ARMS
 from pathlib import Path
 
 #: The effort ladder, duplicated here so the CLI keeps its lazy imports and
@@ -36,8 +38,12 @@ def provenance():
                    'and --runtime this reconstructs the render spec, so the '
                    'render gate can re-render and compare instead of reporting '
                    '`unverifiable` (#497).')
-@click.option('--arm', default='baseline', show_default=True,
-              help='Arm the instruction was rendered for; part of the spec.')
+@click.option('--arm', type=click.Choice(sorted(_ARMS)), default='baseline',
+              show_default=True,
+              help='Arm the instruction was rendered for. Expanded to the same '
+                   'display name `render-prompt` substitutes, so the two '
+                   'commands cannot disagree and the render gate cannot report '
+                   'a false mismatch (#500).')
 @click.option('--runtime', default=None,
               help='Runtime the instruction declared, e.g. "Claude Code".')
 @click.option('--provider', default=None, help='Provider the spec declared.')
@@ -89,8 +95,13 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     if condition:
         from data_sheets_schema.api_runner import RunSpec
         bundle = bundle_for_spec or input_bundle
+        # `render-prompt` substitutes `ARMS[arm][0]`, the display name, not the
+        # token. Storing the token here produced a spec that could never
+        # re-render to what was sent, and the gate blamed an unchanged prompt
+        # file for it (#500). Expanded through the same table, so the two
+        # commands cannot drift apart.
         spec = RunSpec(
-            project=project, arm=arm, method=method,
+            project=project, arm=_ARMS[arm][0], method=method,
             bundle=Path(bundle) if bundle else None, label=label,
             condition=condition, runtime=runtime, provider=provider,
         ).render_spec()

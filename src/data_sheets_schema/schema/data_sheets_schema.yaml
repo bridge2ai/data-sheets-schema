@@ -628,6 +628,21 @@ classes:
         slot_uri: d4d:regulatoryRestrictions
         range: ExportControlRegulatoryRestrictions
         inlined: true
+      data_governance:
+        description: >-
+          Who decides who may use this dataset, and how. DataGovernance object
+          from the Data Governance module describing the access committee, its
+          membership and contacts, the review process, and who remains
+          accountable for the data over time.
+
+          Distinct from `license_and_use_terms` (the terms) and
+          `regulatory_restrictions` (the regulations): this is the people and
+          the process that apply them. Added because `Dataset` previously had
+          no governance slot at all, so a data access committee could only be
+          named by nesting its chair inside an export-control statement (#503).
+        slot_uri: d4d:dataGovernance
+        range: DataGovernance
+        inlined: true
       # Maintenance module classes
       maintainers:
         description: >-
