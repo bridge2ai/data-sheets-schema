@@ -91,3 +91,35 @@ class TestAgainstTheCorpus(unittest.TestCase):
         self.assertGreater(counts[URI_UNVERIFIED], 500)
         # Every one of them would previously have been called unresolvable.
         self.assertLess(report["unresolvable_share"], 0.30)
+
+
+class TestTheSchemeListIsNarrow(unittest.TestCase):
+    """Every name in `NO_AUTHORITY_SCHEMES` exempts values from the audit, so
+    a name that is not really a scheme silently excuses a real defect. This is
+    the direction that fails quietly, and the only one worth guarding hard."""
+
+    def test_file_is_not_exempted(self):
+        """The sharpest case. `file` *is* a registered scheme, but its 22
+        corpus occurrences are `file:torchaudio_spectrograms_parquet` — a
+        minted type-prefix in the same family as `org:` and `creator:` (#531),
+        not `file:///path`. Exempting it would erase 22 genuine findings to
+        accommodate a name collision."""
+        self.assertNotIn("file", NO_AUTHORITY_SCHEMES)
+        self.assertEqual(
+            classify("file:torchaudio_spectrograms_parquet", PREFIXES),
+            CURIE_UNDECLARED)
+
+    def test_urn_namespaces_are_not_listed_as_schemes(self):
+        """`isbn`, `issn` and `uuid` are URN namespaces — `urn:isbn:…` — not
+        schemes. A record writing `uuid:abc` is minting a prefix, not citing
+        one, and must still be reported."""
+        for name in ("isbn", "issn", "uuid"):
+            with self.subTest(name=name):
+                self.assertNotIn(name, NO_AUTHORITY_SCHEMES)
+                self.assertEqual(classify(f"{name}:abc", PREFIXES),
+                                 CURIE_UNDECLARED)
+
+    def test_the_list_stays_small(self):
+        """A growing exemption list is how an audit stops auditing. Anything
+        added should be a registered scheme with corpus evidence behind it."""
+        self.assertLessEqual(len(NO_AUTHORITY_SCHEMES), 8)

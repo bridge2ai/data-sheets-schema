@@ -55,8 +55,20 @@ _CURIE = re.compile(r"^([A-Za-z_][A-Za-z0-9._\-]*):(\S+)$")
 #: 1,067 corpus values sit here — `urn:` 757, `ark:` 286, `doi:` 24 — and every
 #: one was counted as an undeclared CURIE, inflating the migration #457 is sized
 #: against by 28% of that bucket.
+#:
+#: **Kept deliberately short, and to registered schemes only.** Every name here
+#: exempts a value from the audit, so a name that is *not* a scheme silently
+#: excuses a real defect. `isbn`, `issn` and `uuid` were dropped for exactly
+#: this reason: they are URN *namespaces* (`urn:isbn:…`), not schemes, and a
+#: record writing `uuid:abc` would be minting a prefix, not citing one.
+#:
+#: `file` is the sharpest case and is **excluded**. It is a registered scheme,
+#: but its 22 corpus occurrences are `file:torchaudio_spectrograms_parquet` —
+#: a minted type-prefix in the same family as `org:`, `creator:` and
+#: `software:` (#531), not `file:///path`. Adding it would erase 22 genuine
+#: findings to accommodate a name collision.
 NO_AUTHORITY_SCHEMES = frozenset({
-    "urn", "doi", "ark", "mailto", "isbn", "issn", "info", "tel", "uuid",
+    "urn", "doi", "ark", "mailto", "tel", "info",
 })
 
 URI = "uri"
