@@ -156,7 +156,18 @@ def render_values_from(names: list[str]) -> str | None:
             f"{k[len(prefix):] if k.startswith(prefix) else k}={v}"
             for k, v in terms.items())
         parts.append(f"{name} (use `{name}:<id>`) — {items}")
-    return "; ".join(parts) if parts else None
+    if not parts:
+        return None
+    # The fallback, carried here because a nested attribute's *description* is
+    # not rendered: a run sees this list and never the slot's own "prefer
+    # omission over a prose topic". The vocabulary is not exhaustive — CHORUS's
+    # subject is acute and critical care, and none of the 56 B2AI_TOPIC terms
+    # names it — so without this a run meeting an uncovered subject has 56
+    # near-neighbours in front of it and no instruction to decline. Picking the
+    # closest is the invention #403 added `OTHER` to prevent.
+    return ("; ".join(parts)
+            + ". If no term fits, omit the slot rather than approximate, and "
+              "never restate the subject as prose here.")
 
 
 #: Ranges that hold on essentially every object range, stated once rather than

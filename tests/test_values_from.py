@@ -126,3 +126,59 @@ class TestTheCacheKeyMoves(unittest.TestCase):
             nested.values_from = {}
         after = schema_digest.fingerprint(schema_digest.render(digest))
         self.assertNotEqual(before, after)
+
+
+class TestTheFallbackIsRendered(unittest.TestCase):
+    """The vocabulary is not exhaustive, and the slot's own guidance does not
+    reach the run.
+
+    Found reviewing this change. A nested attribute's *description* is not
+    rendered, so `data_topic`'s "Where no term is found, prefer omission over a
+    prose topic" is invisible — a run sees 56 terms and no instruction to
+    decline. CHORUS is the live case: its subject is acute and critical care,
+    and none of the 56 `B2AI_TOPIC` terms names it. Without the fallback the
+    run has 56 near-neighbours in front of it, and picking the closest is the
+    invention `OTHER` was added to prevent in #403.
+    """
+
+    def test_the_rendering_says_to_omit_rather_than_approximate(self):
+        out = schema_digest.render_values_from(["B2AI_TOPIC"])
+        self.assertIn("omit the slot rather than approximate", out)
+
+    def test_it_also_forbids_falling_back_to_prose(self):
+        """The other failure mode, and the one the corpus actually shows: 11
+        prose values in a slot ranged `uriorcurie`."""
+        out = schema_digest.render_values_from(["B2AI_TOPIC"])
+        self.assertIn("never restate the subject as prose", out)
+
+    def test_it_reaches_both_the_run_and_the_judge(self):
+        self.assertIn("omit the slot rather than approximate",
+                      schema_digest.digest_text("Dataset"))
+        self.assertIn("omit the slot rather than approximate",
+                      slot_spec("instances"))
+
+    def test_nothing_is_rendered_when_no_vocabulary_is_known(self):
+        """The fallback must not appear on its own — a bare instruction to
+        omit, with no list, would be worse than silence."""
+        self.assertIsNone(schema_digest.render_values_from(["NOT_A_REGISTRY"]))
+
+
+class TestTheVocabularyCoverageIsKnown(unittest.TestCase):
+    """What the vocabulary can and cannot express, pinned so a future registry
+    refresh shows up as a diff here rather than as a silent change in what runs
+    can say."""
+
+    def test_every_substrate_concept_the_corpus_needs_exists(self):
+        terms = set(schema_digest.vocabularies()["B2AI_SUBSTRATE"].values())
+        for concept in ("DICOM", "Comma-separated values", "Waveform Data",
+                        "JSON", "Text", "Image", "Parquet", "Data Frame"):
+            with self.subTest(concept=concept):
+                self.assertIn(concept, terms)
+
+    def test_chorus_topic_is_a_known_gap(self):
+        """Not a defect to fix here — a fact the fallback exists for. If a
+        `Critical Care` term is ever added upstream, this test fails and the
+        gap is closed rather than forgotten."""
+        terms = set(schema_digest.vocabularies()["B2AI_TOPIC"].values())
+        self.assertNotIn("Critical Care", terms)
+        self.assertNotIn("Radiology", terms)
