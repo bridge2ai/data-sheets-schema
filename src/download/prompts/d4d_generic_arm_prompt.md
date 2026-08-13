@@ -93,7 +93,29 @@ HEADER BLOCK — use exactly:
     # Temperature: 0.0
     # Generated: 2026-07-28
 
-The core file uses "phase 2" and the core schema path in the corresponding lines.
+CORE HEADER BLOCK — use exactly (it is not the full-record block with two
+words changed; four lines differ and two have no counterpart above):
+
+    # D4D Core Datasheet for {PROJECT} Dataset
+    # Generation Method: schema-grounded agentic, phase 2
+    # Agent runtime: {RUNTIME}
+    # Provider: {PROVIDER}
+    # Model: {MODEL}
+    # Mode: four-phase project agent, generic prompt
+    # Prompt: src/download/prompts/d4d_generic_arm_prompt.md (identical for all projects)
+    # Arm: {ARM}
+    # Source bundle: {BUNDLE}
+    # Sources: {BUNDLE} + data/d4d_concatenated/{METHOD}/{LABEL}/{PROJECT}_d4d.yaml
+    {MANIFEST_LINE}
+    # Schema: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+    # Prior D4D factual reuse: prohibited
+    # Temperature: 0.0
+    # Generated: {DATE}
+    # Phase 4 reconciliation: completed
+
+`# Sources:` is required, not decorative: it is what ties a core record to the
+full record it was projected from, and the provenance guard checks for it. Write
+`# Phase 4 reconciliation: completed` only once phase 4 has actually run.
 
 AFTER Phase 4, write a LIVE provenance record:
 

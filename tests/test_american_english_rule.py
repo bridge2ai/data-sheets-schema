@@ -65,8 +65,16 @@ class TestItDidNotRedefineACondition(unittest.TestCase):
         self.assertEqual(result.returncode, 0,
                          (result.stdout + result.stderr)[-600:])
 
-    def test_the_canonical_arm_is_still_canonical(self):
-        """The property that would have been lost by editing v1."""
+    def test_the_canonical_arm_is_not_uncanonical(self):
+        """The property that would have been lost by editing v1 *for this rule*.
+
+        The arm reads `superseded` since #515 deliberately rotated the pins
+        ahead of a re-baselining. That is the state this test was written to
+        avoid reaching *accidentally* — and reaching it by decision, with the
+        rotation recorded and the previous hash retained, is a different thing.
+        `uncanonical` remains the failure: it would mean the text was never a
+        published version of its condition.
+        """
         from data_sheets_schema.runs import (canonical_prompt_status,
                                              canonical_runs)
         runs = canonical_runs()
@@ -76,4 +84,4 @@ class TestItDidNotRedefineACondition(unittest.TestCase):
             with self.subTest(project=project):
                 status, why = canonical_prompt_status(
                     "claudecode_agent", info["label"], project)
-                self.assertEqual(status, "canonical", why)
+                self.assertIn(status, ("canonical", "superseded"), why)
