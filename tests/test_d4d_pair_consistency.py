@@ -47,6 +47,11 @@ class TestD4DPairConsistency(unittest.TestCase):
     #: state the same fact in either record, so a full/core pair disagreeing
     #: about who runs the access committee is a defect and not a projection.
     #:
+    #: Went 78 -> 79 when `conforms_to_standard` was added (#403). Identity is
+    #: right: which standard the *data* follows is a fact about the data and is
+    #: the same in either record — unlike `conforms_to_class`, which describes
+    #: the record and is per-record for that reason.
+    #:
     #: Went 80 -> 78 when `conforms_to_class` and `conforms_to_schema` became
     #: per-record slots (#499). They describe the record rather than the
     #: dataset, so their correct values *differ* between a pair — identity
@@ -56,7 +61,7 @@ class TestD4DPairConsistency(unittest.TestCase):
     'acquisition_methods', 'addressing_gaps', 'annotation_analyses',
     'anomalies', 'at_risk_populations', 'cleaning_strategies',
     'collection_mechanisms', 'collection_timeframes', 'compression',
-    'confidential_elements', 'conforms_to',
+    'confidential_elements', 'conforms_to', 'conforms_to_standard',
     'content_warnings', 'created_by',
     'created_on', 'creators', 'data_collectors', 'data_governance',
     'data_protection_impacts', 'description', 'discouraged_uses',
