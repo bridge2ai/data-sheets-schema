@@ -145,3 +145,56 @@ class TestTheGroundingGapIsNamed(unittest.TestCase):
 
     def test_the_absence_is_documented_rather_than_silent(self):
         self.assertIn("No `meaning:` is asserted", self.enum.description)
+
+
+BUNDLES = ROOT / "data/preprocessed/concatenated"
+
+#: How each value is actually written in the source documents. A vocabulary
+#: value is a claim that some dataset follows this standard, so it has to be
+#: traceable to evidence like any other claim.
+IN_SOURCES = {
+    "DICOM": "DICOM",
+    "BIDS": "Brain Imaging Data Structure",
+    "OMOP_CDM": "OMOP",
+    "WFDB": "WFDB",
+    "OPEN_MHEALTH": "Open mHealth",
+    "ESDS": "Earth Science Data",
+    "CDS": "Clinical Dataset Structure",
+    "RO_CRATE": "RO-Crate",
+    "FHIR": "FHIR",
+}
+
+
+@unittest.skipUnless(BUNDLES.exists(), "bundles absent")
+class TestEveryValueIsAttested(unittest.TestCase):
+    """No value comes from model memory.
+
+    `CDS` — "Clinical Dataset Structure v0.1.1" — was the one to check: it
+    appears in a generated record, and a standard named only by a record and
+    by no source would be a hallucination about to be enshrined in the schema,
+    where it would look authoritative for ever. It appears on 19 lines of the
+    bundles, so it is real.
+
+    This guard matters more than it looks. Adding a plausible standard is easy
+    and unfalsifiable once merged: the schema is not evidence, and nothing else
+    would ever check it against a source.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.text = "\n".join(
+            p.read_text(encoding="utf-8", errors="replace").lower()
+            for p in sorted(BUNDLES.glob("*_preprocessed.txt")))
+
+    def test_each_value_appears_in_some_bundle(self):
+        for value, phrase in IN_SOURCES.items():
+            with self.subTest(value=value):
+                self.assertIn(phrase.lower(), self.text,
+                              f"{value} is named by no source document")
+
+    def test_every_enum_value_is_covered_by_this_check(self):
+        """So a value added later cannot skip the check by not being listed."""
+        enum = SchemaView(str(FULL)).get_enum("DataStandardEnum")
+        unchecked = set(enum.permissible_values) - set(IN_SOURCES) - {"OTHER"}
+        self.assertEqual(unchecked, set(),
+                         "a vocabulary value with no attestation entry")
