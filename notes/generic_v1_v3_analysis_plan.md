@@ -1,5 +1,39 @@
 # generic v1-vs-v3 analysis plan
 
+> ## ⛔ NOT RUN. Retracted 2026-08-13, before any run of this comparison.
+>
+> **The comparison registered below was never executed and will not be.** No
+> v1 arm and no v3 arm were generated against it. One CHORUS v1 run exists
+> (`2026-08-13_claude-opus-5-api-generic_rep1`) and is a canary for the
+> machinery, not a datum for this plan — it predates the #515 pin rotation, so
+> it is not even at the condition text this plan would have required.
+>
+> **What changed.** The goal moved from *deciding the default* to *producing
+> the best records the pipeline can*. Those want different runs. A promotion
+> decision needs a baseline arm at the current schema, because "v4 is good" is
+> unfalsifiable without something to compare it against; production wants only
+> the strongest condition. The decision was to produce records, so the baseline
+> arm has no purpose and generating 15 runs of a condition nobody intends to
+> adopt would be spending for a question no longer being asked.
+>
+> **What is being run instead.** `generic_v4`, five projects × three
+> replicates, at schema digest `622e6d03`. v4 is the most current condition:
+> v1 + v2's three uniform decision rules + v3's hollow-object rule + v4's
+> companion rule about where structure does *not* belong. It had never been run
+> before today.
+>
+> **What this forfeits, stated plainly.** §6's promotion question stays open,
+> and this retraction is the reason. A v4-only arm cannot say whether v4 beats
+> v1, only what v4 produces. Anyone wanting that comparison must generate a
+> baseline arm at the same digest, and should read #479 first: on the *agentic*
+> path four pre-#394 series sit at 94–100% affiliation population under v1
+> prompts, so that path measures ≈0 prompt effect and the comparison only means
+> something on the API path.
+>
+> The plan is retracted rather than deleted. A pre-registered comparison that
+> quietly disappears is indistinguishable from one that ran and was
+> unfavourable, which is the failure #454 was about.
+
 Registered before any generation run of this comparison. The prediction is here
 rather than in the prompt because writing it there would instruct the model to
 produce the result the run is meant to test — the same reason
