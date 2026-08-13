@@ -244,23 +244,44 @@ def _append_identity_errors(
     core_data: Mapping[str, Any],
     slots: Iterable[str],
     path: str = "$",
+    schema_moved: bool = False,
 ) -> None:
+    """Compare the slots a full/core pair must state identically.
+
+    `schema_moved` says the pair was generated against a schema that is no
+    longer the current one. Presence is then a **warning** rather than an
+    error (#520): a slot added after the pair was written is absent from core
+    because it could not have been present, which is a fact about the schema's
+    history and not a defect in the record.
+
+    Content disagreement stays an error either way. Two records asserting
+    different values for one slot were wrong when they were written and are
+    wrong now — no schema change excuses that.
+
+    Scoped by the recorded schema digest rather than by a date, so it rests on
+    what the run actually consumed rather than on a cutoff someone maintains.
+    Adding `related_datasets` to core made 70 historical pairs report this,
+    all correctly and none actionably; back-filling them would have made a
+    2026-07-28 record assert content no run of that date produced.
+    """
     for slot in slots:
         full_present = slot in full_data
         core_present = slot in core_data
         slot_path = f"{path}.{slot}"
         if full_present != core_present:
             present_in = "full" if full_present else "core"
-            report.errors.append(
-                ConsistencyIssue(
-                    code="shared-slot-presence",
-                    path=slot_path,
-                    message=(
-                        "schema-identical slot is present only in "
-                        f"{present_in}; it must be present in both or neither"
-                    ),
-                )
+            issue = ConsistencyIssue(
+                code="shared-slot-presence",
+                path=slot_path,
+                message=(
+                    "schema-identical slot is present only in "
+                    f"{present_in}; it must be present in both or neither"
+                    + (" — but this pair predates the current schema, so the "
+                       "slot may not have existed when it was written"
+                       if schema_moved else "")
+                ),
             )
+            (report.warnings if schema_moved else report.errors).append(issue)
             continue
         if not full_present:
             continue
@@ -562,6 +583,7 @@ def validate_pair_data(
     full_data: Mapping[str, Any],
     core_data: Mapping[str, Any],
     pair_schema: PairSchema,
+    schema_moved: bool = False,
 ) -> PairConsistencyReport:
     """Validate strict shared content and schema-related projections."""
 
@@ -575,6 +597,7 @@ def validate_pair_data(
         full_data,
         core_data,
         pair_schema.identity_slots,
+        schema_moved=schema_moved,
     )
 
     if "resources" in pair_schema.projected_slots:
@@ -677,6 +700,34 @@ def synchronize_core_data(
     return synchronized
 
 
+def pair_predates_current_schema(core_path: Path) -> bool:
+    """Was this pair generated against a schema that has since moved? (#520)
+
+    Read from the core record's own provenance — the `schema.digest_md5` the
+    run recorded — rather than from a date or a hand-maintained list of when
+    each slot arrived. A run states which schema it saw; that is the evidence,
+    and it is the same field #517's straddle check reads.
+
+    Absent provenance returns False, which is the strict reading: a pair that
+    cannot show it predates the schema is held to the current one. Silence is
+    not a licence.
+    """
+    from data_sheets_schema import schema_digest
+
+    provenance = core_path.parent / f"{core_path.name.split('_d4d')[0]}_provenance.yaml"
+    if not provenance.exists():
+        return False
+    try:
+        data = yaml.safe_load(provenance.read_text(encoding="utf-8")) or {}
+    except Exception:                                          # noqa: BLE001
+        return False
+    recorded = (data.get("schema") or {}).get("digest_md5")
+    if not recorded:
+        return False
+    live = schema_digest.fingerprint(schema_digest.digest_text(FULL_CLASS))
+    return recorded != live
+
+
 def _load_yaml_mapping(path: Path) -> Dict[str, Any]:
     loaded = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(loaded, dict):
@@ -750,7 +801,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         core_data = synchronize_core_data(full_data, core_data, pair_schema)
         _write_synchronized_core(args.core, core_data)
 
-    report = validate_pair_data(full_data, core_data, pair_schema)
+    report = validate_pair_data(
+        full_data, core_data, pair_schema,
+        schema_moved=pair_predates_current_schema(args.core))
     if args.as_json:
         print(json.dumps(report.to_dict(), indent=2))
     else:
