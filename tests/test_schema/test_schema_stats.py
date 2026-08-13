@@ -120,15 +120,48 @@ if __name__ == '__main__':
 
 
 class TestDigestBuildIsMemoised(unittest.TestCase):
-    """Rebuilding cost ~0.5s per call and was paid once per distinct slot (#181)."""
+    """Rebuilding cost ~0.5s per call and was paid once per distinct slot (#181).
 
-    def test_repeated_builds_return_the_same_object(self):
+    Asserted by cost, not by object identity. This used to be `assertIs(a, b)`,
+    which was a proxy for "it was memoised" — and stopped being a valid one when
+    #528 made `build` return a copy, precisely so that a caller mutating the
+    result could not corrupt the cache for the rest of the process.
+
+    Identity was the means; not re-reading the schema is the end.
+    """
+
+    def test_a_repeated_build_does_not_reread_the_schema(self):
+        import time
+
+        from data_sheets_schema import schema_digest
+
+        schema_digest.build("Dataset")                 # warm
+        start = time.perf_counter()
+        for _ in range(10):
+            schema_digest.build("Dataset")
+        cached = (time.perf_counter() - start) / 10
+
+        schema_digest._BUILD_CACHE.clear()
+        start = time.perf_counter()
+        schema_digest.build("Dataset")
+        cold = time.perf_counter() - start
+
+        self.assertLess(cached, cold / 10,
+                        f"cached build {cached*1000:.1f}ms against a cold "
+                        f"{cold*1000:.0f}ms — the memo is not working")
+
+    def test_repeated_builds_return_equal_content(self):
+        """What a caller actually depends on, now that the objects differ."""
         from data_sheets_schema import schema_digest
         a = schema_digest.build("Dataset")
         b = schema_digest.build("Dataset")
-        self.assertIs(a, b)
+        self.assertIsNot(a, b)
+        self.assertEqual(schema_digest.render(a), schema_digest.render(b))
 
     def test_different_classes_are_cached_separately(self):
+        """Compared by content. `assertIsNot` would now pass whatever the cache
+        did, because every call returns a distinct object."""
         from data_sheets_schema import schema_digest
-        self.assertIsNot(schema_digest.build("Dataset"),
-                         schema_digest.build("CoreDataset"))
+        self.assertNotEqual(
+            schema_digest.render(schema_digest.build("Dataset")),
+            schema_digest.render(schema_digest.build("CoreDataset")))

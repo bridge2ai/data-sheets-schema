@@ -19,6 +19,7 @@ truncated because their tail is usually curation notes rather than instruction.
 
 from __future__ import annotations
 
+import copy
 import hashlib
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -161,11 +162,32 @@ _BUILD_CACHE: dict[tuple[str, str], "ClassDigest"] = {}
 
 
 def build(class_name: str, schema_path: Path | None = None) -> ClassDigest:
-    """Memoised on (class_name, schema_path); see _build_uncached."""
+    """Memoised on (class_name, schema_path); see _build_uncached.
+
+    Returns a **copy**. The cache used to hand out the stored object itself, so
+    any caller that mutated the result — or its `nested` entries, or their
+    `ranges`/`enums` dicts — silently changed what every later `build()` for
+    that class returned, for the life of the process (#528).
+
+    Found when a test stripped `ranges` to check the fingerprint responded, and
+    two later tests in the same file then measured an empty digest and failed.
+    Those failures read as real defects in the code under test, which is the
+    dangerous shape: the first instinct is to "fix" code that was correct.
+
+    The exposure is not confined to tests. `build` feeds the generation prompt,
+    `slot_spec` (what the fitness judge reads) and the digest fingerprint that
+    keys the fitness and sub-type caches. A mutation anywhere in a long-lived
+    process would change the prompt or the cache key for everything after it,
+    silently and with nothing recording that it happened.
+
+    A copy per call is cheap against what memoisation saves here: `SchemaView`
+    construction and `class_induced_slots` over the whole class, which is the
+    expensive part this cache exists to avoid repeating.
+    """
     key = (class_name, str(schema_path or ""))
     if key not in _BUILD_CACHE:
         _BUILD_CACHE[key] = _build_uncached(class_name, schema_path)
-    return _BUILD_CACHE[key]
+    return copy.deepcopy(_BUILD_CACHE[key])
 
 
 def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDigest:
