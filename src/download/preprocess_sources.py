@@ -81,13 +81,37 @@ def load_source_manifest(manifest_path: Path) -> dict:
     return manifest
 
 
+def _decode(path: Path) -> str:
+    """Decode a downloaded file to text, tolerating non-UTF-8 sources.
+
+    RFC 8259 requires UTF-8 for interchanged JSON, and publishers do not always
+    comply: the AI-READI RO-Crate of 2026-08-12 is cp1252, carrying `©` as a
+    single 0xA9 byte, and `read_text(encoding="utf-8")` raises on it at byte
+    5096. A source that cannot be read is a source silently missing from the
+    bundle, which is the failure worth avoiding.
+
+    UTF-8 is tried first, so a well-formed file is never reinterpreted. cp1252
+    is the fallback because it is what Windows-authored JSON usually is and it
+    decodes every byte, so no character is lost — unlike `errors="ignore"`,
+    which would delete the copyright symbol and leave no trace that it had.
+    """
+    raw = path.read_bytes()
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        # Reported, not silent: the bundle is evidence, and a re-encoded source
+        # should be visible to whoever reads the preprocessing log.
+        print(f"    ! {path.name} is not UTF-8; decoded as cp1252")
+        return raw.decode("cp1252")
+
+
 def extract_source_text(source_path: Path) -> str:
     """Convert one supported raw source artifact to text."""
     suffix = source_path.suffix.lower()
     if suffix in {".txt", ".md"}:
         return source_path.read_text(encoding="utf-8", errors="ignore")
     if suffix == ".json":
-        data = json.loads(source_path.read_text(encoding="utf-8"))
+        data = json.loads(_decode(source_path))
         return json.dumps(data, indent=2, ensure_ascii=False)
     if suffix == ".pdf":
         return extract_pdf_text(source_path)
@@ -274,8 +298,19 @@ def preprocess_project(src_dir: Path, dst_dir: Path) -> dict:
         # Copy text-ready files
         if suffix in [".txt", ".json", ".md"]:
             dst_file = dst_dir / src_file.name
-            shutil.copy2(src_file, dst_file)
-            print(f"    ✓ Copied: {src_file.name}")
+            # Copied byte-for-byte when already UTF-8, so nothing that is
+            # currently correct moves — re-encoding every text source would
+            # rewrite mtimes across four projects and rehash bundles that have
+            # no defect. Only a source that cannot be decoded as UTF-8 is
+            # normalised, because the alternative is a bundle carrying bytes
+            # the concatenator and every downstream reader will choke on.
+            try:
+                src_file.read_bytes().decode("utf-8")
+                shutil.copy2(src_file, dst_file)
+                print(f"    ✓ Copied: {src_file.name}")
+            except UnicodeDecodeError:
+                dst_file.write_text(_decode(src_file), encoding="utf-8")
+                print(f"    ✓ Re-encoded to UTF-8: {src_file.name}")
             stats["copied"] += 1
 
         # Extract text from PDFs

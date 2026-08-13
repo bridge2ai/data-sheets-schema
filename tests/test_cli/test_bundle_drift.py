@@ -165,10 +165,15 @@ class TestAgainstTheRealCorpus(unittest.TestCase):
                     continue
                 counts[bundle_drift(run.method, run.label, project)[0]] += 1
 
-        # 64 drifted is the figure #452 was filed on and must not grow
-        # silently: it can only change when the corpus absorbs another
-        # input change, which is the event this check exists to report.
-        self.assertEqual(counts[BUNDLE_DRIFTED] + counts[BUNDLE_ABSENT], 64)
+        # 64 was the figure #452 was filed on; 68 since 2026-08-12, when the
+        # AI_READI bundle absorbed the release-3.0.0 RO-Crate and the v2.0
+        # licence (#539). Four AI_READI records that still matched now do not.
+        #
+        # The number is pinned rather than computed precisely so that it cannot
+        # grow *silently*: a corpus absorbing an input change is exactly the
+        # event this check exists to report, and updating this line is how that
+        # event gets acknowledged rather than absorbed.
+        self.assertEqual(counts[BUNDLE_DRIFTED] + counts[BUNDLE_ABSENT], 68)
         # `current` grows as fresh runs land — 12 when filed, 14 after the
         # 2026-08-11 canaries, which are drift-free by construction. Asserted
         # as a floor rather than a fixed number so a new run does not fail the
