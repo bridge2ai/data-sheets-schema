@@ -373,6 +373,17 @@
 
       DataSubset : conforms_to_schema
 
+      DataSubset : conforms_to_standard
+
+
+
+
+
+        DataSubset --&gt; "*" DataStandardEnum : conforms_to_standard
+        click DataStandardEnum href "../DataStandardEnum/"
+
+
+
       DataSubset : consent_revocations
 
 
@@ -1544,6 +1555,12 @@
 <td><a href="../conforms_to_schema/">conforms_to_schema</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>The metadata schema <strong>this record itself</strong> is written in — normally `https://...</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../conforms_to_standard/">conforms_to_standard</a></td>
+<td>* <br/> <a href="../DataStandardEnum/">DataStandardEnum</a></td>
+<td>Which registered data standard <code>conforms_to</code> names, where one applies — a ter...</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
@@ -2988,6 +3005,33 @@ attributes:
     domain_of:
     - Information
     range: string
+  conforms_to_standard:
+    name: conforms_to_standard
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: BIDS
+    description: 'Which registered data standard `conforms_to` names, where one applies
+      — a term rather than prose, so the corpus can be queried for "what standards
+      does this follow?" (#403).
+
+      `conforms_to` records what the sources say, in their words. This records which
+      standard that is. Populate both for the same standard: one is verbatim evidence,
+      the other is the normalized term, and they answer different questions.
+
+      Use `OTHER` when the sources name a standard this vocabulary lacks, and keep
+      the name in `conforms_to` so nothing is lost. Never pick a near-neighbour —
+      reporting BIDS because a dataset is neuroimaging, when the sources say otherwise,
+      is an invention.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: dcterms:conformsTo
+    alias: conforms_to_standard
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: DataStandardEnum
+    multivalued: true
   created_by:
     name: created_by
     annotations:

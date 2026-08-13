@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/conforms_to_class/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/DataStandardEnum/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: conforms_to_class - data-sheets-schema</title>
+        <title>Enum: DataStandardEnum - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-conforms_to_class" class="md-skip">
+        <a href="#enum-datastandardenum" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: conforms_to_class
+              Enum: DataStandardEnum
             
           </span>
         </div>
@@ -316,15 +316,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
+  <a href="#permissible-values" class="md-nav__link">
+    Permissible Values
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
+  <a href="#slots" class="md-nav__link">
+    Slots
   </a>
   
 </li>
@@ -338,13 +338,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -353,13 +346,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
   
 </li>
       
@@ -384,134 +370,163 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/conforms_to_class.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/DataStandardEnum.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-conforms_to_class">Slot: conforms_to_class</h1>
-<p><em>The class within <code>conforms_to_schema</code> that this record instantiates — <code>Dataset</code> for a full datasheet, <code>CoreDataset</code> for a core one. Like <code>conforms_to_schema</code>, a statement about the record rather than the data.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/conformsToClass">d4d:conformsToClass</a>
-Alias: conforms_to_class</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
+<h1 id="enum-datastandardenum">Enum: DataStandardEnum</h1>
+<p><em>Data standards and common data models a dataset's content follows.</em></p>
+<p><em>Deliberately <strong>not</strong> merged into <code>FormatEnum</code> (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening <code>FormatEnum</code> to absorb DICOM would conflate them and make <code>format</code> unanswerable.</em></p>
+<p><em>Free-text <code>conforms_to</code> records what a source <em>says</em>; this records which registered standard that is, where one applies. Both may be populated for the same standard — one verbatim, one normalized — which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.</em></p>
+<p><em>⚠️ <strong>No <code>meaning:</code> is asserted on any value.</strong> Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent — it is the exact failure <code>d4d runs identifiers</code> exists to find. The <code>B2AI_STANDARD</code> prefix is declared and is the natural home for these once the registry carries them; until it does, this is a controlled vocabulary without ontology grounding, and says so.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/DataStandardEnum">data_sheets_schema:DataStandardEnum</a></p>
+<h2 id="permissible-values">Permissible Values</h2>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Meaning</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DICOM</td>
+<td>None</td>
+<td>Digital Imaging and Communications in Medicine — imaging data and its acquisi...</td>
+</tr>
+<tr>
+<td>BIDS</td>
+<td>None</td>
+<td>Brain Imaging Data Structure — a file and directory layout with accompanying ...</td>
+</tr>
+<tr>
+<td>OMOP_CDM</td>
+<td>None</td>
+<td>Observational Medical Outcomes Partnership Common Data Model — a relational m...</td>
+</tr>
+<tr>
+<td>WFDB</td>
+<td>None</td>
+<td>WaveForm DataBase — physiologic signal records and annotations</td>
+</tr>
+<tr>
+<td>OPEN_MHEALTH</td>
+<td>None</td>
+<td>Open mHealth — schemas for mobile health and wearable measures</td>
+</tr>
+<tr>
+<td>ESDS</td>
+<td>None</td>
+<td>ASCII File Format Guidelines for Earth Science Data</td>
+</tr>
+<tr>
+<td>CDS</td>
+<td>None</td>
+<td>Clinical Dataset Structure</td>
+</tr>
+<tr>
+<td>RO_CRATE</td>
+<td>None</td>
+<td>RO-Crate — a packaging convention describing a dataset and its context as lin...</td>
+</tr>
+<tr>
+<td>FHIR</td>
+<td>None</td>
+<td>HL7 FHIR — a standard for exchanging healthcare information</td>
+</tr>
+<tr>
+<td>OTHER</td>
+<td>None</td>
+<td>A standard the sources name that has no value here</td>
+</tr>
+</tbody>
+</table>
+<h2 id="slots">Slots</h2>
 <table>
 <thead>
 <tr>
 <th>Name</th>
 <th>Description</th>
-<th>Modifies Slot</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Information/">Information</a></td>
-<td>Grouping for datasets and data files</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>no</td>
+<td><a href="../conforms_to_standard/">conforms_to_standard</a></td>
+<td>Which registered data standard <code>conforms_to</code> names, where one applies — a ter...</td>
 </tr>
 </tbody>
 </table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../String/">String</a></li>
-</ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>Dataset</td>
-</tr>
-<tr>
-<td>d4d:perRecord</td>
-<td>True</td>
-</tr>
-</tbody>
-</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
 </ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>d4d:conformsToClass</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:conforms_to_class</td>
-</tr>
-<tr>
-<td>broad</td>
-<td>dcterms:conformsTo</td>
-</tr>
-</tbody>
-</table>
 <h2 id="linkml-source">LinkML Source</h2>
 <details>
 
-<pre><code class="language-yaml">name: conforms_to_class
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: Dataset
-  d4d:perRecord:
-    tag: d4d:perRecord
-    value: true
-description: The class within `conforms_to_schema` that this record instantiates —
-  `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`,
-  a statement about the record rather than the data.
+<pre><code class="language-yaml">name: DataStandardEnum
+description: 'Data standards and common data models a dataset''s content follows.
+
+  Deliberately **not** merged into `FormatEnum` (#403). A serialization and a data
+  standard are different concepts: CSV says how bytes are laid out, OMOP CDM says
+  what the columns mean. Widening `FormatEnum` to absorb DICOM would conflate them
+  and make `format` unanswerable.
+
+  Free-text `conforms_to` records what a source *says*; this records which registered
+  standard that is, where one applies. Both may be populated for the same standard
+  — one verbatim, one normalized — which is the ordinary label-plus-code pattern and
+  is consistent with the per-slot completeness decision on #501.
+
+  ⚠️ **No `meaning:` is asserted on any value.** Several of these standards have no
+  stable ontology term this repository can verify, and inventing a CURIE that resolves
+  to nothing is worse than leaving the grounding absent — it is the exact failure
+  `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is declared and
+  is the natural home for these once the registry carries them; until it does, this
+  is a controlled vocabulary without ontology grounding, and says so.'
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-broad_mappings:
-- dcterms:conformsTo
 rank: 1000
-slot_uri: d4d:conformsToClass
-alias: conforms_to_class
-domain_of:
-- Information
-range: string
+permissible_values:
+  DICOM:
+    text: DICOM
+    description: Digital Imaging and Communications in Medicine — imaging data and
+      its acquisition metadata.
+  BIDS:
+    text: BIDS
+    description: Brain Imaging Data Structure — a file and directory layout with accompanying
+      metadata for neuroimaging and related recordings.
+  OMOP_CDM:
+    text: OMOP_CDM
+    description: Observational Medical Outcomes Partnership Common Data Model — a
+      relational model for observational health data.
+  WFDB:
+    text: WFDB
+    description: WaveForm DataBase — physiologic signal records and annotations.
+  OPEN_MHEALTH:
+    text: OPEN_MHEALTH
+    description: Open mHealth — schemas for mobile health and wearable measures.
+  ESDS:
+    text: ESDS
+    description: ASCII File Format Guidelines for Earth Science Data.
+  CDS:
+    text: CDS
+    description: Clinical Dataset Structure.
+  RO_CRATE:
+    text: RO_CRATE
+    description: RO-Crate — a packaging convention describing a dataset and its context
+      as linked data.
+  FHIR:
+    text: FHIR
+    description: HL7 FHIR — a standard for exchanging healthcare information.
+  OTHER:
+    text: OTHER
+    description: 'A standard the sources name that has no value here. Use it **with**
+      `conforms_to` carrying the name as the source states it, so the fact is not
+      lost to the absence of a term. A run must never pick a near-neighbour: reporting
+      BIDS because a dataset is neuroimaging, when the sources say something else,
+      is an invention.'
 
 </code></pre>
 

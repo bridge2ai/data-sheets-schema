@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/conforms_to_class/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/conforms_to_standard/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: conforms_to_class - data-sheets-schema</title>
+        <title>Slot: conforms_to_standard - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-conforms_to_class" class="md-skip">
+        <a href="#slot-conforms_to_standard" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: conforms_to_class
+              Slot: conforms_to_standard
             
           </span>
         </div>
@@ -384,16 +384,18 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/conforms_to_class.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/conforms_to_standard.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-conforms_to_class">Slot: conforms_to_class</h1>
-<p><em>The class within <code>conforms_to_schema</code> that this record instantiates — <code>Dataset</code> for a full datasheet, <code>CoreDataset</code> for a core one. Like <code>conforms_to_schema</code>, a statement about the record rather than the data.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/conformsToClass">d4d:conformsToClass</a>
-Alias: conforms_to_class</p>
+<h1 id="slot-conforms_to_standard">Slot: conforms_to_standard</h1>
+<p><em>Which registered data standard <code>conforms_to</code> names, where one applies — a term rather than prose, so the corpus can be queried for "what standards does this follow?" (#403).</em></p>
+<p><em><code>conforms_to</code> records what the sources say, in their words. This records which standard that is. Populate both for the same standard: one is verbatim evidence, the other is the normalized term, and they answer different questions.</em></p>
+<p><em>Use <code>OTHER</code> when the sources name a standard this vocabulary lacks, and keep the name in <code>conforms_to</code> so nothing is lost. Never pick a near-neighbour — reporting BIDS because a dataset is neuroimaging, when the sources say otherwise, is an invention.</em></p>
+<p>URI: <a href="http://purl.org/dc/terms/conformsTo">dcterms:conformsTo</a>
+Alias: conforms_to_standard</p>
 <!-- no inheritance hierarchy -->
 
 <h2 id="applicable-classes">Applicable Classes</h2>
@@ -440,7 +442,12 @@ Alias: conforms_to_class</p>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>Range: <a href="../String/">String</a></li>
+<li>
+<p>Range: <a href="../DataStandardEnum/">DataStandardEnum</a></p>
+</li>
+<li>
+<p>Multivalued: True</p>
+</li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
 <h3 id="annotations">Annotations</h3>
@@ -454,11 +461,7 @@ Alias: conforms_to_class</p>
 <tbody>
 <tr>
 <td>d4d:docExample</td>
-<td>Dataset</td>
-</tr>
-<tr>
-<td>d4d:perRecord</td>
-<td>True</td>
+<td>BIDS</td>
 </tr>
 </tbody>
 </table>
@@ -477,41 +480,41 @@ Alias: conforms_to_class</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>d4d:conformsToClass</td>
+<td>dcterms:conformsTo</td>
 </tr>
 <tr>
 <td>native</td>
-<td>data_sheets_schema:conforms_to_class</td>
-</tr>
-<tr>
-<td>broad</td>
-<td>dcterms:conformsTo</td>
+<td>data_sheets_schema:conforms_to_standard</td>
 </tr>
 </tbody>
 </table>
 <h2 id="linkml-source">LinkML Source</h2>
 <details>
 
-<pre><code class="language-yaml">name: conforms_to_class
+<pre><code class="language-yaml">name: conforms_to_standard
 annotations:
   d4d:docExample:
     tag: d4d:docExample
-    value: Dataset
-  d4d:perRecord:
-    tag: d4d:perRecord
-    value: true
-description: The class within `conforms_to_schema` that this record instantiates —
-  `Dataset` for a full datasheet, `CoreDataset` for a core one. Like `conforms_to_schema`,
-  a statement about the record rather than the data.
+    value: BIDS
+description: 'Which registered data standard `conforms_to` names, where one applies
+  — a term rather than prose, so the corpus can be queried for &quot;what standards does
+  this follow?&quot; (#403).
+
+  `conforms_to` records what the sources say, in their words. This records which standard
+  that is. Populate both for the same standard: one is verbatim evidence, the other
+  is the normalized term, and they answer different questions.
+
+  Use `OTHER` when the sources name a standard this vocabulary lacks, and keep the
+  name in `conforms_to` so nothing is lost. Never pick a near-neighbour — reporting
+  BIDS because a dataset is neuroimaging, when the sources say otherwise, is an invention.'
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-broad_mappings:
-- dcterms:conformsTo
 rank: 1000
-slot_uri: d4d:conformsToClass
-alias: conforms_to_class
+slot_uri: dcterms:conformsTo
+alias: conforms_to_standard
 domain_of:
 - Information
-range: string
+range: DataStandardEnum
+multivalued: true
 
 </code></pre>
 

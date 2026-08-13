@@ -156,6 +156,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/DataStandardEnum/</loc>
+         <lastmod>2026-08-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DataSubset/</loc>
          <lastmod>2026-08-13</lastmod>
          <changefreq>daily</changefreq>
@@ -972,6 +977,11 @@
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/conforms_to_schema/</loc>
+         <lastmod>2026-08-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/conforms_to_standard/</loc>
          <lastmod>2026-08-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
