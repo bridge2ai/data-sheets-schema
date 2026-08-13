@@ -355,8 +355,25 @@ def render(digest: ClassDigest) -> str:
     return "\n".join(lines)
 
 
+_TEXT_CACHE: dict[tuple[str, str], str] = {}
+
+
 def digest_text(class_name: str, schema_path: Path | None = None) -> str:
-    return render(build(class_name, schema_path))
+    """The rendered digest, memoised separately from `build`.
+
+    `build` returns a deep copy so a caller cannot corrupt the cache (#528),
+    which costs ~1.7 ms. `digest_text` renders and discards, so it needs no
+    copy at all — and it is on a hot path: `LLMSlotFitnessScorer._context`
+    calls it once per judgement to compute the cache key, so the copy would
+    have been paid 1,441 times in a sweep for a value that never changes.
+
+    Caching the *string* is safe where caching the object was not: strings are
+    immutable, so there is nothing for a caller to mutate.
+    """
+    key = (class_name, str(schema_path or ""))
+    if key not in _TEXT_CACHE:
+        _TEXT_CACHE[key] = render(build(class_name, schema_path))
+    return _TEXT_CACHE[key]
 
 
 def fingerprint(text: str) -> str:

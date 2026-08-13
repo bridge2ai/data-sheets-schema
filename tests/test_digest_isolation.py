@@ -49,13 +49,48 @@ class TestMutationIsIsolated(unittest.TestCase):
 
     def test_the_rendered_digest_is_unchanged_after_a_mutation(self):
         """The property that actually matters: the generation prompt and the
-        cache key must not move because someone inspected a digest."""
+        cache key must not move because someone inspected a digest.
+
+        `_TEXT_CACHE` is cleared between the two reads on purpose. Without
+        that this passes trivially — the second call would return the string
+        memoised before the mutation, and the test would hold even if `build`
+        went back to sharing the object.
+        """
         before = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
         scratch = schema_digest.build("Dataset")
         scratch.nested.clear()
         scratch.slots.clear()
+        schema_digest._TEXT_CACHE.clear()
         after = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
         self.assertEqual(before, after)
+
+
+class TestTheTextCacheIsSafe(unittest.TestCase):
+    """Caching the rendered string is safe where caching the object was not:
+    strings are immutable, so there is nothing for a caller to mutate.
+
+    It exists because `digest_text` is on a hot path — `_context` calls it once
+    per fitness judgement to build the cache key — and renders-and-discards, so
+    it needs no copy at all.
+    """
+
+    def test_repeated_calls_are_free(self):
+        schema_digest.digest_text("Dataset")
+        start = time.perf_counter()
+        for _ in range(50):
+            schema_digest.digest_text("Dataset")
+        self.assertLess((time.perf_counter() - start) / 50, 0.001)
+
+    def test_it_agrees_with_an_uncached_render(self):
+        """The cache must not be able to serve something `render` would not."""
+        cached = schema_digest.digest_text("Dataset")
+        schema_digest._TEXT_CACHE.clear()
+        schema_digest._BUILD_CACHE.clear()
+        self.assertEqual(cached, schema_digest.digest_text("Dataset"))
+
+    def test_classes_are_cached_separately(self):
+        self.assertNotEqual(schema_digest.digest_text("Dataset"),
+                            schema_digest.digest_text("CoreDataset"))
 
 
 class TestTheCacheStillWorks(unittest.TestCase):
