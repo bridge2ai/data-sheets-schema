@@ -17,7 +17,6 @@ better-informed question, so cached labels from before it are not comparable and
 must not be reused. The last class here is what makes that safe.
 """
 
-import copy
 import unittest
 
 from data_sheets_schema import schema_digest
@@ -106,11 +105,11 @@ class TestCachedJudgementsCannotSurviveThis(unittest.TestCase):
         """Render the same digest with the ranges stripped and confirm the
         fingerprint differs. If it did not, the cache key would be blind to
         exactly the information the judge gained."""
-        # Deep-copied because `build` memoises and returns the *shared*
-        # object: stripping ranges in place corrupted the cached digest for
-        # every later test in the process, and the two tests below then
-        # measured an empty digest and failed for the wrong reason.
-        digest = copy.deepcopy(schema_digest.build("Dataset"))
+        # No longer deep-copied: `build` returns a copy since #528, so
+        # stripping ranges here cannot reach the cache. Left mutating in place
+        # deliberately — if that isolation ever regresses, the two tests below
+        # fail, which is how this one was found in the first place.
+        digest = schema_digest.build("Dataset")
         before = schema_digest.fingerprint(schema_digest.render(digest))
         for nested in digest.nested:
             nested.ranges = {}
