@@ -29,9 +29,22 @@ prefixes:
   schema: http://schema.org/
   sh: https://w3id.org/shacl/
   skos: http://www.w3.org/2004/02/skos/core#
-  B2AI_TOPIC: https://w3id.org/bridge2ai/b2ai-standards-registry/
+  # Taken from the registry's own schemas, not from the registry's homepage
+  # URL (#535). All three previously pointed at
+  # `https://w3id.org/bridge2ai/b2ai-standards-registry/`, so `B2AI_TOPIC:x`
+  # here and `B2AI_TOPIC:x` in the registry were different IRIs — a CURIE that
+  # resolves to the wrong thing, which the identifier audit passes because the
+  # prefix *is* declared. See `src/data_sheets_schema/b2ai_registry_prefixes.yaml`
+  # for the pin and how to refresh it.
+  B2AI_DATA: https://w3id.org/bridge2ai/standards-dataset-schema/
+  B2AI_ORG: https://w3id.org/bridge2ai/standards-organization-schema/
+  B2AI_SUBSTRATE: https://w3id.org/bridge2ai/standards-datasubstrate-schema/
+  B2AI_TOPIC: https://w3id.org/bridge2ai/standards-datatopic-schema/
+  # Local to this repository: the registry models the concept as
+  # `DataStandardOrTool` and declares no `B2AI_STANDARD`. Kept rather than
+  # retired because #403 names it as the eventual grounding for
+  # `DataStandardEnum`, and retiring it is a separate decision.
   B2AI_STANDARD: https://w3id.org/bridge2ai/b2ai-standards-registry/
-  B2AI_SUBSTRATE: https://w3id.org/bridge2ai/b2ai-standards-registry/
 default_prefix: data_sheets_schema
 default_range: string
 

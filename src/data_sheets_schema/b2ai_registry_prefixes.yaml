@@ -1,0 +1,35 @@
+# Prefixes the Bridge2AI standards registry declares, pinned so this repository
+# cannot drift from it silently (#535).
+#
+# Our three B2AI_* prefixes all pointed at the registry's *homepage* URL rather
+# than at the per-schema namespaces the registry actually declares. A prefix
+# bound to the wrong namespace is worse than an undeclared one: the CURIE is
+# well-formed and the prefix is declared, so `d4d runs identifiers` passes it
+# while it resolves somewhere else. Nothing downstream can tell.
+#
+# Refresh with:
+#   curl -sSL https://raw.githubusercontent.com/bridge2ai/standards-schemas/main/src/standards_schemas/schema/standards_dataset_schema.yaml
+# and update `source` below. `tests/test_registry_prefixes.py` compares the
+# schema against this file; it does not reach the network, so a refresh is a
+# deliberate act with a diff a reviewer can read.
+source:
+  repository: bridge2ai/standards-schemas
+  path: src/standards_schemas/schema/standards_dataset_schema.yaml
+  commit: 76122808d3bf1b178c8f7325b0b2705f2e208d95
+  committed: '2026-01-12T22:54:08Z'
+  retrieved: '2026-08-12'
+
+prefixes:
+  B2AI_DATA: https://w3id.org/bridge2ai/standards-dataset-schema/
+  B2AI_ORG: https://w3id.org/bridge2ai/standards-organization-schema/
+  B2AI_SUBSTRATE: https://w3id.org/bridge2ai/standards-datasubstrate-schema/
+  B2AI_TOPIC: https://w3id.org/bridge2ai/standards-datatopic-schema/
+
+# Declared by this repository and not by the registry. Recorded here so the
+# check can tell "ours, deliberately" from "drifted from theirs".
+local_only:
+  B2AI_STANDARD: >-
+    The registry models this concept as `DataStandardOrTool` and declares no
+    such prefix. #403 names B2AI_STANDARD as the eventual grounding for
+    DataStandardEnum; whether to retire it in favour of the registry's own term
+    is an open decision.
