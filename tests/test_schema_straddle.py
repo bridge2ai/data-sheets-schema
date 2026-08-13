@@ -198,12 +198,20 @@ class TestAgainstTheRealArm(unittest.TestCase):
             for project in PROJECTS:
                 label = f"{ARM}_rep{rep}"
                 with self.subTest(rep=rep, project=project):
-                    self.assertEqual(
+                    # `match`/`canonical` were true when this arm was written
+                    # and are properties of a *fresh* record, not of a record.
+                    # #515 rotated the prompt pins on 2026-08-13, so these now
+                    # read `unverifiable`/`superseded` — the file moved under
+                    # them. The failures worth catching are `mismatch` (the
+                    # instruction sent was not the one the spec produces) and
+                    # `uncanonical` (the text was never published).
+                    self.assertNotEqual(
                         verify_request("claudecode_agent", label, project)[0],
-                        "match")
-                    self.assertEqual(
+                        "mismatch")
+                    self.assertNotIn(
                         canonical_prompt_status(
-                            "claudecode_agent", label, project)[0], "canonical")
+                            "claudecode_agent", label, project)[0],
+                        ("uncanonical", "missing"))
                     # Not asserted `current`: the AI_READI bundle changed on
                     # 2026-08-12 when it absorbed the release-3.0.0 RO-Crate
                     # and the v2.0 licence (#539), so those records correctly

@@ -53,37 +53,69 @@ files:
       \ is left to the manifest scope declaration rather than restated here (#422)."
     sha256: b7db067c2852b57287cb68bd1fd4f3bfc229496cc2a4bd33065bb9558a35b215
   src/download/prompts/d4d_generic_arm_prompt.md:
-    bytes: 5754
-    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
-    pinned_on: '2026-08-10'
-    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
-      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
-      retroactively.'
-    sha256: 0fbc626bc3a51d74a8ba3d8e2813752f3bc5ce9366ee5f19c99089afdfd9e8dc
+    bytes: 6737
+    pinned_at_commit: 7141fdc63e43f5049bf98289a142c85bd63107ed
+    pinned_on: '2026-08-13'
+    reason: '#515: the core header block is stated in full instead of implied by ''the core
+      file uses phase 2 and the core schema path''. That one line contradicted the playbook''s
+      requirement for ''# Sources:'' and ''# Phase 4 reconciliation: completed'', and fifteen
+      runs of the 2026-08-11 arm resolved it four different ways.'
+    sha256: f5873222343632a97e0d9200e283924751cddfc70e1c879bbeb9f6416cf95d86
+    superseded:
+    - pinned_on: '2026-08-10'
+      reason: 'initial pin (#432): the file as it stood when the registry was created. All
+        77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+        retroactively.'
+      retired_on: '2026-08-13'
+      sha256: 0fbc626bc3a51d74a8ba3d8e2813752f3bc5ce9366ee5f19c99089afdfd9e8dc
   src/download/prompts/d4d_generic_arm_prompt_v2.md:
-    bytes: 9110
-    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
-    pinned_on: '2026-08-10'
-    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
-      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
-      retroactively.'
-    sha256: 4780613475ef2a629f98b69a934228b58eccd5fe93915fcd259a62cff6583de6
+    bytes: 10099
+    pinned_at_commit: 7141fdc63e43f5049bf98289a142c85bd63107ed
+    pinned_on: '2026-08-13'
+    reason: '#515: the core header block is stated in full instead of implied by ''the core
+      file uses phase 2 and the core schema path''. That one line contradicted the playbook''s
+      requirement for ''# Sources:'' and ''# Phase 4 reconciliation: completed'', and fifteen
+      runs of the 2026-08-11 arm resolved it four different ways.'
+    sha256: 7bb7a2b854e11ad49361eccbd6b84f00ff0eb0808f16b67a148bbb49be76bf67
+    superseded:
+    - pinned_on: '2026-08-10'
+      reason: 'initial pin (#432): the file as it stood when the registry was created. All
+        77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+        retroactively.'
+      retired_on: '2026-08-13'
+      sha256: 4780613475ef2a629f98b69a934228b58eccd5fe93915fcd259a62cff6583de6
   src/download/prompts/d4d_generic_arm_prompt_v3.md:
-    bytes: 7204
-    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
-    pinned_on: '2026-08-10'
-    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
-      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
-      retroactively.'
-    sha256: 2126da06d0834c2501c55fe9838720fe3ee33ab38c4775f2af329bc4759da45a
+    bytes: 8193
+    pinned_at_commit: 7141fdc63e43f5049bf98289a142c85bd63107ed
+    pinned_on: '2026-08-13'
+    reason: '#515: the core header block is stated in full instead of implied by ''the core
+      file uses phase 2 and the core schema path''. That one line contradicted the playbook''s
+      requirement for ''# Sources:'' and ''# Phase 4 reconciliation: completed'', and fifteen
+      runs of the 2026-08-11 arm resolved it four different ways.'
+    sha256: 71c808bca3529140b4b82802ca8cf5c68ee972ec664a2b4e06137cd5df06a714
+    superseded:
+    - pinned_on: '2026-08-10'
+      reason: 'initial pin (#432): the file as it stood when the registry was created. All
+        77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+        retroactively.'
+      retired_on: '2026-08-13'
+      sha256: 2126da06d0834c2501c55fe9838720fe3ee33ab38c4775f2af329bc4759da45a
   src/download/prompts/d4d_generic_arm_prompt_v4.md:
-    bytes: 7670
-    pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
-    pinned_on: '2026-08-10'
-    reason: 'initial pin (#432): the file as it stood when the registry was created. All 77
-      recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
-      retroactively.'
-    sha256: a47e61b52c05a0aa81c2a8629be551942ab2e6e24a39d11dc75ba96ef5b3482a
+    bytes: 8659
+    pinned_at_commit: 7141fdc63e43f5049bf98289a142c85bd63107ed
+    pinned_on: '2026-08-13'
+    reason: '#515: the core header block is stated in full instead of implied by ''the core
+      file uses phase 2 and the core schema path''. That one line contradicted the playbook''s
+      requirement for ''# Sources:'' and ''# Phase 4 reconciliation: completed'', and fifteen
+      runs of the 2026-08-11 arm resolved it four different ways.'
+    sha256: 3845b66c33ba25e585741496755a8e0c9bbec172f6a26a1b90e6fe4fcb0a0cb9
+    superseded:
+    - pinned_on: '2026-08-10'
+      reason: 'initial pin (#432): the file as it stood when the registry was created. All
+        77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
+        retroactively.'
+      retired_on: '2026-08-13'
+      sha256: a47e61b52c05a0aa81c2a8629be551942ab2e6e24a39d11dc75ba96ef5b3482a
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
