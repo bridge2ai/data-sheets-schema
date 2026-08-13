@@ -53,14 +53,20 @@ prefixes:
   skos:
     prefix_prefix: skos
     prefix_reference: http://www.w3.org/2004/02/skos/core#
-  B2AI_TOPIC:
-    prefix_prefix: B2AI_TOPIC
-    prefix_reference: https://w3id.org/bridge2ai/b2ai-standards-registry/
-  B2AI_STANDARD:
-    prefix_prefix: B2AI_STANDARD
-    prefix_reference: https://w3id.org/bridge2ai/b2ai-standards-registry/
+  B2AI_DATA:
+    prefix_prefix: B2AI_DATA
+    prefix_reference: https://w3id.org/bridge2ai/standards-dataset-schema/
+  B2AI_ORG:
+    prefix_prefix: B2AI_ORG
+    prefix_reference: https://w3id.org/bridge2ai/standards-organization-schema/
   B2AI_SUBSTRATE:
     prefix_prefix: B2AI_SUBSTRATE
+    prefix_reference: https://w3id.org/bridge2ai/standards-datasubstrate-schema/
+  B2AI_TOPIC:
+    prefix_prefix: B2AI_TOPIC
+    prefix_reference: https://w3id.org/bridge2ai/standards-datatopic-schema/
+  B2AI_STANDARD:
+    prefix_prefix: B2AI_STANDARD
     prefix_reference: https://w3id.org/bridge2ai/b2ai-standards-registry/
   xsd:
     prefix_prefix: xsd
