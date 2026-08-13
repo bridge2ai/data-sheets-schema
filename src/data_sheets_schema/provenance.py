@@ -75,7 +75,15 @@ HEADER_FIELDS = ("Generation Method", "Agent runtime", "Provider", "Model",
                  # `Prompt` was absent, so `parse_header` silently discarded
                  # the one field a historical prompt could be recovered from
                  # (#399). 15 records carry it and read as carrying nothing.
-                 "Prompt", "Prompt components")
+                 "Prompt", "Prompt components",
+                 # The core record's link to the full record it was projected
+                 # from (#515). Present in substance in every core record and
+                 # discarded by `parse_header` in all of them, because the key
+                 # was never listed — the same silent drop `Prompt` suffered
+                 # until #399. It was also spelled four ways across one arm,
+                 # which is what "use exactly, except add two lines" produces
+                 # when fifteen runs each resolve the contradiction alone.
+                 "Sources", "Phase 4 reconciliation")
 
 
 def _md5(path: Path) -> str | None:
