@@ -51,10 +51,41 @@ class TestSchemaDigest(unittest.TestCase):
             schema_digest.build("NoSuchClass")
 
     def test_digest_carries_no_dataset_facts(self):
-        """It states structure. Content would breach the provenance boundary."""
+        """It states structure. Content would breach the provenance boundary.
+
+        `b2ai` was narrowed to `b2ai-voice` on 2026-08-13. The bare token was a
+        proxy for dataset-specific leakage and now also matches
+        `B2AI_SUBSTRATE` / `B2AI_TOPIC`, the registry *vocabulary* names that
+        #538 renders. A controlled vocabulary is structure — it says what kinds
+        of value a slot admits, never what any dataset contains — so matching
+        it here would fail the test for doing the right thing.
+
+        The dataset-specific forms are still forbidden, and the companion test
+        below asserts the vocabulary names *are* present, so this exemption
+        cannot widen silently into one that lets a real fact through.
+        """
         text = schema_digest.digest_text("Dataset").lower()
-        for leak in ("chorus", "cm4ai", "ai-readi", "physionet", "b2ai"):
-            self.assertNotIn(leak, text)
+        for leak in ("chorus", "cm4ai", "ai-readi", "physionet", "b2ai-voice",
+                     "aireadi", "fairhub"):
+            with self.subTest(leak=leak):
+                self.assertNotIn(leak, text)
+
+    def test_the_registry_vocabulary_names_are_structure_not_facts(self):
+        """The exemption above, stated positively so it is visible.
+
+        `B2AI_SUBSTRATE:11 = DICOM` names a kind of data any dataset might
+        hold. It is the same category of statement as an enum's permitted
+        values, which the digest has always carried.
+        """
+        text = schema_digest.digest_text("Dataset")
+        self.assertIn("B2AI_SUBSTRATE", text)
+        self.assertIn("B2AI_TOPIC", text)
+        # And no dataset is named alongside them.
+        for line in text.splitlines():
+            if "B2AI_" in line:
+                with self.subTest(line=line[:60]):
+                    self.assertNotIn("AI-READI", line)
+                    self.assertNotIn("CHORUS", line)
 
     def test_fingerprint_is_stable_and_content_sensitive(self):
         a = schema_digest.digest_text("Dataset")

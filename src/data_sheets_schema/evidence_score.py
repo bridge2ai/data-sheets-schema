@@ -752,6 +752,14 @@ def slot_spec(slot: str, class_name: str = "Dataset",
         lines.append(
             "A value of the wrong kind for its declared range is a form "
             "failure even when it reads well.")
+        # The registry vocabulary those attributes draw from (#538). Without
+        # it a judge cannot tell that a Cellosaurus cell line in
+        # `data_substrate` is the wrong *kind* of thing — it is a resolvable
+        # IRI, so every syntactic check passes it.
+        for attribute, names in sorted(nested.values_from.items()):
+            vocabulary = schema_digest.render_values_from(names)
+            if vocabulary:
+                lines.append(f"`{attribute}` must be drawn from {vocabulary}")
     return "\n".join(lines)
 
 

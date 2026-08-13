@@ -1,0 +1,166 @@
+# Bridge2AI registry vocabularies for `values_from` slots, pinned (#538).
+#
+# `data_topic` and `data_substrate` declare `values_from: B2AI_TOPIC` /
+# `B2AI_SUBSTRATE`. Nothing rendered that declaration, so no run has ever been
+# shown the vocabulary — and the corpus reflects it: all 23 well-formed
+# `data_substrate` IRIs name cell lines (Cellosaurus MDA-MB-468, KOLF2.1J) or
+# assay techniques (Fluorescence, Mass Spectrometry, CRISPR-Cas Systems), none
+# of which is a type of data. The 11 prose values are correct in substance and
+# had no term to be expressed as.
+#
+# Pinned rather than fetched, for the same reason as the prompt pins: a
+# refresh is an edit with a diff a reviewer reads, not a network dependency
+# that turns a registry-side change into a surprise CI failure.
+#
+# Refresh with:
+#   curl -sSL https://raw.githubusercontent.com/bridge2ai/b2ai-standards-registry/main/project/data/DataSubstrate.tsv
+#   curl -sSL https://raw.githubusercontent.com/bridge2ai/b2ai-standards-registry/main/project/data/DataTopic.tsv
+source:
+  repository: bridge2ai/b2ai-standards-registry
+  commit: d38bcf2408c960a75dfadc295b47990a3890c26f
+  committed: '2026-06-04T19:20:27Z'
+  retrieved: '2026-08-13'
+  paths:
+    - project/data/DataSubstrate.tsv
+    - project/data/DataTopic.tsv
+
+vocabularies:
+  B2AI_SUBSTRATE:
+    B2AI_SUBSTRATE:1: Array
+    B2AI_SUBSTRATE:2: Associative Array
+    B2AI_SUBSTRATE:3: BIDS
+    B2AI_SUBSTRATE:4: BigQuery
+    B2AI_SUBSTRATE:5: Column Store
+    B2AI_SUBSTRATE:6: Comma-separated values
+    B2AI_SUBSTRATE:7: Data
+    B2AI_SUBSTRATE:8: Data Frame
+    B2AI_SUBSTRATE:9: Database
+    B2AI_SUBSTRATE:10: Delimited Text
+    B2AI_SUBSTRATE:11: DICOM
+    B2AI_SUBSTRATE:12: Directed acyclic graph
+    B2AI_SUBSTRATE:13: Document Database
+    B2AI_SUBSTRATE:14: Graph
+    B2AI_SUBSTRATE:15: Graph Database
+    B2AI_SUBSTRATE:16: HDF5
+    B2AI_SUBSTRATE:17: Heap
+    B2AI_SUBSTRATE:18: Hierarchical Array
+    B2AI_SUBSTRATE:19: Image
+    B2AI_SUBSTRATE:20: JSON
+    B2AI_SUBSTRATE:21: KGX TSV
+    B2AI_SUBSTRATE:22: MongoDB
+    B2AI_SUBSTRATE:23: MySQL
+    B2AI_SUBSTRATE:24: N-Dimensional Array
+    B2AI_SUBSTRATE:25: Neo4j
+    B2AI_SUBSTRATE:26: Neural Network Model
+    B2AI_SUBSTRATE:27: NNEF
+    B2AI_SUBSTRATE:28: ONNX
+    B2AI_SUBSTRATE:29: Pandas DataFrame
+    B2AI_SUBSTRATE:30: Parquet
+    B2AI_SUBSTRATE:31: PostgreSQL
+    B2AI_SUBSTRATE:32: Property graph
+    B2AI_SUBSTRATE:33: PyTorch Tensor
+    B2AI_SUBSTRATE:34: R data.frame
+    B2AI_SUBSTRATE:35: R tibble
+    B2AI_SUBSTRATE:36: Raster Image
+    B2AI_SUBSTRATE:37: Relational Database
+    B2AI_SUBSTRATE:38: Set
+    B2AI_SUBSTRATE:39: String
+    B2AI_SUBSTRATE:40: SummarizedExperiment
+    B2AI_SUBSTRATE:41: Tab-separated values
+    B2AI_SUBSTRATE:42: Tensor
+    B2AI_SUBSTRATE:43: Text
+    B2AI_SUBSTRATE:44: Tree
+    B2AI_SUBSTRATE:45: Trie
+    B2AI_SUBSTRATE:46: Vector
+    B2AI_SUBSTRATE:47: Vector Image
+    B2AI_SUBSTRATE:48: Waveform Audio File Format
+    B2AI_SUBSTRATE:49: Waveform Data
+    B2AI_SUBSTRATE:50: xarray
+    B2AI_SUBSTRATE:51: Zarr
+    B2AI_SUBSTRATE:52: Compressed Data
+    B2AI_SUBSTRATE:53: BED
+    B2AI_SUBSTRATE:54: Vector Database
+    B2AI_SUBSTRATE:55: Pinecone
+    B2AI_SUBSTRATE:56: Immunofluorescence Image
+    B2AI_SUBSTRATE:57: Spectral Data
+    B2AI_SUBSTRATE:58: Mass Spectrometry Data
+    B2AI_SUBSTRATE:59: Size Exclusion Chromatography-Mass Spectrometry Data
+    B2AI_SUBSTRATE:60: Sequence
+    B2AI_SUBSTRATE:61: DNA Sequence Data
+    B2AI_SUBSTRATE:62: RNA Sequence Data
+    B2AI_SUBSTRATE:63: Single-cell RNA Sequence Data
+    B2AI_SUBSTRATE:64: Perturb-seq Data
+    B2AI_SUBSTRATE:65: Retinal Image
+    B2AI_SUBSTRATE:66: Fluorescence Lifetime Imaging Ophthalmoscopy data
+    B2AI_SUBSTRATE:67: Optical coherence tomography data
+    B2AI_SUBSTRATE:68: Optical coherence tomography angiography data
+    B2AI_SUBSTRATE:69: Time-series data
+    B2AI_SUBSTRATE:70: Physiological data
+    B2AI_SUBSTRATE:71: Heart rate
+    B2AI_SUBSTRATE:72: Oxygen saturation
+    B2AI_SUBSTRATE:73: Physical activity data
+    B2AI_SUBSTRATE:74: Caloric burn data
+    B2AI_SUBSTRATE:75: Respiratory rate
+    B2AI_SUBSTRATE:76: Sleep tracking data
+    B2AI_SUBSTRATE:77: Stress tracking data
+    B2AI_SUBSTRATE:78: Glucose monitoring data
+    B2AI_SUBSTRATE:79: Participant response data
+    B2AI_SUBSTRATE:80: Questionnaire response data
+    B2AI_SUBSTRATE:81: File headers
+  B2AI_TOPIC:
+    B2AI_TOPIC:1: Biology
+    B2AI_TOPIC:2: Cell
+    B2AI_TOPIC:3: Cheminformatics
+    B2AI_TOPIC:4: Clinical Observations
+    B2AI_TOPIC:5: Data
+    B2AI_TOPIC:6: Demographics
+    B2AI_TOPIC:7: Disease
+    B2AI_TOPIC:8: Drug
+    B2AI_TOPIC:9: EHR
+    B2AI_TOPIC:10: EKG
+    B2AI_TOPIC:11: Environment
+    B2AI_TOPIC:12: Gene
+    B2AI_TOPIC:13: Genome
+    B2AI_TOPIC:14: Geolocation
+    B2AI_TOPIC:15: Image
+    B2AI_TOPIC:16: Literature
+    B2AI_TOPIC:17: Metabolome
+    B2AI_TOPIC:18: mHealth
+    B2AI_TOPIC:19: Microscale Imaging
+    B2AI_TOPIC:20: Molecular Biology
+    B2AI_TOPIC:21: Networks And Pathways
+    B2AI_TOPIC:22: Neurologic Imaging
+    B2AI_TOPIC:23: Omics
+    B2AI_TOPIC:24: Ophthalmic Imaging
+    B2AI_TOPIC:25: Phenotype
+    B2AI_TOPIC:26: Protein
+    B2AI_TOPIC:27: Protein Structure Model
+    B2AI_TOPIC:28: Proteome
+    B2AI_TOPIC:29: SDoH
+    B2AI_TOPIC:30: Social Media
+    B2AI_TOPIC:31: Survey
+    B2AI_TOPIC:32: Text
+    B2AI_TOPIC:33: Transcript
+    B2AI_TOPIC:34: Transcriptome
+    B2AI_TOPIC:35: Variant
+    B2AI_TOPIC:36: Voice
+    B2AI_TOPIC:37: Waveform
+    B2AI_TOPIC:38: Glucose Monitoring
+    B2AI_TOPIC:39: Activity Monitoring
+    B2AI_TOPIC:40: Governance
+    B2AI_TOPIC:41: Neuron
+    B2AI_TOPIC:42: Cardiomyocyte
+    B2AI_TOPIC:43: Diabetes
+    B2AI_TOPIC:44: Eye Diseases
+    B2AI_TOPIC:45: Voice Disorders
+    B2AI_TOPIC:46: Respiration
+    B2AI_TOPIC:47: Respiratory Disorders
+    B2AI_TOPIC:48: Neurology
+    B2AI_TOPIC:49: Neurological Disorders
+    B2AI_TOPIC:50: Psychiatry
+    B2AI_TOPIC:51: Psychiatric Disorders
+    B2AI_TOPIC:52: Training
+    B2AI_TOPIC:53: Ontology
+    B2AI_TOPIC:54: Metadata
+    B2AI_TOPIC:55: Data Packaging
+    B2AI_TOPIC:56: Nutrition
