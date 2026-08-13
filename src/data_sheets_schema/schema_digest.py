@@ -67,6 +67,10 @@ class SlotDigest:
     multivalued: bool = False
     enum_values: list[str] = field(default_factory=list)
     enum_truncated: int = 0
+    #: `values_from` targets, so the permitted vocabulary can be rendered
+    #: (#538). Collected and rendered together — collecting without rendering
+    #: is the state this issue was filed about.
+    values_from: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -100,6 +104,59 @@ class NestedClass:
     # identifiers` found those values only because it reads the schema itself
     # rather than asking a judge.
     ranges: dict[str, str] = field(default_factory=dict)
+    #: `values_from` targets per nested attribute (#538). `data_topic` and
+    #: `data_substrate` are attributes of `Instance`, not slots of `Dataset`,
+    #: so a top-level-only rendering reaches neither — the same reason #486
+    #: had to render nested ranges here rather than on the slot listing.
+    values_from: dict[str, list[str]] = field(default_factory=dict)
+
+
+#: Registry vocabularies for slots declaring `values_from` (#538), pinned in
+#: `b2ai_registry_vocabularies.yaml`.
+VOCABULARY_PIN = Path(__file__).with_name("b2ai_registry_vocabularies.yaml")
+
+_VOCABULARIES: dict[str, dict[str, str]] | None = None
+
+
+def vocabularies() -> dict[str, dict[str, str]]:
+    """The pinned registry vocabularies, keyed by `values_from` name."""
+    global _VOCABULARIES
+    if _VOCABULARIES is None:
+        import yaml as _yaml
+        doc = _yaml.safe_load(VOCABULARY_PIN.read_text(encoding="utf-8")) or {}
+        _VOCABULARIES = doc.get("vocabularies") or {}
+    return _VOCABULARIES
+
+
+def render_values_from(names: list[str]) -> str | None:
+    """The permitted terms for a slot that declares `values_from` (#538).
+
+    Rendered because nothing rendered it before. `data_topic` and
+    `data_substrate` have declared `values_from` all along and no run has ever
+    seen it, so runs improvised: every one of the 23 well-formed
+    `data_substrate` IRIs names a cell line or an assay technique, neither of
+    which is a type of data, while the 11 prose values are right in substance
+    and had no term to be written as.
+
+    The prefix is stated once and terms listed as `id=name`, which halves the
+    cost against repeating `B2AI_SUBSTRATE:` 81 times — the digest is
+    prompt-injected and defends a size budget.
+
+    A `values_from` naming no pinned vocabulary renders nothing rather than
+    guessing. Silence is the honest output when the terms are unknown.
+    """
+    known = vocabularies()
+    parts = []
+    for name in names:
+        terms = known.get(name)
+        if not terms:
+            continue
+        prefix = f"{name}:"
+        items = ", ".join(
+            f"{k[len(prefix):] if k.startswith(prefix) else k}={v}"
+            for k, v in terms.items())
+        parts.append(f"{name} (use `{name}:<id>`) — {items}")
+    return "; ".join(parts) if parts else None
 
 
 #: Ranges that hold on essentially every object range, stated once rather than
@@ -218,6 +275,7 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
             multivalued=bool(slot.multivalued),
             enum_values=enum_values,
             enum_truncated=truncated,
+            values_from=[str(v) for v in (slot.values_from or [])],
         ))
     digest.slots.sort(key=lambda s: s.name)
 
@@ -237,11 +295,14 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
         enums: dict[str, list[str]] = {}
         enums_truncated: dict[str, int] = {}
         ranges: dict[str, str] = {}
+        values_from: dict[str, list[str]] = {}
         for sub in sv.class_induced_slots(rng):
             (req if sub.required else opt).append(str(sub.name))
             if sub.range:
                 ranges[str(sub.name)] = (
                     f"{sub.range}[]" if sub.multivalued else str(sub.range))
+            if sub.values_from:
+                values_from[str(sub.name)] = [str(v) for v in sub.values_from]
             sub_enum = sv.get_enum(sub.range) if sub.range else None
             if sub_enum is not None:
                 values = list((sub_enum.permissible_values or {}).keys())
@@ -253,7 +314,7 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
             digest.nested.append(NestedClass(
                 name=rng, required=sorted(req), optional=sorted(opt),
                 enums=enums, enums_truncated=enums_truncated,
-                ranges=ranges))
+                ranges=ranges, values_from=values_from))
     digest.nested.sort(key=lambda n: n.name)
     return digest
 
@@ -281,6 +342,9 @@ def render(digest: ClassDigest) -> str:
             shown = ", ".join(f"`{v}`" for v in s.enum_values)
             tail = f" (+{s.enum_truncated} more)" if s.enum_truncated else ""
             lines.append(f"Permitted: {shown}{tail}")
+        vocabulary = render_values_from(s.values_from)
+        if vocabulary:
+            lines.append(f"Draw from: {vocabulary}")
         lines.append("")
 
     if digest.nested:
@@ -351,6 +415,12 @@ def render(digest: ClassDigest) -> str:
                 extra = n.enums_truncated.get(slot_name, 0)
                 tail = f" (+{extra} more)" if extra else ""
                 lines.append(f"    - `{slot_name}` accepts only: {shown}{tail}")
+            # The registry vocabulary a nested attribute draws from (#538).
+            # Here or nowhere, exactly as for the enums above.
+            for slot_name, names in sorted(n.values_from.items()):
+                vocabulary = render_values_from(names)
+                if vocabulary:
+                    lines.append(f"    - `{slot_name}` draws from {vocabulary}")
         lines.append("")
     return "\n".join(lines)
 

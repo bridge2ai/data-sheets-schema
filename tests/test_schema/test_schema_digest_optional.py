@@ -233,10 +233,22 @@ class TestTheDigestStaysCompact(unittest.TestCase):
 
     def test_the_listing_did_not_double_the_digest(self):
         """It grew ~20%. A regression that enumerated the mirroring classes in
-        full would roughly double it, and this is the cheapest way to notice."""
+        full would roughly double it, and this is the cheapest way to notice.
+
+        Ceiling raised 40k -> 44k on 2026-08-13, deliberately. #538 renders the
+        B2AI_SUBSTRATE (81 terms) and B2AI_TOPIC (56) vocabularies that
+        `data_topic` and `data_substrate` have always declared and no run had
+        ever been shown — 2,550 characters, 6.8%. The guard exists to catch a
+        regression that *doubles* the digest, which this is not, and the cost
+        buys the thing whose absence let 23 of 34 `data_substrate` values name
+        cell lines and assay techniques instead of data types.
+
+        The prefix is stated once and terms listed `id=name`, which halves what
+        repeating `B2AI_SUBSTRATE:` 81 times would have cost.
+        """
         for target in TARGETS:
             with self.subTest(target=target):
-                self.assertLess(len(schema_digest.digest_text(target)), 40_000)
+                self.assertLess(len(schema_digest.digest_text(target)), 44_000)
 
 
 class TestTheTruncationSafeguard(unittest.TestCase):
