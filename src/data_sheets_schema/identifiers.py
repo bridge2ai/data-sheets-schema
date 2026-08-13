@@ -47,7 +47,25 @@ _ABSOLUTE = re.compile(r"^[A-Za-z][A-Za-z0-9+.\-]*://")
 #: accepting it would pass a value that names no entity.
 _CURIE = re.compile(r"^([A-Za-z_][A-Za-z0-9._\-]*):(\S+)$")
 
+#: URI schemes whose syntax has no authority component, so `://` never appears
+#: and the `_ABSOLUTE` test above misses them (#530). They are URIs, not CURIEs:
+#: `urn` is a scheme, not a namespace this schema could bind to a base IRI, and
+#: declaring a prefix for it would produce an expansion that means nothing.
+#:
+#: 1,067 corpus values sit here — `urn:` 757, `ark:` 286, `doi:` 24 — and every
+#: one was counted as an undeclared CURIE, inflating the migration #457 is sized
+#: against by 28% of that bucket.
+NO_AUTHORITY_SCHEMES = frozenset({
+    "urn", "doi", "ark", "mailto", "isbn", "issn", "info", "tel", "uuid",
+})
+
 URI = "uri"
+#: Well-formed under its scheme, resolution not established. Separate from
+#: `URI` on purpose: `urn:cm4ai:org:ucsd` is a syntactically valid URN whose
+#: NID is not IANA-registered, and `ark:59853/…` depends on a NAAN that may not
+#: be assigned. Filing those beside a resolvable `https://ror.org/…` would
+#: overstate their standing as badly as calling them CURIEs understates it.
+URI_UNVERIFIED = "uri_unverified"
 CURIE_DECLARED = "curie_declared"
 CURIE_UNDECLARED = "curie_undeclared"
 BARE = "bare_token"
@@ -70,12 +88,21 @@ def declared_prefixes(schema_path: Path = FULL_SCHEMA) -> set[str]:
 
 
 def classify(value: str, prefixes: set[str]) -> str:
-    """Which of the four shapes an identifier value has."""
+    """Which of the five shapes an identifier value has.
+
+    Scheme detection runs before the CURIE test, because the two grammars
+    overlap: `urn:cm4ai:org:ucsd` matches `prefix:reference` perfectly well and
+    is not a CURIE. Order is what separates them, and a declared prefix that
+    collided with a scheme name would otherwise change a value's classification
+    depending on which test ran first.
+    """
     v = value.strip()
     if _ABSOLUTE.match(v):
         return URI
     m = _CURIE.match(v)
     if m:
+        if m.group(1).lower() in NO_AUTHORITY_SCHEMES:
+            return URI_UNVERIFIED
         return CURIE_DECLARED if m.group(1) in prefixes else CURIE_UNDECLARED
     return BARE
 
@@ -136,7 +163,8 @@ def audit_record(path: Path, prefixes: set[str],
                  slots: set[str] | None = None) -> dict[str, Any]:
     """Classify every identifier-ranged value in one record."""
     doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    counts = {URI: 0, CURIE_DECLARED: 0, CURIE_UNDECLARED: 0, BARE: 0}
+    counts = {URI: 0, URI_UNVERIFIED: 0, CURIE_DECLARED: 0,
+              CURIE_UNDECLARED: 0, BARE: 0}
     offenders: list[dict[str, str]] = []
     for slot_path, slot, value in walk_identifiers(doc, slots or {"id"}):
         kind = classify(value, prefixes)
@@ -164,7 +192,8 @@ def summarize(records: list[dict[str, Any]], prefixes_declared: int,
     record list beside corpus-wide totals states two scopes in one breath and
     reads as one.
     """
-    totals = {URI: 0, CURIE_DECLARED: 0, CURIE_UNDECLARED: 0, BARE: 0}
+    totals = {URI: 0, URI_UNVERIFIED: 0, CURIE_DECLARED: 0,
+              CURIE_UNDECLARED: 0, BARE: 0}
     for rec in records:
         for kind, n in rec["counts"].items():
             totals[kind] += n
