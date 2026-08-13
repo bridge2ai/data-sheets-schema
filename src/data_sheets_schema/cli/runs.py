@@ -116,6 +116,12 @@ def identifiers_cmd(label, method, output, show, strict):
     click.echo(f"   slots with range uriorcurie: {', '.join(slots)}")
     c = report["counts"]
     click.echo(f"   {c[ident.URI]:>6}  absolute IRI")
+    # Named separately, never folded into either neighbour (#530). Folded into
+    # `uri` it would claim resolvability these do not have; left among the
+    # undeclared CURIEs it inflated the unresolvable headline by 1,067 values
+    # that need no remedy at all.
+    click.echo(f"   {c[ident.URI_UNVERIFIED]:>6}  URI on a no-authority scheme "
+               "(urn:, ark:, doi:) — well-formed, resolution not established")
     click.echo(f"   {c[ident.CURIE_DECLARED]:>6}  CURIE on a declared prefix")
     click.echo(f"   {c[ident.CURIE_UNDECLARED]:>6}  CURIE on an undeclared prefix")
     click.echo(f"   {c[ident.BARE]:>6}  bare token — neither IRI nor CURIE")
