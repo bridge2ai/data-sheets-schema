@@ -400,6 +400,67 @@ types:
     uri: xsd:string
     repr: str
 enums:
+  DataStandardEnum:
+    name: DataStandardEnum
+    description: 'Data standards and common data models a dataset''s content follows.
+
+      Deliberately **not** merged into `FormatEnum` (#403). A serialization and a
+      data standard are different concepts: CSV says how bytes are laid out, OMOP
+      CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would
+      conflate them and make `format` unanswerable.
+
+      Free-text `conforms_to` records what a source *says*; this records which registered
+      standard that is, where one applies. Both may be populated for the same standard
+      — one verbatim, one normalized — which is the ordinary label-plus-code pattern
+      and is consistent with the per-slot completeness decision on #501.
+
+      ⚠️ **No `meaning:` is asserted on any value.** Several of these standards have
+      no stable ontology term this repository can verify, and inventing a CURIE that
+      resolves to nothing is worse than leaving the grounding absent — it is the exact
+      failure `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is
+      declared and is the natural home for these once the registry carries them; until
+      it does, this is a controlled vocabulary without ontology grounding, and says
+      so.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
+    permissible_values:
+      DICOM:
+        text: DICOM
+        description: Digital Imaging and Communications in Medicine — imaging data
+          and its acquisition metadata.
+      BIDS:
+        text: BIDS
+        description: Brain Imaging Data Structure — a file and directory layout with
+          accompanying metadata for neuroimaging and related recordings.
+      OMOP_CDM:
+        text: OMOP_CDM
+        description: Observational Medical Outcomes Partnership Common Data Model
+          — a relational model for observational health data.
+      WFDB:
+        text: WFDB
+        description: WaveForm DataBase — physiologic signal records and annotations.
+      OPEN_MHEALTH:
+        text: OPEN_MHEALTH
+        description: Open mHealth — schemas for mobile health and wearable measures.
+      ESDS:
+        text: ESDS
+        description: ASCII File Format Guidelines for Earth Science Data.
+      CDS:
+        text: CDS
+        description: Clinical Dataset Structure.
+      RO_CRATE:
+        text: RO_CRATE
+        description: RO-Crate — a packaging convention describing a dataset and its
+          context as linked data.
+      FHIR:
+        text: FHIR
+        description: HL7 FHIR — a standard for exchanging healthcare information.
+      OTHER:
+        text: OTHER
+        description: 'A standard the sources name that has no value here. Use it **with**
+          `conforms_to` carrying the name as the source states it, so the fact is
+          not lost to the absence of a term. A run must never pick a near-neighbour:
+          reporting BIDS because a dataset is neuroimaging, when the sources say something
+          else, is an invention.'
   FormatEnum:
     name: FormatEnum
     description: Common file format extensions for data files and documents.
@@ -1670,6 +1731,32 @@ slots:
     - Information
     - CoreDistribution
     - CoreDatasetCollection
+  conforms_to_standard:
+    name: conforms_to_standard
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: BIDS
+    description: 'Which registered data standard `conforms_to` names, where one applies
+      — a term rather than prose, so the corpus can be queried for "what standards
+      does this follow?" (#403).
+
+      `conforms_to` records what the sources say, in their words. This records which
+      standard that is. Populate both for the same standard: one is verbatim evidence,
+      the other is the normalized term, and they answer different questions.
+
+      Use `OTHER` when the sources name a standard this vocabulary lacks, and keep
+      the name in `conforms_to` so nothing is lost. Never pick a near-neighbour —
+      reporting BIDS because a dataset is neuroimaging, when the sources say otherwise,
+      is an invention.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
+    slot_uri: dcterms:conformsTo
+    domain_of:
+    - Information
+    - CoreDistribution
+    - CoreDatasetCollection
+    range: DataStandardEnum
+    multivalued: true
   conforms_to_schema:
     name: conforms_to_schema
     annotations:
@@ -3949,6 +4036,7 @@ classes:
     - conforms_to
     - conforms_to_class
     - conforms_to_schema
+    - conforms_to_standard
     - created_by
     - created_on
     - doi
@@ -4046,6 +4134,34 @@ classes:
         - Information
         - CoreDatasetCollection
         range: string
+      conforms_to_standard:
+        name: conforms_to_standard
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: BIDS
+        description: 'Which registered data standard `conforms_to` names, where one
+          applies — a term rather than prose, so the corpus can be queried for "what
+          standards does this follow?" (#403).
+
+          `conforms_to` records what the sources say, in their words. This records
+          which standard that is. Populate both for the same standard: one is verbatim
+          evidence, the other is the normalized term, and they answer different questions.
+
+          Use `OTHER` when the sources name a standard this vocabulary lacks, and
+          keep the name in `conforms_to` so nothing is lost. Never pick a near-neighbour
+          — reporting BIDS because a dataset is neuroimaging, when the sources say
+          otherwise, is an invention.'
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
+        slot_uri: dcterms:conformsTo
+        alias: conforms_to_standard
+        owner: Information
+        domain_of:
+        - Information
+        - CoreDistribution
+        - CoreDatasetCollection
+        range: DataStandardEnum
+        multivalued: true
       created_by:
         name: created_by
         annotations:
@@ -41134,6 +41250,7 @@ classes:
     - compression
     - media_type
     - conforms_to
+    - conforms_to_standard
     attributes:
       bytes:
         name: bytes
@@ -41299,6 +41416,34 @@ classes:
         - CoreDistribution
         - CoreDatasetCollection
         range: string
+      conforms_to_standard:
+        name: conforms_to_standard
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: BIDS
+        description: 'Which registered data standard `conforms_to` names, where one
+          applies — a term rather than prose, so the corpus can be queried for "what
+          standards does this follow?" (#403).
+
+          `conforms_to` records what the sources say, in their words. This records
+          which standard that is. Populate both for the same standard: one is verbatim
+          evidence, the other is the normalized term, and they answer different questions.
+
+          Use `OTHER` when the sources name a standard this vocabulary lacks, and
+          keep the name in `conforms_to` so nothing is lost. Never pick a near-neighbour
+          — reporting BIDS because a dataset is neuroimaging, when the sources say
+          otherwise, is an invention.'
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
+        slot_uri: dcterms:conformsTo
+        alias: conforms_to_standard
+        owner: CoreDistribution
+        domain_of:
+        - Information
+        - CoreDistribution
+        - CoreDatasetCollection
+        range: DataStandardEnum
+        multivalued: true
       id:
         name: id
         annotations:
@@ -41905,6 +42050,34 @@ classes:
         - Information
         - CoreDatasetCollection
         range: string
+      conforms_to_standard:
+        name: conforms_to_standard
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: BIDS
+        description: 'Which registered data standard `conforms_to` names, where one
+          applies — a term rather than prose, so the corpus can be queried for "what
+          standards does this follow?" (#403).
+
+          `conforms_to` records what the sources say, in their words. This records
+          which standard that is. Populate both for the same standard: one is verbatim
+          evidence, the other is the normalized term, and they answer different questions.
+
+          Use `OTHER` when the sources name a standard this vocabulary lacks, and
+          keep the name in `conforms_to` so nothing is lost. Never pick a near-neighbour
+          — reporting BIDS because a dataset is neuroimaging, when the sources say
+          otherwise, is an invention.'
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
+        slot_uri: dcterms:conformsTo
+        alias: conforms_to_standard
+        owner: CoreDatasetCollection
+        domain_of:
+        - Information
+        - CoreDistribution
+        - CoreDatasetCollection
+        range: DataStandardEnum
+        multivalued: true
       created_by:
         name: created_by
         annotations:
@@ -43523,6 +43696,34 @@ classes:
         - Information
         - CoreDatasetCollection
         range: string
+      conforms_to_standard:
+        name: conforms_to_standard
+        annotations:
+          d4d:docExample:
+            tag: d4d:docExample
+            value: BIDS
+        description: 'Which registered data standard `conforms_to` names, where one
+          applies — a term rather than prose, so the corpus can be queried for "what
+          standards does this follow?" (#403).
+
+          `conforms_to` records what the sources say, in their words. This records
+          which standard that is. Populate both for the same standard: one is verbatim
+          evidence, the other is the normalized term, and they answer different questions.
+
+          Use `OTHER` when the sources name a standard this vocabulary lacks, and
+          keep the name in `conforms_to` so nothing is lost. Never pick a near-neighbour
+          — reporting BIDS because a dataset is neuroimaging, when the sources say
+          otherwise, is an invention.'
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
+        slot_uri: dcterms:conformsTo
+        alias: conforms_to_standard
+        owner: CoreDataset
+        domain_of:
+        - Information
+        - CoreDistribution
+        - CoreDatasetCollection
+        range: DataStandardEnum
+        multivalued: true
       created_by:
         name: created_by
         annotations:
