@@ -242,10 +242,17 @@ projects:
         dataset_documentation where the two disagree.
     - id: dataset_license
       source_type: license
-      url: https://zenodo.org/records/10642459/files/AI-READI-LICENSE-v1.0.pdf?download=1
-      raw_file: AI-READI-LICENSE-v1.0_row11.pdf
-      processed_file: AI-READI-LICENSE-v1.0_row11.txt
-      verification_url: https://doi.org/10.5281/zenodo.10642459
+      # v2.0, not v1.0 (#539). The bundle carried AI-READI-LICENSE-v1.0 while
+      # the dataset is at release 3.0.0 and both the RO-Crate and the canonical
+      # D4D record state v2.0 — so the designated licence source was the one
+      # thing in the bundle that disagreed. The record got v2.0 right anyway,
+      # from the docs site rather than from the licence, which is a correct
+      # answer by an unreliable route.
+      url: https://zenodo.org/records/17555036/files/AI-READI-LICENSE-v2.0.pdf?download=1
+      raw_file: AI-READI-LICENSE-v2.0_2026-08-12.pdf
+      processed_file: AI-READI-LICENSE-v2.0_2026-08-12.txt
+      superseded: AI-READI-LICENSE-v1.0_row11.pdf (Zenodo 10642459), retrieved 2026-07-23
+      verification_url: https://doi.org/10.5281/zenodo.17555036
       curation_note: >-
         The Zenodo record DOI is retained explicitly because an older
         DOI-only extraction carried this identifier separately.
@@ -314,6 +321,30 @@ projects:
         artifact, so material drawn from it is closer to transcription than
         extraction; see notes/D4D_GENERATION_ARMS.md.
       minimum_characters: 50000
+    - id: ro_crate_metadata
+      source_type: RO-Crate
+      # Release 3.0.0 crate, shared 2026-08-12. The bundle previously contained
+      # no crate content at all for AI_READI — `grep ark:59853|ro-crate|
+      # fairscape` returned 0 — so this is new evidence rather than a refresh.
+      # It carries facts no other source states: contentSize 3.82 TB,
+      # deidentified, fdaRegulated, humanSubjectResearch, confidentialityLevel,
+      # dataGovernanceCommittee, and nine component crates.
+      #
+      # ⚠️ Not UTF-8 as published: cp1252, with `©` as a single 0xA9 byte, so
+      # strict JSON parsers reject it (#539). `preprocess_sources._decode`
+      # falls back to cp1252 and re-emits UTF-8; the raw file is kept exactly
+      # as retrieved.
+      #
+      # ⚠️ No stable public URL exists. fairhub returns 404 for
+      # /api/datasets/3/ro-crate-metadata.json and the two obvious variants, so
+      # the URL below is a Google Drive direct-download link and is the weakest
+      # provenance in this manifest. Replace it when the crate is published at
+      # a citable location.
+      url: https://drive.google.com/uc?export=download&id=1appdz89WfHXkkXvJIv2Q_ziegNxdnhAF
+      raw_file: aireadi_ro_crate_metadata_2026-08-12.json
+      processed_file: aireadi_ro_crate_metadata_2026-08-12.txt
+      retrieved: '2026-08-12'
+      md5: 38c221dbdab605145d617481524a4b25
     - id: irb_protocol
       source_type: IRB
       url: https://docs.google.com/document/d/1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q/edit

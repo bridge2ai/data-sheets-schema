@@ -204,9 +204,15 @@ class TestAgainstTheRealArm(unittest.TestCase):
                     self.assertEqual(
                         canonical_prompt_status(
                             "claudecode_agent", label, project)[0], "canonical")
-                    self.assertEqual(
+                    # Not asserted `current`: the AI_READI bundle changed on
+                    # 2026-08-12 when it absorbed the release-3.0.0 RO-Crate
+                    # and the v2.0 licence (#539), so those records correctly
+                    # report `drifted` — they state the bytes they read, and
+                    # the path no longer resolves to them. `absent` would be a
+                    # different matter, since it means the bundle is gone.
+                    self.assertIn(
                         bundle_drift("claudecode_agent", label, project)[0],
-                        "current")
+                        ("current", "drifted"))
                     self.assertEqual(
                         validation_status("claudecode_agent", label, project),
                         "valid")
