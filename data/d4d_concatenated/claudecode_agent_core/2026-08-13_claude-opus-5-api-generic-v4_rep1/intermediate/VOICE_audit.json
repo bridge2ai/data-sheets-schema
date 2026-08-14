@@ -1,0 +1,131 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The `distributions` slot is populated across 13 entries, but no slot named `distributions` appears in the supplied schema digest for the Dataset/CoreDataset target class. The digest lists `distribution_formats` (range DistributionFormat) and `distribution_dates` (range DistributionDate) only. The keys used inside these objects (`path`, `format`, `media_type`, `conforms_to`, `notes`, `source_caveats`) do not correspond to any declared object range in the digest. This is an invented slot and will not validate."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions[].format",
+      "issue": "Values `ZIP` and `TSV` are asserted as enum-like terms with an accompanying source_caveat claiming a 'declared `format` enumeration in the core schema offers no Parquet term'. No such enumeration is present in the supplied digest. The caveat rationalises a constraint that the digest does not evidence, and records `ZIP` for files that are Parquet, which the bundle never describes as compressed archives. The bundle states plainly: 'Binary files are made available as Parquet, an open-source column-oriented data file format.'"
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "related_datasets",
+      "issue": "DatasetRelationship entries carry `name` and `description` but omit `id`. Per the digest, DatasetRelationship 'also accepts the same slots as the top-level listing above', where `id` is `[req]`. The core record supplies `id` on the same four entries; the full record does not. Internal inconsistency between the paired records and a likely required-key violation in the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections",
+      "issue": "Three FileCollection entries are present but none populates `file_count` or `total_bytes`, and the top-level `total_file_count` and `total_size_bytes` are absent. This is correct given the bundle, which reports per-feature record counts but no file counts or byte sizes — noted only to confirm the omission is evidence-driven rather than an oversight."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "file_collections",
+      "issue": "The core record omits `file_collections` entirely while the full record populates three entries (features, phenotype, metadata). The same directory-level content is instead carried in the invented `distributions` slot. Projection from full to core has substituted a non-schema slot for a schema slot that was already correctly populated upstream."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "subsets",
+      "issue": "The full record populates `subsets` with five DataSubset objects (voice disorders, respiratory, neurological, mood/psychiatric, controls). The core record drops `subsets` and folds the same content into a single `subpopulations` entry (`.../subpopulation/disease-cohorts`) as one prose `identification` block. This collapses five distinct entities into one object, contrary to the stated rule that multivalued slots take one object per distinct entity."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "splits",
+      "issue": "The full record carries a `splits` entry recording that no predefined partitions exist. The core record drops `splits` and relocates the same fact into `known_limitations[.../limitation/no-predefined-splits]` with `limitation_type: methodological_limitation`. The content answers the `splits` field and belongs there; `methodological_limitation` is also a poor fit for 'no splits were provided'."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "annotation_analyses",
+      "issue": "The single AnnotationAnalysis entry populates `analysis_method` with a statement that no analysis was performed. Per the stated rule, a value recording that something is absent has not answered the field. The substantive content (single labeller, one annotation per item) is already correctly carried in `labeling_strategies.annotations_per_item: 1` and in `known_biases[.../bias/single-labeler]`. This entry adds nothing the schema asks for and should be omitted."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "instances[.../instance/recording-features].counts",
+      "issue": "`counts: 29278` is asserted as the count for the generic 'Derived acoustic feature set for a single task recording' instance type, but the bundle gives nine different per-feature counts ranging 28,640–32,522 for v3.1.0. The accompanying source_caveat lists them all, so the record is transparent, but selecting the spectrogram count as the canonical value for a generically-typed instance is an unsupported narrowing. No single count exists for 'a recording feature set' in the bundle."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "citation / creators",
+      "issue": "The full record's `source_caveats` states 'the complete list is carried in the citation'; the core record's parallel caveat drops that clause because `citation` is not populated in the core record. The core record therefore names 17 creators, states that more than one hundred exist, and provides no pointer to them. `citation` is present in the full record and appears in the digest's top-level slot inventory; its omission from core loses the only route to the full authorship."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_collectors[].role",
+      "issue": "Values `research staff`, `clinician co-investigator` and `hospital support staff` are free text. The digest declares no enum for `DataCollector.role` (unlike `Maintainer.role`, which is enumerated), so these are permissible — but they are inconsistent with the enumerated vocabulary used for `maintainers[].role` in the same records, where `researcher` and `academic_institution` are the analogous terms."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "human_subject_research.irb_approval",
+      "issue": "The bundle reports the feasibility-study IRB number (USF 004890) but no IRB number for the main Bridge2AI Voice Data Acquisition protocol. `irb_approval` carries a prose description of the approval structure without an approval identifier, which is the strongest available reading of the evidence; flagged only so the absence is on record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables",
+      "issue": "Fifteen VariableMetadata entries cover feature-file columns (participant_id, session_id, task_name, n_frames, and the nine feature tensors) but none cover phenotype columns, despite the bundle enumerating the full phenotype folder structure with per-column JSON dictionaries. The selection is defensible as a sample but is not signalled as one; no `source_caveats` marks the variable list as partial."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "variables",
+      "issue": "The full record populates `variables` with 15 VariableMetadata entries; the core record omits the slot entirely. `variables` appears in the top-level slot inventory and the underlying evidence is unchanged between the two records, so the omission is a projection loss rather than an evidence-driven decision."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "id",
+      "issue": "`id` is set to the version-3.1.0 DOI (10.13026/8xbn-nq66) while `version_access.latest_version_doi` is the version-agnostic DOI (10.13026/37yb-1t42). This is internally coherent given the record describes v3.1.0 specifically, but means the record identifier will not resolve to the dataset's stable landing page."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "existing_uses",
+      "issue": "The single ExistingUse entry populates only `examples`, leaving the object with no other declared content. The bundle supports no more (it reports only the Summer School and hackathon use, and separately states that no repository tracking uses exists), so this is evidence-bounded, but the resulting object is thin."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "use_repository",
+      "issue": "Not populated. Correct: the bundle answers 'Is there a repository that links to any or all papers or systems that use the dataset?' with 'No'. Noted to confirm the omission is deliberate."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_notifications / collection_consents",
+      "issue": "The full record populates both `collection_notifications` and `collection_consents`; the core record drops `collection_notifications` and `collection_consents` while retaining `informed_consent`. The notification content (IRB-approved consent process, in-clinic explanation procedure) is not preserved elsewhere in the core record. Projection loss."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "consent_revocations",
+      "issue": "The full record populates `consent_revocations` as a distinct slot. The core record drops it and merges the withdrawal content into `informed_consent[0].withdrawal_mechanism`. The merged text is complete, but the core record loses the satisfaction-survey detail present in the full record's revocation entry."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "relationships",
+      "issue": "The full record populates `relationships` with two entries describing participant-session-recording linkage and the absence of inter-participant relationships. The core record omits the slot. The linkage fact (participant_id / session_id / task_name keys, multiple sessions per participant) is partly recoverable from `variables` in the full record but is absent from core entirely."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "is_tabular",
+      "issue": "`is_tabular: false` is asserted in core but the slot is absent from the full record. The bundle describes a mixture: phenotype tables are TSV (tabular) while feature tensors are multidimensional arrays in Parquet. A single boolean is a lossy answer either way, and the two records disagree by omission."
+    }
+  ],
+  "summary": "Both records are densely and, on the whole, faithfully grounded in the declared bundle: cohort structure, de-identification steps, two-tier access governance, feature-extraction parameters, version history and the ethics apparatus are all traceable to source, and the source_caveats blocks honestly surface the participant-count, award-number and affiliation conflicts across the eleven input documents. The most serious defect is in the core record, where a `distributions` slot appears that the supplied schema digest does not declare, populated with 13 entries whose keys (`path`, `format`, `media_type`) match no declared object range, and whose `format` values invoke an enumeration the digest does not contain — including recording Parquet files as `ZIP` and rationalising that choice in a source_caveat. This slot appears to have displaced `file_collections`, which the full record populates correctly and the core record drops. A second structural issue: DatasetRelationship entries in the full record omit `id`, which the digest marks required, while the paired core entries supply it. Beyond these, the pattern of defect is projection loss and slot-drift from full to core: `subsets` (five distinct cohorts) collapsed into one `subpopulations` prose block; `splits` relocated into `known_limitations`; `variables`, `relationships`, `citation`, `collection_notifications` and `collection_consents` dropped without evidentiary justification. One added core entry, `annotation_analyses`, records only that no analysis was performed and so does not answer the field it occupies. Remaining findings are minor: an over-specific `counts` value on a generically-typed instance, free-text `role` values inconsistent with the enumerated vocabulary used elsewhere in the same records, a partial `variables` list not flagged as partial, and a lossy `is_tabular` boolean asserted in core but absent in full."
+}

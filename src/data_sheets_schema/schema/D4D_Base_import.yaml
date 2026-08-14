@@ -364,11 +364,15 @@ slots:
       "d4d:docExample": "ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name"
 
   issued:
-    description: Date of formal issuance or publication of the resource.
+    description: >-
+      Date of formal issuance or publication of the resource. A `datetime`
+      renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
+      `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
+      rejected.
     slot_uri: dcterms:issued
     range: datetime
     annotations:
-      "d4d:docExample": "2024-11-15T00:00:00"
+      "d4d:docExample": "2024-11-15T00:00:00Z"
 
   page:
     description: A landing page or web page providing access to or information about the resource.
@@ -567,18 +571,20 @@ slots:
       "d4d:docExample": "orcid:0000-0002-1234-5678"
 
   created_on:
-    description: The date and time when the resource was created.
+    description: >-
+      The date and time when the resource was created. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
     slot_uri: dcterms:created
     range: datetime
     annotations:
-      "d4d:docExample": "2023-07-18T00:00:00"
+      "d4d:docExample": "2023-07-18T00:00:00Z"
 
   last_updated_on:
-    description: The date and time when the resource was most recently modified or updated.
+    description: >-
+      The date and time when the resource was most recently modified or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
     slot_uri: dcterms:modified
     range: datetime
     annotations:
-      "d4d:docExample": "2024-11-15T00:00:00"
+      "d4d:docExample": "2024-11-15T00:00:00Z"
 
   modified_by:
     description: A person or organization that contributed to modifying or updating the resource.

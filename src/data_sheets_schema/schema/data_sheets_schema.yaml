@@ -36,6 +36,17 @@ prefixes:
   # resolves to the wrong thing, which the identifier audit passes because the
   # prefix *is* declared. See `src/data_sheets_schema/b2ai_registry_prefixes.yaml`
   # for the pin and how to refresh it.
+  # Identifier namespaces the corpus already uses as URLs. Declared so those
+  # values can be written as CURIEs instead: `ROR:01an7q238` expands to exactly
+  # the IRI `https://ror.org/01an7q238`, so this is a change of representation
+  # and not of meaning.
+  #
+  # Undeclared, the conversion would have been a regression — a CURIE on an
+  # undeclared prefix resolves to nothing, while the URL at least resolves. 255
+  # values across the v4 arm are ror.org (109), doi.org (85) and orcid.org (61).
+  ROR: https://ror.org/
+  ORCID: https://orcid.org/
+  doi: https://doi.org/
   B2AI_DATA: https://w3id.org/bridge2ai/standards-dataset-schema/
   B2AI_ORG: https://w3id.org/bridge2ai/standards-organization-schema/
   B2AI_SUBSTRATE: https://w3id.org/bridge2ai/standards-datasubstrate-schema/

@@ -53,6 +53,15 @@ prefixes:
   skos:
     prefix_prefix: skos
     prefix_reference: http://www.w3.org/2004/02/skos/core#
+  ROR:
+    prefix_prefix: ROR
+    prefix_reference: https://ror.org/
+  ORCID:
+    prefix_prefix: ORCID
+    prefix_reference: https://orcid.org/
+  doi:
+    prefix_prefix: doi
+    prefix_reference: https://doi.org/
   B2AI_DATA:
     prefix_prefix: B2AI_DATA
     prefix_reference: https://w3id.org/bridge2ai/standards-dataset-schema/
@@ -1664,8 +1673,10 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: '2024-11-15T00:00:00'
-    description: Date of formal issuance or publication of the resource.
+        value: '2024-11-15T00:00:00Z'
+    description: Date of formal issuance or publication of the resource. A `datetime`
+      renders as RFC 3339 `date-time`, which **requires a UTC offset** — write `2024-11-15T00:00:00Z`,
+      not `2024-11-15T00:00:00`. A date alone is also rejected.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:issued
     domain_of:
@@ -2011,8 +2022,9 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: '2023-07-18T00:00:00'
-    description: The date and time when the resource was created.
+        value: '2023-07-18T00:00:00Z'
+    description: The date and time when the resource was created. Requires a UTC offset
+      (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:created
     domain_of:
@@ -2027,9 +2039,10 @@ slots:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: '2024-11-15T00:00:00'
+        value: '2024-11-15T00:00:00Z'
     description: The date and time when the resource was most recently modified or
-      updated.
+      updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects
+      a naive timestamp.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:modified
     domain_of:
@@ -2320,8 +2333,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00'
-        description: The date and time when the resource was created.
+            value: '2023-07-18T00:00:00Z'
+        description: The date and time when the resource was created. Requires a UTC
+          offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:created
         alias: created_on
@@ -2385,8 +2399,11 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00'
-        description: Date of formal issuance or publication of the resource.
+            value: '2024-11-15T00:00:00Z'
+        description: Date of formal issuance or publication of the resource. A `datetime`
+          renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
+          `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
+          rejected.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:issued
         alias: issued
@@ -2442,9 +2459,10 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00'
+            value: '2024-11-15T00:00:00Z'
         description: The date and time when the resource was most recently modified
-          or updated.
+          or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
+          rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:modified
         alias: last_updated_on
@@ -4298,8 +4316,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00'
-        description: The date and time when the resource was created.
+            value: '2023-07-18T00:00:00Z'
+        description: The date and time when the resource was created. Requires a UTC
+          offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:created
         alias: created_on
@@ -4363,8 +4382,11 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00'
-        description: Date of formal issuance or publication of the resource.
+            value: '2024-11-15T00:00:00Z'
+        description: Date of formal issuance or publication of the resource. A `datetime`
+          renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
+          `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
+          rejected.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:issued
         alias: issued
@@ -4420,9 +4442,10 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00'
+            value: '2024-11-15T00:00:00Z'
         description: The date and time when the resource was most recently modified
-          or updated.
+          or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
+          rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:modified
         alias: last_updated_on
@@ -6215,8 +6238,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00'
-        description: The date and time when the resource was created.
+            value: '2023-07-18T00:00:00Z'
+        description: The date and time when the resource was created. Requires a UTC
+          offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:created
         alias: created_on
@@ -6280,8 +6304,11 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00'
-        description: Date of formal issuance or publication of the resource.
+            value: '2024-11-15T00:00:00Z'
+        description: Date of formal issuance or publication of the resource. A `datetime`
+          renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
+          `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
+          rejected.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:issued
         alias: issued
@@ -6337,9 +6364,10 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00'
+            value: '2024-11-15T00:00:00Z'
         description: The date and time when the resource was most recently modified
-          or updated.
+          or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
+          rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:modified
         alias: last_updated_on
@@ -9261,8 +9289,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00'
-        description: The date and time when the resource was created.
+            value: '2023-07-18T00:00:00Z'
+        description: The date and time when the resource was created. Requires a UTC
+          offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:created
         alias: created_on
@@ -9326,8 +9355,11 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00'
-        description: Date of formal issuance or publication of the resource.
+            value: '2024-11-15T00:00:00Z'
+        description: Date of formal issuance or publication of the resource. A `datetime`
+          renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
+          `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
+          rejected.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:issued
         alias: issued
@@ -9383,9 +9415,10 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00'
+            value: '2024-11-15T00:00:00Z'
         description: The date and time when the resource was most recently modified
-          or updated.
+          or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
+          rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:modified
         alias: last_updated_on
@@ -47309,8 +47342,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00'
-        description: The date and time when the resource was created.
+            value: '2023-07-18T00:00:00Z'
+        description: The date and time when the resource was created. Requires a UTC
+          offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:created
         alias: created_on
@@ -47374,8 +47408,11 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00'
-        description: Date of formal issuance or publication of the resource.
+            value: '2024-11-15T00:00:00Z'
+        description: Date of formal issuance or publication of the resource. A `datetime`
+          renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
+          `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
+          rejected.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:issued
         alias: issued
@@ -47431,9 +47468,10 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00'
+            value: '2024-11-15T00:00:00Z'
         description: The date and time when the resource was most recently modified
-          or updated.
+          or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
+          rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:modified
         alias: last_updated_on
@@ -48333,8 +48371,9 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2023-07-18T00:00:00'
-        description: The date and time when the resource was created.
+            value: '2023-07-18T00:00:00Z'
+        description: The date and time when the resource was created. Requires a UTC
+          offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:created
         alias: created_on
@@ -48398,8 +48437,11 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00'
-        description: Date of formal issuance or publication of the resource.
+            value: '2024-11-15T00:00:00Z'
+        description: Date of formal issuance or publication of the resource. A `datetime`
+          renders as RFC 3339 `date-time`, which **requires a UTC offset** — write
+          `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also
+          rejected.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:issued
         alias: issued
@@ -48455,9 +48497,10 @@ classes:
         annotations:
           d4d:docExample:
             tag: d4d:docExample
-            value: '2024-11-15T00:00:00'
+            value: '2024-11-15T00:00:00Z'
         description: The date and time when the resource was most recently modified
-          or updated.
+          or updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time`
+          rejects a naive timestamp.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:modified
         alias: last_updated_on

@@ -1,0 +1,197 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The core schema digest supplied in this task defines no `distributions` slot on CoreDataset, and no `Distribution` range class is listed among the object ranges. The block also uses keys (`path`, `md5`, `format`, `media_type`, `compression`, `conforms_to`, `conforms_to_standard`) that are not declared anywhere for such an object. Under the schema information available to this run this is an invented slot with invented keys (#380). If the core schema does in fact declare `distributions`, the shape must be verified against it; otherwise the file-level content belongs in `distribution_formats` and `notes`, and `total_file_count` should carry the count."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "id",
+      "issue": "`id` is set to `https://doi.org/10.18130/V3/HIGT4C`, which identifies the June 2026 Dataverse release, while `name: CM4AI` and much of `description`, `purposes`, `addressing_gaps` and `tasks` describe the CM4AI project as a whole. The record straddles two referents. The reconciliation report is required to state the chosen referent and hold to it; as written the identifier resolves to a release but the record reads as a project datasheet."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "total_file_count",
+      "issue": "`total_file_count: 10` conflicts with `file_collections`, which lists ten entries, and with the bundle, which shows the June 2026 release containing ten ZIP archives where one of those (`cm4ai_release_metadata.zip`) is the metadata package. The bundle's file table header states '1 to 10 of 10 Files', so 10 is the file count for the release; however the slot description defines it as 'Total number of files across all file collections … aggregated from file_collections[].file_count', and no `file_count` is populated on any collection. The value is a count of collections presented as a count of files."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators",
+      "issue": "The seventh Creator object has no `principal_investigator` and instead carries eleven `affiliations` as a stand-in for forty-seven named authors. `creators` is multivalued and the bundle names every author with ORCID and institution; collapsing them into one institutional object populates the slot without representing the distinct entities it declares. The object's own `source_caveats` concedes this."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators[].affiliations[].id",
+      "issue": "Ten of eleven organization identifiers are locally minted CURIEs (`cm4ai:org/ucsd`, `cm4ai:org/ucsf`, `cm4ai:org/stanford`, `cm4ai:org/kth`, `cm4ai:org/yale`, `cm4ai:org/utaustin`, `cm4ai:org/uab`, `cm4ai:org/sfu`, `cm4ai:org/ua`, `cm4ai:org/umontreal`, `cm4ai:org/hastings`) with no prefix declaration anywhere in the record and no support in the bundle. Only `https://ror.org/0153tk833` (UVA) appears in the sources. The top-level `source_caveats` discloses the minting, which mitigates but does not remove the unsupported-value problem."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "funders[].grants[].id",
+      "issue": "All four Grant identifiers (`cm4ai:grant/OT2OD032742`, `cm4ai:grant/3OT2OD032742-01S2`, `cm4ai:grant/5U54HG012513-02`, `cm4ai:grant/frederick-thomas-fund`) are locally minted CURIEs under an undeclared prefix. The bundle supplies the grant numbers as strings only."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections[].file_count / total_bytes",
+      "issue": "FileCollection declares `file_count` and `total_bytes`; neither is populated on any of the ten collections. Repository-reported sizes (3.8 GB, 4.6 GB, 4.2 GB, 113.3 KB, etc.) are instead written into `description` prose. The evidence answers the declared fields at least approximately for size, and the record elects prose over structure (#385 ordering)."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections[].notes",
+      "issue": "MD5 checksums are placed in `notes` on all ten collections. FileCollection inherits the top-level slot inventory, which offers no checksum slot, so `notes` is defensible as residual — but the same checksums are simultaneously summarised in `distribution_formats[].checksum` as prose ('MD5 checksums are published per file…'), producing duplication across two representations without either being canonical."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "notes",
+      "issue": "The full record's `citation` slot content (the complete 47-author Dataverse citation) is relocated into core `notes` prose. If CoreDataset declares `citation` (the digest for CoreDataset was not supplied, but the full inventory declares it), this is content placed in `notes` while a fitting slot exists, contrary to the residual-only rule for `notes` (#385)."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "relationships",
+      "issue": "The full record's `relationships` entry (cross-modality linkage by protein/gene identity, with incomplete overlap) is dissolved into the trailing `notes` of the fourth `instances` object. If CoreDataset carries `relationships`, the content has been moved out of the slot that declares it; if it does not, the placement inside a single instance's notes misattributes a dataset-level statement to one instance type."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "variables",
+      "issue": "The full record's nine `VariableMetadata` entries are dropped entirely; only fragments survive as prose inside `instances[0].notes` (channel colours) and `subpopulations[0].distribution`. If CoreDataset declares `variables`, this is a supported omission — the bundle explicitly describes the four image channels, the treatment conditions, the cell types and the guide-RNA design. If CoreDataset does not declare it, the fragments' current placement is acceptable but should be noted in the reconciliation report as a deliberate projection loss."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "The full record's `DirectCollection` object (`is_direct: false`, with the ATCC/HipSci provenance) is folded into `sampling_strategies[0].source_data`. The boolean assertion that no data were collected directly from individuals is thereby lost, and `SamplingStrategy.source_data` is repurposed to carry collection-mode evidence. If CoreDataset declares `direct_collection`, populate it."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_by",
+      "issue": "`created_by` is a string slot and holds 'Cell Maps for Artificial Intelligence (CM4AI) consortium', which the bundle never uses as a self-designation; the sources say 'CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UT Austin, UA Birmingham, Simon Fraser University, and the Hastings Center'. The word 'consortium' is a mild interpolation."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "status",
+      "issue": "`status: Beta` is drawn from the release title, but the slot description gives the expected register as 'draft, published, deprecated'. The value is not from a closed enum so it validates, yet the release is in fact published (V2, files public) while labelled Beta by its authors; the two senses are conflated in a single free-text value."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "issued / created_on / last_updated_on",
+      "issue": "`issued: '2026-06-17T00:00:00Z'` and `last_updated_on: '2026-07-15T00:00:00Z'` are file publication dates, not statements the bundle makes about the dataset as a whole; the Dataverse record gives 'Publication Date 2026-06-17' (supporting `issued`) but no dataset-level modification date — 2026-07-15 is the publish date of the three image ZIPs only. `created_on: '2025-02-27T00:00:00Z'` derives from 'Data Creation Date 2025-02-27', which the bundle also gives as the Deposit Date; conflating deposit with creation is a small unsupported inference. The time components `T00:00:00Z` are fabricated precision in all three."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license",
+      "issue": "`license: CC-BY-NC-SA-4.0` normalises the source string 'CC BY-NC-SA 4.0'. Harmless, but the canonical identifier form is not what the bundle states; a URL (`https://creativecommons.org/licenses/by-nc-sa/4.0/`, which the bundle does supply) would be exactly supported."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "publisher",
+      "issue": "`publisher` has range `uriorcurie` and holds `https://dataverse.lib.virginia.edu/`, the repository root. The bundle identifies the publishing hierarchy as 'University of Virginia Dataverse > LibraData: UVa's Scholarly Research > School of Medicine > Cell Maps for Artificial Intelligence'; the bare host URI is a reasonable but not stated choice of publisher identity."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[].data_substrate",
+      "issue": "Three of four substrate terms are approximations of what B2AI_SUBSTRATE offers. `B2AI_SUBSTRATE:59` (Size Exclusion Chromatography-Mass Spectrometry Data) is exact for SEC-MS. `B2AI_SUBSTRATE:56` (Immunofluorescence Image) is exact for the IF images. `B2AI_SUBSTRATE:58` (Mass Spectrometry Data) for AP-MS is a genus term where no AP-MS-specific term exists — acceptable. `B2AI_SUBSTRATE:64` (Perturb-seq Data) is exact. On review these are defensible; flagged only because the instruction is to omit rather than approximate and no note records that 58 is a generalisation."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[].data_topic",
+      "issue": "`B2AI_TOPIC:19` (Microscale Imaging) is used for the IF images where `B2AI_TOPIC:15` (Image) or a cell-biology term might fit as well; `B2AI_TOPIC:21` (Networks And Pathways) is used for AP-MS interactions where the bundle's own keyword vocabulary says 'protein-protein interaction'. Both are judgement calls within the enum, but neither is the term the sources use, and no `source_caveats` records the mapping decision."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "regulatory_restrictions.hipaa_compliant",
+      "issue": "`not_applicable` is an inference the record itself flags in its `source_caveats` ('HIPAA is not discussed anywhere in the sources'). Given the guidance to prefer omission over inference, the enum-valued slot would be better omitted while retaining the two supported statements in `regulatory_restrictions[]`. The disclosure mitigates this."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to_standard",
+      "issue": "`RO_CRATE` is well supported. But `conforms_to` prose also names JSON-Schema, EVI Evidence Graph Ontology and the ARK identifier scheme, none of which map to the enum; that is correct handling (they stay in prose), though `OTHER` is not used and no caveat notes the partial coverage."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "collection_timeframes[].start_date / end_date",
+      "issue": "The dates 2022-09-01 and 2026-08-31 are the NIH award project period, not a data-collection window. The `timeframe_details` is candid about this, but the structured `start_date`/`end_date` fields now assert a collection timeframe the bundle does not state; actual acquisition dates are unavailable in the sources."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "keywords",
+      "issue": "'Medicine, Health and Life Sciences' is the Dataverse *Subject* field, not a keyword; it is appended to the keyword list, mixing two distinct metadata fields from the source record."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "existing_uses[0].examples",
+      "issue": "The first example asserts that the KOLF2.1J atlas 'released here underlies the preprint' — the bundle lists Nourreddine et al. as a Related Publication and describes validation 'via phenotypic, protein-interaction, and metabolic tracing assays', but does not state that this release's files are the ones the preprint used. The directional claim is a small inference beyond 'References:'."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "known_biases[1]",
+      "issue": "`selection_bias` with the description about targeted protein selection is a reasonable reading, but the bundle's own 'Potential Sources of Bias' section lists only the cell-line representativeness point. The second bias object is the record's own analysis of the methods sections rather than a bias the sources identify as such; no `source_caveats` marks the distinction."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "maintainers[].role",
+      "issue": "Trey Ideker is given `role: researcher` while the other three are `academic_institution`. The enum has no 'principal investigator' value, so `researcher` is the closest fit, but the three institutional entries describe named individuals (Thaker, Sembay, Niestroy) with the institution as role — the slot is being used inconsistently across the four objects."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "download_url",
+      "issue": "Omitted. The bundle supplies the Dataverse Data Access API pattern `https://dataverse.lib.virginia.edu/api/access/datafile/` and the record reproduces it inside `distribution_formats[].notes`. The slot description distinguishes download URL from landing page; the landing page is in `page`, so a direct-access URI is available and the dedicated slot is unpopulated."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_consents / collection_notifications / consent_revocations / informed_consent / participant_privacy / participant_compensation / at_risk_populations",
+      "issue": "All omitted. Correct given `involves_human_subjects: false` and cell-line provenance, but the bundle does state that KOLF2.1J derives from 'a healthy male Northern European donor' and MDA-MB-468 from a named patient demographic — i.e. there were originating human sources whose consent status the bundle does not describe. Omission is right; the reconciliation report should record it as a deliberate, evidence-based omission rather than an oversight."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_protection_impacts / annotation_analyses / machine_annotation_tools / imputation_protocols / splits / subsets / raw_sources / content_warnings / parent_datasets / resources / was_derived_from / total_size_bytes / modified_by",
+      "issue": "All omitted, correctly — the bundle supports none of them for the CM4AI release. Noted for completeness of the audit; `raw_sources` in particular is arguably duplicative of `raw_data_sources`, which is populated, and the record's choice between the two is not explained."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "source_caveats",
+      "issue": "The caveat correctly quarantines the Nature/U2OS study, yet U2OS-derived methodological detail still reaches the records: the MuSIC embedding description in `preprocessing_strategies` (node2vec, DenseNet/HPA model, contrastive co-embedding, multi-resolution community detection) is drawn from both the CM4AI preprint's Tools section and the Nature Methods sections. The CM4AI preprint does independently describe all four steps, so the content is supportable — but the boundary between the two sources is not traceable from the record."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "source_caveats",
+      "issue": "The core caveat appends a sentence claiming slots 'with no counterpart in the core schema (per-variable descriptions, instance relationships, file-collection groupings)' are 'represented here through distributions and instances or omitted'. Since the CoreDataset digest was not supplied to this run, the assertion that these slots have no counterpart is unverified, and it is used to justify the non-schema `distributions` block flagged above."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "description",
+      "issue": "The description carries project-portal aggregate statistics (1,374 protein interactions; 53,788 images; 7,023 proteins; 11,739 genes; 21.4 TB) inside a description whose subject is the June 2026 release. The `source_caveats` correctly labels these as project-wide rather than release-specific, but placing them in the release description invites the conflation the caveat warns against."
+    }
+  ],
+  "summary": "Both records are substantially well grounded: the licence terms, governance and ethics contacts, completeness/limitations/prohibited-use text, version lineage, external repository routing and per-file checksums are all traceable to the declared bundle, and the top-level source_caveats does real work in quarantining the U2OS/Nature material and disclosing the 563-vs-464 discrepancy and the minted identifiers. The dominant defect is structural rather than factual. In the core record, a `distributions` block appears that the supplied schema digest does not define, using four undeclared keys; it carries content that belongs in `distribution_formats`, `total_file_count` and `notes`, and its presence is self-justified by a source_caveats claim about the core schema that could not be verified in this run. In the full record, `FileCollection.file_count` and `total_bytes` are left empty while the same information sits in prose descriptions, and `total_file_count: 10` counts collections rather than files. A single Creator object absorbs forty-seven named authors, collapsing distinct entities the bundle enumerates individually with ORCIDs. Fifteen organization and grant identifiers are locally minted CURIEs under an undeclared prefix. Referent discipline is imperfect: `id` names the June 2026 release while name, description, purposes and tasks describe the project, and portal-wide aggregate statistics sit inside a release-scoped description. Smaller issues are fabricated time components on three dates, a project-award period presented in structured collection-timeframe fields, an inferred `hipaa_compliant` value that the record itself admits is unsupported, and a Dataverse Subject term mixed into keywords. Projection losses from full to core (variables, relationships, direct_collection, citation) may or may not be schema-mandated; none is currently declared as a deliberate choice in a way that a reader could check."
+}

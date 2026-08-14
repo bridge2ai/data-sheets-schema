@@ -1165,6 +1165,88 @@ REPAIR_INSTRUCTION = (
 REPAIR_ROUNDS = 4
 
 
+#: Slots whose declared range is multivalued, from the schema rather than a
+#: hand-kept list — the same derivation `_enum_aliases` uses.
+_MULTIVALUED: set[str] | None = None
+
+
+def _multivalued_slots() -> set[str]:
+    global _MULTIVALUED
+    if _MULTIVALUED is None:
+        from linkml_runtime import SchemaView
+        names: set[str] = set()
+        for schema, in ((FULL_SCHEMA_PATH,), (CORE_SCHEMA_PATH,)):
+            try:
+                sv = SchemaView(str(schema))
+                for cls in sv.all_classes():
+                    for slot in sv.class_induced_slots(cls):
+                        if slot.multivalued and str(slot.range) == "string":
+                            names.add(str(slot.name))
+            except Exception:                                      # noqa: BLE001
+                continue
+        _MULTIVALUED = names
+    return _MULTIVALUED
+
+
+#: `  key: value` on one line — a plain scalar, or a block-scalar indicator.
+#:
+#: Flow collections (`[`, `{`), anchors and aliases (`&`, `*`) and tags (`!`)
+#: are excluded: those are either already a collection or too structured to
+#: rewrite blind. Block indicators (`>`, `|`) are *included*, because that is
+#: the shape the failing record actually used — an earlier version excluded
+#: them here while handling them below, so the branch was unreachable and the
+#: function silently did nothing.
+_SCALAR_LINE = re.compile(
+    r"^(?P<head>\s*)(?P<slot>[A-Za-z_][\w]*): (?P<value>(?![\[\{&*!])"
+    r"(?!\s*$).*?)\s*$")
+
+
+def normalise_multivalued(text: str) -> str:
+    """Wrap a lone scalar into a list where the slot declares multivalued.
+
+    Text-level for the same reason as `normalise_temporal` and
+    `normalise_enum_aliases`: re-dumping the YAML would drop the `#` provenance
+    header the reader sees first.
+
+    There is exactly one correct repair here and it needs no evidence — a
+    multivalued slot holding one value is that value in a one-element list — so
+    doing it deterministically is both cheaper and more reliable than asking
+    the model. AI_READI rep3 of the v4 arm wrote `special_populations` as a
+    sentence, the model-driven loop fixed 36 of 37 findings and then logged
+    `not converging: 1 -> 1 findings; stopped`, and the run failed validation
+    over a fix that could not have been ambiguous.
+
+    Only unquoted or simply-quoted single-line scalars are touched. A block
+    scalar, a flow collection, an anchor or an empty value is left alone: those
+    are either already correct or a real generation failure that normalising
+    would hide.
+    """
+    slots = _multivalued_slots()
+    if not slots:
+        return text
+    out = []
+    for line in text.split("\n"):
+        m = _SCALAR_LINE.match(line)
+        if m and m.group("slot") in slots:
+            value = m.group("value")
+            head = m.group("head")
+            # A block scalar: keep the indicator, put it on a list item, and
+            # leave the indented continuation lines untouched. They stay more
+            # indented than the `- `, so the block still belongs to the item.
+            # This is the shape AI_READI rep3 actually used — the first version
+            # of this function excluded block scalars and did nothing at all.
+            if value in (">-", ">", "|-", "|", ">+", "|+"):
+                out.append(f"{head}{m.group('slot')}:")
+                out.append(f"{head}- {value}")
+                continue
+            if value not in ("null", "~", "") and not value.startswith("#"):
+                out.append(f"{head}{m.group('slot')}:")
+                out.append(f"{head}- {value}")
+                continue
+        out.append(line)
+    return "\n".join(out)
+
+
 def build_repair(artifact: str, body: str, errors: list[str]) -> PhaseRequest:
     """A shape-repair request: digest, failing record, validator findings.
 
@@ -1270,6 +1352,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 break
             if not errors:
                 break
+
             if applied_from is not None and len(errors) >= applied_from:
                 log.append({"phase": ph, "round": rnd,
                             "outcome": (f"not converging: {applied_from} -> "
@@ -1322,7 +1405,8 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 log.append({"phase": ph, "round": rnd,
                             "outcome": f"unusable response: {exc}"})
                 continue
-            body = normalise_enum_aliases(normalise_temporal(body))
+            body = normalise_multivalued(
+                normalise_enum_aliases(normalise_temporal(body)))
             path.write_text(body, encoding="utf-8")
             _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
             applied_from = len(errors)
@@ -1687,7 +1771,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         elif artifact:
             target.parent.mkdir(parents=True, exist_ok=True)
             if artifact in ("full", "core"):
-                body = normalise_enum_aliases(normalise_temporal(body))
+                body = normalise_multivalued(
+                normalise_enum_aliases(normalise_temporal(body)))
             target.write_text(body, encoding="utf-8")
             # Reconcile (and later repair) overwrite the artifact in place;
             # the snapshot is the only record of what this phase produced.
