@@ -113,9 +113,22 @@ def classify(value: str, prefixes: set[str]) -> str:
         return URI
     m = _CURIE.match(v)
     if m:
+        # A *declared* prefix wins over a scheme of the same name. `doi` is
+        # both an IANA scheme and, since the CURIE rule, a prefix bound to
+        # `https://doi.org/` — and the CURIE reading is strictly more
+        # informative: it expands to a resolvable IRI, where the scheme
+        # reading can only say "well-formed, resolution not established".
+        #
+        # This reverses the precedence #530 set. That order was right when no
+        # such prefix was declared: `urn:cm4ai:org:ucsd` matches
+        # `prefix:reference` and is not a CURIE, and nothing bound `urn` to a
+        # namespace. It is still right for `urn` and `ark`, which remain
+        # undeclared and still fall through to URI_UNVERIFIED below.
+        if m.group(1) in prefixes:
+            return CURIE_DECLARED
         if m.group(1).lower() in NO_AUTHORITY_SCHEMES:
             return URI_UNVERIFIED
-        return CURIE_DECLARED if m.group(1) in prefixes else CURIE_UNDECLARED
+        return CURIE_UNDECLARED
     return BARE
 
 

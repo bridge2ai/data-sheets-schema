@@ -53,6 +53,15 @@ prefixes:
   skos:
     prefix_prefix: skos
     prefix_reference: http://www.w3.org/2004/02/skos/core#
+  ROR:
+    prefix_prefix: ROR
+    prefix_reference: https://ror.org/
+  ORCID:
+    prefix_prefix: ORCID
+    prefix_reference: https://orcid.org/
+  doi:
+    prefix_prefix: doi
+    prefix_reference: https://doi.org/
   B2AI_DATA:
     prefix_prefix: B2AI_DATA
     prefix_reference: https://w3id.org/bridge2ai/standards-dataset-schema/

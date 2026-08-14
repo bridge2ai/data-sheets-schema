@@ -37,13 +37,26 @@ class TestSchemesAreNotCuries(unittest.TestCase):
                 self.assertEqual(classify(f"{scheme}:something", PREFIXES),
                                  URI_UNVERIFIED)
 
-    def test_the_scheme_test_runs_before_the_curie_test(self):
-        """The grammars overlap — `urn:cm4ai:org:ucsd` matches
-        `prefix:reference` perfectly well. Order is the only thing separating
-        them, so a scheme that were also a declared prefix must still read as a
-        URI rather than flipping on which test ran first."""
+    def test_a_declared_prefix_wins_over_a_scheme_of_the_same_name(self):
+        """Reversed on 2026-08-14, deliberately.
+
+        This asserted the opposite — that a scheme name beat a declared prefix,
+        so ordering could not flip a value's classification. That was right
+        while nothing bound `doi` to a namespace: the reading had to be stable
+        and "well-formed scheme, resolution not established" was all that could
+        honestly be said.
+
+        The CURIE rule then declared `doi: https://doi.org/`. Now the CURIE
+        reading expands to a resolvable IRI, which is strictly more informative
+        than the scheme reading, so a declared prefix takes precedence.
+
+        `urn` and `ark` are unaffected and still fall through — they are
+        schemes this schema does not and should not bind to a namespace.
+        """
         self.assertEqual(classify("doi:10.1/x", PREFIXES | {"doi"}),
-                         URI_UNVERIFIED)
+                         CURIE_DECLARED)
+        self.assertEqual(classify("doi:10.1/x", PREFIXES), URI_UNVERIFIED)
+        self.assertEqual(classify("urn:x:y", PREFIXES), URI_UNVERIFIED)
 
     def test_case_is_not_significant_in_a_scheme(self):
         """RFC 3986 says schemes are case-insensitive."""

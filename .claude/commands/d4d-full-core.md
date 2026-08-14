@@ -216,6 +216,22 @@ to every project. Enforce them whether or not a prompt file was used to launch:
 - There is no target slot count, no expected density, and no expected
   relationship to any other arm or project. Apply your own judgment about what
   the evidence supports.
+- **Write an identifier as a CURIE wherever a declared prefix exists, not as a
+  URL.** `ROR:01an7q238`, not `https://ror.org/01an7q238`; `ORCID:0000-0002-…`,
+  not the orcid.org URL; `doi:10.13026/…`, not `https://doi.org/…`. The two
+  expand to the same IRI, and the CURIE says which namespace the identifier
+  belongs to instead of leaving a reader to infer it from a hostname.
+
+  **Where no prefix is declared, a resolvable URL is the correct answer and an
+  invented prefix is not.** Do not mint `b2ai-voice:` or similar to satisfy
+  this rule — the schema's declared prefixes are the whole list, and a CURIE on
+  an undeclared prefix resolves to nothing while the URL at least resolves
+  (#531). Check the schema's `prefixes:` block rather than guessing.
+
+  This applies to identifier slots — those whose declared range is
+  `uriorcurie` — and never to prose. A URL inside a sentence or a citation is
+  text, not an identifier, and must be left exactly as written.
+
 - **Write generated prose in American English** — `program`, `organization`,
   `analyze`, `license`, `center`, `labeling`, `enrollment`. This is house style
   for the text *you* compose, and it applies to identifiers you mint as well as
