@@ -291,10 +291,10 @@ validation:
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_d4d.yaml
-      md5: 885b9837bb8e74be987ee911a61716c9
+      md5: 33fa830c616b708f9311f5fbb1bd4d25
     core:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_d4d_core.yaml
-      md5: ae1cd722b02803f7bf7cd5743b7e782d
+      md5: 57d9e7f5bca22e6088f08b8f90e56eb4
   schema:
     full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
     core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b

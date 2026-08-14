@@ -13,7 +13,7 @@
 # Temperature: 0.0
 # Generated: 2026-08-14
 
-id: https://doi.org/10.13026/8xbn-nq66
+id: doi:10.13026/8xbn-nq66
 name: Bridge2AI-Voice
 title: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information"
 description: >-
@@ -72,10 +72,10 @@ keywords:
   - voice
 
 creators:
-  - id: https://ror.org/032db5x82
+  - id: ROR:032db5x82
     principal_investigator: Yael Bensoussan
     affiliations:
-      - id: https://ror.org/032db5x82
+      - id: ROR:032db5x82
         name: University of South Florida, USF Health Morsani College of Medicine, Department of Otolaryngology-Head & Neck Surgery, Tampa, FL, USA
     credit_roles:
       - conceptualization
@@ -89,10 +89,10 @@ creators:
       No ORCID or other persistent personal identifier for this individual appears in the declared
       bundle; the organisation ROR is the institution named in the bundle rather than an identifier
       transcribed from it.
-  - id: https://ror.org/02r109517
+  - id: ROR:02r109517
     principal_investigator: Olivier Elemento
     affiliations:
-      - id: https://ror.org/02r109517
+      - id: ROR:02r109517
         name: Englander Institute for Precision Medicine, Weill Cornell Medicine, New York, NY, USA
     credit_roles:
       - conceptualization
@@ -100,28 +100,28 @@ creators:
       - resources
       - supervision
     notes: Co-principal investigator; co-lead of the Tools module for software and IT infrastructure.
-  - id: https://ror.org/02r109517#rameau
+  - id: ROR:02r109517#rameau
     principal_investigator: Anais Rameau
     affiliations:
-      - id: https://ror.org/02r109517#sean-parker
+      - id: ROR:02r109517#sean-parker
         name: Sean Parker Institute for the Voice, Department of Otolaryngology-Head and Neck Surgery, Weill Cornell Medicine, New York, NY, USA
     credit_roles:
       - conceptualization
       - methodology
       - project_administration
     notes: Co-lead of the Data Acquisition module.
-  - id: https://ror.org/02r109517#sigaras
+  - id: ROR:02r109517#sigaras
     principal_investigator: Alexandros Sigaras
     affiliations:
-      - id: https://ror.org/02r109517
+      - id: ROR:02r109517
         name: Englander Institute for Precision Medicine, Weill Cornell Medicine, New York, NY, USA
     credit_roles:
       - software
     notes: Co-lead of the Tools module for software and IT infrastructure.
-  - id: https://ror.org/042nb2s44
+  - id: ROR:042nb2s44
     principal_investigator: Satrajit Ghosh
     affiliations:
-      - id: https://ror.org/042nb2s44
+      - id: ROR:042nb2s44
         name: McGovern Institute for Brain Research, Massachusetts Institute of Technology, Cambridge, MA, USA
     credit_roles:
       - software
@@ -130,101 +130,101 @@ creators:
     notes: >-
       Lead for the mood and psychiatric disorders cohort; author of the b2aiprep and senselab
       processing libraries used to build the release.
-  - id: https://ror.org/032db5x82#bahr
+  - id: ROR:032db5x82#bahr
     principal_investigator: Ruth Bahr
     affiliations:
-      - id: https://ror.org/032db5x82#csd
+      - id: ROR:032db5x82#csd
         name: Department of Communication Sciences & Disorders, University of South Florida, Tampa, FL, USA
     credit_roles:
       - investigation
     notes: Lead for the voice disorders cohort.
-  - id: https://ror.org/032db5x82#watts
+  - id: ROR:032db5x82#watts
     principal_investigator: Stephanie Watts
     affiliations:
-      - id: https://ror.org/032db5x82
+      - id: ROR:032db5x82
         name: USF Health Voice Center, Department of Otolaryngology-Head & Neck Surgery, University of South Florida, Tampa, FL, USA
     credit_roles:
       - investigation
     notes: Lead for the respiratory disorders cohort.
-  - id: https://ror.org/03dbr7087
+  - id: ROR:03dbr7087
     principal_investigator: Frank Rudzicz
     affiliations:
-      - id: https://ror.org/03dbr7087
+      - id: ROR:03dbr7087
         name: University of Toronto, Toronto, Ontario, Canada
     credit_roles:
       - investigation
     notes: >-
       Lead for the neurological disorders cohort; also listed with a Dalhousie University affiliation
       in the feasibility publication consortium roster.
-  - id: https://ror.org/05dq2gs74
+  - id: ROR:05dq2gs74
     principal_investigator: Maria Powell
     affiliations:
-      - id: https://ror.org/05dq2gs74
+      - id: ROR:05dq2gs74
         name: Department of Otolaryngology-Head & Neck Surgery, Vanderbilt University Medical Center, Nashville, TN, USA
     credit_roles:
       - investigation
-  - id: https://ror.org/057q4rt57
+  - id: ROR:057q4rt57
     principal_investigator: Jennifer Siu
     affiliations:
-      - id: https://ror.org/057q4rt57
+      - id: ROR:057q4rt57
         name: The Hospital for Sick Children, Toronto, Ontario, Canada
     credit_roles:
       - investigation
     source_caveats: >-
       Named "Jennifer Sui" in the project documentation roster of lead investigators and "Jennifer
       Siu" in the PhysioNet author lists.
-  - id: https://ror.org/057q4rt57#johnson
+  - id: ROR:057q4rt57#johnson
     principal_investigator: Alistair Johnson
     affiliations:
-      - id: https://ror.org/057q4rt57
+      - id: ROR:057q4rt57
         name: The Hospital for Sick Children, Toronto, Ontario, Canada
     credit_roles:
       - data_curation
     notes: Lead for data integration; first author of the version 1.0 and 1.1 dataset releases.
-  - id: https://ror.org/05deks119
+  - id: ROR:05deks119
     principal_investigator: Jordan Lerner-Ellis
     affiliations:
-      - id: https://ror.org/05deks119
+      - id: ROR:05deks119
         name: Mount Sinai Hospital, Sinai Health, University of Toronto, Toronto, Ontario, Canada
     credit_roles:
       - investigation
     notes: Lead for genomic data collection, conducted under a separate Canadian research ethics board approval.
-  - id: https://ror.org/01yc7t268
+  - id: ROR:01yc7t268
     principal_investigator: Philip Payne
     affiliations:
-      - id: https://ror.org/01yc7t268
+      - id: ROR:01yc7t268
         name: Institute for Informatics, Data Science and Biostatistics, Washington University School of Medicine in St. Louis, MO, USA
     credit_roles:
       - investigation
-  - id: https://ror.org/009avj582
+  - id: ROR:009avj582
     principal_investigator: David Dorr
     affiliations:
-      - id: https://ror.org/009avj582
+      - id: ROR:009avj582
         name: Department of Medical Informatics and Clinical Epidemiology, Oregon Health & Science University, Portland, OR, USA
     credit_roles:
       - investigation
-  - id: https://ror.org/0213rcc28
+  - id: ROR:0213rcc28
     principal_investigator: Jean-Christophe Belisle-Pipon
     affiliations:
-      - id: https://ror.org/0213rcc28
+      - id: ROR:0213rcc28
         name: Faculty of Health Sciences, Department of Health Ethics, Simon Fraser University, Burnaby, BC, Canada
     credit_roles:
       - methodology
     notes: Ethics module lead investigator.
-  - id: https://ror.org/04j198w64
+  - id: ROR:04j198w64
     principal_investigator: Vardit Ravitsky
     affiliations:
-      - id: https://ror.org/04j198w64
+      - id: ROR:04j198w64
         name: The Hastings Center, USA
     credit_roles:
       - methodology
     notes: >-
       Ethics module lead investigator; also listed with a University of Montreal affiliation in the
       feasibility publication consortium roster.
-  - id: https://ror.org/02y3ad647
+  - id: ROR:02y3ad647
     principal_investigator: Donald Bolser
     affiliations:
-      - id: https://ror.org/02y3ad647
+      - id: ROR:02y3ad647
         name: University of Florida, Gainesville, FL, USA
     credit_roles:
       - investigation
@@ -1370,7 +1370,7 @@ data_governance:
     Registered access to the feature-only release is granted through PhysioNet credentialing and
     signature of the Bridge2AI-Voice Registered Access Agreement.
   accountable_organization:
-    id: https://ror.org/032db5x82
+    id: ROR:032db5x82
     name: University of South Florida Board of Trustees, acting as Provider Institution under the Data Transfer and Use Agreement
   stewardship_roles:
     - Provider Institution supplies the data, may amend the agreement unilaterally if the federal sponsor requires revision, and may terminate with thirty days written notice
@@ -1476,7 +1476,7 @@ updates:
     metadata, and back-filled validated diagnosis information with some gold standard variables renamed.
 
 version_access:
-  latest_version_doi: https://doi.org/10.13026/37yb-1t42
+  latest_version_doi: doi:10.13026/37yb-1t42
   versions_available:
     - "1.1, published 2025-01-17, DOI 10.13026/249v-w155 (files no longer available)"
     - "2.0.0, published 2025-04-16"
@@ -1568,7 +1568,7 @@ external_resources:
       - Registration or participation requirements are not documented in the released materials.
 
 related_datasets:
-  - id: https://doi.org/10.13026/h995-bt35
+  - id: doi:10.13026/h995-bt35
     relationship_type: is_supplemented_by
     target_dataset: https://doi.org/10.13026/mf9s-5r03
     name: Bridge2AI-Voice Pediatric Dataset
@@ -1578,17 +1578,17 @@ related_datasets:
       grouped by age, collected with ReproSchema-UI using the Bridge2AI-Voice pediatric protocol.
       Version 1.0.0 was published 2025-12-17 and version 1.1.0 on 2026-05-01; its raw audio is
       available under controlled access via Synapse at https://www.synapse.org/Synapse:syn73617068.
-  - id: https://doi.org/10.13026/k81f-qr68
+  - id: doi:10.13026/k81f-qr68
     relationship_type: is_new_version_of
-    target_dataset: https://doi.org/10.13026/k81f-qr68
+    target_dataset: doi:10.13026/k81f-qr68
     name: "Bridge2AI-Voice version 3.0.0"
     description: >-
       Immediately preceding release, published 2025-12-16, containing the same 833 participants before
       the version 3.1.0 fixes to Parquet files, addition of audio quality metrics and per-recording
       metadata, and back-filling of validated diagnosis information.
-  - id: https://doi.org/10.57764/qb6h-em84
+  - id: doi:10.57764/qb6h-em84
     relationship_type: is_new_version_of
-    target_dataset: https://doi.org/10.57764/qb6h-em84
+    target_dataset: doi:10.57764/qb6h-em84
     name: "Bridge2AI-Voice version 1.0 on the Health Data Nexus"
     description: >-
       First release of the flagship voice dataset, published on the Health Data Nexus in November 2024,
