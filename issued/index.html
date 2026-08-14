@@ -391,7 +391,7 @@
 
 
 <h1 id="slot-issued">Slot: issued</h1>
-<p><em>Date of formal issuance or publication of the resource.</em></p>
+<p><em>Date of formal issuance or publication of the resource. A <code>datetime</code> renders as RFC 3339 <code>date-time</code>, which <strong>requires a UTC offset</strong> — write <code>2024-11-15T00:00:00Z</code>, not <code>2024-11-15T00:00:00</code>. A date alone is also rejected.</em></p>
 <p>URI: <a href="http://purl.org/dc/terms/issued">dcterms:issued</a>
 Alias: issued</p>
 <!-- no inheritance hierarchy -->
@@ -407,8 +407,23 @@ Alias: issued</p>
 </thead>
 <tbody>
 <tr>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../File/">File</a></td>
+<td>A single file within a dataset or file collection</td>
+<td>no</td>
+</tr>
+<tr>
 <td><a href="../Information/">Information</a></td>
 <td>Grouping for datasets and data files</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -419,21 +434,6 @@ Alias: issued</p>
 <tr>
 <td><a href="../DataSubset/">DataSubset</a></td>
 <td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -454,7 +454,7 @@ Alias: issued</p>
 <tbody>
 <tr>
 <td>d4d:docExample</td>
-<td>2024-11-15T00:00:00</td>
+<td>2024-11-15T00:00:00Z</td>
 </tr>
 </tbody>
 </table>
@@ -488,8 +488,10 @@ Alias: issued</p>
 annotations:
   d4d:docExample:
     tag: d4d:docExample
-    value: '2024-11-15T00:00:00'
-description: Date of formal issuance or publication of the resource.
+    value: '2024-11-15T00:00:00Z'
+description: Date of formal issuance or publication of the resource. A `datetime`
+  renders as RFC 3339 `date-time`, which **requires a UTC offset** — write `2024-11-15T00:00:00Z`,
+  not `2024-11-15T00:00:00`. A date alone is also rejected.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: dcterms:issued

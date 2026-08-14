@@ -391,7 +391,7 @@
 
 
 <h1 id="slot-last_updated_on">Slot: last_updated_on</h1>
-<p><em>The date and time when the resource was most recently modified or updated.</em></p>
+<p><em>The date and time when the resource was most recently modified or updated. Requires a UTC offset (<code>…T00:00:00Z</code>); RFC 3339 <code>date-time</code> rejects a naive timestamp.</em></p>
 <p>URI: <a href="http://purl.org/dc/terms/modified">dcterms:modified</a>
 Alias: last_updated_on</p>
 <!-- no inheritance hierarchy -->
@@ -407,8 +407,23 @@ Alias: last_updated_on</p>
 </thead>
 <tbody>
 <tr>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../File/">File</a></td>
+<td>A single file within a dataset or file collection</td>
+<td>no</td>
+</tr>
+<tr>
 <td><a href="../Information/">Information</a></td>
 <td>Grouping for datasets and data files</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -419,21 +434,6 @@ Alias: last_updated_on</p>
 <tr>
 <td><a href="../DataSubset/">DataSubset</a></td>
 <td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -454,7 +454,7 @@ Alias: last_updated_on</p>
 <tbody>
 <tr>
 <td>d4d:docExample</td>
-<td>2024-11-15T00:00:00</td>
+<td>2024-11-15T00:00:00Z</td>
 </tr>
 </tbody>
 </table>
@@ -488,8 +488,9 @@ Alias: last_updated_on</p>
 annotations:
   d4d:docExample:
     tag: d4d:docExample
-    value: '2024-11-15T00:00:00'
+    value: '2024-11-15T00:00:00Z'
 description: The date and time when the resource was most recently modified or updated.
+  Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: dcterms:modified

@@ -1006,8 +1006,9 @@ attributes:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: '2023-07-18T00:00:00'
-    description: The date and time when the resource was created.
+        value: '2023-07-18T00:00:00Z'
+    description: The date and time when the resource was created. Requires a UTC offset
+      (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:created
@@ -1062,8 +1063,10 @@ attributes:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: '2024-11-15T00:00:00'
-    description: Date of formal issuance or publication of the resource.
+        value: '2024-11-15T00:00:00Z'
+    description: Date of formal issuance or publication of the resource. A `datetime`
+      renders as RFC 3339 `date-time`, which **requires a UTC offset** — write `2024-11-15T00:00:00Z`,
+      not `2024-11-15T00:00:00`. A date alone is also rejected.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:issued
@@ -1110,9 +1113,10 @@ attributes:
     annotations:
       d4d:docExample:
         tag: d4d:docExample
-        value: '2024-11-15T00:00:00'
+        value: '2024-11-15T00:00:00Z'
     description: The date and time when the resource was most recently modified or
-      updated.
+      updated. Requires a UTC offset (`…T00:00:00Z`); RFC 3339 `date-time` rejects
+      a naive timestamp.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:modified
