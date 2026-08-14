@@ -1,0 +1,137 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "Slot `distributions` is not present in the Dataset/CoreDataset slot inventory supplied in the schema digest. The digest lists `distribution_formats`, `distribution_dates` and `file_collections`, but no `distributions` slot, and no keys `path`, `bytes`, `format`, `media_type`, `conforms_to`, `conforms_to_standard`, `notes` on any such range. The eleven-entry `distributions` block in the core record is therefore an invented slot and will fail validation against CoreDataset. The per-directory file counts, byte totals and standards it carries were represented in the full record via `file_collections`, whose range (FileCollection, required key `id`, accepting `path`, `file_count`, `total_bytes`, `collection_type`) is the schema-defined home for that content."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions[*].id",
+      "issue": "Every entry in the `distributions` list omits an identifier. If the intent was FileCollection (the only slot in the digest that accepts `path`, `file_count` and `total_bytes`), `id` is a required key on that range and its absence is an independent validation failure on all eleven entries."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "file_collections",
+      "issue": "Omission the bundle clearly supports and the full record already carries. The declared bundle (fairhub_api_dataset_3 dataset_structure_description) gives per-directory `size` and `numberOfFiles` for all nine data type directories plus the root metadata file list. The full record encodes these as ten FileCollection objects; the core record drops the slot entirely and re-encodes the same facts under the non-schema `distributions` slot. The evidence supports populating `file_collections`."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "total_file_count",
+      "issue": "Supported by the bundle (356343, stated in fairhub_api_dataset_3 `data.fileCount`, the README and the RO-Crate) and populated in the full record, but omitted from the core record. The value is instead buried in prose in the final `distributions` entry's `notes`, which is not the field the schema declares for it."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "total_size_bytes",
+      "issue": "Supported by the bundle (3815969779678, fairhub_api_dataset_3 `data.size` and `metadata.datasetDescription.size`) and populated in the full record, but omitted from the core record. As with total_file_count, the value appears only inside a `distributions` entry rather than in the declared integer slot."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "citation",
+      "issue": "Omission the bundle clearly supports. The RO-Crate `associatedPublication` gives the verbatim dataset citation ('AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the AI-READI Project (3.0.0) [Data set]. FAIRhub. https://doi.org/10.60775/fairhub.3'), which the full record populates in `citation`. The core record omits `citation` and instead states the citation requirement as prose in the closing paragraph of `notes`, contrary to the rule that residual content goes to notes only after every fitting slot is used."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "splits",
+      "issue": "Omission the bundle clearly supports. The README 'Suggested split' table and healthsheet labeling Q7 describe the 70/15/15 recommended split, its rationale, and the balancing across sex, race/ethnicity and diabetes status. The full record populates `splits` with a Splits object. The core record omits the slot and moves the entire content, including the per-stratum counts, into the free-text `notes` field."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "participant_compensation",
+      "issue": "Omission the bundle clearly supports. Healthsheet collection Q4 states 'Study subjects received a compensation of $200 for the study visit also through the grant funding', and the IRB protocol gives the payment schedule and non-proration. The full record populates `participant_compensation` with a HumanSubjectCompensation object; the core record omits the slot and relocates the same facts into `notes` prose."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "collection_consents / collection_notifications / consent_revocations",
+      "issue": "Three consent-related slots present in the full record are dropped in the core record, with their content folded into `informed_consent.consent_documentation` and `informed_consent.withdrawal_mechanism`. The bundle answers each separately (healthsheet collection Q9 on how consent was requested and provided; Q8 on notification; Q10 on revocation), and CoreDataset per the digest is a projection of the same slot inventory. This is a structural loss rather than a factual error, but the notification content in particular now sits inside a documentation field rather than in a CollectionNotification object."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "acquisition_methods[2].notes",
+      "issue": "Source-of-collection commentary ('Data were collected directly from participants at the three recruiting sites; this was active data collection rather than passive collection or secondary use of existing data...') has been embedded in the `notes` of an InstanceAcquisition object whose boolean is `was_inferred_derived: true`. The content answers `direct_collection` (DirectCollection, with `is_direct` and `collection_details`), which the full record populates and the core record omits. Placing it under an inferred/derived acquisition object also creates a mild internal contradiction, since the text asserts direct collection."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "is_deidentified.deidentification_details",
+      "issue": "The re-identification-risk sentence appended here ('A theoretical risk of future re-identification is acknowledged, because AI algorithms can infer individual patient characteristics...') is content the schema places in `participant_privacy.reidentification_risk` (ParticipantPrivacy), a slot the full record populates and the core record omits. The full record's `participant_privacy` also carried `anonymization_method`, `privacy_techniques` and `data_linkage`, all of which the bundle supports (Nature Metabolism comment; licence §3.B, §6; healthsheet composition Q14) and none of which survive in the core record."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[0].data_topic",
+      "issue": "`data_topic` is set to B2AI_TOPIC:43 (Diabetes) alone. The bundle documents a dataset spanning retinal/ophthalmic imaging, ECG/waveform, mHealth wearable, environmental and survey domains, for which the enumeration offers Ophthalmic Imaging (24), Waveform (37), mHealth (18), Glucose Monitoring (38), Activity Monitoring (39) and Survey (31). The range is single-valued so only one term is admissible; the choice is defensible, but no `data_substrate` was set at all despite the bundle naming DICOM (11), Waveform Data (49), Comma-separated values (6) and Time-series data (69) explicitly. Omission is permitted, but the substrate evidence here is unusually direct."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[0]",
+      "issue": "The first Creator object carries only `affiliations: [{name: AI-READI Consortium}]` with no `principal_investigator` and no `credit_roles`. The bundle identifies the AI-READI Consortium as the organizational creator (fairhub `creator.creatorName` with `nameType: Organizational`), so the entity is correct, but representing an organizational creator as an unnamed person-shaped object whose only content is an affiliation is a weak fit for the declared class. Same issue in the core record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "funders[2].grantor",
+      "issue": "The third FundingMechanism uses `grantor` to hold a prose list of in-kind contributors ('In-kind support: the Microsoft AI for Good Lab supported the cloud services...; Topcon Corporation, Optomed, iCare World and Carl Zeiss loaned imaging devices at no cost; Heidelberg Engineering, Dexcom and Garmin provided research discounts'). This collapses seven distinct entities into one grantor value and puts narrative into an identifier-like field. The multivalued-range rule calls for one object per distinct entity, or for this content to sit in `notes`. Same issue in the core record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[1].source_caveats",
+      "issue": "Correct placement (source_caveats is the trust-annotation field and the commentary is not embedded in the name or affiliation value), but the same Washington University in St. Louis / University of Washington conflict is asserted a second time at top-level `source_caveats` item (2). Duplication is not a defect, though the affiliation given for Aaron Y. Lee, Cecilia S. Lee and Linda M. Zangwill resolves the conflict silently in favour of ROR 01yc7t268 for the two Lees while giving Zangwill UC San Diego, an inconsistency in how the same conflicting source is applied across three sibling objects."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "annotation_analyses",
+      "issue": "Emitted as an empty list `[]`. The bundle supports omission (healthsheet labeling section answers N/A throughout, no labels provided), and the record states this correctly in `instances[0].label_description`. An empty list is not equivalent to omission and adds no information; the core record correctly drops the slot."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "file_collections[9]",
+      "issue": "The root-metadata FileCollection omits `path`, `file_count` and `total_bytes` although the bundle enumerates nine named root metadata files (CHANGELOG.md, dataset_description.json, dataset_structure_description.json, healthsheet.md, LICENSE.txt, participants.json, participants.tsv, README.md, study_description.json), and the record's own `source_caveats` item (12) derives the count of nine from the file-total arithmetic. `file_count: 9` is supported."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "Set to `restricted`. The bundle's only explicit confidentiality statement is the RO-Crate `confidentialityLevel: 'HL7:2N (normal)'`, and the public release is downloadable after self-attestation. `restricted` is an interpretive mapping of a two-tier public/controlled release onto the enum rather than a value the bundle states; the RO-Crate wording is preserved in `other_compliance`, which mitigates but does not remove the inference."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license_and_use_terms.data_use_permission",
+      "issue": "Set to `disease_specific_research`, which is well supported for the public tier (access requires 'Agreeing to use the data only for type 2 diabetes related research'). The bundle also records that the licence permits commercial use and that 'A private version will allow for more generic use', so the single enum value describes one tier of a two-tier arrangement. The prose in `license_terms` carries the qualification, so this is a granularity limit of the single-valued slot rather than an unsupported claim."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to_standard",
+      "issue": "Includes `DICOM`, `CDS`, `WFDB`, `OMOP_CDM`, `OPEN_MHEALTH`, `ESDS`, `RO_CRATE` — all present in the permitted enum and all named in the bundle. No defect in the values themselves; noted only because `ESDS` is asserted on the strength of the README's phrase 'Earth Science Data Systems (ESDS) format' pointing at the NASA ASCII guidelines, which is a naming shortcut in the source rather than a formal standard identifier."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "source_caveats item (13)",
+      "issue": "The core record's source_caveats adds an item enumerating healthsheet questions answered 'No' or 'N/A' and stating that the corresponding slots were left unpopulated. This is accurate and correctly placed, but it partially duplicates the function of omission itself; more materially, the full record has no equivalent item, so the two records' trust annotations diverge on a point where the underlying evidence and the modelling decision are identical."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets",
+      "issue": "Three DataSubset objects encode the recommended train/validation/test partitions and duplicate, in prose within `description`, the per-stratum counts also carried in `splits.split_details`. Not unsupported, but the same numbers are stated three times across `subsets`, `splits` and `subpopulations`, and the core record then states them a fourth time in `notes`, giving four independent transcriptions of one README table with no single authoritative location."
+    }
+  ],
+  "summary": "Both records are, on factual content, well grounded in the declared bundle: the participant count, collection window, file and byte totals, device inventory, standards, licence terms, IRB approval, consent process, split composition and the documented biases and limitations are all traceable to the bundle, and the extensive top-level source_caveats correctly surfaces the acronym, institution, enrolment-date, target-N and de-identification conflicts rather than silently resolving them. The dominant defect is structural and confined to the core record: it introduces a `distributions` slot that does not exist in the supplied schema inventory, populating it with eleven objects that also lack the `id` required by the only comparable declared range (FileCollection). This single decision is high-severity on its own and cascades — `file_collections`, `total_file_count` and `total_size_bytes` are dropped from the core record even though the bundle states all three explicitly and the full record encodes them correctly. A second pattern in the core record is the migration of structured content into free text: `citation`, `splits`, `participant_compensation`, `collection_consents`, `collection_notifications`, `consent_revocations`, `direct_collection` and `participant_privacy` are all supported by the bundle and populated in the full record, but appear in the core record only as prose inside `notes`, `informed_consent` sub-fields, `is_deidentified.deidentification_details` or an `acquisition_methods` note — the last of which additionally sits under a `was_inferred_derived` object while asserting direct collection. The full record's defects are minor by comparison: an empty `annotation_analyses: []` instead of omission, an organizational creator modelled as an affiliation-only person object, seven in-kind contributors collapsed into one `grantor` string, a root-metadata FileCollection missing a supported `file_count`, and heavy duplication of the split table across four slots. Two enum choices in both records (`confidentiality_level: restricted`, `data_use_permission: disease_specific_research`) are interpretive mappings of two-tier access onto single-valued fields rather than verbatim source statements, though both are qualified in adjacent prose. No hallucinated dataset facts were found, and no source commentary was found embedded in a name, identifier or affiliation value."
+}

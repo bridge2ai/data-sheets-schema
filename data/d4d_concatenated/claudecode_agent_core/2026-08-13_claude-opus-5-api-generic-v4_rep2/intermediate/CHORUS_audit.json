@@ -1,0 +1,125 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators[0].principal_investigator.id",
+      "issue": "Fabricated identifier. `mailto:erosenthal@mgh.harvard.edu` appears nowhere in the declared bundle; NIH RePORTER gives only the name 'ROSENTHAL, ERIC S.' and the organization 'MASSACHUSETTS GENERAL HOSPITAL'. The record's own source_caveats admits the identifier is 'constructed from the institution rather than published in the sources'. A constructed, resolvable-looking email address is an invented fact, not an omission-with-caveat. Omit the `id` or use a non-email opaque identifier."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "creators[0].principal_investigator.id",
+      "issue": "Same fabricated `mailto:erosenthal@mgh.harvard.edu` identifier carried into the core record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[1..5]",
+      "issue": "Overreach of the `Creator`/`principal_investigator` framing. The bundle lists Bihorac, Jiang, Strekalova, Rashidi and Kwong on a 'Bridge2AI CHoRUS Leadership Team' slide only; nothing calls them principal investigators or dataset creators. NIH RePORTER names a single PI. The source_caveats flag the discrepancy but the slot value still asserts PI status for five people the bundle does not so describe."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "creators[1..5]",
+      "issue": "Same PI overreach for the five leadership-team members carried into the core record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "license_and_use_terms.contact_person",
+      "issue": "Unsupported role assignment. The bundle lists jared.houghtaling@tuftsmedicine.org under 'Request access' on the chorus-ai GitHub page and separately as a Tufts lecturer in the webinar curriculum table. Nothing in the bundle designates him a contact for licensing or use terms. The access-request role is already correctly recorded in `data_governance.stewardship_roles`."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "license_and_use_terms.contact_person",
+      "issue": "Same unsupported licensing-contact designation for Jared Houghtaling."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[*].counts (radiology)",
+      "issue": "Count/instance-type mismatch. `instance_type` declares 'Radiology imaging study' but `counts: 7642` is the number of *admissions with* radiology data per chorus4ai.org, not a count of imaging studies. The source_caveats disclose this, but the numeric slot still carries a value of the wrong unit for the declared instance type."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "instances[*].counts (radiology)",
+      "issue": "Same unit mismatch between imaging-study instance_type and admission-level count of 7,642."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_formats",
+      "issue": "Supported omission: `download_url`/`access_urls` are correctly absent, but the bundle states plainly that OMOP and telemetry are held 'in enclave' while clinical notes are 'stored locally except tokens'. Only the first entry carries the enclave note; the DICOM, WFDB and EDF+/Persyst entries omit the controlled-access/enclave qualifier the bundle supplies for every listed data type."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_by",
+      "issue": "Range is `string`, so the value is well-shaped, but 'CHoRUS for Equitable AI Network (Bridge2AI data generation project)' is a composed gloss rather than a name appearing as such in the bundle. The bundle offers 'CHoRUS for Equitable AI' (GitHub org) or 'CHoRUS Network' (GitHub About); the parenthetical is editorial."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "status",
+      "issue": "The slot is a short status descriptor; the value embeds a verbatim quotation of the site's Administration-directives banner, which is source commentary better placed in `source_caveats` (where it is already recorded) or `regulatory_restrictions` (where it is also already recorded). Triple-recording the same banner across three slots is redundant rather than wrong."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "status",
+      "issue": "Same banner quotation embedded in the status descriptor, duplicating source_caveats and regulatory_restrictions."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.stewardship_roles",
+      "issue": "Range is `string[]` and values are strings, so shape conforms. However each entry packs a role label, a person name, an institution and an email into one free-text string while the class's structured neighbours (`committee_contact`, `committee_members`, ranges `Person`/`Person[]`) sit empty. The bundle supplies named people with addresses; at least the two access-request contacts could populate `committee_members` as Person objects."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "data_governance.stewardship_roles",
+      "issue": "Same packing of person/institution/email into free-text strings while Person-ranged neighbours remain empty."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_collectors[*].role",
+      "issue": "`DataCollector.role` is unconstrained in the digest (no enum listed), so 'Data Acquisition centers', 'Consortium membership' and 'Awardee organization' are permissible. Note the contrast with `Maintainer.role`, which is enum-bound and is used correctly in `maintainers`. Flagged only as an internal asymmetry, not a validation defect."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "at_risk_populations",
+      "issue": "`at_risk_groups_included: true` is supported by the PICU/NICU statement, but the object carries no `special_protections`, `assent_procedures` or `guardian_consent` and relies wholly on `source_caveats` to say so. This is the correct handling of absent evidence; noted for completeness rather than as a defect."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources[*].external_resources",
+      "issue": "Six separate ExternalResource objects each wrap a single string in the inner `external_resources` list. This satisfies the one-object-per-entity rule but leaves `archival`, `restrictions` and `future_guarantees` unpopulated on five of six; only the GitHub entry sets `archival: false`, which is itself an inference the bundle does not state."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "source_caveats",
+      "issue": "The trailing paragraph explaining which full-record slots have no CoreDataset counterpart is meta-commentary about the projection process rather than commentary on the evidence behind sibling slot values. It belongs in the Phase 4 reconciliation report, which is where such mapping decisions are recorded."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "collection_timeframes[0].start_date / end_date",
+      "issue": "Both date-ranged fields are correctly omitted because the bundle gives no clinical-data span, and the caveat correctly distinguishes the award period from the data period. No defect; recorded as a positive check on a slot where the NIH project dates could easily have been misplaced."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "total_size_bytes",
+      "issue": "Supported omission worth noting: chorus4ai.org states '23 Tb Waveform data'. The unit is ambiguous (Tb vs TB) and the figure covers waveforms only, not the whole dataset, so omitting `total_size_bytes` is defensible; the 23 TB figure is however absent from every slot including `description`, where it does appear — verified present. No action."
+    }
+  ],
+  "summary": "Both records are broadly faithful to the declared bundle: modality-by-modality standards (OMOP, OHNLP, DICOM, WFDB, EDF+/Persyst), the 50,000 vs 45,000 vs 100,000 admission discrepancy, the notes-stay-local arrangement, the staged imaging/EEG release, and the enclave/licensing access route are all traceable to source and the conflicts are surfaced rather than silently resolved. Enum usage (conforms_to_standard, limitation_type, bias_type, Maintainer.role, confidentiality_level, collection_type) is valid throughout; multivalued slots emit one object per entity; no prose appears where a list is required; no object appears in a scalar-ranged slot. Two high-severity issues require correction, both the same defect duplicated across records: a fabricated mailto identifier for the principal investigator, self-declared as constructed. Four medium issues concern assertion beyond the source — five leadership-team members promoted to principal_investigator, an access-request contact promoted to licensing contact, and an admission-level count of 7,642 placed under an imaging-study instance_type — plus one supported omission where the controlled-access qualifier is dropped from four of five distribution_formats entries. Remaining findings are low-severity redundancy, under-use of Person-ranged fields in data_governance, and one core-record source_caveats paragraph that carries projection meta-commentary properly belonging to the reconciliation report."
+}

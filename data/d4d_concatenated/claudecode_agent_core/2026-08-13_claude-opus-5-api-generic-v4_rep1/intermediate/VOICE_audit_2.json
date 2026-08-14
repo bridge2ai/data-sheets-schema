@@ -1,0 +1,113 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The `distributions` slot is not present in the supplied schema digest for `Dataset`/`CoreDataset`, and no range or required keys are defined for it. The keys used (`path`, `format`, `media_type`, `notes`, `source_caveats`) resemble a mix of FileCollection and DistributionFormat. Unless the core schema separately declares this slot, the block is unschematized and will fail validation. The same content is already carried correctly by `distribution_formats` (a declared slot) plus a FileCollection-shaped grouping; in the full record it is carried by `file_collections`, which the core schema does not declare."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions[1].format",
+      "issue": "`format: TSV` is asserted for the phenotype folder while the accompanying note states each table is paired with a JSON data dictionary, so the folder is mixed-format exactly as the features folder is. The features entry withholds `format` on that reasoning and the phenotype entry does not; the two are inconsistent with each other on identical evidence."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "use_repository",
+      "issue": "Emitted as an empty list. The bundle supports an affirmative negative statement — the healthsheet answers 'No' to whether a repository links to papers or systems that use the dataset — but an empty list is not that statement; it is an unpopulated multivalued slot. Under the stated preference for omission over empty structure, the slot should be omitted (the fact is already recoverable from the healthsheet)."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[1].counts",
+      "issue": "`counts: 32522` is presented as the recording-instance count, but 32522 is the row count of a single feature file (torchaudio_pitch.parquet) in v3.1.0, not a count of recordings. The bundle gives no single authoritative recording count for v3.1.0; the pediatric release states 23,533 recordings explicitly, the adult release does not. The value is a maximum-across-features proxy rather than an attested count. The source_caveats disclose the derivation, which mitigates but does not remove the issue, since `counts` is an integer-ranged assertion."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "id",
+      "issue": "`id` is set to the version-independent DOI `https://doi.org/10.13026/37yb-1t42` while `doi`, `version`, `page`, `issued` and the entire feature-count/file-layout body describe version 3.1.0 specifically (`10.13026/8xbn-nq66`). The record identifier therefore denotes the version series while the record content denotes one version. Both records share the identical `id`, so the full and core records are also not distinguishable by identifier."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "subsets[*].description",
+      "issue": "Each DataSubset carries its entire content in `description` prose. DataSubset accepts the full Dataset slot inventory, so the per-cohort inclusion criteria, exclusion criteria and gold-standard validation methods given in Table 1 of the documentation could populate declared fields (e.g. `sampling_strategies`, `labeling_strategies`, `instances`) rather than being narrated. The objects are correctly shaped but carry no structure beyond `id`, `name`, `description` and the two boolean flags."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators[*].affiliations[*].id",
+      "issue": "Organization `id` values use an undeclared CURIE prefix `b2ai-voice:` (e.g. `b2ai-voice:org-usf`). The same applies to all Creator, Person, DataSubset, FileCollection and DatasetRelationship identifiers, and to `nih:` under `funders[*].grants[*].id`. Neither prefix is bound anywhere in the record (no `prefixes` block, no `@context`), so these uriorcurie values do not resolve. This is a systematic shape issue across roughly forty identifier values in each record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "errata",
+      "issue": "The first Erratum object states 'No erratum is maintained' — a statement that the field's subject does not exist, which under the stated rules should be an omission rather than a populated object. The second object carries the actual correction history and is well-formed. The first object should be dropped and its changelog remark folded into the second or into `updates`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "informed_consent[0].notes",
+      "issue": "Participant compensation (gift card amounts, session thresholds, three-session cap, 120 USD maximum) is placed in InformedConsent.notes. The full record carries this correctly in `participant_compensation` as a HumanSubjectCompensation object with `compensation_provided`, `compensation_type`, `compensation_amount` and `compensation_rationale`. If the core schema declares `participant_compensation`, this is a misplacement; if it does not, the relocation is defensible but the structured amounts are lost to prose. The core `source_caveats` claims the core schema has no slot for it, which the supplied digest cannot confirm either way."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "collection_notifications",
+      "issue": "The full record carries a CollectionNotification object describing the IRB-approved notification process; the core record folds the same text into `informed_consent[0].notes` instead. If the core schema declares `collection_notifications` (the digest does not say it does not), this is content relocated out of the field that asks for it."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to_class",
+      "issue": "Both records set `conforms_to_class` to their own class name (`Dataset` / `CoreDataset`), which matches the slot description. No defect in itself, but note that `conforms_to_schema` on the core record points at the full schema IRI `https://w3id.org/bridge2ai/data-sheets-schema` while the header declares the core schema file; if the core schema has a distinct IRI, the value is wrong."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "collection_consents",
+      "issue": "The single CollectionConsent object restates material already carried in greater detail by `informed_consent[0]` (prospective informed consent, participants informed of what was collected and how secured). The duplication is not a schema violation but neither object is distinguishable from the other in evidentiary content."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "relationships",
+      "issue": "The Relationships object opens by asserting the healthsheet's claim that instances are unrelated, then describes participant_id/session_id linkage — i.e. it both denies and affirms inter-instance relationships in one value. The two halves are reconcilable (no semantic edges between participants; structural keys within a participant) but the object as written reads as internally contradictory."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license",
+      "issue": "`license` is set to the free-text string 'Bridge2AI Voice Registered Access License', which is the PhysioNet label for the registered-access tier only. The raw audio moves under a separate Data Transfer and Use Agreement, and the record elsewhere (license_and_use_terms) correctly describes both tiers. The single scalar therefore under-describes the licensing of the referent as a whole, though the bundle does support the string as written for the PhysioNet release."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables",
+      "issue": "The `variables` list covers only the eleven feature-file columns and omits every phenotype column, though the bundle names dozens of phenotype tables and states each has a JSON data dictionary with per-column descriptions, questions and data types. The omission is defensible (the bundle does not enumerate the individual columns) but the list as emitted is not representative of the dataset's variables and could be read as complete."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_governance.committee_contact",
+      "issue": "The DACO contact address DACO@b2ai-voice.org is stated in the bundle and appears in `access_review_process` prose, but `committee_contact` (range Person) is left unpopulated. A Person object carrying the mailbox as the contact point is supported; as written the contact is recoverable only from narrative."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[0].data_substrate",
+      "issue": "The participant instance is given `data_substrate: B2AI_SUBSTRATE:41` (Tab-separated values), describing the storage format of the phenotype tables rather than the substrate of a human participant. The recording instance is given `B2AI_SUBSTRATE:30` (Parquet), which is likewise the container rather than the signal; `B2AI_SUBSTRATE:49` (Waveform Data) or `48` (Waveform Audio File Format) sit closer to the recorded material, and `B2AI_SUBSTRATE:79` (Participant response data) sits closer to the questionnaire content. The chosen terms are defensible for the release-as-distributed but describe packaging over content."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "keywords",
+      "issue": "`keywords` mixes the PhysioNet topic terms actually attached to the project (health, biomarkers, bridge2ai, voice — present on v3.1.0) with terms not attested as keywords anywhere in the bundle (speech, audiomics, artificial intelligence, voice disorders). The latter four are inferred from body text rather than transcribed from a keyword field."
+    }
+  ],
+  "summary": "Both records are substantially well-grounded in the declared bundle, carry no detectable reuse of prior D4D material, and correctly decompose multivalued slots into per-entity objects. Source conflicts across the bundle (award identifier variants, Siu/Sui, recording counts, HIPAA characterisation, host platform, cleaning-vs-audit) are disclosed rather than silently resolved, and the referent choice (adult flagship v3.1.0, pediatric as related_datasets) is stated and held consistently. The most serious defects are structural rather than factual and concentrate in the core record: an undeclared `distributions` slot carrying FileCollection-shaped content that duplicates the declared `distribution_formats`, with an internally inconsistent `format` assertion between its two entries. Across both records, every CURIE identifier uses unbound prefixes (`b2ai-voice:`, `nih:`) and both records share an identical `id` set to the version-independent DOI while their content describes v3.1.0 specifically. Two slots populate objects that assert their own subject's absence (`errata[0]`, and `use_repository` as an empty list) where omission is called for. Remaining findings are minor: prose-only DataSubset objects that could carry declared structure, an unpopulated `committee_contact` whose value appears in adjacent narrative, substrate terms that describe packaging over content, and a partly inferred keyword list."
+}

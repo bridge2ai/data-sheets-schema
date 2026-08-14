@@ -1,0 +1,197 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "data_collectors[].role",
+      "issue": "Values 'Data contributing site' and 'Central coordinating teams' are not members of the DataCollector.role enum. The schema digest constrains `role` on Maintainer to a fixed list (data_subject, third_party, researcher, industry, academic_institution, government_agency, commercial_entity, non_profit_organization, crowdsourced, automated_system, other); DataCollector.role is the same slot and the digest supplies no separate permitted set for it, so free prose here is a probable enum violation. Safer to use 'academic_institution' or 'other' and move the descriptive text into collector_details."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "data_collectors[].role",
+      "issue": "Same non-enum role values ('Data contributing site', 'Central coordinating teams') carried over from the full record."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "ethical_reviews[].reviewing_organization",
+      "issue": "'CHoRUS consortium Ethics pillar' is not an entity named in the bundle as a reviewing organization; the bundle describes an Ethics pillar of the data generation project that runs focus groups and legal analysis, but never states that any body reviewed the dataset. The value is a constructed reviewer name and is unsupported."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "ethical_reviews[].reviewing_organization",
+      "issue": "Same constructed reviewer name 'CHoRUS consortium Ethics pillar' as in the full record; unsupported by the bundle."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[]",
+      "issue": "All six leadership-team members are encoded with `principal_investigator`. The bundle names only ROSENTHAL, ERIC S. as Principal Investigator (NIH RePORTER); Bihorac, Jiang, Strekalova, Rashidi and Kwong appear only on a 'Bridge2AI CHoRUS Leadership Team' slide with no role stated. Asserting PI status for five people is an inference the bundle does not support, and the source_caveats on those entries acknowledge as much while the structured field still makes the claim."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "creators[]",
+      "issue": "Same over-assertion of `principal_investigator` for five leadership-team members not identified as PIs in the bundle."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "Boolean `true` is asserted from an inference chain (PICU/NICU admissions therefore minors and neonates) that the bundle never states in terms of at-risk populations or protections. The accompanying source_caveats admits the value is inferred and that no assent, guardian consent or special protections are described. Under prefer-omission this object is better omitted entirely."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "Same inferred boolean assertion as in the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "human_subject_research.source_caveats",
+      "issue": "Caveat states the dataset uses 'identifiable hospital clinical records from more than 100,000 critically ill patients'. The bundle's NIH abstract gives >100,000 as the target acquisition figure, not the current holding, and 'identifiable' is the auditor's characterization — the bundle describes de-identification and re-identification-limiting transformation. The caveat overstates and mis-dates the underlying claim."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "human_subject_research.source_caveats",
+      "issue": "Same overstated 'identifiable ... more than 100,000 patients' characterization."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "acquisition_methods[].was_directly_observed",
+      "issue": "Set to true while `direct_collection[].is_direct` is set to false with the explanation that data are obtained retrospectively from hospital systems rather than observed for this project. The two booleans pull in opposite directions on the same fact and no source distinguishes them; internal inconsistency."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "machine_annotation_tools[] (CTP-deid)",
+      "issue": "The bundle lists 'CTP-deid Public' in a repository listing with no description whatsoever. Classifying it as a de-identification tool for clinical imaging is inference from a repository name; the entry's own source_caveats concedes this. Omission is the correct treatment."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "machine_annotation_tools[] (CTP-deid)",
+      "issue": "Same name-based inference about an undescribed repository."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[].data_substrate (OMOP rows, admissions, demographics)",
+      "issue": "B2AI_SUBSTRATE:37 (Relational Database) is assigned to three OMOP-derived instance types. The bundle states the data standard is OMOP and that structured data live in a cloud enclave, but never describes the physical substrate as a relational database. The 'admission with linked multi-modal data' instance in particular is not a relational-database substrate; if no listed term fits, the digest instructs omitting the slot."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "instances[].data_substrate (OMOP rows, admissions, demographics)",
+      "issue": "Same unsupported B2AI_SUBSTRATE:37 assignments."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "Range is uriorcurie and the value 'https://chorus4ai.org/' is a well-formed URI, but it duplicates `page` and names a website rather than the publishing organization. The bundle identifies Massachusetts General Hospital as the awardee organization; the website URL is a weak referent for publisher."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "publisher",
+      "issue": "Same website-URL-as-publisher issue as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[].id and creators[].principal_investigator.id",
+      "issue": "Identifiers such as https://chorus4ai.org/team#eric-rosenthal and https://chorus4ai.org/person/eric-s-rosenthal are minted by the generator; no such fragment URIs or person URIs appear in the bundle. Same for organization ids under https://chorus4ai.org/organization/. Syntactically valid but not evidenced."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "creators[].id and creators[].principal_investigator.id",
+      "issue": "Same minted identifiers."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.committee_contact.id",
+      "issue": "mailto:cmccrary@mgh.havard.edu reproduces the misspelled domain from the source ('havard' for 'harvard'). Transcription is faithful and the error is flagged in source_caveats, but embedding a known-broken address in an identifier slot makes the identifier non-resolvable."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "data_governance.committee_contact.id",
+      "issue": "Same non-resolvable mailto identifier with the misspelled domain."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_by",
+      "issue": "'CHoRUS Consortium' is a plausible collective attribution but the bundle names no creator of the datasheet record or of the dataset under that exact phrasing in a creator role; the website refers to 'CHoRUS Consortium' as a section heading and to 'the authors' generically."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "created_by",
+      "issue": "Same weakly-supported collective attribution."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "status",
+      "issue": "The slot's description implies a short controlled-style value (draft, published, deprecated). The value here is a multi-sentence narrative including the website banner. Content is faithful to the bundle but the shape overloads a scalar status field; the banner text would sit better in notes or source_caveats."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "status",
+      "issue": "Same narrative overload of a short-status scalar slot."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "third_party_sharing[].notes",
+      "issue": "The substantive content (training-program access, holdout set for external validation) sits in `notes` while only the `is_shared` boolean is structured. ThirdPartySharing declares no other content field, so this is forced by the class, but the same facts are already carried in data_governance and existing_uses — the object adds little beyond the boolean."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats[]",
+      "issue": "The enclave-delivery caveat is attached as `notes` to the fifth format object only, although it applies to all five. Reader may take it as scoped to EDF+/Persyst."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "distribution_formats[]",
+      "issue": "Same mis-scoped enclave note on the final format entry."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "license",
+      "issue": "Omitted while the bundle states the chorus-ai GitHub organization is MIT-licensed. The omission is defensible — MIT covers code, not the clinical data — and the distinction is made in license_and_use_terms and source_caveats, so this is noted rather than faulted."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "total_size_bytes",
+      "issue": "Omitted despite the bundle's '23 Tb' waveform figure. Correctly omitted given the Tb/TB ambiguity flagged in source_caveats, and the figure is preserved in prose; noted for completeness only."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "source_caveats",
+      "issue": "The final sentence documents the phase-2 projection decision (which slots CoreDataset lacks). This is process commentary about record construction rather than commentary on the evidence behind sibling slot values, which is what the slot declares."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets[]",
+      "issue": "DataSubset requires only `id`, satisfied. But both subsets set is_data_split/is_subpopulation as booleans while the 'current release' subset is arguably neither a split nor a subpopulation but a temporal release state; the flags assert a classification the bundle does not make."
+    }
+  ],
+  "summary": "Both records are substantially grounded in the declared bundle and the two size-figure conflicts (45K vs 50K admissions; 100,000 patients vs admissions) are correctly surfaced rather than silently reconciled. Two high-severity shape defects recur in both records: free-prose values in the enum-constrained data_collectors[].role, and a constructed reviewing_organization ('CHoRUS consortium Ethics pillar') that the bundle never names as a review body. A recurring medium-severity pattern is inference asserted through structured fields while the accompanying source_caveats concedes the inference — five leadership-team members encoded as principal_investigator, at_risk_groups_included set true from PICU/NICU presence, CTP-deid classified as a de-identification tool from its repository name, and B2AI_SUBSTRATE:37 assigned to OMOP instances whose physical substrate is never described. One internal inconsistency: acquisition_methods.was_directly_observed=true against direct_collection.is_direct=false on the same underlying fact. Remaining findings are low-severity: minted person/organization URIs, a faithfully-transcribed but non-resolvable mailto identifier, a narrative value in the scalar status slot, and process commentary in the core record's source_caveats. Core is a clean projection of full with no facts introduced; every finding in core has a counterpart in full."
+}

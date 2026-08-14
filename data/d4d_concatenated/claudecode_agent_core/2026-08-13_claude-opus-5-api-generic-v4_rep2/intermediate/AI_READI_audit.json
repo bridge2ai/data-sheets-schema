@@ -1,0 +1,119 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The slot `distributions` is not present in the 98-slot inventory supplied for the Dataset/CoreDataset class. The digest declares `distribution_formats` (DistributionFormat[]) and `file_collections` (FileCollection[]) but no `distributions` slot. Sub-keys used (`path`, `bytes`, `conforms_to`, `conforms_to_standard`, `notes`) do not match DistributionFormat's accepted keys (`access_urls`, `checksum`, `download_url`, `format`, `media_type`, `notes`, `source_caveats`). This is an invented slot and will fail validation unless the core schema declares it independently of the digest given."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "conforms_to_standard",
+      "issue": "The enum DataStandardEnum permits only DICOM, BIDS, OMOP_CDM, WFDB, OPEN_MHEALTH, ESDS, CDS, RO_CRATE, FHIR, OTHER. The value list is within range at the top level, but the same enum is reused inside `file_collections[*].conforms_to_standard` where `CDS` is repeatedly paired with domain standards — that is permitted — however no violation there. The genuine issue: the digest lists `CDS` as permitted, so this finding is withdrawn for the top-level slot. Flagging instead that `conforms_to_standard` is populated with seven terms while `conforms_to` prose describes the same set, which is the intended paired usage and is correct."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Creator objects use `id` values that are ORCID URIs identical to the nested `principal_investigator.id`. The Creator class has no declared `name`; the digest shows Creator accepts `affiliations`, `credit_roles`, `notes`, `principal_investigator`, `source_caveats` plus `id`. Reusing the PI's ORCID as the Creator `id` conflates two entities that the schema models separately, and produces sixteen Creator objects whose only distinguishing content is the nested Person. The bundle names one organizational creator (\"AI-READI Consortium\", nameType Organizational) and separately lists overall officials with the role \"Study Principal Investigator\"; representing every overall official as a Creator is an inference beyond what the bundle states about authorship."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "funders",
+      "issue": "Two Grant objects are emitted for the same award (OT2OD032644) differing only in the RePORTER application URL used as `id`. These are not distinct grants; the bundle shows one core project number with two application records. Emitting both as separate Grant entities under one FundingMechanism misrepresents the count of grants, even though the source_caveats note explains the duplication."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections",
+      "issue": "The entry with id `https://doi.org/10.60775/fairhub.3#root-metadata` carries `file_count: 9`, a value the record's own `source_caveats` states was derived by arithmetic rather than read from the bundle. Deriving a count and placing it in a data slot, with the derivation disclosed only in a caveat, populates a factual field with an inference."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "notes",
+      "issue": "The `notes` slot carries substantive content that fitting structured slots would hold: the recommended 70/15/15 split description belongs in `splits` (Splits[]), and the statement about instance relationships and participant-identifier linkage belongs in `relationships` (Relationships[]). Both slots exist in the inventory and were populated in the full record but omitted from core, with the content displaced into notes. The slot description states notes is for residual content only, after every fitting slot is used."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "subsets",
+      "issue": "Clearly supported omission. The bundle's README split table gives per-partition counts by race/ethnicity, sex, diabetes status and mean age for train/val/test. The full record represents these as three DataSubset objects with `is_data_split: true`. The core record drops `subsets` and `splits` entirely, losing the recommended-split structure that the bundle documents in detail."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "relationships",
+      "issue": "Clearly supported omission. The healthsheet composition Q8 explicitly answers the question about relationships between instances (all instances part of the same prospective data generation project; one visit per participant). The full record populates `relationships`; core omits the slot and relegates the content to `notes`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "citation",
+      "issue": "Supported omission. The bundle gives an explicit recommended citation (\"AI-READI Consortium. (2025). Flagship Dataset of Type 2 Diabetes from the AI-READI Project (3.0.0) [Data set]. FAIRhub. https://doi.org/10.60775/fairhub.3\") in the RO-Crate associatedPublication list. The full record populates `citation`; the core record omits it without explanation, though `citation` is a scalar string slot present in the inventory."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "total_file_count / total_size_bytes",
+      "issue": "Supported omission. The bundle states 356,343 files and 3,815,969,779,678 bytes directly in the FAIRhub API payload. The full record populates both scalars; the core record omits them while retaining the same figures embedded in prose within `description` and per-directory `bytes` values in `distributions`."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license",
+      "issue": "The scalar `license` slot holds \"AI-READI custom license v2.0\", which is the rightsName from FAIRhub metadata rather than an identifier. The v4 rule directs scalar slots to carry the identifier of the thing referred to; the licence has a stable DOI (10.5281/zenodo.17555036) recorded elsewhere in the record. The chosen value is a name, not a reference."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[0].data_topic",
+      "issue": "`data_topic` is set to B2AI_TOPIC:43 (Diabetes) only. The dataset spans modalities for which the vocabulary has fitting terms the bundle plainly supports — Ophthalmic Imaging (24), Waveform (37), mHealth (18), Glucose Monitoring (38), Activity Monitoring (39), Survey (31), Environment (11). The slot is single-valued per the digest, so only one term can be carried; noting that `data_substrate` is left unpopulated despite the bundle supporting several substrate terms (DICOM=11, Waveform Data=49, Comma-separated values=6, JSON=20)."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "Value `restricted` is chosen by the record's own reasoning about gated access, while the only explicit confidentiality statement in the bundle is the RO-Crate's \"HL7:2N (normal)\". The source_caveats discloses this, but the populated enum value is an interpretation rather than a transcription; the bundle does not map HL7:2N onto the schema's three-term enum."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license_and_use_terms.data_use_permission",
+      "issue": "Value `disease_specific_research` is a reasonable reading of the self-attestation requirement (\"use the data only for type 2 diabetes related research\"), but FAIRhub's own datasetConsent block sets consentResearchType to false and consentNoncommercial to false, and the licence grants use \"for research, commercial and non-commercial purposes\". The enum selection resolves a tension the bundle leaves open without flagging it in source_caveats at that slot."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[1].notes",
+      "issue": "Source commentary about conflicting institutional attribution is embedded in the Creator `notes` field. This is the correct field for such commentary per the digest (Creator accepts `notes` and `source_caveats`), but the content is a trust annotation about the sibling `affiliations` value and belongs in `source_caveats` rather than `notes` under the slot descriptions given."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_governance.committee_name",
+      "issue": "\"AI-READI Data Access Committee\" is asserted as a committee name. The BMJ Open protocol refers to \"the Data Access Committee\" developing controlled-access requirements; the RO-Crate names \"AI-READI Consortium\" as dataGovernanceCommittee. The concatenated form \"AI-READI Data Access Committee\" appears in neither source verbatim."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "Set to false. The bundle supports this for minors, prisoners and pregnant individuals (all excluded), but the IRB protocol section 2.5 checkboxes are unfilled and the protocol form is a partly blank template. The boolean is an inference from exclusion criteria rather than a statement the bundle makes."
+    },
+    {
+      "severity": "info",
+      "record": "core",
+      "slot": "header",
+      "issue": "Header block matches the mandated core template including the `# Sources:` line and `# Phase 4 reconciliation: completed`. Note that the latter asserts completion of a phase that, at audit time, has not run."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "source_caveats",
+      "issue": "The eleven-item source_caveats block is well-formed trust annotation and correctly excludes dataset content. No defect; recorded to confirm the conflicting-evidence rule was applied rather than silently resolved."
+    }
+  ],
+  "summary": "Two high-severity structural defects and a cluster of medium-severity representation issues. (1) The core record's `distributions` slot is not declared in the supplied schema digest; its sub-keys match neither DistributionFormat nor FileCollection, and it will fail CoreDataset validation unless the core schema independently declares it. This is the single blocking finding. (2) The core record omits three slots the bundle clearly supports and the full record populates — `subsets`, `relationships`, `splits` — displacing their content into `notes`, contrary to the notes slot's stated residual-only role; `citation`, `total_file_count` and `total_size_bytes` are likewise dropped without cause. (3) Sixteen Creator objects are minted from the bundle's list of study Principal Investigators, reusing each PI's ORCID as the Creator id and nesting the same person as `principal_investigator`; the bundle names exactly one organizational creator and describes the others as overall officials, so this over-generates entities in a multivalued slot. (4) Two Grant objects are emitted for one award (OT2OD032644) differing only in RePORTER application URL. (5) One `file_count` (9, root metadata) is arithmetic-derived rather than sourced, disclosed only in a caveat. Lower-severity items concern scalar `license` holding a name where a DOI exists, three enum selections (`confidentiality_level`, `data_use_permission`, `at_risk_groups_included`) that resolve genuine source ambiguity by interpretation, an unsourced committee name, an unpopulated `data_substrate` despite fitting vocabulary terms, and one trust annotation placed in `notes` rather than `source_caveats`. The record is otherwise strongly grounded: the eleven-item top-level `source_caveats` block correctly surfaces source conflicts rather than silently choosing between them, dual-tier sensitivity is modelled as two SensitiveElement objects rather than collapsed, and no factual content appears traceable outside the declared bundle."
+}
