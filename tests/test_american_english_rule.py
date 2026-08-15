@@ -13,7 +13,9 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PLAYBOOK = ROOT / ".claude/commands/d4d-full-core.md"
+#: The rules live in one file since #563; before that they were inside
+#: d4d-full-core.md, where /d4d-agent could not see them.
+PLAYBOOK = ROOT / ".claude/commands/d4d-uniform-rules.md"
 PROMPTS = ROOT / "src/download/prompts"
 
 
@@ -28,9 +30,10 @@ class TestTheRuleIsStated(unittest.TestCase):
     def test_it_sits_among_the_uniform_decision_rules(self):
         """Not in a section a run might skip. The uniform rules are the ones
         the playbook says to enforce whether or not a prompt file was used."""
+        # The rules are a file of their own since #563, so the section is the
+        # file below its heading rather than a span between two headings.
         start = self.text.index("Uniform decision rules")
-        end = self.text.index("### Recording the condition")
-        self.assertIn("American English", self.text[start:end])
+        self.assertIn("American English", self.text[start:])
 
     def test_the_three_carve_outs_are_present(self):
         """Without them the rule instructs a run to corrupt evidence — the

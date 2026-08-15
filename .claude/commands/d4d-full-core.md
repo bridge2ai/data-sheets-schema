@@ -201,75 +201,9 @@ the record; do not create new ones.
 
 ### Uniform decision rules (all conditions, all projects)
 
-These are part of the method rather than tuning, because each applies identically
-to every project. Enforce them whether or not a prompt file was used to launch:
-
-- Populate a slot only where the declared bundle supports it. **Prefer omission
-  over inference:** an absent slot is a correct answer when the evidence is
-  absent, and a plausible guess is not.
-- Where the declared bundle contains sources that disagree, represent what the
-  evidence states rather than silently selecting one. Do not merge distinct
-  entities into a single claim.
-- `Dataset` admits one referent. Choose the one the declared bundle best
-  supports, state that choice in the reconciliation report, and hold to it
-  consistently across both records.
-- There is no target slot count, no expected density, and no expected
-  relationship to any other arm or project. Apply your own judgment about what
-  the evidence supports.
-- **Write an identifier as a CURIE wherever a declared prefix exists, not as a
-  URL.** `ROR:01an7q238`, not `https://ror.org/01an7q238`; `ORCID:0000-0002-…`,
-  not the orcid.org URL; `doi:10.13026/…`, not `https://doi.org/…`. The two
-  expand to the same IRI, and the CURIE says which namespace the identifier
-  belongs to instead of leaving a reader to infer it from a hostname.
-
-  **Where no prefix is declared, a resolvable URL is the correct answer and an
-  invented prefix is not.** Do not mint `b2ai-voice:` or similar to satisfy
-  this rule — the schema's declared prefixes are the whole list, and a CURIE on
-  an undeclared prefix resolves to nothing while the URL at least resolves
-  (#531). Check the schema's `prefixes:` block rather than guessing.
-
-  This applies to identifier slots — those whose declared range is
-  `uriorcurie` — and never to prose. A URL inside a sentence or a citation is
-  text, not an identifier, and must be left exactly as written.
-
-- **An identifier is a fact and comes from the evidence.** Take it from the
-  declared bundle or omit it; do not supply an identifier you recognise but the
-  bundle does not state. A correct identifier the evidence does not contain is
-  still an unsupported claim, and to a reader who was not present it is
-  indistinguishable from a wrong one. Naming an organisation the bundle names is
-  grounded; adding that organisation's ROR from your own knowledge is not — the
-  2026-08-13 arm did exactly this, supplying RORs for institutions the bundle
-  names only in prose (#547). `grounding.absent` in the provenance record counts
-  them.
-
-- **Where something needs an identifier and the bundle supplies none, hang it
-  off one the bundle does supply** — a fragment on the identifier of the thing
-  it is part of, `doi:10.60775/fairhub.3#split-train`, rather than a new
-  namespace (#531). A person is identified by an ORCID and an organisation by a
-  ROR; **a fragment appended to an organisation's ROR does not identify a
-  person**, it asserts something false about that organisation.
-
-- **Write generated prose in American English** — `program`, `organization`,
-  `analyze`, `license`, `center`, `labeling`, `enrollment`. This is house style
-  for the text *you* compose, and it applies to identifiers you mint as well as
-  to descriptions.
-
-  Three carve-outs, and they are not optional:
-
-  - **Quoted source text keeps its original spelling.** Changing a quotation to
-    match house style corrupts evidence, which is the one thing the provenance
-    guard exists to prevent. The bundles contain `licence` 13 times and
-    `programme` 6.
-  - **Proper nouns keep their spelling** — "Wellcome Trust Sanger Centre",
-    "Medical Research Council Programme Grant". A name is not prose.
-  - **Identifiers copied from a source keep the source's spelling.** An id you
-    take from a crate or a DOI is a token, not a sentence. Only ids *you* mint
-    follow house style.
-
-The rule about there being no target slot count is the load-bearing one: it is
-what makes a slot count an observation rather than a target. Named rather than
-referred to by position, so inserting a rule cannot silently point this sentence
-at a different one.
+**Read `.claude/commands/d4d-uniform-rules.md` and enforce every rule in it.**
+It is the single copy; this section deliberately does not restate them, because
+a second copy is what #563 was filed about.
 
 ### Recording the condition
 
@@ -498,8 +432,51 @@ identical slot and proves consistency across the pair.
    ```
    Validator warnings mark related content that still requires the semantic
    review in step 4; warnings are not evidence that review occurred.
-6. Re-run schema and term validation for both records.
-7. Write `{PROJECT}_reconciliation.md` with separate Phase 3 and Phase 4
+6. **Check the identifiers against the bundle, and the report against the
+   record.** The API path runs both automatically at the end of every run; this
+   path ran neither, so the arm that reads the rules was the arm that did not
+   verify them (#563).
+   ```bash
+   poetry run python -c "
+   from pathlib import Path
+   from data_sheets_schema.grounding import check_run
+   from data_sheets_schema.identifiers import uriorcurie_slots
+   r = check_run(Path('<full_file>'), Path('<core_file>'), Path('<bundle>'),
+                 uriorcurie_slots())
+   if not r.get('checked'):
+       print('NOT CHECKED:', r['reason'])
+   else:
+       print(r['distinct'])
+       for f in {(x['kind'], x['identifier']) for x in r['findings']}:
+           print(*f)"
+   ```
+   Any identifier reported `absent` is one this record states and the bundle
+   does not (#547). Correct it or remove it — a correct identifier the evidence
+   does not contain is still an unsupported claim. `minted_fragment` is fine:
+   the base is attested and the fragment is ours.
+
+   After writing the reconciliation report in step 8, check its claims against
+   the record you actually produced:
+   ```bash
+   poetry run python -c "
+   from pathlib import Path
+   from data_sheets_schema.report_claims import check_report, declared_slots
+   import yaml
+   full = yaml.safe_load(Path('<full_file>').read_text())
+   core = yaml.safe_load(Path('<core_file>').read_text())
+   out = check_report(Path('<report_file>'), full, core, declared_slots())
+   [print(f) for f in out['findings']]"
+   ```
+   Findings are printed once per identifier, not once per slot that repeats
+   it: VOICE rep1 has 19 ungrounded identifiers across 78 occurrences, and the
+   number to act on is 19.
+
+   `removal_not_performed` means the report says a slot was removed and it is
+   still there; `false_schema_claim` means the report says a slot is not
+   declared and it is. Both are decidable, and in the 2026-08-13 API arm every
+   record that emitted a `distributions` block claimed to have removed it (#546).
+7. Re-run schema and term validation for both records.
+8. Write `{PROJECT}_reconciliation.md` with separate Phase 3 and Phase 4
    sections: source/provenance findings, schema-derived shared-slot count,
    corrections, related-content mapping and review, files changed, all commands,
    and final results. If nothing diverged, say so explicitly.

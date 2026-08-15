@@ -128,7 +128,11 @@ class TestPlaybooksAreNotFabricatedForOldRuns(unittest.TestCase):
         if not self.BUNDLE.exists():
             self.skipTest("bundles not present")
         d = self._record("live", input_bundle=self.BUNDLE, input_verified=True)
-        self.assertEqual(3, len(d["playbooks"]["files"]))
+        # Derived, not restated: a literal 3 broke when #563 made the uniform
+        # rules a fourth playbook, failing a test about fabrication for a
+        # reason that had nothing to do with fabrication.
+        from data_sheets_schema.provenance import AGENT_PLAYBOOKS
+        self.assertEqual(len(AGENT_PLAYBOOKS), len(d["playbooks"]["files"]))
 
     def test_a_reconstructed_record_does_not(self):
         d = self._record("reconstructed")

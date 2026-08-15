@@ -8,6 +8,13 @@ model: inherit
 color: yellow
 ---
 
+
+> **The uniform decision rules are in `.claude/commands/d4d-uniform-rules.md`.**
+> Read them with this file. The evidence boundary and the rule that an
+> identifier must come from the evidence are the same principle applied to two
+> kinds of value, and enforcing one without the other is how a run supplied
+> correct RORs its bundle never stated (#547, #563).
+
 # D4D Provenance Guard
 
 Apply this policy to every D4D generation run, regardless of whether the runtime
