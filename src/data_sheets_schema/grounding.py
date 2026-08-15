@@ -98,7 +98,7 @@ def ground(value: str, bundle: str) -> tuple[str, str, str] | None:
     return name, bare, "absent"
 
 
-def person_fragment_on_org(path: str, value: str) -> bool:
+def person_fragment_on_org(value: str) -> bool:
     """A local fragment appended to an organisational identifier.
 
     Not decidable from the identifier alone — `#split-train` on a DOI is fine —
@@ -120,23 +120,36 @@ def check_record(record: dict[str, Any], bundle_text: str,
     counts = {"grounded": 0, "minted_fragment": 0, "absent": 0}
     findings: list[dict[str, str]] = []
     lowered = bundle_text.lower()
-    seen: set[tuple[str, str]] = set()
+    seen: set[tuple[str, ...]] = set()
     for path, _slot, value in walk_identifiers(record, slots):
         result = ground(value, lowered)
         if not result:
             continue
         name, bare, status = result
         counts[status] += 1
-        if status == "absent" and (path, bare) not in seen:
-            seen.add((path, bare))
+        if status == "absent" and (path, bare, "abs") not in seen:
+            seen.add((path, bare, "abs"))
             findings.append({"kind": "identifier_not_in_bundle",
                              "authority": name, "identifier": bare,
                              "path": path})
-        if person_fragment_on_org(path, value):
+        if person_fragment_on_org(value) and (path, bare, "frag") not in seen:
+            seen.add((path, bare, "frag"))
             findings.append({"kind": "fragment_on_org_identifier",
                              "authority": name, "identifier": bare,
                              "path": path})
-    return {"checked": True, "counts": counts, "findings": findings}
+    # Occurrences and distinct identifiers are both reported. The first says
+    # how much of the record rests on unattested values; the second says how
+    # many facts are at issue. Reporting only occurrences turned 7 identifiers
+    # that appear in both records into "14", and reporting only distinct hides
+    # that one bad id can carry 20 slots.
+    distinct = {"grounded": set(), "minted_fragment": set(), "absent": set()}
+    for path, _slot, value in walk_identifiers(record, slots):
+        r = ground(value, lowered)
+        if r:
+            distinct[r[2]].add(r[1])
+    return {"checked": True, "counts": counts,
+            "distinct": {k: len(v) for k, v in distinct.items()},
+            "findings": findings}
 
 
 def iter_external(record: dict[str, Any], slots: set[str]
@@ -163,6 +176,11 @@ def check_run(full: Path, core: Path, bundle: Path,
                            "counts": {"grounded": 0, "minted_fragment": 0,
                                       "absent": 0},
                            "findings": []}
+    # Distinct is taken over the *pair*, not summed per record: the same
+    # identifier in both files is one identifier, and summing made VOICE rep1's
+    # 7 organisational fragments read as 14.
+    pooled: dict[str, set] = {"grounded": set(), "minted_fragment": set(),
+                              "absent": set()}
     for which, path in (("full", full), ("core", core)):
         if not path.exists():
             continue
@@ -172,4 +190,11 @@ def check_run(full: Path, core: Path, bundle: Path,
             out["counts"][key] += n
         for f in r["findings"]:
             out["findings"].append({**f, "record": which})
+        doc_ids = doc
+        from data_sheets_schema.identifiers import walk_identifiers
+        for _p, _s, value in walk_identifiers(doc_ids, slots):
+            g = ground(value, text.lower())
+            if g:
+                pooled[g[2]].add(g[1])
+    out["distinct"] = {k: len(v) for k, v in pooled.items()}
     return out

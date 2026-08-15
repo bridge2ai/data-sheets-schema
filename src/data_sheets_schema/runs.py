@@ -1196,7 +1196,10 @@ def grounding_status(method: str, label: str, project: str,
         return GROUNDED_UNRECORDED, 0
     if not block.get("checked"):
         return GROUNDED_NOT_RUN, 0
-    n = int((block.get("counts") or {}).get("absent") or 0)
+    # Distinct, not occurrences: the number a reader wants is how many facts
+    # rest on nothing, not how many slots repeat them.
+    counts = block.get("distinct") or block.get("counts") or {}
+    n = int(counts.get("absent") or 0)
     return (GROUNDED_GAPS if n else GROUNDED_ALL), n
 
 

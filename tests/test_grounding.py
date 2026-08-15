@@ -83,19 +83,26 @@ class OrgFragmentTest(unittest.TestCase):
     """A ROR names an organisation, so a person fragment on one is wrong."""
 
     def test_person_fragment_on_a_ror(self):
-        self.assertTrue(person_fragment_on_org("$.creators[].id",
-                                               "ROR:02r109517#rameau"))
+        self.assertTrue(person_fragment_on_org("ROR:02r109517#rameau"))
 
     def test_a_plain_ror_is_fine(self):
-        self.assertFalse(person_fragment_on_org("$.x", "ROR:02r109517"))
+        self.assertFalse(person_fragment_on_org("ROR:02r109517"))
 
     def test_a_fragment_on_a_doi_is_fine(self):
         """`#split-train` on a dataset DOI names a part of that dataset."""
         self.assertFalse(person_fragment_on_org(
-            "$.x", "doi:10.60775/fairhub.3#split-train"))
+            "doi:10.60775/fairhub.3#split-train"))
 
 
 class RecordTest(unittest.TestCase):
+
+    def test_distinct_and_occurrence_counts_are_both_reported(self):
+        """One bad identifier in twenty slots is one fact and twenty slots."""
+        record = {"id": "ROR:032db5x82",
+                  "creators": [{"id": "ROR:032db5x82"}, {"id": "ROR:032db5x82"}]}
+        out = check_record(record, "nothing here", SLOTS)
+        self.assertEqual(out["counts"]["absent"], 3)
+        self.assertEqual(out["distinct"]["absent"], 1)
 
     def test_counts_and_findings(self):
         record = {"id": "ROR:0153tk833",
@@ -137,8 +144,11 @@ class CorpusTest(unittest.TestCase):
     def test_voice_rep1_supplied_rors_its_bundle_never_stated(self):
         seen = self._distinct("VOICE", 1)
         absent = [b for (a, b), s in seen.items() if s == "absent"]
-        self.assertTrue(absent, "this is the record #547 was filed for")
+        # #547's figures exactly: 5 grounded, 0 minted, 19 absent.
+        self.assertEqual(len(absent), 19)
         self.assertEqual(len([1 for s in seen.values() if s == "grounded"]), 5)
+        self.assertEqual(len([1 for s in seen.values()
+                              if s == "minted_fragment"]), 0)
 
     def test_cm4ai_rep3_has_the_same_defect(self):
         """#547 measured one replicate per project and did not see this one.
@@ -152,7 +162,12 @@ class CorpusTest(unittest.TestCase):
 
     def test_voice_rep1_hangs_people_off_an_institutional_ror(self):
         """`ROR:02r109517#rameau` asserts "Weill Cornell Medicine, fragment
-        rameau" and is used to identify a person. #547 lists six; there are 14.
+        rameau" and is used to identify a person. #547 lists six examples;
+        there are seven distinct identifiers, each appearing in both records.
+
+        Counted distinctly on purpose. The occurrence count is 14, and
+        reporting that as "14 organisational fragments" would double every
+        figure — which the first version of this test did.
         """
         from data_sheets_schema.grounding import check_run
         from data_sheets_schema.identifiers import uriorcurie_slots
@@ -164,9 +179,12 @@ class CorpusTest(unittest.TestCase):
             self.BASE / "claudecode_agent" / label / "VOICE_d4d.yaml", core,
             Path("data/preprocessed/concatenated/VOICE_preprocessed.txt"),
             uriorcurie_slots())
-        n = sum(1 for f in out["findings"]
-                if f["kind"] == "fragment_on_org_identifier")
-        self.assertEqual(n, 14)
+        frags = {f["identifier"] for f in out["findings"]
+                 if f["kind"] == "fragment_on_org_identifier"}
+        self.assertEqual(len(frags), 7)
+        occurrences = sum(1 for f in out["findings"]
+                          if f["kind"] == "fragment_on_org_identifier")
+        self.assertEqual(occurrences, 14, "seven identifiers, in both records")
 
     def test_chorus_carries_no_external_identifiers_at_all(self):
         self.assertEqual(self._distinct("CHORUS", 1), {})
