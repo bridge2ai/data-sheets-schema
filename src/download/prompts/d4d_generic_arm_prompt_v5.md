@@ -31,7 +31,9 @@ from.
   rules already say to prefer omission over inference for facts; nothing said
   that an identifier is one.
 - **A minted identifier hangs off an attested one.** #531 found one namespace
-  written five ways and ~12,000 minted ids across the corpus, invented because
+  written five ways — 1,094 VOICE values across five spellings. Counting the
+  same way across every project while implementing this brought the total to
+  roughly 12,000 minted ids, invented because
   the schema never offered a prefix. Declaring all the spellings would make
   every value valid and join nothing. The remedy that needs no new namespace is
   the pattern the corpus already contains and the grounding check already
