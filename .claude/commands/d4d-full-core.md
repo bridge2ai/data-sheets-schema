@@ -443,7 +443,12 @@ identical slot and proves consistency across the pair.
    from data_sheets_schema.identifiers import uriorcurie_slots
    r = check_run(Path('<full_file>'), Path('<core_file>'), Path('<bundle>'),
                  uriorcurie_slots())
-   print(r['distinct']); [print(f) for f in r['findings']]"
+   if not r.get('checked'):
+       print('NOT CHECKED:', r['reason'])
+   else:
+       print(r['distinct'])
+       for f in {(x['kind'], x['identifier']) for x in r['findings']}:
+           print(*f)"
    ```
    Any identifier reported `absent` is one this record states and the bundle
    does not (#547). Correct it or remove it — a correct identifier the evidence
@@ -462,6 +467,10 @@ identical slot and proves consistency across the pair.
    out = check_report(Path('<report_file>'), full, core, declared_slots())
    [print(f) for f in out['findings']]"
    ```
+   Findings are printed once per identifier, not once per slot that repeats
+   it: VOICE rep1 has 19 ungrounded identifiers across 78 occurrences, and the
+   number to act on is 19.
+
    `removal_not_performed` means the report says a slot was removed and it is
    still there; `false_schema_claim` means the report says a slot is not
    declared and it is. Both are decidable, and in the 2026-08-13 API arm every
