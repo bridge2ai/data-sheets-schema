@@ -167,7 +167,21 @@ def repo_relative(path: Path | str) -> str:
         return str(resolved)
 
 
-def playbook_facts(paths: tuple[Path, ...] = AGENT_PLAYBOOKS) -> dict[str, Any]:
+#: Runtimes that open the playbooks for themselves. The agentic path does,
+#: because the launch instruction's first lines tell it to; `d4d api run`
+#: renders a condition prompt and sends nothing else (#545).
+PLAYBOOK_READING_RUNTIMES = ("claude code", "codex cli")
+
+
+def runtime_reads_playbooks(runtime: str | None) -> bool | None:
+    """Does this runtime open the playbook files? None when unstated."""
+    if not runtime:
+        return None
+    return any(r in runtime.lower() for r in PLAYBOOK_READING_RUNTIMES)
+
+
+def playbook_facts(paths: tuple[Path, ...] = AGENT_PLAYBOOKS,
+                   consumed: bool | None = None) -> dict[str, Any]:
     """Hash the instruction files an agentic run follows.
 
     The launch prompt is sent to the agent; these it opens itself, because the
@@ -179,14 +193,34 @@ def playbook_facts(paths: tuple[Path, ...] = AGENT_PLAYBOOKS) -> dict[str, Any]:
     Recorded for every run, not just agentic ones: an API run does not read
     them, and a record showing they were unchanged is how you can later tell
     that it did not.
+
+    ``consumed`` says which case this run is, so a reader does not have to
+    already know that the API path skips them (#545). Without it the block is
+    three files with hashes and no statement about their role, and the obvious
+    reading — that the run followed them — is wrong for every API record. The
+    four uniform decision rules reach the API path only because the *condition
+    prompt* carries its own copy; the two added to the playbook since (#502's
+    American English, and the CURIE rule) reach it not at all.
+
+    None means the runtime was not stated, which is a third case and not the
+    same as False.
     """
-    out = []
+    out: list[dict[str, Any]] = []
     for p in paths:
         p = Path(p)
         out.append({"path": repo_relative(p), "sha256": _sha256(p),
                     "bytes": p.stat().st_size if p.exists() else None,
                     "exists": p.exists()})
-    return {"hash_algorithm": PROMPT_HASH, "files": out}
+    block: dict[str, Any] = {"hash_algorithm": PROMPT_HASH, "files": out}
+    if consumed is not None:
+        block["consumed"] = consumed
+        block["consumed_basis"] = (
+            "the runtime opens these files itself, as the launch instruction "
+            "directs" if consumed else
+            "this runtime renders a condition prompt and sends nothing else, "
+            "so these were not read; they are hashed so an unchanged hash "
+            "shows that (#545)")
+    return block
 
 
 def prompt_facts(prompt_paths: list[Path] | None,
@@ -927,7 +961,9 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     # docstring forbids, in the same shape as hashing a since-refreshed bundle
     # and attributing it to an April run. Raised reviewing #420.
     if mode == "live":
-        playbooks = playbook_facts()
+        runtime = (prompt_request_spec or {}).get("runtime")
+        playbooks = playbook_facts(
+            consumed=runtime_reads_playbooks(runtime))
     else:
         playbooks = None
         unrecoverable.append({
