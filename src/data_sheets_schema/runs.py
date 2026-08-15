@@ -1174,6 +1174,7 @@ def bundle_drift_detail(method: str, label: str, project: str,
 
 CLAIMS_CLEAN, CLAIMS_CONTRADICTED = "clean", "contradicted"
 CLAIMS_NOT_RUN, CLAIMS_UNRECORDED = "not_run", "unrecorded"
+CLAIMS_STALE = "stale"
 
 
 def report_claim_status(method: str, label: str, project: str,
@@ -1201,7 +1202,10 @@ def report_claim_status(method: str, label: str, project: str,
             continue
         f = Path(entry["path"])
         if not f.exists() or _md5(f) != entry["md5"]:
-            return CLAIMS_NOT_RUN, 0      # the report was edited after checking
+            # Distinct from `not_run`, as PAIR_STALE is: a checker that could
+            # not run and a verdict about bytes that have changed are different
+            # states, and the pair check already draws that line.
+            return CLAIMS_STALE, 0
     n = len(block.get("findings") or [])
     return (CLAIMS_CONTRADICTED if n else CLAIMS_CLEAN), n
 

@@ -369,7 +369,17 @@ def check_report(report: Path, full: dict, core: dict,
                                    "it is declared on " + ", ".join(holders)),
                         "claim": claim.strip()[:240]})
 
-    return {"checked": True, "findings": findings, "claims_checked": claims,
+    # One claim can be stated twice — a summary table row and the prose that
+    # elaborates it. Reporting it twice inflates the count a reader uses to
+    # judge how bad a report is.
+    seen, unique = set(), []
+    for f in findings:
+        key = (f["kind"], f.get("slot"), f.get("record"))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(f)
+    return {"checked": True, "findings": unique, "claims_checked": claims,
             # Named rather than dropped: a claim naming no slot in backticks
             # cannot be checked, and a reader should know how many there were.
             "claims_unnamed": unnamed}

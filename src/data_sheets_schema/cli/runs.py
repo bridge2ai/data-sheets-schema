@@ -609,8 +609,8 @@ def check_cmd(method, label, project, strict):
     # `distributions` block reported removing it, from the false premise that
     # the slot is not declared — and the blocks are still there.
     from data_sheets_schema.runs import (
-        CLAIMS_CLEAN, CLAIMS_CONTRADICTED, CLAIMS_NOT_RUN, CLAIMS_UNRECORDED,
-        report_claim_status,
+        CLAIMS_CLEAN, CLAIMS_CONTRADICTED, CLAIMS_NOT_RUN, CLAIMS_STALE,
+        CLAIMS_UNRECORDED, report_claim_status,
     )
     claims: collections.Counter = collections.Counter()
     contradicted: list[tuple[str, str, int]] = []
@@ -625,6 +625,7 @@ def check_cmd(method, label, project, strict):
                    f"report(s) assert something the record or the schema "
                    f"contradicts ({claims[CLAIMS_CLEAN]} clean, "
                    f"{claims[CLAIMS_NOT_RUN]} not checked, "
+                   f"{claims[CLAIMS_STALE]} stale, "
                    f"{claims[CLAIMS_UNRECORDED]} predate the check):")
         for project, label, n in sorted(contradicted)[:8]:
             click.echo(f"     {project:9} {label:44} {n} claim(s)")

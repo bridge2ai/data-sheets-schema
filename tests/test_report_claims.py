@@ -29,10 +29,11 @@ DECLARED = {"Dataset": {"file_collections", "distributions", "keywords"},
 class Harness(unittest.TestCase):
     def check(self, markdown, full=None, core=None):
         import tempfile
-        d = Path(tempfile.mkdtemp())
-        (d / "r.md").write_text(markdown, encoding="utf-8")
-        self.addCleanup(lambda: None)
-        return check_report(d / "r.md", full or {}, core or {}, DECLARED)
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        path = Path(tmp.name) / "r.md"
+        path.write_text(markdown, encoding="utf-8")
+        return check_report(path, full or {}, core or {}, DECLARED)
 
     def kinds(self, markdown, **kw):
         return [(f["kind"], f["slot"]) for f in self.check(markdown, **kw)["findings"]]
