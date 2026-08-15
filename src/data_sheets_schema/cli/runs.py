@@ -603,6 +603,37 @@ def check_cmd(method, label, project, strict):
         if st == PAIR_DIVERGENT:
             divergent.append((r["project"], r["label"], errs))
 
+    # External identifiers checked against the bundle they were read from
+    # (#547). The hardest fabrication class: right answer, no evidence. VOICE
+    # rep1's RORs are all correct and none of them is in its bundle.
+    from data_sheets_schema.runs import (
+        GROUNDED_ALL, GROUNDED_GAPS, GROUNDED_NOT_RUN, GROUNDED_UNRECORDED,
+        grounding_status,
+    )
+    grounds: collections.Counter = collections.Counter()
+    ungrounded: list[tuple[str, str, int]] = []
+    for r in rows:
+        st, n = grounding_status(r["method"], r["label"], r["project"])
+        grounds[st] += 1
+        if st == GROUNDED_GAPS:
+            ungrounded.append((r["project"], r["label"], n))
+
+    if grounds[GROUNDED_GAPS]:
+        click.echo(f"\nⓘ  {grounds[GROUNDED_GAPS]} record(s) carry an external "
+                   f"identifier that is not in the bundle they read "
+                   f"({grounds[GROUNDED_ALL]} fully grounded, "
+                   f"{grounds[GROUNDED_NOT_RUN]} not checked, "
+                   f"{grounds[GROUNDED_UNRECORDED]} predate the check):")
+        for project, label, n in sorted(ungrounded)[:8]:
+            click.echo(f"     {project:9} {label:44} {n} identifier(s)")
+        if len(ungrounded) > 8:
+            click.echo(f"     … and {len(ungrounded) - 8} more")
+        click.echo("   These are generally correct values. Correct is not the "
+                   "same as attested, and only the bundle can tell them apart.")
+    elif grounds[GROUNDED_UNRECORDED]:
+        click.echo(f"\nⓘ  {grounds[GROUNDED_UNRECORDED]} record(s) predate the "
+                   "identifier-grounding check (#547).")
+
     # Reconciliation reports checked against the record and the schema (#546).
     # The report is what a reviewer reads instead of diffing YAML; nothing
     # checked it against either. In the v4 arm every record that emitted a

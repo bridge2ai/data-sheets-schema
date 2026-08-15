@@ -1241,6 +1241,30 @@ def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
     return out
 
 
+def grounding_block(spec: RunSpec) -> dict[str, Any] | None:
+    """Are this run's external identifiers in the bundle it read? (#547)
+
+    VOICE rep1 supplied 19 RORs that appear nowhere in its bundle. Every one is
+    correct — the run learned the institutions from the evidence and the
+    identifiers from memory. Right answer, no evidence, and no existing check
+    can see it: `linkml-validate` accepts any well-formed `uriorcurie`, and
+    `d4d runs identifiers` treats a resolvable IRI as the best possible
+    outcome.
+
+    Reported, never fatal, following #520.
+    """
+    try:
+        from data_sheets_schema.grounding import check_run
+        out = check_run(spec.full_path, spec.core_path, spec.bundle)
+    except Exception as exc:                                       # noqa: BLE001
+        return {"checked": False, "reason": str(exc)[:200]}
+    if out.get("checked"):
+        from data_sheets_schema.provenance import _md5
+        out["artifacts"] = {"bundle": {"path": str(spec.bundle),
+                                       "md5": _md5(spec.bundle)}}
+    return out
+
+
 REPAIR_SYSTEM = (
     "You repair the shape of Datasheets-for-Datasets records. The schema "
     "digest defines the required structure. The validator findings are the "
@@ -1972,6 +1996,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # earlier would describe bytes that no longer exist (#544).
     rec.data["pair_consistency"] = pair_consistency(spec)
     rec.data["report_claims"] = report_claims_block(spec)
+    rec.data["grounding"] = grounding_block(spec)
     rec.data["intermediates"] = _intermediates_block(spec)
 
     rec.write(spec.provenance_path)
