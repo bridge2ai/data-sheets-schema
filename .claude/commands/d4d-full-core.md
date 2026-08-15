@@ -232,6 +232,23 @@ to every project. Enforce them whether or not a prompt file was used to launch:
   `uriorcurie` — and never to prose. A URL inside a sentence or a citation is
   text, not an identifier, and must be left exactly as written.
 
+- **An identifier is a fact and comes from the evidence.** Take it from the
+  declared bundle or omit it; do not supply an identifier you recognise but the
+  bundle does not state. A correct identifier the evidence does not contain is
+  still an unsupported claim, and to a reader who was not present it is
+  indistinguishable from a wrong one. Naming an organisation the bundle names is
+  grounded; adding that organisation's ROR from your own knowledge is not — the
+  2026-08-13 arm did exactly this, supplying RORs for institutions the bundle
+  names only in prose (#547). `grounding.absent` in the provenance record counts
+  them.
+
+- **Where something needs an identifier and the bundle supplies none, hang it
+  off one the bundle does supply** — a fragment on the identifier of the thing
+  it is part of, `doi:10.60775/fairhub.3#split-train`, rather than a new
+  namespace (#531). A person is identified by an ORCID and an organisation by a
+  ROR; **a fragment appended to an organisation's ROR does not identify a
+  person**, it asserts something false about that organisation.
+
 - **Write generated prose in American English** — `program`, `organization`,
   `analyze`, `license`, `center`, `labeling`, `enrollment`. This is house style
   for the text *you* compose, and it applies to identifiers you mint as well as

@@ -66,58 +66,115 @@ class TestTheRecordSaysWhich(unittest.TestCase):
 class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
     """The duplication that caused this.
 
-    The four original rules are maintained byte-identically in the playbook and
-    in every condition prompt. That is the pattern #518 and #521 kept finding in
-    the build — one list of content, several hand-kept copies — and it diverged
-    the moment two rules were added to one copy only.
+    One list of decision rules, kept by hand in the playbook and in every
+    condition prompt. That is the pattern #518 and #521 kept finding in the
+    build, and it diverged the moment two rules were added to one copy only
+    (#545).
 
-    This does not forbid divergence; a rule may legitimately be
-    playbook-scope. It requires that any rule present in the playbook and
-    absent from the prompts is one somebody chose, by listing it here.
+    Until v5 the copies were byte-identical, so a text-prefix probe could check
+    correspondence. They no longer can be: the playbook cites issue numbers and
+    real identifiers, and the generic prompt may contain neither — a first draft
+    of the v5 block used a real dataset DOI as an example and
+    `test_no_dataset_identifiers` refused it, correctly.
+
+    So the correspondence is **declared** below rather than inferred from the
+    text. That is weaker than byte-identity and it is the honest weaker thing:
+    a table someone must edit beats a probe that silently stops matching.
     """
 
-    #: Rules the playbook carries that the condition prompts deliberately do
-    #: not, each with the reason. Emptying this list is the goal, and v5 is
-    #: where the two below are expected to move into the prompt (#547).
-    PLAYBOOK_ONLY = {
-        "American English": "#502 — added to the playbook to avoid rotating "
-                            "pins mid-arm; reaches the agentic path only",
-        "CURIE": "same, added this session; reaches the agentic path only",
+    #: rule → (a phrase only that rule has in the playbook,
+    #:         a phrase only that rule has in the current condition prompt)
+    SHARED_RULES = {
+        "prefer omission":
+            ("prefer omission", "prefer omission"),
+        "sources that disagree":
+            ("sources that disagree", "sources that disagree"),
+        "one referent":
+            ("admits one referent", "admits one referent"),
+        "no target count":
+            ("no target slot count", "no target slot count"),
+        "curie form":
+            ("as a CURIE", "as a CURIE"),
+        "identifier provenance":
+            ("comes from the evidence", "take it from the evidence"),
+        "minted fragment":
+            ("does not identify a person", "does not identify a person"),
+        "american english":
+            ("American English", "American English"),
     }
 
-    def _rule_bullets(self, text, start, end):
-        block = text[text.index(start):text.index(end)]
-        return [b.strip() for b in re.findall(r"^- (.+?)(?=\n- |\n\n)",
-                                              block, re.S | re.M)]
+    #: Rules the playbook carries that the condition prompts deliberately do
+    #: not, each with the reason. **Empty as of v5**, which is what this guard
+    #: was for: American English (#502) and CURIE form were playbook-only
+    #: because they were added mid-arm to avoid rotating a pin, and v5 is the
+    #: version boundary where they move into the prompt.
+    #:
+    #: Emptying it does not retire the guard. A rule added to the playbook
+    #: tomorrow, mid-arm, for the same good reason, belongs here again — with
+    #: its reason, so the divergence is a decision rather than a discovery.
+    PLAYBOOK_ONLY: dict[str, str] = {}
 
-    def test_every_playbook_only_rule_is_declared_here(self):
-        """A rule that reaches one path and not the other is a decision. If a
-        third appears without being listed, this fails and someone has to say
-        whether that was intended."""
+    CURRENT_PROMPT = "d4d_generic_arm_prompt_v5.md"
+
+    def _texts(self):
         playbook = PLAYBOOK.read_text(encoding="utf-8")
-        rules = self._rule_bullets(playbook, "### Uniform decision rules",
-                                   "### Recording the condition")
-        v4 = (PROMPTS / "d4d_generic_arm_prompt_v4.md").read_text(
-            encoding="utf-8")
-        undeclared = []
-        for rule in rules:
-            head = rule.split(".")[0][:60]
-            key = next((k for k in self.PLAYBOOK_ONLY if k in rule), None)
-            if key:
-                continue
-            # a shared rule: some distinctive phrase of it must appear in v4
-            probe = re.sub(r"[*`]", "", rule).split(".")[0][:40]
-            if probe and probe not in re.sub(r"[*`]", "", v4):
-                undeclared.append(head)
-        self.assertEqual(undeclared, [],
-                         "playbook rules absent from the v4 prompt and not "
-                         "declared as playbook-only")
+        prompt = (PROMPTS / self.CURRENT_PROMPT).read_text(encoding="utf-8")
+        return (re.sub(r"[*`\s]+", " ", playbook).lower(),
+                re.sub(r"[*`\s]+", " ", prompt).lower())
 
-    def test_the_declared_ones_really_are_absent_from_the_prompts(self):
-        """If a listed rule reaches the prompts after all, the entry is stale
-        and should be removed rather than left asserting a gap that closed."""
-        v4 = (PROMPTS / "d4d_generic_arm_prompt_v4.md").read_text(
-            encoding="utf-8")
+    def test_every_shared_rule_reaches_both(self):
+        playbook, prompt = self._texts()
+        missing = []
+        for name, (in_book, in_prompt) in self.SHARED_RULES.items():
+            if in_book.lower() not in playbook:
+                missing.append(f"{name}: absent from the playbook")
+            if in_prompt.lower() not in prompt:
+                missing.append(f"{name}: absent from {self.CURRENT_PROMPT}")
+        self.assertEqual(missing, [])
+
+    def test_the_playbook_has_no_rule_this_table_does_not_know(self):
+        """A rule added to the playbook and to no prompt is the original defect.
+
+        Counting bullets rather than matching their text: the count is what
+        catches an addition, and the table above is what says where it reaches.
+        """
+        text = PLAYBOOK.read_text(encoding="utf-8")
+        block = text[text.index("### Uniform decision rules"):
+                     text.index("### Recording the condition")]
+        bullets = re.findall(r"^- (.+?)(?=\n- |\n\n)", block, re.S | re.M)
+        self.assertEqual(
+            len(bullets), len(self.SHARED_RULES) + len(self.PLAYBOOK_ONLY),
+            "a uniform decision rule was added or removed; say in SHARED_RULES "
+            "or PLAYBOOK_ONLY where it reaches")
+
+    def test_the_declared_playbook_only_rules_really_are_absent(self):
+        """A stale entry asserts a gap that has closed."""
+        _playbook, prompt = self._texts()
         for key in self.PLAYBOOK_ONLY:
             with self.subTest(rule=key):
-                self.assertNotIn(key, v4)
+                self.assertNotIn(key.lower(), prompt)
+
+    def test_the_two_rules_v5_was_for_actually_reached_it(self):
+        """PLAYBOOK_ONLY is empty; this is what makes that mean something.
+
+        An empty declaration is satisfied both by "the gap closed" and by
+        "someone deleted the entries". This asserts the first.
+        """
+        block = (PROMPTS / self.CURRENT_PROMPT).read_text(encoding="utf-8")
+        block = block.split("--- ADDED IN v5 ---", 1)[1].split(
+            "--- END ADDED IN v5 ---", 1)[0]
+        self.assertIn("American English", block)
+        self.assertIn("CURIE", block)
+
+    def test_the_new_v5_rules_reached_the_playbook_too(self):
+        """The mirror direction, which nothing checked before.
+
+        This guard was built for rules that reach the agentic path and not the
+        API path. Two of v5's four arrived the other way round — written for the
+        prompt, out of #547 and #531 — and a rule the API arm follows while the
+        agentic arm does not is the same defect wearing the other shoe.
+        """
+        playbook, _prompt = self._texts()
+        for probe in ("comes from the evidence", "does not identify a person"):
+            with self.subTest(probe=probe):
+                self.assertIn(probe, playbook)
