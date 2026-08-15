@@ -403,9 +403,17 @@ class TestTheCLI(unittest.TestCase):
         self.prompt = Path("src/download/prompts/d4d_generic_arm_prompt.md")
         self.prompt.parent.mkdir(parents=True)
         self.prompt.write_text("# v1\n\n## Prompt body\nbody\n")
-        for name in ("_v2", "_v3", "_v4"):
-            p = self.prompt.with_name(f"d4d_generic_arm_prompt{name}.md")
-            p.write_text(f"# {name}\n\n## Prompt body\nbody\n")
+        # Derived from the condition registry, not restated. A hardcoded
+        # ("_v2", "_v3", "_v4") meant that adding generic_v5 left `check
+        # --strict` reporting a real file the fixture had not created, and two
+        # tests failed for a reason that had nothing to do with what they test.
+        # Same shape as #467, where a four-project literal silently excluded
+        # VOICE_PEDIATRIC.
+        from data_sheets_schema.api_runner import CONDITION_PROMPTS
+        for real in set(CONDITION_PROMPTS.values()):
+            here = self.prompt.with_name(real.name)
+            if not here.exists():
+                here.write_text(f"# {real.stem}\n\n## Prompt body\nbody\n")
         self.prompt.with_name("d4d_tuned_arm_prompt.md").write_text("# tuned\n")
 
 
