@@ -51,11 +51,50 @@ class TestTheRuleIsStated(unittest.TestCase):
 class TestItDidNotRedefineACondition(unittest.TestCase):
     """The reason it is in the playbook rather than the prompts."""
 
-    def test_no_condition_prompt_carries_the_rule(self):
+    #: The condition created *with* the rule, so it re-baselines nothing.
+    NEW_CONDITION = "d4d_generic_arm_prompt_v5.md"
+
+    def test_no_existing_condition_prompt_acquired_the_rule(self):
+        """#502's actual constraint, which v5 does not breach.
+
+        The rule went into the playbook rather than the prompts because adding
+        it to a prompt that had already been run would change what that
+        condition means for every record naming it, and require a pin rotation
+        mid-arm. That is still forbidden, and it is about *existing* conditions.
+
+        v5 carries the rule from birth (#545). No record names generic_v5 yet,
+        so nothing is re-baselined — which is exactly why a version boundary is
+        where a playbook-only rule is allowed to move.
+        """
         for path in sorted(PROMPTS.glob("d4d_*_arm_prompt*.md")):
+            if path.name == self.NEW_CONDITION:
+                continue
             with self.subTest(prompt=path.name):
                 self.assertNotIn("American English",
                                  path.read_text(encoding="utf-8"))
+
+    def test_the_new_condition_does_carry_it(self):
+        """Otherwise the exemption above is an unguarded hole rather than a
+        statement about one file."""
+        text = (PROMPTS / self.NEW_CONDITION).read_text(encoding="utf-8")
+        self.assertIn("American English", text)
+
+    def test_no_record_yet_names_the_new_condition(self):
+        """The premise of the exemption, asserted rather than assumed.
+
+        The moment a run is generated under generic_v5, this test should be
+        deleted — not because the rule changed, but because from then on the
+        prompt may not be edited at all, which is a stronger guarantee than
+        this one and is enforced by the pin.
+        """
+        import yaml
+        from data_sheets_schema.provenance import CONCAT_DIR
+        named = []
+        for rec in CONCAT_DIR.glob("*_core/*/*_provenance.yaml"):
+            data = yaml.safe_load(rec.read_text(encoding="utf-8")) or {}
+            if "generic_v5" in str(data.get("condition") or ""):
+                named.append(rec.parts[-2])
+        self.assertEqual(named, [])
 
     def test_every_pinned_prompt_is_still_at_its_pin(self):
         import subprocess
