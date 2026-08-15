@@ -299,9 +299,10 @@ intermediates:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 26
-  warnings: 0
+  errors: 12
+  warnings: 14
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.acquisition_methods[3].acquisition_details
@@ -313,30 +314,6 @@ pair_consistency:
     message: 'value differs: full=''Affiliations: University of Washington; University
       of Alabama at Birmingham; University of California, San Diego; Johns Hopkins
       University; Stanford University; Oregon Health & Sc'
-  - code: shared-slot-presence
-    path: $.discouraged_uses
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
-  - code: shared-slot-presence
-    path: $.distribution_dates
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
-  - code: shared-slot-presence
-    path: $.distribution_formats
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
-  - code: shared-slot-presence
-    path: $.existing_uses
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
-  - code: shared-slot-presence
-    path: $.extension_mechanism
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
-  - code: shared-slot-presence
-    path: $.external_resources
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.funders[0].notes
     message: 'value differs: full=''Award OT2OD032644 ("Bridge2AI: Salutogenesis Data
@@ -357,23 +334,11 @@ pair_consistency:
     message: 'value differs: full="Each instance consists of all of the data available
       for one individual participating in the study. Data are organised in the release
       with one folder per participant within each de'
-  - code: shared-slot-presence
-    path: $.ip_restrictions
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.is_deidentified.identifiers_removed
     message: 'value differs: full=''Protected Health Information as defined by the
       HIPAA Privacy Rule (Safe Harbor method).\nSex.\nRace and ethnicity.\nMedications
       used.\n5-digit zip code (held under controlled acce'
-  - code: shared-slot-presence
-    path: $.license_and_use_terms
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
-  - code: shared-slot-presence
-    path: $.maintainers
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.missing_data_documentation[0].missing_data_causes
     message: 'value differs: full=''Participants elected not to participate in some
@@ -387,11 +352,17 @@ pair_consistency:
   - code: shared-slot-content
     path: $.raw_data_sources
     message: 'list length differs: full=3, core=9'
-  - code: shared-slot-presence
-    path: $.regulatory_restrictions
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
-  findings_truncated: 6
+  - code: shared-slot-content
+    path: $.sampling_strategies[0].strategies
+    message: 'value differs: full=''Non-probability sampling.\nTriple-balanced recruitment
+      in equal proportions across four race/ethnic groups (Asian, Black, Hispanic,
+      White), four T2DM categories (no diabetes; pre-'
+  - code: shared-slot-content
+    path: $.subpopulations[0].notes
+    message: 'value differs: full=''Race and ethnicity are held under controlled access
+      and are not released in the public dataset; the FAIRhub healthsheet therefore
+      answers "No" to whether the dataset identifies de'
+  findings_truncated: null
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_d4d.yaml

@@ -140,9 +140,10 @@ validation:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 10
-  warnings: 1
+  errors: 9
+  warnings: 2
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.creators[0].description
@@ -180,10 +181,6 @@ pair_consistency:
     message: 'value differs: full=''The REDCap instance hosted at the University of
       Washington holds patient-reported questionnaire responses, consent records,
       and clinical data entered at the visit (medications ass'
-  - code: shared-slot-presence
-    path: $.related_datasets
-    message: schema-identical slot is present only in full; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.subpopulations[0].description
     message: 'value differs: full=''380 of 2,280 participants in version 3.0.0 (204

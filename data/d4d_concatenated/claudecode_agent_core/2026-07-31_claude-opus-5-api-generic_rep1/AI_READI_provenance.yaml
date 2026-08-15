@@ -165,6 +165,7 @@ pair_consistency:
   errors: 5
   warnings: 1
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.external_resources[13].description

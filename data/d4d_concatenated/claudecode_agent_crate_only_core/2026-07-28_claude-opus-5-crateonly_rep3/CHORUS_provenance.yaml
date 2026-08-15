@@ -84,6 +84,7 @@ pair_consistency:
   errors: 0
   warnings: 1
   identity_slots: 79
+  schema_moved: false
   findings: []
   findings_truncated: null
   artifacts:

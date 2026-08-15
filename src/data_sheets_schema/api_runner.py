@@ -1178,7 +1178,21 @@ def pair_consistency(spec: RunSpec) -> dict[str, Any] | None:
         pair = load_pair_schema(FULL_SCHEMA_PATH, CORE_SCHEMA_PATH)
         full = _yaml.safe_load(spec.full_path.read_text(encoding="utf-8")) or {}
         core = _yaml.safe_load(spec.core_path.read_text(encoding="utf-8")) or {}
-        report = validate_pair_data(full, core, pair)
+        # `schema_moved` is what #520 is for: a slot added to core after a pair
+        # was written is absent from that pair because it could not have been
+        # present, which is a fact about the schema's history rather than a
+        # defect in the record. Presence then warns; content disagreement stays
+        # an error, because two records asserting different values were wrong
+        # when written.
+        #
+        # For a fresh run this is always False — the run just consumed the
+        # current schema. Computed rather than hardcoded so the answer stays
+        # right if this is ever called on an older pair, which is exactly how
+        # the backfill got it wrong (#550).
+        from data_sheets_schema.d4d_pair_consistency import (
+            pair_predates_current_schema)
+        moved = pair_predates_current_schema(spec.core_path)
+        report = validate_pair_data(full, core, pair, schema_moved=moved)
     except Exception as exc:                                       # noqa: BLE001
         # A checker that cannot run must say so rather than report agreement.
         return {"ran": False, "reason": str(exc)[:200]}
@@ -1203,6 +1217,9 @@ def pair_consistency(spec: RunSpec) -> dict[str, Any] | None:
         "errors": len(report.errors),
         "warnings": len(report.warnings),
         "identity_slots": len(report.identity_slots),
+        # Recorded, because it changes what the verdict means: with it true,
+        # a presence divergence is a warning and the pair can pass.
+        "schema_moved": moved,
         # Bounded, and says so. A list silently cut at 20 reads as a complete
         # one; `errors` above is the true count either way.
         "findings": [{"code": i.code, "path": i.path, "message": i.message[:200]}

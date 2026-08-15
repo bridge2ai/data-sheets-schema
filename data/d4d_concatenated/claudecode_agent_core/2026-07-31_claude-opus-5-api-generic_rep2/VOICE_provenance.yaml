@@ -135,9 +135,10 @@ validation:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 19
-  warnings: 1
+  errors: 18
+  warnings: 2
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.acquisition_methods[0].description
@@ -195,10 +196,6 @@ pair_consistency:
     message: 'value differs: full=''Curates the dataset, performs internal audits
       for missingness and consistency, and issues versioned releases. General dataset
       questions are directed to the corresponding author li'
-  - code: shared-slot-presence
-    path: $.other_tasks
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.preprocessing_strategies[3].description
     message: 'value differs: full=''Torchaudio pitch contours are extracted with minimum

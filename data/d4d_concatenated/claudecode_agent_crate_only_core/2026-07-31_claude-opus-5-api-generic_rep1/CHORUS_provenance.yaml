@@ -165,6 +165,7 @@ pair_consistency:
   errors: 3
   warnings: 0
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.acquisition_methods[0].description

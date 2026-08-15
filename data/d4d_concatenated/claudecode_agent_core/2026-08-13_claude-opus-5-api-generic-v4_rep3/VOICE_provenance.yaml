@@ -296,6 +296,7 @@ pair_consistency:
   errors: 6
   warnings: 1
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.distribution_formats[0]

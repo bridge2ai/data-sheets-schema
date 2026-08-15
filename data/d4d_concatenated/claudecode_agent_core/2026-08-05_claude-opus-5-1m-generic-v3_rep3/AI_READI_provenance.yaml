@@ -265,9 +265,10 @@ intermediates:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 10
-  warnings: 0
+  errors: 8
+  warnings: 2
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.anomalies
@@ -276,10 +277,6 @@ pair_consistency:
     path: $.creators[0]
     message: 'mapping keys differ: missing from core=[''affiliations''], missing from
       full=[]'
-  - code: shared-slot-presence
-    path: $.distribution_formats
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.ethical_reviews[2]
     message: 'mapping keys differ: missing from core=[], missing from full=[''contact_person'']'
@@ -297,10 +294,6 @@ pair_consistency:
   - code: shared-slot-content
     path: $.missing_data_documentation
     message: 'list length differs: full=1, core=2'
-  - code: shared-slot-presence
-    path: $.related_datasets
-    message: schema-identical slot is present only in full; it must be present in
-      both or neither
   - code: distribution-relation-presence
     path: $.distributions
     message: full file_collections exist without core distributions

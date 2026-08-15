@@ -346,6 +346,7 @@ pair_consistency:
   errors: 9
   warnings: 1
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.data_governance.committee_contact

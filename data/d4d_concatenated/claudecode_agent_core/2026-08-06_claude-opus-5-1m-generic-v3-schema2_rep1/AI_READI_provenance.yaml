@@ -319,9 +319,10 @@ intermediates:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 14
-  warnings: 1
+  errors: 13
+  warnings: 2
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.creators[0]
@@ -371,10 +372,6 @@ pair_consistency:
     message: 'value differs: full=''Transcribed from the University of Washington
       AI-READI Data License Agreement v1.0 (Zenodo record 10.5281/zenodo.10642459),
       which is the only license text present in the source bu'
-  - code: shared-slot-presence
-    path: $.related_datasets
-    message: schema-identical slot is present only in full; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.sampling_strategies[0].strategies
     message: 'value differs: full=''Triple balancing: participants are recruited in

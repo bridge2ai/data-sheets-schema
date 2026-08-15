@@ -130,9 +130,10 @@ validation:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 13
-  warnings: 1
+  errors: 11
+  warnings: 3
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.acquisition_methods
@@ -169,10 +170,6 @@ pair_consistency:
   - code: shared-slot-content
     path: $.missing_data_documentation
     message: 'list length differs: full=4, core=5'
-  - code: shared-slot-presence
-    path: $.other_tasks
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.preprocessing_strategies
     message: 'list length differs: full=11, core=12'
@@ -181,10 +178,6 @@ pair_consistency:
     message: 'value differs: full=''The unprocessed source data are WAV audio recordings
       of the acoustic task battery, captured at  the collection sites. The raw data,
       post de-identification, was saved in addition t'
-  - code: shared-slot-presence
-    path: $.related_datasets
-    message: schema-identical slot is present only in full; it must be present in
-      both or neither
   findings_truncated: null
   artifacts:
     full:

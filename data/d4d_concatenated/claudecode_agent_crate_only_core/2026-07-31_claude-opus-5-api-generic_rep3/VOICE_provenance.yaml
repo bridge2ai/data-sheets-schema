@@ -170,26 +170,19 @@ validation:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 4
-  warnings: 1
+  errors: 2
+  warnings: 3
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.anomalies
     message: 'list length differs: full=4, core=3'
-  - code: shared-slot-presence
-    path: $.data_protection_impacts
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.external_resources[0].description
     message: 'value differs: full=''Associated publication and dataset citation: Bensoussan,
       Y., et al. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset
       linked to health information (version 3.0.'
-  - code: shared-slot-presence
-    path: $.informed_consent
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   findings_truncated: null
   artifacts:
     full:

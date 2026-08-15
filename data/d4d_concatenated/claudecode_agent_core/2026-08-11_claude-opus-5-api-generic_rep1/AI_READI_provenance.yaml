@@ -347,9 +347,10 @@ intermediates:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 19
-  warnings: 1
+  errors: 18
+  warnings: 2
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.acquisition_methods[0].notes
@@ -404,10 +405,6 @@ pair_consistency:
   - code: shared-slot-content
     path: $.regulatory_restrictions.regulatory_restrictions
     message: 'list length differs: full=1, core=2'
-  - code: shared-slot-presence
-    path: $.related_datasets
-    message: schema-identical slot is present only in full; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.sampling_strategies
     message: 'list length differs: full=2, core=1'

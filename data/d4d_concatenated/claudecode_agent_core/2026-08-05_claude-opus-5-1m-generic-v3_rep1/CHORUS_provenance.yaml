@@ -220,9 +220,10 @@ validation:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 9
-  warnings: 0
+  errors: 8
+  warnings: 1
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.acquisition_methods[0].acquisition_details[0]
@@ -252,10 +253,6 @@ pair_consistency:
     message: 'value differs: full=''Provision a sequestered holdout test set accessible
       for external model validation, to aid marketplace adoption of AI-developed models
       for implementation in acute and critical care'
-  - code: shared-slot-presence
-    path: $.related_datasets
-    message: schema-identical slot is present only in full; it must be present in
-      both or neither
   - code: resource-projection-presence
     path: $.resources
     message: resources must be represented in both records when present in either

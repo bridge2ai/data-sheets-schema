@@ -99,6 +99,7 @@ pair_consistency:
   errors: 2
   warnings: 0
   identity_slots: 79
+  schema_moved: false
   findings:
   - code: shared-slot-presence
     path: $.resources[id='https://physionet.org/content/b2ai-voice-pediatric/'].related_datasets

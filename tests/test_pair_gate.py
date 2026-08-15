@@ -201,3 +201,78 @@ class RecordGateTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SchemaMovedTest(unittest.TestCase):
+    """#520's guard, which the first version of this check left out (#550).
+
+    A slot added to `CoreDataset` after a pair was written is absent from that
+    pair because it *could not have been present*. That is a fact about the
+    schema's history, not a defect in the record, so presence divergence warns
+    rather than errors when the pair predates the current schema. Content
+    disagreement stays an error either way: two records asserting different
+    values for one slot were wrong when they were written.
+
+    Omitting the flag made `related_datasets` — added to core after most of the
+    corpus existed — report as a defect in 70 pairs, and led me to tell the user
+    the agentic arm had 100 divergent pairs of 125 when it has none of 15.
+    """
+
+    BASE = Path("data/d4d_concatenated")
+
+    def _pairs(self, series):
+        from data_sheets_schema.backfill_checks import record_paths
+        out = []
+        for p in sorted(self.BASE.glob(f"*_core/{series}_rep*/*_provenance.yaml")):
+            q = record_paths(p)
+            if q["full"].exists() and q["core"].exists():
+                out.append(q)
+        return out
+
+    def _divergent(self, series, guard):
+        from data_sheets_schema.d4d_pair_consistency import (
+            load_pair_schema, pair_predates_current_schema, validate_pair_data,
+        )
+        from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA
+        pairs = self._pairs(series)
+        if not pairs:
+            self.skipTest(f"{series} not present in this checkout")
+        schema = load_pair_schema(FULL_SCHEMA, CORE_SCHEMA)
+        n = 0
+        for q in pairs:
+            full = yaml.safe_load(q["full"].read_text(encoding="utf-8")) or {}
+            core = yaml.safe_load(q["core"].read_text(encoding="utf-8")) or {}
+            moved = pair_predates_current_schema(q["core"]) if guard else False
+            if not validate_pair_data(full, core, schema,
+                                      schema_moved=moved).passed:
+                n += 1
+        return n, len(pairs)
+
+    def test_the_agentic_arm_is_clean_and_the_guard_is_why_that_is_visible(self):
+        series = "2026-08-11_claude-opus-5-claudecode-generic"
+        self.assertEqual(self._divergent(series, guard=True), (0, 15))
+        # Without the guard, 13 of the 15 report — the two exceptions state
+        # `related_datasets` in neither record, so there is no presence
+        # divergence to misread. 13 reported defects where there are none is
+        # what I sent upstream as "the agentic arm is not clean".
+        self.assertEqual(self._divergent(series, guard=False)[0], 13)
+
+    def test_the_v4_arm_diverges_with_the_guard_applied(self):
+        """The guard does not explain the API arm away.
+
+        All 12 v4 pairs have a moved digest too, so the guard applies to both
+        arms equally. Eleven still fail, on content rather than presence.
+        """
+        self.assertEqual(
+            self._divergent("2026-08-13_claude-opus-5-api-generic-v4",
+                            guard=True), (11, 12))
+
+    def test_the_recorded_block_says_which_reading_it_used(self):
+        p = (self.BASE / "claudecode_agent_core"
+             / "2026-08-11_claude-opus-5-claudecode-generic_rep1"
+             / "AI_READI_provenance.yaml")
+        if not p.exists():
+            self.skipTest("record not present in this checkout")
+        block = yaml.safe_load(p.read_text(encoding="utf-8"))["pair_consistency"]
+        self.assertTrue(block["schema_moved"])
+        self.assertTrue(block["consistent"])

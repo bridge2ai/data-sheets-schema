@@ -155,15 +155,12 @@ canonical:
   - 2026-08-07_claude-opus-5-claudecode-generic-v3_rep3
 pair_consistency:
   ran: true
-  consistent: false
-  errors: 1
-  warnings: 0
+  consistent: true
+  errors: 0
+  warnings: 1
   identity_slots: 79
-  findings:
-  - code: shared-slot-presence
-    path: $.data_governance
-    message: schema-identical slot is present only in full; it must be present in
-      both or neither
+  schema_moved: true
+  findings: []
   findings_truncated: null
   artifacts:
     full:
