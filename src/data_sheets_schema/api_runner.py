@@ -483,7 +483,8 @@ PHASE_INSTRUCTIONS = {
         "evidence boundary. Report, as a JSON object with keys `findings` (a "
         "list of {severity, record, slot, issue}) and `summary`: any slot whose "
         "value the bundle does not support, any omission the bundle clearly "
-        "supports, any internal inconsistency, and any value whose shape does "
+        "supports, any content the core record states that the full record "
+        "does not, any internal inconsistency, and any value whose shape does "
         "not conform to the schema digest supplied above — prose where the "
         "schema requires a list, enum values the schema does not define, or "
         "source commentary embedded inside a name, identifier or affiliation "
@@ -491,6 +492,12 @@ PHASE_INSTRUCTIONS = {
     "reconcile_full": (
         "Phase 4a. Apply the audit findings that concern the FULL record and "
         "emit the corrected full record in its entirety, header block included. "
+        "The core record is supplied above: anything it states that the full "
+        "record does not, absorb into the full record, in the slot that fits "
+        "it. The core record is a projection of the full one and cannot "
+        "outrank it, so a fact reaching only core is a fact the full record "
+        "lost. Absorb the content, not the wording — put it where the schema "
+        "says it belongs, which may not be where core put it. "
         "Every value you write or change must conform to the schema digest "
         "supplied above — a repair that fixes evidence but breaks shape is "
         "still a defect. If no finding requires a change, emit it unchanged. "
@@ -523,7 +530,14 @@ PHASE_NEEDS = {
     "full": (),
     "core": ("Completed full record",),
     "audit": ("Completed full record", "Completed core record"),
-    "reconcile_full": ("Completed full record", "Audit findings"),
+    # The core record too (#566). Without it there was no path by which a fact
+    # the core phase found in the bundle could reach the full record, and 10 of
+    # the 12 v4 records ended with core-only prose the full record lacks —
+    # 25,417 characters, including AI-READI's recommended train/validation/test
+    # split and CHORUS's holdout test set. The full record is the comprehensive
+    # one; a reader of it never saw them.
+    "reconcile_full": ("Completed full record", "Completed core record",
+                       "Audit findings"),
     "reconcile_core": ("Reconciled full record", "Completed core record", "Audit findings"),
     "report": ("Audit findings",),
 }
