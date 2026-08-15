@@ -20,7 +20,9 @@ from data_sheets_schema.provenance import (AGENT_PLAYBOOKS, playbook_facts,
                                            runtime_reads_playbooks)
 
 ROOT = Path(__file__).resolve().parents[1]
-PLAYBOOK = ROOT / ".claude/commands/d4d-full-core.md"
+#: The rules live in one file since #563; before that they were inside
+#: d4d-full-core.md, where /d4d-agent could not see them.
+PLAYBOOK = ROOT / ".claude/commands/d4d-uniform-rules.md"
 PROMPTS = ROOT / "src/download/prompts"
 
 
@@ -139,8 +141,8 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
         catches an addition, and the table above is what says where it reaches.
         """
         text = PLAYBOOK.read_text(encoding="utf-8")
-        block = text[text.index("### Uniform decision rules"):
-                     text.index("### Recording the condition")]
+        # The whole file below its heading, since #563 made the rules a file.
+        block = text[text.index("# Uniform decision rules"):]
         bullets = re.findall(r"^- (.+?)(?=\n- |\n\n)", block, re.S | re.M)
         self.assertEqual(
             len(bullets), len(self.SHARED_RULES) + len(self.PLAYBOOK_ONLY),
@@ -165,6 +167,45 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
             "--- END ADDED IN v5 ---", 1)[0]
         self.assertIn("American English", block)
         self.assertIn("CURIE", block)
+
+    def test_every_hashed_playbook_reaches_the_rules(self):
+        """The blind spot #563 was filed for.
+
+        This guard only ever opened `d4d-full-core.md`. The rules lived there
+        and nowhere else, so `/d4d-agent` — a standalone entry point producing
+        full records — ran under none of them, and the file that could silently
+        diverge was the one nothing checked.
+
+        Now every playbook a record hashes must either state the rules or name
+        the file that does. Reading `AGENT_PLAYBOOKS` rather than a list here,
+        so a fifth playbook arrives already covered.
+        """
+        from data_sheets_schema.provenance import AGENT_PLAYBOOKS
+        rules_file = PLAYBOOK.name
+        missing = []
+        for rel in AGENT_PLAYBOOKS:
+            path = ROOT / rel
+            if path.name == rules_file:
+                continue
+            text = path.read_text(encoding="utf-8")
+            if rules_file not in text:
+                missing.append(str(rel))
+        self.assertEqual(missing, [],
+                         "a hashed playbook neither states the uniform rules "
+                         f"nor points at {rules_file}")
+
+    def test_the_rules_are_not_restated_anywhere_else(self):
+        """One copy, or the extraction bought nothing.
+
+        A pointer that sits beside a stale duplicate is worse than either alone:
+        two sources of truth and no signal about which is current.
+        """
+        from data_sheets_schema.provenance import AGENT_PLAYBOOKS
+        probe = "no target slot count"
+        holders = [str(rel) for rel in AGENT_PLAYBOOKS
+                   if probe in (ROOT / rel).read_text(encoding="utf-8")]
+        self.assertEqual(holders, [str(p) for p in AGENT_PLAYBOOKS
+                                   if p.name == PLAYBOOK.name])
 
     def test_the_new_v5_rules_reached_the_playbook_too(self):
         """The mirror direction, which nothing checked before.

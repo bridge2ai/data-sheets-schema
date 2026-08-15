@@ -129,6 +129,11 @@ AGENT_PLAYBOOKS = (
     Path(".claude/commands/d4d-full-core.md"),
     Path(".claude/commands/d4d-agent.md"),
     Path(".claude/agents/d4d-provenance-guard.md"),
+    # The uniform decision rules, extracted from d4d-full-core.md so that both
+    # entry points read one copy (#563). Hashed like the rest: it is now where
+    # the rules live, so a record that did not hash it could not show which
+    # rules it followed.
+    Path(".claude/commands/d4d-uniform-rules.md"),
 )
 
 

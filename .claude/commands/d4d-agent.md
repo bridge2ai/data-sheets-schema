@@ -8,8 +8,19 @@ approach.
 > full D4D, audits both against current sources in Phase 3, and performs strict
 > schema-derived full/core reconciliation in Phase 4.
 
-Before generation, read and enforce
-`.claude/agents/d4d-provenance-guard.md`.
+Before generation, read and enforce **both**:
+
+- `.claude/agents/d4d-provenance-guard.md` — the evidence boundary;
+- `.claude/commands/d4d-uniform-rules.md` — the uniform decision rules that
+  apply to every condition, every project and both runtimes.
+
+The rules are not restated here. Until #563 they lived only in
+`d4d-full-core.md`, so a run entered through this command — which is a complete
+standalone method for full records — followed none of them: not
+omission-over-inference, not identifier-from-evidence, not CURIE form. Every
+record in the corpus happens to have been generated through `/d4d-full-core`,
+which reads them and delegates extraction here, so nothing on disk is affected.
+The gap was in what this file permitted, not in what it produced.
 
 ## Task Overview
 
