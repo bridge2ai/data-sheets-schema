@@ -276,3 +276,62 @@ class SchemaMovedTest(unittest.TestCase):
         block = yaml.safe_load(p.read_text(encoding="utf-8"))["pair_consistency"]
         self.assertTrue(block["schema_moved"])
         self.assertTrue(block["consistent"])
+
+
+class ReconcileFullSeesCoreTest(unittest.TestCase):
+    """A fact the core phase found must have a path back into full (#566).
+
+    `reconcile_full` used to receive only the full record and the audit
+    findings. The core phase gets the bundle, so it finds material the full
+    phase missed — and with no path back, that material stopped in core. Across
+    the v4 arm, 10 of 12 records ended with core-only prose the full record
+    lacks, 25,417 characters of it, including AI-READI's recommended
+    train/validation/test split and CHORUS's holdout test set.
+
+    The full record is the comprehensive one. A reader of it never saw them.
+    """
+
+    def _spec(self):
+        from data_sheets_schema.api_runner import RunSpec
+        return RunSpec(
+            project="CHORUS", arm="baseline", method="claudecode_agent",
+            bundle=Path("data/preprocessed/concatenated/CHORUS_preprocessed.txt"),
+            label="test", condition="generic_v5")
+
+    def test_the_core_record_is_carried_into_reconcile_full(self):
+        import dataclasses
+
+        from data_sheets_schema.api_runner import PHASE_NEEDS, build_phase
+        self.assertIn("Completed core record", PHASE_NEEDS["reconcile_full"])
+        req = build_phase(self._spec(), "reconcile_full", carry={
+            "Completed full record": "FULL-MARKER",
+            "Completed core record": "CORE-MARKER",
+            "Audit findings": "AUDIT-MARKER"})
+        blob = str(dataclasses.asdict(req))
+        for marker in ("FULL-MARKER", "CORE-MARKER", "AUDIT-MARKER"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, blob)
+
+    def test_the_instruction_says_what_to_do_with_it(self):
+        """Carrying the record without saying why would leave the model to
+        guess, and the guess that matches the old behaviour is to ignore it."""
+        from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS
+        text = PHASE_INSTRUCTIONS["reconcile_full"]
+        self.assertIn("absorb into the full record", text)
+        self.assertIn("cannot outrank it", text)
+
+    def test_the_audit_is_told_to_look_for_it_too(self):
+        """The audit already reads both records, so it is the cheapest place to
+        catch a recurrence — and it is the phase that should have caught this."""
+        from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS
+        self.assertIn("core record states that the full record does not",
+                      PHASE_INSTRUCTIONS["audit"])
+
+    def test_the_change_is_attestable(self):
+        """`assembly_digest` covers the phase instructions and their order
+        (#353), so this moves without a prompt pin rotation — and a v4 record
+        and a v5 record are distinguishable by it.
+        """
+        from data_sheets_schema.api_runner import assembly_digest
+        self.assertNotEqual(assembly_digest()["sha256"][:16], "77331f08a663e5b9",
+                            "the digest the 2026-08-13 v4 arm recorded")
