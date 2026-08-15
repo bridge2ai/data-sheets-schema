@@ -90,6 +90,19 @@ them.
   the corpus already diverges (#550). This is a regression watch, not a
   prediction.
 
+## The canary is AI-READI, not CHORUS
+
+The v4 arm canaried CHORUS, whose `reconcile_full` request is 52k tokens against
+AI-READI's 249k. #566 adds the core record to that phase, taking the largest
+request to roughly 279k, and the corpus does not record what context ceiling was
+in force — the model is named `claude-opus-5` with no `[1m]` suffix and the
+249k requests nonetheless succeeded.
+
+So the canary must be **AI-READI**, and it must be verified to have completed
+`reconcile_full`, not merely to have started. A CHORUS canary exercises
+credentials, persistence, the run lock and every gate, and says nothing about
+the one thing this arm changed that could fail. See #568.
+
 ## What this plan does not license
 
 Comparing v5 against anything other than v4. Every earlier arm sits at a
