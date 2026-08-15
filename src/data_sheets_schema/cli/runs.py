@@ -614,6 +614,8 @@ def check_cmd(method, label, project, strict):
                    f"{pairs[PAIR_UNRECORDED]} predate the check):")
         for project, label, errs in sorted(divergent)[:8]:
             click.echo(f"     {project:9} {label:44} {errs} error(s)")
+        if len(divergent) > 8:
+            click.echo(f"     … and {len(divergent) - 8} more")
         click.echo("   Both files validate alone. This is a property of the "
                    "two together, so no single-file gate can see it.")
     elif pairs[PAIR_UNRECORDED]:

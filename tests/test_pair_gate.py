@@ -141,10 +141,62 @@ class PairConsistencyTest(unittest.TestCase):
         self.assertGreater(block["errors"], 0)
         self.assertEqual(set(block["artifacts"]), {"full", "core"})
 
-    def test_missing_record_is_none_rather_than_consistent(self):
+    def test_missing_record_names_the_missing_file(self):
+        """Distinct from a block that was never written.
+
+        `None` means no check happened at all — which is what every record
+        predating this reports. A run whose record was absent did check, and
+        found nothing to check against; collapsing the two would file it with
+        the 122 historical records instead of as the defect it is.
+        """
         from data_sheets_schema.api_runner import pair_consistency
-        spec = self._spec("NO_SUCH_PROJECT")
-        self.assertIsNone(pair_consistency(spec))
+        block = pair_consistency(self._spec("NO_SUCH_PROJECT"))
+        self.assertFalse(block["ran"])
+        self.assertIn("missing", block["reason"])
+
+    def test_truncation_is_declared_rather_than_silent(self):
+        """`errors` is the true count even when `findings` is cut at 20."""
+        from data_sheets_schema.api_runner import pair_consistency
+        spec = self._spec("CHORUS")
+        if not (spec.full_path.exists() and spec.core_path.exists()):
+            self.skipTest("v4 CHORUS records not present in this checkout")
+        block = pair_consistency(spec)
+        dropped = block["findings_truncated"] or 0
+        self.assertEqual(len(block["findings"]) + dropped, block["errors"])
+
+
+
+
+class RecordGateTest(unittest.TestCase):
+    """The new key must survive the gate the runner runs on its own output.
+
+    `execute()` writes the record and immediately calls `check_provenance`,
+    raising if it is not usable. A top-level key that gate rejected would fail
+    every live run *after* the model spend, which is the most expensive place
+    to discover it and the one no unit test of `pair_consistency` reaches.
+    """
+
+    LABEL = "2026-08-13_claude-opus-5-api-generic-v4_rep1"
+
+    def test_pair_block_does_not_break_check_provenance(self):
+        import tempfile
+
+        from data_sheets_schema.runs import check_provenance
+        src = Path("data/d4d_concatenated/claudecode_agent_core") / self.LABEL \
+            / "CHORUS_provenance.yaml"
+        if not src.exists():
+            self.skipTest("v4 CHORUS record not present in this checkout")
+        rec = yaml.safe_load(src.read_text(encoding="utf-8"))
+        rec["pair_consistency"] = {
+            "ran": True, "consistent": False, "errors": 6,
+            "artifacts": {"full": {"path": "x", "md5": "y"},
+                          "core": {"path": "x", "md5": "y"}}}
+        # A copy. Round-tripping the real record through yaml.safe_dump would
+        # strip the header comments it carries.
+        tmp = Path(tempfile.mkdtemp()) / "CHORUS_provenance.yaml"
+        tmp.write_text(yaml.safe_dump(rec, sort_keys=False), encoding="utf-8")
+        self.assertTrue(check_provenance(
+            "claudecode_agent", self.LABEL, "CHORUS", record=tmp)["ok"])
 
 
 if __name__ == "__main__":

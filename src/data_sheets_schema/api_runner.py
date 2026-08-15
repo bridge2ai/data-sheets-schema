@@ -1165,8 +1165,13 @@ def pair_consistency(spec: RunSpec) -> dict[str, Any] | None:
         from data_sheets_schema.d4d_pair_consistency import (load_pair_schema,
                                                              validate_pair_data)
         import yaml as _yaml
-        if not (spec.full_path.exists() and spec.core_path.exists()):
-            return None
+        missing = [str(f) for f in (spec.full_path, spec.core_path)
+                   if not f.exists()]
+        if missing:
+            # Not None. None means the block was never written; this run wrote
+            # one and the file it needed was absent, which `validate_outputs`
+            # will also have flagged. Two different states, two answers.
+            return {"ran": False, "reason": f"missing: {', '.join(missing)}"}
         pair = load_pair_schema(FULL_SCHEMA_PATH, CORE_SCHEMA_PATH)
         full = _yaml.safe_load(spec.full_path.read_text(encoding="utf-8")) or {}
         core = _yaml.safe_load(spec.core_path.read_text(encoding="utf-8")) or {}
@@ -1195,8 +1200,11 @@ def pair_consistency(spec: RunSpec) -> dict[str, Any] | None:
         "errors": len(report.errors),
         "warnings": len(report.warnings),
         "identity_slots": len(report.identity_slots),
+        # Bounded, and says so. A list silently cut at 20 reads as a complete
+        # one; `errors` above is the true count either way.
         "findings": [{"code": i.code, "path": i.path, "message": i.message[:200]}
                      for i in report.errors[:20]],
+        "findings_truncated": max(0, len(report.errors) - 20) or None,
     }
 
 
