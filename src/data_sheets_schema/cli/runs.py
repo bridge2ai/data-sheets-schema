@@ -603,6 +603,39 @@ def check_cmd(method, label, project, strict):
         if st == PAIR_DIVERGENT:
             divergent.append((r["project"], r["label"], errs))
 
+    # Reconciliation reports checked against the record and the schema (#546).
+    # The report is what a reviewer reads instead of diffing YAML; nothing
+    # checked it against either. In the v4 arm every record that emitted a
+    # `distributions` block reported removing it, from the false premise that
+    # the slot is not declared — and the blocks are still there.
+    from data_sheets_schema.runs import (
+        CLAIMS_CLEAN, CLAIMS_CONTRADICTED, CLAIMS_NOT_RUN, CLAIMS_UNRECORDED,
+        report_claim_status,
+    )
+    claims: collections.Counter = collections.Counter()
+    contradicted: list[tuple[str, str, int]] = []
+    for r in rows:
+        st, n = report_claim_status(r["method"], r["label"], r["project"])
+        claims[st] += 1
+        if st == CLAIMS_CONTRADICTED:
+            contradicted.append((r["project"], r["label"], n))
+
+    if claims[CLAIMS_CONTRADICTED]:
+        click.echo(f"\nⓘ  {claims[CLAIMS_CONTRADICTED]} reconciliation "
+                   f"report(s) assert something the record or the schema "
+                   f"contradicts ({claims[CLAIMS_CLEAN]} clean, "
+                   f"{claims[CLAIMS_NOT_RUN]} not checked, "
+                   f"{claims[CLAIMS_UNRECORDED]} predate the check):")
+        for project, label, n in sorted(contradicted)[:8]:
+            click.echo(f"     {project:9} {label:44} {n} claim(s)")
+        if len(contradicted) > 8:
+            click.echo(f"     … and {len(contradicted) - 8} more")
+        click.echo("   A report is the audit trail read instead of the diff. "
+                   "These claims are decidable and were never decided.")
+    elif claims[CLAIMS_UNRECORDED]:
+        click.echo(f"\nⓘ  {claims[CLAIMS_UNRECORDED]} record(s) predate the "
+                   "reconciliation-report check (#546).")
+
     if pairs[PAIR_STALE]:
         click.echo(f"\nⓘ  {pairs[PAIR_STALE]} pair verdict(s) describe bytes "
                    "that have since changed; the pair is unknown again.")

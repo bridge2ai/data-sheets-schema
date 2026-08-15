@@ -1208,6 +1208,39 @@ def pair_consistency(spec: RunSpec) -> dict[str, Any] | None:
     }
 
 
+def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
+    """Check the reconciliation report against the record and the schema (#546).
+
+    The report is what a reviewer reads instead of diffing YAML, and nothing
+    checked it against anything. In the v4 arm every record that emitted a
+    `distributions` block — 9 of 12 — reported removing it, from the premise
+    that `distributions` is not a declared slot. It is, with range
+    `CoreDistribution`, and the blocks are still there.
+
+    Reported, never fatal, like the pair check: a wrong report does not make a
+    record wrong, and the whole corpus predates this.
+    """
+    try:
+        import yaml as _yaml
+
+        from data_sheets_schema.report_claims import (check_report,
+                                                      declared_slots)
+        if not spec.report_path.exists():
+            return {"checked": False, "reason": "no reconciliation report"}
+        full = _yaml.safe_load(spec.full_path.read_text(encoding="utf-8")) \
+            if spec.full_path.exists() else {}
+        core = _yaml.safe_load(spec.core_path.read_text(encoding="utf-8")) \
+            if spec.core_path.exists() else {}
+        out = check_report(spec.report_path, full or {}, core or {},
+                           declared_slots())
+    except Exception as exc:                                       # noqa: BLE001
+        return {"checked": False, "reason": str(exc)[:200]}
+    from data_sheets_schema.provenance import _md5
+    out["artifacts"] = {"report": {"path": str(spec.report_path),
+                                   "md5": _md5(spec.report_path)}}
+    return out
+
+
 REPAIR_SYSTEM = (
     "You repair the shape of Datasheets-for-Datasets records. The schema "
     "digest defines the required structure. The validator findings are the "
@@ -1938,6 +1971,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # After repair, not before: repair rewrites both records, so a pair checked
     # earlier would describe bytes that no longer exist (#544).
     rec.data["pair_consistency"] = pair_consistency(spec)
+    rec.data["report_claims"] = report_claims_block(spec)
     rec.data["intermediates"] = _intermediates_block(spec)
 
     rec.write(spec.provenance_path)
