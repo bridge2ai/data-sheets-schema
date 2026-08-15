@@ -1172,6 +1172,44 @@ def bundle_drift_detail(method: str, label: str, project: str,
                             f"record pinned {recorded[:8]}"), declared
 
 
+CLAIMS_CLEAN, CLAIMS_CONTRADICTED = "clean", "contradicted"
+CLAIMS_NOT_RUN, CLAIMS_UNRECORDED = "not_run", "unrecorded"
+CLAIMS_STALE = "stale"
+
+
+def report_claim_status(method: str, label: str, project: str,
+                        concat_dir: Path | None = None) -> tuple[str, int]:
+    """(status, finding count) for a record's reconciliation report (#546).
+
+    Read from the record, like `pair_status`, and for the same reason: every
+    other reporter here reads what a run attested rather than recomputing an
+    answer about today's files.
+    """
+    import yaml as _yaml
+
+    from data_sheets_schema.provenance import _md5, record_path_for
+    path = record_path_for(project, method, label, concat_dir or CONCAT_DIR)
+    if not path.exists():
+        return CLAIMS_UNRECORDED, 0
+    rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    block = rec.get("report_claims")
+    if not isinstance(block, dict):
+        return CLAIMS_UNRECORDED, 0
+    if not block.get("checked"):
+        return CLAIMS_NOT_RUN, 0
+    for entry in (block.get("artifacts") or {}).values():
+        if not isinstance(entry, dict) or not entry.get("md5"):
+            continue
+        f = Path(entry["path"])
+        if not f.exists() or _md5(f) != entry["md5"]:
+            # Distinct from `not_run`, as PAIR_STALE is: a checker that could
+            # not run and a verdict about bytes that have changed are different
+            # states, and the pair check already draws that line.
+            return CLAIMS_STALE, 0
+    n = len(block.get("findings") or [])
+    return (CLAIMS_CONTRADICTED if n else CLAIMS_CLEAN), n
+
+
 PAIR_CONSISTENT, PAIR_DIVERGENT = "consistent", "divergent"
 PAIR_NOT_RUN, PAIR_UNRECORDED = "not_run", "unrecorded"
 PAIR_STALE = "stale"
