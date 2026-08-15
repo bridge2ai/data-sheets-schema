@@ -169,3 +169,88 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_d4d_core.yaml
       md5: da2ddbe54cdb445a86cd52da70d60bcf
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 8
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-content
+    path: $.content_warnings[0].description
+    message: 'value differs: full=''The healthsheet states that the dataset does not
+      contain data that, if viewed directly, might be offensive, insulting, threatening,
+      or otherwise pose a safety risk (such as psycho'
+  - code: shared-slot-content
+    path: $.data_collectors[0].description
+    message: 'value differs: full=''Details about the AI-READI team members involved
+      in the data collection process are available at https://aireadi.org/team. Their
+      effort was supported by the National Institutes of'
+  - code: shared-slot-content
+    path: $.distribution_formats[0].description
+    message: 'value differs: full=''The dataset is available through the FAIRhub platform
+      (http://fairhub.io/). The dataset DOI is https://doi.org/10.60775/fairhub.3.
+      Data are released as a public tier and a control'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=1, core=3'
+  - code: shared-slot-content
+    path: $.instances
+    message: 'list length differs: full=2, core=3'
+  - code: shared-slot-content
+    path: $.raw_sources[0].description
+    message: 'value differs: full=''Raw data are saved and expected to be preserved
+      by the AI-READI project at least for the duration of the project, but are not
+      anticipated to be shared outside the project team at '
+  - code: shared-slot-content
+    path: $.sampling_strategies
+    message: 'list length differs: full=3, core=4'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_d4d.yaml
+      md5: e4b6ff02f24d6d188dd44a9604f02fe3
+    core:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_d4d_core.yaml
+      md5: da2ddbe54cdb445a86cd52da70d60bcf
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: known_limitations
+    record: either
+    detail: report says removed; record has 4 entries
+    claim: '| `known_limitations` | Removed the clause "distribution shifts over time."
+      | The phrase appears in the bundle only as sub-prompt (d) of the Challenge question.
+      The answer addresses site diversity, device diversity, urban/hospital-based
+      rec'
+  claims_checked: 1
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_reconciliation.md
+      md5: 7b82d8ca176e6d0e29a21333ca48f4f0
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 2
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 1
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/AI_READI_healthsheet_only.txt
+      md5: a66b16818139bca4018efe11cae5cc7a
+  recorded_by: backfill_checks

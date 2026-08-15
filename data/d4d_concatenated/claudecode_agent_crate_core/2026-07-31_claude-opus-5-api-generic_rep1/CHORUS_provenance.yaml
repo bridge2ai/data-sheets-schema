@@ -128,3 +128,50 @@ validation:
     class: CoreDataset
     error: '[ERROR] [data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml/0]
       ''2026-04-03T00:00:00'' is not a ''date-time'' in /issued'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 4
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods
+    message: 'list length differs: full=4, core=5'
+  - code: shared-slot-content
+    path: $.data_protection_impacts
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-content
+    path: $.instances
+    message: 'list length differs: full=1, core=2'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml
+      md5: 1a40894eebefe473e6ce7990f7e49dae
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml
+      md5: e2b8257b25c6ffb25044a62c43c08c72
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 2
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_reconciliation.md
+      md5: 2a510571d0348d8916eaf6b0bc95e37c
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

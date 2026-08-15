@@ -162,3 +162,101 @@ validation:
     class: CoreDataset
     error: '[ERROR] [data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_d4d_core.yaml/0]
       ''2025-12-16'' is not a ''date-time'' in /issued'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 11
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[0].description
+    message: 'value differs: full=''Structured voice and respiratory tasks, such as
+      sustained vowels, coughs and reading passages, were directly recorded from participants
+      during in-clinic sessions using a mobile or'
+  - code: shared-slot-content
+    path: $.created_by
+    message: 'value differs: full=''Bridge2AI-Voice project team'', core=''Authorship
+      is recorded in the crate as a list of 117 named authors, with Yael Bensoussan
+      as principal investigator and PhysioNet as publisher;'
+  - code: shared-slot-content
+    path: $.description
+    message: 'value differs: full=''The human voice contains complex acoustic markers
+      which have been linked to important health conditions including dementia, mood
+      disorders, and cancer. When viewed as a biomarker,'
+  - code: shared-slot-content
+    path: $.distribution_formats[0].description
+    message: 'value differs: full=''Derived acoustic, articulatory and phonetic features
+      are stored as dense tensors in Apache Parquet files with participant, session
+      and task identifiers.'', core=''Derived acoustic, '
+  - code: shared-slot-content
+    path: $.external_resources[1].description
+    message: 'value differs: full=''Bensoussan, Y., et al. (2025). Bridge2AI-Voice:
+      An ethically-sourced, diverse voice dataset linked to health information (version
+      3.0.0). PhysioNet. RRID:SCR_007345. https://doi.o'
+  - code: shared-slot-content
+    path: $.informed_consent[0].description
+    message: 'value differs: full=''Eligible adults were screened against predefined
+      inclusion and exclusion criteria and provided informed consent before any study
+      procedures were administered. The crate does not d'
+  - code: shared-slot-content
+    path: $.instances[0].description
+    message: 'value differs: full=''Bridge2AI-Voice v3.0 contains data for 833 participants
+      across five sites in North America. Participants may contribute multiple sessions
+      over time; most completed a single in-cli'
+  - code: shared-slot-content
+    path: $.is_deidentified.description
+    message: 'value differs: full=''The crate records deidentified as true. Prior
+      to release, data are transformed to reduce re-identification risk and align
+      with regulatory and ethical requirements: direct identifi'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.description
+    message: 'value differs: full=''The release is governed by the PhysioNet license
+      at https://physionet.org/content/b2ai-voice/view-license/3.0.0/ and the data
+      use agreement at https://physionet.org/content/b2ai-v'
+  - code: shared-slot-content
+    path: $.status
+    message: 'value differs: full=''published'', core=''Published. The crate records
+      a datePublished for version 3.0.0 and marks its embedded schema entities as
+      published; no explicit lifecycle status is declared for '
+  - code: distribution-relation-presence
+    path: $.distributions
+    message: full file_collections exist without core distributions
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_d4d.yaml
+      md5: 5e5e2a88adf6d28609100228efa87a82
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_d4d_core.yaml
+      md5: 309cb7afb494be235b15a6aa4e581e7f
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 1
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_reconciliation.md
+      md5: af7319973ff3062575ae3bacbabcb082
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/VOICE_crate_only.txt
+      md5: e0da1c226b05e944a617e2b0cdf9b6a0
+  recorded_by: backfill_checks

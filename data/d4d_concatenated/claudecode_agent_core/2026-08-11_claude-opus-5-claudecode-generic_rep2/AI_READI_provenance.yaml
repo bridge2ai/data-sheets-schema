@@ -133,3 +133,52 @@ validation:
     full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
     core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 2
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.data_governance
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/AI_READI_d4d.yaml
+      md5: 75598890500e88b842eed0f3deea0096
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep2/AI_READI_d4d_core.yaml
+      md5: bf8d3706efaf398738fbbdbcfc098c70
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: description
+    record: either
+    detail: report says removed; record has a value
+    claim: '| 1 | `description` merged two acronym expansions into "Equitable/Exploratory"
+      — an unsupported composite | Removed the expansion; disagreement moved to `source_caveats`
+      |'
+  claims_checked: 2
+  claims_unnamed: 1
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep2/AI_READI_reconciliation.md
+      md5: 06a33a68c49f08c9861e885a2329aaa8
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

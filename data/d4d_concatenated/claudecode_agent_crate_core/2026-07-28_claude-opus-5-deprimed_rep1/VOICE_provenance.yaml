@@ -80,3 +80,60 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep1/VOICE_d4d_core.yaml
       sha256: f01dec8101857be2b358462a7be4437507764f9387452565922228b367da2c77
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 1
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate/2026-07-28_claude-opus-5-deprimed_rep1/VOICE_d4d.yaml
+      md5: feab259f43f94e697247b8f4e984994a
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep1/VOICE_d4d_core.yaml
+      md5: 5bed6dc76533b3aa33206334239a5ac1
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: license_and_use_terms.data_use_permission
+    record: either
+    detail: report says removed; record has 6 entries
+    claim: '| 5 | `license_and_use_terms.data_use_permission` | dropped `publication_required`
+      | The DTUA says the recipient "is encouraged to" publish, not required. Retained
+      permissions: `general_research_use`, `health_medical_biomedical_research`, `'
+  claims_checked: 2
+  claims_unnamed: 4
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep1/VOICE_reconciliation.md
+      md5: a242360bc35021fdcba84f2e5a36e23b
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 10
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 5
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/VOICE_preprocessed_with_crate.txt
+      md5: ebca872f3275e7bd0e685c0486ee4881
+  bundle_hash_basis: the record pinned no hash
+  recorded_by: backfill_checks

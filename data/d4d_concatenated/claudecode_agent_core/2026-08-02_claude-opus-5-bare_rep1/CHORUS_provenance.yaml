@@ -162,3 +162,37 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep1/CHORUS_d4d_core.yaml
       md5: be034f6de05d36c5056d5d35f357d03f
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: true
+  errors: 0
+  warnings: 1
+  identity_slots: 79
+  findings: []
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-02_claude-opus-5-bare_rep1/CHORUS_d4d.yaml
+      md5: d24a12b4b66ade2e2f7c59094e3e8d00
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep1/CHORUS_d4d_core.yaml
+      md5: be034f6de05d36c5056d5d35f357d03f
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep1/CHORUS_reconciliation.md
+      md5: 0a92d40f08ff292e6ef22db4b7404154
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

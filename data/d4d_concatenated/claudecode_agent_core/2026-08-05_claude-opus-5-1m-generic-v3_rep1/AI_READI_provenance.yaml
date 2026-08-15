@@ -257,3 +257,68 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/AI_READI_d4d_core.yaml
       md5: 73e277c34093a0d012a9f039dcc412d8
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 7
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.creators
+    message: 'list length differs: full=20, core=21'
+  - code: shared-slot-presence
+    path: $.ip_restrictions
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.issued
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.sampling_strategies[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''is_random'']'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  - code: distribution-relation-presence
+    path: $.distributions
+    message: full file_collections exist without core distributions
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-1m-generic-v3_rep1/AI_READI_d4d.yaml
+      md5: d0f4a8d18ddd700779f41fc919ee5865
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/AI_READI_d4d_core.yaml
+      md5: 73e277c34093a0d012a9f039dcc412d8
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: false_schema_claim
+    slot: id
+    detail: report says this is not a declared slot; it is declared on CoreDataset,
+      CoreDistribution, Dataset
+    claim: A fragment on a resolvable DOI URL implies a resolvable sub-resource that
+      does not exist.
+  claims_checked: 1
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/AI_READI_reconciliation.md
+      md5: 730ea9cf1beb9fb3dd1f89d783880a57
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

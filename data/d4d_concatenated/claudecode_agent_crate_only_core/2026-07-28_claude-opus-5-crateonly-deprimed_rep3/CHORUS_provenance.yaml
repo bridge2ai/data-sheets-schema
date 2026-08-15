@@ -80,3 +80,54 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/CHORUS_d4d_core.yaml
       sha256: c52d82266cfcb8035d375a0e1ffca0e4abf13d58c6b54ef320c279fc6c0c2812
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: true
+  errors: 0
+  warnings: 0
+  identity_slots: 79
+  findings: []
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/CHORUS_d4d.yaml
+      md5: 353f0ac3bbcc98d965290fb03ac96826
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/CHORUS_d4d_core.yaml
+      md5: a8e11e9a9dbc2f08c3ef8756dc2c57c5
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: false_schema_claim
+    slot: total_size_bytes
+    detail: report says this is not a declared slot; it is declared on Dataset
+    claim: '`total_size_bytes` are not declared on `CoreDataset`, so they are legitimately
+      full-only.'
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/CHORUS_reconciliation.md
+      md5: 38be8b5ae26230763d25a68ffabcb0cc
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 4
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 1
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CHORUS_crate_only.txt
+      md5: 06ad867c85e1d1ba0818c34e5bbaec29
+  bundle_hash_basis: the record pinned no hash
+  recorded_by: backfill_checks

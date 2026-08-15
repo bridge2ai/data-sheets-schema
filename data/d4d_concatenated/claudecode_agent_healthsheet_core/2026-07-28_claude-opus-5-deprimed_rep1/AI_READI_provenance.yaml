@@ -77,3 +77,49 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-deprimed_rep1/AI_READI_d4d_core.yaml
       sha256: 06aa7658327c0d2206ad34d08e3e1078d3ed3422e92303f878e3bb8c67bb9159
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: true
+  errors: 0
+  warnings: 0
+  identity_slots: 79
+  findings: []
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet/2026-07-28_claude-opus-5-deprimed_rep1/AI_READI_d4d.yaml
+      md5: dfbacef87041ae8251cf8e3c7b70b817
+    core:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-deprimed_rep1/AI_READI_d4d_core.yaml
+      md5: 380f8100d03ff8cafed6db6999377e27
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-28_claude-opus-5-deprimed_rep1/AI_READI_reconciliation.md
+      md5: 7a1d9bc7ce67ae8a64b4ff2457331716
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 4
+    minted_fragment: 21
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 1
+    minted_fragment: 12
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/AI_READI_healthsheet_only.txt
+      md5: a66b16818139bca4018efe11cae5cc7a
+  bundle_hash_basis: the record pinned no hash
+  recorded_by: backfill_checks

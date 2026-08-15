@@ -159,3 +159,101 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/AI_READI_d4d_core.yaml
       md5: 322cd16b43fb75b5870b3c43d0df2ba0
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 13
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.collection_mechanisms[5].description
+    message: 'value differs: full="Custom-designed indoor environmental sensor (the
+      LeeLab Anura, designed at the Karalis Johnson Retina Center, University of Washington),
+      placed in the participant''s home for 10 da'
+  - code: shared-slot-content
+    path: $.collection_timeframes[2].description
+    message: 'value differs: full=''Overall project timeline: the NIH RePORTER record
+      gives a project period of 2022-09-01 to 2025-08-31. The Nature Metabolism comment
+      states that AI-READI is enrolling 4,000 partici'
+  - code: shared-slot-content
+    path: $.creators[0].description
+    message: 'value differs: full=''AI-READI Consortium, recorded in the FAIRhub dataset
+      description as an organizational creator. The consortium is a multidisciplinary,
+      multi-institution team spanning the Universit'
+  - code: shared-slot-content
+    path: $.data_collectors[1].description
+    message: 'value differs: full=''All research personnel at the three data sites
+      who recruited, enrolled, and collected data underwent training by the data manager
+      at UAB and worked from a detailed Manual of Proce'
+  - code: shared-slot-content
+    path: $.external_resources
+    message: 'list length differs: full=10, core=11'
+  - code: shared-slot-content
+    path: $.human_subject_research.description
+    message: 'value differs: full=''Yes. AI-READI is human subjects research conducted
+      under Institutional Review Board approval from the University of Washington
+      (approval number STUDY00016228), with reliance agree'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=6, core=9'
+  - code: shared-slot-content
+    path: $.instances
+    message: 'list length differs: full=2, core=4'
+  - code: shared-slot-content
+    path: $.preprocessing_strategies[2].description
+    message: 'value differs: full="Electrocardiography data were released following
+      the WaveForm DataBase (WFDB) standard. Wearable activity monitor and continuous
+      glucose monitoring data were converted to the Open'
+  - code: shared-slot-content
+    path: $.sampling_strategies[5].description
+    message: 'value differs: full=''Eligibility criteria used for study recruitment.
+      Inclusion: able to provide consent; aged 40 years or older; persons with or
+      without type 2 diabetes; must speak and read English. '
+  - code: shared-slot-content
+    path: $.sensitive_elements
+    message: 'list length differs: full=4, core=5'
+  - code: shared-slot-content
+    path: $.subpopulations[0].description
+    message: 'value differs: full=''Race/ethnicity counts across the 2,280 participants
+      in v3.0.0, as reported in the suggested-split table in the dataset README: Hispanic
+      380, Asian 545, Black 519, White 836. These'
+  - code: shared-slot-content
+    path: $.resources[id='https://doi.org/10.60775/fairhub.4'].description
+    message: 'value differs: full=''A smaller companion release, recorded in the FAIRhub
+      API metadata for v3.0.0 as the child of this dataset (child id 4) and noted
+      on the v3.0.0 landing page as "A smaller version i'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep2/AI_READI_d4d.yaml
+      md5: 0a5b75ebd78ef2770015ec7cf0fd7852
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/AI_READI_d4d_core.yaml
+      md5: 322cd16b43fb75b5870b3c43d0df2ba0
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: false_schema_claim
+    slot: description
+    detail: report says this is not a declared slot; it is declared on CoreDataset,
+      CoreDistribution, Dataset
+    claim: It does not appear in any structured keyword or subject list — not in the
+      FAIRhub `subject` array, not in the `studyDescription.conditionsModule.keywordList`,
+      and not on the HTML capture's keyword panel.
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/AI_READI_reconciliation.md
+      md5: abd9f9dea3a3550d0100cb86181ac34a
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

@@ -196,3 +196,81 @@ validation:
     class: CoreDataset
     error: '[ERROR] [data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d_core.yaml/0]
       Additional properties are not allowed (''description'' was unexpected) in /dialect'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 8
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[0].description
+    message: 'value differs: full=''Directly observed and measured: structured voice
+      and respiratory tasks such as sustained vowels, coughs and reading passages,
+      recorded during an in-clinic session under a standard'
+  - code: shared-slot-content
+    path: $.creators
+    message: 'list length differs: full=117, core=2'
+  - code: shared-slot-content
+    path: $.distribution_formats[4].description
+    message: 'value differs: full=''Distribution is through PhysioNet at https://doi.org/10.13026/k81f-qr68,
+      with access conditions at https://physionet.org/content/b2ai-voice/view-dua/3.0.0/.'',
+      core=''Distribution i'
+  - code: shared-slot-content
+    path: $.external_resources[0].description
+    message: 'value differs: full=''Associated publication and dataset citation: Bensoussan,
+      Y., et al. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset
+      linked to health information (version 3.0.'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-content
+    path: $.instances
+    message: 'list length differs: full=5, core=7'
+  - code: shared-slot-content
+    path: $.is_deidentified.description
+    message: 'value differs: full=''The release is recorded as de-identified (deidentified:
+      true). Prior to release, data are transformed to reduce re-identification risk
+      and align with regulatory and ethical requir'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d.yaml
+      md5: a9bc0a2a4052a9af6a3b8cb569d09978
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d_core.yaml
+      md5: 758561e3e1ab0176951a55ad867a54f2
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 5
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_reconciliation.md
+      md5: 0d95595bd804b52280c4148345b10dec
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/VOICE_crate_only.txt
+      md5: e0da1c226b05e944a617e2b0cdf9b6a0
+  recorded_by: backfill_checks

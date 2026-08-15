@@ -130,3 +130,57 @@ validation:
       Additional properties are not allowed (''checksum'' was unexpected) in /distributions/2
       | [ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/CM4AI_d4d_core.yaml/0]
       Additional properties are not allowed (''checksum'' was unexpected) in /distributions/3'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 4
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.funders[0].description
+    message: 'value differs: full=''NIH funding award number 1OT2OD032742-01, recorded
+      as the funding information for this Dataverse release and displayed on the CM4AI
+      project website. NIH RePORTER lists application'
+  - code: shared-slot-content
+    path: $.human_subject_research.description
+    message: 'value differs: full=''The release governance metadata records Human
+      Subjects: No, De-identified Samples: Yes, and FDA Regulated: No. The CM4AI preprint
+      states that CM4AI data are non-clinical, derived '
+  - code: shared-slot-content
+    path: $.maintainers[3].description
+    message: 'value differs: full="Repository responsible for hosting and long-term
+      preservation of the release, within the collection path University of Virginia
+      Dataverse > LibraData: UVa''s Scholarly Research > S'
+  - code: shared-slot-content
+    path: $.preprocessing_strategies[4].description
+    message: 'value differs: full=''Each segment of the MuSIC pipeline calls the FAIRSCAPE
+      client package to validate inputs and create an RO-Crate package containing
+      datasets, metadata, and software or resolvable r'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep1/CM4AI_d4d.yaml
+      md5: 126765d85e12dd4a8b3ee1cd97d42073
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/CM4AI_d4d_core.yaml
+      md5: fdd8f250bbbe5d19a35c33d7948173d5
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 1
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/CM4AI_reconciliation.md
+      md5: 02300b51a5200b38747e047ab21b409a
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

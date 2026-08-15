@@ -222,3 +222,54 @@ intermediates:
   sha256: be2646dbe460cae84334c334bdc41ac787f485902e44e422240e026b2f8c9283
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/intermediate/CHORUS_report.md
   sha256: 0d01c44ceddb65b4bc07b8afc69f7b11335edd9fe74f471a49271d66498d6d91
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 4
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.funders[0].notes
+    message: 'value differs: full=''Grant identifiers: OT2OD032701; 1OT2OD032701-01.
+      NIH RePORTER application ID 10472824; awardee organization Massachusetts General
+      Hospital; fiscal year 2022; award amount 5,880,30'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''The CHoRUS consortium comprises 60+ members across
+      20 different institutions, of which 14 contribute as Data Acquisition centers,
+      and collaborates with Bridge2AI and 3 other data '
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  - code: distribution-relation-presence
+    path: $.distributions
+    message: full file_collections exist without core distributions
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/CHORUS_d4d.yaml
+      md5: 371fec4e27403cd1f826cada42404364
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/CHORUS_d4d_core.yaml
+      md5: 6a8ba62d785cc77550642e476172232d
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/CHORUS_reconciliation.md
+      md5: 9033f44abb68b0f6f7fd77447ed78e29
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

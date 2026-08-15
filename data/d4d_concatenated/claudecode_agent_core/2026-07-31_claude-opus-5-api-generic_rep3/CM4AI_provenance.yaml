@@ -159,3 +159,44 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/CM4AI_d4d_core.yaml
       md5: 9dd15865954124841c4856a7b9e56cd8
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 2
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  - code: distribution-relation-presence
+    path: $.file_collections
+    message: core distributions exist without full file_collections
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep3/CM4AI_d4d.yaml
+      md5: fa56043c584a8b2995b09649e67ee58d
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/CM4AI_d4d_core.yaml
+      md5: 9dd15865954124841c4856a7b9e56cd8
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 1
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/CM4AI_reconciliation.md
+      md5: f63496e520749e0717d9c3588ce6bd2f
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

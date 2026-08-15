@@ -217,3 +217,73 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/CHORUS_d4d_core.yaml
       md5: c5d950c70aa023ab532637d05f9c3f0c
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 9
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[0].acquisition_details[0]
+    message: 'value differs: full=''Retrospective extraction of clinical data from
+      the operational systems of contributing hospitals, standardized to the OMOP
+      Common Data Model and delivered to CHoRUS following vali'
+  - code: shared-slot-content
+    path: $.creators[0]
+    message: 'mapping keys differ: missing from core=[''affiliations''], missing from
+      full=[]'
+  - code: shared-slot-content
+    path: $.external_resources
+    message: 'list length differs: full=3, core=4'
+  - code: shared-slot-content
+    path: $.funders[0].grants[0]
+    message: 'mapping keys differ: missing from core=[''name''], missing from full=[]'
+  - code: shared-slot-content
+    path: $.is_deidentified.deidentification_details[0]
+    message: 'value differs: full=''The project transforms data using approaches that
+      limit re-identification and retains full clinical notes locally at contributing
+      sites, sharing only tokens. Imaging de-identifica'
+  - code: shared-slot-content
+    path: $.missing_data_documentation
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-content
+    path: $.purposes[2].response
+    message: 'value differs: full=''Provision a sequestered holdout test set accessible
+      for external model validation, to aid marketplace adoption of AI-developed models
+      for implementation in acute and critical care'
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-1m-generic-v3_rep1/CHORUS_d4d.yaml
+      md5: 9825f174e1ad3f9812c6409a3142c172
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/CHORUS_d4d_core.yaml
+      md5: c5d950c70aa023ab532637d05f9c3f0c
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep1/CHORUS_reconciliation.md
+      md5: 89688d7c8449a0a5e8158a5ffc51c6fb
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

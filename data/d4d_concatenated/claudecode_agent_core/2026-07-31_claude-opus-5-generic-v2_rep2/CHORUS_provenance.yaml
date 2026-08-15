@@ -163,3 +163,49 @@ canonical_superseded_by:
   label: 2026-08-07_claude-opus-5-claudecode-generic-v3_rep3
   at: '2026-08-08T01:19:11+00:00'
   by: d4d runs select
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 3
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.license_and_use_terms.description
+    message: 'value differs: full=''All CHoRUS data types are controlled access. All
+      participants in the AIM-AHEAD Bridge2AI for Clinical Care Training Program must
+      sign a licensing agreement, included in the regist'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  - code: distribution-relation-presence
+    path: $.distributions
+    message: full file_collections exist without core distributions
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/CHORUS_d4d.yaml
+      md5: 7fbf901a75665515ec8d9030044ae7a0
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/CHORUS_d4d_core.yaml
+      md5: 9166cc66e1f35595fcde0a19132b153d
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/CHORUS_reconciliation.md
+      md5: 68564c6f53dcec961eb7459269432cac
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

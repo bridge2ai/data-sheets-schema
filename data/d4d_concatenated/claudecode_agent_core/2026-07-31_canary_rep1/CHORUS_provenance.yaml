@@ -169,3 +169,41 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_canary_rep1/CHORUS_d4d_core.yaml
       md5: da8d0c29b6a0a5997c68e9f312a33d25
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 1
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_canary_rep1/CHORUS_d4d.yaml
+      md5: cd706a7fd8d4f75fa25c612693f65825
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_canary_rep1/CHORUS_d4d_core.yaml
+      md5: da8d0c29b6a0a5997c68e9f312a33d25
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_canary_rep1/CHORUS_reconciliation.md
+      md5: 334fbaac4813619128c39fc584fa8b52
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

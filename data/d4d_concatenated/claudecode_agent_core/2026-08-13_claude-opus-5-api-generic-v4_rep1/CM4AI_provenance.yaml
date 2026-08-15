@@ -258,3 +258,96 @@ intermediates:
   sha256: fe7955af17a8b81e7d914b910ae46ec1090ca34996ee34dda8e47bf0c5a78292
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/intermediate/CM4AI_report.md
   sha256: 0d6a17b4a06c17305abfb54a85435ced99bd99bff8fd8591b4d5f1973bacfdc2
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 6
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.data_governance.committee_contact
+    message: 'value differs: full=''Jillian Parker (ORCID https://orcid.org/0000-0003-4535-3486)'',
+      core=''Jillian Parker (https://orcid.org/0000-0003-4535-3486)'''
+  - code: shared-slot-content
+    path: $.ethical_reviews[0].contact_person
+    message: 'value differs: full=''Vardit Ravitsky'', core=''Vardit Ravitsky (https://orcid.org/0000-0002-7080-8801)'''
+  - code: shared-slot-content
+    path: $.license_and_use_terms.license_terms
+    message: 'value differs: full=''Creative Commons Attribution-NonCommercial-ShareAlike
+      4.0 International (CC BY-NC-SA 4.0). Users are free to share - copy and redistribute
+      the material in any medium or format - a'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''The CM4AI project portal reports project-wide
+      totals across all releases of 1,374 protein interactions, 53,788 immunofluorescent
+      images, 7,023 total proteins investigated, 11,739 '
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''1. The declared bundle includes the Nature 2025
+      paper "Multimodal cell maps as a foundation\nfor structural and functional genomics",
+      which reports a cell map of U2OS osteosarcoma'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/CM4AI_d4d.yaml
+      md5: 69dd73250aac8e3cf2b5e208c07e1aa4
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/CM4AI_d4d_core.yaml
+      md5: 824d85a1b86337dad3fadacd9f6c811f
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: distributions
+    record: either
+    detail: report says removed; record has 10 entries
+    claim: '| `distributions` | **Removed** | Not declared anywhere in the schema.
+      Its keys `path`, `md5` and `bytes` are likewise undeclared; checksums are carried
+      by `DistributionFormat.checksum`, and per-file grouping by `FileCollection`.
+      This block'
+  - kind: removal_not_performed
+    slot: distributions[*].conforms_to_standard
+    record: either
+    detail: report says removed; record has 1 entry
+    claim: '| `distributions[*].conforms_to_standard` | Removed with its parent |
+      `conforms_to_standard` is declared on `Dataset`, `DataSubset` and `FileCollection`,
+      not on a per-file object of undeclared class. The dataset-level `RO_CRATE` assertion
+      i'
+  - kind: false_schema_claim
+    slot: distributions
+    detail: report says this is not a declared slot; it is declared on CoreDataset
+    claim: Not declared anywhere in the schema. Its keys `path`, `md5` and `bytes`
+      are likewise undeclared; checksums are carried by `DistributionFormat.checksum`,
+      and per-file grouping by `FileCollection`. This block would have failed validation.
+  claims_checked: 6
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/CM4AI_reconciliation.md
+      md5: 7f2023a4fdca328761a3cafe10049689
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 20
+    minted_fragment: 14
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 9
+    minted_fragment: 12
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+      md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+  recorded_by: backfill_checks

@@ -344,3 +344,115 @@ intermediates:
   sha256: 5d7e55edf0fd5b206ba6128acd01a9eb1722375b797ef1280a2742c2bb2a05ae
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/AI_READI_report_2.md
   sha256: 2392292742aad1e147509613eaf3e11490164cb301f6dd01aa2598b6dad0ff3c
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 19
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[0].notes
+    message: 'value differs: full=''Verification of data entry was performed where
+      possible, for example by cross-referencing entered medications against medications
+      physically brought in or photographed by each par'
+  - code: shared-slot-content
+    path: $.creators[0].notes
+    message: 'value differs: full=''Named Study Principal Investigator and central
+      contact of record in the FAIRhub study description; contact e-mail leeay@uw.edu.
+      Principal investigator of NIH project OT2OD032644. '
+  - code: shared-slot-content
+    path: $.data_collectors[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''role'']'
+  - code: shared-slot-content
+    path: $.description
+    message: 'value differs: full="Version 3.0.0 of the flagship dataset generated
+      by the Artificial Intelligence Ready and Equitable/Exploratory Atlas for Diabetes
+      Insights (AI-READI) project, one of four Data Gen'
+  - code: shared-slot-content
+    path: $.external_resources[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''notes'']'
+  - code: shared-slot-content
+    path: $.funders[0].notes
+    message: 'value differs: full=''OT2OD032644 is titled "Bridge2AI: Salutogenesis
+      Data Generation Project", awarded to the University of Washington with Aaron
+      Lee as principal investigator; NIH RePORTER records ap'
+  - code: shared-slot-content
+    path: $.human_subject_research.irb_approval
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-content
+    path: $.informed_consent[0].withdrawal_mechanism
+    message: 'value differs: full=''Participants were permitted to withdraw consent
+      at any time and cease study participation. Any data that had been shared or
+      used up to that point would remain in the dataset. This'
+  - code: shared-slot-content
+    path: $.instances[0].notes
+    message: 'value differs: full="Each instance comprises all data available for
+      one individual participating in the study, spanning tabular, imaging and physiological
+      signal/waveform data. There is no unstructure'
+  - code: shared-slot-content
+    path: $.ip_restrictions.restrictions
+    message: 'list length differs: full=1, core=4'
+  - code: shared-slot-content
+    path: $.known_biases[2].affected_subsets
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''Two aspects of the AI-READI programme are documented
+      in the source material but describe resources and activities outside the released
+      dataset, and are recorded here rather than i'
+  - code: shared-slot-content
+    path: $.regulatory_restrictions.regulatory_restrictions
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.sampling_strategies
+    message: 'list length differs: full=2, core=1'
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''The bundle contains several unreconciled discrepancies
+      about the project\''s institutional home and scale, and this record does not
+      resolve them: where a slot could carry only one '
+  - code: shared-slot-content
+    path: $.subpopulations[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''subpopulation_elements_present'']'
+  - code: shared-slot-content
+    path: $.updates.update_details
+    message: 'value differs: full=''Released versions are static and are not updated
+      in place. New versions are released approximately once a year with additional
+      data from participants enrolled since the previous r'
+  - code: shared-slot-content
+    path: $.version_access.versions_available[1]
+    message: 'value differs: full=''version 2.0.0 (DOI 10.60775/fairhub.2, 8 November
+      2024, marked no longer accessible)'', core=''Version 2.0.0 (DOI 10.60775/fairhub.2,
+      8 November 2024, marked no longer accessible)'''
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-api-generic_rep1/AI_READI_d4d.yaml
+      md5: 9fb69f00c1550ea546f04591c0e8f403
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/AI_READI_d4d_core.yaml
+      md5: 19f4a17c60311d6bbc32fd06d266a76c
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/AI_READI_reconciliation.md
+      md5: 3e9d30d8465f4ff562fc97a66a337416
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

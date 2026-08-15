@@ -322,3 +322,80 @@ intermediates:
   sha256: 8394182d0450056042b07557acf4bec0cf90ca426e7410bf0a72c9b066e918ef
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/intermediate/VOICE_report.md
   sha256: 335e9e313499be8a215063503346058dde8369358fce254692c32e137a891ad1
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 4
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.creators[0].source_caveats
+    message: 'value differs: full=''Recorded in the NIH RePORTER entry as principal
+      investigator, in the project documentation as co-principal investigator, and
+      in the IRB protocol as Co-Lead of Data Acquisition; CR'
+  - code: shared-slot-content
+    path: $.informed_consent[0].consent_scope
+    message: 'value differs: full=''Consent covers all study procedures, the collection
+      of voice and clinical data, and the uploading of de-identified voice and clinical
+      data to an open-sourced database. For longitu'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''The project documentation publishes an AI-readiness
+      self-assessment against the Bridge2AI recommendations for AI-readiness of biomedical
+      data, scoring FAIRness 100%, Provenance 10'
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''The bundle documents several releases of this
+      dataset (PhysioNet versions 1.1, 2.0.0, 2.0.1, 3.0.0 and 3.1.0, preceded by
+      a version 1.0 published on Health Data Nexus) as well as '
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep2/VOICE_d4d.yaml
+      md5: 0b4906535132a733a584bf128f469f8f
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/VOICE_d4d_core.yaml
+      md5: fac4597902f2018bee4dfc983ba767a8
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: distributions
+    record: either
+    detail: report says removed; record has 3 entries
+    claim: '| core | `distributions` | removed; content moved to `file_collections`
+      |'
+  - kind: removal_not_performed
+    slot: distributions
+    record: core
+    detail: report says removed; record has 3 entries
+    claim: 'The three `distributions` objects were removed from the core record. Their
+      content was redistributed:'
+  claims_checked: 6
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/VOICE_reconciliation.md
+      md5: 6eaa2ccd022899ae62b03addc6c9af9b
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 4
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 2
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+      md5: dcd717170da6762569c0b4eeafc1c3d2
+  recorded_by: backfill_checks

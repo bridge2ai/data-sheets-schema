@@ -258,3 +258,48 @@ intermediates:
   sha256: d59440ce1295f458ed8a2ed9baf6dc799a81c5dcee89f86a00c21d17b407c33b
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/intermediate/CHORUS_report.md
   sha256: 600e4af38eeabdbea8d4f2dc54687634598aa1fb9219bf5294b8925d75b0bcfb
+pair_consistency:
+  ran: true
+  consistent: true
+  errors: 0
+  warnings: 0
+  identity_slots: 79
+  findings: []
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep2/CHORUS_d4d.yaml
+      md5: 4c914a0e4898883aafd85f07a5bdaad1
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/CHORUS_d4d_core.yaml
+      md5: 55767c67799f6f81f28ffad45ad27314
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/CHORUS_reconciliation.md
+      md5: 0da59f96183bbb28c5518caf2d04ca7b
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+      md5: 9b2ef4b65d67957f79362266cab0bc7a
+  recorded_by: backfill_checks

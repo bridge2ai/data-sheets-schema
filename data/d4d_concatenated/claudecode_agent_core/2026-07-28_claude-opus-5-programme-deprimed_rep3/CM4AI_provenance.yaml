@@ -74,3 +74,53 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep3/CM4AI_d4d_core.yaml
       sha256: 8a2aa68c76a6a571df579ba99ad92694f601f3051e052eaa2a251f3376873146
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 1
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-programme-deprimed_rep3/CM4AI_d4d.yaml
+      md5: 90e8ff21b88db3848eef199b9234ceb0
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep3/CM4AI_d4d_core.yaml
+      md5: c55591df4757c8a17a3ae0ef8200c83e
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-programme-deprimed_rep3/CM4AI_reconciliation.md
+      md5: f19274d88aec36ee4ae08990d669a835
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 32
+    minted_fragment: 32
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 13
+    minted_fragment: 16
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+      md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+  bundle_hash_basis: the record pinned no hash
+  recorded_by: backfill_checks

@@ -133,3 +133,48 @@ validation:
     full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
     core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: true
+  errors: 0
+  warnings: 0
+  identity_slots: 79
+  findings: []
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/CM4AI_d4d.yaml
+      md5: 94ed657893a8939c45817a054fe2e08d
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/CM4AI_d4d_core.yaml
+      md5: 1afef4d05562622097d4e577b3bb4648
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep1/CM4AI_reconciliation.md
+      md5: 41bd5948defa3eb11c85d6cac6ad139a
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 16
+    minted_fragment: 80
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 6
+    minted_fragment: 46
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+      md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+  recorded_by: backfill_checks

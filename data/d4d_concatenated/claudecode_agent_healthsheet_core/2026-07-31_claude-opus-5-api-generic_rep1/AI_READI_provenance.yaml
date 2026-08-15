@@ -159,3 +159,78 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_d4d_core.yaml
       md5: 9e8512760c199c7dbbdcd41beccf25ba
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 6
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-content
+    path: $.data_collectors[0].description
+    message: 'value differs: full=''Details about the AI-READI team members involved
+      in the data collection process are available at https://aireadi.org/team. Their
+      effort was supported by the National Institutes of'
+  - code: shared-slot-content
+    path: $.distribution_formats[0].description
+    message: 'value differs: full=''The dataset is available through the FAIRhub platform
+      (http://fairhub.io/). The dataset DOI is https://doi.org/10.60775/fairhub.3.
+      Content comprises tabular data, imaging data, an'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-content
+    path: $.instances
+    message: 'list length differs: full=2, core=3'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_d4d.yaml
+      md5: f147f3a7655f75c51c50370d7a4be58f
+    core:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_d4d_core.yaml
+      md5: 9e8512760c199c7dbbdcd41beccf25ba
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: false_schema_claim
+    slot: license
+    detail: report says this is not a declared slot; it is declared on CoreDataset,
+      Dataset
+    claim: 'The slot now carries the DOI pointer and the bundle''s own characterization
+      of the terms (tailored for commercial or research reuse with requirements around
+      data usage, security, and secondary sharing) without asserting a license identifier '
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_reconciliation.md
+      md5: b7f735960a5ea780ae74b31388d5b19f
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 2
+    minted_fragment: 4
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 1
+    minted_fragment: 2
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/AI_READI_healthsheet_only.txt
+      md5: a66b16818139bca4018efe11cae5cc7a
+  recorded_by: backfill_checks

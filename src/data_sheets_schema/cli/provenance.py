@@ -481,3 +481,73 @@ def backfill_prompts(execute, label):
     n = sum(1 for proj, method, lab, _ in recoverable
             if apply_historical_prompt(proj, method, lab) is not None)
     click.echo(f"{n} record(s) updated, each naming the commit its hash is of.")
+
+
+@provenance.command("backfill-checks")
+@click.option('--execute', is_flag=True,
+              help='write the records; without it this reports and changes nothing')
+@click.option('--method', default=None, help='restrict to one method directory')
+@click.option('--label', default=None, help='restrict to one run label')
+@click.option('--project', default=None, help='restrict to one project')
+@click.option('--overwrite', is_flag=True,
+              help='replace blocks that are already present')
+def backfill_checks(execute, method, label, project, overwrite):
+    """Recompute the pair, report and grounding checks for older records (#552).
+
+    #544, #546 and #547 each added a block that `d4d api run` writes from then
+    on. Nothing gave those blocks to the records already on disk, so `d4d runs
+    check` reported the whole corpus as unknown — including the 15 agentic
+    records whose playbook does run the pair checker, and whose clean result is
+    the arm comparison that motivated #544.
+
+    Every block written here carries `recorded_by: backfill_checks`. A verdict
+    the run attested and one recomputed today are different claims, and where
+    the bytes have moved they are different answers.
+
+    Grounding is skipped for a record whose bundle has drifted: checking its
+    identifiers against today's bundle would answer a question about a file the
+    run never read. Reported as such rather than silently omitted.
+    """
+    from pathlib import Path
+
+    from data_sheets_schema.backfill_checks import apply, compute, summarise
+    from data_sheets_schema.provenance import CONCAT_DIR
+    from data_sheets_schema.report_claims import declared_slots
+
+    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    if method:
+        base = method[:-5] if method.endswith("_core") else method
+        paths = [p for p in paths if p.parts[-3] == f"{base}_core"]
+    if label:
+        paths = [p for p in paths if p.parts[-2] == label]
+    if project:
+        paths = [p for p in paths if p.name.startswith(f"{project}_")]
+    if not paths:
+        click.echo("no records matched")
+        return
+
+    # Built once. Each call loads two SchemaViews, which over 122 records is
+    # the difference between seconds and minutes.
+    declared = declared_slots()
+    written = skipped = 0
+    for p in paths:
+        try:
+            blocks = compute(p, declared)
+            # Inside the same guard as compute: a write that raises halfway
+            # through 192 records leaves a corpus in two states, and the reason
+            # it raised is exactly the kind a reader needs to see per-record.
+            changed = apply(p, blocks, overwrite=overwrite) if execute else True
+        except Exception as exc:                               # noqa: BLE001
+            click.echo(f"   ✗ {p.parts[-2]}/{p.name}: {exc}")
+            continue
+        if execute and not changed:
+            skipped += 1
+            continue
+        written += 1
+        click.echo(f"   {'✔' if execute else '·'} {p.parts[-2][:38]:38} "
+                   f"{p.name[:-16]:16} {summarise(blocks)}")
+    verb = "written" if execute else "would be written"
+    click.echo(f"\n{written} record(s) {verb}"
+               + (f", {skipped} already carried the blocks" if skipped else ""))
+    if not execute:
+        click.echo("Nothing was changed. Re-run with --execute to write.")

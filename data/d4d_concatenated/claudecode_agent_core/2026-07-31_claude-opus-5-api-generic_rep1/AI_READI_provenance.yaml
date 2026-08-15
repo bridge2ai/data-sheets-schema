@@ -159,3 +159,60 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_d4d_core.yaml
       md5: e3b7c31719f5a857a41037892a826895
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 5
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.external_resources[13].description
+    message: 'value differs: full=''Healthsheet metadata files distributed with the
+      dataset - healthsheet.md, README.md, CHANGELOG.md, LICENSE.txt, dataset_description.json,
+      dataset_structure_description.json, study'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=3, core=5'
+  - code: shared-slot-content
+    path: $.instances[2].description
+    message: 'value differs: full=''Data are organized per participant within each
+      device directory; participant folders are named after the participant ID number
+      used in the study.'', core=''All instances are part of'
+  - code: shared-slot-content
+    path: $.known_limitations[8].description
+    message: 'value differs: full=''Marijuana use was not assessed for participants
+      living in Alabama because it is an illegal substance there.'', core=''Marijuana
+      use was not assessed for participants living in Alaba'
+  - code: shared-slot-content
+    path: $.missing_data_documentation[1].description
+    message: 'value differs: full="The healthsheet reports that no imputation or completion
+      of missing values was performed; cleaning corrected data only where a logical
+      or appropriate correction was available from'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_d4d.yaml
+      md5: db930c4e1900fdfde04e6b3bf8e52c26
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_d4d_core.yaml
+      md5: e3b7c31719f5a857a41037892a826895
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_reconciliation.md
+      md5: 7e96a94b902d734026f23b7734c8b38d
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

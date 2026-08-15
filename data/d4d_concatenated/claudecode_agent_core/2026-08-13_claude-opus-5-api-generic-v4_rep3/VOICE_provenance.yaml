@@ -290,3 +290,90 @@ intermediates:
   sha256: b3226609ede045a18a1241d7a77498ab07879156ebb2655bf223bc38c82af8f8
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/intermediate/VOICE_report.md
   sha256: 361b6b927b1d276364f968c1d68fdeff4b8513aa9c288dd2afa05e5bf3d4bbf6
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 6
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.distribution_formats[0]
+    message: 'mapping keys differ: missing from core=[''media_type''], missing from
+      full=[]'
+  - code: shared-slot-content
+    path: $.is_deidentified.identifiers_removed
+    message: 'value differs: full=''Names; civic address and other geographic locators,
+      including state and province; country of collection retained; social security
+      numbers; date information at a resolution finer t'
+  - code: shared-slot-content
+    path: $.missing_data_documentation[0].missing_data_patterns
+    message: 'value differs: full=''Some questionnaire items are optional and were
+      left unanswered; each participant answered a common set of questions and then
+      responded to additional questions relevant to their pr'
+  - code: shared-slot-content
+    path: $.regulatory_restrictions.other_compliance
+    message: 'value differs: full=''Data were collected in the United States and Canada;
+      Canadian participating institutions operate under separate research ethics board
+      approvals rather than the United States singl'
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''Enrollment targets differ across sources. The
+      NIH RePORTER narrative and the IRB protocol describe a database of 30,000 human
+      voices with up to 5,000 participants per disease cate'
+  - code: shared-slot-content
+    path: $.subpopulations[1].identification
+    message: 'value differs: full=''Participants are grouped into five disease cohort
+      categories: voice disorders, neurological and neurodegenerative disorders, mood
+      and psychiatric disorders, respiratory disorders,'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep3/VOICE_d4d.yaml
+      md5: e381a1aef27e5969e9680154d7c6414b
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/VOICE_d4d_core.yaml
+      md5: e532b3fbf2bfe6f3b6584a7c49612542
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: distributions
+    record: core
+    detail: report says removed; record has 3 entries
+    claim: 'The slot was deleted and its content redistributed into the two declared
+      slots that actually carry it:'
+  - kind: false_schema_claim
+    slot: distributions
+    detail: report says this is not a declared slot; it is declared on CoreDataset
+    claim: '**Finding:** The core record carried a `distributions` slot not declared
+      in the schema digest, whose member objects mixed keys from two different declared
+      classes — `path` (a `FileCollection` key) alongside `format` and `media_type`
+      (`Distr'
+  claims_checked: 2
+  claims_unnamed: 2
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/VOICE_reconciliation.md
+      md5: 39f56a1bd0feb444ed84fa68bcc8ac3e
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 4
+    minted_fragment: 20
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 2
+    minted_fragment: 14
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+      md5: dcd717170da6762569c0b4eeafc1c3d2
+  recorded_by: backfill_checks

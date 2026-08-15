@@ -316,3 +316,103 @@ intermediates:
   sha256: e5dc8a12c5584b4b0bc21aba9fc62a65bea1288d9f4042662ebe3e01202bd380
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/intermediate/AI_READI_report.md
   sha256: d25f40ae2a91fe598b014c56af1962fe2e22973f3abe362f5fff679c0fdbb746
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 14
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.creators[0]
+    message: 'mapping keys differ: missing from core=[''name''], missing from full=[]'
+  - code: shared-slot-content
+    path: $.distribution_formats[0].notes
+    message: 'value differs: full=''DICOM (application/dicom). Used for all retinal
+      photography, OCT, OCTA and FLIO imaging files.'', core=''DICOM (application/dicom):
+      all retinal photography, OCT, OCTA and FLIO imagi'
+  - code: shared-slot-content
+    path: $.funders[0].notes
+    message: 'value differs: full=''Grants: OT2OD032644; P30DK035816; UL1TR003096.
+      Funder ROR identifier 01cwqze88. OT2OD032644 ("Bridge2AI: Salutogenesis Data
+      Generation Project") is the primary award, made through'
+  - code: shared-slot-content
+    path: $.human_subject_research.irb_approval[0]
+    message: 'value differs: full=''STUDY00016228, University of Washington Institutional
+      Review Board; initial approval received 20 December 2022, with the approval
+      letter published at https://docs.aireadi.org/v3/A'
+  - code: shared-slot-content
+    path: $.informed_consent[0].notes
+    message: 'value differs: full=''Potential participants could read all consent
+      documentation electronically before their visit and give consent with an electronic
+      signature without verbal communication with a cli'
+  - code: shared-slot-content
+    path: $.instances[0].notes
+    message: 'value differs: full="Each instance consists of all data available for
+      one individual participating in the study. Version 3.0.0 contains 2,280 instances;
+      version 1.0.0 contained 204 (pilot phase) and v'
+  - code: shared-slot-content
+    path: $.is_deidentified.notes
+    message: 'value differs: full=''The healthsheet questions asking whether measures
+      were taken to avoid re-identification and whether there was any pre-processing
+      for de-identification of the patients were left un'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.notes
+    message: 'value differs: full=''Access to the dataset requires several steps:
+      logging in through a verified ID system; agreeing to use the data only for type
+      2 diabetes related research; and agreeing to the lice'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''Additional documented facts that fit no dedicated
+      slot. (1) Audit status: the healthsheet states the dataset has not undergone
+      any formal external audits, but has been reviewed in'
+  - code: shared-slot-content
+    path: $.prohibited_uses[0].notes
+    message: 'value differs: full=''Transcribed from the University of Washington
+      AI-READI Data License Agreement v1.0 (Zenodo record 10.5281/zenodo.10642459),
+      which is the only license text present in the source bu'
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.sampling_strategies[0].strategies
+    message: 'value differs: full=''Triple balancing: participants are recruited in
+      approximately equal proportions across four self-reported race/ethnic groups
+      (Asian, Black, Hispanic, White), four categories of T2'
+  - code: shared-slot-content
+    path: $.subpopulations[0].distribution
+    message: 'value differs: full=''Aggregate counts documented in the v3.0.0 README
+      recommended-split table for all 2,280 participants: Hispanic 380, Asian 545,
+      Black 519, White 836. Within the recommended split th'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_d4d.yaml
+      md5: 44c05d71eac247f7b6bcc1669c85d692
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_d4d_core.yaml
+      md5: b8dce8172a18e7ef68aafee9420e980b
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_reconciliation.md
+      md5: 32f254d87b20c579f13dbaad76b2bf3a
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

@@ -290,3 +290,107 @@ intermediates:
   sha256: 4223df55588c7bf1981244bf42944a41b4557549e8fe479c8b218ac3691ceabd
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/intermediate/AI_READI_report.md
   sha256: def564c4a4c7892f18865f3d9e0257316de801783833327b216650ff56e5978d
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 10
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.collection_mechanisms[11].notes
+    message: 'value differs: full=''The environmental sensor and the fitness tracker
+      were specifically chosen with participant privacy as a primary concern: they
+      do not capture video or audio, have no GPS location m'
+  - code: shared-slot-content
+    path: $.description
+    message: 'value differs: full=''Release 3.0.0 of the flagship dataset of the Artificial
+      Intelligence Ready and Equitable (also given as Exploratory) Atlas for Diabetes
+      Insights (AI-READI) project, one of four Da'
+  - code: shared-slot-content
+    path: $.informed_consent[0].consent_type
+    message: 'value differs: full=''Written informed consent, obtained either as an
+      electronic signature in REDCap before the visit or in person at the start of
+      the visit.'', core=''Written informed consent, obtained '
+  - code: shared-slot-content
+    path: $.instances[0].notes
+    message: 'value differs: full=''No `data_substrate` or `data_topic` term is asserted
+      at this level because the instance is a person rather than a topic-homogeneous
+      or substrate-homogeneous artefact; per-director'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.notes
+    message: 'value differs: full=''An earlier statement of licence terms for reusing
+      the AI-READI dataset was published as Contreras, J. et al., "License terms for
+      reusing the AI-READI dataset", Zenodo, https://doi'
+  - code: shared-slot-content
+    path: $.missing_data_documentation[0].missing_data_patterns
+    message: 'value differs: full=''Not all modalities are available for all participants;
+      a participant may have complete data for some data types and none for others.
+      Incomplete or skipped items within survey inst'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''The project treats team science as an object of
+      study in its own right, implementing strategies to understand the interaction
+      patterns of its multi-team systems and disseminating '
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''This record describes version 3.0.0 of the Flagship
+      Dataset of Type 2 Diabetes from the AI-READI Project, the release documented
+      by the FAIRhub API record, the RO-Crate and the v3'
+  - code: shared-slot-content
+    path: $.subpopulations[2].distribution
+    message: 'value differs: full=''Of 2,280 participants: 776 with no diabetes, 560
+      pre-diabetes or lifestyle controlled, 686 oral or non-insulin injectable medication
+      controlled, 258 insulin controlled.'', core=''Of'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_d4d.yaml
+      md5: e6df865c9203a216a41fd501ceeee1ae
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_d4d_core.yaml
+      md5: b7fac13c25b6c49d81016ff5282e6ffb
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: distributions
+    record: either
+    detail: report says removed; record has 10 entries
+    claim: 'the block was removed. Its content was redistributed to slots that do
+      exist:'
+  - kind: false_schema_claim
+    slot: distributions
+    detail: report says this is not a declared slot; it is declared on CoreDataset
+    claim: '### 2.1 Core `distributions` slot not in the schema — **changed**'
+  claims_checked: 4
+  claims_unnamed: 3
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_reconciliation.md
+      md5: 73d924b46bb67fee8a926176225e8063
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 92
+    minted_fragment: 24
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 27
+    minted_fragment: 17
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+      md5: 0f3abb51a333555456bedd63891fcd99
+  recorded_by: backfill_checks

@@ -157,3 +157,59 @@ canonical_superseded_by:
   label: 2026-08-07_claude-opus-5-claudecode-generic-v3_rep2
   at: '2026-08-08T01:18:54+00:00'
   by: d4d runs select
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 3
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.informed_consent
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.instances[0].description
+    message: 'value differs: full=''Each instance represents an individual study participant.
+      Version 3.0.0 contains 2280 instances; version 1.0.0 (pilot phase) contained
+      204 instances and version 2.0.0 contained 10'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.description
+    message: 'value differs: full=''The dataset is released under a custom licence
+      developed for the project, "AI-READI custom licence v2.0" (https://doi.org/10.5281/zenodo.17555036);
+      version 1.0 of the licence is a'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep1/AI_READI_d4d.yaml
+      md5: f98ab6f8b23ea7a20e965688b3071bfc
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/AI_READI_d4d_core.yaml
+      md5: 0e9f0914e5f028f0944e724afb4e50bb
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: resources
+    record: either
+    detail: report says removed; record has 1 entry
+    claim: '| `resources` | Removed | Held only the Mini Version, now relocated to
+      `related_datasets`. The bundle''s own curation note states the Mini Version
+      is "not a version of this dataset," and the slot description ("component datasets
+      that are par'
+  claims_checked: 8
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/AI_READI_reconciliation.md
+      md5: f27c05a4e82183a6b4421a322ec48114
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

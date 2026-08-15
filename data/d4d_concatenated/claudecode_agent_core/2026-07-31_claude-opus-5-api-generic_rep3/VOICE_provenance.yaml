@@ -132,3 +132,56 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d_core.yaml
       md5: 659d3bec62c3ffc9c027c5720d007abe
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 5
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods
+    message: 'list length differs: full=3, core=4'
+  - code: shared-slot-content
+    path: $.confidential_elements[1].description
+    message: 'value differs: full="Raw audio data is nonetheless disseminated through
+      controlled access only, to protect participants'' privacy. Data that would pose
+      a heightened risk of re-identification if shared '
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=5, core=9'
+  - code: shared-slot-content
+    path: $.instances
+    message: 'list length differs: full=5, core=7'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.description
+    message: 'value differs: full=''The dataset is released under the Bridge2AI Voice
+      Registered Access License, governed by the Bridge2AI Voice Registered Access
+      Agreement. Users of the dataset must agree to the te'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d.yaml
+      md5: 8275c5069f34ab595d9bffae4e9fbbe6
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d_core.yaml
+      md5: 659d3bec62c3ffc9c027c5720d007abe
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_reconciliation.md
+      md5: 6cbc0c91939992b8e39e642bcb1d1cda
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

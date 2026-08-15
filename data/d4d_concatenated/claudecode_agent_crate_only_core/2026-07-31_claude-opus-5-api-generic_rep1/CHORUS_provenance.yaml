@@ -159,3 +159,70 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml
       md5: 9bfc4d21c45cb857309039c176bd3e12
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 3
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[0].description
+    message: 'value differs: full=''Data are derived from routine clinical care at
+      participating hospitals under IRB oversight. Data are not collected solely for
+      research but repurposed from clinical workflows under'
+  - code: shared-slot-content
+    path: $.instances[0].description
+    message: 'value differs: full=''Instances derive from patients and their clinical
+      encounters at participating hospitals, represented across modalities: EHR records
+      in the OMOP common data model, high-resolution '
+  - code: shared-slot-content
+    path: $.license_and_use_terms.description
+    message: 'value differs: full=''Governed by a Data Use Agreement available at
+      https://chorus4ai.org/dataset/; the executable agreement is posted at https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml
+      md5: d072813d3501e9e73975ef22796498b8
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml
+      md5: 9bfc4d21c45cb857309039c176bd3e12
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: data_collectors
+    record: either
+    detail: report says removed; record has 1 entry
+    claim: '| `data_collectors` | **Edited** | Removed the clause attributing harmonization
+      coordination to the CHoRUS Data Pillar. The bundle names the Data Pillar only
+      as `Primary maintainers: CHoRUS Data Pillar in collaboration with institutional
+      da'
+  claims_checked: 9
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_reconciliation.md
+      md5: be19d20a71751276d9c5b5790dfd284c
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 2
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 1
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CHORUS_crate_only.txt
+      md5: 06ad867c85e1d1ba0818c34e5bbaec29
+  recorded_by: backfill_checks

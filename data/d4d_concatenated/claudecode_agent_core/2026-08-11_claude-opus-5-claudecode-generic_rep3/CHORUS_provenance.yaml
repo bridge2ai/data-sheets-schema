@@ -133,3 +133,52 @@ validation:
     full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
     core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 1
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.data_governance
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep3/CHORUS_d4d.yaml
+      md5: 83958493a194b12cc17dd1eea1cb9aff
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep3/CHORUS_d4d_core.yaml
+      md5: cbf2482273b6d8bcfa10711b43266cf5
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-claudecode-generic_rep3/CHORUS_reconciliation.md
+      md5: 2289ac5ea9dea8211410e1d54a3d0b99
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+      md5: 9b2ef4b65d67957f79362266cab0bc7a
+  recorded_by: backfill_checks

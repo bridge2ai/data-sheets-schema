@@ -167,3 +167,88 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/CHORUS_d4d_core.yaml
       md5: 8532cfb8ba71c95b2f0cfcfcc5d67bc5
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 5
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods
+    message: 'list length differs: full=3, core=4'
+  - code: shared-slot-content
+    path: $.external_resources
+    message: 'list length differs: full=11, core=8'
+  - code: shared-slot-content
+    path: $.is_deidentified.description
+    message: 'value differs: full=''The project develops capabilities to acquire,
+      standardize, tokenize, store, visualize, and label data, and states that it
+      will transform data using approaches that limit re-identi'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.description
+    message: 'value differs: full=''The dataset is controlled access across all modalities.
+      All participants in the AIM-AHEAD Bridge2AI for Clinical Care Training Program
+      must sign a licensing agreement, included in'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep3/CHORUS_d4d.yaml
+      md5: 0f1f0987f7b6aec36a2a20ba3cec9618
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/CHORUS_d4d_core.yaml
+      md5: 8532cfb8ba71c95b2f0cfcfcc5d67bc5
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: machine_annotation_tools
+    record: either
+    detail: report says removed; record has 1 entry
+    claim: '| `machine_annotation_tools` | full, core | Removed the `privacy_scan_tool`
+      / `CTP-deid` entry and the `UF-Geocoding` entry. Retained the OHNLP toolkit
+      entry. | The bundle describes `privacy_scan_tool` as "A Privacy Scan tools for
+      medical r'
+  - kind: removal_not_performed
+    slot: collection_mechanisms
+    record: either
+    detail: report says removed; record has 5 entries
+    claim: '| `collection_mechanisms` | full, core | Removed the `chorus-container-apps`
+      / internal web-applications entry. | The bundle describes these as "dockerized
+      container applications … deployed to support CHoRUS services on Azure" — service
+      and'
+  - kind: removal_not_performed
+    slot: preprocessing_strategies
+    record: either
+    detail: report says removed; record has 4 entries
+    claim: '| `preprocessing_strategies` | full, core | Removed the geocoding entry
+      in full. | The entry asserted that UF-Geocoding was applied to CHoRUS data "in
+      support of contextual factors such as geographic distance to the nearest hospital
+      and soc'
+  - kind: removal_not_performed
+    slot: is_deidentified
+    record: either
+    detail: report says removed; record has a value
+    claim: '| `is_deidentified` | full, core | Removed the characterization of `CTP-deid`
+      as de-identification tooling. Retained all bundle-stated de-identification content.
+      | The bundle gives the repository name `CTP-deid` and nothing else — no descri'
+  claims_checked: 6
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/CHORUS_reconciliation.md
+      md5: 6000f07bef67664691e21f78040bfcbe
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

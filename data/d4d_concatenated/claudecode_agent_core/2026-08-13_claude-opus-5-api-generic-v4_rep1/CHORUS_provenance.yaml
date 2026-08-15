@@ -258,3 +258,68 @@ intermediates:
   sha256: f67a870938f266047c8a004a3e80cfdb0e6bd03d5e0e6a1259f36b1f9b6ba916
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/intermediate/CHORUS_report.md
   sha256: e80ac52f5bf468ad6748f54fca4b6047f9d19ac740041aff326301ee563a9106
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 6
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods
+    message: 'list length differs: full=5, core=6'
+  - code: shared-slot-content
+    path: $.data_governance.stewardship_roles
+    message: 'list length differs: full=1, core=3'
+  - code: shared-slot-content
+    path: $.existing_uses
+    message: 'list length differs: full=2, core=3'
+  - code: shared-slot-content
+    path: $.is_deidentified.deidentification_details
+    message: 'value differs: full=''De-identification is applied before data enter
+      the shared enclave, and all released data types remain under controlled access.'',
+      core=''De-identification is applied before data ent'
+  - code: shared-slot-content
+    path: $.regulatory_restrictions.regulatory_restrictions
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-content
+    path: $.sampling_strategies
+    message: 'list length differs: full=1, core=2'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/CHORUS_d4d.yaml
+      md5: 06cb8b3fb66f3f97d18a53e538e07cab
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/CHORUS_d4d_core.yaml
+      md5: 2300b9ebb397d9ba0d7509c2268c854f
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/CHORUS_reconciliation.md
+      md5: 1a0162d61ca4bba6a44906f6afa9f7c0
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+      md5: 9b2ef4b65d67957f79362266cab0bc7a
+  recorded_by: backfill_checks
