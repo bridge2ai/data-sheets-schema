@@ -1172,6 +1172,37 @@ def bundle_drift_detail(method: str, label: str, project: str,
                             f"record pinned {recorded[:8]}"), declared
 
 
+GROUNDED_ALL, GROUNDED_GAPS = "all_grounded", "gaps"
+GROUNDED_NOT_RUN, GROUNDED_UNRECORDED = "not_run", "unrecorded"
+
+
+def grounding_status(method: str, label: str, project: str,
+                     concat_dir: Path | None = None) -> tuple[str, int]:
+    """(status, count of identifiers absent from the bundle) for a run (#547).
+
+    Read from the record, like the other two. Recomputing would ask about
+    today's bundle, and 59 records already name a bundle whose bytes have
+    changed — the answer would be about a file the run never saw.
+    """
+    import yaml as _yaml
+
+    from data_sheets_schema.provenance import record_path_for
+    path = record_path_for(project, method, label, concat_dir or CONCAT_DIR)
+    if not path.exists():
+        return GROUNDED_UNRECORDED, 0
+    rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    block = rec.get("grounding")
+    if not isinstance(block, dict):
+        return GROUNDED_UNRECORDED, 0
+    if not block.get("checked"):
+        return GROUNDED_NOT_RUN, 0
+    # Distinct, not occurrences: the number a reader wants is how many facts
+    # rest on nothing, not how many slots repeat them.
+    counts = block.get("distinct") or block.get("counts") or {}
+    n = int(counts.get("absent") or 0)
+    return (GROUNDED_GAPS if n else GROUNDED_ALL), n
+
+
 CLAIMS_CLEAN, CLAIMS_CONTRADICTED = "clean", "contradicted"
 CLAIMS_NOT_RUN, CLAIMS_UNRECORDED = "not_run", "unrecorded"
 CLAIMS_STALE = "stale"
