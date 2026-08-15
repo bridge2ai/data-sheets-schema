@@ -107,16 +107,24 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
                                    "recorded_by": RECORDED_BY}
     else:
         from data_sheets_schema.d4d_pair_consistency import (
-            load_pair_schema, validate_pair_data,
+            load_pair_schema, pair_predates_current_schema, validate_pair_data,
         )
         pair = load_pair_schema(FULL_SCHEMA, CORE_SCHEMA)
+        # The whole point of a backfill is that these pairs are old, so this is
+        # exactly where #520 applies and exactly where the first version left
+        # it out (#550). Without it, `related_datasets` — added to core after
+        # most of the corpus was written — reported as a defect in 70 pairs
+        # that could not have carried it.
+        moved = pair_predates_current_schema(core)
         rep = validate_pair_data(
             yaml.safe_load(full.read_text(encoding="utf-8")) or {},
-            yaml.safe_load(core.read_text(encoding="utf-8")) or {}, pair)
+            yaml.safe_load(core.read_text(encoding="utf-8")) or {}, pair,
+            schema_moved=moved)
         out["pair_consistency"] = {
             "ran": True, "consistent": rep.passed, "errors": len(rep.errors),
             "warnings": len(rep.warnings),
             "identity_slots": len(rep.identity_slots),
+            "schema_moved": moved,
             "findings": [{"code": i.code, "path": i.path,
                           "message": i.message[:200]} for i in rep.errors[:20]],
             "findings_truncated": max(0, len(rep.errors) - 20) or None,

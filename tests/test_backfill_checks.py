@@ -113,21 +113,40 @@ class CorpusTest(unittest.TestCase):
         self.assertEqual(set(rec["pair_consistency"]["schema"]),
                          {"full_sha256", "core_sha256"})
 
-    def test_the_agentic_arm_is_not_clean(self):
-        """Corrects the figure #544 and #550 were filed on.
+    def test_the_agentic_arm_is_clean_once_the_guard_is_applied(self):
+        """Reverses what this test asserted when it was first written (#550).
 
-        I reported the 2026-08-11 agentic arm as 0 divergent pairs of 15. It is
-        not: `related_datasets` sits in the full record and not in core, and it
-        is a schema-identity slot. The schema pin above rules out a stale-schema
-        artifact — those hashes are today's bytes.
+        It asserted the agentic arm was not clean, on a backfill that omitted
+        `schema_moved`. `related_datasets` was added to `CoreDataset` after
+        these records were written, so its absence from core is a fact about
+        the schema's history — #520 makes that a warning, and the first version
+        of the backfill made it an error in 70 pairs.
+
+        With the guard the arm is clean, which is what I originally reported
+        and then wrongly corrected.
         """
         rec = self._record("2026-08-11_claude-opus-5-claudecode-generic_rep1",
                            "AI_READI")
         pair = rec["pair_consistency"]
         self.assertTrue(pair["ran"])
+        self.assertTrue(pair["schema_moved"],
+                        "the premise: this pair predates the current schema")
+        self.assertTrue(pair["consistent"])
+
+    def test_the_v4_arm_still_diverges_with_the_guard(self):
+        """The guard does not explain the API arm away.
+
+        All 12 v4 pairs predate the current schema too, so the guard applies to
+        both arms equally. This one fails on content, which no schema change
+        excuses.
+        """
+        rec = self._record("2026-08-13_claude-opus-5-api-generic-v4_rep1",
+                           "CHORUS")
+        pair = rec["pair_consistency"]
+        self.assertTrue(pair["schema_moved"])
         self.assertFalse(pair["consistent"])
-        self.assertIn("related_datasets",
-                      " ".join(f["path"] for f in pair["findings"]))
+        self.assertTrue(any("content" in f["code"] for f in pair["findings"]),
+                        "content divergence, not a presence artifact")
 
     def test_grounding_is_declined_for_a_drifted_bundle(self):
         """Checking against today's bundle would test a file the run never read.

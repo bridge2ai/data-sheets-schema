@@ -181,6 +181,7 @@ pair_consistency:
   errors: 1
   warnings: 0
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: resource-projection-presence
     path: $.resources

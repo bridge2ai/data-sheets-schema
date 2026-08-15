@@ -160,14 +160,11 @@ canonical_superseded_by:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 3
-  warnings: 1
+  errors: 2
+  warnings: 2
   identity_slots: 79
+  schema_moved: true
   findings:
-  - code: shared-slot-presence
-    path: $.informed_consent
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.instances[0].description
     message: 'value differs: full=''Each instance represents an individual study participant.

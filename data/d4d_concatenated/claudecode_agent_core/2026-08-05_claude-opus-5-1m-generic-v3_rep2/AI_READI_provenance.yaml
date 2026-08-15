@@ -249,9 +249,10 @@ intermediates:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 7
-  warnings: 1
+  errors: 5
+  warnings: 3
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.collection_timeframes[2]
@@ -260,10 +261,6 @@ pair_consistency:
   - code: shared-slot-content
     path: $.creators[0]
     message: 'mapping keys differ: missing from core=[], missing from full=[''affiliations'']'
-  - code: shared-slot-presence
-    path: $.data_protection_impacts
-    message: schema-identical slot is present only in full; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.funders[3].grants[0].id
     message: 'value differs: full=''https://doi.org/10.60775/fairhub.3#grant-microsoft-ai-for-good-lab'',
@@ -271,10 +268,6 @@ pair_consistency:
   - code: shared-slot-content
     path: $.missing_data_documentation[0].missing_data_patterns
     message: 'list length differs: full=2, core=1'
-  - code: shared-slot-presence
-    path: $.related_datasets
-    message: schema-identical slot is present only in full; it must be present in
-      both or neither
   - code: resource-projection-presence
     path: $.resources
     message: resources must be represented in both records when present in either

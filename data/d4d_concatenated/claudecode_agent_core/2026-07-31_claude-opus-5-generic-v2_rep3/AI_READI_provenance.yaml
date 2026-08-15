@@ -190,9 +190,10 @@ validation:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 47
-  warnings: 1
+  errors: 44
+  warnings: 4
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.acquisition_methods[0].description
@@ -205,10 +206,6 @@ pair_consistency:
   - code: shared-slot-content
     path: $.anomalies
     message: 'list length differs: full=6, core=5'
-  - code: shared-slot-presence
-    path: $.at_risk_populations
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.cleaning_strategies
     message: 'list length differs: full=7, core=4'
@@ -266,7 +263,12 @@ pair_consistency:
   - code: shared-slot-content
     path: $.informed_consent
     message: 'list length differs: full=4, core=6'
-  findings_truncated: 27
+  - code: shared-slot-content
+    path: $.instances[0].description
+    message: 'value differs: full=''Each instance represents an individual participant
+      (patient). There are 2,280 instances in version 3.0.0 of the dataset. An instance
+      comprises all data available for that individu'
+  findings_truncated: 24
   artifacts:
     full:
       path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep3/AI_READI_d4d.yaml

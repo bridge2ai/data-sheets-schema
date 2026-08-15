@@ -274,6 +274,7 @@ pair_consistency:
   errors: 2
   warnings: 0
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.is_deidentified.deidentification_details

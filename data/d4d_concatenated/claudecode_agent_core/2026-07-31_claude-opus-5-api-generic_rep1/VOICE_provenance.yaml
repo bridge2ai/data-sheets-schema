@@ -170,9 +170,10 @@ validation:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 6
-  warnings: 0
+  errors: 5
+  warnings: 1
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.acquisition_methods[0].description
@@ -192,10 +193,6 @@ pair_consistency:
     message: 'value differs: full=''Participants are grouped into five disease cohort
       categories for which voice changes have been associated with specific diseases
       with well-recognised unmet needs: voice disorders,'
-  - code: shared-slot-presence
-    path: $.use_repository
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   - code: distribution-relation-presence
     path: $.distributions
     message: full file_collections exist without core distributions

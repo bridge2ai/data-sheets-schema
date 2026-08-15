@@ -159,6 +159,7 @@ pair_consistency:
   errors: 5
   warnings: 0
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.conforms_to

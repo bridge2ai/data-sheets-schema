@@ -183,14 +183,11 @@ validation:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 9
-  warnings: 1
+  errors: 8
+  warnings: 2
   identity_slots: 79
+  schema_moved: true
   findings:
-  - code: shared-slot-presence
-    path: $.annotation_analyses
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.at_risk_populations
     message: 'type differs: full=list, core=dict'

@@ -211,9 +211,10 @@ validation:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 8
-  warnings: 1
+  errors: 7
+  warnings: 2
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.data_collectors
@@ -237,10 +238,6 @@ pair_consistency:
     message: 'value differs: full=''Access is governed by a controlled-access framework.
       The license is stated as "Data Use Agreement available at \''https://chorus4ai.org/dataset/\''",
       with the agreement document at '
-  - code: shared-slot-presence
-    path: $.publisher
-    message: schema-identical slot is present only in full; it must be present in
-      both or neither
   - code: shared-slot-content
     path: $.sampling_strategies
     message: 'list length differs: full=2, core=3'

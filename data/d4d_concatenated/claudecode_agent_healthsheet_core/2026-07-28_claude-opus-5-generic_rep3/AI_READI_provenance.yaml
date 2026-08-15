@@ -96,6 +96,7 @@ pair_consistency:
   errors: 1
   warnings: 0
   identity_slots: 79
+  schema_moved: false
   findings:
   - code: shared-slot-presence
     path: $.related_datasets

@@ -136,6 +136,7 @@ pair_consistency:
   errors: 4
   warnings: 1
   identity_slots: 79
+  schema_moved: true
   findings:
   - code: shared-slot-content
     path: $.funders[0].description

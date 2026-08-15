@@ -135,19 +135,12 @@ validation:
   recorded_by: d4d runs validate
 pair_consistency:
   ran: true
-  consistent: false
-  errors: 2
-  warnings: 1
+  consistent: true
+  errors: 0
+  warnings: 3
   identity_slots: 79
-  findings:
-  - code: shared-slot-presence
-    path: $.data_governance
-    message: schema-identical slot is present only in full; it must be present in
-      both or neither
-  - code: shared-slot-presence
-    path: $.related_datasets
-    message: schema-identical slot is present only in full; it must be present in
-      both or neither
+  schema_moved: true
+  findings: []
   findings_truncated: null
   artifacts:
     full:

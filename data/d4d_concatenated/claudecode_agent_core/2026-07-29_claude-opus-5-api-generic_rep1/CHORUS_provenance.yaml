@@ -159,14 +159,11 @@ validation:
 pair_consistency:
   ran: true
   consistent: false
-  errors: 2
-  warnings: 0
+  errors: 1
+  warnings: 1
   identity_slots: 79
+  schema_moved: true
   findings:
-  - code: shared-slot-presence
-    path: $.version_access
-    message: schema-identical slot is present only in core; it must be present in
-      both or neither
   - code: resource-projection-presence
     path: $.resources
     message: resources must be represented in both records when present in either
