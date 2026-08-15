@@ -1142,6 +1142,72 @@ def validate_outputs(spec: RunSpec) -> list[dict[str, str]]:
     return problems
 
 
+def pair_consistency(spec: RunSpec) -> dict[str, Any] | None:
+    """Does the full/core pair this run produced actually agree? (#544)
+
+    The API path has `reconcile_full` and `reconcile_core` phases and writes
+    `# Phase 4 reconciliation: completed` into every core header, but nothing
+    ever ran the pair checker afterwards. The agentic playbook does, at its own
+    phase 4, and the difference is the whole difference: across the
+    2026-08-13 v4 arm 11 of 12 pairs failed, against 0 of 15 in the
+    2026-08-11 agentic arm.
+
+    Every individual record validated in both arms, which is why neither
+    `linkml-validate` nor `runs check --strict` noticed — both read one file at
+    a time, and this is a property of two files together.
+
+    Reported, never fatal. A divergent pair is still usable evidence and the
+    records are individually valid; the defect being fixed here is that it was
+    invisible, not that it is fatal. Returns None when the checker cannot run,
+    so "not established" stays distinct from "consistent".
+    """
+    try:
+        from data_sheets_schema.d4d_pair_consistency import (load_pair_schema,
+                                                             validate_pair_data)
+        import yaml as _yaml
+        missing = [str(f) for f in (spec.full_path, spec.core_path)
+                   if not f.exists()]
+        if missing:
+            # Not None. None means the block was never written; this run wrote
+            # one and the file it needed was absent, which `validate_outputs`
+            # will also have flagged. Two different states, two answers.
+            return {"ran": False, "reason": f"missing: {', '.join(missing)}"}
+        pair = load_pair_schema(FULL_SCHEMA_PATH, CORE_SCHEMA_PATH)
+        full = _yaml.safe_load(spec.full_path.read_text(encoding="utf-8")) or {}
+        core = _yaml.safe_load(spec.core_path.read_text(encoding="utf-8")) or {}
+        report = validate_pair_data(full, core, pair)
+    except Exception as exc:                                       # noqa: BLE001
+        # A checker that cannot run must say so rather than report agreement.
+        return {"ran": False, "reason": str(exc)[:200]}
+    from data_sheets_schema.provenance import _md5
+    return {
+        "ran": True,
+        "consistent": report.passed,
+        # Pinned for the same reason `validation_block` pins its artifacts
+        # (#426, #433): a verdict about two files is a cached assertion, and
+        # editing either one leaves it saying `consistent: true` about bytes
+        # that no longer exist. Both files, because either can break the pair.
+        # Paths as well as hashes, and for the same reason `validation_block`
+        # records them: the two records do not live in one directory — the full
+        # record is under `{method}/{label}/` and the core one under
+        # `{method}_core/{label}/`, beside this provenance file. A re-check
+        # that reconstructs either path from the record's own location looks
+        # for a file that was never there and calls every pair stale.
+        "artifacts": {
+            "full": {"path": str(spec.full_path), "md5": _md5(spec.full_path)},
+            "core": {"path": str(spec.core_path), "md5": _md5(spec.core_path)},
+        },
+        "errors": len(report.errors),
+        "warnings": len(report.warnings),
+        "identity_slots": len(report.identity_slots),
+        # Bounded, and says so. A list silently cut at 20 reads as a complete
+        # one; `errors` above is the true count either way.
+        "findings": [{"code": i.code, "path": i.path, "message": i.message[:200]}
+                     for i in report.errors[:20]],
+        "findings_truncated": max(0, len(report.errors) - 20) or None,
+    }
+
+
 REPAIR_SYSTEM = (
     "You repair the shape of Datasheets-for-Datasets records. The schema "
     "digest defines the required structure. The validator findings are the "
@@ -1869,6 +1935,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     else:
         rec.data["repair"] = prior_repair or None
     rec.data["validation"] = validation_block(spec, problems)
+    # After repair, not before: repair rewrites both records, so a pair checked
+    # earlier would describe bytes that no longer exist (#544).
+    rec.data["pair_consistency"] = pair_consistency(spec)
     rec.data["intermediates"] = _intermediates_block(spec)
 
     rec.write(spec.provenance_path)

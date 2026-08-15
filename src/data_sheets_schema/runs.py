@@ -1172,6 +1172,51 @@ def bundle_drift_detail(method: str, label: str, project: str,
                             f"record pinned {recorded[:8]}"), declared
 
 
+PAIR_CONSISTENT, PAIR_DIVERGENT = "consistent", "divergent"
+PAIR_NOT_RUN, PAIR_UNRECORDED = "not_run", "unrecorded"
+PAIR_STALE = "stale"
+
+
+def pair_status(method: str, label: str, project: str,
+                concat_dir: Path | None = None) -> tuple[str, int]:
+    """(status, error count) for a record's full/core pair check (#544).
+
+    Read from the record rather than recomputed. Every other reporter here
+    reads what a run attested; recomputing would answer a question about
+    today's files instead of about the run, and would put a SchemaView load
+    per row into a status command.
+
+    `unrecorded` is the honest answer for every record written before the
+    runner learned to check — which is the whole corpus as of 2026-08-13,
+    including all 12 v4 records. It is not `consistent`.
+    """
+    import yaml as _yaml
+
+    from data_sheets_schema.provenance import record_path_for
+    path = record_path_for(project, method, label, concat_dir or CONCAT_DIR)
+    if not path.exists():
+        return PAIR_UNRECORDED, 0
+    rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    block = rec.get("pair_consistency")
+    if not isinstance(block, dict):
+        return PAIR_UNRECORDED, 0
+    if not block.get("ran"):
+        return PAIR_NOT_RUN, 0
+    errors = int(block.get("errors") or 0)
+    # A verdict about two files, re-checked against those files. Same reason
+    # `validation_status` re-hashes: without this, editing either record leaves
+    # the pair verdict asserting agreement about bytes that are gone.
+    from data_sheets_schema.provenance import _md5
+    for entry in (block.get("artifacts") or {}).values():
+        if not isinstance(entry, dict) or not entry.get("md5"):
+            continue
+        f = Path(entry["path"])
+        if not f.exists() or _md5(f) != entry["md5"]:
+            return PAIR_STALE, errors
+    return (PAIR_CONSISTENT if block.get("consistent") else PAIR_DIVERGENT,
+            errors)
+
+
 PLAYBOOK_CURRENT, PLAYBOOK_DRIFTED = "current", "drifted"
 PLAYBOOK_ABSENT, PLAYBOOK_UNRECORDED = "absent", "unrecorded"
 

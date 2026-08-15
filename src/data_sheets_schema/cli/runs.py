@@ -582,6 +582,47 @@ def check_cmd(method, label, project, strict):
         click.echo("   The decision rules live in these files, so a record "
                    "that names them cannot be re-derived from them.")
 
+    # Full/core pair consistency (#544). Every other check here reads one
+    # file; this reads two together, which is why `linkml-validate` and every
+    # gate above passed a v4 arm in which 11 of 12 pairs disagreed. The API
+    # path writes "Phase 4 reconciliation: completed" into every core header
+    # and never ran the checker that would substantiate it; the agentic
+    # playbook runs it, and scored 0 divergent pairs in 15.
+    #
+    # Reported, never fatal: each record is individually valid and usable, and
+    # the whole corpus predates the check, so a gate would fail history.
+    from data_sheets_schema.runs import (
+        PAIR_CONSISTENT, PAIR_DIVERGENT, PAIR_NOT_RUN, PAIR_STALE,
+        PAIR_UNRECORDED, pair_status,
+    )
+    pairs: collections.Counter = collections.Counter()
+    divergent: list[tuple[str, str, int]] = []
+    for r in rows:
+        st, errs = pair_status(r["method"], r["label"], r["project"])
+        pairs[st] += 1
+        if st == PAIR_DIVERGENT:
+            divergent.append((r["project"], r["label"], errs))
+
+    if pairs[PAIR_STALE]:
+        click.echo(f"\nⓘ  {pairs[PAIR_STALE]} pair verdict(s) describe bytes "
+                   "that have since changed; the pair is unknown again.")
+
+    if pairs[PAIR_DIVERGENT] or pairs[PAIR_NOT_RUN]:
+        click.echo(f"\nⓘ  {pairs[PAIR_DIVERGENT]} record(s) wrote a full/core "
+                   f"pair that disagrees ({pairs[PAIR_CONSISTENT]} agree, "
+                   f"{pairs[PAIR_NOT_RUN]} could not be checked, "
+                   f"{pairs[PAIR_UNRECORDED]} predate the check):")
+        for project, label, errs in sorted(divergent)[:8]:
+            click.echo(f"     {project:9} {label:44} {errs} error(s)")
+        if len(divergent) > 8:
+            click.echo(f"     … and {len(divergent) - 8} more")
+        click.echo("   Both files validate alone. This is a property of the "
+                   "two together, so no single-file gate can see it.")
+    elif pairs[PAIR_UNRECORDED]:
+        click.echo(f"\nⓘ  {pairs[PAIR_UNRECORDED]} record(s) predate the "
+                   "full/core pair check (#544); their pairs are unknown, "
+                   "not consistent.")
+
     stale = drift[BUNDLE_DRIFTED] + drift[BUNDLE_ABSENT]
     if stale:
         click.echo(f"\nⓘ  {stale} record(s) name an input bundle whose bytes "
