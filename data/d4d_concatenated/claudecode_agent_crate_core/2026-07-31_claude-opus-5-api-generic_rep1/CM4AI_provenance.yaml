@@ -142,3 +142,97 @@ validation:
       ''is_version_of'', ''is_new_version_of'', ''replaces'', ''is_replaced_by'',
       ''is_required_by'', ''requires'', ''is_part_of'', ''has_part'', ''is_referenced_by'',
       ''references'', ''is_identical_to''] in /related_datasets/3/relationship_type'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 1
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_d4d.yaml
+      md5: ae0404d6b8d1e46ce4e3f480f7af9faf
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_d4d_core.yaml
+      md5: b011ebec7c868fffbae6599b0f1ec33e
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: false_schema_claim
+    slot: third_party_sharing
+    detail: report says this is not a declared slot; it is declared on Dataset
+    claim: The audit flagged seven slots present in the full record and absent from
+      the core record (`third_party_sharing`, `citation`, `subsets`, `direct_collection`,
+      `relationships`, `total_file_count`, `total_size_bytes`), plus a slot named
+      `distri
+  - kind: false_schema_claim
+    slot: citation
+    detail: report says this is not a declared slot; it is declared on Dataset
+    claim: The audit flagged seven slots present in the full record and absent from
+      the core record (`third_party_sharing`, `citation`, `subsets`, `direct_collection`,
+      `relationships`, `total_file_count`, `total_size_bytes`), plus a slot named
+      `distri
+  - kind: false_schema_claim
+    slot: subsets
+    detail: report says this is not a declared slot; it is declared on Dataset
+    claim: The audit flagged seven slots present in the full record and absent from
+      the core record (`third_party_sharing`, `citation`, `subsets`, `direct_collection`,
+      `relationships`, `total_file_count`, `total_size_bytes`), plus a slot named
+      `distri
+  - kind: false_schema_claim
+    slot: direct_collection
+    detail: report says this is not a declared slot; it is declared on Dataset
+    claim: The audit flagged seven slots present in the full record and absent from
+      the core record (`third_party_sharing`, `citation`, `subsets`, `direct_collection`,
+      `relationships`, `total_file_count`, `total_size_bytes`), plus a slot named
+      `distri
+  - kind: false_schema_claim
+    slot: relationships
+    detail: report says this is not a declared slot; it is declared on Dataset
+    claim: The audit flagged seven slots present in the full record and absent from
+      the core record (`third_party_sharing`, `citation`, `subsets`, `direct_collection`,
+      `relationships`, `total_file_count`, `total_size_bytes`), plus a slot named
+      `distri
+  - kind: false_schema_claim
+    slot: total_file_count
+    detail: report says this is not a declared slot; it is declared on Dataset
+    claim: The audit flagged seven slots present in the full record and absent from
+      the core record (`third_party_sharing`, `citation`, `subsets`, `direct_collection`,
+      `relationships`, `total_file_count`, `total_size_bytes`), plus a slot named
+      `distri
+  - kind: false_schema_claim
+    slot: total_size_bytes
+    detail: report says this is not a declared slot; it is declared on Dataset
+    claim: The audit flagged seven slots present in the full record and absent from
+      the core record (`third_party_sharing`, `citation`, `subsets`, `direct_collection`,
+      `relationships`, `total_file_count`, `total_size_bytes`), plus a slot named
+      `distri
+  - kind: false_schema_claim
+    slot: distributions
+    detail: report says this is not a declared slot; it is declared on CoreDataset
+    claim: The audit flagged seven slots present in the full record and absent from
+      the core record (`third_party_sharing`, `citation`, `subsets`, `direct_collection`,
+      `relationships`, `total_file_count`, `total_size_bytes`), plus a slot named
+      `distri
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_reconciliation.md
+      md5: 994eb20803d8180dc1296ba44b9841fc
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

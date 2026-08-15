@@ -322,3 +322,90 @@ intermediates:
   sha256: ea801c3ed88b2501c4b9b939462bcf0d9100d907d1f4ddf78a89f3750a0b3488
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/intermediate/AI_READI_report.md
   sha256: d3206eaeb09ad57ce42a835645449681dce4ba98be6735c1ad38f616fcca557b
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 8
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.creators[0].id
+    message: 'value differs: full=''doi:10.60775/fairhub.3#creator-consortium'', core=''https://aireadi.org/#consortium'''
+  - code: shared-slot-content
+    path: $.data_governance.committee_contact
+    message: 'value differs: full=''AI-READI central contact (mailto:contact@aireadi.org)'',
+      core=''AI-READI central contact (contact@aireadi.org)'''
+  - code: shared-slot-content
+    path: $.ethical_reviews[0].contact_person
+    message: 'value differs: full=''University of Washington IRB Reliance Team (mailto:hsdrely@uw.edu)'',
+      core=''University of Washington IRB Reliance Team (hsdrely@uw.edu)'''
+  - code: shared-slot-content
+    path: $.instances[0].notes
+    message: 'value differs: full=''There is currently one study visit per participant.
+      Approximately 10% of the cohort is planned to be invited back for a follow-up
+      visit in year 4 of the project; the BMJ Open prot'
+  - code: shared-slot-content
+    path: $.is_deidentified.identifiers_removed
+    message: 'value differs: full=''Protected Health Information as defined by the
+      HIPAA Privacy Rule; Sex; Race; Ethnicity; Medications used; 5-digit ZIP code;
+      Genetic sequencing data; Past health records; Traffic '
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''A smaller "mini" version of the dataset is offered
+      for pipeline development; the FAIRhub API records it as a child dataset (id
+      4) of version 3.0.0, and the version 3 documentation'
+  - code: shared-slot-content
+    path: $.regulatory_restrictions.governance_committee_contact
+    message: 'value differs: full=''AI-READI central contact (mailto:contact@aireadi.org)'',
+      core=''AI-READI central contact (contact@aireadi.org)'''
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_d4d.yaml
+      md5: 1640ffa1a8fe7533bd6111d3c5dbeac6
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_d4d_core.yaml
+      md5: 75a88afbe4cd1cb27278afbb822168b3
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: distributions
+    record: either
+    detail: report says removed; record has 10 entries
+    claim: The slot was removed. Its nine per-directory entries — the CDS datatype
+      directories (`cardiac_ecg`, `clinical_data`, `environment`, `retinal_flio`,
+      `retinal_oct`, `retinal_octa`, `retinal_photography`, `wearable_activity_monitor`,
+      `wearable
+  claims_checked: 1
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_reconciliation.md
+      md5: 7da1ea1dc190385dd865afdcdba7108d
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 25
+    minted_fragment: 25
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 10
+    minted_fragment: 14
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+      md5: 0f3abb51a333555456bedd63891fcd99
+  recorded_by: backfill_checks

@@ -93,3 +93,63 @@ prompts:
     as_of: '2026-07-28'
     note: hash is of the bytes at that commit, not of the file today — this prompt
       was edited after the run (#399)
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 2
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.resources[id='https://physionet.org/content/b2ai-voice-pediatric/'].related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.resources[id='https://physionet.org/content/b2ai-voice/'].related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d.yaml
+      md5: b330893fc08b4aef2aa15bb829e0f4c6
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d_core.yaml
+      md5: 278e09f0dd477681c185f4c28546ae82
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: id
+    record: either
+    detail: report says removed; record has a value
+    claim: '| `id` | full nested slots | core nested slots | dropped (full-only) |
+      added (core-only) |'
+  claims_checked: 1
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep1/VOICE_reconciliation.md
+      md5: 6dafc7e9c35495b9a17b59296c86e068
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 4
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 2
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+      md5: dcd717170da6762569c0b4eeafc1c3d2
+  bundle_hash_basis: the record pinned no hash
+  recorded_by: backfill_checks

@@ -230,3 +230,41 @@ validation:
       the given schemas in /creators/2/affiliations/0 | [ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml/0]
       ''University of California, San Diego (https://ror.org/0168r3w48)'' is not valid
       under any of the given schemas in /creators/3/affiliations/0'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 1
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml
+      md5: 8e80e84224b06a9746faf4b8ede86414
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d_core.yaml
+      md5: 47e23602b1966ddd83e8df28eadc7509
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_reconciliation.md
+      md5: 238a76d868e407508ea19e5c3390931a
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

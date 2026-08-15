@@ -170,3 +170,49 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep2/CHORUS_d4d_core.yaml
       md5: 060e0c8b616c3899013d6cc39fe4041c
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 1
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-02_claude-opus-5-bare_rep2/CHORUS_d4d.yaml
+      md5: 8df314756c096da27aaa013e77c2346f
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep2/CHORUS_d4d_core.yaml
+      md5: 060e0c8b616c3899013d6cc39fe4041c
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: collection_timeframes
+    record: either
+    detail: report says removed; record has 2 entries
+    claim: '| `collection_timeframes` | **Removed.** The NIH award period (2022-09-01
+      → 2026-11-30) relocated to `funders` as the award period of OT2OD032701. | Award
+      period is not a collection timeframe. Collection is described as retrospective
+      and th'
+  claims_checked: 5
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-02_claude-opus-5-bare_rep2/CHORUS_reconciliation.md
+      md5: 9fd610ebe1a89d6972157e916a96fcb2
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

@@ -138,3 +138,98 @@ validation:
       Registered Access License'', ''page'': ''https://physionet.org/content/b2ai-voice-pediatric/1.1.0/'',
       ''publisher'': ''https://physionet.org/'', ''keywords'': [''health'', ''pediatric'',
       ''biomarkers'', ''bridge2ai'', ''voice'']} is not of type ''string'' in /related_datasets/0/target_dataset'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 16
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods
+    message: 'list length differs: full=4, core=5'
+  - code: shared-slot-content
+    path: $.cleaning_strategies
+    message: 'list length differs: full=6, core=5'
+  - code: shared-slot-content
+    path: $.collection_timeframes
+    message: 'list length differs: full=3, core=4'
+  - code: shared-slot-presence
+    path: $.confidential_elements
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.creators[17].description
+    message: 'value differs: full=''The Bridge2AI-Voice Consortium as a collective
+      author entity, comprising over 50 investigators, clinicians, scholars and trainees
+      across the participating institutions.'', core=''Th'
+  - code: shared-slot-content
+    path: $.data_protection_impacts
+    message: 'list length differs: full=3, core=2'
+  - code: shared-slot-content
+    path: $.distribution_formats[1].description
+    message: 'value differs: full=''Tab-separated values (TSV) plain-text files, used
+      for the phenotype tables, static_features.tsv and audio_quality_metrics.tsv.'',
+      core=''Tab-separated values (TSV) plain-text files '
+  - code: shared-slot-content
+    path: $.external_resources[14].description
+    message: 'value differs: full=''"AI-readiness for Biomedical Data: Bridge2AI Recommendations",
+      the criterion framework against which the dataset\''s AI-readiness scorecard
+      was assessed.'', core=''"AI-readiness for '
+  - code: shared-slot-content
+    path: $.human_subject_research.description
+    message: 'value differs: full=''The dataset arises from human subjects research.
+      The official title is Bridge2AI-Voice; the study type is observational, with
+      a cohort observation model and a cross-sectional time'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=5, core=10'
+  - code: shared-slot-content
+    path: $.instances
+    message: 'list length differs: full=4, core=5'
+  - code: shared-slot-presence
+    path: $.is_tabular
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.other_tasks
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.subpopulations
+    message: 'list length differs: full=5, core=10'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep1/VOICE_d4d.yaml
+      md5: 489285d0b9a98fade98b67a9704c3cd4
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/VOICE_d4d_core.yaml
+      md5: f0469ec0ac5395acddbcaa16dd60f57b
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/VOICE_reconciliation.md
+      md5: ed8fc7713550d0c44ef2c6dd35e4b2b6
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

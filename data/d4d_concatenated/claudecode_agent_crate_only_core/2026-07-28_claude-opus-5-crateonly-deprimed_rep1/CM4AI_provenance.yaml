@@ -80,3 +80,49 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CM4AI_d4d_core.yaml
       sha256: d0b884fb83652371fd49b54bb0553fa4d7f64728cd5636ef7b82b0699d0b3db6
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: true
+  errors: 0
+  warnings: 1
+  identity_slots: 79
+  findings: []
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CM4AI_d4d.yaml
+      md5: 069b792b863e9db36bc8db6f4dfdedec
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CM4AI_d4d_core.yaml
+      md5: 01f19a4482b56305e7a40ce4048316a5
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CM4AI_reconciliation.md
+      md5: 327d59ccc8cc35e0514126fc2b35db4a
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 78
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 39
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CM4AI_crate_only.txt
+      md5: 965b0aa654facd9992fda14ff4535a25
+  bundle_hash_basis: the record pinned no hash
+  recorded_by: backfill_checks

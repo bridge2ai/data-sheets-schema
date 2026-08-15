@@ -159,3 +159,66 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d_core.yaml
       md5: 00ed1dd039dc69d90eb9e5b7c681a10b
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 7
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods
+    message: 'list length differs: full=3, core=4'
+  - code: shared-slot-content
+    path: $.external_resources[9].description
+    message: 'value differs: full=''Companion dataset (typed relationship: separate
+      but related resource) - the Bridge2AI-Voice Pediatric Dataset, a distinct PhysioNet
+      project covering 300 participants aged 2-18 wit'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=3, core=8'
+  - code: shared-slot-content
+    path: $.is_deidentified.description
+    message: 'value differs: full=''The dataset is de-identified. Identifiable information
+      under HIPAA and the Common Rule, as well as data considered sensitive, has been
+      removed. Direct identifiers are removed; HIP'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.description
+    message: 'value differs: full=''The dataset is released under the Bridge2AI Voice
+      Registered Access License with an associated Bridge2AI Voice Registered Access
+      Agreement. On PhysioNet, versions up to 1.1 used r'
+  - code: shared-slot-content
+    path: $.subpopulations
+    message: 'list length differs: full=5, core=6'
+  - code: shared-slot-content
+    path: $.version_access.description
+    message: 'value differs: full=''Each version of the dataset has a unique DOI and,
+      by default, older versions continue to be supported, hosted and made available
+      to researchers; the dataset publishers reserve the'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d.yaml
+      md5: 1c980ccc5ebb2ad6a3484f781a6dc81f
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d_core.yaml
+      md5: 00ed1dd039dc69d90eb9e5b7c681a10b
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_reconciliation.md
+      md5: c732bcfc09924b3e101c58bb681059b5
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

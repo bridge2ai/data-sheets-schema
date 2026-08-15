@@ -143,3 +143,125 @@ validation:
       ''replaces'', ''is_replaced_by'', ''is_required_by'', ''requires'', ''is_part_of'',
       ''has_part'', ''is_referenced_by'', ''references'', ''is_identical_to''] in
       /related_datasets/3/relationship_type'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 4
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.license_and_use_terms.description
+    message: 'value differs: full=''The dataset is licensed for reuse under CC BY-NC-SA
+      4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/). Users are free to
+      share (copy and redistribute the material in any me'
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.tasks[0].description
+    message: 'value differs: full=''Integration of protein localization and protein
+      interaction data using self-supervised embedding approaches from deep learning,
+      followed by algorithmic community detection at mult'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep3/CM4AI_d4d.yaml
+      md5: 0c19ca63c10feb6d945e8607cdcc65d4
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep3/CM4AI_d4d_core.yaml
+      md5: fdfd84d2fcdf191e2388ec735fb41e13
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: machine_annotation_tools
+    record: either
+    detail: report says removed; record has 5 entries
+    claim: '| `machine_annotation_tools` | Removed the GPT-4 Gene Set AI entry''s
+      mechanism detail (engineered prompt, chain-of-thought, one-shot strategy, PubMed
+      citation module). Retained only what the CM4AI preprint states: an LLM approach
+      that names'
+  - kind: removal_not_performed
+    slot: labeling_strategies
+    record: either
+    detail: report says removed; record has 2 entries
+    claim: '| `labeling_strategies` | Removed the Annotation Jamboree entry (dozen
+      individuals working in pairs, named annotator initials). | Documented exclusively
+      in the U2OS Nature paper, describing curation of the U2OS map. No evidence this
+      process'
+  - kind: removal_not_performed
+    slot: external_resources
+    record: either
+    detail: report says removed; record has 10 entries
+    claim: '| `external_resources` | Removed the U2OS multimodal cell maps publication
+      entry. | The slot asks for resources referenced at the dataset level. Neither
+      the HIGT4C release record nor any CM4AI Dataverse release lists this paper as
+      a Related'
+  - kind: removal_not_performed
+    slot: collection_mechanisms
+    record: either
+    detail: report says removed; record has 5 entries
+    claim: '| `collection_mechanisms` | Removed the five Year 1 mechanism entries
+      (pipetting robot fixation protocols, 6 guide RNAs per gene, 10x Genomics 3''HT
+      kit, 17 endogenously tagged genes, 34 in progress). | All are drawn from the
+      May 2024 prepri'
+  - kind: removal_not_performed
+    slot: preprocessing_strategies
+    record: either
+    detail: report says removed; record has 6 entries
+    claim: '| `preprocessing_strategies` | Removed the four MuSIC-pipeline entries
+      (node2vec embedding, HPA DenseNet image embedding, contrastive co-embedding,
+      HiDeF community detection). | These describe production of cell maps. Both records
+      state, on'
+  - kind: removal_not_performed
+    slot: raw_sources
+    record: either
+    detail: report says removed; record has 3 entries
+    claim: '| `raw_sources` | Removed the "deposition archives feeding the MuSIC pipeline"
+      entry. | Internal laboratory staging locations for a pipeline whose outputs
+      are absent from this release. |'
+  - kind: removal_not_performed
+    slot: confidential_elements
+    record: either
+    detail: report says removed; record has 1 entry
+    claim: '| `confidential_elements` | Removed the "commercial-use gating" entry;
+      slot now omitted. | Commercial licensing restriction is a use-terms matter,
+      not confidentiality of dataset content. The content is already correctly carried
+      by `license_'
+  - kind: removal_not_performed
+    slot: collection_timeframes
+    record: either
+    detail: report says removed; record has 3 entries
+    claim: '| `collection_timeframes` | Removed both entries (release publication
+      timeline, Year 1 milestones); slot now omitted. | Both record publication and
+      reporting chronology, not periods during which data was collected. `distribution_dates`
+      alre'
+  - kind: removal_not_performed
+    slot: sampling_strategies
+    record: either
+    detail: report says removed; record has 4 entries
+    claim: '| `sampling_strategies` | Removed the "proteome coverage attained by SEC-MS"
+      entry. | Records achieved coverage (~7,000 proteins, 72/100 chromatin modifiers
+      detected), which is an outcome statistic, not a selection methodology. |'
+  claims_checked: 13
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep3/CM4AI_reconciliation.md
+      md5: f0465831d925cbf7a030a47676f611e6
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

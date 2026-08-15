@@ -268,3 +268,58 @@ intermediates:
   sha256: 0de3e03dfcfcb65f3c1de18958112c799edac7e7ca51a45d10803c198f740a83
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic_rep1/intermediate/CHORUS_report.md
   sha256: 201b8fd962d22b09816bea2711cf5a7b4542f3cbaf00934364586d99f92d77f5
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 2
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.is_deidentified.deidentification_details
+    message: 'value differs: full=''As of August 2025, de-identification of a larger
+      imaging cohort was in process, with about 1,000 images then available.'', core=''As
+      of August 2025, de-identification of a larger im'
+  - code: shared-slot-content
+    path: $.sampling_strategies[0].strategies
+    message: 'value differs: full=''Sampling is designed to ensure comprehensive sets
+      of patient conditions and clinical treatment strategies; federated access is
+      intended to enable sampling methods that ensure a ba'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml
+      md5: fc8f14e727424eb34b517e96d4baed4b
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml
+      md5: 9392ef1acffe05277340b1bd7ec013a9
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic_rep1/CHORUS_reconciliation.md
+      md5: d35e25914522598c00121a5730323c68
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+      md5: 9b2ef4b65d67957f79362266cab0bc7a
+  recorded_by: backfill_checks

@@ -339,3 +339,87 @@ intermediates:
   sha256: a667bb814b53389eea09e0a3a66717dbd506fc8dc20e59580af8f03a6992cb97
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/intermediate/AI_READI_report.md
   sha256: c30a27a3b3408fbf8e5af685a973f5536b213024aebfebcc52f4b5092365e5db
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 6
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''notes'']'
+  - code: shared-slot-content
+    path: $.distribution_dates[0].notes
+    message: 'value differs: full=''The BMJ Open protocol describes the first release
+      as the publicly accessible dataset from pilot data collection made available
+      in May 2024, with all data collected through 31 July'
+  - code: shared-slot-content
+    path: $.informed_consent[0].consent_type
+    message: 'value differs: full=''Written informed consent, obtained either as an
+      electronic signature in REDCap before the visit or on paper in person at the
+      start of the visit.'', core=''Written informed consent, '
+  - code: shared-slot-content
+    path: $.is_deidentified.deidentification_details
+    message: 'value differs: full=''The dataset description records deIdentType as
+      NoDeIdentification with deIdentHIPAA true, and explains that no identifiers
+      were collected so no active de-identification was necess'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''Beyond the dataset itself, the AI-READI project
+      pursues two accompanying programmes recorded in the source materials. It hosts
+      a year-long research internship programme at UC San '
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''Several disagreements and gaps exist across the
+      sources in the bundle. (1) The acronym is expanded as "Artificial Intelligence
+      Ready and Equitable Atlas for Diabetes Insights" in '
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_d4d.yaml
+      md5: c8a58be2016bb9924491b1c7f49647bb
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_d4d_core.yaml
+      md5: 23185c5c9b728415e2c4fa7c2f676507
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: distributions
+    record: either
+    detail: report says removed; record has 11 entries
+    claim: '| 1 | `distributions` | **Removed.** | Not in the declared slot inventory.
+      An invented slot is a validation failure and a schema-fidelity defect regardless
+      of the accuracy of its contents. |'
+  - kind: false_schema_claim
+    slot: distributions
+    detail: report says this is not a declared slot; it is declared on CoreDataset
+    claim: No such slot exists in the `CoreDataset`/`Dataset` inventory.
+  claims_checked: 2
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_reconciliation.md
+      md5: 4b984d9f09edf908bb29ec17c31d2a56
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 38
+    minted_fragment: 13
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 10
+    minted_fragment: 13
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+      md5: 0f3abb51a333555456bedd63891fcd99
+  recorded_by: backfill_checks

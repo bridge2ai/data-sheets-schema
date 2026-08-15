@@ -187,3 +187,109 @@ validation:
       ''references'', ''is_identical_to''] in /related_datasets/2/relationship_type
       | [ERROR] [data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep3/AI_READI_d4d.yaml/0]
       ''2025-11-17'' is not a ''date-time'' in /issued'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 47
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[0].description
+    message: 'value differs: full=''Directly observable measurement. Laboratory results
+      from blood and urine, vital signs and anthropometrics, retinal imaging, ECG,
+      monofilament testing, visual function testing, and'
+  - code: shared-slot-content
+    path: $.addressing_gaps
+    message: 'list length differs: full=4, core=5'
+  - code: shared-slot-content
+    path: $.anomalies
+    message: 'list length differs: full=6, core=5'
+  - code: shared-slot-presence
+    path: $.at_risk_populations
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.cleaning_strategies
+    message: 'list length differs: full=7, core=4'
+  - code: shared-slot-content
+    path: $.collection_mechanisms
+    message: 'list length differs: full=17, core=11'
+  - code: shared-slot-content
+    path: $.collection_timeframes
+    message: 'list length differs: full=5, core=3'
+  - code: shared-slot-content
+    path: $.conforms_to
+    message: 'value differs: full=''Clinical Dataset Structure (CDS) v0.1.1 (https://cds-specification.readthedocs.io/en/v0.1.1/)'',
+      core=''https://cds-specification.readthedocs.io/en/v0.1.1/'''
+  - code: shared-slot-content
+    path: $.creators
+    message: 'list length differs: full=17, core=1'
+  - code: shared-slot-content
+    path: $.data_collectors
+    message: 'list length differs: full=6, core=7'
+  - code: shared-slot-content
+    path: $.description
+    message: 'value differs: full=''A multimodal, cross-sectional dataset collected
+      from 2,280 participants with and without type 2 diabetes mellitus (T2DM), harmonized
+      across three United States data collection sit'
+  - code: shared-slot-content
+    path: $.distribution_dates
+    message: 'list length differs: full=3, core=4'
+  - code: shared-slot-content
+    path: $.distribution_formats
+    message: 'list length differs: full=7, core=6'
+  - code: shared-slot-content
+    path: $.ethical_reviews
+    message: 'list length differs: full=4, core=3'
+  - code: shared-slot-content
+    path: $.extension_mechanism.description
+    message: 'value differs: full=''There is currently no mechanism for parties outside
+      the project to extend, augment, or contribute to the AI-READI dataset; extension
+      is limited to those involved in the project. T'
+  - code: shared-slot-content
+    path: $.external_resources
+    message: 'list length differs: full=14, core=12'
+  - code: shared-slot-content
+    path: $.funders
+    message: 'list length differs: full=6, core=4'
+  - code: shared-slot-content
+    path: $.future_use_impacts[0].description
+    message: 'value differs: full=''Theoretical risk of future re-identification.
+      The project states it does not currently anticipate uses of the dataset that
+      could result in unfair treatment or harm, but explicitly'
+  - code: shared-slot-content
+    path: $.human_subject_research.description
+    message: 'value differs: full=''The dataset derives from human subjects research.
+      The study is an observational, cross-sectional cohort study registered at ClinicalTrials.gov
+      as NCT06002048 and approved by the I'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=4, core=6'
+  findings_truncated: 27
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep3/AI_READI_d4d.yaml
+      md5: aea6fc0ffe3665764e033032fcd9adb1
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep3/AI_READI_d4d_core.yaml
+      md5: b3f2bd1eb0d565eeae3cff10cc28540f
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep3/AI_READI_reconciliation.md
+      md5: dc9bd81a9c5dd74484073ac7df5efd9b
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

@@ -167,3 +167,64 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d_core.yaml
       md5: 906fb9370246536a401bd12ec7cc6d05
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 4
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.anomalies
+    message: 'list length differs: full=4, core=3'
+  - code: shared-slot-presence
+    path: $.data_protection_impacts
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.external_resources[0].description
+    message: 'value differs: full=''Associated publication and dataset citation: Bensoussan,
+      Y., et al. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset
+      linked to health information (version 3.0.'
+  - code: shared-slot-presence
+    path: $.informed_consent
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d.yaml
+      md5: c39c83a8036898d309c610f9fff1b290
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d_core.yaml
+      md5: 906fb9370246536a401bd12ec7cc6d05
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 1
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_reconciliation.md
+      md5: 9792054c7e4d5be340d20f9ee31f1583
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/VOICE_crate_only.txt
+      md5: e0da1c226b05e944a617e2b0cdf9b6a0
+  recorded_by: backfill_checks

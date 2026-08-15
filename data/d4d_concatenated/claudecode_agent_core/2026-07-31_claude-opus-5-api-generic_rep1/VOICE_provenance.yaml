@@ -167,3 +167,62 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_d4d_core.yaml
       md5: 37bd20e5c3d318b6590286c7b4d83d9a
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 6
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[0].description
+    message: 'value differs: full=''The data was directly observable and reported
+      by subjects. Clinical diagnoses were verified by clinicians reviewing audio
+      and/or imaging data, looking at electronic health records'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=4, core=8'
+  - code: shared-slot-content
+    path: $.instances[2].description
+    message: 'value differs: full=''Each individual answered a common set of questions
+      and then responded to additional questions relevant to their primary diagnostic
+      category.'', core=''Each individual answered a com'
+  - code: shared-slot-content
+    path: $.subpopulations[1].description
+    message: 'value differs: full=''Participants are grouped into five disease cohort
+      categories for which voice changes have been associated with specific diseases
+      with well-recognised unmet needs: voice disorders,'
+  - code: shared-slot-presence
+    path: $.use_repository
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: distribution-relation-presence
+    path: $.distributions
+    message: full file_collections exist without core distributions
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_d4d.yaml
+      md5: 2f8ce5fccfdca17de054c35a3cbabe84
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_d4d_core.yaml
+      md5: 37bd20e5c3d318b6590286c7b4d83d9a
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_reconciliation.md
+      md5: 6ee861261087c8733f9339e1fd0d1a79
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

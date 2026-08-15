@@ -340,3 +340,492 @@ intermediates:
   sha256: 188f166d3652733259af659e8446dbb8aff5ba5f79c55920caacba7059247c8b
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/intermediate/VOICE_report_2.md
   sha256: 159dd7aa7a0d5b27b8c6237fd491d2bca949cc7a44619d8720cec059eb8ac80a
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 9
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.data_governance.committee_contact
+    message: 'value differs: full=''Bridge2AI-Voice Data Access Compliance Office'',
+      core=''Bridge2AI-Voice Data Access Compliance Office (DACO@b2ai-voice.org)'''
+  - code: shared-slot-content
+    path: $.distribution_formats
+    message: 'list length differs: full=4, core=3'
+  - code: shared-slot-content
+    path: $.informed_consent[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''notes'',
+      ''source_caveats'']'
+  - code: shared-slot-content
+    path: $.is_deidentified.identifiers_removed
+    message: 'value differs: full=''Names\nCivic addresses and geographic locators\nSocial
+      security numbers\nDate information at a resolution finer than years\nPhone and
+      fax numbers\nEmail addresses\nIP addresses\nM'
+  - code: shared-slot-content
+    path: $.machine_annotation_tools[0].tool_descriptions
+    message: 'value differs: full=''Whisper Large generated transcriptions of the
+      recordings\nopenSMILE extracted eGeMAPS acoustic features per audio file\nPraat
+      and Parselmouth produced phonetic and prosodic measur'
+  - code: shared-slot-content
+    path: $.missing_data_documentation[0].missing_data_causes
+    message: 'value differs: full=''Some questionnaire items are optional\nData collection
+      irregularities during a session\nParticipants answered a common set of items
+      plus items specific to their primary diagnostic'
+  - code: shared-slot-content
+    path: $.sampling_strategies[0].strategies
+    message: 'value differs: full=''Non-probability sampling\nPurposive recruitment
+      at high-volume expert clinics, defined as outpatient clinics within hospital
+      systems or academic institutions with expertise in a s'
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''Evidence commentary on the values above. (1) Referent:
+      the bundle documents two published collections from the same project. This record
+      describes the adult flagship dataset publi'
+  - code: shared-slot-content
+    path: $.subpopulations[1].identification
+    message: 'value differs: full=''Disease cohort membership is identifiable through
+      the per-condition diagnosis tables in the phenotype folder, one table per validated
+      condition plus a control table.'', core="Disea'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_d4d.yaml
+      md5: 33fa830c616b708f9311f5fbb1bd4d25
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_d4d_core.yaml
+      md5: 57d9e7f5bca22e6088f08b8f90e56eb4
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: distributions
+    record: either
+    detail: report says removed; record has 3 entries
+    claim: the block was removed. Its content was already fully represented by the
+      declared `distribution_formats` slot, which was retained and left unchanged.
+      No evidence was lost. The folder-level grouping that `path` was carrying survives
+      in the fu
+  - kind: false_schema_claim
+    slot: distributions
+    detail: report says this is not a declared slot; it is declared on CoreDataset
+    claim: This slot is not declared on `CoreDataset`, and the key set is a hybrid
+      of `FileCollection` (`path`) and `DistributionFormat` (`format`, `media_type`).
+  claims_checked: 2
+  claims_unnamed: 4
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_reconciliation.md
+      md5: d291823125243eff2b0ef35f31a10f7b
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 10
+    minted_fragment: 0
+    absent: 70
+  findings:
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 032db5x82
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 032db5x82
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02r109517
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02r109517
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02r109517#rameau
+    path: $.creators[].id
+    record: full
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 02r109517#rameau
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02r109517#sean-parker
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 02r109517#sean-parker
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02r109517#sigaras
+    path: $.creators[].id
+    record: full
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 02r109517#sigaras
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 042nb2s44
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 042nb2s44
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 032db5x82#bahr
+    path: $.creators[].id
+    record: full
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 032db5x82#bahr
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 032db5x82#csd
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 032db5x82#csd
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 032db5x82#watts
+    path: $.creators[].id
+    record: full
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 032db5x82#watts
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 03dbr7087
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 03dbr7087
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 05dq2gs74
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 05dq2gs74
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 057q4rt57
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 057q4rt57
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 057q4rt57#johnson
+    path: $.creators[].id
+    record: full
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 057q4rt57#johnson
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 05deks119
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 05deks119
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 01yc7t268
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 01yc7t268
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 009avj582
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 009avj582
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 0213rcc28
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 0213rcc28
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 04j198w64
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 04j198w64
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02y3ad647
+    path: $.creators[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02y3ad647
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 032db5x82
+    path: $.data_governance.accountable_organization.id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 032db5x82
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 032db5x82
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02r109517
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02r109517
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02r109517#rameau
+    path: $.creators[].id
+    record: core
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 02r109517#rameau
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02r109517#sean-parker
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 02r109517#sean-parker
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02r109517#sigaras
+    path: $.creators[].id
+    record: core
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 02r109517#sigaras
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 042nb2s44
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 042nb2s44
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 032db5x82#bahr
+    path: $.creators[].id
+    record: core
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 032db5x82#bahr
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 032db5x82#csd
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 032db5x82#csd
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 032db5x82#watts
+    path: $.creators[].id
+    record: core
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 032db5x82#watts
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 03dbr7087
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 03dbr7087
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 05dq2gs74
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 05dq2gs74
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 057q4rt57
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 057q4rt57
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 057q4rt57#johnson
+    path: $.creators[].id
+    record: core
+  - kind: fragment_on_org_identifier
+    authority: ROR
+    identifier: 057q4rt57#johnson
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 05deks119
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 05deks119
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 01yc7t268
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 01yc7t268
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 009avj582
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 009avj582
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 0213rcc28
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 0213rcc28
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 04j198w64
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 04j198w64
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02y3ad647
+    path: $.creators[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 02y3ad647
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 032db5x82
+    path: $.data_governance.accountable_organization.id
+    record: core
+  distinct:
+    grounded: 5
+    minted_fragment: 0
+    absent: 19
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+      md5: dcd717170da6762569c0b4eeafc1c3d2
+  recorded_by: backfill_checks

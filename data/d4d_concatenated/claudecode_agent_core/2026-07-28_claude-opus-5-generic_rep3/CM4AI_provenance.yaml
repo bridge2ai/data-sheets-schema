@@ -93,3 +93,69 @@ prompts:
     as_of: '2026-07-28'
     note: hash is of the bytes at that commit, not of the file today — this prompt
       was edited after the run (#399)
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 5
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.resources[id='https://doi.org/10.18130/V3/B35XWX'].related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.resources[id='https://doi.org/10.18130/V3/F3TD5R'].related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.resources[id='https://doi.org/10.18130/V3/HIGT4C'].related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.resources[id='https://doi.org/10.18130/V3/K7TGEM'].related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/CM4AI_d4d.yaml
+      md5: 2602c554b46417e5a4c51e2032cdff0f
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep3/CM4AI_d4d_core.yaml
+      md5: 34f4d9312d5a7d596632b8551c737323
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep3/CM4AI_reconciliation.md
+      md5: c1c134e5d0df4c264b2a8146181630c3
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 98
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 43
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+      md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+  bundle_hash_basis: the record pinned no hash
+  recorded_by: backfill_checks

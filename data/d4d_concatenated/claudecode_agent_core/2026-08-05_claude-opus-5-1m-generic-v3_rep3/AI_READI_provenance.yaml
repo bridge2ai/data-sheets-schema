@@ -262,3 +262,86 @@ intermediates:
   sha256: aa2527e6e709d0990b62fb0b17581785904d64e1bfbbcfd8d1c784c3643d9102
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep3/intermediate/AI_READI_repair_core_r2.yaml
   sha256: 1e08eea9b22168f1f2938e2dd1484dc7a8317e95e0c8fe98d9a10d2641a8021d
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 10
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.anomalies
+    message: 'list length differs: full=10, core=9'
+  - code: shared-slot-content
+    path: $.creators[0]
+    message: 'mapping keys differ: missing from core=[''affiliations''], missing from
+      full=[]'
+  - code: shared-slot-presence
+    path: $.distribution_formats
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.ethical_reviews[2]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''contact_person'']'
+  - code: shared-slot-content
+    path: $.funders[0].grants[0]
+    message: 'mapping keys differ: missing from core=[''name''], missing from full=[]'
+  - code: shared-slot-content
+    path: $.is_deidentified
+    message: 'mapping keys differ: missing from core=[], missing from full=[''identifiers_removed'']'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.license_terms[0]
+    message: 'value differs: full=''The dataset is released under a custom AI-READI
+      licence (v2.0 for this release, recorded at https://doi.org/10.5281/zenodo.17555036;
+      v1.0 of the licence, a University of Washingto'
+  - code: shared-slot-content
+    path: $.missing_data_documentation
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: distribution-relation-presence
+    path: $.distributions
+    message: full file_collections exist without core distributions
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-05_claude-opus-5-1m-generic-v3_rep3/AI_READI_d4d.yaml
+      md5: 5045f8e86102d7acd552a7c0650ac12e
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep3/AI_READI_d4d_core.yaml
+      md5: e10225bc38593c9fba873e09ef815682
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: keywords
+    record: either
+    detail: report says removed; record has 9 entries
+    claim: '| `keywords` | Dropped "Type 2 Diabetes" (a `resourceTypeValue` and `conditionName`,
+      not a keyword) and "Salutogenesis" (appears nowhere as a keyword). Seven FAIRhub
+      `subject` values retained verbatim. |'
+  - kind: removal_not_performed
+    slot: conforms_to_schema
+    record: either
+    detail: report says removed; record has a value
+    claim: '| `conforms_to_schema` | Removed. It held the v0.1.0 metadata-file schema
+      URL while `conforms_to` held CDS v0.1.1, producing an internal version conflict.
+      `conforms_to` retained as the dataset-level statement. |'
+  claims_checked: 6
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-05_claude-opus-5-1m-generic-v3_rep3/AI_READI_reconciliation.md
+      md5: 75b5d043f9a3b2a0e77aa80a5282f02d
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

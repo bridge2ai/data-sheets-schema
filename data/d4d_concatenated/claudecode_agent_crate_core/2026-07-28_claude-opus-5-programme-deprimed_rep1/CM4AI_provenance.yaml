@@ -75,3 +75,133 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_d4d_core.yaml
       sha256: 633fec205061a2fc8ac8ab3eddca41f94618c3462ce22bb465f055ebf5dac008
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 1
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_d4d.yaml
+      md5: 274399b394f79e91450b30010257f96d
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_d4d_core.yaml
+      md5: 1ca4c847e3b3de1daaf23cf5dfb43443
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_reconciliation.md
+      md5: 13745775d6269b3393adfce88297ba4b
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 12
+    minted_fragment: 0
+    absent: 16
+  findings:
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 0168r3w48
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 043mz5j54
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 00f54p054
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 03v76x132
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 008s83205
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 00hj54h04
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 0213rcc28
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 0161xgx34
+    path: $.creators[].affiliations[].id
+    record: full
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 0168r3w48
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 043mz5j54
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 00f54p054
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 03v76x132
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 008s83205
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 00hj54h04
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 0213rcc28
+    path: $.creators[].affiliations[].id
+    record: core
+  - kind: identifier_not_in_bundle
+    authority: ROR
+    identifier: 0161xgx34
+    path: $.creators[].affiliations[].id
+    record: core
+  distinct:
+    grounded: 5
+    minted_fragment: 0
+    absent: 8
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CM4AI_preprocessed_with_crate.txt
+      md5: c62ede765a0cd1f925aab35d4c2e22ee
+  bundle_hash_basis: the record pinned no hash
+  recorded_by: backfill_checks

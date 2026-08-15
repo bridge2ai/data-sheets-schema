@@ -74,3 +74,53 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-27_claude-opus-5_rep2/AI_READI_d4d_core.yaml
       sha256: b49c82132be9d2aac4ac56f7d89ebb9aaa90fc25978741573825d5f0acce0978
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 1
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet/2026-07-27_claude-opus-5_rep2/AI_READI_d4d.yaml
+      md5: 8a1168cc8bcc3e462456c83e9674ac04
+    core:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-27_claude-opus-5_rep2/AI_READI_d4d_core.yaml
+      md5: b6badddcb71f5d583fe35882381c9ca7
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_healthsheet_core/2026-07-27_claude-opus-5_rep2/AI_READI_reconciliation.md
+      md5: 932421c1e3a06f5d1b2a94367d182f77
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 4
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 1
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/AI_READI_healthsheet_only.txt
+      md5: a66b16818139bca4018efe11cae5cc7a
+  bundle_hash_basis: the record pinned no hash
+  recorded_by: backfill_checks

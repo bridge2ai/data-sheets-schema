@@ -208,3 +208,72 @@ validation:
     class: CoreDataset
     error: '[ERROR] [data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep2/CHORUS_d4d_core.yaml/0]
       ''2026-04-03T00:00:00'' is not a ''date-time'' in /issued'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 8
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.data_collectors
+    message: 'list length differs: full=2, core=3'
+  - code: shared-slot-content
+    path: $.data_protection_impacts
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-content
+    path: $.description
+    message: 'value differs: full=''The Collaborative Hospital Repository Uniting
+      Standards (CHoRUS) for Clinical Care AI is a clinical data network developing
+      a flagship multi-hospital, multimodal, high-resolution '
+  - code: shared-slot-content
+    path: $.instances
+    message: 'list length differs: full=1, core=2'
+  - code: shared-slot-content
+    path: $.known_limitations
+    message: 'list length differs: full=9, core=10'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.description
+    message: 'value differs: full=''Access is governed by a controlled-access framework.
+      The license is stated as "Data Use Agreement available at \''https://chorus4ai.org/dataset/\''",
+      with the agreement document at '
+  - code: shared-slot-presence
+    path: $.publisher
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.sampling_strategies
+    message: 'list length differs: full=2, core=3'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep2/CHORUS_d4d.yaml
+      md5: b1167c0b076b9f5cb200e982545a3010
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep2/CHORUS_d4d_core.yaml
+      md5: 0c9765cc030320feda524a93242b3851
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: false_schema_claim
+    slot: distributions
+    detail: report says this is not a declared slot; it is declared on CoreDataset
+    claim: It does not appear in the declared `Dataset` slot inventory, and no supplied
+      artifact establishes that `CoreDataset` defines it; its range and required keys
+      are therefore unverified.
+  claims_checked: 4
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep2/CHORUS_reconciliation.md
+      md5: 49ac4e5c0798ea18e3c5bb8fa421993c
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

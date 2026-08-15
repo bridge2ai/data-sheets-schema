@@ -222,3 +222,79 @@ intermediates:
   sha256: dad5ed52b9a65dc1ee2e1409a8583b0ea692253bb3b70a0165b12cb976203840
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/intermediate/CHORUS_report.md
   sha256: f8d701adc9c851cac51244ca051f47c60a3cbb3fa8cb3e5ab0fe990e944dfcf0
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 9
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[0].notes
+    message: 'value differs: full=''The webinar characterises the CHoRUS dataset as
+      retrospective data collection under controlled access.'', core=''The webinar
+      characterises the CHoRUS dataset as retrospective data c'
+  - code: shared-slot-content
+    path: $.creators[0].notes
+    message: 'value differs: full=''Eric S. Rosenthal; affiliation: Massachusetts
+      General Hospital'', core=''Eric S. Rosenthal. Affiliation: Massachusetts General
+      Hospital.'''
+  - code: shared-slot-content
+    path: $.distribution_dates[0].release_dates[0]
+    message: 'value differs: full=''2025-08 (dataset available as of August 2025)'',
+      core=''2025-08'''
+  - code: shared-slot-content
+    path: $.future_use_impacts[0].impact_details
+    message: 'value differs: full="The project anticipates that the dataset and the
+      sequestered holdout set will catalyze biomedical research and expertise necessary
+      to promote the patient-focused deployment of AI '
+  - code: shared-slot-content
+    path: $.instances[0].notes
+    message: 'value differs: full=''Currently released dataset: 50,000 patient admissions
+      from ICU, PICU and NICU, comprising 1.6 billion rows of EHR OMOP data, 7,642
+      admissions with radiology data, and 23 Tb of wav'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.notes
+    message: 'value differs: full=''Program manager contact for the project is Ciera
+      McCrary, MGH, listed on the project website as cmccrary@mgh.havard.edu (address
+      transcribed as printed on the source page).'', core'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''Dataset-level conformance is not asserted to a
+      single standard: five of the nine modalities are standardised to the OMOP Common
+      Data Model, while the remainder conform to OHNLP, D'
+  - code: shared-slot-content
+    path: $.status
+    message: 'value differs: full=''Under active development; a controlled-access
+      release is available and the anticipated final dataset is not yet complete.'',
+      core=''Under active development. A controlled-access rel'
+  - code: distribution-relation-presence
+    path: $.distributions
+    message: full file_collections exist without core distributions
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/CHORUS_d4d.yaml
+      md5: 00a9af6f7a810a57af77d1f776086c1d
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/CHORUS_d4d_core.yaml
+      md5: dc97c0912ecd8ea897a919e0c4a35ea6
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 1
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/CHORUS_reconciliation.md
+      md5: a7d574dabec47807517226dcd62904ed
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

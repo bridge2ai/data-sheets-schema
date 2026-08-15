@@ -153,3 +153,58 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/CHORUS_d4d_core.yaml
       md5: ebee570a6a03ffc76efb26214b493f36
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 5
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.conforms_to
+    message: 'value differs: full=''OMOP Common Data Model (OHDSI). Modality-specific
+      standards used for individual data types are recorded on the corresponding file
+      collections and distribution formats.'', core=''OMO'
+  - code: shared-slot-content
+    path: $.distribution_formats[0].description
+    message: 'value differs: full=''OMOP Common Data Model tables for structured EHR
+      data (demographics, medication administration, procedures, nursing flowsheets
+      and diagnoses), accessed in the cloud enclave under '
+  - code: shared-slot-content
+    path: $.instances[0].description
+    message: 'value differs: full=''Each instance is a hospital admission of an acutely
+      or critically ill patient, drawn from ICU, PICU and NICU units at contributing
+      hospitals. An admission links multiple modalitie'
+  - code: shared-slot-content
+    path: $.keywords
+    message: 'list length differs: full=16, core=15'
+  - code: distribution-relation-presence
+    path: $.distributions
+    message: full file_collections exist without core distributions
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep1/CHORUS_d4d.yaml
+      md5: ad274491d2c95156edb4164bc18ffd7f
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/CHORUS_d4d_core.yaml
+      md5: ebee570a6a03ffc76efb26214b493f36
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep1/CHORUS_reconciliation.md
+      md5: 726cb9a87a0cf63ab459ee740fed00cc
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

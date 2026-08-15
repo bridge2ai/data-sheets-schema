@@ -137,3 +137,82 @@ validation:
       ''is_version_of'', ''is_new_version_of'', ''replaces'', ''is_replaced_by'',
       ''is_required_by'', ''requires'', ''is_part_of'', ''has_part'', ''is_referenced_by'',
       ''references'', ''is_identical_to''] in /related_datasets/2/relationship_type'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 10
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.creators[0].description
+    message: 'value differs: full=''Sole creator of record for the dataset: the FAIRhub
+      DataCite-style dataset description lists exactly one creator, "AI-READI Consortium",
+      with name type Organizational. The healths'
+  - code: shared-slot-content
+    path: $.external_resources
+    message: 'list length differs: full=12, core=13'
+  - code: shared-slot-content
+    path: $.funders[0].description
+    message: 'value differs: full=''Primary funding for dataset creation, awarded
+      through the NIH Common Fund Bridge2AI program (https://commonfund.nih.gov/bridge2ai)
+      under award OT2OD032644, titled "Bridge2AI: Salu'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=1, core=3'
+  - code: shared-slot-content
+    path: $.instances[0].description
+    message: 'value differs: full=''Each instance represents an individual participant
+      in the AI-READI study. Version 3.0.0 contains 2,280 instances, each consisting
+      of all data available for that person across the '
+  - code: shared-slot-content
+    path: $.intended_uses[2].description
+    message: 'value differs: full=''The project intends its dataset, standards and
+      platform to serve as a blueprint that future Data Generation Projects can follow
+      for collecting and sharing AI-ready datasets, inclu'
+  - code: shared-slot-content
+    path: $.purposes[3].description
+    message: 'value differs: full=''A further purpose is to establish standards, best
+      practices and guidelines for the collection, preparation and sharing of data
+      for AI/ML purposes, including guidance from bioethic'
+  - code: shared-slot-content
+    path: $.raw_data_sources[1].source_description
+    message: 'value differs: full=''The REDCap instance hosted at the University of
+      Washington holds patient-reported questionnaire responses, consent records,
+      and clinical data entered at the visit (medications ass'
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.subpopulations[0].description
+    message: 'value differs: full=''380 of 2,280 participants in version 3.0.0 (204
+      in the recommended training split, 88 in validation, 88 in test), by self-reported
+      race/ethnicity recorded at screening. Race/ethni'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml
+      md5: 9978cab5d41dc70fc18011c614af7eaa
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d_core.yaml
+      md5: 22dad1269afd0467e0e2a0c2e9c35b72
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_reconciliation.md
+      md5: 856c08e7013681dd7e4641ea71b6e361
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

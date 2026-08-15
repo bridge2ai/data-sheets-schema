@@ -75,3 +75,61 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep2/VOICE_d4d_core.yaml
       sha256: 971d77e58c9d88d0759bf5e42a48ec77ec95ced65e9ae06813e443374186a01b
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 3
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.resources[id='d4d:VOICE-adult'].related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.resources[id='d4d:VOICE-pediatric'].related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-27_claude-opus-5_rep2/VOICE_d4d.yaml
+      md5: 9b64ee69cec01e3ccb3cf91fa91b0934
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep2/VOICE_d4d_core.yaml
+      md5: 4fe207a17a027bea79670cdb24208df4
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep2/VOICE_reconciliation.md
+      md5: f43bd240c2513a3770feb5053569aa67
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 4
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 2
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+      md5: dcd717170da6762569c0b4eeafc1c3d2
+  bundle_hash_basis: the record pinned no hash
+  recorded_by: backfill_checks

@@ -80,3 +80,53 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep2/VOICE_d4d_core.yaml
       sha256: 199d402563fe17609ccf2653bd613911fa64996b81291c7bfa945e808f8b8aa7
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 1
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate/2026-07-28_claude-opus-5-deprimed_rep2/VOICE_d4d.yaml
+      md5: 9daeb75f259254429ec37d362f382c23
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep2/VOICE_d4d_core.yaml
+      md5: 27bb4d979b6dee91e686a4b10416aee9
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-28_claude-opus-5-deprimed_rep2/VOICE_reconciliation.md
+      md5: 86a15d17113597367ca4ffed54cd0447
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 12
+    minted_fragment: 30
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 6
+    minted_fragment: 30
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/VOICE_preprocessed_with_crate.txt
+      md5: ebca872f3275e7bd0e685c0486ee4881
+  bundle_hash_basis: the record pinned no hash
+  recorded_by: backfill_checks

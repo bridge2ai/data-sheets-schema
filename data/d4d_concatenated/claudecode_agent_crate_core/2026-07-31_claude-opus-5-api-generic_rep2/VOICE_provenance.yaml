@@ -139,3 +139,56 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d_core.yaml
       md5: efc6e93316411394d9469eebf4c94ab1
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 5
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.creators[0].description
+    message: 'value differs: full=''Yael Bensoussan, MD, MSc, FRCSC - co-principal
+      investigator of the project and principal investigator of the data acquisition
+      protocol; USF Health Voice Center, Department of Otol'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=2, core=4'
+  - code: shared-slot-content
+    path: $.instances
+    message: 'list length differs: full=5, core=6'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.description
+    message: 'value differs: full=''The released files are governed by the Bridge2AI
+      Voice Registered Access License, and access requires signature of the Bridge2AI
+      Voice Registered Access Agreement. Users must agre'
+  - code: shared-slot-content
+    path: $.subpopulations
+    message: 'list length differs: full=3, core=7'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d.yaml
+      md5: 23e30cf2d2fb5cc83d49262c68f336bb
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d_core.yaml
+      md5: efc6e93316411394d9469eebf4c94ab1
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_reconciliation.md
+      md5: 27236cfa8265fc57db88a291a3d27d3a
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

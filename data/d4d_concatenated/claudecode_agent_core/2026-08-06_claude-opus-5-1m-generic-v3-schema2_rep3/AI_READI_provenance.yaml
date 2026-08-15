@@ -274,3 +274,83 @@ intermediates:
   sha256: d06e4e458e85a648908fc68bab6709069fd9af5ae8a042f23137973bc3a3ab5c
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/intermediate/AI_READI_report.md
   sha256: ccddd596ed673b5fc8b42fc565f320f66b2d5d2866819122d035bcd8ac4777bf
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 11
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.collection_mechanisms[0]
+    message: 'mapping keys differ: missing from core=[''notes''], missing from full=[]'
+  - code: shared-slot-content
+    path: $.collection_timeframes[3]
+    message: 'mapping keys differ: missing from core=[''notes''], missing from full=[]'
+  - code: shared-slot-content
+    path: $.creators
+    message: 'list length differs: full=16, core=17'
+  - code: shared-slot-content
+    path: $.external_resources
+    message: 'list length differs: full=7, core=12'
+  - code: shared-slot-content
+    path: $.funders[0].notes
+    message: 'value differs: full=''Grant identifiers: OT2OD032644, P30DK035816, UL1TR003096.
+      Award OT2OD032644 ("Bridge2AI: Salutogenesis Data Generation Project") was made
+      through the NIH Common Fund Bridge2AI pro'
+  - code: shared-slot-content
+    path: $.informed_consent[0].notes
+    message: 'value differs: full=''Comprehension is supported by asking subjects
+      to confirm their understanding of study activities and requirements. Non-English
+      speakers were not initially enrolled because transla'
+  - code: shared-slot-content
+    path: $.instances[0].data_substrate
+    message: 'value differs: full=''Tabular data, imaging data, and physiological
+      signal/waveform data. There is no unstructured text data in the dataset.'',
+      core=''Tabular survey and clinical data; Medical imaging da'
+  - code: shared-slot-content
+    path: $.is_deidentified.identifiers_removed
+    message: 'value differs: full=''All HIPAA-defined Protected Health Information;
+      sex; race and ethnicity; medications used.'', core=''All HIPAA-defined Protected
+      Health Information; Sex; Race and ethnicity; Medicat'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''Additional documented facts that fit no dedicated
+      slot. (1) No labels or annotations were assigned to instances; the healthsheet
+      states the dataset is hypothesis-agnostic and that'
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.sampling_strategies[0].strategies
+    message: 'value differs: full=''(1) Triple-balanced recruitment: participants
+      are recruited in equal proportions across four self-reported race/ethnic groups
+      (Asian, Black, Hispanic, White), four categories of T'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/AI_READI_d4d.yaml
+      md5: 885aa8b23f6e9984e92d3773e66f0a21
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/AI_READI_d4d_core.yaml
+      md5: 09b52c5836959f1bda3fddf93bf1fbb1
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/AI_READI_reconciliation.md
+      md5: 1be40d7e7005c17236ed1afbf5c53ddc
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

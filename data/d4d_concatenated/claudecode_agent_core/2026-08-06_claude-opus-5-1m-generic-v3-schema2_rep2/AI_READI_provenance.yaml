@@ -296,3 +296,125 @@ intermediates:
   sha256: 065f88c4fbf93a266bcd09ced0e8a0eb31b41e5abde969cae72f60ff842c4314
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/intermediate/AI_READI_report.md
   sha256: 409f3ed5e7b70b69105fdf89767a643620e42df9c6877068d7ebe2b651953bef
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 26
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[3].acquisition_details
+    message: 'value differs: full=''A small number of variables are marked in the
+      study protocol as calculated rather than measured: waist-hip ratio and body
+      mass index derived from anthropometrics, calculated low-d'
+  - code: shared-slot-content
+    path: $.creators[0].notes
+    message: 'value differs: full=''Affiliations: University of Washington; University
+      of Alabama at Birmingham; University of California, San Diego; Johns Hopkins
+      University; Stanford University; Oregon Health & Sc'
+  - code: shared-slot-presence
+    path: $.discouraged_uses
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.distribution_dates
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.distribution_formats
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.existing_uses
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.extension_mechanism
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.external_resources
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.funders[0].notes
+    message: 'value differs: full=''Award OT2OD032644 ("Bridge2AI: Salutogenesis Data
+      Generation Project") was made through the NIH Common Fund Bridge2AI program;
+      NIH RePORTER records an FY2022 award amount of $5,02'
+  - code: shared-slot-content
+    path: $.human_subject_research.notes
+    message: 'value differs: full=''Written informed consent is provided by all participants.
+      A Community Advisory Board of 11 persons from the three sites, including diversity
+      in race and ethnicity as represented i'
+  - code: shared-slot-content
+    path: $.informed_consent[0].notes
+    message: 'value differs: full=''The consent form includes a table clarifying which
+      information will be publicly available and which requires an application and
+      approval process with privacy protections. Consent '
+  - code: shared-slot-content
+    path: $.instances[0].notes
+    message: 'value differs: full="Each instance consists of all of the data available
+      for one individual participating in the study. Data are organised in the release
+      with one folder per participant within each de'
+  - code: shared-slot-presence
+    path: $.ip_restrictions
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.is_deidentified.identifiers_removed
+    message: 'value differs: full=''Protected Health Information as defined by the
+      HIPAA Privacy Rule (Safe Harbor method).\nSex.\nRace and ethnicity.\nMedications
+      used.\n5-digit zip code (held under controlled acce'
+  - code: shared-slot-presence
+    path: $.license_and_use_terms
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-presence
+    path: $.maintainers
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.missing_data_documentation[0].missing_data_causes
+    message: 'value differs: full=''Participants elected not to participate in some
+      study elements.\nThe data collection device had no stored results or was returned
+      too late to retrieve the results (for example the'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''The dataset has not undergone any formal external
+      audits; it has been reviewed internally by AI-READI team members for quality
+      checks and to ensure that no personally identifiable'
+  - code: shared-slot-content
+    path: $.raw_data_sources
+    message: 'list length differs: full=3, core=9'
+  - code: shared-slot-presence
+    path: $.regulatory_restrictions
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  findings_truncated: 6
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_d4d.yaml
+      md5: df1782b9d98ea7e796e4a94eef6eb269
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_d4d_core.yaml
+      md5: 4c92a17b5277e84b5ba9cc77f9a2738d
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_reconciliation.md
+      md5: 1585d5de81dfd567a467ea5d7399889b
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

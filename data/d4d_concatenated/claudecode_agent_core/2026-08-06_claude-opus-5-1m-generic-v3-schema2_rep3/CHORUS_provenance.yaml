@@ -254,3 +254,84 @@ intermediates:
   sha256: 2017d0466b0aae78121fac65791aa378a47a03ea1cd43c15c4c366e028970e51
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/intermediate/CHORUS_report.md
   sha256: dfae5cd9e20523530adad4eabcfb64f0ba7662dce0eceed7e48b9c48ea1c8139
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 11
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''was_reported_by_subjects'']'
+  - code: shared-slot-content
+    path: $.collection_timeframes[0].timeframe_details
+    message: 'value differs: full=''Retrospective data collection is carried out across
+      the award period of the supporting NIH project (start 2022-09-01, end 2026-11-30).
+      As of August 2025 the assembled dataset cove'
+  - code: shared-slot-content
+    path: $.data_collectors[0].role
+    message: 'value differs: full=''Data acquisition center (data-contributing hospital)'',
+      core=''Data acquisition centers'''
+  - code: shared-slot-content
+    path: $.funders[0].notes
+    message: 'value differs: full=''Grant identifiers: OT2OD032701; 1OT2OD032701-01.
+      Fiscal year 2022 award amount USD 5,880,300; project period 2022-09-01 to 2026-11-30;
+      awardee organization Massachusetts General H'
+  - code: shared-slot-content
+    path: $.instances[0].notes
+    message: 'value differs: full=''The current released dataset is reported as 50,000
+      patient admissions from ICU, PICU and NICU, comprising 1.6 billion rows of EHR
+      OMOP data, 7,642 admissions with radiology data a'
+  - code: shared-slot-content
+    path: $.is_deidentified
+    message: 'mapping keys differ: missing from core=[], missing from full=[''notes'']'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.notes
+    message: 'value differs: full=''Data are made available inside a controlled-access
+      cloud enclave (the Bridge2AI AI/ML for Clinical Care Collaborative Cloud) with
+      provisioned compute, rather than as a bulk downlo'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''The CHoRUS project is organized around three pillars:
+      Data (standards, tool development and optimization, and data acquisition), Ethics
+      (ethical and trustworthy AI), and People (t'
+  - code: shared-slot-content
+    path: $.status
+    message: 'value differs: full=''Partially released and actively growing; a controlled-access
+      release exists as of August 2025, with imaging de-identification and EEG extraction
+      still in process.'', core=''Partiall'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  - code: distribution-relation-presence
+    path: $.distributions
+    message: full file_collections exist without core distributions
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/CHORUS_d4d.yaml
+      md5: bb177ead256e0c438e152268340af1e6
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/CHORUS_d4d_core.yaml
+      md5: 40dea444399a5acf93c5b92325542418
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/CHORUS_reconciliation.md
+      md5: 854eb87aeca5e2a7d90e4e14ce8b9bd4
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

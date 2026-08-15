@@ -180,3 +180,75 @@ validation:
       reads the consent form aloud, with an impartial witness procedure available
       for functionally illiterate individuals.''}] is not valid under any of the given
       schemas in /at_risk_populations'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 9
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.annotation_analyses
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.at_risk_populations
+    message: 'type differs: full=list, core=dict'
+  - code: shared-slot-content
+    path: $.collection_timeframes[2].description
+    message: 'value differs: full=''Overall project timeline: four years, with one
+      year dedicated to protocol development and training and years 2-4 allocated
+      to subject recruitment and data collection. Approximatel'
+  - code: shared-slot-content
+    path: $.human_subject_research.description
+    message: 'value differs: full=''This is human subjects research. It is an observational,
+      cross-sectional cohort study of adults with and without type 2 diabetes, approved
+      by the University of Washington IRB unde'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=4, core=5'
+  - code: shared-slot-content
+    path: $.is_deidentified.description
+    message: 'value differs: full=''The FAIRhub dataset description records deIdentType
+      "NoDeIdentification" with deIdentDirect true and deIdentHIPAA true, and explains:
+      "No identifiers were collected so no active d'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.description
+    message: 'value differs: full=''Version 3.0.0 is released under "AI-READI custom
+      license v2.0" (https://doi.org/10.5281/zenodo.17555036), shown on the FAIRhub
+      record as "Health Data License". The creators descri'
+  - code: shared-slot-content
+    path: $.subpopulations
+    message: 'list length differs: full=5, core=7'
+  - code: shared-slot-content
+    path: $.version_access.description
+    message: 'value differs: full=''Each version has its own DOI and its own documentation
+      set on docs.aireadi.org, navigable through a version dropdown: v1.0.0 (DOI 10.60775/fairhub.1,
+      2024-05-03), v2.0.0 (DOI 10.6'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_d4d.yaml
+      md5: a3055cbefcdeb087a543b3447193ffbc
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_d4d_core.yaml
+      md5: 9501476aa48d6aa693f179983d3109c1
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 1
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_reconciliation.md
+      md5: 860076ce57aea5da749b274ee08743b0
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

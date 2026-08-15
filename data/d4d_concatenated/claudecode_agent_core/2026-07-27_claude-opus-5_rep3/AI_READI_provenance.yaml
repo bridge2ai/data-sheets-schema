@@ -75,3 +75,61 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep3/AI_READI_d4d_core.yaml
       sha256: 2d2512aaf8d23a8cf127ac7be51eb12b2d1864160ff0bd892e711b05465b6259
   recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 1
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.related_datasets
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-27_claude-opus-5_rep3/AI_READI_d4d.yaml
+      md5: 0a04efda7273fab97b336a4a19799857
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep3/AI_READI_d4d_core.yaml
+      md5: 9d6e039e7b7b1d5a6862a4d824de8c3d
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: license_and_use_terms.data_use_permission
+    record: either
+    detail: report says removed; record has 1 entry
+    claim: '| `license_and_use_terms.data_use_permission` | removed `publication_required`
+      and `no_population_ancestry_research`, kept `disease_specific_research` | The
+      corpus supports only the disease-specific restriction. FAIRhub''s `datasetConsent`
+      s'
+  claims_checked: 1
+  claims_unnamed: 1
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep3/AI_READI_reconciliation.md
+      md5: 3e2a4a2461b2c6394b694bf221129fa6
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 54
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 10
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+      md5: 0f3abb51a333555456bedd63891fcd99
+  bundle_hash_basis: the record pinned no hash
+  recorded_by: backfill_checks

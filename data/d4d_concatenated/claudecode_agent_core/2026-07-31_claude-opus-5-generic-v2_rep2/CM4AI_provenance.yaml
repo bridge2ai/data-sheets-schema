@@ -157,3 +157,63 @@ canonical_superseded_by:
   label: 2026-08-07_claude-opus-5-claudecode-generic-v3_rep2
   at: '2026-08-08T01:19:31+00:00'
   by: d4d runs select
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 6
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-presence
+    path: $.at_risk_populations
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.confidential_elements[0].description
+    message: 'value differs: full=''The June 2026 release record marks the external
+      data links for perturb-seq data in KOLF2.1J iPSCs (undifferentiated) and perturb-seq
+      data in MDA-MB-468 breast cancer cells (with a'
+  - code: shared-slot-presence
+    path: $.content_warnings
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.distribution_formats[0].description
+    message: 'value differs: full=''All ten files in the June 2026 release are distributed
+      as ZIP archives through the University of Virginia Dataverse (LibraData), each
+      with a published MD5 checksum and public file'
+  - code: shared-slot-content
+    path: $.labeling_strategies[2].description
+    message: 'value differs: full=''As part of its AI-readiness approach the project
+      characterizes and validates all datasets and data elements and maps data elements
+      to public ontology vocabularies where appropriat'
+  - code: distribution-relation-presence
+    path: $.distributions
+    message: full file_collections exist without core distributions
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/CM4AI_d4d.yaml
+      md5: 30bab6e8a0e0d7695b09378b51ab6560
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/CM4AI_d4d_core.yaml
+      md5: 8845bd9aad1c518e1dc65396a9b18dd6
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-generic-v2_rep2/CM4AI_reconciliation.md
+      md5: bc25ce8d47e03a03094bb0b3a28c1861
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

@@ -132,3 +132,125 @@ validation:
       | [ERROR] [data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d_core.yaml/0]
       datetime.datetime(2026, 5, 1, 0, 0, tzinfo=datetime.timezone.utc) is not of
       type ''string'', ''null'' in /issued'
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 19
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[0].description
+    message: 'value differs: full=''Data associated with each instance was directly
+      observable and reported by subjects. Participants performed acoustic tasks that
+      were recorded, and completed self-reported demograp'
+  - code: shared-slot-content
+    path: $.addressing_gaps[0].description
+    message: 'value differs: full=''Previous studies on machine learning-based voice
+      diagnosis produced promising results, but their sample sizes were too small
+      or they lacked the key metadata needed for training ro'
+  - code: shared-slot-content
+    path: $.at_risk_populations.description
+    message: 'value differs: full="The adult dataset is restricted to participants
+      aged 18 years or older (maximum 120 years), so minors are excluded from this
+      release. Pediatric participants are enrolled only at p'
+  - code: shared-slot-content
+    path: $.collection_mechanisms[1].description
+    message: 'value differs: full=''Data is collected on iPads (9th or 10th generation)
+      and iPad Air (5th generation) using an Avid AE-36 microphone connected to the
+      iPad through an Apple dongle. Participants were i'
+  - code: shared-slot-content
+    path: $.creators[0].description
+    message: 'value differs: full=''MD, MSc, FRCSC. Co-principal investigator and
+      co-lead of Data Acquisition. USF Health Voice Center, Department of Otolaryngology-Head
+      & Neck Surgery, University of South Florida M'
+  - code: shared-slot-content
+    path: $.distribution_formats[0].description
+    message: 'value differs: full=''Open-source column-oriented data file format used
+      for the dense time-varying derived features (spectrograms, Mel spectrograms,
+      MFCCs, pitch, SPARC articulatory and source features'
+  - code: shared-slot-content
+    path: $.human_subject_research.description
+    message: 'value differs: full=''The dataset arises from human subjects research.
+      The study is an observational, cohort, cross-sectional prospective study titled
+      "Bridge2AI-Voice," organization study ID OT2OD0327'
+  - code: shared-slot-content
+    path: $.informed_consent
+    message: 'list length differs: full=4, core=6'
+  - code: shared-slot-content
+    path: $.instances
+    message: 'list length differs: full=3, core=4'
+  - code: shared-slot-content
+    path: $.is_deidentified.description
+    message: 'value differs: full="Level of de-identification: identifiable information
+      under HIPAA and the Common Rule, as well as data considered sensitive, have
+      been removed from this dataset. The dataset remove'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.description
+    message: 'value differs: full=''The feature-only dataset is released under the
+      Bridge2AI Voice Registered Access License, with use governed by the Bridge2AI
+      Voice Registered Access Agreement. Note a terminology '
+  - code: shared-slot-content
+    path: $.maintainers[1].description
+    message: 'value differs: full=''Curates the dataset, performs internal audits
+      for missingness and consistency, and issues versioned releases. General dataset
+      questions are directed to the corresponding author li'
+  - code: shared-slot-presence
+    path: $.other_tasks
+    message: schema-identical slot is present only in core; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.preprocessing_strategies[3].description
+    message: 'value differs: full=''Torchaudio pitch contours are extracted with minimum
+      and maximum pitch of 80 and 500 Hz. Speech Articulatory Coding (sparc) is used
+      to generate kinematic traces of vocal tract art'
+  - code: shared-slot-content
+    path: $.purposes[0].description
+    message: 'value differs: full=''Bridge2AI-Voice is a Precision Public Health grand
+      challenge project whose stated purpose is to create a flagship, standardized,
+      and ethically sourced dataset of voices linked to '
+  - code: shared-slot-content
+    path: $.regulatory_restrictions.description
+    message: 'value differs: full="No export controls apply to the dataset. Applicable
+      regulatory frameworks include HIPAA, whose de-identification rules are applied
+      and whose Safe Harbor identifiers were removed; '
+  - code: shared-slot-content
+    path: $.sampling_strategies[1].description
+    message: 'value differs: full=''Eligibility for the adult dataset requires age
+      18 years or older (maximum 120 years), ability to read and speak English, and
+      consent to provide a voice sample for an open-sourced '
+  - code: shared-slot-content
+    path: $.subpopulations[0].name
+    message: 'value differs: full=''Age'', core=''Disease cohort category'''
+  - code: shared-slot-content
+    path: $.tasks[1].description
+    message: 'value differs: full=''Supporting the use of voice as a non-invasive,
+      cost-effective biomarker for the screening, diagnosis, and monitoring of a wide
+      range of health conditions, including named use case'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d.yaml
+      md5: 2bd9519007c92e67e3af66874660a5db
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d_core.yaml
+      md5: d575115a1a525cdcc980e57ee27aa339
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_reconciliation.md
+      md5: b8614d922271abd72df62fce6a89c9c7
+  recorded_by: backfill_checks
+grounding:
+  checked: false
+  reason: bundle drifted since the run; grounding against today's bytes would test
+    a file the run never read
+  recorded_by: backfill_checks

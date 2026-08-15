@@ -290,3 +290,82 @@ intermediates:
   sha256: 20135183c05e6c30b109b83275c3ee14969711ba2be3e982be35bb0536db86cc
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_report.md
   sha256: 46b7fe889e5a91f590b7c235b3c1736ea80877d08c60669e207476e87e5e5c72
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 7
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods[0].acquisition_details
+    message: 'value differs: full=''Retrospective extraction of clinical data already
+      recorded during care from hospital source systems: electronic health records,
+      PACS imaging archives, bedside monitors with gatewa'
+  - code: shared-slot-content
+    path: $.creators[0]
+    message: 'mapping keys differ: missing from core=[''notes''], missing from full=[''affiliations'']'
+  - code: shared-slot-content
+    path: $.funders[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''grants'']'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.license_terms
+    message: 'value differs: full=''Access is controlled. Prospective users complete
+      a registration form supplying name, email, and institution, and must sign a
+      licensing agreement included in the registration form '
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''The record draws on four sources of differing
+      dates and purposes: an NIH RePORTER project page for award 1OT2OD032701-01 (fiscal
+      year 2022), a September 2025 AIM-AHEAD training-pr'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  - code: distribution-relation-presence
+    path: $.distributions
+    message: full file_collections exist without core distributions
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml
+      md5: 203e1ea304068551b53f934459caed97
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml
+      md5: 57d52aa67e15baf249e791cd1ce32481
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: false_schema_claim
+    slot: splits
+    detail: report says this is not a declared slot; it is declared on Dataset
+    claim: The bundle describes an unrealised plan ("will also provision", "sequestering").
+      Recording it as a split asserts a partition that does not exist. Finding 12/13,
+      medium. Also resolves the cross-record divergence.
+  claims_checked: 4
+  claims_unnamed: 3
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_reconciliation.md
+      md5: 092f82abea8b78ddf714451e27b805f7
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+      md5: 9b2ef4b65d67957f79362266cab0bc7a
+  recorded_by: backfill_checks

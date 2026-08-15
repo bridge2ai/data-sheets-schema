@@ -290,3 +290,90 @@ intermediates:
   sha256: 70d0c31f5699a167e8639d2f7eaabf52cfb3d0bc832117571ba30623cede41e1
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/intermediate/CM4AI_report.md
   sha256: f8b78160439ea689e5ea841e84a8f2f819b016c102871ebb35e55aa97ca594f9
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 9
+  warnings: 1
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.creators
+    message: 'list length differs: full=47, core=12'
+  - code: shared-slot-content
+    path: $.data_governance.stewardship_roles
+    message: 'list length differs: full=3, core=1'
+  - code: shared-slot-content
+    path: $.distribution_formats[0].checksum
+    message: 'value differs: full=''An MD5 checksum is published for each of the ten
+      archives and is recorded on the corresponding file collection.'', core=''An
+      MD5 checksum is published for each of the ten archives a'
+  - code: shared-slot-content
+    path: $.ethical_reviews[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''notes'']'
+  - code: shared-slot-content
+    path: $.instances[0].notes
+    message: 'value differs: full=''Covering 464 proteins of interest in each of three
+      conditions (untreated, paclitaxel, vorinostat). The June 2025 revision added
+      RGB composite images alongside the per-channel data'
+  - code: shared-slot-content
+    path: $.license_and_use_terms
+    message: 'mapping keys differ: missing from core=[], missing from full=[''notes'']'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''Project-wide context for this release. CM4AI defines
+      AI-Ready biomedical data as fully characterized FAIR data of known provenance
+      that can be ethically and reliably processed by '
+  - code: shared-slot-content
+    path: $.sampling_strategies[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''source_caveats'',
+      ''source_data'']'
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''Referent: this record describes the June 2026
+      Dataverse release (DOI 10.18130/V3/HIGT4C), not the CM4AI project as a whole.
+      Project-level statements from cm4ai.org and from the CM'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep2/CM4AI_d4d.yaml
+      md5: e13ce98456797f00060f42f402ec16a0
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/CM4AI_d4d_core.yaml
+      md5: 6685c2f64691c0c67ea54190806905a8
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: distributions
+    record: either
+    detail: report says removed; record has 10 entries
+    claim: '| 1 | high | core `distributions` | **Removed**; content redistributed
+      |'
+  claims_checked: 3
+  claims_unnamed: 2
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/CM4AI_reconciliation.md
+      md5: ab1483909b71baaad588a7555fdff6b5
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 12
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 2
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+      md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+  recorded_by: backfill_checks

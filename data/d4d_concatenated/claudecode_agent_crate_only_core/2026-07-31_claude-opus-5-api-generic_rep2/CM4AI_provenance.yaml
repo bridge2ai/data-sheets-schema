@@ -167,3 +167,67 @@ validation:
       path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_d4d_core.yaml
       md5: 08d0bb038139ea0f087870bc56bccb9d
   recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  errors: 3
+  warnings: 0
+  identity_slots: 79
+  findings:
+  - code: shared-slot-content
+    path: $.anomalies[0].description
+    message: 'value differs: full=''The declared bundle records two disagreeing figures
+      for the total size of the release: schema:contentSize "19.9 TB" (repeated by
+      the AI-readiness assessment as "Total size: 19.9 T'
+  - code: shared-slot-content
+    path: $.external_resources
+    message: 'list length differs: full=6, core=7'
+  - code: shared-slot-content
+    path: $.instances
+    message: 'list length differs: full=2, core=3'
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_d4d.yaml
+      md5: 892d82bca89d8bbbaec21043a50f627a
+    core:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_d4d_core.yaml
+      md5: 08d0bb038139ea0f087870bc56bccb9d
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: backfill_checks
+report_claims:
+  checked: true
+  findings:
+  - kind: removal_not_performed
+    slot: labeling_strategies
+    record: either
+    detail: report says removed; record has 1 entry
+    claim: '| `labeling_strategies` | **Removed.** | Described entity-ID naming conventions
+      in the collapsed `hasPart` summaries. No annotation or labeling procedure is
+      documented anywhere in the bundle; this was metadata structure, not methodology.
+      |'
+  claims_checked: 8
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_reconciliation.md
+      md5: 921e5a5e6c6c5e04095c232d0ca04e4f
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 2
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 1
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CM4AI_crate_only.txt
+      md5: 965b0aa654facd9992fda14ff4535a25
+  recorded_by: backfill_checks
