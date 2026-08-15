@@ -148,3 +148,27 @@ class CorpusTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RefusalTest(unittest.TestCase):
+    """A record that does not parse must not be replaced by the blocks."""
+
+    def _write(self, text):
+        import tempfile
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        p = Path(tmp.name) / "p.yaml"
+        p.write_text(text, encoding="utf-8")
+        return p
+
+    def test_a_record_that_is_not_a_mapping_is_refused(self):
+        p = self._write("# header\n- a\n- list\n")
+        with self.assertRaises(ValueError):
+            apply(p, {"grounding": {"checked": True}})
+        self.assertIn("- list", p.read_text(encoding="utf-8"),
+                      "the original content must still be there")
+
+    def test_an_all_comment_file_is_refused_rather_than_filled_in(self):
+        p = self._write("# only comments\n")
+        with self.assertRaises(ValueError):
+            apply(p, {"grounding": {"checked": True}})

@@ -89,10 +89,9 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
     """The three blocks for one record, or reasons they cannot be computed."""
     from data_sheets_schema.grounding import check_run
     from data_sheets_schema.identifiers import uriorcurie_slots
-    from data_sheets_schema.provenance import _md5, _sha256
+    from data_sheets_schema.provenance import (CORE_SCHEMA, FULL_SCHEMA,
+                                                _md5, _sha256)
     from data_sheets_schema.report_claims import check_report, declared_slots
-
-    from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA
 
     text = provenance.read_text(encoding="utf-8")
     record = yaml.safe_load(_split_header(text)[1]) or {}
@@ -110,7 +109,6 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
         from data_sheets_schema.d4d_pair_consistency import (
             load_pair_schema, validate_pair_data,
         )
-        from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA
         pair = load_pair_schema(FULL_SCHEMA, CORE_SCHEMA)
         rep = validate_pair_data(
             yaml.safe_load(full.read_text(encoding="utf-8")) or {},
@@ -195,7 +193,13 @@ def apply(provenance: Path, blocks: dict[str, Any],
     """
     text = provenance.read_text(encoding="utf-8")
     header, body = _split_header(text)
-    record = yaml.safe_load(body) or {}
+    record = yaml.safe_load(body)
+    # Refuse rather than write. `safe_load` returning None or a non-mapping for
+    # a file with content means the record did not parse as expected, and
+    # writing then would replace a provenance record with nothing but the three
+    # blocks — losing the run it describes to make room for a note about it.
+    if not isinstance(record, dict) or (body.strip() and not record):
+        raise ValueError(f"{provenance} did not parse as a mapping; not written")
     changed = False
     for name in BLOCKS:
         if name in record and not overwrite:

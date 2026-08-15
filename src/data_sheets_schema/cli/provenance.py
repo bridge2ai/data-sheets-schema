@@ -533,10 +533,13 @@ def backfill_checks(execute, method, label, project, overwrite):
     for p in paths:
         try:
             blocks = compute(p, declared)
+            # Inside the same guard as compute: a write that raises halfway
+            # through 192 records leaves a corpus in two states, and the reason
+            # it raised is exactly the kind a reader needs to see per-record.
+            changed = apply(p, blocks, overwrite=overwrite) if execute else True
         except Exception as exc:                               # noqa: BLE001
             click.echo(f"   ✗ {p.parts[-2]}/{p.name}: {exc}")
             continue
-        changed = apply(p, blocks, overwrite=overwrite) if execute else True
         if execute and not changed:
             skipped += 1
             continue
