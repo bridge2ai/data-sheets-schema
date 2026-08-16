@@ -1386,3 +1386,43 @@ def redundancy_cmd(method, label, project, threshold, show):
 
     click.echo("\nThis is reported, not failed: per-slot completeness is the "
                "decision on #501, and the repetition is its accepted cost.")
+
+
+@runs.command("compare-arms")
+@click.option("--a", "prefix_a", required=True, help="label prefix of one arm")
+@click.option("--b", "prefix_b", required=True, help="label prefix of the other")
+@click.option("--method", default="claudecode_agent", show_default=True)
+def compare_arms(prefix_a, prefix_b, method):
+    """What differs between two arms besides the thing you meant to change.
+
+    `comparable_conditions` reasons from condition names, so it cannot see a
+    schema that moved between two arms or a phase instruction that was
+    reworded. This reads what the records state.
+
+    Every line is a reason a difference cannot be attributed to the condition
+    alone. That does not make the arms incomparable — it makes the comparison a
+    measurement of their sum, and saying so is the honest form of the result.
+    """
+    from data_sheets_schema.runs import arm_confounds, arm_facts
+
+    a, b = arm_facts(prefix_a, method), arm_facts(prefix_b, method)
+    for arm in (a, b):
+        click.echo(f"{arm['prefix']}\n   {len(arm['labels'])} label(s), "
+                   f"{len(arm['projects'])} project(s)")
+        for name, values in arm["values"].items():
+            if len(values) > 1:
+                click.echo(f"   ⚠️  {name} is not constant within this arm: "
+                           + ", ".join(v[:12] for v in values))
+
+    confounds = arm_confounds(a, b)
+    if not confounds:
+        click.echo("\nNo recorded procedural difference between the two arms.")
+        return
+    click.echo(f"\n{len(confounds)} field(s) differ besides the condition:")
+    for c in confounds:
+        click.echo(f"   {c['field']}")
+        for key, value in c.items():
+            if key != "field":
+                click.echo(f"     {key[:46]:46} {value}")
+    click.echo("\nA difference between these arms measures the sum of the "
+               "above. Report it that way, or hold them constant and re-run.")
