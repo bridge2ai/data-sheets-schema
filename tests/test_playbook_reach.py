@@ -207,6 +207,45 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
         self.assertEqual(holders, [str(p) for p in AGENT_PLAYBOOKS
                                    if p.name == PLAYBOOK.name])
 
+    #: Claims that must hold in *both* texts, phrased as a probe that should
+    #: match and a probe that must not. Co-occurrence of a topic is not
+    #: agreement about it (#573): both files said "as a CURIE" while one told
+    #: the model to write a URL where no prefix is declared and the other said
+    #: never to write one.
+    AGREEMENTS = (
+        ("a URL-ranged slot still takes a URL",
+         ("declared range is a URL",), ()),
+        ("prose and citations are left alone",
+         ("prose or a citation",), ()),
+        ("an undeclared prefix is never invented",
+         ("invent a prefix", "invent one"), ()),
+        ("no unqualified ban on URLs",
+         (), ("never as a URL",)),
+    )
+
+    def test_the_two_texts_do_not_contradict_each_other(self):
+        """The check that would have caught #573.
+
+        The parity table above asks whether a rule *reaches* both runtimes. It
+        cannot see two rules that both arrive and disagree — and that is what
+        shipped: the prompt said an identifier is "never as a URL" with no
+        scope, while the playbook said a URL is correct where no prefix is
+        declared and that URL-ranged slots and prose are exempt.
+
+        `download_url` and `access_urls` are declared `uri`, so the unscoped
+        version told the API arm to put a CURIE where the schema requires a URL.
+        """
+        playbook, prompt = self._texts()
+        problems = []
+        for name, required, forbidden in self.AGREEMENTS:
+            for text, where in ((playbook, "playbook"), (prompt, "prompt")):
+                if required and not any(r.lower() in text for r in required):
+                    problems.append(f"{where} does not say: {name}")
+                for f in forbidden:
+                    if f.lower() in text:
+                        problems.append(f"{where} still says {f!r}: {name}")
+        self.assertEqual(problems, [])
+
     def test_the_new_v5_rules_reached_the_playbook_too(self):
         """The mirror direction, which nothing checked before.
 

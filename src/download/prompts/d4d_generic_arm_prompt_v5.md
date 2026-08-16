@@ -210,10 +210,13 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
 --- END ADDED IN v3 ---
 --- ADDED IN v5 ---
 
-- Write every identifier as a CURIE — a declared prefix, a colon, and the local
-  part — never as a URL, a resolver link or a bare IRI. Two records naming one
-  thing in one form produce one identity; the same thing written as a prefix
-  here and a URL there produces two.
+- Write an identifier as a CURIE wherever the schema declares a prefix for it —
+  a prefix, a colon, and the local part — rather than as a resolver URL. Two
+  records naming one thing in one form produce one identity; the same thing
+  written as a prefix here and a resolver URL there produces two. This governs
+  slots whose declared range is an identifier. A slot whose declared range is a
+  URL takes a URL, and a URL inside prose or a citation is text: leave both
+  exactly as written.
 - An identifier is a fact about the dataset, subject to the same rule as any
   other fact: take it from the evidence or omit it. Do not supply an identifier
   you recognise but the input documents do not state. A correct identifier the
@@ -223,8 +226,10 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   registry identifier from your own knowledge is not.
 - Where something needs an identifier and the evidence supplies none, hang it
   off one the evidence does supply: a fragment appended to the identifier of the
-  thing it is part of. Do not invent a prefix for it. A person is identified by
-  a personal-identifier registry entry and an organisation by an organisation
+  thing it is part of. Never invent a prefix — a prefix the schema does not
+  declare resolves to nothing, and where no fragment is possible either, a
+  resolvable URL is the better answer. A person is identified by a
+  personal-identifier registry entry and an organisation by an organisation
   registry entry; a fragment appended to an organisation's identifier does not
   identify a person, it makes a false claim about that organisation.
 - Write American English throughout — characterize, organization, standardized,
