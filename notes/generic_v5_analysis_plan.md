@@ -90,18 +90,31 @@ them.
   the corpus already diverges (#550). This is a regression watch, not a
   prediction.
 
-## The canary is AI-READI, not CHORUS
+## The canary is AI-READI, and the context risk is smaller than first stated
 
-The v4 arm canaried CHORUS, whose `reconcile_full` request is 52k tokens against
-AI-READI's 249k. #566 adds the core record to that phase, taking the largest
-request to roughly 279k, and the corpus does not record what context ceiling was
-in force — the model is named `claude-opus-5` with no `[1m]` suffix and the
-249k requests nonetheless succeeded.
-
-So the canary must be **AI-READI**, and it must be verified to have completed
-`reconcile_full`, not merely to have started. A CHORUS canary exercises
+The v4 arm canaried CHORUS, whose largest request is 64k tokens against
+AI-READI's 285k. #566 adds the core record to `reconcile_full`, so the canary
+must be **AI-READI** — the project that can actually fail — and it must be
+verified to have completed, not merely started. A CHORUS canary exercises
 credentials, persistence, the run lock and every gate, and says nothing about
-the one thing this arm changed that could fail. See #568.
+the one thing this arm changed that could break.
+
+**Two corrections to the first version of this section**, both from measuring
+rather than reasoning (#568):
+
+- The peak phase is `reconcile_core`, not `reconcile_full`. It receives the
+  reconciled full record, the core record and the audit findings, and it is the
+  largest request in 56 of 67 API runs; `reconcile_full` peaks in 3.
+- **The corpus has already sent 363,261 tokens successfully** — VOICE, rep3 of
+  the 2026-07-31 arm. AI-READI's v4 peak of 285,113 is well inside that, and
+  #566 raising `reconcile_full` toward ~279k puts it below a size this pipeline
+  has demonstrably handled. The risk is real but it is headroom-unknown, not
+  headroom-exceeded.
+
+Every API record now carries `model.context.peak_request_tokens`, so the next
+person answers this from the corpus instead of re-deriving it. The *limit*
+stays null and says why: no route states it and the provider does not return
+it, and a guess would make headroom computable and wrong.
 
 ## What this plan does not license
 

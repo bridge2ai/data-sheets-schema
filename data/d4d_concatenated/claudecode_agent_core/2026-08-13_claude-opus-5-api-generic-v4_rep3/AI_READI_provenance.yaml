@@ -27,6 +27,13 @@ model:
     report: 24000
   temperature: null
   temperature_basis: not applicable to this model
+  context:
+    peak_request_tokens: 272299
+    peak_phase: reconcile_core
+    peak_basis: 'observed: input + cache_read + cache_write of the largest request'
+    limit_tokens: null
+    limit_basis: not stated by the route and not returned by the provider; headroom
+      cannot be computed from this record
 prompts:
   hash_algorithm: sha256
   files:

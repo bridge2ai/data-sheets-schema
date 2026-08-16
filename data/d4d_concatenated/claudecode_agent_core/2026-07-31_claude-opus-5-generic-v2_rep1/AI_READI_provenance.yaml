@@ -28,6 +28,13 @@ model:
   reasoning_effort: high
   reasoning_effort_basis: read from the model route; the provider exposes effort as
     a model-name suffix, not a parameter
+  context:
+    peak_request_tokens: 206490
+    peak_phase: reconcile_core
+    peak_basis: 'observed: input + cache_read + cache_write of the largest request'
+    limit_tokens: null
+    limit_basis: not stated by the route and not returned by the provider; headroom
+      cannot be computed from this record
 prompts:
   hash_algorithm: sha256
   files:
