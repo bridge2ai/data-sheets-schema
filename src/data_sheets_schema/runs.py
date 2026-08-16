@@ -1172,6 +1172,36 @@ def bundle_drift_detail(method: str, label: str, project: str,
                             f"record pinned {recorded[:8]}"), declared
 
 
+PHASES_RECORDED, PHASES_API = "recorded", "api_usage"
+PHASES_ABSENT = "absent"
+
+
+def phase_log_status(method: str, label: str, project: str,
+                     concat_dir: Path | None = None) -> tuple[str, int]:
+    """(status, phase count) for what a run said about its own steps (#562).
+
+    Three answers, not two. `api_usage` and `phase_log` are both real accounts
+    of a run's phases, written by different runtimes recording different
+    things — the API path can report seconds and tokens, the agentic path
+    cannot. Collapsing them would suggest the two are comparable in detail,
+    and they are not; counting the agentic path's as absent would be false.
+    """
+    import yaml as _yaml
+
+    from data_sheets_schema.provenance import record_path_for
+    path = record_path_for(project, method, label, concat_dir or CONCAT_DIR)
+    if not path.exists():
+        return PHASES_ABSENT, 0
+    rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    block = rec.get("phase_log")
+    if isinstance(block, dict) and block.get("phases"):
+        return PHASES_RECORDED, len(block["phases"])
+    usage = rec.get("api_usage")
+    if isinstance(usage, list) and usage:
+        return PHASES_API, len({u.get("phase") for u in usage})
+    return PHASES_ABSENT, 0
+
+
 GROUNDED_ALL, GROUNDED_GAPS = "all_grounded", "gaps"
 GROUNDED_NOT_RUN, GROUNDED_UNRECORDED = "not_run", "unrecorded"
 

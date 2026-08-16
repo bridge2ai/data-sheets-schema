@@ -18,6 +18,38 @@ def provenance():
     pass
 
 
+def _parse_phases(specs) -> list[dict]:
+    """`--phase` values into phase dicts, in the order given (#562).
+
+    Two forms, because the caller is sometimes a person and sometimes an agent
+    writing a shell command: a bare name, or a JSON object for the cases where
+    completion, iteration count or artifacts are worth stating.
+
+    A malformed value raises rather than being dropped. A phase log missing one
+    phase is worse than no phase log: it reads as a run that skipped a step.
+    """
+    import json
+
+    out = []
+    for raw in specs or ():
+        text = str(raw).strip()
+        if not text:
+            continue
+        if text.startswith("{"):
+            try:
+                obj = json.loads(text)
+            except json.JSONDecodeError as exc:
+                raise click.BadParameter(
+                    f"--phase {text!r} is not valid JSON: {exc}") from exc
+            if not isinstance(obj, dict) or not obj.get("name"):
+                raise click.BadParameter(
+                    f"--phase {text!r} must be an object with a 'name'")
+            out.append(obj)
+        else:
+            out.append({"name": text, "completed": True})
+    return out
+
+
 @provenance.command()
 @click.option('--project', required=True)
 @click.option('--method', required=True, help='e.g. claudecode_agent')
@@ -61,9 +93,15 @@ def provenance():
                    '(#450), because `PLACEHOLDER_VALUES` in runs.py would '
                    'discard it downstream and the record and the analysis '
                    'would then disagree.')
+@click.option('--phase', 'phase_specs', multiple=True,
+              help='a phase this run performed, in order. Either a bare name '
+                   '("reconcile") or a JSON object '
+                   '(\'{"name":"reconcile","completed":true,"iterations":3}\'). '
+                   'Repeat once per phase. Records what the API path records '
+                   'as api_usage and the agentic path recorded nowhere (#562).')
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
-           reasoning_effort):
+           reasoning_effort, phase_specs):
     """Write a LIVE provenance record for a run just produced.
 
     Every field is observed at run time — hardware, software versions, input
@@ -114,7 +152,8 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                                        if prompt_text else None),
                        prompt_request_spec=spec,
                        schema_digest_md5=digest,
-                       reasoning_effort=reasoning_effort)
+                       reasoning_effort=reasoning_effort,
+                       phases=_parse_phases(phase_specs))
     out = rec.write(record_path_for(project, method, label))
     click.echo(f"✓ {out}")
 

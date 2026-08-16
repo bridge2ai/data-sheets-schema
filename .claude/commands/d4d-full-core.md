@@ -495,8 +495,27 @@ poetry run d4d provenance record \
   --input-bundle {EXACT INPUT BUNDLE PATH} \
   --prompt {EACH PROMPT FILE THE RUN CONSUMED} \
   --prompt-text {THE INSTRUCTION AS SENT} \
-  --reasoning-effort {EFFORT, ONLY IF YOU KNOW IT}
+  --reasoning-effort {EFFORT, ONLY IF YOU KNOW IT} \
+  --phase '{"name":"generate_full","completed":true,"artifacts":["{PROJECT}_d4d.yaml"]}' \
+  --phase '{"name":"generate_core","completed":true,"artifacts":["{PROJECT}_d4d_core.yaml"]}' \
+  --phase '{"name":"source_audit","completed":true}' \
+  --phase '{"name":"reconcile","completed":true,"iterations":{HOW MANY TIMES YOU RAN VALIDATE-AND-ITERATE}}'
 ```
+
+**Pass one `--phase` per phase you actually performed, in order.** The API path
+records eight `api_usage` entries per run; this path recorded nothing, so its
+phase structure existed only as prose in the reconciliation report — and #546
+showed a report is not a reliable account of what happened. Every comparison
+between the two arms was one-sided as a result (#562).
+
+Record what you did, not what this file describes. A phase you skipped is
+omitted; a phase that did not complete gets `"completed": false`. `iterations`
+belongs only on a phase that actually loops — writing `1` on a phase that
+cannot iterate implies the number was measured.
+
+Timing and token counts are not asked for, and must not be estimated: this
+runtime has no access to its own accounting (#400). The record names them as
+unavailable so the gap reads as a limit rather than an oversight.
 
 Writes `{METHOD}_core/{VERSION}/{PROJECT}_provenance.yaml` capturing schema
 md5s, model and runtime identity, input bundle hash, repo commit, software
