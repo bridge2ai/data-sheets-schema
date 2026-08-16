@@ -150,6 +150,32 @@ class PrecisionTest(Harness):
         self.assertEqual(out["claims_unnamed"], 1)
 
 
+class BothRecordsTest(Harness):
+    """A claim naming both records must be checked against both (#578).
+
+    `_target` returned `either` for a claim that named no record *and* for one
+    that named both, and `either` was read against core alone. So "removed from
+    the full and core records" passed when core removed it and full did not —
+    the direction #566 exists to catch.
+    """
+
+    MD = ("**Action:** the `distributions` block was removed from the full "
+          "record and the core record.\n")
+
+    def test_survival_in_full_alone_is_reported(self):
+        self.assertEqual(
+            self.kinds(self.MD, full={"distributions": [1, 2]}, core={}),
+            [("removal_not_performed", "distributions")])
+
+    def test_survival_in_core_alone_is_reported(self):
+        self.assertEqual(
+            self.kinds(self.MD, full={}, core={"distributions": [1]}),
+            [("removal_not_performed", "distributions")])
+
+    def test_a_removal_from_both_passes(self):
+        self.assertEqual(self.kinds(self.MD, full={}, core={}), [])
+
+
 class SchemaClaimTest(Harness):
 
     def test_a_slot_said_not_to_exist_but_declared(self):
@@ -181,6 +207,18 @@ class SchemaClaimTest(Harness):
 
     def test_a_true_absence_claim_is_not_reported(self):
         md = "**Finding:** `invented_slot` is not declared on `CoreDataset`.\n"
+        self.assertEqual(self.kinds(md), [])
+
+    def test_a_dotted_claim_is_not_answered_by_its_root(self):
+        """`distributions.bogus` is not `distributions` (#578).
+
+        Resolving a dotted path to its root contradicted a report that was
+        right, because the root exists. Checking it properly needs the range
+        class of the parent slot, which this does not resolve — so it is
+        skipped rather than guessed at, and a true claim is left alone.
+        """
+        md = ("**Finding:** `distributions.bogus` is not declared on "
+              "`CoreDistribution`.\n")
         self.assertEqual(self.kinds(md), [])
 
 

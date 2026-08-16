@@ -162,6 +162,12 @@ def _target(text: str) -> str:
         return "core"
     if full and not core:
         return "full"
+    if core and full:
+        # Named both, so both must have performed it. This fell into `either`
+        # and was read against core alone, so "removed from the full and core
+        # records" passed while the full record still held it (#578) — which is
+        # the very direction #566 is about.
+        return "both"
     return "either"
 
 
@@ -274,6 +280,8 @@ def check_report(report: Path, full: dict, core: dict,
             in_core, v_core = resolve(core, name)
             live = {"core": in_core and _populated(v_core),
                     "full": in_full and _populated(v_full),
+                    "both": (in_core and _populated(v_core))
+                            or (in_full and _populated(v_full)),
                     "either": in_core and _populated(v_core)}[where]
             if live:
                 v = v_full if where == "full" else v_core
@@ -360,7 +368,15 @@ def check_report(report: Path, full: dict, core: dict,
 
         for names, claim in sentence_subjects:
             for name in names:
-                root = re.split(r"[.\[]", name)[0]
+                # A dotted path names a slot on a nested class, not the root.
+                # Resolving `distributions.bogus` to `distributions` reported a
+                # true claim as false, because the root does exist (#578).
+                # Only unqualified names are checkable against a class
+                # inventory; a nested one needs the range class, which this
+                # does not resolve, so it is skipped rather than guessed.
+                if re.search(r"[.\[]", name):
+                    continue
+                root = name
                 holders = sorted(c for c, sl in declared.items() if root in sl)
                 if holders:
                     findings.append({

@@ -267,9 +267,15 @@ def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
 @click.option("--dry-run", is_flag=True, help="cost the sweep without calling the API")
 @click.option("--continue-on-error", is_flag=True,
               help="keep going after a failed run instead of stopping")
+@click.option("--canary-baseline", default=None,
+              help="label prefix of the arm the first run is held against; it "
+                   "must be no worse on any check or the sweep stops (#579)")
+@click.option("--no-canary-gate", is_flag=True,
+              help="fan out even if the first run regresses against the "
+                   "baseline; the comparison is still printed")
 @click.option("--yes", is_flag=True)
 def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
-              continue_on_error, yes):
+              continue_on_error, canary_baseline, no_canary_gate, yes):
     """Run a sweep of projects x replicates, reporting cumulative cost.
 
     Each run resumes independently, so a sweep interrupted partway costs only
@@ -314,6 +320,7 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
         raise click.ClickException(str(exc)) from exc
 
     ok, failed, spent_in, spent_out = [], [], 0, 0
+    canary_stop: str | None = None
     for i, s in enumerate(specs, 1):
         click.echo(f"\n[{i}/{len(specs)}] {s.project} {s.label}")
         try:
@@ -338,6 +345,41 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
                     break
                 continue
             click.echo(f"   ✓ in={spent_in:,} out={spent_out:,} cache_read={cached:,}{note}")
+
+            # The three post-generation checks, printed for every run so a
+            # sweep cannot look clean while they fail (#579) — and, on the
+            # first run, gating the fan-out.
+            from data_sheets_schema import canary as _canary
+            counts = _canary.counts_from(res.get("checks") or {})
+            click.echo("     " + "  ".join(
+                f"{name}={'—' if v is None else v}"
+                for name, v in counts.items()))
+
+            if i == 1 and canary_baseline and not no_canary_gate:
+                v = _canary.verdict(res.get("checks") or {},
+                                    _canary.baseline_for(s.project,
+                                                         canary_baseline))
+                for row in v["rows"]:
+                    mark = "❌" if row.get("regressed") else "  "
+                    click.echo(f"     {mark} {row['metric']:24} "
+                               f"{row['run']} vs baseline worst "
+                               f"{row['baseline_worst']}")
+                if v["status"] != _canary.OK:
+                    for line in v["regressions"] or v["blind"]:
+                        click.echo(f"     {line}", err=True)
+                    # Recorded, not raised here: this block is inside the
+                    # per-run `try`, whose bare `except Exception` would catch
+                    # a ClickException and — under --continue-on-error — fan
+                    # out anyway, which is the one thing this gate exists to
+                    # prevent. Raised after the loop, once the lock is released.
+                    canary_stop = (
+                        f"canary {v['status']}: the first run is worse than "
+                        f"the {canary_baseline} baseline for {s.project}, or a "
+                        "check could not run. Fanning out would spend the rest "
+                        "of the sweep on a known regression. Re-run with "
+                        "--no-canary-gate to proceed anyway.")
+                else:
+                    click.echo("     canary ok — fanning out")
             ok.append(s.label)
         except Exception as exc:                       # noqa: BLE001
             click.echo(f"   ❌ {type(exc).__name__}: {exc}", err=True)
@@ -345,12 +387,17 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
             if not continue_on_error:
                 click.echo("stopping; re-run to resume unfinished phases", err=True)
                 break
+        if canary_stop:
+            break
 
     # Released even when the sweep failed or was interrupted mid-loop: a lock
     # outliving its process would make the next attempt refuse to start, which
     # turns a crash into a permanent block. `live()` also checks the pid, so a
     # lock left by a hard kill is recognised as stale rather than believed.
     run_lock.release(lock_path)
+
+    if canary_stop:
+        raise click.ClickException(canary_stop)
 
     click.echo(f"\n{len(ok)} succeeded, {len(failed)} failed")
     click.echo(f"tokens: {spent_in:,} in, {spent_out:,} out")
