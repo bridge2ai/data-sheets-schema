@@ -317,8 +317,37 @@ class ReconcileFullSeesCoreTest(unittest.TestCase):
         guess, and the guess that matches the old behaviour is to ignore it."""
         from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS
         text = PHASE_INSTRUCTIONS["reconcile_full"]
-        self.assertIn("absorb into the full record", text)
+        self.assertIn("absorb into", text)
         self.assertIn("cannot outrank it", text)
+
+    def test_absorption_is_conditioned_on_the_evidence(self):
+        """#574: as first written this said "anything it states", full stop.
+
+        The core phase reads the bundle and can hallucinate. Before #566 a
+        core-only fabrication stayed in core, where the pair check would show
+        it as a divergence. Unconditional absorption would copy it into the
+        full record and make it authoritative in both — and the pair check
+        would then report the pair *consistent*, because they agree.
+
+        That is strictly worse than the defect #566 fixed. Losing a true fact
+        is recoverable from the bundle; gaining a false one that both records
+        assert is not.
+        """
+        from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS
+        text = PHASE_INSTRUCTIONS["reconcile_full"]
+        self.assertIn("the input bundle supports", text)
+        self.assertIn("identify as unsupported", text)
+
+    def test_the_audit_supplies_the_finding_this_relies_on(self):
+        """The exclusion is only enforceable because the audit already looks.
+
+        `audit` runs before `reconcile_full` and receives both records, so the
+        finding is available at the point of use — no new phase or input.
+        """
+        from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS, PHASES
+        self.assertLess(PHASES.index("audit"), PHASES.index("reconcile_full"))
+        self.assertIn("the bundle does not support",
+                      PHASE_INSTRUCTIONS["audit"])
 
     def test_the_audit_is_told_to_look_for_it_too(self):
         """The audit already reads both records, so it is the cheapest place to

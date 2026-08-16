@@ -492,12 +492,18 @@ PHASE_INSTRUCTIONS = {
     "reconcile_full": (
         "Phase 4a. Apply the audit findings that concern the FULL record and "
         "emit the corrected full record in its entirety, header block included. "
-        "The core record is supplied above: anything it states that the full "
-        "record does not, absorb into the full record, in the slot that fits "
-        "it. The core record is a projection of the full one and cannot "
-        "outrank it, so a fact reaching only core is a fact the full record "
-        "lost. Absorb the content, not the wording — put it where the schema "
-        "says it belongs, which may not be where core put it. "
+        "The core record is supplied above. Anything it states that the full "
+        "record does not, **and that the input bundle supports**, absorb into "
+        "the full record, in the slot that fits it: the core record is a "
+        "projection of the full one and cannot outrank it, so a bundle-"
+        "supported fact reaching only core is a fact the full record lost. "
+        "Absorb the content, not the wording — put it where the schema says it "
+        "belongs, which may not be where core put it. "
+        "Do not absorb anything the audit findings above identify as "
+        "unsupported: content the core record invented must be removed from "
+        "core, never copied into full. A fabrication the two records agree on "
+        "is worse than one only core carries, because agreement is what a "
+        "reader checks. "
         "Every value you write or change must conform to the schema digest "
         "supplied above — a repair that fixes evidence but breaks shape is "
         "still a defect. If no finding requires a change, emit it unchanged. "
@@ -1901,8 +1907,13 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             carry[name] = body
         else:
             # Not a record: forget the phases that claim to have written it so
-            # they run again, rather than resuming on top of a fragment.
+            # they run again, rather than resuming on top of a fragment — and
+            # the phases that *consumed* it too (#575). Dropping only the
+            # producers left `audit` marked done with findings computed against
+            # the artifact just discarded, and `reconcile_full` marked done
+            # having absorbed from it.
             done -= set(produced_by)
+            done -= {ph for ph in PHASES if name in PHASE_NEEDS.get(ph, ())}
     if "reconcile_full" in done and "Completed full record" in carry:
         carry["Reconciled full record"] = carry["Completed full record"]
 
@@ -1914,7 +1925,20 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             skipped.append(ph)
             continue
 
-        needed = {k: carry[k] for k in PHASE_NEEDS[ph] if k in carry}
+        # Every declared input, or none. Filtering to whatever happened to be
+        # present let a phase run short of its context and write a record
+        # indistinguishable from one where there was nothing to use — the
+        # resumed `reconcile_full` that silently absorbs nothing because the
+        # core record never reached it (#575).
+        absent = [k for k in PHASE_NEEDS[ph] if k not in carry]
+        if absent:
+            raise RuntimeError(
+                f"phase {ph!r} declares inputs {list(PHASE_NEEDS[ph])} and "
+                f"{absent} are not available on this resume. Re-run with "
+                "--no-resume to regenerate from the phase that produces them; "
+                "continuing would write a record that cannot be told from one "
+                "produced with the full context.")
+        needed = {k: carry[k] for k in PHASE_NEEDS[ph]}
         req = build_phase(spec, ph, carry=needed)
 
         # A 200 whose body is unusable is not a permanent failure, and treating
