@@ -551,3 +551,63 @@ def backfill_checks(execute, method, label, project, overwrite):
                + (f", {skipped} already carried the blocks" if skipped else ""))
     if not execute:
         click.echo("Nothing was changed. Re-run with --execute to write.")
+
+
+@provenance.command("backfill-context")
+@click.option('--execute', is_flag=True,
+              help='write the records; without it this reports and changes nothing')
+@click.option('--label', default=None, help='restrict to one run label')
+def backfill_context(execute, label):
+    """Record the context each API run actually used (#568).
+
+    Adds no claim the record was not already making: `peak_request_tokens` is
+    computed from the `api_usage` the run wrote itself, so this is arithmetic
+    over existing evidence rather than a new assertion — the same ground on
+    which `backfill-effort` is defensible and a temperature backfill would not
+    be.
+
+    The *limit* is not backfilled. It was not knowable at the time and is not
+    knowable now; recording a guess would make headroom computable and wrong.
+
+    Agentic records have no `api_usage` and are skipped, not filled with zero.
+    """
+    import yaml as _yaml
+
+    from data_sheets_schema.api_runner import context_facts
+    from data_sheets_schema.backfill_checks import _split_header
+    from data_sheets_schema.provenance import CONCAT_DIR
+
+    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    if label:
+        paths = [p for p in paths if p.parts[-2] == label]
+    rows, skipped = [], 0
+    for p in paths:
+        header, body = _split_header(p.read_text(encoding="utf-8"))
+        rec = _yaml.safe_load(body)
+        if not isinstance(rec, dict):
+            continue
+        usage = rec.get("api_usage")
+        if not isinstance(usage, list) or not usage:
+            skipped += 1
+            continue
+        model = rec.get("model") or {}
+        facts = context_facts(str(model.get("model") or ""), usage)
+        # Marked, like every other backfill (#552): a value the run wrote and
+        # one computed afterwards are different claims even when the arithmetic
+        # is the same, and only the record can say which this is.
+        facts["recorded_by"] = "backfill_context"
+        rows.append((p, facts))
+        if execute:
+            model["context"] = facts
+            rec["model"] = model
+            p.write_text(header + _yaml.safe_dump(rec, sort_keys=False,
+                                                  allow_unicode=True),
+                         encoding="utf-8")
+    for p, f in sorted(rows, key=lambda r: -(r[1]["peak_request_tokens"] or 0))[:12]:
+        click.echo(f"   {'✔' if execute else '·'} {p.parts[-2][:38]:38} "
+                   f"{p.name[:-16]:16} peak {f['peak_request_tokens']:>8,} "
+                   f"({f['peak_phase']})")
+    click.echo(f"\n{len(rows)} API record(s) {'written' if execute else 'would be written'}"
+               f"; {skipped} skipped as having no api_usage (agentic runs)")
+    if not execute:
+        click.echo("Nothing was changed. Re-run with --execute to write.")

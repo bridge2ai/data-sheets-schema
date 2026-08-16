@@ -1242,6 +1242,53 @@ def pair_consistency(spec: RunSpec) -> dict[str, Any] | None:
     }
 
 
+#: Context windows a model name states outright. The route is the only place
+#: this appears — CBORG returns no limit in its responses — so a name that does
+#: not carry one leaves the limit genuinely unknown (#568).
+CONTEXT_FROM_NAME = ((r"\[1m\]|-1m\b|:1m\b", 1_000_000),)
+
+
+def context_facts(model_name: str,
+                  usage: list[dict[str, Any]]) -> dict[str, Any]:
+    """What the run can honestly say about its context window (#568).
+
+    Two different claims, kept apart:
+
+    `peak_request_tokens` is **observed** — the largest request this run
+    actually sent, summing input, cache reads and cache writes, because cached
+    tokens occupy the window just as fresh ones do. It is what answers "did it
+    fit", and it is available whatever the model says about itself.
+
+    `limit_tokens` is the ceiling, and is usually **not knowable here**. The
+    v4 arm named `claude-opus-5` and sent a 249,015-token request that
+    succeeded, so the name understated the truth by at least a quarter. A guess
+    would be worse than the gap: it would make headroom computable and wrong.
+    Recorded only when the route states it, and named as a gap otherwise —
+    the same rule `reasoning_effort` follows (#397, #470).
+    """
+    peak, phase = 0, None
+    for u in usage:
+        total = (int(u.get("input_tokens") or 0) + int(u.get("cache_read") or 0)
+                 + int(u.get("cache_write") or 0))
+        if total > peak:
+            peak, phase = total, u.get("phase")
+    out: dict[str, Any] = {"peak_request_tokens": peak or None,
+                           "peak_phase": phase,
+                           "peak_basis": "observed: input + cache_read + "
+                                         "cache_write of the largest request"}
+    for pattern, limit in CONTEXT_FROM_NAME:
+        if re.search(pattern, model_name or "", re.I):
+            out["limit_tokens"] = limit
+            out["limit_basis"] = f"the model route names it ({model_name})"
+            break
+    else:
+        out["limit_tokens"] = None
+        out["limit_basis"] = ("not stated by the route and not returned by the "
+                              "provider; headroom cannot be computed from this "
+                              "record")
+    return out
+
+
 def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
     """Check the reconciliation report against the record and the schema (#546).
 
@@ -1984,6 +2031,11 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         "base_url": ident["base_url"],
         "model": settings["name"],
         "max_tokens_by_phase": PHASE_MAX_TOKENS,
+        # What the run sent, and what it was allowed to send. The second is
+        # usually unknown, and #568 exists because that could not be told from
+        # the record: AI-READI's reconcile_full ran at 249,015 tokens under a
+        # name suggesting far less.
+        "context": context_facts(settings["name"], usage),
     }
     if settings["temperature_applies"]:
         rec.data["model"]["temperature"] = settings["temperature"]
