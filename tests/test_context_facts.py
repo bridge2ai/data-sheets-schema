@@ -83,6 +83,17 @@ class CorpusTest(unittest.TestCase):
         """
         self.assertGreaterEqual(max(t for t, _ in self._peaks()), 363_000)
 
+    def test_backfilled_context_says_it_was_backfilled(self):
+        """A value the run wrote and one computed afterwards are different
+        claims even when the arithmetic is identical (#552)."""
+        p = (self.BASE / "claudecode_agent_core"
+             / "2026-08-13_claude-opus-5-api-generic-v4_rep1"
+             / "AI_READI_provenance.yaml")
+        if not p.exists():
+            self.skipTest("record not present in this checkout")
+        ctx = yaml.safe_load(p.read_text(encoding="utf-8"))["model"]["context"]
+        self.assertEqual(ctx["recorded_by"], "backfill_context")
+
     def test_the_peak_phase_is_reconcile_core_not_reconcile_full(self):
         """Also corrects #568: I reasoned about the wrong phase.
 

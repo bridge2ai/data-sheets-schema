@@ -34,6 +34,7 @@ model:
     limit_tokens: null
     limit_basis: not stated by the route and not returned by the provider; headroom
       cannot be computed from this record
+    recorded_by: backfill_context
 prompts:
   hash_algorithm: sha256
   files:

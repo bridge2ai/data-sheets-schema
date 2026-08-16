@@ -592,6 +592,10 @@ def backfill_context(execute, label):
             continue
         model = rec.get("model") or {}
         facts = context_facts(str(model.get("model") or ""), usage)
+        # Marked, like every other backfill (#552): a value the run wrote and
+        # one computed afterwards are different claims even when the arithmetic
+        # is the same, and only the record can say which this is.
+        facts["recorded_by"] = "backfill_context"
         rows.append((p, facts))
         if execute:
             model["context"] = facts
