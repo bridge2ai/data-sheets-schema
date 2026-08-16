@@ -159,9 +159,32 @@ class TestTheConditionIsWiredComparably(unittest.TestCase):
     def test_v5_resolves_to_its_own_prompt(self):
         self.assertEqual(CONDITION_PROMPTS["generic_v5"], GENERIC_PROMPT_V5)
 
-    def test_v4_against_v5_is_the_isolating_comparison(self):
+    def test_v4_against_v5_is_one_condition_step_and_not_an_isolating_one(self):
+        """Both halves matter, and the second is #576.
+
+        At the level of prompt text v4 and v5 are adjacent, which is what
+        `comparable_conditions` answers. That is *not* sufficient for the
+        comparison to isolate anything: between the two arms the schema digest
+        moved (`622e6d03` to `44d29023`) and `reconcile_full` gained the core
+        record, neither of which a condition name can show.
+
+        So this asserts the condition step is single **and** that the
+        record-level check exists to qualify it. v5 is a production run; the
+        comparison is reported with its confounds rather than as a measurement
+        of the block.
+        """
+        from data_sheets_schema.api_runner import MULTI_RULE_BASES
+        from data_sheets_schema.runs import arm_confounds, arm_facts
         self.assertTrue(comparable_conditions("generic_v4", "generic_v5"))
-        self.assertEqual(condition_delta("generic_v4", "generic_v5"), ["base"])
+        # …but the step is four rules, not one.
+        self.assertEqual(MULTI_RULE_BASES["v5"], 4)
+        # …and the records disagree on more than the condition.
+        a = arm_facts("2026-08-13_claude-opus-5-api-generic-v4")
+        if not a["labels"]:
+            self.skipTest("v4 arm not present in this checkout")
+        fields = {c["field"] for c in arm_confounds(
+            a, arm_facts("2026-08-11_claude-opus-5-claudecode-generic"))}
+        self.assertIn("schema digest", fields)
 
     def test_v2_against_v5_is_not_isolating(self):
         """Two rule additions apart. `condition_delta` reports the single axis

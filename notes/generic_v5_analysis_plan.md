@@ -1,4 +1,13 @@
-# generic v5 — what the block predicts, registered before any run
+# generic v5 — a production run, and what it can honestly be compared against
+
+**v5 is a production run, not an experiment.** Decided 2026-08-15. The goal is
+the best records the pipeline can currently produce. Comparisons against v4 are
+made where the records support them and reported with their confounds, rather
+than presented as an isolating measurement.
+
+That decision is what #576 resolves. It is not a workaround: an isolating v4-v5
+comparison was never available, and the honest options were to regenerate both
+arms at one digest or to stop claiming it. This is the second.
 
 Written 2026-08-14, before any v5 generation. Its purpose is to hold the
 predictions **out** of the prompt: a prompt that states the result a run is
@@ -20,6 +29,46 @@ construction — that arm has been reading them all along.
 
 The other two are new and are one subject: where an identifier may come from
 (#547) and what to write when the evidence supplies none (#531).
+
+## What v5 can and cannot be compared against
+
+`d4d runs compare-arms --a <v5 prefix> --b <v4 prefix>` reads what the records
+state rather than reasoning from condition names, and prints every field that
+differs. Against the 2026-08-13 v4 arm the differences are already known:
+
+| field | v4 | v5 |
+|---|---|---|
+| schema digest | `622e6d03` | `44d29023` |
+| assembly digest | `77331f08` | `2c1442fc` |
+| condition | `generic_v4` | `generic_v5` |
+
+So a v4-v5 difference measures **the four v5 rules, plus a schema change, plus
+`reconcile_full` gaining the core record and the audit gaining a clause**.
+`comparable_conditions('generic_v4', 'generic_v5')` now returns False, and
+`MULTI_RULE_BASES` records why: a step that adds four rules cannot have a
+difference attributed to one of them.
+
+### What is still worth comparing
+
+Quantities that are **counts of a defect**, not measurements of an effect size.
+Each is a property of a record on its own, so a schema change between the arms
+does not invalidate it — it only means the two arms are not a controlled pair:
+
+- ungrounded external identifiers (v4: 19 in VOICE rep1, 10 in CM4AI rep3)
+- person fragments on organisational identifiers (v4: 7 in VOICE rep1)
+- undeclared CURIE prefixes and URL-valued identifier slots
+- British spellings in generated prose
+- full/core pair divergence (v4: 11 of 12)
+- report claims contradicted by the record (v4: 19 findings)
+
+If v5 shows fewer, that is worth stating as *what the current pipeline
+produces* — not as evidence that a particular rule caused it.
+
+### What is not worth comparing
+
+Anything whose value depends on the schema: slot counts, density, coverage
+against the inventory, and any per-slot presence rate. The digest moved, so
+those are not like-for-like and no caveat repairs them.
 
 ## Predictions
 

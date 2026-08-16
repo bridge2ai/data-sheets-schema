@@ -103,6 +103,14 @@ def condition_delta(a: str, b: str) -> list[str]:
     return [k for k in ("base", "tuned") if ax[k] != bx[k]]
 
 
+#: Bases whose step added several rules at once, and how many. Both were
+#: deliberate change-sets registered before the run — v2's three, v5's four — so
+#: comparing across them is legitimate; what is unavailable is attributing a
+#: difference to one rule inside the set. Recorded so an analysis can say which
+#: it is doing.
+MULTI_RULE_BASES = {"v2": 3, "v5": 4}
+
+
 def _base_step(base: str) -> int:
     """`v3` -> 3. Bases are an ordered series, each adding one rule."""
     try:
@@ -112,7 +120,18 @@ def _base_step(base: str) -> int:
 
 
 def comparable_conditions(a: str, b: str) -> bool:
-    """True when a difference between the two is attributable to one change.
+    """True when a difference between the two *prompt conditions* is one step.
+
+    **This answers a question about prompt text and nothing else.** Two arms can
+    satisfy it and still be uncomparable, because a schema digest, a phase
+    instruction or a runtime can change between them — none of which is visible
+    in a condition name. `runs.arm_confounds` reads what the records state and
+    is the check that governs interpretation; #576 exists because this function
+    reported v4-against-v5 as isolating while the schema had moved underneath it
+    (`622e6d03` to `44d29023`) and `reconcile_full` had gained an input.
+
+    A True here also does not mean one *rule* changed: see `MULTI_RULE_BASES`,
+    where v2's step is three rules and v5's is four.
 
     `generic` vs `generic_v2` differs only in base — that is the v2 experiment.
     `generic` vs `tuned` differs only in tuning — that is the study's main

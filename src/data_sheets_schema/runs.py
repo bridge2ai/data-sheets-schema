@@ -1172,6 +1172,68 @@ def bundle_drift_detail(method: str, label: str, project: str,
                             f"record pinned {recorded[:8]}"), declared
 
 
+#: What a record states about how it was produced. Two arms differing on any of
+#: these are not measuring one change — and unlike `comparable_conditions`,
+#: which reasons from condition *names*, this reads what the runs recorded.
+ARM_PROCEDURE_FIELDS = (
+    ("schema digest", ("schema", "digest_md5")),
+    ("assembly digest", ("prompts", "assembly", "sha256")),
+    ("condition", ("condition",)),
+    ("model", ("model", "model")),
+    ("runtime", ("model", "agent_runtime")),
+)
+
+
+def _dig(record: dict, path: tuple[str, ...]):
+    cur = record
+    for key in path:
+        if not isinstance(cur, dict):
+            return None
+        cur = cur.get(key)
+    return cur
+
+
+def arm_facts(label_prefix: str, method: str = "claudecode_agent",
+              concat_dir: Path | None = None) -> dict[str, Any]:
+    """What every record under a label prefix says about its own procedure."""
+    import yaml as _yaml
+
+    base = (concat_dir or CONCAT_DIR)
+    seen: dict[str, set] = {name: set() for name, _ in ARM_PROCEDURE_FIELDS}
+    labels, projects = set(), set()
+    for path in sorted(base.glob(f"{method}_core/{label_prefix}*/*_provenance.yaml")):
+        rec = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        labels.add(path.parts[-2])
+        projects.add(path.name[: -len("_provenance.yaml")])
+        for name, field in ARM_PROCEDURE_FIELDS:
+            seen[name].add(str(_dig(rec, field)))
+    return {"prefix": label_prefix, "labels": sorted(labels),
+            "projects": sorted(projects), "records": len(projects) * len(labels),
+            "values": {k: sorted(v) for k, v in seen.items()}}
+
+
+def arm_confounds(a: dict[str, Any], b: dict[str, Any]) -> list[dict[str, str]]:
+    """What differs between two arms, one entry per differing field (#576).
+
+    `comparable_conditions` answers from condition names, so it cannot see a
+    schema that moved between two arms or a phase instruction that was reworded
+    — both of which change what a difference means. This reads the records.
+
+    Every entry is a reason a difference between the arms cannot be attributed
+    to the condition alone. It does not follow that the arms are incomparable:
+    it follows that the comparison measures their sum, and that saying so is
+    the honest form of the result.
+    """
+    out = []
+    for name, _ in ARM_PROCEDURE_FIELDS:
+        va, vb = a["values"].get(name, []), b["values"].get(name, [])
+        if va and vb and va != vb:
+            out.append({"field": name,
+                        a["prefix"]: ", ".join(x[:12] for x in va),
+                        b["prefix"]: ", ".join(x[:12] for x in vb)})
+    return out
+
+
 PHASES_RECORDED, PHASES_API = "recorded", "api_usage"
 PHASES_ABSENT = "absent"
 
