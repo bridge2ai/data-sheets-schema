@@ -90,6 +90,23 @@ them.
   the corpus already diverges (#550). This is a regression watch, not a
   prediction.
 
+## Before the arm starts: the schema must be current
+
+`make check-digest` (or `d4d schema check-digest --strict`) rebuilds each merged
+schema from its source and compares. `d4d api run` now performs the same check
+and refuses to start when it fails, because a merged schema built from stale
+source makes every record in the arm attest to a digest describing a schema this
+repository no longer holds — invisibly, since the record correctly hashes the
+file it did read.
+
+Verified in sync at the time of writing: `Dataset` `44d29023`, `CoreDataset`
+`dff487bc`, both byte-identical to a fresh build.
+
+**This does not resolve #576.** The check establishes that the digest describes
+today's source; it says nothing about whether today's source is the same one v4
+was generated against. It is not — v4 recorded `622e6d03` — and that remains a
+decision about the comparison rather than a defect to fix here.
+
 ## The canary is AI-READI, and the context risk is smaller than first stated
 
 The v4 arm canaried CHORUS, whose largest request is 64k tokens against

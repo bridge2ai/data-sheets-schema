@@ -266,7 +266,20 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
             f"No schema known for class {class_name!r}; pass schema_path "
             f"explicitly. Known: {sorted(CLASS_SCHEMA)}")
     sv = SchemaView(str(path))
-    digest = ClassDigest(class_name=class_name, schema_path=str(path))
+    # The digest names the schema it came from, and that name is rendered into
+    # the digest text — so an identical schema read from a different location
+    # produced a different fingerprint. Verifying a digest by rebuilding the
+    # merged schema into a temp directory and re-digesting it, which is exactly
+    # what a pre-run gate must do, therefore always disagreed.
+    #
+    # Canonicalised to the path this class's schema is known by, so the
+    # fingerprint is a function of the schema's content and not of where the
+    # file happens to sit. The default path already rendered this string, so
+    # no existing digest moves.
+    known = CLASS_SCHEMA.get(class_name)
+    named = str(known) if known and Path(path).name == Path(known).name \
+        else str(path)
+    digest = ClassDigest(class_name=class_name, schema_path=named)
 
     for slot in sv.class_induced_slots(class_name):
         enum_values: list[str] = []

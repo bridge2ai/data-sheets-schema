@@ -1778,6 +1778,28 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     if dry_run:
         return plan(spec)
 
+    # Before a token is spent. The digest this run is about to send, the schema
+    # it validates against and the identity slots its pair check uses all come
+    # from the *merged* schemas, which are generated artifacts — so a module
+    # edited without regenerating makes every record in the arm attest to a
+    # schema this repository no longer holds, invisibly, because the record
+    # correctly hashes the file it actually read.
+    #
+    # Fatal, unlike every other check here. Bundle drift, pair divergence,
+    # report claims and grounding all describe a record that remains usable
+    # evidence; this corrupts the run's central input, and there would be
+    # nothing to preserve by continuing.
+    from data_sheets_schema.schema_sync import blocking, check as _schema_check
+    stale = blocking(_schema_check())
+    if stale:
+        detail = "; ".join(f"{r['class']}: {r.get('reason', r['status'])}"
+                           for r in stale)
+        raise RuntimeError(
+            "the merged schema is not built from the current source, so this "
+            f"run would record a digest for a schema that does not exist — "
+            f"{detail}. Run `make regen-all`, review the diff and commit it, "
+            "or check with `d4d schema check-digest`.")
+
     from data_sheets_schema.provenance import build_record, record_path_for
 
     settings = _model_settings()
