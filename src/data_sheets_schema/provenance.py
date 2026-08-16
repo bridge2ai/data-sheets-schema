@@ -137,6 +137,61 @@ AGENT_PLAYBOOKS = (
 )
 
 
+#: Fields the API path records per phase that an agentic run cannot supply.
+#: Named rather than omitted, so a reader sees a limit instead of a gap — the
+#: same three-way distinction `d4d provenance reasoning` draws (#400).
+PHASE_FIELDS_UNAVAILABLE_TO_AGENTS = ("seconds", "input_tokens",
+                                      "output_tokens", "stop_reason")
+
+
+def phase_facts(phases: list[dict[str, Any]],
+                runtime: str | None = None) -> dict[str, Any] | None:
+    """What an agentic run can honestly say about its own phases (#562).
+
+    The API path records eight `api_usage` entries per run — phase, attempt,
+    seconds, tokens, stop reason. The agentic path recorded nothing, so its
+    phase structure existed only as prose in the reconciliation report, which
+    #546 showed cannot be trusted as an account of what happened. Every arm
+    comparison was therefore one-sided in a way easy to miss: #544's finding
+    was about a phase, and the same question could not be asked of the other
+    arm from the record.
+
+    This is not the #400 limitation. A Claude Code subagent cannot report its
+    own token accounting, which is why no reasoning log is written for it —
+    but *which phase ran*, *whether it completed* and *how many times a loop
+    iterated* are things the agent knows, and the playbook already tells it to
+    write them into the report in prose.
+
+    So timing and tokens are named as unavailable rather than left absent,
+    because an absent field reads as an oversight and a named one reads as a
+    limit.
+    """
+    if not phases:
+        return None
+    out = []
+    for i, ph in enumerate(phases, start=1):
+        entry: dict[str, Any] = {"phase": ph.get("name") or f"phase_{i}",
+                                 "ordinal": int(ph.get("ordinal") or i)}
+        if "completed" in ph:
+            entry["completed"] = bool(ph["completed"])
+        # Only when a phase actually loops. `iterations: 1` on a phase that
+        # cannot iterate would imply the number was measured.
+        if ph.get("iterations") is not None:
+            entry["iterations"] = int(ph["iterations"])
+        if ph.get("artifacts"):
+            entry["artifacts"] = list(ph["artifacts"])
+        if ph.get("notes"):
+            entry["notes"] = str(ph["notes"])
+        out.append(entry)
+    return {"phases": out,
+            "recorded_by": "the run itself, as the playbook directs",
+            "unavailable": list(PHASE_FIELDS_UNAVAILABLE_TO_AGENTS),
+            "unavailable_basis": (
+                "this runtime has no access to its own token accounting or "
+                "per-call timing (#400); these are named rather than omitted "
+                "so the gap reads as a limit and not an oversight")}
+
+
 def repo_relative(path: Path | str) -> str:
     """A path as this repository names it, whatever the caller passed (#398).
 
@@ -899,6 +954,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  prompt_request_spec: dict[str, Any] | None = None,
                  schema_digest_md5: str | None = None,
                  reasoning_effort: str | None = None,
+                 phases: list[dict[str, Any]] | None = None,
                  extra_notes: list[str] | None = None) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
 
@@ -1134,6 +1190,11 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         "prompts": prompt_facts(prompt_paths, prompt_request,
                                 prompt_request_spec),
         "playbooks": playbooks,
+        # The agentic path's answer to the API path's `api_usage` (#562).
+        # None when the run said nothing, which is honest: the phases are not
+        # inferred from the artifacts on disk, because a phase that ran and a
+        # phase whose output happens to exist are different claims.
+        "phase_log": phase_facts(phases or []),
         "schema": schema_facts() | (
             {"digest_md5": schema_digest_md5} if schema_digest_md5 else {}),
         "software": software_facts() if mode == "live" else {

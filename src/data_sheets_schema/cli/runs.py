@@ -603,6 +603,21 @@ def check_cmd(method, label, project, strict):
         if st == PAIR_DIVERGENT:
             divergent.append((r["project"], r["label"], errs))
 
+    # What each run said about its own phases (#562). The API path has always
+    # written `api_usage`; the agentic path wrote nothing, so its phase
+    # structure lived only in prose and no arm comparison could reach it.
+    from data_sheets_schema.runs import (
+        PHASES_ABSENT, PHASES_API, PHASES_RECORDED, phase_log_status,
+    )
+    logs: collections.Counter = collections.Counter()
+    for r in rows:
+        logs[phase_log_status(r["method"], r["label"], r["project"])[0]] += 1
+    if logs[PHASES_ABSENT]:
+        click.echo(f"\nⓘ  {logs[PHASES_ABSENT]} record(s) say nothing about "
+                   f"which phases they ran ({logs[PHASES_API]} carry "
+                   f"`api_usage`, {logs[PHASES_RECORDED]} a `phase_log`).")
+        click.echo("   An arm comparison over a phase cannot include these.")
+
     # External identifiers checked against the bundle they were read from
     # (#547). The hardest fabrication class: right answer, no evidence. VOICE
     # rep1's RORs are all correct and none of them is in its bundle.
