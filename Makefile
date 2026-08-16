@@ -200,6 +200,10 @@ gen-examples:
 
 # Build the combined schema
 # Also write proper yaml header to it
+.PHONY: check-digest
+check-digest: ## Is the merged schema built from today's source? (gate before generating)
+	$(RUN) d4d schema check-digest --strict
+
 .PHONY: full-schema
 full-schema: $(SOURCE_SCHEMA_ALL)
 
