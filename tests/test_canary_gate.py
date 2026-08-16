@@ -126,3 +126,40 @@ class RealArmTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class GateControlFlowTest(unittest.TestCase):
+    """Where the refusal is raised decides whether it works at all.
+
+    The first version raised inside the per-run `try`, whose bare
+    `except Exception` catches everything — so under `--continue-on-error` the
+    sweep caught its own canary refusal, logged it as a failed run, and fanned
+    out. The gate existed and did nothing, which is worse than not having it,
+    because the summary then says a canary passed.
+    """
+
+    def _source(self):
+        import inspect
+
+        from data_sheets_schema.cli.api import batch_cmd
+        return inspect.getsource(batch_cmd.callback)
+
+    def test_the_refusal_is_raised_outside_the_per_run_handler(self):
+        src = self._source()
+        self.assertGreater(src.index("raise click.ClickException(canary_stop)"),
+                           src.index("except Exception as exc:"))
+
+    def test_the_loop_breaks_rather_than_continuing(self):
+        """`--continue-on-error` must not override the canary: it governs
+        individual run failures, not the decision to fan out at all."""
+        self.assertIn("if canary_stop:", self._source())
+
+    def test_the_lock_is_released_exactly_once(self):
+        """Releasing twice on the refusal path, or not at all, turns a stopped
+        sweep into a permanently blocked label prefix (#513)."""
+        self.assertEqual(self._source().count("run_lock.release(lock_path)"), 1)
+
+    def test_the_gate_is_opt_in_and_says_how_to_bypass(self):
+        src = self._source()
+        self.assertIn("--no-canary-gate", src)
+        self.assertIn("canary_baseline and not no_canary_gate", src)
