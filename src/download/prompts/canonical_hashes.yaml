@@ -121,15 +121,19 @@ files:
       retired_on: '2026-08-13'
       sha256: a47e61b52c05a0aa81c2a8629be551942ab2e6e24a39d11dc75ba96ef5b3482a
   src/download/prompts/d4d_generic_arm_prompt_v5.md:
-    body_sha256: baf755f808f84c7d92e817d936300f1baeedb69a7d95f0a9e9028ca5f39f0c15
-    bytes: 11812
-    pinned_at_commit: 9b6dd51d2940f976b85682b53e7191fd6d4347b0
-    pinned_on: '2026-08-14'
-    reason: 'rotation before any v5 run: corrects an attribution in the rationale (#531 established
-      1,094 VOICE values, not the corpus-wide ~12,000). The prompt body is byte-identical
-      to the previous pin; only rationale prose, which prompt_body does not send, changed.
-      Free to rotate because no record names generic_v5 yet.'
-    sha256: 606e7382cd4ee5214d7a910fc5b89f8e9faa053cb193dbaeff02ac65b672904d
+    body_sha256: 7b226a9bbe604f181d9aa18c60df964377a14b8fea6d26fe34084414e9ab5f18
+    bytes: 12167
+    pinned_at_commit: e12cc7913b38649b5b3091c01ef775c5e8d8fe1a
+    pinned_on: '2026-08-15'
+    reason: "reconcile the CURIE rule with the playbook before any v5 run (#573). The first\
+      \ version said an identifier is \"never as a URL\" with no scope, contradicting the\
+      \ playbook \u2014 which says a URL is correct where no prefix is declared, that URL-ranged\
+      \ slots take URLs, and that prose is exempt. `download_url` and `access_urls` are declared\
+      \ `uri`, so the unscoped rule told the API arm to put a CURIE where the schema requires\
+      \ a URL. Both texts now state one rule: CURIE where a prefix is declared, URL-ranged\
+      \ slots and prose untouched, never an invented prefix, fragment on an attested identifier\
+      \ where none fits. Free to rotate because no record names generic_v5."
+    sha256: bc239c3ab991b18e67cac19c25c4a374b5fec867d707c781e78c902606d5815a
     superseded:
     - pinned_on: '2026-08-14'
       reason: "initial pin for the generic-v5 condition (#547, #531, #545): v4 plus one marked\
@@ -141,6 +145,13 @@ files:
         \ in notes/generic_v5_analysis_plan.md, not in the prompt."
       retired_on: '2026-08-14'
       sha256: e4d0570921f84f2024a8166bbd6284557d1c7f65471d8356a18edd957bf42e52
+    - pinned_on: '2026-08-14'
+      reason: 'rotation before any v5 run: corrects an attribution in the rationale (#531
+        established 1,094 VOICE values, not the corpus-wide ~12,000). The prompt body is byte-identical
+        to the previous pin; only rationale prose, which prompt_body does not send, changed.
+        Free to rotate because no record names generic_v5 yet.'
+      retired_on: '2026-08-15'
+      sha256: 606e7382cd4ee5214d7a910fc5b89f8e9faa053cb193dbaeff02ac65b672904d
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
