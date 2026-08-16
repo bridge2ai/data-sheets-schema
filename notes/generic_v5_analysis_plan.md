@@ -94,37 +94,58 @@ Stated so they can be wrong.
 
 ## Measured v4 baselines
 
-Taken 2026-08-15 from the 12 records of `2026-08-13_claude-opus-5-api-generic-v4`,
-before any v5 run. Predictions above are unfalsifiable without them.
+Produced by `poetry run python scripts/v5_baselines.py`, committed so the v5
+figures are produced the same way. **Three of these were wrong or undefined in
+the first version** (#577), which is why the script exists rather than an ad-hoc
+pass.
 
-| quantity | v4 baseline | which prediction |
-|---|---|---|
-| ungrounded external identifiers (distinct) | 19 in VOICE rep1, 10 in CM4AI rep3, 0 in the other ten | 1 |
-| minted fragments on an attested base (distinct) | 17 / 12 / 14 in AI_READI rep1, CM4AI rep1, VOICE rep3; 0 elsewhere | 2 |
-| person fragments on an organisational ROR (distinct) | 7 in VOICE rep1, 0 elsewhere | 3 |
-| undeclared CURIE prefixes (occurrences) | **370** — `chorus:` 226, `cm4ai:` 86, `urn:` 41, `ark:` 9, `nih:` 8 | 4 |
-| identifier slots holding a URL | **397** — `b2ai-voice.org` 302, `chorus4ai.org` 38, `reporter.nih.gov` 18, `fairhub.io` 16 | 4 |
-| British spellings in record prose | **627** — `licence` 199, `analyse` 85, `organisation` 81, `enrolment` 71, `programme` 67 | 5 |
-| full/core pairs diverging on content | 11 of 12 | regression watch |
+| project | rep | grounded | minted | absent | org-frag |
+|---|---|---|---|---|---|
+| AI_READI | 1 | 27 | 17 | 0 | 0 |
+| AI_READI | 2 | 10 | **14** | 0 | 0 |
+| AI_READI | 3 | 10 | **13** | 0 | 0 |
+| CHORUS | 1–3 | 0 | 0 | 0 | 0 |
+| CM4AI | 1 | 9 | 12 | 0 | 0 |
+| CM4AI | 2 | 2 | 0 | 0 | 0 |
+| CM4AI | 3 | 40 | 0 | **10** | 0 |
+| VOICE | 1 | 5 | 0 | **19** | **7** |
+| VOICE | 2 | 2 | 0 | 0 | 0 |
+| VOICE | 3 | 2 | 14 | 0 | 0 |
 
-Two notes on how these were counted, because both were got wrong once:
+| corpus-wide | |
+|---|---|
+| undeclared CURIE prefixes (occurrences) | **370** — `chorus:` 226, `cm4ai:` 86, `urn:` 41, `ark:` 9, `nih:` 8 |
+| URL-valued identifier slots | **397** — VOICE 330, CHORUS 40, AI_READI 21, CM4AI 6 |
+| British spellings in generated prose | **613** — `licence` 199, `analyse` 85, `organisation` 81 |
+| full/core pairs diverging on content | 11 of 12 |
 
-- **Distinct identifiers, not occurrences.** Every identifier appears in both
-  records of a pair, so an occurrence count is exactly double and reads as twice
-  the problem (#556).
-- **`B2AI_TOPIC` and `B2AI_SUBSTRATE` are declared prefixes**, not invented ones.
-  Counting them among the undeclared put 192 legitimate values in the defect
-  column on the first pass.
+### The counting rules, stated so the v5 figure matches
 
-The 397 URL-valued slots are not all defects under the v4 rules: the playbook in
+- **Distinct per record pair, not per occurrence.** Every identifier appears in
+  both records, so an occurrence count is exactly double and reads as twice the
+  problem (#556).
+- **"Undeclared" means the schema's `prefixes:` block does not declare it.**
+  `urn:` and `ark:` are counted here. Classifying them instead as no-authority
+  URI schemes gives 320; both are defensible and the plan previously stated
+  neither, so the v5 figure could have been compared against the other one.
+- **British spellings in generated prose only** — spans inside double quotes
+  are removed first, because the rule exempts quoted material. That is the
+  difference between 613 and the ~626 a naive count gives.
+- **`B2AI_TOPIC` and `B2AI_SUBSTRATE` are declared prefixes**, not invented
+  ones. Counting them among the undeclared put 192 legitimate values in the
+  defect column on a first pass.
+
+### What the first version got wrong
+
+It said minted fragments were "17 / 12 / 14 in AI_READI rep1, CM4AI rep1, VOICE
+rep3; **0 elsewhere**". AI-READI rep2 and rep3 have 14 and 13. Prediction 2 —
+that minted-fragment counts rise or hold — would have been evaluated against a
+baseline 27 too low.
+
+The 397 URL-valued slots are not defects under the v4 rules: the playbook in
 force for that arm said a resolvable URL is correct where no prefix is declared.
-They are a baseline for v5's rule 3, which redirects them onto attested
-identifiers, not evidence that v4 broke its own rule.
-
-British spellings were checked to be in generated prose rather than only in
-quoted titles — "prohibited by section 3.F of the licence", "is a custom licence
-tailored to" — so the rule's carve-out for quoted material does not account for
-them.
+Since #573 both texts say the same thing, so this is a baseline for v5's rule,
+not evidence v4 broke its own.
 
 ## What would falsify the block rather than confirm it
 

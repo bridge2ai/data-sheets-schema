@@ -90,10 +90,15 @@ def ground(value: str, bundle: str) -> tuple[str, str, str] | None:
     if not found:
         return None
     name, bare = found
+    # Normalised before anything compares or counts it. DOIs are
+    # case-insensitive in the local part by convention and case-varying in
+    # practice, so `doi:10.1234/ABC` and `doi:10.1234/abc` were counted as two
+    # distinct identifiers (#578).
+    bare = bare.lower()
     base = bare.split("#", 1)[0]
-    if bare.lower() in bundle:
+    if bare in bundle:
         return name, bare, "grounded"
-    if "#" in bare and base.lower() in bundle:
+    if "#" in bare and base in bundle:
         return name, bare, "minted_fragment"
     return name, bare, "absent"
 
@@ -171,6 +176,14 @@ def check_run(full: Path, core: Path, bundle: Path,
     if not bundle.exists():
         return {"checked": False, "reason": f"bundle absent: {bundle}"}
     slots = slots if slots is not None else uriorcurie_slots()
+    # Both records absent read as `checked: true` with three zeroes, which
+    # `runs check` reported as fully grounded (#578). Zero identifiers found in
+    # a file that is not there is not a measurement — the same distinction
+    # `pair_consistency` draws with `ran: false`, missed here.
+    missing = [str(p) for p in (full, core) if not p.exists()]
+    if len(missing) == 2:
+        return {"checked": False,
+                "reason": f"neither record is on disk: {', '.join(missing)}"}
     text = bundle.read_text(encoding="utf-8", errors="replace")
     out: dict[str, Any] = {"checked": True,
                            "counts": {"grounded": 0, "minted_fragment": 0,

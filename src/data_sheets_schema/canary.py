@@ -1,0 +1,123 @@
+"""Hold the first run of a sweep to a higher bar than the rest (#579).
+
+`d4d api batch` counted a run as succeeded on schema validation alone. A run
+whose full/core pair diverges, whose reconciliation report contradicts its own
+record, or which carries identifiers absent from its bundle entered the
+"succeeded" column. That is how the 2026-08-13 arm swept clean: twelve records,
+all valid, `runs check --strict` exit 0, and eleven divergent pairs and
+twenty-nine ungrounded identifiers inside them.
+
+The canary rule says one unit is verified before the batch fans out. But the
+canary's verdict *was* the batch's verdict, and the batch did not look at the
+three checks — so a canary could pass while exhibiting precisely the defects the
+arm was built to fix, and the sweep would proceed to spend the rest.
+
+## A regression gate, not a perfection gate
+
+v5 is a production run. Requiring zero pair errors would refuse to start, since
+eleven of twelve v4 records have some. What the gate asks instead is whether the
+canary is **worse than the worst v4 record for the same project** — a bar known
+to be achievable, with room for the replicate variance that arm showed.
+
+Three outcomes, and the middle one is the point:
+
+``ok``
+    no check regressed against the baseline.
+``regressed``
+    a check is worse than the worst baseline run for that project. Stop; the
+    remaining runs would spend on a known regression.
+``unmeasurable``
+    a check could not run. Also stops: a canary whose instruments were blind
+    has not verified anything, which is the failure #565 recorded one level
+    down.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+OK = "ok"
+REGRESSED = "regressed"
+UNMEASURABLE = "unmeasurable"
+
+#: (label, how to read a count out of a check block, lower-is-better)
+#: Each is a count of a defect in one record, so it is comparable across arms
+#: even when the schema has moved — unlike anything schema-dependent (#576).
+METRICS = (
+    ("pair errors", "pair", lambda b: int(b.get("errors") or 0)),
+    ("report findings", "report", lambda b: len(b.get("findings") or [])),
+    ("ungrounded identifiers", "grounding",
+     lambda b: int((b.get("distinct") or b.get("counts") or {}).get("absent") or 0)),
+)
+
+
+def _ran(block: Any) -> bool:
+    if not isinstance(block, dict):
+        return False
+    if "ran" in block:
+        return bool(block["ran"])
+    return bool(block.get("checked"))
+
+
+def counts_from(checks: dict[str, Any]) -> dict[str, int | None]:
+    """One number per metric, or None where the check did not run."""
+    out: dict[str, int | None] = {}
+    for name, key, read in METRICS:
+        block = (checks or {}).get(key)
+        out[name] = read(block) if _ran(block) else None
+    return out
+
+
+def baseline_for(project: str, label_prefix: str,
+                 method: str = "claudecode_agent",
+                 concat_dir: Path | None = None) -> dict[str, int | None]:
+    """The worst value each metric took across a baseline arm, for one project.
+
+    The *worst*, deliberately. The best would make normal replicate variance
+    read as a regression, and this gate stops a paid sweep — it should fire on
+    a real step backwards, not on a run landing at the unlucky end of a spread
+    the baseline arm itself showed.
+    """
+    import yaml
+
+    from data_sheets_schema.provenance import CONCAT_DIR
+    base = concat_dir or CONCAT_DIR
+    worst: dict[str, int | None] = {name: None for name, _, _ in METRICS}
+    for path in sorted(base.glob(
+            f"{method}_core/{label_prefix}*/{project}_provenance.yaml")):
+        rec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        counts = counts_from({"pair": rec.get("pair_consistency"),
+                              "report": rec.get("report_claims"),
+                              "grounding": rec.get("grounding")})
+        for name, value in counts.items():
+            if value is None:
+                continue
+            worst[name] = value if worst[name] is None else max(worst[name],
+                                                                value)
+    return worst
+
+
+def verdict(checks: dict[str, Any], baseline: dict[str, int | None]
+            ) -> dict[str, Any]:
+    """Compare one run's checks against a baseline. See module docstring."""
+    counts = counts_from(checks)
+    blind = [name for name, value in counts.items() if value is None]
+    rows = []
+    regressions = []
+    for name, value in counts.items():
+        bar = baseline.get(name)
+        row = {"metric": name, "run": value, "baseline_worst": bar}
+        if value is not None and bar is not None and value > bar:
+            row["regressed"] = True
+            regressions.append(f"{name}: {value} against a baseline worst of {bar}")
+        rows.append(row)
+
+    if blind:
+        status = UNMEASURABLE
+    elif regressions:
+        status = REGRESSED
+    else:
+        status = OK
+    return {"status": status, "rows": rows, "blind": blind,
+            "regressions": regressions}

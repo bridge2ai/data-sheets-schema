@@ -2176,6 +2176,13 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
 
     return {"label": spec.label, "project": spec.project, "usage": usage,
             "skipped": skipped, "validation_problems": problems,
+            # The three post-generation checks, returned rather than only
+            # written to the record (#579). A batch that cannot see them counts
+            # a run with 11 pair errors and 19 ungrounded identifiers as a
+            # success, which is how the v4 arm swept clean.
+            "checks": {"pair": rec.data.get("pair_consistency"),
+                       "report": rec.data.get("report_claims"),
+                       "grounding": rec.data.get("grounding")},
             "outputs": {"full": str(spec.full_path), "core": str(spec.core_path),
                         "report": str(spec.report_path),
                         "provenance": str(spec.provenance_path)}}
