@@ -116,6 +116,29 @@ class StatusTest(unittest.TestCase):
                          pr.UNCANONICAL)
 
 
+class TheTwoBodyExtractorsAgreeTest(unittest.TestCase):
+    """`body_sha256_of` must hash exactly what `prompt_body` sends.
+
+    They are separate implementations in separate modules — `prompt_registry`
+    cannot import `api_runner` without a cycle — and this codebase's recurring
+    defect is one piece of content maintained in two places (#518, #521, #545,
+    #563). If they drift, the pin would vouch for text the model never receives,
+    which is the opposite of what #560 is for.
+    """
+
+    def test_they_hash_the_same_text_for_every_condition_prompt(self):
+        import hashlib
+
+        from data_sheets_schema.api_runner import CONDITION_PROMPTS, prompt_body
+        for name, path in sorted(CONDITION_PROMPTS.items()):
+            if not path.exists():
+                continue
+            with self.subTest(condition=name):
+                sent = hashlib.sha256(
+                    prompt_body(path).encode("utf-8")).hexdigest()
+                self.assertEqual(pr.body_sha256_of(path), sent)
+
+
 class RealRegistryTest(unittest.TestCase):
 
     def test_every_condition_prompt_now_carries_a_body_hash(self):
