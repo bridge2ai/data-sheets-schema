@@ -440,15 +440,20 @@ def prompts_check_cmd(strict):
     # record may legitimately name a prompt the registry does not cover; the
     # working tree has no such excuse. A condition prompt nobody pinned is
     # text that was never declared, which is the hole (#432), not a gap in it.
-    bad = [r for r in rows if r["status"] != pr.CANONICAL]
+    # `annotated` is reported and not counted against the gate: the
+    # instruction is at its pin and only rationale moved (#560).
+    bad = [r for r in rows if r["status"] not in (pr.CANONICAL, pr.ANNOTATED)]
+    annotated = [r for r in rows if r["status"] == pr.ANNOTATED]
     for r in rows:
-        mark = {"canonical": "✓", "superseded": "⚠️ ",
+        mark = {"canonical": "✓", "superseded": "⚠️ ", "annotated": "ⓘ ",
                 "uncanonical": "❌", "unpinned": "❌",
                 "missing": "❌"}[r["status"]]
         click.echo(f" {mark} {r['status']:12} {r['path']}")
         if r["reason"]:
             click.echo(f"       {r['reason']}")
-    click.echo(f"\n{len(rows)} prompt file(s), {len(bad)} not at their pin")
+    click.echo(f"\n{len(rows)} prompt file(s), {len(bad)} not at their pin"
+               + (f", {len(annotated)} annotated (body unchanged)"
+                  if annotated else ""))
     if bad:
         click.echo("Declare them with `d4d api prompts pin --file <path> "
                    "--reason '<why this is the condition's text>'`. Editing a "

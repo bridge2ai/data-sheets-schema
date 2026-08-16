@@ -53,6 +53,7 @@ files:
       \ is left to the manifest scope declaration rather than restated here (#422)."
     sha256: b7db067c2852b57287cb68bd1fd4f3bfc229496cc2a4bd33065bb9558a35b215
   src/download/prompts/d4d_generic_arm_prompt.md:
+    body_sha256: 0e16a8a8dc35d6fe242bdb55972918ad6dc39875df069caed4be998369a99436
     bytes: 6737
     pinned_at_commit: 7141fdc63e43f5049bf98289a142c85bd63107ed
     pinned_on: '2026-08-13'
@@ -69,6 +70,7 @@ files:
       retired_on: '2026-08-13'
       sha256: 0fbc626bc3a51d74a8ba3d8e2813752f3bc5ce9366ee5f19c99089afdfd9e8dc
   src/download/prompts/d4d_generic_arm_prompt_v2.md:
+    body_sha256: 6b639abb906c44af91a5b3a7f6391da3fc6dd8f039de9e7d6544858e1fb17410
     bytes: 10099
     pinned_at_commit: 7141fdc63e43f5049bf98289a142c85bd63107ed
     pinned_on: '2026-08-13'
@@ -85,6 +87,7 @@ files:
       retired_on: '2026-08-13'
       sha256: 4780613475ef2a629f98b69a934228b58eccd5fe93915fcd259a62cff6583de6
   src/download/prompts/d4d_generic_arm_prompt_v3.md:
+    body_sha256: 5a4d7ab16e04caa124f3c9d6ceccc84384bd7cd6d8657a2f23a4a565fa9bb847
     bytes: 8193
     pinned_at_commit: 7141fdc63e43f5049bf98289a142c85bd63107ed
     pinned_on: '2026-08-13'
@@ -101,6 +104,7 @@ files:
       retired_on: '2026-08-13'
       sha256: 2126da06d0834c2501c55fe9838720fe3ee33ab38c4775f2af329bc4759da45a
   src/download/prompts/d4d_generic_arm_prompt_v4.md:
+    body_sha256: 3d31f5a15fab7b62091d119f9401ac981eed8e9ffaded5637521105115df799b
     bytes: 8659
     pinned_at_commit: 7141fdc63e43f5049bf98289a142c85bd63107ed
     pinned_on: '2026-08-13'
@@ -117,6 +121,7 @@ files:
       retired_on: '2026-08-13'
       sha256: a47e61b52c05a0aa81c2a8629be551942ab2e6e24a39d11dc75ba96ef5b3482a
   src/download/prompts/d4d_generic_arm_prompt_v5.md:
+    body_sha256: baf755f808f84c7d92e817d936300f1baeedb69a7d95f0a9e9028ca5f39f0c15
     bytes: 11812
     pinned_at_commit: 9b6dd51d2940f976b85682b53e7191fd6d4347b0
     pinned_on: '2026-08-14'
