@@ -57,6 +57,30 @@ UNPINNED = "unpinned"
 # record named it and hashed nothing. Distinct from `unpinned`, which is an
 # absence of evidence — this is evidence of an absence (#437).
 MISSING = "missing"
+# The instruction is at its pin; something else in the file is not. A prompt
+# file carries a rationale that `prompt_body` never sends to the model, and
+# under whole-file hashing correcting a sentence of it cost exactly what
+# changing a decision rule costs — so rationale errors went uncorrected during
+# an arm, because correcting them looked like tampering (#560).
+ANNOTATED = "annotated"
+
+
+def body_sha256_of(path: Path) -> str | None:
+    """Hash of the text a run actually sends, or None if the file has no body.
+
+    `prompt_body` splits on `## Prompt body`; everything above it is rationale
+    that documents the condition without being part of it. Component files and
+    the tuned block have no such section, and for those this returns None and
+    the whole-file hash stays the only check — which is correct, because for
+    them every byte is sent.
+    """
+    if not path or not Path(path).exists():
+        return None
+    text = Path(path).read_text(encoding="utf-8", errors="replace")
+    if "## Prompt body" not in text:
+        return None
+    body = text.split("## Prompt body", 1)[1].strip()
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()
 
 
 def sha256_of(path: Path) -> str | None:
@@ -178,7 +202,24 @@ def disk_status(path: str | Path,
             return MISSING, (f"{normalise(path)} is pinned but not on disk; "
                              "the declared text of its condition is gone")
         return UNPINNED, f"{normalise(path)} is neither pinned nor on disk"
-    return status_of_hash(path, sha, registry)
+    status, why = status_of_hash(path, sha, registry)
+    # Only here, never in `status_of_hash`. That function judges a hash a
+    # *record* wrote, for bytes that need not exist any more — so decomposing
+    # it into body and rationale is impossible, and comparing today's body
+    # against the pin would let a record whose prompt matches nothing pass as
+    # `annotated` because an unrelated file on disk happens to agree. The
+    # existing test for that caught this when the check was misplaced.
+    if status == UNCANONICAL:
+        pinned_body = (entry_for(path, registry) or {}).get("body_sha256")
+        here = body_sha256_of(Path(path))
+        # A pin taken before #560 records no body hash and cannot tell
+        # rationale from instruction; those keep failing closed.
+        if pinned_body and here and here == pinned_body:
+            return ANNOTATED, (
+                f"{normalise(path)}: the prompt body is at its pin; only text "
+                "outside `## Prompt body` differs, which is rationale the model "
+                "is never sent. Rotate the pin when convenient (#560).")
+    return status, why
 
 
 def registered_paths(registry: Path = REGISTRY) -> list[str]:
@@ -275,6 +316,18 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
     key = normalise(p)
     prev = files.get(key)
     if prev and prev.get("sha256") == sha:
+        # Same bytes, but the entry may predate #560 and carry no body hash.
+        # Adding one is arithmetic over bytes already pinned — no new claim,
+        # and without it every pre-#560 pin stays unable to tell a rationale
+        # edit from an instruction edit, which is the whole point.
+        body = body_sha256_of(p)
+        if body and not prev.get("body_sha256"):
+            prev["body_sha256"] = body
+            Path(registry).write_text(
+                _HEADER + yaml.safe_dump(data, sort_keys=True, width=88),
+                encoding="utf-8")
+            _REGISTRY_CACHE.clear()
+            return {"path": key, "status": "body_hash_added", "sha256": sha}
         return {"path": key, "status": "unchanged", "sha256": sha}
 
     superseded = list((prev or {}).get("superseded") or [])
@@ -283,7 +336,8 @@ def pin(path: str | Path, reason: str, registry: Path = REGISTRY,
                            "pinned_on": prev.get("pinned_on"),
                            "retired_on": today,
                            "reason": prev.get("reason")})
-    files[key] = {"sha256": sha, "bytes": p.stat().st_size,
+    files[key] = {"sha256": sha, "body_sha256": body_sha256_of(p),
+                  "bytes": p.stat().st_size,
                   "pinned_on": today, "pinned_at_commit": _head_commit(),
                   "reason": reason.strip()}
     if superseded:
