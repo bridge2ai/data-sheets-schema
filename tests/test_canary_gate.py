@@ -214,6 +214,49 @@ class ResolverUrlMetricTest(unittest.TestCase):
         self.assertEqual(v["status"], REGRESSED)
         self.assertTrue(any("resolver URLs" in r for r in v["regressions"]))
 
+    def test_the_host_map_is_derived_from_the_schema(self):
+        """Hardcoding three hosts missed the other 35 (#593).
+
+        The schema declares 38 prefixes with an http base. A resolver URL for
+        any of the others was invisible, and adding a prefix did not extend the
+        check — the defect of #340, #467 and #563 in a fourth place.
+        """
+        from data_sheets_schema.grounding import declared_bases
+        bases = declared_bases()
+        self.assertGreater(len(bases), 30)
+        self.assertEqual({p for _, p in bases} & {"doi", "ROR", "ORCID"},
+                         {"doi", "ROR", "ORCID"})
+
+    def test_longer_bases_are_matched_first(self):
+        """Several prefixes share the w3id.org host, so matching the shorter
+        base first would attribute a value to the wrong prefix."""
+        from data_sheets_schema.grounding import declared_bases
+        lengths = [len(b) for b, _ in declared_bases()]
+        self.assertEqual(lengths, sorted(lengths, reverse=True))
+
+    def test_a_prefix_beyond_the_original_three_is_caught(self):
+        """The point of deriving: a w3id.org base is now detected too."""
+        from data_sheets_schema.grounding import (declared_bases,
+                                                  resolver_urls_in_identifier_slots)
+        from data_sheets_schema.identifiers import uriorcurie_slots
+        base, _ = next((b, p) for b, p in declared_bases()
+                       if "w3id.org" in b)
+        found = resolver_urls_in_identifier_slots(
+            {"id": base + "something"}, uriorcurie_slots())
+        self.assertEqual(len(found), 1)
+
+    def test_the_metric_counts_distinct_identifiers(self):
+        """#556 again: every identifier appears in both records, so an
+        occurrence count is roughly double. The canary's 45 is 22 distinct."""
+        from data_sheets_schema.canary import counts_from
+        findings = [{"kind": "resolver_url_in_identifier_slot",
+                     "value": "https://doi.org/10.1/x", "record": r}
+                    for r in ("full", "core")]
+        counts = counts_from({"grounding": {"checked": True,
+                                            "distinct": {"absent": 0},
+                                            "findings": findings}})
+        self.assertEqual(counts["resolver URLs in identifier slots"], 1)
+
     def test_a_url_ranged_slot_is_not_counted(self):
         """`download_url` and `access_urls` are declared `uri`; a URL there is
         correct, and counting it would penalise the schema's own design."""
