@@ -245,6 +245,7 @@ def _append_identity_errors(
     slots: Iterable[str],
     path: str = "$",
     schema_moved: bool = False,
+    slot_existed=None,
 ) -> None:
     """Compare the slots a full/core pair must state identically.
 
@@ -270,6 +271,19 @@ def _append_identity_errors(
         slot_path = f"{path}.{slot}"
         if full_present != core_present:
             present_in = "full" if full_present else "core"
+            # Per slot where the ledger can answer, broad where it cannot
+            # (#580). `schema_moved` alone downgrades *every* presence mismatch
+            # whenever the digest differs at all, so an unrelated schema edit
+            # suppressed real defects. The ledger records which slots each
+            # digest had, so a slot that demonstrably existed at the run's
+            # digest stays an error; one that did not is genuinely excused; and
+            # an unrecorded digest falls back to the old behaviour rather than
+            # guessing.
+            excused = schema_moved
+            if schema_moved and slot_existed is not None:
+                existed = slot_existed(slot)
+                if existed is True:
+                    excused = False
             issue = ConsistencyIssue(
                 code="shared-slot-presence",
                 path=slot_path,
@@ -278,10 +292,10 @@ def _append_identity_errors(
                     f"{present_in}; it must be present in both or neither"
                     + (" — but this pair predates the current schema, so the "
                        "slot may not have existed when it was written"
-                       if schema_moved else "")
+                       if excused else "")
                 ),
             )
-            (report.warnings if schema_moved else report.errors).append(issue)
+            (report.warnings if excused else report.errors).append(issue)
             continue
         if not full_present:
             continue
@@ -579,13 +593,31 @@ def _append_distribution_relation_issues(
     )
 
 
+def _slot_resolver(run_digest: str | None):
+    """A callable(slot) -> bool|None over the digest ledger, or None."""
+    if not run_digest:
+        return None
+    from data_sheets_schema import schema_digest
+
+    def existed(slot: str):
+        return schema_digest.slot_existed_at(run_digest, CORE_CLASS, slot)
+    return existed
+
+
 def validate_pair_data(
     full_data: Mapping[str, Any],
     core_data: Mapping[str, Any],
     pair_schema: PairSchema,
     schema_moved: bool = False,
+    run_digest: str | None = None,
 ) -> PairConsistencyReport:
-    """Validate strict shared content and schema-related projections."""
+    """Validate strict shared content and schema-related projections.
+
+    `run_digest` is the schema digest the pair was generated against. Given
+    one, a presence mismatch is excused only for slots the digest ledger shows
+    did not exist then; without one, `schema_moved` applies broadly as before
+    (#580).
+    """
 
     report = PairConsistencyReport(
         identity_slots=pair_schema.identity_slots,
@@ -598,6 +630,7 @@ def validate_pair_data(
         core_data,
         pair_schema.identity_slots,
         schema_moved=schema_moved,
+        slot_existed=_slot_resolver(run_digest),
     )
 
     if "resources" in pair_schema.projected_slots:

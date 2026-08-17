@@ -560,7 +560,12 @@ def backfill_checks(execute, method, label, project, overwrite):
     if label:
         paths = [p for p in paths if p.parts[-2] == label]
     if project:
-        paths = [p for p in paths if p.name.startswith(f"{project}_")]
+        # Exact, not a prefix. `VOICE_PEDIATRIC_provenance.yaml` starts with
+        # `VOICE_`, so `--project VOICE --overwrite` rewrote records of a
+        # different project (#580). A scoped write that is not scoped is only
+        # noticed after it matters.
+        paths = [p for p in paths
+                 if p.name == f"{project}_provenance.yaml"]
     if not paths:
         click.echo("no records matched")
         return

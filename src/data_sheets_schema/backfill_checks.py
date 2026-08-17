@@ -116,10 +116,15 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
         # most of the corpus was written — reported as a defect in 70 pairs
         # that could not have carried it.
         moved = pair_predates_current_schema(core)
+        # The digest this record states it was generated against, not today's.
+        # Where the ledger knows that digest, a slot that demonstrably existed
+        # then stays an error; where it does not, `schema_moved` applies
+        # broadly as before (#580).
         rep = validate_pair_data(
             yaml.safe_load(full.read_text(encoding="utf-8")) or {},
             yaml.safe_load(core.read_text(encoding="utf-8")) or {}, pair,
-            schema_moved=moved)
+            schema_moved=moved,
+            run_digest=(record.get("schema") or {}).get("digest_md5"))
         out["pair_consistency"] = {
             "ran": True, "consistent": rep.passed, "errors": len(rep.errors),
             "warnings": len(rep.warnings),

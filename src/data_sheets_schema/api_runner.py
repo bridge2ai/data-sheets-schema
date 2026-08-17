@@ -466,9 +466,15 @@ class PhaseRequest:
     messages: list[dict[str, Any]] = field(default_factory=list)
 
     def approx_tokens(self) -> int:
+        """Rough input size of this request.
+
+        `cached_blocks` are not added separately: `build_phase` starts the
+        message parts with `list(cached)`, so those blocks are already inside
+        `messages` and counting both double-counted the bundle — the largest
+        thing in the request, and the one a cost estimate most needs right
+        (#580).
+        """
         chars = len(self.system)
-        for b in self.cached_blocks:
-            chars += len(b.get("text", ""))
         for m in self.messages:
             c = m.get("content")
             chars += len(c) if isinstance(c, str) else sum(
@@ -538,8 +544,13 @@ PHASE_INSTRUCTIONS = {
     "report": (
         "Phase 4c. Write the reconciliation report as Markdown: what the audit "
         "found, what was changed in each record and why, and what was left "
-        "as-is and why. Write it even when nothing changed. Output only "
-        "Markdown."),
+        "as-is and why. The reconciled records are supplied above — check each "
+        "statement against them before you write it. Do not report a slot as "
+        "removed if it is still present, and do not state that a slot is not "
+        "declared in the schema without the schema digest supporting you: both "
+        "are checked against the records afterwards, and a report that fails "
+        "that check is worse than a shorter one that does not. Write it even "
+        "when nothing changed. Output only Markdown."),
 }
 
 # What each phase produces, and where it lands. Writing as we go is what makes a
@@ -564,7 +575,14 @@ PHASE_NEEDS = {
     "reconcile_full": ("Completed full record", "Completed core record",
                        "Audit findings"),
     "reconcile_core": ("Reconciled full record", "Completed core record", "Audit findings"),
-    "report": ("Audit findings",),
+    # The reconciled records too (#580). The report is asked what changed in
+    # each record and why, and it received only the audit findings — so it had
+    # to reconstruct actions it never observed. #546 found every record that
+    # emitted a `distributions` block reporting a removal that did not happen;
+    # a phase asked to narrate a diff it cannot see is a plausible cause, and
+    # #546 fixed the checking rather than the cause.
+    "report": ("Audit findings", "Reconciled full record",
+               "Completed core record"),
 }
 
 
@@ -617,6 +635,42 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     )
 
 
+def _carry_sizes(spec: RunSpec) -> tuple[dict[str, int], str]:
+    """Byte sizes to assume for each carried artifact, and where they came from.
+
+    A dry run cannot know how large this run's records will be. The best
+    available evidence is what the same project produced before, so the most
+    recent existing artifacts are measured; failing that the estimate says so
+    rather than quietly costing the phases as though nothing were carried.
+    """
+    from data_sheets_schema.provenance import CONCAT_DIR
+
+    wanted = {"Completed full record": f"{spec.project}_d4d.yaml",
+              "Reconciled full record": f"{spec.project}_d4d.yaml",
+              "Completed core record": f"{spec.project}_d4d_core.yaml",
+              "Audit findings": None}
+    sizes: dict[str, int] = {}
+    source = None
+    for name, filename in wanted.items():
+        if filename is None:
+            continue
+        found = sorted(CONCAT_DIR.glob(f"*/*/{filename}"),
+                       key=lambda p: p.stat().st_mtime, reverse=True)
+        if found:
+            sizes[name] = found[0].stat().st_size
+            source = source or found[0].parent.name
+    # The audit is JSON findings, an order of magnitude smaller than a record
+    # and not separately archived; approximated from the core record.
+    if "Completed core record" in sizes:
+        sizes["Audit findings"] = sizes["Completed core record"] // 8
+
+    if not sizes:
+        return {}, ("no previous artifacts for this project; carried inputs "
+                    "are costed as empty and the totals are a lower bound")
+    return sizes, (f"carried artifacts sized from the most recent existing "
+                   f"records for this project ({source})")
+
+
 def plan(spec: RunSpec) -> dict[str, Any]:
     """Render every phase without calling the API.
 
@@ -624,13 +678,21 @@ def plan(spec: RunSpec) -> dict[str, Any]:
     inspected and tested without a key or a charge.
     """
     settings = _model_settings()
-    carry: dict[str, str] = {}
+    sizes, basis = _carry_sizes(spec)
     phases = []
     for ph in PHASES:
+        # Every input the phase declares, at a realistic size. The old version
+        # carried a nine-character placeholder for the full record after phase
+        # 1 and nothing else ever, so `audit` was costed without core,
+        # `reconcile_full` without core or audit, and `reconcile_core` and
+        # `report` with nothing at all. The free check that exists to size a
+        # run could not see the largest thing in it — and after #566 could not
+        # see the change whose size was the open question (#568).
+        carry = {name: "x" * sizes.get(name, 0) for name in PHASE_NEEDS[ph]}
         req = build_phase(spec, ph, carry=carry)
         phases.append({"phase": ph, "approx_input_tokens": req.approx_tokens(),
+                       "carried": {n: sizes.get(n, 0) for n in PHASE_NEEDS[ph]},
                        "cached_blocks": len(req.cached_blocks)})
-        carry = {"Completed full record": "<phase 1 output>"} if ph == "full" else carry
     return {
         "project": spec.project, "arm": spec.arm, "method": spec.method,
         "label": spec.label, "condition": spec.condition,
@@ -642,6 +704,7 @@ def plan(spec: RunSpec) -> dict[str, Any]:
             schema_digest.digest_text("Dataset")),
         "phases": phases,
         "approx_total_input_tokens": sum(p["approx_input_tokens"] for p in phases),
+        "estimate_basis": basis,
         "outputs": {"full": str(spec.full_path), "core": str(spec.core_path),
                     "report": str(spec.report_path)},
     }
@@ -1231,7 +1294,13 @@ def pair_consistency(spec: RunSpec) -> dict[str, Any] | None:
         from data_sheets_schema.d4d_pair_consistency import (
             pair_predates_current_schema)
         moved = pair_predates_current_schema(spec.core_path)
-        report = validate_pair_data(full, core, pair, schema_moved=moved)
+        # This run's own digest, so a presence mismatch is excused only for
+        # slots the ledger shows did not exist then (#580).
+        from data_sheets_schema import schema_digest as _sd
+        _sd.record_inventory()
+        run_digest = _sd.fingerprint(_sd.digest_text("Dataset"))
+        report = validate_pair_data(full, core, pair, schema_moved=moved,
+                                    run_digest=run_digest)
     except Exception as exc:                                       # noqa: BLE001
         # A checker that cannot run must say so rather than report agreement.
         return {"ran": False, "reason": str(exc)[:200]}
@@ -1341,9 +1410,21 @@ def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
                            declared_slots())
     except Exception as exc:                                       # noqa: BLE001
         return {"checked": False, "reason": str(exc)[:200]}
-    from data_sheets_schema.provenance import _md5
-    out["artifacts"] = {"report": {"path": str(spec.report_path),
-                                   "md5": _md5(spec.report_path)}}
+    from data_sheets_schema.provenance import (CORE_SCHEMA, FULL_SCHEMA, _md5,
+                                                _sha256)
+    # The records and the schema, not only the report (#580). A claim is
+    # checked *against* a record and a slot inventory, so a verdict pinned to
+    # the report alone survives an edit to either — the same reason
+    # `validation_block` pins its schema (#426) and the pair verdict pins both
+    # records (#544).
+    out["artifacts"] = {
+        "report": {"path": str(spec.report_path),
+                   "md5": _md5(spec.report_path)},
+        "full": {"path": str(spec.full_path), "md5": _md5(spec.full_path)},
+        "core": {"path": str(spec.core_path), "md5": _md5(spec.core_path)},
+    }
+    out["schema"] = {"full_sha256": _sha256(FULL_SCHEMA),
+                     "core_sha256": _sha256(CORE_SCHEMA)}
     return out
 
 
