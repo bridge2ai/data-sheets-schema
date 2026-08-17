@@ -192,6 +192,40 @@ scope:
           so the overlap is in the evidence, not in the referent
         express_as: related_datasets
 
+# Which source wins when two of them state different things (Harry, 2026-08-17).
+#
+# Before this the uniform rule said only to represent a disagreement, and a
+# record following it wrote: "No instance count is asserted because the two
+# sources give different figures (over 45,000 and 50,000) for the same released
+# dataset and **the bundle offers no basis for preferring one**." That last
+# clause is the gap this closes — the rule was right and the basis was missing.
+#
+# Declared here rather than in a prompt, for the reason #422 records: a
+# constraint in the launch text is per-run adaptation that no future dataset
+# inherits and no test can see. This is checkable and inherited.
+#
+# Tier 1 is strongest. A tier is a claim about how directly a source speaks for
+# the released dataset, not about how much anyone trusts its authors:
+#
+#   1  the release describing itself — machine-readable metadata deposited with
+#      the data, and the repository record of the release
+#   2  the project describing its own release in prose, and the instruments
+#      that govern it
+#   3  the literature: peer-reviewed and preprint, authoritative on method and
+#      often behind the current release on counts
+#   4  presentations and funder records: about the project or a moment in it,
+#      not about the release
+#   5  explicitly historical material, retained for provenance
+#
+# A source may override its tier with `priority:`. An override is a deliberate
+# line someone has to write, and should say why in a `curation_note`.
+source_priority:
+  1: [RO-Crate, structured metadata, data resource]
+  2: [documentation, license, DUA, IRB]
+  3: [publication, preprint, white paper]
+  4: [NIH project page, tutorial]
+  5: [historical data release, historical documentation]
+
 default_minimum_characters: 500
 
 projects:

@@ -106,6 +106,8 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
             ("does not identify a person", "does not identify a person"),
         "american english":
             ("American English", "American English"),
+        "source priority":
+            ("ranks higher", "ranks higher"),
     }
 
     #: Rules the playbook carries that the condition prompts deliberately do

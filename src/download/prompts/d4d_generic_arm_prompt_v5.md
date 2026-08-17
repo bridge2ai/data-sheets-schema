@@ -238,6 +238,12 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   analyze, behavior, license. This governs the prose the record states, not
   quoted material: a title, a name or a direct quotation keeps the spelling its
   source used.
+- Where two sources in the declared bundle disagree, prefer the one the input
+  manifest ranks higher: state its value, and record in the caveat that the
+  sources disagreed, what each said, and which was preferred. Where the
+  disagreeing sources share the same rank the ranking cannot decide, so
+  represent what the evidence states rather than selecting one. This refines
+  the earlier rule about disagreement; it does not replace it.
 
 --- END ADDED IN v5 ---
 

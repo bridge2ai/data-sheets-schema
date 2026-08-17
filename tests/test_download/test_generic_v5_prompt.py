@@ -87,16 +87,22 @@ class TestV5IsV4PlusTheAddedBlock(unittest.TestCase):
                     len([l for l in block.splitlines() if l.startswith("- ")]),
                     expected)
 
-    def test_the_added_block_holds_exactly_four_rules(self):
-        """Four, and the number is asserted so a fifth cannot arrive quietly.
+    def test_the_added_block_holds_exactly_five_rules(self):
+        """Five, and the number is asserted so a sixth cannot arrive quietly.
 
         The convention is one rule per version; v5 departs from it for the
         reason in the module docstring. A departure that is counted is a
         decision — one that is not is a drift.
+
+        The fifth is source priority (Harry, 2026-08-17). It went *into* this
+        block rather than editing the inherited disagreement rule, which is
+        v2's and carried by every version: changing it here would silently
+        change what v2, v3 and v4 mean. The suite caught the first attempt to
+        do exactly that.
         """
         rules = [l for l in _added_block(GENERIC_PROMPT_V5.read_text()).splitlines()
                  if l.startswith("- ")]
-        self.assertEqual(len(rules), 4)
+        self.assertEqual(len(rules), 5)
 
     def test_earlier_versions_are_untouched_by_v5(self):
         for path in (GENERIC_PROMPT, GENERIC_PROMPT_V2, GENERIC_PROMPT_V3,

@@ -24,6 +24,22 @@ to every project:
 - Where the declared bundle contains sources that disagree, represent what the
   evidence states rather than silently selecting one. Do not merge distinct
   entities into a single claim.
+
+- **Where two sources disagree, prefer the one the manifest ranks higher.**
+  State its value, and record in the caveat that the sources disagreed, what
+  each said, and which was preferred. The ranking is `source_priority` in
+  `data/preprocessed/source_manifest.yaml`, lowest tier strongest;
+  `d4d download priority --project X` lists it and
+  `d4d download priority --project X --decide a,b` answers a specific pair.
+
+  **Where the disagreeing sources share the same rank the ranking cannot
+  decide**: represent what the evidence states, as the rule above says. This
+  refines that rule rather than replacing it.
+
+  It exists because a v4 CHORUS record wrote that no instance count was
+  asserted "because the two sources give different figures … and the bundle
+  offers no basis for preferring one". The rule was right; the basis was
+  missing.
 - `Dataset` admits one referent. Choose the one the declared bundle best
   supports, state that choice in the reconciliation report, and hold to it
   consistently across both records.
