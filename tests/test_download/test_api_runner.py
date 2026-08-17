@@ -145,12 +145,25 @@ class TestPromptResolution(unittest.TestCase):
 
 
 class TestPhaseAssembly(unittest.TestCase):
-    def test_every_phase_caches_the_bundle_and_digest(self):
+    def test_every_phase_caches_the_bundle_digest_and_ranking(self):
+        """Asserted by content, not by count.
+
+        A literal `2` broke when #596 added the source ranking — a test about
+        *what* is cached failing because of *how many*. What matters is that
+        each block is per-project input that does not change between phases,
+        and that all of them are marked ephemeral.
+        """
         for ph in PHASES:
             req = build_phase(spec(), ph, carry={})
-            self.assertEqual(len(req.cached_blocks), 2, ph)
-            for b in req.cached_blocks:
-                self.assertEqual(b["cache_control"]["type"], "ephemeral")
+            texts = [b["text"] for b in req.cached_blocks]
+            with self.subTest(phase=ph):
+                self.assertTrue(any("Declared input bundle" in t for t in texts))
+                self.assertTrue(any("Declared source ranking" in t
+                                    for t in texts))
+                # the digest block leads, and names the class it describes
+                self.assertTrue(texts[0].strip())
+                for b in req.cached_blocks:
+                    self.assertEqual(b["cache_control"]["type"], "ephemeral")
 
     def test_core_phase_uses_the_core_class_digest(self):
         req = build_phase(spec(), "core", carry={})
@@ -627,7 +640,13 @@ class TestExecuteOffline(unittest.TestCase):
         for kw in client.messages.calls:
             parts = kw["messages"][0]["content"]
             cached = [p for p in parts if p.get("cache_control")]
-            self.assertEqual(len(cached), 2)
+            # By content: the count changed when the source ranking joined the
+            # cached prefix (#596), and the property under test is that the
+            # prefix is sent on every call, not its length.
+            self.assertTrue(any("Declared input bundle" in p["text"]
+                                for p in cached))
+            self.assertTrue(any("Declared source ranking" in p["text"]
+                                for p in cached))
             # temperature must be absent for models that reject it
             self.assertNotIn("temperature", kw)
             from data_sheets_schema.api_runner import output_limit

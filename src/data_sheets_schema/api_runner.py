@@ -341,7 +341,7 @@ def prompt_body(path: Path = GENERIC_PROMPT) -> str:
 # Updated by hand when build_phase() reorders its parts; the instruction texts
 # are hashed mechanically below, so wording changes cannot go unrecorded, but
 # nothing derives this ordering from the code — keep it true.
-ASSEMBLY_LAYOUT = ("schema digest, input bundle, arm prompt, "
+ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, arm prompt, "
                    "carried artifacts, phase instruction")
 
 
@@ -586,6 +586,35 @@ PHASE_NEEDS = {
 }
 
 
+def source_ranking_block(project: str) -> str | None:
+    """The declared source ranking for one project, as sent to the model.
+
+    Rendered from the manifest rather than restated, so a tier edited there
+    reaches the next run with no code change. None when the project declares no
+    sources — the rule then has nothing to say and the block would be noise.
+    """
+    try:
+        from data_sheets_schema.source_priority import ranked
+        rows = ranked(project)
+    except Exception:                                          # noqa: BLE001
+        return None
+    if not rows:
+        return None
+    lines = [
+        "# Declared source ranking",
+        "",
+        "Where two sources disagree, prefer the one ranked higher — lower tier",
+        "number is stronger. Each file in the bundle names its `Source ID` and",
+        "`Source type` in its SOURCE METADATA block; match on those.",
+        "Sources of the same tier do not settle a disagreement between them.",
+        "",
+    ]
+    for row in rows:
+        lines.append(f"  tier {row['priority']}  {row.get('id')}  "
+                     f"({row.get('source_type')})")
+    return "\n".join(lines)
+
+
 def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseRequest:
     """Assemble one phase's request.
 
@@ -610,6 +639,18 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
          "text": f"# Declared input bundle — {spec.bundle}\n\n{bundle_text}",
          "cache_control": {"type": "ephemeral"}},
     ]
+    # The ranking the rules tell the model to consult (#596). Without it the
+    # instruction "prefer the source the manifest ranks higher" named a table
+    # the API path never received — the agentic path can open the manifest and
+    # this path cannot, so one condition would have meant two behaviours.
+    #
+    # Cached with the bundle because it is the same kind of thing: per-project
+    # input that does not change between phases. It joins to the `Source type`
+    # each file already carries in its SOURCE METADATA block.
+    ranking = source_ranking_block(spec.project)
+    if ranking:
+        cached.append({"type": "text", "text": ranking,
+                       "cache_control": {"type": "ephemeral"}})
 
     # Carried artifacts go BEFORE the phase instruction, so the instruction is
     # the last thing in the message (#346). With the old order the message

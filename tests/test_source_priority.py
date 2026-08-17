@@ -129,5 +129,60 @@ class RealManifestTest(unittest.TestCase):
                            table["documentation"])
 
 
+class TheModelIsShownTheRankingTest(unittest.TestCase):
+    """The rule names a table; the API path must receive it (#596).
+
+    The instruction "prefer the source the manifest ranks higher" was sent to a
+    runtime that never got the manifest. The agentic path can open the file and
+    the API path cannot, so one condition name would have meant two
+    behaviours — the defect #563 and #573 were about, reintroduced by the rule
+    that fixed a different one.
+    """
+
+    def _request(self, project="CHORUS"):
+        import dataclasses
+        from pathlib import Path
+
+        from data_sheets_schema.api_runner import RunSpec, build_phase
+        bundle = Path(f"data/preprocessed/concatenated/{project}_preprocessed.txt")
+        if not bundle.exists():
+            self.skipTest(f"{project} bundle not present in this checkout")
+        req = build_phase(
+            RunSpec(project=project, arm="baseline", method="claudecode_agent",
+                    bundle=bundle, label="t", condition="generic_v5"),
+            "full", carry={})
+        return str(dataclasses.asdict(req))
+
+    def test_the_ranking_is_in_the_rendered_request(self):
+        self.assertIn("Declared source ranking", self._request())
+
+    def test_it_names_the_source_that_would_win(self):
+        self.assertIn("tier 2  project_documentation", self._request())
+
+    def test_it_tells_the_model_how_to_join_it_to_the_bundle(self):
+        """The bundle carries `Source ID` and `Source type` per file; the block
+        is useless unless the model is told to match on them."""
+        blob = self._request()
+        self.assertIn("Source type", blob)
+        self.assertIn("SOURCE METADATA", blob)
+
+    def test_equal_tiers_are_declared_not_to_settle_it(self):
+        self.assertIn("same tier do not settle", self._request())
+
+    def test_a_project_with_no_declared_sources_gets_no_block(self):
+        """An empty ranking is noise, and a heading with nothing under it reads
+        as a ranking that failed to load."""
+        from data_sheets_schema.api_runner import source_ranking_block
+        self.assertIsNone(source_ranking_block("NO_SUCH_PROJECT"))
+
+    def test_the_assembly_digest_records_the_change(self):
+        """A block added to every request is a change of method, and the
+        digest is what makes a v5 record distinguishable from one made before
+        the ranking was sent (#353)."""
+        from data_sheets_schema.api_runner import ASSEMBLY_LAYOUT, assembly_digest
+        self.assertIn("source ranking", ASSEMBLY_LAYOUT)
+        self.assertNotEqual(assembly_digest()["sha256"][:12], "9c2ad4a7d5f2")
+
+
 if __name__ == "__main__":
     unittest.main()
