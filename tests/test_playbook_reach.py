@@ -95,8 +95,11 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
             ("admits one referent", "admits one referent"),
         "no target count":
             ("no target slot count", "no target slot count"),
+        # Probed on "write the CURIE", not "as a CURIE": #591 restored the
+        # rule's force and the old phrase went with the old framing. A probe
+        # pinned to wording rather than substance breaks on every rewrite.
         "curie form":
-            ("as a CURIE", "as a CURIE"),
+            ("write the CURIE", "write the CURIE"),
         "identifier provenance":
             ("comes from the evidence", "take it from the evidence"),
         "minted fragment":
@@ -219,8 +222,14 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
          ("prose or a citation",), ()),
         ("an undeclared prefix is never invented",
          ("invent a prefix", "invent one"), ()),
+        # A *qualified* ban is what the rule needs: "in an identifier slot,
+        # never write a resolver URL where the schema declares a prefix". What
+        # is forbidden is an unscoped one, which #573 removed because
+        # `download_url` and `access_urls` are URL-ranged.
         ("no unqualified ban on URLs",
-         (), ("never as a URL",)),
+         (), ("never as a URL", "never a URL,")),
+        ("the ban that remains is scoped to identifier slots",
+         ("identifier slot", "range is an identifier"), ()),
     )
 
     def test_the_two_texts_do_not_contradict_each_other(self):

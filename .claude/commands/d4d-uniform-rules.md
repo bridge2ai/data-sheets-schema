@@ -30,12 +30,14 @@ to every project:
 - There is no target slot count, no expected density, and no expected
   relationship to any other arm or project. Apply your own judgment about what
   the evidence supports.
-- **Write an identifier as a CURIE wherever the schema declares a prefix for
-  it, rather than as a resolver URL.** `ROR:01an7q238`, not
+- **In an identifier slot, never write a resolver URL where the schema declares
+  a prefix — write the CURIE.** `ROR:01an7q238`, not
   `https://ror.org/01an7q238`; `ORCID:0000-0002-…`, not the orcid.org URL;
   `doi:10.13026/…`, not `https://doi.org/…`. Two records naming one thing in
   one form produce one identity; the same thing written as a prefix here and a
-  resolver URL there produces two.
+  resolver URL there produces two. A resolver URL in such a slot is a defect
+  even though it resolves: the v5 canary wrote 45 of them and that is what
+  #591 records.
 
   **This governs slots whose declared range is an identifier** —
   `uriorcurie`. A slot whose declared range is a URL takes a URL: `download_url`

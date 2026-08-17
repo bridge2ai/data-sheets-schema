@@ -12,6 +12,7 @@ pass while showing exactly the defects the arm was built to fix.
 """
 
 import unittest
+from pathlib import Path
 
 from data_sheets_schema.canary import (
     OK,
@@ -42,7 +43,8 @@ class CountsTest(unittest.TestCase):
     def test_counts_are_read_from_each_block(self):
         self.assertEqual(counts_from(GOOD),
                          {"pair errors": 2, "report findings": 0,
-                          "ungrounded identifiers": 0})
+                          "ungrounded identifiers": 0,
+                          "resolver URLs in identifier slots": 0})
 
 
 class BaselineTest(unittest.TestCase):
@@ -163,3 +165,111 @@ class GateControlFlowTest(unittest.TestCase):
         src = self._source()
         self.assertIn("--no-canary-gate", src)
         self.assertIn("canary_baseline and not no_canary_gate", src)
+
+
+class ResolverUrlMetricTest(unittest.TestCase):
+    """The metric the v5 canary needed and the gate did not have (#591).
+
+    A resolver URL for a declared prefix grounds perfectly —
+    `doi.org/10.60775/…` is in the bundle — so what is wrong with it is form,
+    not evidence. The canary wrote 45 and passed a gate measuring pair
+    consistency, report claims and grounding, none of which could see the rule
+    v5 exists to enforce.
+    """
+
+    B = "2026-08-13_claude-opus-5-api-generic-v4"
+    V5 = "2026-08-16_claude-opus-5-api-generic-v5_rep1"
+    BASE = Path("data/d4d_concatenated")
+
+    def test_it_is_one_of_the_gate_metrics(self):
+        from data_sheets_schema.canary import METRICS
+        self.assertIn("resolver URLs in identifier slots",
+                      [m[0] for m in METRICS])
+
+    def test_the_v4_baseline_is_zero(self):
+        bar = baseline_for("AI_READI", self.B)
+        if bar["pair errors"] is None:
+            self.skipTest("v4 arm not present in this checkout")
+        self.assertEqual(bar["resolver URLs in identifier slots"], 0)
+
+    def test_the_canary_would_now_be_refused(self):
+        """The whole point: the gate must fail the run it passed."""
+        import yaml
+
+        from data_sheets_schema.grounding import check_run
+        from data_sheets_schema.identifiers import uriorcurie_slots
+        core = self.BASE / "claudecode_agent_core" / self.V5 / "AI_READI_provenance.yaml"
+        if not core.exists():
+            self.skipTest("v5 canary not present in this checkout")
+        grounding = check_run(
+            self.BASE / "claudecode_agent" / self.V5 / "AI_READI_d4d.yaml",
+            self.BASE / "claudecode_agent_core" / self.V5 / "AI_READI_d4d_core.yaml",
+            Path("data/preprocessed/concatenated/AI_READI_preprocessed.txt"),
+            uriorcurie_slots())
+        rec = yaml.safe_load(core.read_text(encoding="utf-8"))
+        v = verdict({"pair": rec.get("pair_consistency"),
+                     "report": rec.get("report_claims"),
+                     "grounding": grounding},
+                    baseline_for("AI_READI", self.B))
+        self.assertEqual(v["status"], REGRESSED)
+        self.assertTrue(any("resolver URLs" in r for r in v["regressions"]))
+
+    def test_the_host_map_is_derived_from_the_schema(self):
+        """Hardcoding three hosts missed the other 35 (#593).
+
+        The schema declares 38 prefixes with an http base. A resolver URL for
+        any of the others was invisible, and adding a prefix did not extend the
+        check — the defect of #340, #467 and #563 in a fourth place.
+        """
+        from data_sheets_schema.grounding import declared_bases
+        bases = declared_bases()
+        self.assertGreater(len(bases), 30)
+        self.assertEqual({p for _, p in bases} & {"doi", "ROR", "ORCID"},
+                         {"doi", "ROR", "ORCID"})
+
+    def test_longer_bases_are_matched_first(self):
+        """Several prefixes share the w3id.org host, so matching the shorter
+        base first would attribute a value to the wrong prefix."""
+        from data_sheets_schema.grounding import declared_bases
+        lengths = [len(b) for b, _ in declared_bases()]
+        self.assertEqual(lengths, sorted(lengths, reverse=True))
+
+    def test_a_prefix_beyond_the_original_three_is_caught(self):
+        """The point of deriving: a w3id.org base is now detected too."""
+        from data_sheets_schema.grounding import (declared_bases,
+                                                  resolver_urls_in_identifier_slots)
+        from data_sheets_schema.identifiers import uriorcurie_slots
+        base, _ = next((b, p) for b, p in declared_bases()
+                       if "w3id.org" in b)
+        found = resolver_urls_in_identifier_slots(
+            {"id": base + "something"}, uriorcurie_slots())
+        self.assertEqual(len(found), 1)
+
+    def test_the_metric_counts_distinct_identifiers(self):
+        """#556 again: every identifier appears in both records, so an
+        occurrence count is roughly double. The canary's 45 is 22 distinct."""
+        from data_sheets_schema.canary import counts_from
+        findings = [{"kind": "resolver_url_in_identifier_slot",
+                     "value": "https://doi.org/10.1/x", "record": r}
+                    for r in ("full", "core")]
+        counts = counts_from({"grounding": {"checked": True,
+                                            "distinct": {"absent": 0},
+                                            "findings": findings}})
+        self.assertEqual(counts["resolver URLs in identifier slots"], 1)
+
+    def test_a_url_ranged_slot_is_not_counted(self):
+        """`download_url` and `access_urls` are declared `uri`; a URL there is
+        correct, and counting it would penalise the schema's own design."""
+        from data_sheets_schema.grounding import resolver_urls_in_identifier_slots
+        from data_sheets_schema.identifiers import uriorcurie_slots
+        found = resolver_urls_in_identifier_slots(
+            {"download_url": "https://doi.org/10.1234/x"}, uriorcurie_slots())
+        self.assertEqual(found, [])
+
+    def test_an_undeclared_host_is_not_counted(self):
+        """No prefix exists for it, so a URL is the correct answer there."""
+        from data_sheets_schema.grounding import resolver_urls_in_identifier_slots
+        from data_sheets_schema.identifiers import uriorcurie_slots
+        found = resolver_urls_in_identifier_slots(
+            {"id": "https://b2ai-voice.org/thing"}, uriorcurie_slots())
+        self.assertEqual(found, [])

@@ -117,6 +117,62 @@ def person_fragment_on_org(value: str) -> bool:
     return name in _ORG_AUTHORITIES and "#" in bare
 
 
+def declared_bases() -> list[tuple[str, str]]:
+    """(url base, prefix) for every prefix the schema declares with an http base.
+
+    Derived, never restated. The first version hardcoded three hosts while the
+    schema declares 38 prefixes with an http base, so a resolver URL for any of
+    the other 35 was invisible and adding a prefix did not extend the check —
+    the defect of #340, #467 and #563 in a fourth place.
+
+    Longest base first: `https://w3id.org/bridge2ai/standards-dataset-schema/`
+    and `https://w3id.org/aio/` share a host, so matching the shorter one first
+    would attribute a value to the wrong prefix.
+    """
+    import yaml
+
+    from data_sheets_schema.provenance import FULL_SCHEMA
+    schema = yaml.safe_load(FULL_SCHEMA.read_text(encoding="utf-8")) or {}
+    out = []
+    for prefix, value in (schema.get("prefixes") or {}).items():
+        base = value.get("prefix_reference") if isinstance(value, dict) else value
+        if isinstance(base, str) and base.startswith("http"):
+            out.append((base.lower(), str(prefix)))
+    return sorted(out, key=lambda pair: -len(pair[0]))
+
+
+def resolver_urls_in_identifier_slots(record: dict[str, Any],
+                                      slots: set[str]) -> list[dict[str, str]]:
+    """Identifier slots holding a resolver URL where a prefix is declared (#591).
+
+    Distinct from grounding, and invisible to it: `https://doi.org/10.60775/…`
+    *is* in the bundle, so it grounds perfectly. What is wrong with it is form,
+    not evidence — the schema declares `doi`, so two records naming that DOI in
+    the two notations produce two identities.
+
+    The v5 canary wrote 45 of these and passed a gate that measured pair
+    consistency, report claims and grounding. None of the three could see the
+    rule v5 exists to enforce.
+    """
+    from data_sheets_schema.identifiers import walk_identifiers
+
+    bases = declared_bases()
+    out, seen = [], set()
+    for path, slot, value in walk_identifiers(record, slots):
+        value = str(value)
+        for base, prefix in bases:
+            if value.lower().startswith(base) and len(value) > len(base):
+                key = (path, value)
+                if key in seen:
+                    break
+                seen.add(key)
+                out.append({"kind": "resolver_url_in_identifier_slot",
+                            "slot": slot, "path": path, "value": value,
+                            "prefix": prefix})
+                break
+    return out
+
+
 def check_record(record: dict[str, Any], bundle_text: str,
                  slots: set[str]) -> dict[str, Any]:
     """Ground every external identifier in one record against its bundle."""
@@ -202,6 +258,8 @@ def check_run(full: Path, core: Path, bundle: Path,
         for key, n in r["counts"].items():
             out["counts"][key] += n
         for f in r["findings"]:
+            out["findings"].append({**f, "record": which})
+        for f in resolver_urls_in_identifier_slots(doc, slots):
             out["findings"].append({**f, "record": which})
         doc_ids = doc
         from data_sheets_schema.identifiers import walk_identifiers

@@ -210,13 +210,15 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
 --- END ADDED IN v3 ---
 --- ADDED IN v5 ---
 
-- Write an identifier as a CURIE wherever the schema declares a prefix for it —
-  a prefix, a colon, and the local part — rather than as a resolver URL. Two
-  records naming one thing in one form produce one identity; the same thing
-  written as a prefix here and a resolver URL there produces two. This governs
-  slots whose declared range is an identifier. A slot whose declared range is a
-  URL takes a URL, and a URL inside prose or a citation is text: leave both
-  exactly as written.
+- In a slot whose declared range is an identifier, never write a resolver URL
+  where the schema declares a prefix: write the CURIE — a prefix, a colon, and
+  the local part. Two records naming one thing in one form produce one
+  identity; the same thing written as a prefix here and a resolver URL there
+  produces two. Check the schema's declared prefixes and use one whenever it
+  fits; a resolver URL in such a slot is a defect even though it resolves.
+  Two things this does not govern, and they are exempt entirely: a slot whose
+  declared range is a URL takes a URL, and a URL inside prose or a citation is
+  text. Leave both exactly as written.
 - An identifier is a fact about the dataset, subject to the same rule as any
   other fact: take it from the evidence or omit it. Do not supply an identifier
   you recognise but the input documents do not state. A correct identifier the

@@ -49,6 +49,18 @@ METRICS = (
     ("report findings", "report", lambda b: len(b.get("findings") or [])),
     ("ungrounded identifiers", "grounding",
      lambda b: int((b.get("distinct") or b.get("counts") or {}).get("absent") or 0)),
+    # #591. Invisible to the other three: a resolver URL for a declared prefix
+    # grounds perfectly — `doi.org/10.60775/…` is in the bundle — so what is
+    # wrong with it is form, not evidence. The v5 canary wrote 45 and passed a
+    # gate that measured pair consistency, report claims and grounding, none of
+    # which could see the rule v5 exists to enforce.
+    # Distinct identifiers, not occurrences (#593). Every identifier appears in
+    # both records of a pair, so an occurrence count is roughly double and reads
+    # as twice the problem — the error #556 records for the grounding counts,
+    # made again here: the canary's 45 is 22 distinct values.
+    ("resolver URLs in identifier slots", "grounding",
+     lambda b: len({f.get("value") for f in (b.get("findings") or [])
+                    if f.get("kind") == "resolver_url_in_identifier_slot"})),
 )
 
 
