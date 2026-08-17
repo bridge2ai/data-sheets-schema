@@ -49,6 +49,14 @@ METRICS = (
     ("report findings", "report", lambda b: len(b.get("findings") or [])),
     ("ungrounded identifiers", "grounding",
      lambda b: int((b.get("distinct") or b.get("counts") or {}).get("absent") or 0)),
+    # #591. Invisible to the other three: a resolver URL for a declared prefix
+    # grounds perfectly — `doi.org/10.60775/…` is in the bundle — so what is
+    # wrong with it is form, not evidence. The v5 canary wrote 45 and passed a
+    # gate that measured pair consistency, report claims and grounding, none of
+    # which could see the rule v5 exists to enforce.
+    ("resolver URLs in identifier slots", "grounding",
+     lambda b: sum(1 for f in (b.get("findings") or [])
+                   if f.get("kind") == "resolver_url_in_identifier_slot")),
 )
 
 

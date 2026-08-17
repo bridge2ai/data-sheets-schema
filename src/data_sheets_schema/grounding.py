@@ -117,6 +117,38 @@ def person_fragment_on_org(value: str) -> bool:
     return name in _ORG_AUTHORITIES and "#" in bare
 
 
+def resolver_urls_in_identifier_slots(record: dict[str, Any],
+                                      slots: set[str]) -> list[dict[str, str]]:
+    """Identifier slots holding a resolver URL where a prefix is declared (#591).
+
+    Distinct from grounding, and invisible to it: `https://doi.org/10.60775/…`
+    *is* in the bundle, so it grounds perfectly. What is wrong with it is form,
+    not evidence — the schema declares `doi`, so two records naming that DOI in
+    the two notations produce two identities.
+
+    The v5 canary wrote 45 of these and passed a gate that measured pair
+    consistency, report claims and grounding. None of the three could see the
+    rule v5 exists to enforce.
+    """
+    import re as _re
+
+    from data_sheets_schema.identifiers import declared_prefixes, walk_identifiers
+    declared = {p.lower() for p in declared_prefixes()}
+    hosts = {"doi.org": "doi", "ror.org": "ror", "orcid.org": "orcid"}
+    out = []
+    for path, slot, value in walk_identifiers(record, slots):
+        value = str(value)
+        m = _re.match(r"^https?://(?:www\.)?([^/]+)/", value)
+        if not m:
+            continue
+        prefix = hosts.get(m.group(1).lower())
+        if prefix and prefix in declared:
+            out.append({"kind": "resolver_url_in_identifier_slot",
+                        "slot": slot, "path": path, "value": value,
+                        "prefix": prefix})
+    return out
+
+
 def check_record(record: dict[str, Any], bundle_text: str,
                  slots: set[str]) -> dict[str, Any]:
     """Ground every external identifier in one record against its bundle."""
@@ -202,6 +234,8 @@ def check_run(full: Path, core: Path, bundle: Path,
         for key, n in r["counts"].items():
             out["counts"][key] += n
         for f in r["findings"]:
+            out["findings"].append({**f, "record": which})
+        for f in resolver_urls_in_identifier_slots(doc, slots):
             out["findings"].append({**f, "record": which})
         doc_ids = doc
         from data_sheets_schema.identifiers import walk_identifiers

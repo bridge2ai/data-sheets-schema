@@ -12,6 +12,7 @@ pass while showing exactly the defects the arm was built to fix.
 """
 
 import unittest
+from pathlib import Path
 
 from data_sheets_schema.canary import (
     OK,
@@ -42,7 +43,8 @@ class CountsTest(unittest.TestCase):
     def test_counts_are_read_from_each_block(self):
         self.assertEqual(counts_from(GOOD),
                          {"pair errors": 2, "report findings": 0,
-                          "ungrounded identifiers": 0})
+                          "ungrounded identifiers": 0,
+                          "resolver URLs in identifier slots": 0})
 
 
 class BaselineTest(unittest.TestCase):
@@ -163,3 +165,68 @@ class GateControlFlowTest(unittest.TestCase):
         src = self._source()
         self.assertIn("--no-canary-gate", src)
         self.assertIn("canary_baseline and not no_canary_gate", src)
+
+
+class ResolverUrlMetricTest(unittest.TestCase):
+    """The metric the v5 canary needed and the gate did not have (#591).
+
+    A resolver URL for a declared prefix grounds perfectly —
+    `doi.org/10.60775/…` is in the bundle — so what is wrong with it is form,
+    not evidence. The canary wrote 45 and passed a gate measuring pair
+    consistency, report claims and grounding, none of which could see the rule
+    v5 exists to enforce.
+    """
+
+    B = "2026-08-13_claude-opus-5-api-generic-v4"
+    V5 = "2026-08-16_claude-opus-5-api-generic-v5_rep1"
+    BASE = Path("data/d4d_concatenated")
+
+    def test_it_is_one_of_the_gate_metrics(self):
+        from data_sheets_schema.canary import METRICS
+        self.assertIn("resolver URLs in identifier slots",
+                      [m[0] for m in METRICS])
+
+    def test_the_v4_baseline_is_zero(self):
+        bar = baseline_for("AI_READI", self.B)
+        if bar["pair errors"] is None:
+            self.skipTest("v4 arm not present in this checkout")
+        self.assertEqual(bar["resolver URLs in identifier slots"], 0)
+
+    def test_the_canary_would_now_be_refused(self):
+        """The whole point: the gate must fail the run it passed."""
+        import yaml
+
+        from data_sheets_schema.grounding import check_run
+        from data_sheets_schema.identifiers import uriorcurie_slots
+        core = self.BASE / "claudecode_agent_core" / self.V5 / "AI_READI_provenance.yaml"
+        if not core.exists():
+            self.skipTest("v5 canary not present in this checkout")
+        grounding = check_run(
+            self.BASE / "claudecode_agent" / self.V5 / "AI_READI_d4d.yaml",
+            self.BASE / "claudecode_agent_core" / self.V5 / "AI_READI_d4d_core.yaml",
+            Path("data/preprocessed/concatenated/AI_READI_preprocessed.txt"),
+            uriorcurie_slots())
+        rec = yaml.safe_load(core.read_text(encoding="utf-8"))
+        v = verdict({"pair": rec.get("pair_consistency"),
+                     "report": rec.get("report_claims"),
+                     "grounding": grounding},
+                    baseline_for("AI_READI", self.B))
+        self.assertEqual(v["status"], REGRESSED)
+        self.assertTrue(any("resolver URLs" in r for r in v["regressions"]))
+
+    def test_a_url_ranged_slot_is_not_counted(self):
+        """`download_url` and `access_urls` are declared `uri`; a URL there is
+        correct, and counting it would penalise the schema's own design."""
+        from data_sheets_schema.grounding import resolver_urls_in_identifier_slots
+        from data_sheets_schema.identifiers import uriorcurie_slots
+        found = resolver_urls_in_identifier_slots(
+            {"download_url": "https://doi.org/10.1234/x"}, uriorcurie_slots())
+        self.assertEqual(found, [])
+
+    def test_an_undeclared_host_is_not_counted(self):
+        """No prefix exists for it, so a URL is the correct answer there."""
+        from data_sheets_schema.grounding import resolver_urls_in_identifier_slots
+        from data_sheets_schema.identifiers import uriorcurie_slots
+        found = resolver_urls_in_identifier_slots(
+            {"id": "https://b2ai-voice.org/thing"}, uriorcurie_slots())
+        self.assertEqual(found, [])
