@@ -452,6 +452,75 @@ def render(digest: ClassDigest) -> str:
 _TEXT_CACHE: dict[tuple[str, str], str] = {}
 
 
+#: digest -> the slot names that class had at that digest. Appended to, never
+#: rewritten: it is the only thing that can say whether a slot missing from an
+#: old pair was missing because the run omitted it or because it did not yet
+#: exist (#580).
+INVENTORY_LEDGER = Path("src/data_sheets_schema/schema/digest_inventory.yaml")
+
+
+def slot_names(class_name: str, schema_path: Path | None = None) -> list[str]:
+    """The slot names in a class's digest, sorted."""
+    return sorted(s.name for s in build(class_name, schema_path).slots)
+
+
+#: Keyed by the `Dataset` digest, because that is the one a provenance record
+#: stores as `schema.digest_md5`. Keying each class by its own digest made a
+#: `CoreDataset` lookup unresolvable from a record, which is the only place a
+#: lookup is ever made from.
+LEDGER_KEY_CLASS = "Dataset"
+
+
+def record_inventory(classes: tuple[str, ...] = ("Dataset", "CoreDataset"),
+                     ledger: Path | None = None) -> bool:
+    """Note today's digest and the slot inventory of each class. True if new.
+
+    Called when a run records its schema, so the ledger grows as digests do.
+    Entries are never edited: an inventory recorded for a digest is a fact
+    about that schema, and rewriting it would destroy the only evidence that
+    distinguishes a slot a run omitted from one that did not yet exist.
+    """
+    import yaml as _yaml
+
+    path = ledger or INVENTORY_LEDGER
+    data = {}
+    if path.exists():
+        data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    entries = data.setdefault("digests", {})
+    digest = fingerprint(digest_text(LEDGER_KEY_CLASS))
+    entry = entries.setdefault(digest, {})
+    added = False
+    for class_name in classes:
+        if class_name not in entry:
+            entry[class_name] = slot_names(class_name)
+            added = True
+    if not added:
+        return False
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "# digest -> slot inventory, appended as digests appear.\n"
+        "# Written by schema_digest.record_inventory; never edit an existing\n"
+        "# entry — it is the evidence that tells a slot a run omitted from a\n"
+        "# slot that did not yet exist (#580).\n"
+        + _yaml.safe_dump(data, sort_keys=True), encoding="utf-8")
+    return True
+
+
+def slot_existed_at(digest: str, class_name: str, slot: str,
+                    ledger: Path | None = None) -> bool | None:
+    """Did `slot` exist in `class_name` at `digest`? None when unrecorded."""
+    import yaml as _yaml
+
+    path = ledger or INVENTORY_LEDGER
+    if not path.exists():
+        return None
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    names = ((data.get("digests") or {}).get(digest) or {}).get(class_name)
+    if names is None:
+        return None
+    return slot in names
+
+
 def digest_text(class_name: str, schema_path: Path | None = None) -> str:
     """The rendered digest, memoised separately from `build`.
 

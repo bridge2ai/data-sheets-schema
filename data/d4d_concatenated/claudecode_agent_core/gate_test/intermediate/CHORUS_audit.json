@@ -1,0 +1,119 @@
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators",
+      "issue": "Five of the six Creator objects place Azra Bihorac, Xiaoqian Jiang, Yulia Strekalova, Parisa Rashidi and Manlik Kwong in the `principal_investigator` field. The bundle names only ROSENTHAL, ERIC S. as principal investigator (NIH RePORTER, application 10472824); the other five are listed solely as members of the 'Bridge2AI CHoRUS Leadership Team' in the webinar deck. Asserting PI status for them is an unsupported claim introduced by the choice of field."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "is_deidentified / preprocessing_strategies",
+      "issue": "'image de-identification using a CTP-based tool' and 'CTP-based image de-identification' expand the bare GitHub repository name 'CTP-deid' (listed with no description in the bundle) into a claim about the technology used and the data type it is applied to. Neither 'CTP' nor 'image' is glossed anywhere in the input; this is outside-knowledge elaboration."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "ethical_reviews",
+      "issue": "The EthicalReview class documents IRB approvals, ethics committee reviews and compliance certifications. The bundle describes community-facing ethics focus groups and analysis of the legal/regulatory landscape — project activities, not a review of this dataset by a reviewing body. `reviewing_organization` is populated with 'CHoRUS Ethics pillar (Ethical and Trustworthy AI)', a project workstream the bundle never identifies as a reviewing organization."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "known_limitations (limitation-metadata-pending) / instances / distribution_formats",
+      "issue": "The per-modality assignment of 'metadata published' vs 'planned', and of metadata-schema strings ('OMOP schema with extensions', 'PhysioNet schema extended', 'DICOM schema') to particular data types, is read off a table whose column alignment is destroyed in the preprocessed bundle (Access control, Metadata and Published metadata schema columns are interleaved as free-floating cell values). The record commits to one alignment without recording that uncertainty in the relevant `source_caveats`, though it does flag other source conflicts."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "distribution_formats / preprocessing_strategies",
+      "issue": "Strings that the bundle presents in the 'Published metadata schema' column ('Yes (OMOP schema with extensions)', 'Yes (PhysioNet schema extended)', 'Yes (OHNLP open source schema)') are repurposed as statements about the data's own encoding format. Metadata-schema evidence is being used to assert distribution format."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "data_governance.access_review_process",
+      "issue": "The registration form, licensing agreement, compute provisioning and '.edu' email requirement all come from AIM-AHEAD Bridge2AI for Clinical Care Training Program eligibility slides and describe access for that program's trainees. They are stated here as the general access-review process for the dataset. The `notes` field partially discloses the training-program context but the process prose itself is generalized beyond its source."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_governance.committee_contact",
+      "issue": "Jared Houghtaling is given as the governance committee contact. The bundle lists him only as one of two 'Request access' email contacts on the GitHub README; no committee is named anywhere and no committee membership is stated. The second contact (dbold@emory.edu) is dropped from this slot without explanation."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "maintainers (maintainer-access-contact-emory)",
+      "issue": "'Access requests are handled at Emory University' infers the institution from the email domain emory.edu; the bundle states only the address 'dbold@emory.edu' with no name or affiliation. Similarly 'Tufts Medicine' for Houghtaling is derived from tuftsmedicine.org rather than stated (the deck lists him under host 'Tufts')."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats[format-dicom].media_type",
+      "issue": "`media_type: application/dicom` is not stated anywhere in the bundle; it is supplied from general knowledge of the DICOM IANA type. It is also absent from the core record, so the two records disagree on this object."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "The boolean asserts inclusion of at-risk groups; the record's own `source_caveats` concedes this is inferred from the presence of PICU and NICU admissions rather than stated. The bundle documents no protections, assent or guardian-consent arrangements, so the object carries a single inferred flag and a caveat and no substantive content."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "subsets (full) / resources (core) — holdout test set",
+      "issue": "The NIH abstract uses future tense ('The dataset will also provision a holdout test set', 'sequestering holdout datasets'). Both records present the holdout set as an existing partition of the released dataset, and the full record marks it `is_data_split: true`. Nothing in the bundle indicates the holdout set has been created or is currently accessible."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "description vs confidential_elements",
+      "issue": "Internal inconsistency: the description says 'Every data type is under controlled access ... except clinical notes, which remain stored locally', which reads as clinical notes being outside controlled access, while `confidential_elements` correctly states 'All nine data types carry controlled access'. The bundle's table lists clinical notes as Controlled; the exception concerns storage location (local, tokens only), not access control."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[instance-imaging-study].counts",
+      "issue": "`instance_type` is 'Radiology imaging study' but the count 7,642 is, per the bundle, the number of admissions with radiology data. The unit of the count does not match the declared instance type; the mismatch is disclosed in `source_caveats` but not corrected in the value."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "preprocessing_strategies (preprocessing-geocoding) / cleaning_strategies (cleaning-characterization-reports)",
+      "issue": "Both steps are asserted as procedures applied to this dataset on the basis of the existence of GitHub repositories (UF-Geocoding, a fork of bihorac-LAB/Exposome; CHoRUSReports). The bundle establishes that the code exists in the organization, not that it was run over the released data. The added clause 'allowing data quality issues to be identified and resolved at source' is likewise inferred."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "status",
+      "issue": "The slot's declared intent is a short status term (e.g. draft, published, deprecated). Both records place two sentences of release-state narrative here; the same content already appears in `description`, `known_limitations` and `updates`."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "machine_annotation_tools",
+      "issue": "Omitted although the bundle supports it: the OHNLP toolkit performs automated extraction and tokenization of clinical notes, and a 'Privacy Scan tool for medical records' is listed among the organization's repositories. This content currently sits only in prose inside `preprocessing_strategies`, leaving a fitting structured slot empty."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "external_resources",
+      "issue": "Omitted although the bundle names several dataset-level external resources: the chorus-ai GitHub organization (28 repositories), the Chorus_SOP documentation site, the chorus-mapping repository, the package status page and www.bridge2ai.org/chorus. Only the GitHub organization URL appears, embedded in `extension_mechanism.contribution_url`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "resources",
+      "issue": "The holdout test set is carried in `resources` (generic sub-resource) rather than as a subset, so the `is_data_split: true` distinction present in the full record's `subsets` entry is lost in the projection. The identifier is retained as '#subset-holdout-test-set', which now names a slot the core record does not use."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "The second sentence restates the funding award OT2OD032701, already carried structurally in `funders`. Per the residual-content rule, `notes` should hold only what no structured slot or the description can carry; here only the 'under review for potential modification' website notice and the NIH disclaimer qualify."
+    }
+  ],
+  "summary": "No high-severity defects. Both records stay within the declared bundle for their major factual content, correctly represent the two reported cohort-size and imaging conflicts, and correctly omit DOI, citation, version, IRB approval, consent and retention where the bundle is silent. Nothing appears in the core record that is absent from the full record; the core is a clean projection apart from three intentional drops (media_type, direct_collection, participant_privacy, third_party_sharing) and the subsets-to-resources remapping, which loses the data-split flag. The recurring weaknesses are (1) evidence-boundary stretches where repository names or email domains are expanded into substantive claims (CTP-deid to 'CTP-based image de-identification', emory.edu to 'Emory University', UF-Geocoding to an applied preprocessing step), (2) field-fit errors where the correct-looking object carries content its class was not written for (community ethics focus groups as an EthicalReview with a reviewing_organization; training-program access rules as general data governance; metadata-schema strings as distribution formats), and (3) one shape/value mismatch (media_type supplied from outside knowledge, present in full only). The garbled modality table in the bundle is the single largest source of soft claims and warrants an explicit caveat at the slots that depend on it."
+}

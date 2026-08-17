@@ -1236,6 +1236,16 @@ def arm_confounds(a: dict[str, Any], b: dict[str, Any]) -> list[dict[str, str]]:
 
 PHASES_RECORDED, PHASES_API = "recorded", "api_usage"
 PHASES_ABSENT = "absent"
+#: An agentic run made after the phase log existed, which recorded none. Unlike
+#: `absent` this is a defect rather than a limit — the playbook directs it and
+#: the runtime can supply it (#572).
+PHASES_MISSING = "missing"
+
+#: The date `d4d provenance record --phase` landed. A record written before it
+#: could not have recorded phases, and calling that a defect would put honest
+#: history in the same bucket as a run that skipped the step — the distinction
+#: `d4d provenance reasoning` already draws for reasoning logs (#400).
+PHASE_LOG_SINCE = "2026-08-15"
 
 
 def phase_log_status(method: str, label: str, project: str,
@@ -1261,6 +1271,14 @@ def phase_log_status(method: str, label: str, project: str,
     usage = rec.get("api_usage")
     if isinstance(usage, list) and usage:
         return PHASES_API, len({u.get("phase") for u in usage})
+    # An agentic run that could have recorded phases and did not. `consumed`
+    # is the #545 flag: true means the runtime opens the playbooks itself,
+    # which is what an agentic run is.
+    consumed = (rec.get("playbooks") or {}).get("consumed")
+    written = str(rec.get("record_generated_at") or "")[:10]
+    if (rec.get("record_mode") == "live" and consumed
+            and written and written >= PHASE_LOG_SINCE):
+        return PHASES_MISSING, 0
     return PHASES_ABSENT, 0
 
 

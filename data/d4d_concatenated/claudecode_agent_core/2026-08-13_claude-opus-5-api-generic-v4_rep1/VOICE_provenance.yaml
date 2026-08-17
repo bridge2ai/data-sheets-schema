@@ -414,7 +414,7 @@ report_claims:
   findings:
   - kind: removal_not_performed
     slot: distributions
-    record: either
+    record: both
     detail: report says removed; record has 3 entries
     claim: the block was removed. Its content was already fully represented by the
       declared `distribution_formats` slot, which was retained and left unchanged.
