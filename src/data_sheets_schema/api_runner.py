@@ -659,10 +659,16 @@ def _carry_sizes(spec: RunSpec) -> tuple[dict[str, int], str]:
         if found:
             sizes[name] = found[0].stat().st_size
             source = source or found[0].parent.name
-    # The audit is JSON findings, an order of magnitude smaller than a record
-    # and not separately archived; approximated from the core record.
-    if "Completed core record" in sizes:
-        sizes["Audit findings"] = sizes["Completed core record"] // 8
+    # Measured, not guessed. The audit *is* archived — `_snapshot` writes
+    # `{project}_audit.json` under `intermediate/` — and an eighth of the core
+    # record, which the first version assumed, understated it by half: the real
+    # median ratio across seven AI-READI snapshots is nearer a quarter.
+    audits = sorted(CONCAT_DIR.glob(f"*/*/intermediate/{spec.project}_audit.json"),
+                    key=lambda p: p.stat().st_mtime, reverse=True)
+    if audits:
+        sizes["Audit findings"] = audits[0].stat().st_size
+    elif "Completed core record" in sizes:
+        sizes["Audit findings"] = sizes["Completed core record"] // 4
 
     if not sizes:
         return {}, ("no previous artifacts for this project; carried inputs "
