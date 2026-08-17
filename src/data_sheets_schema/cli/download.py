@@ -511,3 +511,60 @@ def _crate_evidence_in(bundle: Path) -> set[str]:
             if stripped.startswith("+ "):
                 names.add(stripped[2:].split(" — ")[0].strip())
     return names
+
+
+@download.command("priority")
+@click.option("--project", default=None, help="list this project's sources, strongest first")
+@click.option("--decide", "decide_ids", default=None,
+              help="comma-separated source ids; which of them settles a disagreement")
+@click.option("--strict", is_flag=True, help="exit 1 if any source_type is unranked")
+def priority_cmd(project, decide_ids, strict):
+    """Which source wins when two of them state different things.
+
+    The uniform rules have always said to represent a disagreement rather than
+    select a side, and a v4 CHORUS record named the gap that left: "the bundle
+    offers no basis for preferring one". `source_priority` in the manifest is
+    that basis — declared there rather than in a prompt, for the reason #422
+    records.
+
+    A tier is about how directly a source speaks for the released dataset, not
+    about how much anyone trusts its authors. Equal tiers do not decide.
+    """
+    import sys
+
+    from data_sheets_schema.source_priority import (decide as decide_between,
+                                                    ranked, tiers,
+                                                    unranked_types)
+    if decide_ids:
+        if not project:
+            raise click.ClickException("--decide needs --project")
+        ids = [x.strip() for x in decide_ids.split(",") if x.strip()]
+        result = decide_between(project, ids)
+        for c in result["candidates"]:
+            click.echo(f"   tier {c['priority']}  {c['id']:32} {c['basis']}")
+        for u in result["unknown"]:
+            click.echo(f"   ?       {u:32} not declared for {project}", err=True)
+        click.echo(f"\n{'winner: ' + result['winner'] if result['winner'] else 'no winner'}"
+                   f"\n{result['reason']}")
+        return
+
+    if project:
+        for s in ranked(project):
+            click.echo(f"   tier {s['priority']}  {s['id']:32} "
+                       f"{str(s.get('source_type') or ''):26} {s['priority_basis']}")
+    else:
+        table = {}
+        for source_type, tier in tiers().items():
+            table.setdefault(tier, []).append(source_type)
+        for tier in sorted(table):
+            click.echo(f"   tier {tier}  {', '.join(sorted(table[tier]))}")
+
+    missing = unranked_types()
+    if missing:
+        click.echo("\n⚠️  source_types in use that no tier covers:")
+        for proj, types in sorted(missing.items()):
+            click.echo(f"     {proj:16} {', '.join(types)}")
+        click.echo("   An unranked source cannot win a disagreement, which is "
+                   "safe — but it also cannot lose on the record.")
+    if strict and missing:
+        sys.exit(1)
