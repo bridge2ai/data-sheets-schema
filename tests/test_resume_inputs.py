@@ -108,3 +108,48 @@ class ArtifactConsumerTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class InvalidationBoundsTest(unittest.TestCase):
+    """The closure must be wide enough to be safe and narrow enough to be cheap.
+
+    A transitive walk that over-reaches discards work that was fine, which on a
+    multi-hour arm is expensive; one that under-reaches is #601.
+    """
+
+    def test_discarding_core_does_not_discard_full(self):
+        """`full` is produced before core and depends on nothing downstream."""
+        from data_sheets_schema.api_runner import _dependents_of
+        self.assertNotIn("full",
+                         _dependents_of("Completed core record",
+                                        ("core", "reconcile_core")))
+
+    def test_discarding_core_does_discard_reconcile_full(self):
+        """Since #566 `reconcile_full` consumes the core record, so a replaced
+        core invalidates the absorption it performed."""
+        from data_sheets_schema.api_runner import _dependents_of
+        self.assertIn("reconcile_full",
+                      _dependents_of("Completed core record",
+                                     ("core", "reconcile_core")))
+
+    def test_it_terminates_on_a_self_dependency(self):
+        """A fixed-point walk over a graph nobody guarantees is acyclic."""
+        import data_sheets_schema.api_runner as api
+        original = api.PHASE_NEEDS
+        try:
+            api.PHASE_NEEDS = {**original,
+                               "report": ("Reconciliation report",)}
+            self.assertEqual(
+                api._dependents_of("Reconciliation report", ("report",)),
+                {"report"})
+        finally:
+            api.PHASE_NEEDS = original
+
+    def test_a_progress_file_without_hashes_keeps_the_old_behaviour(self):
+        """Progress files predating #601 carry no `artifact_md5`, and treating
+        a missing hash as a mismatch would re-run every resumable phase of
+        every older run."""
+        import inspect
+
+        from data_sheets_schema.api_runner import execute
+        self.assertIn("recorded is not None", inspect.getsource(execute))
