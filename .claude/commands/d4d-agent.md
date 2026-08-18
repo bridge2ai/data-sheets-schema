@@ -185,8 +185,13 @@ For each project (AI_READI, CM4AI, VOICE, CHORUS):
 When multiple sources describe the same dataset:
 1. Merge complementary information from all sources
 2. Prefer more detailed and specific information over generic descriptions
-3. Resolve conflicts using authority and recency metadata within the current
-   source bundle
+3. Resolve conflicts by the declared ranking, not by your own reading of
+   authority and recency: `source_priority` in
+   `data/preprocessed/source_manifest.yaml`, and `superseded_by` where a source
+   states which one replaced it. `d4d download priority --project X --decide
+   a,b` answers a specific pair. An independent recency rule here gave the two
+   runtimes different answers on the same conflict (#600); where the ranking
+   cannot decide, represent the disagreement rather than choosing
 4. Never consult an older generated D4D to fill a gap or break a tie
 
 ## Runtime Cases

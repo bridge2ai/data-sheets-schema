@@ -84,6 +84,49 @@ def priority_of(source: dict[str, Any],
                       if source_type else "the source declares no source_type")
 
 
+def superseded_by(project: str, manifest: dict[str, Any] | None = None
+                  ) -> dict[str, str]:
+    """`{source id: the id that replaced it}` from the manifest (#600).
+
+    The manifest has recorded this for five sources all along — AI-READI's
+    documentation and FAIRhub entries, CM4AI's October release, VOICE 3.0.0 —
+    and the first version of the resolver read only `source_type`, so a
+    superseded release tied with the one replacing it and the tie meant "cannot
+    decide".
+
+    Supersession is the strongest signal there is: it is a direct statement
+    that one source replaces another, made by whoever curated the manifest. It
+    outranks a tier, which is only a claim about a *kind* of source.
+    """
+    out = {}
+    for source in sources(project, manifest):
+        replacement = source.get("superseded_by")
+        if replacement and source.get("id"):
+            out[str(source["id"])] = str(replacement)
+    return out
+
+
+def _supersedes(project: str, a: str, b: str,
+                manifest: dict[str, Any] | None = None) -> str | None:
+    """Which of `a`/`b` replaced the other, directly or through a chain."""
+    chain = superseded_by(project, manifest)
+
+    def replaces(newer: str, older: str) -> bool:
+        seen, cur = set(), older
+        while cur in chain and cur not in seen:
+            seen.add(cur)
+            cur = chain[cur]
+            if cur == newer:
+                return True
+        return False
+
+    if replaces(a, b):
+        return a
+    if replaces(b, a):
+        return b
+    return None
+
+
 def ranked(project: str, manifest: dict[str, Any] | None = None
            ) -> list[dict[str, Any]]:
     """Every source for a project, strongest first.
@@ -121,6 +164,19 @@ def decide(project: str, source_ids: list[str],
     if not known:
         return {"winner": None, "reason": "none of these sources is declared",
                 "unknown": unknown, "candidates": []}
+    # Supersession first: a source the manifest says was replaced loses to its
+    # replacement whatever their tiers, because that is a direct statement
+    # about these two sources rather than a claim about their kinds (#600).
+    if len(known) == 2:
+        winner = _supersedes(project, known[0]["id"], known[1]["id"], manifest)
+        if winner:
+            loser = next(s["id"] for s in known if s["id"] != winner)
+            return {"winner": winner, "candidates": known, "unknown": unknown,
+                    "priority": next(s["priority"] for s in known
+                                     if s["id"] == winner),
+                    "reason": (f"the manifest declares {loser} superseded by "
+                               f"{winner}, which settles it regardless of tier")}
+
     best = min(s["priority"] for s in known)
     top = [s for s in known if s["priority"] == best]
     if len(top) > 1:

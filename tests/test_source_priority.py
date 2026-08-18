@@ -96,6 +96,72 @@ class DecideTest(unittest.TestCase):
         self.assertLess(order.index("crate"), order.index("boosted"))
 
 
+class SupersessionTest(unittest.TestCase):
+    """A source the manifest says was replaced loses to its replacement (#600).
+
+    The first version read only `source_type`, so a superseded release *tied*
+    with the one replacing it and the tie meant "cannot decide" — on four
+    conflicts the manifest had already resolved. Harry's CHORUS case happened
+    to differ by type, so it resolved, and the commoner version-supersession
+    case went untested.
+    """
+
+    CASES = (("AI_READI", "dataset_documentation", "dataset_documentation_v3"),
+             ("AI_READI", "fairhub_dataset", "fairhub_dataset_v3"),
+             ("CM4AI", "october_2025_dataverse_release",
+              "june_2026_dataverse_release"),
+             ("VOICE", "physionet_3_0_0", "physionet_3_1_0"))
+
+    def test_every_documented_supersession_resolves(self):
+        for project, old, new in self.CASES:
+            with self.subTest(project=project, old=old):
+                d = decide(project, [old, new])
+                self.assertEqual(d["winner"], new)
+                self.assertIn("superseded", d["reason"])
+
+    def test_it_beats_the_tier(self):
+        """Two `data resource` entries share tier 1; supersession still decides."""
+        from data_sheets_schema.source_priority import priority_of, sources
+        by_id = {s["id"]: s for s in sources("AI_READI")}
+        a, b = by_id["fairhub_dataset"], by_id["fairhub_dataset_v3"]
+        self.assertEqual(priority_of(a)[0], priority_of(b)[0])
+        self.assertEqual(decide("AI_READI", [a["id"], b["id"]])["winner"],
+                         b["id"])
+
+    def test_order_of_the_arguments_does_not_matter(self):
+        for project, old, new in self.CASES:
+            with self.subTest(project=project):
+                self.assertEqual(decide(project, [new, old])["winner"], new)
+
+    def test_an_unrelated_pair_is_unaffected(self):
+        """Supersession must not leak into pairs that declare none."""
+        d = decide("CHORUS", ["project_documentation", "cohort_2_webinar"])
+        self.assertEqual(d["winner"], "project_documentation")
+        self.assertNotIn("superseded", d["reason"])
+
+    def test_the_map_is_read_from_the_manifest(self):
+        from data_sheets_schema.source_priority import superseded_by
+        self.assertEqual(superseded_by("VOICE").get("physionet_3_0_0"),
+                         "physionet_3_1_0")
+
+    def test_the_model_is_told_which_source_was_superseded(self):
+        """A resolver that knows and a model that is not told would leave the
+        API arm exactly where it was."""
+        from data_sheets_schema.api_runner import source_ranking_block
+        block = source_ranking_block("AI_READI")
+        self.assertIn("SUPERSEDED BY fairhub_dataset_v3", block)
+        self.assertIn("whatever", block)
+
+    def test_the_agentic_path_no_longer_has_its_own_tie_breaker(self):
+        """`d4d-agent.md` told that runtime to resolve conflicts by its own
+        reading of authority and recency, against the declared ranking — same
+        condition, two answers."""
+        from pathlib import Path
+        text = Path(".claude/commands/d4d-agent.md").read_text(encoding="utf-8")
+        self.assertNotIn("Resolve conflicts using authority and recency", text)
+        self.assertIn("source_priority", text)
+
+
 class RealManifestTest(unittest.TestCase):
     """Against the manifest actually shipped."""
 

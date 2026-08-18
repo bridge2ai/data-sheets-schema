@@ -60,12 +60,34 @@ class ResumeGuardTest(unittest.TestCase):
         self.assertNotIn("for k in PHASE_NEEDS[ph] if k in carry", src,
                          "the filtering form is what allowed a short run")
 
-    def test_discarding_an_artifact_also_discards_its_consumers(self):
-        """Dropping only the producers left `audit` marked done with findings
-        computed against the artifact just discarded, and `reconcile_full`
-        marked done having absorbed from it."""
+    def test_discarding_an_artifact_discards_its_whole_dependency_closure(self):
+        """One level was not enough (#601).
+
+        `reconcile_core` and `report` need the *reconciled* full record, not the
+        completed one, so neither named a discarded `Completed full record` and
+        neither was invalidated. After `reconcile_full` re-ran with different
+        bytes they could stay in `done` and be skipped — shipping a core record
+        and a report reconciled against a full record that no longer exists.
+        """
+        from data_sheets_schema.api_runner import PHASES, _dependents_of
+        closure = _dependents_of("Completed full record",
+                                 ("full", "reconcile_full"))
+        for phase in ("core", "audit", "reconcile_full", "reconcile_core",
+                      "report"):
+            with self.subTest(phase=phase):
+                self.assertIn(phase, closure)
+
+    def test_a_changed_artifact_invalidates_even_when_still_record_shaped(self):
+        """`_looks_like_a_record` cannot tell *which* record it is looking at.
+
+        Progress now stores the md5 of each artifact the completed phases were
+        computed against, so bytes that changed between passes invalidate the
+        work that depended on them — the same reasoning that pins a validation
+        or pair verdict to its artifacts (#426, #544).
+        """
         src = self._source()
-        self.assertIn("PHASE_NEEDS.get(ph, ())", src)
+        self.assertIn("artifact_md5", src)
+        self.assertIn("_dependents_of", src)
 
     def test_the_message_names_the_way_out(self):
         """A gate that stops a paid run must say what to do next."""
@@ -86,3 +108,48 @@ class ArtifactConsumerTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class InvalidationBoundsTest(unittest.TestCase):
+    """The closure must be wide enough to be safe and narrow enough to be cheap.
+
+    A transitive walk that over-reaches discards work that was fine, which on a
+    multi-hour arm is expensive; one that under-reaches is #601.
+    """
+
+    def test_discarding_core_does_not_discard_full(self):
+        """`full` is produced before core and depends on nothing downstream."""
+        from data_sheets_schema.api_runner import _dependents_of
+        self.assertNotIn("full",
+                         _dependents_of("Completed core record",
+                                        ("core", "reconcile_core")))
+
+    def test_discarding_core_does_discard_reconcile_full(self):
+        """Since #566 `reconcile_full` consumes the core record, so a replaced
+        core invalidates the absorption it performed."""
+        from data_sheets_schema.api_runner import _dependents_of
+        self.assertIn("reconcile_full",
+                      _dependents_of("Completed core record",
+                                     ("core", "reconcile_core")))
+
+    def test_it_terminates_on_a_self_dependency(self):
+        """A fixed-point walk over a graph nobody guarantees is acyclic."""
+        import data_sheets_schema.api_runner as api
+        original = api.PHASE_NEEDS
+        try:
+            api.PHASE_NEEDS = {**original,
+                               "report": ("Reconciliation report",)}
+            self.assertEqual(
+                api._dependents_of("Reconciliation report", ("report",)),
+                {"report"})
+        finally:
+            api.PHASE_NEEDS = original
+
+    def test_a_progress_file_without_hashes_keeps_the_old_behaviour(self):
+        """Progress files predating #601 carry no `artifact_md5`, and treating
+        a missing hash as a mismatch would re-run every resumable phase of
+        every older run."""
+        import inspect
+
+        from data_sheets_schema.api_runner import execute
+        self.assertIn("recorded is not None", inspect.getsource(execute))

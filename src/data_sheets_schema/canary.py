@@ -110,11 +110,22 @@ def baseline_for(project: str, label_prefix: str,
     return worst
 
 
-def verdict(checks: dict[str, Any], baseline: dict[str, int | None]
-            ) -> dict[str, Any]:
-    """Compare one run's checks against a baseline. See module docstring."""
+def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
+            baseline_requested: bool = True) -> dict[str, Any]:
+    """Compare one run's checks against a baseline. See module docstring.
+
+    `baseline_requested` distinguishes the two ways a bar can be missing, which
+    the first version did not (#599). A baseline nobody asked for is an absence;
+    a baseline that was named and matched no records is an **error**, and
+    treating them alike meant a mistyped prefix returned `ok` for a run with 999
+    defects in every metric.
+
+    That is the distinction this whole corpus turns on — "not established" is
+    not "fine" — missed inside the gate built to enforce it.
+    """
     counts = counts_from(checks)
     blind = [name for name, value in counts.items() if value is None]
+    unbaselined = [name for name, value in baseline.items() if value is None]
     rows = []
     regressions = []
     for name, value in counts.items():
@@ -127,9 +138,13 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None]
 
     if blind:
         status = UNMEASURABLE
+    elif baseline_requested and unbaselined:
+        # A bar that was asked for and did not resolve cannot pass anything.
+        status = UNMEASURABLE
     elif regressions:
         status = REGRESSED
     else:
         status = OK
     return {"status": status, "rows": rows, "blind": blind,
+            "unbaselined": unbaselined if baseline_requested else [],
             "regressions": regressions}
