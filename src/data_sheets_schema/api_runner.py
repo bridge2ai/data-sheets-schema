@@ -2019,9 +2019,17 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # from exactly this field. Validation is local and free, and it
             # checks the bytes on disk now rather than a claim recorded earlier.
             problems = validate_outputs(spec)
+            # The three checks too, recomputed from the bytes on disk for the
+            # same reason validation is (#599). Omitting them made every metric
+            # None on a resumed batch, so the canary reported `unmeasurable`
+            # and a sweep interrupted after a *passing* canary could not resume
+            # and fan out under the gate it had already satisfied.
             return {"label": spec.label, "project": spec.project,
                     "usage": existing.get("api_usage") or [],
                     "skipped": list(PHASES), "validation_problems": problems,
+                    "checks": {"pair": pair_consistency(spec),
+                               "report": report_claims_block(spec),
+                               "grounding": grounding_block(spec)},
                     "already_complete": True,
                     "outputs": {"full": str(spec.full_path),
                                 "core": str(spec.core_path),

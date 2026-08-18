@@ -356,9 +356,14 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
                 for name, v in counts.items()))
 
             if i == 1 and canary_baseline and not no_canary_gate:
-                v = _canary.verdict(res.get("checks") or {},
-                                    _canary.baseline_for(s.project,
-                                                         canary_baseline))
+                bar = _canary.baseline_for(s.project, canary_baseline)
+                v = _canary.verdict(res.get("checks") or {}, bar,
+                                    baseline_requested=True)
+                if v.get("unbaselined"):
+                    click.echo(
+                        f"     no baseline for {s.project} under "
+                        f"{canary_baseline!r} — check the label prefix",
+                        err=True)
                 for row in v["rows"]:
                     mark = "❌" if row.get("regressed") else "  "
                     click.echo(f"     {mark} {row['metric']:24} "

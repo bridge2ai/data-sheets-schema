@@ -100,11 +100,37 @@ class VerdictTest(unittest.TestCase):
         self.assertEqual(v["status"], UNMEASURABLE)
         self.assertEqual(v["blind"], ["pair errors"])
 
-    def test_a_missing_baseline_never_regresses(self):
-        """No bar is not a failed bar. A first-ever arm has nothing to compare
-        against and must not be blocked by that."""
+    def test_a_baseline_that_was_asked_for_and_missing_is_unmeasurable(self):
+        """The blocker this test used to assert the opposite of (#599).
+
+        It read: "No bar is not a failed bar. A first-ever arm has nothing to
+        compare against and must not be blocked by that." True of an arm with
+        no baseline; false of a **mistyped** one — and the code could not tell
+        them apart, so a run with 999 defects in every metric passed.
+
+        That is "not established is not fine", missed inside the gate built to
+        enforce it.
+        """
+        awful = {"pair": {"ran": True, "errors": 999},
+                 "report": {"checked": True, "findings": [1] * 999},
+                 "grounding": {"checked": True, "distinct": {"absent": 999},
+                               "findings": []}}
+        v = verdict(awful, {k: None for k in self.BAR}, baseline_requested=True)
+        self.assertEqual(v["status"], UNMEASURABLE)
+        self.assertEqual(sorted(v["unbaselined"]), sorted(self.BAR))
+
+    def test_no_baseline_asked_for_is_still_permissible(self):
+        """The case the old test was right about: a first-ever arm has nothing
+        to compare against, and saying so is not the same as failing."""
         self.assertEqual(
-            verdict(GOOD, {k: None for k in self.BAR})["status"], OK)
+            verdict(GOOD, {k: None for k in self.BAR},
+                    baseline_requested=False)["status"], OK)
+
+    def test_a_partially_resolved_baseline_does_not_pass(self):
+        """One metric with no bar is enough: a gate that passes on the metrics
+        it happens to have is the #591 hole in another form."""
+        bar = dict(self.BAR); bar["ungrounded identifiers"] = None
+        self.assertEqual(verdict(GOOD, bar)["status"], UNMEASURABLE)
 
 
 class RealArmTest(unittest.TestCase):
@@ -273,3 +299,34 @@ class ResolverUrlMetricTest(unittest.TestCase):
         found = resolver_urls_in_identifier_slots(
             {"id": "https://b2ai-voice.org/thing"}, uriorcurie_slots())
         self.assertEqual(found, [])
+
+
+class ResumedBatchCanRegateTest(unittest.TestCase):
+    """A sweep interrupted after a passing canary must be able to resume (#599).
+
+    `execute()`'s completed-run early return omitted `checks`, so every metric
+    became None and the canary reported `unmeasurable`. A batch that had already
+    satisfied the gate could not fan out after an interruption — and
+    interruption is normal: arms take hours and #513 is the precedent.
+    """
+
+    def test_the_completed_run_path_returns_the_checks(self):
+        import inspect
+
+        from data_sheets_schema.api_runner import execute
+        src = inspect.getsource(execute)
+        head = src[:src.index("already_complete")]
+        self.assertIn('"checks":', head)
+
+    def test_they_are_recomputed_rather_than_read_from_the_record(self):
+        """Same reason validation is recomputed there: returning a verdict the
+        record asserted earlier would report a clean bill nobody checked."""
+        import inspect
+
+        from data_sheets_schema.api_runner import execute
+        src = inspect.getsource(execute)
+        head = src[:src.index("already_complete")]
+        for fn in ("pair_consistency(spec)", "report_claims_block(spec)",
+                   "grounding_block(spec)"):
+            with self.subTest(fn=fn):
+                self.assertIn(fn, head)
