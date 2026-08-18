@@ -173,6 +173,94 @@ def resolver_urls_in_identifier_slots(record: dict[str, Any],
     return out
 
 
+#: Counted in generated prose only. The American English rule exempts quoted
+#: material — a title or a direct quotation keeps its source's spelling — so
+#: double-quoted spans are removed before counting. That is the difference
+#: between 613 and the ~626 a naive count gives for the v4 arm.
+BRITISH_FORMS = ("licence", "analyse", "organisation", "enrolment", "programme",
+                 "standardis", "labelling", "centre", "recognise", "utilise",
+                 "catalogue", "summarise", "behaviour")
+_QUOTED = re.compile(r'"[^"\n]*"')
+
+
+def british_spellings(text: str) -> int:
+    """Occurrences of British forms in prose the record states (#602).
+
+    Prediction 5 of the v5 plan is measured on this and nothing computed it at
+    run time — only `scripts/v5_baselines.py`, after the fact. A prediction the
+    gate cannot see is one the gate cannot protect.
+    """
+    prose = _QUOTED.sub(" ", text).lower()
+    return sum(prose.count(form) for form in BRITISH_FORMS)
+
+
+def undeclared_prefixes(record: dict[str, Any],
+                        slots: set[str]) -> dict[str, int]:
+    """`{prefix: occurrences}` for CURIE prefixes the schema does not declare.
+
+    Prediction 4: the invented-prefix population stops growing. `chorus:`,
+    `cm4ai:` and friends resolve to nothing, which is why v5's rule three tells
+    the model to hang an identifier off an attested one instead of minting a
+    namespace.
+
+    `urn:` and `ark:` are counted here, and the plan says so: classifying them
+    instead as no-authority URI schemes gives a lower figure, and both readings
+    are defensible as long as the same one produces both sides of a comparison.
+    """
+    from data_sheets_schema.identifiers import (declared_prefixes,
+                                                walk_identifiers)
+    declared = {p.lower() for p in declared_prefixes()}
+    out: dict[str, int] = {}
+    for _path, _slot, value in walk_identifiers(record, slots):
+        m = re.match(r"^([A-Za-z][\w.\-]*):(?!//)", str(value))
+        if m and m.group(1).lower() not in declared:
+            out[m.group(1)] = out.get(m.group(1), 0) + 1
+    return out
+
+
+def form_facts(full: Path, core: Path,
+               slots: set[str] | None = None) -> dict[str, Any]:
+    """Counts that are properties of the records alone (#602).
+
+    Separate from `grounding` deliberately. Grounding compares a record to its
+    bundle and declines when the bundle has drifted (#452) — but undeclared
+    prefixes, British spellings and organisational fragments need no bundle at
+    all, and burying them inside a block that can decline would make three
+    preregistered predictions unmeasurable for the 59 records whose bundle has
+    moved.
+    """
+    import yaml as _yaml
+
+    from data_sheets_schema.identifiers import uriorcurie_slots
+    slots = slots if slots is not None else uriorcurie_slots()
+    prefixes: dict[str, int] = {}
+    british = 0
+    fragments: set[str] = set()
+    present = []
+    for path in (full, core):
+        if not path.exists():
+            continue
+        present.append(str(path))
+        raw = path.read_text(encoding="utf-8", errors="replace")
+        british += british_spellings(raw)
+        doc = _yaml.safe_load(raw) or {}
+        for prefix, n in undeclared_prefixes(doc, slots).items():
+            prefixes[prefix] = prefixes.get(prefix, 0) + n
+        from data_sheets_schema.identifiers import walk_identifiers
+        for _p, _s, value in walk_identifiers(doc, slots):
+            if person_fragment_on_org(str(value)):
+                found = authority(str(value))
+                if found:
+                    fragments.add(found[1].lower())
+    if not present:
+        return {"checked": False, "reason": "neither record is on disk"}
+    return {"checked": True, "records": present,
+            "undeclared_prefixes": prefixes,
+            "undeclared_prefix_occurrences": sum(prefixes.values()),
+            "british_spellings": british,
+            "organisational_fragments": len(fragments)}
+
+
 def check_record(record: dict[str, Any], bundle_text: str,
                  slots: set[str]) -> dict[str, Any]:
     """Ground every external identifier in one record against its bundle."""

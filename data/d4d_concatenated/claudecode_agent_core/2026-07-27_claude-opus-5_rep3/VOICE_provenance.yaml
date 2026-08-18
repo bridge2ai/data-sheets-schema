@@ -134,3 +134,13 @@ grounding:
       md5: dcd717170da6762569c0b4eeafc1c3d2
   bundle_hash_basis: the record pinned no hash
   recorded_by: backfill_checks
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_agent/2026-07-27_claude-opus-5_rep3/VOICE_d4d.yaml
+  - data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep3/VOICE_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  british_spellings: 2
+  organisational_fragments: 0
+  recorded_by: backfill_checks

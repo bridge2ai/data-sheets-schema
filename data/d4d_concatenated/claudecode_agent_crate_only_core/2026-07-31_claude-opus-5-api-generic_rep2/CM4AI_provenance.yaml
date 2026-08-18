@@ -240,3 +240,13 @@ grounding:
       path: data/preprocessed/concatenated/CM4AI_crate_only.txt
       md5: 965b0aa654facd9992fda14ff4535a25
   recorded_by: backfill_checks
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_d4d.yaml
+  - data/d4d_concatenated/claudecode_agent_crate_only_core/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  british_spellings: 2
+  organisational_fragments: 0
+  recorded_by: backfill_checks

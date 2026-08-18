@@ -41,7 +41,7 @@ import yaml
 #: without it, so absence means "attested by the run".
 RECORDED_BY = "backfill_checks"
 
-BLOCKS = ("pair_consistency", "report_claims", "grounding")
+BLOCKS = ("pair_consistency", "report_claims", "grounding", "form")
 
 
 def _split_header(text: str) -> tuple[str, str]:
@@ -161,6 +161,12 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
                                          "md5": _md5(report)}}
         block["recorded_by"] = RECORDED_BY
         out["report_claims"] = block
+
+    # --- form -------------------------------------------------------------
+    # Computed from the records alone, so unlike grounding it is available even
+    # where the bundle has drifted (#602).
+    from data_sheets_schema.grounding import form_facts
+    out["form"] = {**form_facts(full, core), "recorded_by": RECORDED_BY}
 
     # --- grounding --------------------------------------------------------
     bundle = declared_bundle(record)
