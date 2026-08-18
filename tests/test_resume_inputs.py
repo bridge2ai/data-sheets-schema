@@ -60,12 +60,34 @@ class ResumeGuardTest(unittest.TestCase):
         self.assertNotIn("for k in PHASE_NEEDS[ph] if k in carry", src,
                          "the filtering form is what allowed a short run")
 
-    def test_discarding_an_artifact_also_discards_its_consumers(self):
-        """Dropping only the producers left `audit` marked done with findings
-        computed against the artifact just discarded, and `reconcile_full`
-        marked done having absorbed from it."""
+    def test_discarding_an_artifact_discards_its_whole_dependency_closure(self):
+        """One level was not enough (#601).
+
+        `reconcile_core` and `report` need the *reconciled* full record, not the
+        completed one, so neither named a discarded `Completed full record` and
+        neither was invalidated. After `reconcile_full` re-ran with different
+        bytes they could stay in `done` and be skipped — shipping a core record
+        and a report reconciled against a full record that no longer exists.
+        """
+        from data_sheets_schema.api_runner import PHASES, _dependents_of
+        closure = _dependents_of("Completed full record",
+                                 ("full", "reconcile_full"))
+        for phase in ("core", "audit", "reconcile_full", "reconcile_core",
+                      "report"):
+            with self.subTest(phase=phase):
+                self.assertIn(phase, closure)
+
+    def test_a_changed_artifact_invalidates_even_when_still_record_shaped(self):
+        """`_looks_like_a_record` cannot tell *which* record it is looking at.
+
+        Progress now stores the md5 of each artifact the completed phases were
+        computed against, so bytes that changed between passes invalidate the
+        work that depended on them — the same reasoning that pins a validation
+        or pair verdict to its artifacts (#426, #544).
+        """
         src = self._source()
-        self.assertIn("PHASE_NEEDS.get(ph, ())", src)
+        self.assertIn("artifact_md5", src)
+        self.assertIn("_dependents_of", src)
 
     def test_the_message_names_the_way_out(self):
         """A gate that stops a paid run must say what to do next."""

@@ -610,8 +610,21 @@ def source_ranking_block(project: str) -> str | None:
         "",
     ]
     for row in rows:
-        lines.append(f"  tier {row['priority']}  {row.get('id')}  "
-                     f"({row.get('source_type')})")
+        line = (f"  tier {row['priority']}  {row.get('id')}  "
+                f"({row.get('source_type')})")
+        # Supersession is a direct statement that one source replaces another,
+        # so it settles a disagreement regardless of tier. Sending only the
+        # tier left the model unable to resolve four conflicts the manifest
+        # had already resolved (#600).
+        if row.get("superseded_by"):
+            line += f"  — SUPERSEDED BY {row['superseded_by']}"
+        lines.append(line)
+    lines += [
+        "",
+        "A source marked SUPERSEDED BY loses to the source named, whatever",
+        "their tiers: that is a statement about these two sources rather than",
+        "about their kinds.",
+    ]
     return "\n".join(lines)
 
 
@@ -1203,6 +1216,17 @@ def _save_progress(spec: RunSpec, completed: list[str],
     data: dict[str, Any] = {"completed": completed, "label": spec.label}
     if audit:
         data["Audit findings"] = audit
+    # The bytes each completed phase was computed against (#601). Without them
+    # an artifact that changes but stays record-shaped passes
+    # `_looks_like_a_record`, and the audit stays marked complete with nothing
+    # tying it to the pair it audited. Same reasoning as pinning a validation
+    # or pair verdict to its artifacts (#426, #544).
+    from data_sheets_schema.provenance import _md5
+    data["artifact_md5"] = {
+        artifact: _md5(path)
+        for artifact, path in (("full", spec.full_path),
+                               ("core", spec.core_path))
+        if path.exists()}
     p.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
@@ -1920,6 +1944,54 @@ def _rate_limit_pause(exc: Exception, *, now: datetime | None = None) -> float |
     return max(1.0, min((reset - current).total_seconds() + 2, RATE_LIMIT_MAX_PAUSE))
 
 
+def _dependents_of(carry_name: str, produced_by: tuple[str, ...]) -> set[str]:
+    """Every phase downstream of a discarded artifact, to a fixed point (#601).
+
+    Dropping only the phases that *directly* need the artifact was one level
+    deep, and the graph is deeper:
+
+        full -> reconcile_full -> "Reconciled full record" -> reconcile_core -> report
+
+    `reconcile_core` and `report` need the *reconciled* full record, not the
+    completed one, so neither named the discarded artifact and neither was
+    invalidated. After `reconcile_full` re-ran and produced different bytes,
+    both could stay in `done` and be skipped — shipping a core record and a
+    reconciliation report reconciled against a full record that no longer
+    exists.
+    """
+    # What each phase publishes into `carry`, mirroring the labelling at the
+    # end of the phase loop. Derived from PHASE_ARTIFACT so a new phase is
+    # covered without editing a second list.
+    publishes = {}
+    for phase, artifact in PHASE_ARTIFACT.items():
+        label = {"full": "Completed full record",
+                 "core": "Completed core record",
+                 "report": "Reconciliation report"}.get(artifact)
+        if phase == "reconcile_full":
+            label = "Reconciled full record"
+        if phase == "audit":
+            label = "Audit findings"
+        if label:
+            publishes[phase] = label
+    publishes.setdefault("audit", "Audit findings")
+
+    stale = {carry_name}
+    dependents: set[str] = set(produced_by)
+    changed = True
+    while changed:
+        changed = False
+        for phase in PHASES:
+            if phase in dependents:
+                continue
+            if stale & set(PHASE_NEEDS.get(phase, ())):
+                dependents.add(phase)
+                produced = publishes.get(phase)
+                if produced and produced not in stale:
+                    stale.add(produced)
+                changed = True
+    return dependents
+
+
 def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             client=None) -> dict[str, Any]:
     """Run the phases, writing each artifact as it completes.
@@ -2057,7 +2129,17 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             parsed = yaml.safe_load(body)
         except yaml.YAMLError:
             parsed = None
-        if isinstance(parsed, dict) and _looks_like_a_record(
+        recorded = (progress.get("artifact_md5") or {}).get(artifact)
+        from data_sheets_schema.provenance import _md5
+        moved = recorded is not None and _md5(path) != recorded
+        if moved:
+            # Record-shaped but not the bytes the completed phases saw, so
+            # everything downstream was computed against something else (#601).
+            print(f"   {artifact} artifact changed since the last pass; "
+                  f"re-running the phases that depended on it")
+            done -= set(produced_by)
+            done -= _dependents_of(name, produced_by)
+        elif isinstance(parsed, dict) and _looks_like_a_record(
                 parsed, schema_path, class_name):
             carry[name] = body
         else:
@@ -2068,7 +2150,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # the artifact just discarded, and `reconcile_full` marked done
             # having absorbed from it.
             done -= set(produced_by)
-            done -= {ph for ph in PHASES if name in PHASE_NEEDS.get(ph, ())}
+            done -= _dependents_of(name, produced_by)
     if "reconcile_full" in done and "Completed full record" in carry:
         carry["Reconciled full record"] = carry["Completed full record"]
 
