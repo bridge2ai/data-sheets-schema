@@ -1,0 +1,363 @@
+id: https://w3id.org/bridge2ai/d4d-generation-record
+name: d4d-generation-record
+title: D4D Generation Record
+description: >-
+  The record a generation run writes about itself: what it consumed, what it
+  produced, what was checked afterwards, and what it could not establish.
+
+  This repository schematises metadata about datasets. Until now its own
+  generation metadata was a hand-built Python dictionary written as YAML —
+  25 top-level keys, `record_version: 1`, and nothing that could be validated.
+  The one artifact that did have a LinkML schema, `d4d_run_telemetry.yaml`, is
+  the *derived* report rather than the authoritative record.
+
+  **This schema is deliberately not imported by `data_sheets_schema.yaml`.** It
+  describes the pipeline, not a dataset, and importing it would move the
+  `Dataset` digest that a generation arm is frozen against.
+
+  **It describes today's record rather than a tidier one.** Across 195 records
+  the shape genuinely varies: a `live` record carries `model`, `system` and
+  `api_usage`; a `derived` record carries `derivation` and `sources` and none of
+  those; older records predate blocks added later. Requiring a field that some
+  honest record cannot have would make the schema a fiction. Only what every
+  record has is required; the rest is optional and documented.
+license: MIT
+prefixes:
+  linkml: https://w3id.org/linkml/
+  d4dgen: https://w3id.org/bridge2ai/d4d-generation-record/
+default_prefix: d4dgen
+default_range: string
+imports:
+  - linkml:types
+
+classes:
+
+  GenerationRecord:
+    description: >-
+      One run, one project. Written by `d4d api run` or by
+      `d4d provenance record` from an agentic run, and read by every gate in
+      `d4d runs check`.
+    tree_root: true
+    attributes:
+
+      record_type:
+        description: Always `d4d_generation_provenance`; names the kind of file.
+        required: true
+      record_version:
+        description: >-
+          Bumped when the record's shape changes incompatibly. Still 1: every
+          block added since has been additive, which is why records written
+          months apart still validate together.
+        range: integer
+        required: true
+      record_mode:
+        description: >-
+          How much of this record is observed. `live` is written by the run
+          itself; `reconstructed` is assembled afterwards and names what it
+          cannot recover; `derived` describes a record computed from other
+          records rather than generated.
+        range: RecordMode
+        required: true
+      record_generated_at:
+        description: When the record was written, not when the run started.
+        range: datetime
+        required: true
+
+      run:
+        description: Which project, method, label and arm this run is.
+        range: RunIdentity
+        required: true
+        inlined: true
+
+      schema:
+        description: >-
+          The schema the run generated against, by hash and by digest. The
+          digest is what the model was actually sent.
+        required: true
+        inlined: true
+        range: SchemaFacts
+
+      repo:
+        description: The commit the run was made at.
+        required: true
+        inlined: true
+        range: AnyBlock
+
+      software:
+        description: Versions of the packages that produced the record.
+        required: true
+        inlined: true
+        range: AnyBlock
+
+      outputs:
+        description: The records this run wrote, by path and hash.
+        required: true
+        inlined: true
+        range: AnyBlock
+
+      inputs:
+        description: >-
+          The bundle the run consumed, its hash, and the manifest that selected
+          it. Absent on a `derived` record, which consumes records rather than
+          a bundle.
+        inlined: true
+        range: AnyBlock
+
+      model:
+        description: >-
+          Model, provider, route, per-phase ceilings, and what can honestly be
+          said about temperature, reasoning effort and context.
+        inlined: true
+        range: AnyBlock
+
+      system:
+        description: The machine the run was made on.
+        inlined: true
+        range: AnyBlock
+
+      prompts:
+        description: >-
+          Every prompt file the run consumed, hashed, plus the assembly digest
+          covering the phase instructions and their order.
+        inlined: true
+        range: AnyBlock
+
+      playbooks:
+        description: >-
+          The instruction files an agentic run opens for itself, hashed. Carries
+          `consumed`, which says whether this runtime reads them at all.
+        inlined: true
+        range: AnyBlock
+
+      companions:
+        description: >-
+          Everything else a reader may need, by reference rather than by copy:
+          the reasoning log beside this record, the registries the run was
+          checked against, and the telemetry report derived from records like
+          it. A registry is shared and appended to over time, so copying it into
+          every record would multiply it and still not say which version was in
+          force; a hash does say.
+        inlined: true
+        range: CompanionFiles
+
+      api_usage:
+        description: >-
+          One entry per API call: phase, attempt, timing, tokens and stop
+          reason. Absent for a runtime with no access to its own accounting.
+        multivalued: true
+        inlined_as_list: true
+        range: AnyBlock
+
+      phase_log:
+        description: >-
+          What an agentic run says about the phases it performed. The
+          counterpart to `api_usage` for a runtime that knows which phase it ran
+          but not what the call cost.
+        inlined: true
+        range: AnyBlock
+
+      phases_skipped:
+        description: Phases a resumed run did not repeat.
+        multivalued: true
+
+      repair:
+        description: Validator-driven repair rounds, in order.
+        multivalued: true
+        inlined_as_list: true
+        range: AnyBlock
+
+      intermediates:
+        description: Phase snapshots written as the run progressed.
+        multivalued: true
+        inlined_as_list: true
+        range: AnyBlock
+
+      validation:
+        description: >-
+          Whether the records validate, pinned to the bytes and the schema the
+          verdict was reached on, so a stale verdict is detectable.
+        inlined: true
+        range: AnyBlock
+
+      pair_consistency:
+        description: >-
+          Whether the full and core records agree. A property of two files
+          together, which no single-file gate can see.
+        inlined: true
+        range: AnyBlock
+
+      report_claims:
+        description: >-
+          Whether the reconciliation report's claims survive checking against
+          the record and the schema.
+        inlined: true
+        range: AnyBlock
+
+      grounding:
+        description: >-
+          Whether external identifiers appear in the bundle they were read
+          from, and whether identifier slots hold resolver URLs.
+        inlined: true
+        range: AnyBlock
+
+      unverified:
+        description: >-
+          Values recorded but not observed. Named rather than silently trusted.
+        multivalued: true
+        inlined_as_list: true
+        range: AnyBlock
+
+      unrecoverable:
+        description: >-
+          Fields a reconstructed record cannot establish, with the reason. The
+          difference between a gap that is named and one that is hidden.
+        multivalued: true
+        inlined_as_list: true
+        range: AnyBlock
+
+      notes:
+        description: Free-text observations about this run.
+        multivalued: true
+
+      derivation:
+        description: >-
+          For a `derived` record: how it was computed from other records.
+        inlined: true
+        range: AnyBlock
+
+      sources:
+        description: "For a `derived` record: the records it consumed, hashed."
+        multivalued: true
+        inlined_as_list: true
+        range: AnyBlock
+
+      not_applicable:
+        description: >-
+          Fields that do not apply to this kind of record, with the reason —
+          distinct from a field that is missing.
+        multivalued: true
+        inlined_as_list: true
+        range: AnyBlock
+
+      canonical:
+        description: "For a canonicalised record: what it was canonicalised from."
+        inlined: true
+        range: AnyBlock
+
+      canonical_superseded_by:
+        description: The record that replaced this one, if any.
+        inlined: true
+        range: AnyBlock
+
+  RunIdentity:
+    description: Which run this is.
+    attributes:
+      project:
+        required: true
+      method:
+        required: true
+      label:
+        description: "The run label; `_rep{N}` names the replicate."
+        required: true
+      arm:
+        description: Which arm of the study, where one applies.
+        required: true
+      replicate:
+        description: >-
+          Which replicate of the series, or absent for a record that is not one
+          of a series — five records carry it as null rather than omitting it.
+        range: integer
+
+  SchemaFacts:
+    description: The schema a run generated against.
+    attributes:
+      declared_version:
+        description: The schema version the run declared.
+        required: true
+      declared_in:
+        description: Where that version was read from.
+        required: true
+      merged_schema_carries_version:
+        description: >-
+          Whether the merged schema states the version itself, rather than it
+          being taken from the source schema alone.
+        range: boolean
+        required: true
+      full_path:
+        required: true
+      core_path:
+        required: true
+      digest_md5:
+        description: >-
+          Fingerprint of the rendered digest the model was sent. This is what a
+          straddle check compares, and what the digest inventory keys on. Absent
+          on records written before the digest was recorded.
+      full_md5:
+      core_md5:
+      full_sha256:
+        description: >-
+          Recorded alongside the md5 rather than instead of it: `_artifact`
+          hashes run outputs with md5 and the prompt registry uses sha256, so
+          both appear and neither is a mistake.
+      core_sha256:
+      note:
+
+  CompanionFiles:
+    description: >-
+      Related files, by reference. Each says whether it was present, because an
+      absent reasoning log is a fact about the runtime rather than a gap.
+    attributes:
+      reasoning_log:
+        inlined: true
+        range: FileReference
+      telemetry_report:
+        inlined: true
+        range: FileReference
+      prompt_registry:
+        inlined: true
+        range: FileReference
+      digest_inventory:
+        inlined: true
+        range: FileReference
+
+  FileReference:
+    description: A file this record points at rather than copies.
+    attributes:
+      path:
+        required: true
+      present:
+        range: boolean
+        required: true
+      md5:
+        description: Absent when the file is absent, or when it is not hashed.
+      note:
+        description: Why this file matters to a reader of the record.
+
+  AnyBlock:
+    description: >-
+      A block whose interior varies legitimately across record modes and
+      versions, described here as a reference rather than enumerated.
+
+      Enumerating every field of `model`, `validation` or `grounding` would
+      freeze blocks that are still being added to — `grounding` gained a
+      finding kind this week — and a schema that has to be edited before an
+      additive change can be recorded would be a brake rather than a contract.
+      What is asserted here is that the block exists and what it is for; the
+      code that writes each block is its own definition, and the checks that
+      read them fail loudly on a shape they do not expect.
+    class_uri: linkml:Any
+
+enums:
+  RecordMode:
+    description: How much of a record is observed rather than reconstructed.
+    permissible_values:
+      live:
+        description: Written by the run itself; every field observed at run time.
+      reconstructed:
+        description: >-
+          Assembled after the fact for a run that predates live recording. Names
+          what it cannot recover instead of filling it in.
+      derived:
+        description: >-
+          Computed from other records rather than generated. Consumes replicates
+          instead of a bundle, so it declares `bundle_md5` not-applicable.

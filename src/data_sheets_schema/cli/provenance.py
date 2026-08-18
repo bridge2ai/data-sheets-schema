@@ -655,3 +655,52 @@ def backfill_context(execute, label):
                f"; {skipped} skipped as having no api_usage (agentic runs)")
     if not execute:
         click.echo("Nothing was changed. Re-run with --execute to write.")
+
+
+@provenance.command("validate-records")
+@click.option('--strict', is_flag=True, help='exit 1 if any record fails')
+@click.option('--label', default=None, help='restrict to one run label')
+def validate_records(strict, label):
+    """Validate generation records against their own LinkML schema.
+
+    This repository schematises metadata about datasets, and its own generation
+    metadata was a hand-built dictionary that nothing could check — 25
+    top-level keys and no definition. The one artifact that did have a schema,
+    `d4d_run_telemetry.yaml`, is the derived report rather than the
+    authoritative record.
+
+    The schema is deliberately not imported by `data_sheets_schema.yaml`: it
+    describes the pipeline, not a dataset, so importing it would move the
+    `Dataset` digest a generation arm is frozen against.
+    """
+    import subprocess
+    import sys
+
+    from data_sheets_schema.provenance import CONCAT_DIR
+
+    schema = Path("src/data_sheets_schema/schema/d4d_generation_record.yaml")
+    paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
+    if label:
+        paths = [p for p in paths if p.parts[-2] == label]
+    if not paths:
+        click.echo("no records matched")
+        return
+
+    failed = []
+    for p in paths:
+        r = subprocess.run(
+            ["poetry", "run", "linkml-validate", "-s", str(schema),
+             "-C", "GenerationRecord", str(p)],
+            capture_output=True, text=True)
+        if r.returncode != 0:
+            failed.append(p)
+            click.echo(f"   ❌ {p.parts[-2][:38]:38} {p.name}")
+            for line in (r.stdout + r.stderr).splitlines():
+                if "[ERROR]" in line:
+                    click.echo(f"      {line.split(']')[-1].strip()[:110]}")
+
+    click.echo(f"\n{len(paths)} record(s) checked, {len(failed)} failing")
+    if not failed:
+        click.echo("Every generation record conforms to its schema.")
+    if strict and failed:
+        sys.exit(1)

@@ -945,6 +945,54 @@ def build_derived_record(project: str, method: str, label: str, *,
     return ProvenanceRecord(data=data)
 
 
+#: Files a run is checked against or writes alongside its records, which the
+#: record pointed at only implicitly. A reader had the bundle, the prompts, the
+#: playbooks, the schemas and the outputs, and had to know by other means that a
+#: reasoning log sat beside the record or which pin registry the prompt hashes
+#: were judged against.
+#:
+#: Referenced with a hash rather than inlined: a registry is shared across runs
+#: and appended to over time, so copying it into every record would multiply it
+#: and still not say which version was in force. The hash does say.
+COMPANION_FILES = (
+    ("prompt_registry", Path("src/download/prompts/canonical_hashes.yaml"),
+     "the pins the recorded prompt hashes were judged against"),
+    ("digest_inventory", Path("src/data_sheets_schema/schema/digest_inventory.yaml"),
+     "digest to slot inventory, which decides whether a slot predates a pair"),
+)
+
+
+def companion_facts(project: str, method: str, label: str,
+                    concat_dir: Path = CONCAT_DIR) -> dict[str, Any]:
+    """Everything else a reader of this record may need, by reference.
+
+    The record already names its bundle, prompts, playbooks, schemas, outputs
+    and phase snapshots. This adds what it did not: the reasoning log beside it,
+    the registries it was checked against, and the telemetry report derived from
+    it. A path that does not exist is recorded with `present: false` rather than
+    omitted — an absent reasoning log is a fact about the runtime (#400), not a
+    gap in the record.
+    """
+    out: dict[str, Any] = {}
+    label_dir = concat_dir / f"{method}_core" / label
+    reasoning = label_dir / f"{project}_reasoning.jsonl"
+    out["reasoning_log"] = {
+        "path": repo_relative(reasoning), "present": reasoning.exists(),
+        "md5": _md5(reasoning) if reasoning.exists() else None,
+        "note": ("one JSON line per phase; absent for a runtime that cannot "
+                 "report its own token accounting (#400)")}
+    telemetry = Path("data/run_telemetry") / f"{label.rsplit('_rep', 1)[0]}.yaml"
+    out["telemetry_report"] = {
+        "path": repo_relative(telemetry), "present": telemetry.exists(),
+        "note": ("derived from records like this one, per label rather than "
+                 "per run; `d4d runs telemetry` writes it")}
+    for name, path, note in COMPANION_FILES:
+        out[name] = {"path": repo_relative(path), "present": path.exists(),
+                     "md5": _md5(path) if path.exists() else None,
+                     "note": note}
+    return out
+
+
 def build_record(project: str, method: str, label: str, *, mode: str,
                  input_bundle: Path | None = None,
                  input_verified: bool = False,
@@ -1204,6 +1252,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         "inputs": inputs,
         "outputs": {"full": _artifact(full), "core": _artifact(core),
                     "report": _artifact(report)},
+        # Everything else a reader may need, by reference rather than by copy.
+        "companions": companion_facts(project, method, label, concat_dir),
         "unrecoverable": unrecoverable or None,
         "unverified": unverified or None,
         "notes": notes or None,
