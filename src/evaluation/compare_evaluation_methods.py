@@ -73,8 +73,19 @@ class EvaluationComparator:
         results = []
 
         # Compare each project/method combination
-        for project_method in llm_scores.keys():
-            project, method = project_method.split("_", 1)
+        for project_method, llm_entry in llm_scores.items():
+            # From the record, not the key. This reads `scores.json`, whose
+            # producer now carries identity — and splitting the key here gave
+            # project "AI" for every AI-READI row (#633). The fallback keeps
+            # the whole key rather than a prefix of it, so a stale file is
+            # visibly unresolved instead of quietly attributed to `AI`.
+            carried = (llm_entry or {}).get("identity") \
+                if isinstance(llm_entry, dict) else None
+            if isinstance(carried, dict) and carried.get("project"):
+                project = str(carried["project"])
+                method = str(carried.get("method") or "")
+            else:
+                project, method = project_method, ""
 
             # Find matching presence evaluation
             presence_key = None

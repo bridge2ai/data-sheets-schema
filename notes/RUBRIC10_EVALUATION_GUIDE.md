@@ -272,7 +272,7 @@ Then continue with next batches.
 
 ```bash
 # Verify files exist
-cat data/evaluation_llm/rubric10/file_inventory.json | jq -r '.concatenated_files[]' | while read file; do
+cat data/evaluation_llm/rubric10/file_inventory.json | jq -r '.concatenated_files[].path' | while read file; do
   [ -f "$file" ] || echo "Missing: $file"
 done
 ```

@@ -23,14 +23,15 @@ evaluations = []
 for json_file in sorted(eval_dir.glob("*.json")):
     with open(json_file) as f:
         data = json.load(f)
-        # Parse filename: PROJECT_METHOD_evaluation.json
-        parts = json_file.stem.replace("_evaluation", "").split("_")
-        if len(parts) >= 2:
-            project = parts[0]
-            method = "_".join(parts[1:])
-        else:
-            project = parts[0]
-            method = "unknown"
+        # Read the identity the file already records rather than inferring it
+        # from its name. `AI_READI_claudecode_agent_evaluation.json` parsed to
+        # project "AI" and method "READI_claudecode_agent" — and the fields
+        # were sitting in the JSON all along (#633). Only fall back to the
+        # filename when the record carries nothing, and say so.
+        project = data.get("project")
+        method = data.get("method")
+        if not project:
+            project, method = json_file.stem.replace("_evaluation", ""), "unknown"
 
         evaluations.append({
             "file": json_file.name,
