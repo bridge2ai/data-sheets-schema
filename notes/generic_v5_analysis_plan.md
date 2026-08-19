@@ -15,7 +15,7 @@ meant to test instructs the model to produce it.
 
 ## What v5 changes
 
-Four rules, in one block. This breaks the one-rule-per-version convention that
+Five rules, in one block. This breaks the one-rule-per-version convention that
 v2, v3 and v4 kept, and the cost is stated rather than hidden: **a v4-against-v5
 comparison measures the whole block and cannot attribute any effect to a rule
 within it.**
@@ -39,14 +39,29 @@ differs. Against the 2026-08-13 v4 arm the differences are already known:
 | field | v4 | v5 |
 |---|---|---|
 | schema digest | `622e6d03` | `44d29023` |
-| assembly digest | `77331f08` | `2c1442fc` |
+| assembly digest | `77331f08` | `7d0ce8f3` |
 | condition | `generic_v4` | `generic_v5` |
 
-So a v4-v5 difference measures **the four v5 rules, plus a schema change, plus
-`reconcile_full` gaining the core record and the audit gaining a clause**.
-`comparable_conditions('generic_v4', 'generic_v5')` now returns False, and
-`MULTI_RULE_BASES` records why: a step that adds five rules cannot have a
-difference attributed to one of them.
+> The v5 assembly digest has moved three times since this table was first
+> written: `2c1442fc`, then `d59f8532` when the source-ranking block entered the
+> layout, then `7d0ce8f3` when the report phase gained the pre-reconciliation
+> records (#639). It is stated as of 2026-08-19 and **must be re-checked against
+> `assembly_digest()` immediately before the canary** — a plan naming a digest
+> the arm did not run against describes a different arm, which is what #638 was
+> filed for.
+
+So a v4-v5 difference measures **the five v5 rules, plus a schema change, plus
+`reconcile_full` gaining the core record, the audit gaining a clause, and — as
+of 2026-08-19 — the report phase receiving both records' pre-reconciliation
+states (#639)**.
+
+`comparable_conditions('generic_v4', 'generic_v5')` returns **True**, not False
+as this said before it was checked (#638). That is not a contradiction of the
+paragraph above: the function deliberately assesses *prompt adjacency only* —
+whether one condition is the other plus one marked block — and the procedural
+differences are carried by `runs.arm_confounds`, which is where a reader should
+look before attributing anything. `MULTI_RULE_BASES` records the rest: a step
+that adds five rules cannot have a difference attributed to one of them.
 
 ### What is still worth comparing
 
@@ -88,9 +103,34 @@ Stated so they can be wrong.
 4. **The invented-prefix population stops growing.** ~12,000 values across the
    corpus today (#531), five spellings for the VOICE namespace alone. v5 records
    should add none; existing records are not rewritten (#520).
-5. **British spellings fall on the API arm and are unchanged on the agentic
-   arm.** This is the parity fix's own test. If the agentic arm moves, something
-   other than the rule moved with it.
+5. **British spellings fall on the API arm.** Narrowed to the API arm on
+   2026-08-19, before generation, because the planned arm contains no agentic
+   runs and the original wording — "and are unchanged on the agentic arm" —
+   could not be measured by it (#638). Deciding that after seeing the results
+   is what pre-registration exists to prevent, so it is decided here.
+
+   **What the narrowing costs, stated rather than absorbed.** The agentic clause
+   was the control: the agentic playbook has carried the American-English rule
+   all along (`.claude/commands/d4d-uniform-rules.md:90`), so v5 changes nothing
+   for that arm, and an agentic arm that moved would have shown that something
+   other than rule 5 moved with it. Without it, **a fall on the API arm is
+   consistent with rule 5 and equally consistent with any other corpus-wide
+   change between the two dates.** The result is evidence, not attribution.
+
+   **Calibration, measured rather than assumed.** The agentic arm already has
+   this rule and is not at zero:
+
+   | arm | n | total | mean/record | max |
+   |---|---|---|---|---|
+   | agentic 2026-08-11 | 15 | 461 | 30.7 | 99 |
+   | API v4 2026-08-13 | 12 | 613 | 51.1 | 146 |
+
+   So the rule's observed effect where it already applies is a lower rate, not
+   elimination. A v5 API arm landing near ~31 per record would be the outcome
+   this rule can produce; predicting zero would be predicting something no arm
+   has achieved, including the one that has had the rule the whole time. The two
+   arms differ in runtime and in which records they wrote, so this is a
+   reference point and not a matched comparison.
 
 ## Measured v4 baselines
 

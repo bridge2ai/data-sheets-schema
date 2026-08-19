@@ -10,7 +10,7 @@ a test asserts that the only difference is the block marked `ADDED IN v5`.
 
 ## Why v5 exists
 
-Four rules, not one. Two of them are not new instructions at all — they already
+Five rules, not one. Two of them are not new instructions at all — they already
 reach the agentic arm through the playbook and reach the API arm through
 nothing, which is the divergence #545 measured. Bringing them here is a parity
 fix; a condition whose two runtimes read different rules is not one condition.

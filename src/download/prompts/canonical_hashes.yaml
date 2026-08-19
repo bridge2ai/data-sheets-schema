@@ -123,18 +123,12 @@ files:
   src/download/prompts/d4d_generic_arm_prompt_v5.md:
     body_sha256: eacd39e002e148c22c4e8012b171bcdbe59d25f2b0c94710a7eef1af446241b9
     bytes: 13237
-    pinned_at_commit: 38f0e76d26a20d923d6083e628a980d8292f6afb
-    pinned_on: '2026-08-18'
-    reason: "resolve the identifier contradiction and correct the rule count (#603). The provenance\
-      \ rule said \"take it from the evidence or omit it\" and the minting rule said to hang\
-      \ a new identifier off an attested one \u2014 a minted fragment is not in the evidence,\
-      \ so the first forbade what the second required, on the case a model meets for every\
-      \ identifier it writes. The line is now external referent versus internal label: an\
-      \ identifier naming something outside this dataset is a claim about the world and comes\
-      \ from the evidence; one naming a part of this record is a label no evidence can supply,\
-      \ and the test is whether the thing named has a referent outside the record. Also corrects\
-      \ the rationale from four rules to five."
-    sha256: 389f7bfe6a202f3e7207e28296b87dad44de19f956c503532e2d6530768613ec
+    pinned_at_commit: 7c3400b7f422575c1ae81935e43562cafad88f19
+    pinned_on: '2026-08-19'
+    reason: "Rationale said \"Four rules\"; the block holds five (#638). Rationale only \u2014\
+      \ above `## Prompt body`, never sent to the model, so the body hash is unchanged and\
+      \ the condition is not re-baselined."
+    sha256: 97ccf288e22b52c7baca4fb163c60218f821b365c846e9eaa9a81b292c4b0513
     superseded:
     - pinned_on: '2026-08-14'
       reason: "initial pin for the generic-v5 condition (#547, #531, #545): v4 plus one marked\
@@ -185,6 +179,18 @@ files:
         editing the inherited disagreement rule, which is v2s and carried by every version.'
       retired_on: '2026-08-18'
       sha256: 3446689e35fcabd4e873d30f4bd08e80a2c3fd6cd63b3e73343cfd8cceaee893
+    - pinned_on: '2026-08-18'
+      reason: "resolve the identifier contradiction and correct the rule count (#603). The\
+        \ provenance rule said \"take it from the evidence or omit it\" and the minting rule\
+        \ said to hang a new identifier off an attested one \u2014 a minted fragment is not\
+        \ in the evidence, so the first forbade what the second required, on the case a model\
+        \ meets for every identifier it writes. The line is now external referent versus internal\
+        \ label: an identifier naming something outside this dataset is a claim about the\
+        \ world and comes from the evidence; one naming a part of this record is a label no\
+        \ evidence can supply, and the test is whether the thing named has a referent outside\
+        \ the record. Also corrects the rationale from four rules to five."
+      retired_on: '2026-08-19'
+      sha256: 389f7bfe6a202f3e7207e28296b87dad44de19f956c503532e2d6530768613ec
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
