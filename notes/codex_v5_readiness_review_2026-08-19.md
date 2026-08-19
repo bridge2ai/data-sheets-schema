@@ -7,8 +7,17 @@
 - **Verdict: NO-GO.**
 - Third readiness review, after `codex_v5_readiness_review_2026-08-15.md` and
   `..._2026-08-17.md`. This one was also asked to check whether what those two
-  found was *fixed* or merely *filed*: 14 of 14 and 12 of 14 respectively are
-  fixed, with the report before/after finding partially fixed in both.
+  found was *fixed* or merely *filed*.
+
+**2026-08-15: 11 of 14 fixed**, not 14 of 14 as the first version of this
+header said. Counting the review's own words, 285 lines below: item 6 (report
+before/after) *partially fixed*, item 11 (v4/v5 comparability) *reframed, not
+fully cleaned up*, item 12 (agentic phase names) **not fixed**. The wrong
+figure was also self-contradicting — "14 of 14 fixed, with one partially fixed"
+cannot both hold — and it erased an open defect, so item 12 is now #642.
+
+**2026-08-17: 12 of 14 fixed**, with item 3 (four-vs-five rules) not fixed and
+item 13 (report before/after) partially fixed. That figure was right.
 
 ## The blocking reason, and a correction to how the review states it
 
@@ -38,10 +47,19 @@ So the canary's stored verdict is not a pass; it is an absence of measurement
 that reads like one — the failure this corpus keeps naming (#447, #599, #613).
 
 The v4 bar it is measured against **is** a real measurement, not the same
-absence. Recomputed from v4 artifacts: `AI_READI resolver_urls=0`,
-`CM4AI resolver_urls=0`. So v4 genuinely had none and the canary genuinely had
-22 — which is #591, the regression that was subsequently fixed by restoring the
-CURIE rule and re-pinning.
+absence — and the asymmetry is sharper than the first version of this header
+claimed. All **12** v4 records recompute cleanly (no drifted bundle, so no
+record's zero is an unmeasurable) and all 12 give `resolver_distinct = 0`.
+Their *recorded* blocks are themselves post-check measurements: every one
+carries `recorded_by: backfill_checks` written 2026-08-18, after both the
+resolver metric and the form metrics existed, and two carry real findings of
+other kinds — direct evidence the findings list was live rather than empty by
+default.
+
+So the gate compares a **stale run-time block against freshly backfilled
+baselines**. v4 genuinely had none and the canary genuinely had 22 — which is
+#591, the regression subsequently fixed by restoring the CURIE rule and
+re-pinning.
 
 That is the whole case in one line: **the canary exhibited a regression, the
 regression was fixed, and nothing has been canaried since.** Exactly the
@@ -54,6 +72,14 @@ I have described the gate as having "eight gated metrics". It has **seven
 gated** plus one reported-only (`minted fragments`, deliberately ungated because
 prediction 2 expects it to rise). Verified: `len(METRICS) == 7`,
 `len(REPORTED_ONLY) == 1`.
+
+And one caution about the review's section 6, which a reader skimming for a
+green light will misread: **credentials are not verified reachable.** What was
+established is that `CBORG_API_KEY` is present in the launch shell and that
+`_client()` constructs; the endpoint was deliberately not called, and the
+section's own verdict is UNVERIFIED. Given that the canary rule names missing
+credentials in a child process as a recurring failure, this is the last thing to
+round up — the re-canary is what tests it.
 
 ---
 
