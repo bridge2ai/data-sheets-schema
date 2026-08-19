@@ -25,6 +25,14 @@ class DeclaredInputsTest(unittest.TestCase):
         """Otherwise a required input could never be satisfiable on resume."""
         produced = {"Completed full record": "full",
                     "Completed core record": "core",
+                    # The pre-reconciliation states (#639). Produced by the
+                    # same phases as the "Completed" keys, but never
+                    # overwritten — which is the whole point of their existing
+                    # separately, since reconciliation rewrites the others in
+                    # place and the report was being asked to describe a diff
+                    # against records it had only the after-state of.
+                    "Original full record": "full",
+                    "Original core record": "core",
                     "Audit findings": "audit",
                     "Reconciled full record": "reconcile_full"}
         for i, ph in enumerate(PHASES):
@@ -34,6 +42,41 @@ class DeclaredInputsTest(unittest.TestCase):
                     self.assertIsNotNone(src, f"nothing produces {need!r}")
                     self.assertLess(PHASES.index(src), i,
                                     f"{ph} needs {need}, produced later")
+
+    def test_the_report_can_see_both_sides_of_the_diff(self):
+        """It is asked what changed; it must receive a before and an after.
+
+        Before #639 it received the audit findings, the reconciled full record
+        and a key named `Completed core record` that reconciliation had
+        overwritten with the *final* core — so it held the after-state of both
+        records and the before-state of neither, while being asked to narrate
+        the difference. Both prior readiness reviews raised it.
+        """
+        needs = PHASE_NEEDS["report"]
+        for before, after in (("Original full record", "Reconciled full record"),
+                              ("Original core record", "Completed core record")):
+            with self.subTest(record=before):
+                self.assertIn(before, needs)
+                self.assertIn(after, needs)
+
+    def test_the_originals_are_not_the_keys_reconciliation_overwrites(self):
+        """A before-state that a later phase rewrites is not a before-state."""
+        for phase in ("reconcile_full", "reconcile_core", "report"):
+            for need in PHASE_NEEDS[phase]:
+                self.assertNotEqual(
+                    need, "Original full record" if phase == "reconcile_full"
+                    else None,
+                    "reconciliation must not consume the originals as its "
+                    "working copy")
+        # The producers write them once, under names nothing else assigns.
+        import inspect
+
+        from data_sheets_schema import api_runner
+        source = inspect.getsource(api_runner.execute)
+        for key in ("Original full record", "Original core record"):
+            self.assertEqual(
+                source.count(f'carry["{key}"] = '), 1,
+                f"{key} is assigned more than once, so it is not an original")
 
     def test_reconcile_full_declares_the_core_record(self):
         """The dependency #566 added, and the one #575 can strand."""

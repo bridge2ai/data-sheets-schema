@@ -131,7 +131,7 @@ def comparable_conditions(a: str, b: str) -> bool:
     (`622e6d03` to `44d29023`) and `reconcile_full` had gained an input.
 
     A True here also does not mean one *rule* changed: see `MULTI_RULE_BASES`,
-    where v2's step is three rules and v5's is four.
+    where v2's step is three rules and v5's is five.
 
     `generic` vs `generic_v2` differs only in base — that is the v2 experiment.
     `generic` vs `tuned` differs only in tuning — that is the study's main
@@ -544,8 +544,11 @@ PHASE_INSTRUCTIONS = {
     "report": (
         "Phase 4c. Write the reconciliation report as Markdown: what the audit "
         "found, what was changed in each record and why, and what was left "
-        "as-is and why. The reconciled records are supplied above — check each "
-        "statement against them before you write it. Do not report a slot as "
+        "as-is and why. Both the original records and the reconciled records "
+        "are supplied above: compare them and report the differences you can "
+        "see. Do not describe a change you cannot locate in that comparison — "
+        "if the two are identical for a finding, say the finding was left "
+        "as-is. Check each statement against them before you write it. Do not report a slot as "
         "removed if it is still present, and do not state that a slot is not "
         "declared in the schema without the schema digest supporting you: both "
         "are checked against the records afterwards, and a report that fails "
@@ -581,8 +584,20 @@ PHASE_NEEDS = {
     # emitted a `distributions` block reporting a removal that did not happen;
     # a phase asked to narrate a diff it cannot see is a plausible cause, and
     # #546 fixed the checking rather than the cause.
-    "report": ("Audit findings", "Reconciled full record",
-               "Completed core record"),
+    #
+    # #580 supplied the after-states and stopped there, so the diff was still
+    # unobservable — half of it was missing. Both prior readiness reviews
+    # raised it again; a marker test confirmed the original full record was
+    # never sent. The before-states are now supplied too (#639), so the phase
+    # can read a change rather than infer one, and `report_claims` checks a
+    # narrative the model was actually in a position to write.
+    #
+    # Costed before adopting: the two originals add ~41k tokens on AI-READI,
+    # the largest project, taking its report request from ~67k to ~108k. The
+    # corpus has sent 363,261 successfully, so this is inside demonstrated
+    # headroom rather than inside an assumption about the limit.
+    "report": ("Audit findings", "Original full record", "Original core record",
+               "Reconciled full record", "Completed core record"),
 }
 
 
@@ -2252,6 +2267,35 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # having absorbed from it.
             done -= set(produced_by)
             done -= _dependents_of(name, produced_by)
+    # The pre-reconciliation states, recovered from the snapshots the `full`
+    # and `core` phases wrote (#639). They are not artifacts — reconciliation
+    # overwrites those in place — so a resumed run cannot rebuild them from
+    # `spec.full_path`/`spec.core_path`, and without them the `report` phase
+    # would find its inputs absent and refuse to resume at all.
+    #
+    # Read only; a snapshot that is missing or unparseable simply leaves the
+    # key absent, and the resume check below then re-runs the phase that
+    # produces it rather than reporting a diff against a record it never saw.
+    for phase, name in (("full", "Original full record"),
+                        ("core", "Original core record")):
+        snapshot = _intermediate_dir(spec) / f"{spec.project}_{phase}.yaml"
+        if not snapshot.exists():
+            continue
+        body = snapshot.read_text(encoding="utf-8")
+        schema_path, class_name = PHASE_SCHEMA[phase]
+        try:
+            parsed = yaml.safe_load(body)
+        except yaml.YAMLError:
+            parsed = None
+        if isinstance(parsed, dict) and _looks_like_a_record(
+                parsed, schema_path, class_name):
+            carry[name] = body
+        else:
+            # The snapshot is not a record, so the phase that wrote it must
+            # run again — the same reasoning as the artifact branch above.
+            done.discard(phase)
+            done -= _dependents_of(name, (phase,))
+
     if "reconcile_full" in done and "Completed full record" in carry:
         carry["Reconciled full record"] = carry["Completed full record"]
 
@@ -2373,6 +2417,17 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             if ph == "reconcile_full":
                 label = "Reconciled full record"
             carry[label] = body
+            # The pre-reconciliation state, kept under a key nothing later
+            # overwrites (#639). `Completed full record` and `Completed core
+            # record` are both rewritten in place by reconciliation and repair,
+            # so by the report phase they hold the *final* records despite
+            # their names — which is why the report was asked what changed and
+            # shown only after-states. These two are written once, by the
+            # phases that produce them, and never again.
+            if ph == "full":
+                carry["Original full record"] = body
+            elif ph == "core":
+                carry["Original core record"] = body
 
         done.add(ph)
         _save_progress(spec, [x for x in PHASES if x in done],

@@ -95,9 +95,29 @@ class ReportPhaseTest(unittest.TestCase):
 
     def test_it_is_told_to_check_before_asserting(self):
         from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS
-        text = PHASE_INSTRUCTIONS["report"]
+        # Case-insensitive: the phrase became sentence-initial when #639
+        # rewrote the instruction, and an assertion on the capitalisation of
+        # prose fails for a reason that has nothing to do with the behaviour
+        # it is guarding.
+        text = PHASE_INSTRUCTIONS["report"].lower()
         self.assertIn("check each statement against them", text)
         self.assertIn("still present", text)
+
+    def test_it_is_given_both_sides_of_the_diff_and_told_to_use_them(self):
+        """#639. The instruction and the inputs have to agree.
+
+        Asking for a change account while supplying only after-states is what
+        both readiness reviews found; supplying the before-states without
+        telling the phase they are there would be the same defect with the
+        halves swapped.
+        """
+        from data_sheets_schema.api_runner import (PHASE_INSTRUCTIONS,
+                                                   PHASE_NEEDS)
+        for key in ("Original full record", "Original core record"):
+            self.assertIn(key, PHASE_NEEDS["report"])
+        text = PHASE_INSTRUCTIONS["report"].lower()
+        self.assertIn("original records", text)
+        self.assertIn("compare them", text)
 
     def test_the_verdict_pins_the_records_and_the_schema(self):
         """A claim is checked *against* a record and a slot inventory, so a
