@@ -837,6 +837,25 @@ def evaluate_d4d_file(file_path: Path, project: str, method: str, eval_type: str
     return result
 
 
+def entry_identity(key, entry):
+    """`(project, method, path)` for one inventory entry.
+
+    Prefers what the inventory carries. The previous version recovered the
+    project by splitting the key on underscores with a special case for
+    `AI_READI`, which was a standing admission that the parse was wrong — and
+    it stayed wrong for `VOICE_PEDIATRIC` and for any other name with an
+    underscore (#622).
+
+    A legacy inventory holding a bare path string cannot have its identity
+    recovered, so it reports the raw key and an empty method rather than a
+    plausible-looking guess.
+    """
+    if isinstance(entry, dict):
+        return (entry.get("project") or key, entry.get("method") or "",
+                entry.get("path"))
+    return key, "", entry
+
+
 def main():
     print("=" * 70)
     print("Rubric20 Hybrid Batch Evaluator")
@@ -872,14 +891,8 @@ def main():
 
     concat_count = 0
     for key, file_path in inventory["concatenated_files"].items():
-        parts = key.split('_')
-        # Handle AI_READI which has underscore in project name
-        if parts[0] == "AI" and parts[1] == "READI":
-            project = "AI_READI"
-            method = '_'.join(parts[2:-1])
-        else:
-            project = parts[0]
-            method = '_'.join(parts[1:-1])
+        project, method, carried_path = entry_identity(key, file_path)
+        file_path = carried_path if carried_path is not None else file_path
 
         file_full_path = BASE_DIR / file_path
 
@@ -916,14 +929,9 @@ def main():
     total_individual = sum(len(files) for files in inventory["individual_files"].values())
 
     for key, file_list in inventory["individual_files"].items():
-        parts = key.split('_')
-        # Handle AI_READI which has underscore in project name
-        if parts[0] == "AI" and parts[1] == "READI":
-            project = "AI_READI"
-            method = '_'.join(parts[2:-1])
-        else:
-            project = parts[0]
-            method = '_'.join(parts[1:-1])
+        project, method, _ = entry_identity(key, file_list)
+        file_list = (file_list.get("paths") if isinstance(file_list, dict)
+                     else file_list)
 
         for file_path in file_list:
             file_full_path = BASE_DIR / file_path

@@ -35,6 +35,30 @@ from datetime import datetime
 import anthropic
 
 
+#: Where a result's identity is carried, so no exporter has to parse it out of
+#: a composite key. A dataset name may contain underscores and so may a method
+#: (`claudecode_agent`), which makes such a key ambiguous in both directions —
+#: no split recovers `AI_READI` + `claudecode_agent` from
+#: `AI_READI_claudecode_agent`, and the previous one silently did not (#622).
+IDENTITY = "identity"
+
+
+def identity_of(key: str, project_results: dict) -> tuple[str, str]:
+    """`(project, method)` for one result.
+
+    Falls back to naming the gap rather than guessing. A result written before
+    identity was carried cannot have it recovered — the ambiguity is real, not
+    an implementation shortcut — so it reports the raw key as the project and
+    leaves the method empty, which is visibly incomplete rather than plausibly
+    wrong.
+    """
+    carried = project_results.get(IDENTITY) if isinstance(project_results, dict) \
+        else None
+    if isinstance(carried, dict) and carried.get("project"):
+        return str(carried["project"]), str(carried.get("method") or "")
+    return key, ""
+
+
 @dataclass
 class LLMEvaluationConfig:
     """Configuration for LLM-based evaluation"""
@@ -259,7 +283,7 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
         rows = []
 
         for project_method, project_results in results.items():
-            project, method = project_method.split("_", 1)
+            project, method = identity_of(project_method, project_results)
 
             row = {
                 "project": project,
@@ -312,7 +336,8 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
 
             for project_method, project_results in results.items():
                 if rubric_name in project_results:
-                    project, method = project_method.split("_", 1)
+                    project, method = identity_of(project_method,
+                                                  project_results)
                     r = project_results[rubric_name]["overall_score"]
                     f.write(f"| {project} | {method} | {r['total_points']} | {r['max_points']} | {r['percentage']:.1f}% |\n")
 
@@ -325,7 +350,7 @@ Provide your evaluation in the specified JSON format. Remember to assess QUALITY
                 if rubric_name not in project_results:
                     continue
 
-                project, method = project_method.split("_", 1)
+                project, method = identity_of(project_method, project_results)
                 result = project_results[rubric_name]
 
                 f.write(f"### {project} - {method}\n\n")
@@ -438,6 +463,11 @@ def main():
 
         try:
             results = evaluator.evaluate_file(d4d_file, project, method, args.rubric)
+            # Carried, not re-derived. Both values are in hand here; recovering
+            # them later by splitting the key on its first underscore reported
+            # AI_READI as project "AI" and VOICE_PEDIATRIC as "VOICE" — merging
+            # two datasets the manifest declares distinct (#622).
+            results[IDENTITY] = {"project": project, "method": method}
             all_results[f"{project}_{method}"] = results
 
             # Print summary

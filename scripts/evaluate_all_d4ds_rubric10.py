@@ -41,8 +41,11 @@ def find_individual_files() -> Dict[str, List[str]]:
                 for yaml_file in yaml_files:
                     key = f"{project}_{method}_individual"
                     if key not in files:
-                        files[key] = []
-                    files[key].append(str(yaml_file.relative_to(BASE_DIR)))
+                        files[key] = {"paths": [], "project": project,
+                                      "method": method,
+                                      "granularity": "individual"}
+                    files[key]["paths"].append(
+                        str(yaml_file.relative_to(BASE_DIR)))
 
     return files
 
@@ -56,7 +59,14 @@ def find_concatenated_files() -> Dict[str, str]:
             file_path = BASE_DIR / "data" / "d4d_concatenated" / method / f"{project}_d4d.yaml"
             if file_path.exists():
                 key = f"{project}_{method}_concatenated"
-                files[key] = str(file_path.relative_to(BASE_DIR))
+                # An entry, not a bare path. Consumers used to recover the
+                # project by splitting this key on underscores, which required
+                # a special case for AI_READI and was simply wrong for any
+                # other name containing one (#622). Both values are known
+                # here, so they are carried.
+                files[key] = {"path": str(file_path.relative_to(BASE_DIR)),
+                              "project": project, "method": method,
+                              "granularity": "concatenated"}
 
     return files
 
