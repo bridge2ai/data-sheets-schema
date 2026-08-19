@@ -963,7 +963,8 @@ COMPANION_FILES = (
 
 
 def companion_facts(project: str, method: str, label: str,
-                    concat_dir: Path = CONCAT_DIR) -> dict[str, Any]:
+                    concat_dir: Path = CONCAT_DIR,
+                    reasoning: Path | None = None) -> dict[str, Any]:
     """Everything else a reader of this record may need, by reference.
 
     The record already names its bundle, prompts, playbooks, schemas, outputs
@@ -975,7 +976,7 @@ def companion_facts(project: str, method: str, label: str,
     """
     out: dict[str, Any] = {}
     label_dir = concat_dir / f"{method}_core" / label
-    reasoning = label_dir / f"{project}_reasoning.jsonl"
+    reasoning = reasoning or label_dir / f"{project}_reasoning.jsonl"
     out["reasoning_log"] = {
         "path": repo_relative(reasoning), "present": reasoning.exists(),
         "md5": _md5(reasoning) if reasoning.exists() else None,
@@ -1003,6 +1004,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  schema_digest_md5: str | None = None,
                  reasoning_effort: str | None = None,
                  phases: list[dict[str, Any]] | None = None,
+                 outputs: dict[str, Path] | None = None,
                  extra_notes: list[str] | None = None) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
 
@@ -1010,10 +1012,19 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     only when the input bundle on disk is known to be the same bytes the run
     consumed; otherwise the input hash is withheld as unrecoverable.
     """
+    # Taken from the caller when it knows, reconstructed only when it does not.
+    # A run with `--out-dir` writes flat into that directory, and rebuilding the
+    # standard layout here made the record name output and companion files that
+    # were elsewhere or absent — the GitHub assistant's layout, and the same
+    # class as the declared-bundle defect: a path assumed rather than derived
+    # from the spec that already knew it (#604).
     base = method[:-5] if method.endswith("_core") else method
-    full = concat_dir / base / label / f"{project}_d4d.yaml"
-    core = concat_dir / f"{base}_core" / label / f"{project}_d4d_core.yaml"
-    report = concat_dir / f"{base}_core" / label / f"{project}_reconciliation.md"
+    outputs = outputs or {}
+    full = outputs.get("full") or concat_dir / base / label / f"{project}_d4d.yaml"
+    core = outputs.get("core") or (
+        concat_dir / f"{base}_core" / label / f"{project}_d4d_core.yaml")
+    report = outputs.get("report") or (
+        concat_dir / f"{base}_core" / label / f"{project}_reconciliation.md")
 
     header = parse_header(full)
     unrecoverable: list[dict[str, str]] = []
@@ -1253,7 +1264,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         "outputs": {"full": _artifact(full), "core": _artifact(core),
                     "report": _artifact(report)},
         # Everything else a reader may need, by reference rather than by copy.
-        "companions": companion_facts(project, method, label, concat_dir),
+        "companions": companion_facts(project, method, label, concat_dir,
+                                      reasoning=outputs.get("reasoning")),
         "unrecoverable": unrecoverable or None,
         "unverified": unverified or None,
         "notes": notes or None,

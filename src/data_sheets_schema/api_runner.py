@@ -923,6 +923,13 @@ def _looks_like_a_record(parsed: dict, schema_path: str = FULL_SCHEMA_PATH,
 MIN_RECORD_SLOTS = 5
 
 
+#: What a finding's `record` may say. Enumerated because "the findings that
+#: concern the FULL record" is only answerable if the value is one the
+#: reconciliation phases can match on; a free-text record name would be a
+#: finding nobody can route (#604).
+AUDIT_RECORD_VALUES = frozenset({"full", "core", "both"})
+
+
 def _audit_is_well_formed(parsed: dict) -> bool:
     """Does this JSON actually carry an audit, or merely the word `findings`?
 
@@ -934,7 +941,18 @@ def _audit_is_well_formed(parsed: dict) -> bool:
     findings = parsed.get("findings")
     if not isinstance(findings, list):
         return False
-    return all(isinstance(f, dict) and {"severity", "slot", "issue"} <= set(f)
+    # `summary` and `record` are checked because the instruction asks for them
+    # and reconciliation depends on them (#604). Each reconciliation phase is
+    # told to apply "the findings that concern" its record — a finding that
+    # does not say which record it concerns cannot be applied by either, and
+    # since #574 conditions absorption on the audit's verdict, a finding that
+    # cannot be attributed is worse than one that is absent.
+    if not isinstance(parsed.get("summary"), str) or not parsed["summary"].strip():
+        return False
+    required = {"severity", "record", "slot", "issue"}
+    return all(isinstance(f, dict) and required <= set(f)
+               and str(f.get("record", "")).strip().lower()
+               in AUDIT_RECORD_VALUES
                for f in findings)
 
 
@@ -1957,6 +1975,51 @@ def _rate_limit_pause(exc: Exception, *, now: datetime | None = None) -> float |
     return max(1.0, min((reset - current).total_seconds() + 2, RATE_LIMIT_MAX_PAUSE))
 
 
+def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
+                       usage: list[dict[str, Any]],
+                       carry: dict[str, str]) -> None:
+    """Rewrite the reconciliation report against the repaired records (#604).
+
+    Reads the records from disk rather than from `carry`: the point is that
+    repair changed them, so the carried copies are precisely the stale ones.
+    """
+    fresh = dict(carry)
+    if spec.full_path.exists():
+        fresh["Reconciled full record"] = spec.full_path.read_text(
+            encoding="utf-8")
+    if spec.core_path.exists():
+        fresh["Completed core record"] = spec.core_path.read_text(
+            encoding="utf-8")
+    needed = {k: fresh[k] for k in PHASE_NEEDS["report"] if k in fresh}
+    if len(needed) != len(PHASE_NEEDS["report"]):
+        return                      # cannot rebuild it honestly; leave it
+    req = build_phase(spec, "report", carry=needed)
+    try:
+        resp = _call_with_retry(
+            client, model=settings["name"],
+            max_tokens=PHASE_MAX_TOKENS.get("report", settings["max_tokens"]),
+            temperature=(settings["temperature"]
+                         if settings["temperature_applies"] else None),
+            system=req.system, messages=req.messages)
+    except Exception:                                          # noqa: BLE001
+        return                      # a stale report is better than none
+    text = "".join(getattr(b, "text", "") for b in getattr(resp, "content", [])
+                   if getattr(b, "type", None) == "text")
+    usage.append({"phase": "report_after_repair", "attempt": 1,
+                  "input_tokens": getattr(resp.usage, "input_tokens", None),
+                  "output_tokens": getattr(resp.usage, "output_tokens", None),
+                  "cache_read": getattr(resp.usage,
+                                        "cache_read_input_tokens", None),
+                  "cache_write": getattr(resp.usage,
+                                         "cache_creation_input_tokens", None),
+                  "stop_reason": getattr(resp, "stop_reason", None)})
+    try:
+        body = _extract(text, "md")
+    except RuntimeError:
+        return
+    spec.report_path.write_text(body, encoding="utf-8")
+
+
 def _dependents_of(carry_name: str, produced_by: tuple[str, ...]) -> set[str]:
     """Every phase downstream of a discarded artifact, to a fixed point (#601).
 
@@ -2300,6 +2363,12 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # (#419). `prompt_request_hash` was written for this and had no caller.
         prompt_request=spec.instruction,
         prompt_request_spec=spec.render_spec(),
+        # The spec already knows where this run wrote; reconstructing the
+        # standard layout made an --out-dir record name files that are not
+        # there (#604).
+        outputs={"full": spec.full_path, "core": spec.core_path,
+                 "report": spec.report_path,
+                 "reasoning": _reasoning_path(spec)},
         schema_digest_md5=schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
         extra_notes=[
             (f"Generated via {RUNTIME}; temperature {settings['temperature']} "
@@ -2368,10 +2437,32 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # cheaper than discarding the run. Hashing happens in
         # validation_block() below, *after* repair — integrity pins the final
         # bytes, never an intermediate state.
+        from data_sheets_schema.provenance import _md5
+        before = {a: _md5(pth) for a, pth in (("full", spec.full_path),
+                                              ("core", spec.core_path))
+                  if pth.exists()}
         rec.data["repair"] = (prior_repair
                               + _repair_invalid(spec, client, settings,
                                                 usage)) or None
         problems = validate_outputs(spec)
+        # The report was written in phase 6 and repair runs after the whole
+        # loop, so a repair that rewrites a record leaves the report describing
+        # bytes that no longer exist — and `report_claims` then checks a stale
+        # report against the repaired records (#604). Regenerated only when
+        # repair actually changed something, so the extra call is paid exactly
+        # when it buys a report that matches its records.
+        after = {a: _md5(pth) for a, pth in (("full", spec.full_path),
+                                             ("core", spec.core_path))
+                 if pth.exists()}
+        if after != before:
+            rec.data["report_regenerated_after_repair"] = {
+                "changed": sorted(a for a in after
+                                  if before.get(a) != after.get(a)),
+                "why": ("repair rewrote a record after the report was written; "
+                        "a report describing bytes that no longer exist is the "
+                        "artifact a reviewer reads instead of the diff"),
+            }
+            _regenerate_report(spec, client, settings, usage, carry)
     else:
         rec.data["repair"] = prior_repair or None
     rec.data["validation"] = validation_block(spec, problems)

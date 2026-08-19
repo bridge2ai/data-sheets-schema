@@ -776,9 +776,15 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         self.assertIn("repaired", s.full_path.read_text())
         d = _yaml.safe_load((self.out / "CHORUS_provenance.yaml").read_text())
         self.assertEqual([x["outcome"] for x in d["repair"]], ["applied"])
-        self.assertEqual([u["phase"] for u in d["api_usage"]][-1],
-                         "repair_full")
-        self.assertEqual(len(d["api_usage"]), 7)
+        # Repair rewrote the full record *after* the report was written in
+        # phase 6, so the report is regenerated against the repaired bytes and
+        # is the last call (#604). Before that, `report_claims` checked a stale
+        # report against records it no longer described.
+        phases = [u["phase"] for u in d["api_usage"]]
+        self.assertEqual(phases[-2:], ["repair_full", "report_after_repair"])
+        self.assertEqual(len(phases), 8)
+        self.assertEqual(
+            d["report_regenerated_after_repair"]["changed"], ["full"])
 
     def test_resume_of_a_completed_run_keeps_the_prior_accounting(self):
         """#362: re-running an invalid-but-complete run is how repair is
@@ -1564,8 +1570,11 @@ class TestExtractionRefusesProse(unittest.TestCase):
 
     def test_a_well_formed_audit_is_accepted(self):
         from data_sheets_schema.api_runner import _extract
-        good = ('{"findings": [{"severity": "high", "slot": "id", '
-                '"issue": "mismatch"}], "summary": "one finding"}')
+        # `record` is required since #604: each reconciliation phase applies
+        # "the findings that concern" its record, so a finding that does not
+        # say which record it concerns cannot be applied by either.
+        good = ('{"findings": [{"severity": "high", "record": "full", '
+                '"slot": "id", "issue": "mismatch"}], "summary": "one finding"}')
         self.assertEqual(_extract(f"```json\n{good}\n```", "json"), good)
 
     def test_an_audit_with_no_findings_is_still_an_audit(self):
