@@ -788,9 +788,92 @@ def preservable_validation(path: Path,
     return v
 
 
+#: The schema a generation record must conform to. Not imported by
+#: `data_sheets_schema.yaml`: it describes the pipeline rather than a dataset,
+#: so importing it would move the `Dataset` digest an arm is frozen against.
+#:
+#: Repo-relative to match `FULL_SCHEMA` and `CORE_SCHEMA` above, but resolved
+#: against the installed package when that does not exist. The others are read
+#: by commands run from the repo root; this one is read on the *generation*
+#: path, and a gate that silently no-ops when a sweep is launched from
+#: elsewhere is the failure mode #582 recorded — a check that exists but is not
+#: on the path it guards.
+RECORD_SCHEMA = Path("src/data_sheets_schema/schema/d4d_generation_record.yaml")
+
+
+def record_schema_path() -> Path:
+    """`RECORD_SCHEMA` if it resolves from here, else the packaged copy."""
+    if RECORD_SCHEMA.exists():
+        return RECORD_SCHEMA
+    return Path(__file__).resolve().parent / "schema" / RECORD_SCHEMA.name
+
+
+def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
+    """`(violations, why it could not be checked)` for a record (#605).
+
+    Validation existed only as the manual `d4d provenance validate-records`, so
+    a run could declare success having written a record that does not conform —
+    the shape #582 fixed for the schema digest, reproduced for the record schema
+    in the same week.
+
+    **Exactly one of the two is meaningful, and an empty list alone does not
+    mean "conforms".** The first version returned only the list and returned it
+    empty when the validator itself could not run, so any dependency conflict or
+    schema-compilation error silently disabled the gate for every run in a sweep
+    while each printed a tick — "not established" read as "fine", inside the gate
+    built to stop exactly that (#613). Two places in this codebase already get
+    it right and are the model here: `_validator_lines` in `api_runner`, whose
+    `findings` is None precisely when `failure` says why, and `canary.verdict`,
+    whose `blind` metrics make a run `UNMEASURABLE` rather than `ok`.
+
+    Raising is still wrong: the record is the run's only account of itself and
+    must reach disk. The caller decides what an unverifiable record is worth,
+    and `execute()` treats it as a failure.
+    """
+    try:
+        from linkml.validator import validate
+    except Exception as exc:                                   # noqa: BLE001
+        return [], f"the linkml validator is unavailable: {exc}"
+    schema = record_schema_path()
+    if not schema.exists():
+        return [], f"the record schema is not at {schema}"
+    try:
+        report = validate(data, str(schema), "GenerationRecord")
+    except Exception as exc:                                   # noqa: BLE001
+        return [], f"the validator could not run against {schema}: {exc}"
+    return [str(r.message) for r in getattr(report, "results", [])], None
+
+
+def record_conformance(data: dict[str, Any]) -> list[str]:
+    """Violations only, for a caller that has separately handled the failure.
+
+    **Never use this to decide that a record is fine.** An empty list means
+    "no violations found", which includes "found nothing because the validator
+    could not run" — `check_record` is the only call that distinguishes them,
+    and collapsing the two is #613 itself.
+
+    Kept for the narrow case of asking what is wrong with a record already
+    known to be checkable — chiefly tests, which assert on findings. The
+    justification given when this was split out named `d4d provenance
+    validate-records` as a caller; that command shells out to `linkml-validate`
+    and has never called this (#620).
+    """
+    return check_record(data)[0]
+
+
 @dataclass
 class ProvenanceRecord:
     data: dict[str, Any] = field(default_factory=dict)
+
+    #: Set by :meth:`write`. Schema violations found in what was just written.
+    #: Empty when the record conforms *and* when it could not be checked — read
+    #: :attr:`conformance_failure` to tell those apart (#613).
+    conformance: list[str] = field(default_factory=list)
+
+    #: Set by :meth:`write`. Why conformance could not be established, or None
+    #: when it was. A record that could not be checked is not a record that
+    #: passed, and this is the field that says which happened.
+    conformance_failure: str | None = None
 
     #: Set by :meth:`write`. True if a prior verdict was carried forward, False
     #: if one was found but dropped as stale, None if there was none. The CLI
@@ -820,6 +903,12 @@ class ProvenanceRecord:
             f"# record_version {RECORD_VERSION} — see src/data_sheets_schema/provenance.py\n"
             + yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
             encoding="utf-8")
+        # Checked here, on the write path, not only by a command someone
+        # remembers to run (#605). Reported rather than raised: the record is
+        # already on disk and is the run's only account of itself, so losing it
+        # to a schema complaint would cost more than the complaint is worth.
+        # The caller decides — `d4d api run` fails the run on either outcome.
+        self.conformance, self.conformance_failure = check_record(data)
         return path
 
 

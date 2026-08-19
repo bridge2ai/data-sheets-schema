@@ -90,6 +90,22 @@ def _require_bundle(spec, project, bundle):
         raise click.ClickException(f"bundle not found: {spec.bundle}")
 
 
+def _canary_never_ran(spec, baseline, what_happened: str) -> str:
+    """The stop message for a canary that produced no verdict at all (#619).
+
+    Distinct from a canary that ran and regressed: there, the gate can name the
+    metric that moved. Here there is no measurement, and "no measurement" is
+    the one thing this corpus insists must not read as "fine".
+    """
+    return (f"canary did not pass: the first run ({spec.project} "
+            f"{spec.label}) never produced a verdict against the {baseline} "
+            f"baseline because {what_happened}. Fanning out would spend the "
+            "rest of the sweep on a failure that has not been diagnosed, and "
+            "these failures are usually systematic — the remaining runs would "
+            "hit it too, each after being billed. Fix it and re-run, or pass "
+            "--no-canary-gate to proceed anyway.")
+
+
 @click.group()
 def api():
     """Generate D4D records via the Anthropic API (six-phase)."""
@@ -321,6 +337,9 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
 
     ok, failed, spent_in, spent_out = [], [], 0, 0
     canary_stop: str | None = None
+    #: Whether the fan-out is gated on the first run at all. Read in three
+    #: places, so it is computed once rather than restated (#619).
+    gating = bool(canary_baseline) and not no_canary_gate
     for i, s in enumerate(specs, 1):
         click.echo(f"\n[{i}/{len(specs)}] {s.project} {s.label}")
         try:
@@ -340,8 +359,14 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
                                err=True)
                 failed.append((s.project, s.label,
                                f"{len(vp)} validation failure(s)"))
-                if not continue_on_error:
+                if gating and i == 1:
+                    canary_stop = _canary_never_ran(
+                        s, canary_baseline,
+                        f"it produced {len(vp)} validation failure(s)")
+                if not continue_on_error and not canary_stop:
                     click.echo("stopping; re-run to resume", err=True)
+                    break
+                if canary_stop:
                     break
                 continue
             click.echo(f"   ✓ in={spent_in:,} out={spent_out:,} cache_read={cached:,}{note}")
@@ -355,7 +380,7 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
                 f"{name}={'—' if v is None else v}"
                 for name, v in counts.items()))
 
-            if i == 1 and canary_baseline and not no_canary_gate:
+            if i == 1 and gating:
                 bar = _canary.baseline_for(s.project, canary_baseline)
                 v = _canary.verdict(res.get("checks") or {}, bar,
                                     baseline_requested=True)
@@ -389,6 +414,20 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
         except Exception as exc:                       # noqa: BLE001
             click.echo(f"   ❌ {type(exc).__name__}: {exc}", err=True)
             failed.append((s.project, s.label, str(exc)))
+            # A canary that *raised* has not passed, and before #619 nothing
+            # said so: `canary_stop` was only ever set by a verdict, so a first
+            # run that threw left the gate unevaluated and `--continue-on-error`
+            # fanned out to the rest of the sweep. The failures that reach here
+            # are systematic by construction — a broken validator, a writer the
+            # schema does not know, an unreachable route — so they recur on
+            # every run, after each is fully billed, and `ok` ends up empty.
+            #
+            # This is the gate's whole purpose stated the other way round: it
+            # must fan out only on a canary that demonstrably passed, never
+            # merely on one that failed to say it did not.
+            if gating and i == 1:
+                canary_stop = _canary_never_ran(
+                    s, canary_baseline, f"it raised {type(exc).__name__}")
             if not continue_on_error:
                 click.echo("stopping; re-run to resume unfinished phases", err=True)
                 break

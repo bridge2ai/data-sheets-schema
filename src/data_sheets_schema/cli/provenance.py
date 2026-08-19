@@ -676,9 +676,14 @@ def validate_records(strict, label):
     import subprocess
     import sys
 
-    from data_sheets_schema.provenance import CONCAT_DIR
+    from data_sheets_schema.provenance import CONCAT_DIR, record_schema_path
 
-    schema = Path("src/data_sheets_schema/schema/d4d_generation_record.yaml")
+    # Resolved, not hardcoded (#620). Run from outside the repo root the
+    # literal path does not exist and `linkml-validate` exits non-zero on every
+    # record, reporting a clean corpus as entirely failing. Loud rather than
+    # silent, so not the #618 failure mode — but #618 fixed the gate and left
+    # the command it was written about still holding the literal.
+    schema = record_schema_path()
     paths = sorted(CONCAT_DIR.glob("*_core/*/*_provenance.yaml"))
     if label:
         paths = [p for p in paths if p.parts[-2] == label]

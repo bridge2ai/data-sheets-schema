@@ -41,7 +41,7 @@ from typing import Any
 
 import yaml
 
-from data_sheets_schema import reasoning, schema_digest
+from data_sheets_schema import provenance, reasoning, schema_digest
 from data_sheets_schema.provenance import (
     DETERMINISTIC_CONFIG,
     load_generation_config,
@@ -2167,6 +2167,30 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # from exactly this field. Validation is local and free, and it
             # checks the bytes on disk now rather than a claim recorded earlier.
             problems = validate_outputs(spec)
+            # And conformance, for the third time on this exit and for the same
+            # reason as the first two (#619). `check_provenance` asks whether a
+            # usable record exists, not whether it conforms — so a record
+            # written by any other path (`d4d provenance record`, a backfill, a
+            # run that failed the gate and was resumed) came back through here
+            # as a success. That is the #582 shape the gate below refuses,
+            # reached by the exit that skips the gate.
+            #
+            # Recomputed from the bytes on disk rather than trusted from the
+            # record, exactly as validation and the three checks are.
+            conformance, conformance_failure = provenance.check_record(existing)
+            if conformance_failure:
+                raise RuntimeError(
+                    f"run {spec.label} for {spec.project} has a provenance "
+                    f"record whose conformance could not be established, so it "
+                    f"is unverified rather than valid: {conformance_failure}")
+            if conformance:
+                raise RuntimeError(
+                    f"run {spec.label} for {spec.project} has a provenance "
+                    f"record that does not conform to "
+                    f"{provenance.record_schema_path()}: "
+                    + "; ".join(conformance[:5])
+                    + (f" (+{len(conformance) - 5} more)"
+                       if len(conformance) > 5 else ""))
             # The three checks too, recomputed from the bytes on disk for the
             # same reason validation is (#599). Omitting them made every metric
             # None on a resumed batch, so the canary reported `unmeasurable`
@@ -2494,6 +2518,35 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         raise RuntimeError(
             f"run {spec.label} for {spec.project} finished without usable "
             f"provenance: {prov['reason']}")
+
+    # And that the record conforms to the schema that describes it (#605).
+    # `check_provenance` asks whether a usable record exists; this asks whether
+    # what it contains is what a record of its mode must contain — a `live`
+    # record omitting its bundle, its model or the machine it ran on passed the
+    # first check and told a reader nothing about how it was made. Fails the run
+    # for the same reason as above: an unattestable artifact left behind is the
+    # defect, not the error message about it.
+    #
+    # Two failures, not one. A record that *could not be checked* is not a
+    # record that passed, and a sweep that silently stopped checking would
+    # produce a whole arm of unverified records each reported as clean (#613) —
+    # the shape `canary.verdict` refuses with UNMEASURABLE one level up. Named
+    # separately so the operator can tell a broken record from a broken gate.
+    # The path comes from `record_schema_path()`, not the repo-relative
+    # constant: when the fallback fired, naming the constant would point the
+    # operator at a file that does not exist on their filesystem (#618).
+    if rec.conformance_failure:
+        raise RuntimeError(
+            f"run {spec.label} for {spec.project} wrote a provenance record "
+            f"whose conformance could not be established, so it is unverified "
+            f"rather than valid: {rec.conformance_failure}")
+    if rec.conformance:
+        raise RuntimeError(
+            f"run {spec.label} for {spec.project} wrote a provenance record "
+            f"that does not conform to {provenance.record_schema_path()}: "
+            + "; ".join(rec.conformance[:5])
+            + (f" (+{len(rec.conformance) - 5} more)"
+               if len(rec.conformance) > 5 else ""))
 
     # Only now is the run finished. Keeping the progress file on a validation
     # failure means a rerun resumes instead of regenerating from phase 1.

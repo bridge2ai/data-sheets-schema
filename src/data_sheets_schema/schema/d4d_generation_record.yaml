@@ -41,7 +41,12 @@ classes:
     attributes:
 
       record_type:
-        description: Always `d4d_generation_provenance`; names the kind of file.
+        description: >-
+          Names the kind of file. Not always `d4d_generation_provenance`, as
+          this said before it was checked: a derived record writes
+          `d4d_derived_provenance`, and calling both by one name would hide the
+          distinction the mode exists to draw.
+        range: RecordType
         required: true
       record_version:
         description: >-
@@ -90,7 +95,14 @@ classes:
         range: AnyBlock
 
       outputs:
-        description: The records this run wrote, by path and hash.
+        description: >-
+          The records this run wrote, by path and size — **not** by hash for a
+          generation record. `_artifact` drops the hash deliberately: the agent
+          path records provenance as a separate step from writing the
+          artifacts, so 77 live records had hashed a state their files merely
+          passed through. Integrity lives in `validation.artifacts`, computed
+          after the run is final. A *derived* record does hash its outputs,
+          because it writes and hashes them in one step.
         required: true
         inlined: true
         range: AnyBlock
@@ -164,6 +176,27 @@ classes:
         description: Validator-driven repair rounds, in order.
         multivalued: true
         inlined_as_list: true
+        range: AnyBlock
+
+      report_regenerated_after_repair:
+        description: >-
+          Present when repair rewrote a record after the reconciliation report
+          was written, naming which records changed and why the report was
+          regenerated (#604). Absent on the ordinary path, where the report
+          already describes the final bytes.
+
+          Missing from the first version of this schema, and found by the
+          conformance gate on its first run rather than by inspection: no
+          record on disk carries it, so validating the corpus could not have
+          reached it. That is the difference the gate makes — it checks the
+          writers, not the archive.
+
+          Exactly one other attribute is in the same position: `companions`,
+          which `build_record` writes unconditionally and which will appear on
+          the next record written. Named here because presenting this field as
+          the single thing the gate surfaced would overstate a real result by
+          leaving out its twin (#618).
+        inlined: true
         range: AnyBlock
 
       intermediates:
@@ -259,6 +292,105 @@ classes:
         inlined: true
         range: AnyBlock
 
+    rules:
+      # Conditional by mode, because the modes genuinely differ and blanket
+      # optionality made the schema assert almost nothing: a `live` record
+      # validated while omitting its bundle, its model, its validation verdict
+      # and all three post-generation checks (#605).
+      #
+      # Each list below is what `build_record` — the single writer both runtimes
+      # go through — **emits at write time**, not what the archive happens to
+      # hold.
+      #
+      # The first version got that wrong in a way worth recording. It required
+      # `validation` on the strength of "all 158 live records carry it". They
+      # do, because `d4d runs validate` sweeps the corpus afterwards; the writer
+      # never emits it. So the rule rejected every freshly written agentic
+      # record, and the justification — "describes the writers as they are" —
+      # described the archive after a later step had touched it (#612).
+      #
+      # `tests/test_generation_record_schema.py` now derives these lists from
+      # `build_record` itself, so the two cannot drift apart again.
+      #
+      # These fail nothing **within the scope every checker uses** — the 195
+      # records under `*_core/`. Three `curated/` records sit outside the glob
+      # that `d4d provenance validate-records` uses and do not conform: three
+      # of their four violations predate this schema and the reconstructed rule
+      # adds `system` (#616). Saying "fails nothing" without naming the scope
+      # would be the same overreach as measuring the archive and calling it the
+      # writers — and the count was itself wrong at first, five rather than
+      # four, which is the same failure one level down (#620).
+      - title: a live run observed its own inputs, model and machine
+        preconditions:
+          slot_conditions:
+            record_mode:
+              equals_string: live
+        postconditions:
+          slot_conditions:
+            inputs:
+              required: true
+            model:
+              required: true
+            system:
+              required: true
+      - title: a reconstructed record names what it could not recover
+        preconditions:
+          slot_conditions:
+            record_mode:
+              equals_string: reconstructed
+        postconditions:
+          slot_conditions:
+            inputs:
+              required: true
+            model:
+              required: true
+            system:
+              required: true
+            unrecoverable:
+              required: true
+      - title: a derived mode implies a derived type
+        description: >-
+          `record_mode` and `record_type` are set by the same writer and must
+          not disagree; a `derived` record typed as a generation record would
+          pass every mode rule below while telling a reader the opposite.
+        preconditions:
+          slot_conditions:
+            record_mode:
+              equals_string: derived
+        postconditions:
+          slot_conditions:
+            record_type:
+              equals_string: d4d_derived_provenance
+      - title: a derived type implies a derived mode
+        description: >-
+          The converse, which the first version left open (#620): a record
+          typed `d4d_derived_provenance` while calling itself `live` validated.
+          The description claimed a mismatch "would tell a reader the opposite"
+          — true in both directions, checked in one. Two rules rather than one
+          because a precondition tests a single value, so neither direction
+          implies the other.
+        preconditions:
+          slot_conditions:
+            record_type:
+              equals_string: d4d_derived_provenance
+        postconditions:
+          slot_conditions:
+            record_mode:
+              equals_string: derived
+      - title: a derived record declares what it was derived from
+        preconditions:
+          slot_conditions:
+            record_mode:
+              equals_string: derived
+        postconditions:
+          slot_conditions:
+            derivation:
+              required: true
+            sources:
+              required: true
+            not_applicable:
+              required: true
+
   RunIdentity:
     description: Which run this is.
     attributes:
@@ -299,9 +431,16 @@ classes:
         required: true
       digest_md5:
         description: >-
-          Fingerprint of the rendered digest the model was sent. This is what a
-          straddle check compares, and what the digest inventory keys on. Absent
-          on records written before the digest was recorded.
+          Fingerprint of the rendered schema digest, which a straddle check
+          compares and the digest inventory keys on.
+
+          **When it was computed differs by runtime**, and the two are not the
+          same claim. The API path fingerprints the digest as it renders it to
+          send, so the value is of the bytes the model received. The agentic
+          recorder runs after generation and fingerprints the schema as it
+          stands then — the same value whenever the schema did not move mid-run,
+          and an unfalsifiable assumption when it did. Absent on records written
+          before the digest was recorded.
       full_md5:
       core_md5:
       full_sha256:
@@ -358,6 +497,19 @@ classes:
     class_uri: linkml:Any
 
 enums:
+  RecordType:
+    description: >-
+      What kind of record this is. Two values across 195 records; enumerated
+      rather than left open so a typo in the discriminator is a validation
+      failure and not a silently unmatched record.
+    permissible_values:
+      d4d_generation_provenance:
+        description: A run's account of generating a full/core pair.
+      d4d_derived_provenance:
+        description: >-
+          An account of a record computed from other records. Pairs with
+          `record_mode: derived`.
+
   RecordMode:
     description: How much of a record is observed rather than reconstructed.
     permissible_values:
