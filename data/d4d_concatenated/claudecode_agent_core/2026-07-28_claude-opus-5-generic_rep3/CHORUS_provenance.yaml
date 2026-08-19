@@ -144,3 +144,13 @@ grounding:
       md5: 9b2ef4b65d67957f79362266cab0bc7a
   bundle_hash_basis: the record pinned no hash
   recorded_by: backfill_checks
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/CHORUS_d4d.yaml
+  - data/d4d_concatenated/claudecode_agent_core/2026-07-28_claude-opus-5-generic_rep3/CHORUS_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  british_spellings: 6
+  organisational_fragments: 0
+  recorded_by: backfill_checks

@@ -61,7 +61,47 @@ METRICS = (
     ("resolver URLs in identifier slots", "grounding",
      lambda b: len({f.get("value") for f in (b.get("findings") or [])
                     if f.get("kind") == "resolver_url_in_identifier_slot"})),
+    # The three preregistered families the gate could not see (#602). Each is a
+    # count of a defect in one record, so it survives a schema change between
+    # arms the way slot counts do not (#576).
+    ("organisational fragments", "form",
+     lambda b: int(b.get("organisational_fragments") or 0)),
+    ("undeclared prefixes", "form",
+     lambda b: int(b.get("undeclared_prefix_occurrences") or 0)),
+    ("British spellings", "form",
+     lambda b: int(b.get("british_spellings") or 0)),
 )
+
+#: Measured and reported, never gated. Prediction 2 of the v5 plan is that
+#: minted-fragment counts **rise or hold** — rule three redirects invention
+#: rather than forbidding it — so "higher than baseline" is the intended
+#: outcome, and a gate built on "higher is a regression" would fail the arm for
+#: working. The plan also names the failure this number diagnoses: if `absent`
+#: falls while this does not rise, the model is omitting identifiers rather
+#: than anchoring them, which is a different result from the intended one and
+#: must not be reported as it.
+REPORTED_ONLY = (
+    ("minted fragments", "grounding",
+     lambda b: int((b.get("distinct") or b.get("counts") or {})
+                   .get("minted_fragment") or 0)),
+)
+
+
+#: Which metric answers each numbered prediction in
+#: `notes/generic_v5_analysis_plan.md`. Declared so a prediction with no metric
+#: is a test failure rather than something to notice later (#602).
+#:
+#: The gate's metric set and the plan's prediction set were never reconciled,
+#: and the consequence was #591: a run regressed on the rule v5 exists to
+#: enforce and the gate passed it, because nothing measured that rule. Fixing
+#: that instance added one metric; this is the general form.
+PREDICTION_METRICS = {
+    1: "ungrounded identifiers",
+    2: "minted fragments",              # reported, never gated — see REPORTED_ONLY
+    3: "organisational fragments",
+    4: "undeclared prefixes",
+    5: "British spellings",
+}
 
 
 def _ran(block: Any) -> bool:
@@ -72,10 +112,11 @@ def _ran(block: Any) -> bool:
     return bool(block.get("checked"))
 
 
-def counts_from(checks: dict[str, Any]) -> dict[str, int | None]:
+def counts_from(checks: dict[str, Any],
+                metrics=None) -> dict[str, int | None]:
     """One number per metric, or None where the check did not run."""
     out: dict[str, int | None] = {}
-    for name, key, read in METRICS:
+    for name, key, read in (metrics if metrics is not None else METRICS):
         block = (checks or {}).get(key)
         out[name] = read(block) if _ran(block) else None
     return out
@@ -101,7 +142,8 @@ def baseline_for(project: str, label_prefix: str,
         rec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         counts = counts_from({"pair": rec.get("pair_consistency"),
                               "report": rec.get("report_claims"),
-                              "grounding": rec.get("grounding")})
+                              "grounding": rec.get("grounding"),
+                              "form": rec.get("form")})
         for name, value in counts.items():
             if value is None:
                 continue

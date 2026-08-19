@@ -27,7 +27,9 @@ BASELINE = "2026-08-13_claude-opus-5-api-generic-v4"
 
 GOOD = {"pair": {"ran": True, "errors": 2},
         "report": {"checked": True, "findings": []},
-        "grounding": {"checked": True, "distinct": {"absent": 0}}}
+        "grounding": {"checked": True, "distinct": {"absent": 0}},
+        "form": {"checked": True, "organisational_fragments": 0,
+                 "undeclared_prefix_occurrences": 0, "british_spellings": 0}}
 
 
 class CountsTest(unittest.TestCase):
@@ -41,10 +43,15 @@ class CountsTest(unittest.TestCase):
         self.assertEqual(set(counts.values()), {None})
 
     def test_counts_are_read_from_each_block(self):
-        self.assertEqual(counts_from(GOOD),
-                         {"pair errors": 2, "report findings": 0,
-                          "ungrounded identifiers": 0,
-                          "resolver URLs in identifier slots": 0})
+        """By metric, not by a literal dict: the set grew from four to seven
+        when #602 added the preregistered families, and a test about *where*
+        each count comes from should not fail over *how many* there are."""
+        counts = counts_from(GOOD)
+        self.assertEqual(counts["pair errors"], 2)
+        self.assertEqual(counts["report findings"], 0)
+        self.assertEqual(counts["ungrounded identifiers"], 0)
+        from data_sheets_schema.canary import METRICS
+        self.assertEqual(set(counts), {m[0] for m in METRICS})
 
 
 class BaselineTest(unittest.TestCase):
@@ -73,15 +80,17 @@ class BaselineTest(unittest.TestCase):
 class VerdictTest(unittest.TestCase):
 
     BAR = {"pair errors": 10, "report findings": 2,
-           "ungrounded identifiers": 0}
+           "ungrounded identifiers": 0,
+           "resolver URLs in identifier slots": 0,
+           "organisational fragments": 0, "undeclared prefixes": 0,
+           "British spellings": 0}
 
     def test_no_worse_than_the_baseline_passes(self):
         self.assertEqual(verdict(GOOD, self.BAR)["status"], OK)
 
     def test_equalling_the_worst_baseline_is_not_a_regression(self):
-        at_bar = {"pair": {"ran": True, "errors": 10},
-                  "report": {"checked": True, "findings": [1, 2]},
-                  "grounding": {"checked": True, "distinct": {"absent": 0}}}
+        at_bar = {**GOOD, "pair": {"ran": True, "errors": 10},
+                  "report": {"checked": True, "findings": [1, 2]}}
         self.assertEqual(verdict(at_bar, self.BAR)["status"], OK)
 
     def test_one_metric_worse_stops_the_sweep(self):
@@ -147,7 +156,7 @@ class RealArmTest(unittest.TestCase):
         rec = yaml.safe_load(p.read_text(encoding="utf-8"))
         checks = {"pair": rec.get("pair_consistency"),
                   "report": rec.get("report_claims"),
-                  "grounding": rec.get("grounding")}
+                  "grounding": rec.get("grounding"), "form": rec.get("form")}
         self.assertEqual(
             verdict(checks, baseline_for("AI_READI", BASELINE))["status"], OK)
 
@@ -235,7 +244,7 @@ class ResolverUrlMetricTest(unittest.TestCase):
         rec = yaml.safe_load(core.read_text(encoding="utf-8"))
         v = verdict({"pair": rec.get("pair_consistency"),
                      "report": rec.get("report_claims"),
-                     "grounding": grounding},
+                     "grounding": grounding, "form": rec.get("form")},
                     baseline_for("AI_READI", self.B))
         self.assertEqual(v["status"], REGRESSED)
         self.assertTrue(any("resolver URLs" in r for r in v["regressions"]))
@@ -330,3 +339,107 @@ class ResumedBatchCanRegateTest(unittest.TestCase):
                    "grounding_block(spec)"):
             with self.subTest(fn=fn):
                 self.assertIn(fn, head)
+
+
+class PredictionCoverageTest(unittest.TestCase):
+    """Every preregistered prediction must have a metric (#602).
+
+    The gate measured four things; the v5 plan preregisters five outcome
+    families, and only one of them was among the four. So the canary could
+    print "canary ok" while a run broke three of the five things v5 exists to
+    change.
+
+    That is #591 in general form: there, a run regressed on the rule v5 exists
+    to enforce and the gate passed it because nothing measured that rule.
+    Fixing the instance added one metric. This makes the omission fail a test.
+    """
+
+    PLAN = Path("notes/generic_v5_analysis_plan.md")
+
+    def test_every_prediction_in_the_plan_maps_to_a_metric(self):
+        import re
+
+        from data_sheets_schema.canary import PREDICTION_METRICS
+        if not self.PLAN.exists():
+            self.skipTest("plan not present in this checkout")
+        body = self.PLAN.read_text(encoding="utf-8")
+        section = body[body.index("## Predictions"):]
+        section = section[:section.index("\n## ")]
+        numbered = {int(n) for n in re.findall(r"^(\d+)\. ", section, re.M)}
+        self.assertTrue(numbered, "the plan states no numbered predictions")
+        self.assertEqual(numbered, set(PREDICTION_METRICS),
+                         "a prediction has no metric, or a metric no prediction")
+
+    def test_every_named_metric_exists(self):
+        from data_sheets_schema.canary import (METRICS, PREDICTION_METRICS,
+                                               REPORTED_ONLY)
+        known = {m[0] for m in METRICS} | {m[0] for m in REPORTED_ONLY}
+        for prediction, metric in PREDICTION_METRICS.items():
+            with self.subTest(prediction=prediction):
+                self.assertIn(metric, known)
+
+    def test_minted_fragments_is_reported_and_not_gated(self):
+        """Prediction 2 is that the count **rises or holds**, so "higher than
+        baseline" is the intended outcome and gating on it would fail the arm
+        for working."""
+        from data_sheets_schema.canary import METRICS, REPORTED_ONLY
+        self.assertIn("minted fragments", {m[0] for m in REPORTED_ONLY})
+        self.assertNotIn("minted fragments", {m[0] for m in METRICS})
+
+    def test_the_gate_is_satisfiable_by_the_arm_that_defines_it(self):
+        """The check that caught this change breaking itself.
+
+        The three new metrics first lived inside the `grounding` block, whose
+        recorded form predated them — so every v4 baseline read 0 and all
+        twelve records "regressed" against their own arm. A gate that always
+        fails is as useless as one that always passes, and worse, because it
+        gets switched off.
+        """
+        import yaml
+        base = Path("data/d4d_concatenated/claudecode_agent_core")
+        checked = 0
+        for rep in (1, 2, 3):
+            label = f"{BASELINE}_rep{rep}"
+            for project in ("AI_READI", "CHORUS", "CM4AI", "VOICE"):
+                p = base / label / f"{project}_provenance.yaml"
+                if not p.exists():
+                    continue
+                rec = yaml.safe_load(p.read_text(encoding="utf-8"))
+                if not rec.get("form"):
+                    self.skipTest("records predate the form block")
+                v = verdict({"pair": rec["pair_consistency"],
+                             "report": rec["report_claims"],
+                             "grounding": rec["grounding"],
+                             "form": rec["form"]},
+                            baseline_for(project, BASELINE))
+                checked += 1
+                with self.subTest(project=project, rep=rep):
+                    self.assertEqual(v["status"], OK, v.get("regressions"))
+        if not checked:
+            self.skipTest("v4 arm not present in this checkout")
+
+    def test_form_counts_survive_a_drifted_bundle(self):
+        """They are properties of the records alone, so burying them inside
+        `grounding` — which declines when a bundle has drifted (#452) — would
+        make three preregistered predictions unmeasurable for 59 records."""
+        from data_sheets_schema.grounding import form_facts
+        label = f"{BASELINE}_rep1"
+        base = Path("data/d4d_concatenated")
+        full = base / "claudecode_agent" / label / "VOICE_d4d.yaml"
+        core = base / "claudecode_agent_core" / label / "VOICE_d4d_core.yaml"
+        if not core.exists():
+            self.skipTest("v4 arm not present in this checkout")
+        facts = form_facts(full, core)      # no bundle argument at all
+        self.assertTrue(facts["checked"])
+        self.assertEqual(facts["organisational_fragments"], 7)
+
+    def test_the_v4_baseline_carries_the_new_metrics(self):
+        """A metric with no baseline makes the gate unmeasurable (#599), so
+        adding one without its bar would have disabled the whole gate."""
+        bar = baseline_for("VOICE", BASELINE)
+        if bar["pair errors"] is None:
+            self.skipTest("v4 arm not present in this checkout")
+        for metric in ("organisational fragments", "undeclared prefixes",
+                       "British spellings"):
+            with self.subTest(metric=metric):
+                self.assertIsNotNone(bar[metric])

@@ -193,6 +193,16 @@ classes:
         inlined: true
         range: AnyBlock
 
+      form:
+        description: >-
+          Counts that are properties of the records alone — undeclared CURIE
+          prefixes, British spellings in generated prose, and fragments on
+          organisational identifiers. Separate from `grounding` because they
+          need no bundle: burying them there would make three preregistered
+          predictions unmeasurable for every record whose bundle has drifted.
+        inlined: true
+        range: AnyBlock
+
       grounding:
         description: >-
           Whether external identifiers appear in the bundle they were read

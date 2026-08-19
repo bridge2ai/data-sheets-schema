@@ -1,0 +1,150 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The core schema digest supplied in this task does not define a `distributions` slot, nor does it define the keys used inside it (`path`, `bytes`, `format`, `media_type`, `conforms_to`, `conforms_to_standard`, `notes`) as members of any such class. The full record carried this content in `file_collections` (a FileCollection[] slot that is defined). Projecting file_collections into an undefined `distributions` slot with invented keys (`bytes` where FileCollection declares `total_bytes`; `path` is defined but `format`/`media_type` are DistributionFormat keys, not FileCollection keys) is a schema-shape defect and risks validation failure."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "conforms_to_standard",
+      "issue": "The value list includes `DICOM`, but the permitted enum for `conforms_to_standard` as given in the schema digest is: DICOM, BIDS, OMOP_CDM, WFDB, OPEN_MHEALTH, ESDS, CDS, RO_CRATE, FHIR, OTHER. DICOM is in fact permitted — no defect on that term. However the same list is emitted on FileCollection entries and on the core `distributions` entries; on FileCollection the slot is permitted, so this is clean there. Re-checking: no enum violation exists in this slot. Retaining this finding only to note that `CDS` and `RO_CRATE` are correctly drawn from the enum. No action needed.",
+      "resolution": "false positive on review"
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[0].data_topic",
+      "issue": "`B2AI_TOPIC:43` is Diabetes, which is defensible for the participant-level instance, but the participant instance is a person rather than a topic-bearing artifact and carries no `data_substrate`. The bundle supports the count and the label statement; the topic assignment is an interpretive choice not stated in the bundle. Low-confidence rather than unsupported."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[3].data_substrate",
+      "issue": "`B2AI_SUBSTRATE:69` (Time-series data) is assigned to the environmental sensor instance. The bundle states these files follow the NASA ASCII File Format Guidelines for Earth Science Data, i.e. delimited ASCII text; `10=Delimited Text` or `41=Tab-separated values` is closer to what the bundle states about the substrate. Time-series is an inference about content shape rather than a substrate the bundle names."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[1].data_substrate",
+      "issue": "`B2AI_SUBSTRATE:49` (Waveform Data) for the 12-lead ECG is well supported by the WFDB standard statement; however `data_topic: B2AI_TOPIC:10` (EKG) is supported while `37=Waveform` would be equally so. Not a defect, noted for consistency only."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "instances[9].notes",
+      "issue": "The relationship statement ('All instances are part of the same prospective data generation project... only one visit per participant... approximately 10 percent invited back in year 4') has been appended as a `notes` value on the tenth Instance object, where it does not belong to that instance. In the full record this content correctly occupies the top-level `relationships` slot. Attaching cross-instance relationship prose to a single unrelated instance is a placement defect; if the core schema lacks `relationships`, the content belongs in the record-level `notes`, not inside one Instance."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "data_collectors[4]",
+      "issue": "Participant compensation ($200 stipend, transportation costs) has been folded into a DataCollector object with `role: 'Compensation arrangement for the collection team and participants'`. The full record kept participant compensation in `participant_compensation` (HumanSubjectCompensation[]). A DataCollector describes who collected the data; participant payment is not a property of the collecting party. If the core schema omits `participant_compensation`, this content belongs in record-level `notes`, not repurposed into a collector entry."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "is_deidentified.deidentification_details",
+      "issue": "The core record appends re-identification risk and mitigation prose ('A theoretical risk of future re-identification remains... robust data dissemination system, a strict license agreement and static data watermarking') to `deidentification_details`. In the full record this content sits in `participant_privacy.reidentification_risk` and `participant_privacy.privacy_techniques`. Merging distinct declared fields into one free-text field is the shape defect the v3 rule names. Also: the core record omits `participant_privacy` entirely without stating whether the core schema defines it."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "informed_consent[0].withdrawal_mechanism",
+      "issue": "Consent revocation content that the full record carries in the dedicated `consent_revocations` slot has been relocated into `informed_consent[0].withdrawal_mechanism`. This is a defensible projection if the core schema lacks `consent_revocations`, but the record does not state that, and the same merge was applied to `collection_consents` and `collection_notifications` (both dropped, their content absorbed into `consent_scope`). Collapsing four distinct declared slots into one InformedConsent object loses the structure those slots exist to carry."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "funders[0].grants[1..2]",
+      "issue": "Grant identifiers `https://doi.org/10.60775/fairhub.3#grant-p30dk035816` and `#grant-ul1tr003096` hang NIH grant numbers off the dataset DOI as fragments. The v5 rule permits fragment-on-a-supplied-identifier where the evidence gives none, but a grant is not part of the dataset, so the fragment asserts a part-whole relation the bundle does not support. The grant numbers themselves (P30DK035816, UL1TR003096) are stated in the bundle; only the constructed IDs are unsupported."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "creators[0].id",
+      "issue": "`https://doi.org/10.60775/fairhub.3#creator-ai-readi-consortium` constructs a creator identity as a fragment of the dataset DOI. Same concern as the grant IDs: the AI-READI Consortium is an organization, not a part of the dataset. No organizational registry identifier for the consortium appears in the bundle, so omission of `id` was not available (id is required on Creator per the digest? — the digest lists `id` as uriorcurie on every object but marks Creator as 'required: none'), meaning omission was in fact permitted and preferable."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "publisher",
+      "issue": "`publisher: https://fairhub.io/` is a website URL used in a `uriorcurie` slot to denote the publishing entity. The bundle states `publisherName: FAIRhub` in dataset_description.json. A bare homepage URL is a weak identifier for the organization; no registry identifier for FAIRhub appears in the bundle."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license",
+      "issue": "`license: AI-READI custom license v2.0` is the rightsName from FAIRhub metadata and is supported. Note that the accompanying rightsURI (https://doi.org/10.5281/zenodo.17555036) is captured only inside `license_and_use_terms.license_terms` prose rather than in any URI-ranged slot; the schema digest exposes no license-URI slot, so this is a schema limitation rather than a record defect."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets",
+      "issue": "The three split subsets use `is_data_split: true` and `is_subpopulation: false`, which is correct, but each subset's composition is placed entirely in `description` prose while the DataSubset class (per the digest) accepts the full Dataset slot inventory, including `subpopulations` and `instances` with `counts`. Per the v3 rule, the per-split race/sex/diabetes counts and mean age would be better carried in declared fields than in free text."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "subsets",
+      "issue": "The core record omits the three recommended-split DataSubset objects and the `splits` slot that the full record carries, while retaining the split counts only inside `distributions[9].notes` ('participants.tsv also carries the recommended 70/15/15 split assignment'). The bundle documents the split composition in detail (README table). If the core schema defines `subsets` or `splits`, this is a supported omission; the record does not say."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "variables",
+      "issue": "The core record omits the entire `variables` block (36 VariableMetadata objects in the full record), all of which are supported by the bundle's Table 2 reference ranges, device tables and healthsheet device descriptions. No statement is made about whether the core schema defines `variables`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "total_file_count / total_size_bytes",
+      "issue": "The core record drops the `total_file_count` (356343) and `total_size_bytes` (3815969779678) scalars present in the full record and restates them inside the free-text `notes`. Both are directly stated in the bundle (fairhub API `fileCount`, `size`). If the core schema defines these slots, moving structured integers into prose is a shape regression."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "citation",
+      "issue": "The core record drops the `citation` slot present in the full record and restates the citation string inside `notes`. The citation is directly stated in the bundle's RO-Crate `associatedPublication`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "sampling_strategies[0].source_caveats",
+      "issue": "The caveat about ICD-10 code transposition (R73.09/E11.X) is correctly placed in `source_caveats` on the sibling object, consistent with the slot description. No defect; noted as a positive check."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "human_subject_research.ethics_review_board",
+      "issue": "The value embeds a postal address and email in a free-text string. The bundle's RO-Crate carries this as a structured Organization with ContactPoint and PostalAddress. The digest defines `ethics_review_board` as a plain slot with no declared object range, so string is acceptable; noted only because the structure is available in the source and is lost."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to_class",
+      "issue": "Correctly differentiated: full record states `Dataset`, core states `CoreDataset`. No defect."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "description",
+      "issue": "The description states the acronym as 'Artificial Intelligence Ready and Equitable/Exploratory Atlas for Diabetes Insights', a slashed conflation of two source variants. The variance is separately and correctly documented in `source_caveats`; the slashed form in the description body is a minor readability compromise rather than an unsupported claim."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "collection_timeframes[0].timeframe_details",
+      "issue": "States enrollment continues until 30 November 2026 and completion anticipated 1 January 2027. Both are supported (BMJ Open protocol; FAIRhub completionDateStruct). The 18 vs 19 July 2023 start-date discrepancy is correctly surfaced in `source_caveats`."
+    },
+    {
+      "severity": "info",
+      "record": "full",
+      "slot": "notes",
+      "issue": "The `notes` value carries substantive dataset content (mini-subset availability, manufacturer in-kind support, return-of-results procedures, biorepository description) rather than residual content only. Per the slot description, notes is for what description cannot hold after every fitting slot is used; return-of-results and biorepository content have no fitting slot in the digest, so this is largely defensible, but manufacturer in-kind support arguably belongs under `funders`."
+    }
+  ],
+  "summary": "Two records audited against the AI_READI bundle. No fabricated dataset facts were found: every substantive claim in both records traces to the declared bundle, source conflicts are surfaced in source_caveats rather than silently resolved, and no prior-D4D content is evident. The dominant defect class is structural rather than factual, and it is concentrated in the core record. One high-severity issue: the core record introduces a `distributions` slot that the supplied core schema digest does not define, populated with keys (`bytes`, `format`, `media_type`) that do not belong to the FileCollection class the content came from — this is a probable validation failure and, at minimum, an invented shape. Four medium-severity placement defects in the core record all share one cause: content from declared slots that the core projection dropped (relationships, participant_compensation, participant_privacy, consent_revocations, collection_consents, collection_notifications) was absorbed into unrelated sibling objects — relationship prose into an Instance's notes, participant payment into a DataCollector, re-identification risk into deidentification_details, revocation into withdrawal_mechanism — instead of being placed in record-level notes or omitted. In each case the core record fails to state whether the omitted slot exists in the core schema, so the projection cannot be verified as lossless-by-design. Lower-severity issues: three constructed identifiers hang non-part entities (an organization, two NIH grants) off the dataset DOI as fragments, asserting part-whole relations the bundle does not support and where omission was permitted; two Instance data_substrate/data_topic assignments (environmental sensor as Time-series rather than Delimited Text; participant as Diabetes topic) are interpretive rather than stated; and the core record demotes several structured scalars present in the full record (total_file_count, total_size_bytes, citation) into free-text notes. No content appears in the core record that the full record does not also support. No enum violations were found: all conforms_to_standard, credit_roles, bias_type, limitation_type, relationship_type, collection_type, data_use_permission, confidentiality_level and hipaa_compliant values draw from the permitted sets. Recommended remediation before Phase 4 sign-off: rename or remove the core `distributions` slot and align its keys to the declared class; relocate the four misplaced content blocks to record-level notes with an explicit statement of which core slots are undefined; drop the three fragment-constructed identifiers in favour of omission."
+}

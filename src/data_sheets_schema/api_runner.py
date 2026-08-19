@@ -1499,6 +1499,11 @@ def report_claims_block(spec: RunSpec) -> dict[str, Any] | None:
     return out
 
 
+def _form_block(spec: RunSpec) -> dict[str, Any]:
+    from data_sheets_schema.grounding import form_facts
+    return form_facts(spec.full_path, spec.core_path)
+
+
 def grounding_block(spec: RunSpec) -> dict[str, Any] | None:
     """Are this run's external identifiers in the bundle it read? (#547)
 
@@ -2101,7 +2106,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                     "skipped": list(PHASES), "validation_problems": problems,
                     "checks": {"pair": pair_consistency(spec),
                                "report": report_claims_block(spec),
-                               "grounding": grounding_block(spec)},
+                               "grounding": grounding_block(spec),
+                               "form": _form_block(spec)},
                     "already_complete": True,
                     "outputs": {"full": str(spec.full_path),
                                 "core": str(spec.core_path),
@@ -2366,6 +2372,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     rec.data["pair_consistency"] = pair_consistency(spec)
     rec.data["report_claims"] = report_claims_block(spec)
     rec.data["grounding"] = grounding_block(spec)
+    # Properties of the records alone, so they survive a drifted bundle (#602).
+    from data_sheets_schema.grounding import form_facts
+    rec.data["form"] = form_facts(spec.full_path, spec.core_path)
     rec.data["intermediates"] = _intermediates_block(spec)
 
     rec.write(spec.provenance_path)
@@ -2400,7 +2409,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # success, which is how the v4 arm swept clean.
             "checks": {"pair": rec.data.get("pair_consistency"),
                        "report": rec.data.get("report_claims"),
-                       "grounding": rec.data.get("grounding")},
+                       "grounding": rec.data.get("grounding"),
+                       "form": rec.data.get("form")},
             "outputs": {"full": str(spec.full_path), "core": str(spec.core_path),
                         "report": str(spec.report_path),
                         "provenance": str(spec.provenance_path)}}

@@ -397,3 +397,13 @@ grounding:
   reason: bundle drifted since the run; grounding against today's bytes would test
     a file the run never read
   recorded_by: backfill_checks
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_d4d.yaml
+  - data/d4d_concatenated/claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  british_spellings: 43
+  organisational_fragments: 0
+  recorded_by: backfill_checks
