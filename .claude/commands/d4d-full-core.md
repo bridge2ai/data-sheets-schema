@@ -164,19 +164,26 @@ above.
 ## Prompt Conditions and Priming
 
 Every run belongs to exactly one prompt condition, and the record must say which.
-Two conditions exist:
+Conditions come in two families, and the **generic** family has several
+versions. `d4d api prompts check` lists the registered prompt files, and
+`CONDITION_PROMPTS` in `src/data_sheets_schema/api_runner.py` is the registry
+they are derived from — read it rather than trusting a list written here, which
+is how this section came to claim only two conditions existed long after
+`generic_v2` through `generic_v5` were registered (#603).
 
-- **generic** — `src/download/prompts/d4d_generic_arm_prompt.md`. Every project
-  and every arm receives *this exact text*; only mechanical fields are
-  substituted (project, arm, method, bundle, label, runtime, provider, model).
-  Nothing in it is specific to a project, dataset, or input set.
+- **generic**, currently `generic` (v1) through `generic_v5`. Every project and
+  every arm receives *the exact text of that version*; only mechanical fields
+  are substituted (project, arm, method, bundle, label, runtime, provider,
+  model). Nothing in any of them is specific to a project, dataset, or input
+  set. Each version is its predecessor plus one marked block, so a run must
+  name **which** version it used.
 - **tuned** — `src/download/prompts/d4d_tuned_arm_prompt.md` plus the project's
   component file in `src/download/prompts/components/{PROJECT}.md`. Carries
   project-specific and input-set-specific content deliberately.
 
-The difference between the two is what the prompt-condition study measures, so
-**adding a project-specific sentence to the generic prompt silently creates a
-third condition and destroys the comparison.**
+The difference between generic and tuned is what the prompt-condition study
+measures, so **adding a project-specific sentence to any generic version
+silently creates a new condition and destroys the comparison.**
 
 ### The priming taxonomy
 
@@ -210,8 +217,8 @@ a second copy is what #563 was filed about.
 Both file headers carry a `# Mode:` line naming the condition and a `# Prompt:`
 line naming the resolved prompt file(s) — see the header blocks below. A record
 that does not name its prompt condition cannot be placed in the study, and a run
-launched without one of the two prompt files above is neither condition; say so
-in the provenance `notes` rather than picking a label.
+launched without one of the registered prompt files is neither condition; say
+so in the provenance `notes` rather than picking a label.
 
 ## Runtime Cases
 

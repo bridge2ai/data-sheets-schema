@@ -108,7 +108,7 @@ def condition_delta(a: str, b: str) -> list[str]:
 #: comparing across them is legitimate; what is unavailable is attributing a
 #: difference to one rule inside the set. Recorded so an analysis can say which
 #: it is doing.
-MULTI_RULE_BASES = {"v2": 3, "v5": 4}
+MULTI_RULE_BASES = {"v2": 3, "v5": 5}
 
 
 def _base_step(base: str) -> int:
@@ -586,13 +586,21 @@ PHASE_NEEDS = {
 }
 
 
-def source_ranking_block(project: str) -> str | None:
+def source_ranking_block(project: str,
+                         manifest_line: str | None = None) -> str | None:
     """The declared source ranking for one project, as sent to the model.
 
     Rendered from the manifest rather than restated, so a tier edited there
     reaches the next run with no code change. None when the project declares no
     sources — the rule then has nothing to say and the block would be noise.
+
+    Also None when the *arm* declares the manifest unused (#603). `crate_only`
+    and `healthsheet` state "Source manifest: not used" in their own header and
+    supply a single bundle, so sending the baseline arm's ranking would tell the
+    model to prefer between documents it was never given.
     """
+    if manifest_line and "not used" in manifest_line.lower():
+        return None
     try:
         from data_sheets_schema.source_priority import ranked
         rows = ranked(project)
@@ -660,7 +668,7 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     # Cached with the bundle because it is the same kind of thing: per-project
     # input that does not change between phases. It joins to the `Source type`
     # each file already carries in its SOURCE METADATA block.
-    ranking = source_ranking_block(spec.project)
+    ranking = source_ranking_block(spec.project, spec.manifest_line)
     if ranking:
         cached.append({"type": "text", "text": ranking,
                        "cache_control": {"type": "ephemeral"}})

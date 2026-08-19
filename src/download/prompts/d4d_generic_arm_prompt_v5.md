@@ -1,6 +1,6 @@
 # D4D generic-arm generation prompt — v5
 
-**This is v4 plus a block of four rules, and nothing else.** That is a
+**This is v4 plus a block of five rules, and nothing else.** That is a
 departure from the one-rule-per-version convention, and the reason is stated
 under "Why v5 exists" rather than left to be inferred. The
 substitution fields, outputs, header block, constraints, the four original rules
@@ -46,7 +46,7 @@ local namespace — the defect #531 records.
 ## Why v5 is not a clean single-rule increment, and what that costs
 
 The v2→v3→v4 series each isolated one rule so a delta could be attributed to it.
-v5 cannot: four rules move together, and a v4-against-v5 comparison measures
+v5 cannot: five rules move together, and a v4-against-v5 comparison measures
 their sum.
 
 That is accepted rather than hidden. Two of the four are parity fixes whose
@@ -219,21 +219,27 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   Two things this does not govern, and they are exempt entirely: a slot whose
   declared range is a URL takes a URL, and a URL inside prose or a citation is
   text. Leave both exactly as written.
-- An identifier is a fact about the dataset, subject to the same rule as any
-  other fact: take it from the evidence or omit it. Do not supply an identifier
-  you recognise but the input documents do not state. A correct identifier the
-  evidence does not contain is still an unsupported claim, and to every reader
-  who was not present it is indistinguishable from an incorrect one. Naming an
-  organisation the documents name is grounded; adding that organisation's
-  registry identifier from your own knowledge is not.
-- Where something needs an identifier and the evidence supplies none, hang it
-  off one the evidence does supply: a fragment appended to the identifier of the
-  thing it is part of. Never invent a prefix — a prefix the schema does not
-  declare resolves to nothing, and where no fragment is possible either, a
-  resolvable URL is the better answer. A person is identified by a
-  personal-identifier registry entry and an organisation by an organisation
-  registry entry; a fragment appended to an organisation's identifier does not
-  identify a person, it makes a false claim about that organisation.
+- An identifier that names something outside this dataset — an organisation, a
+  person, a publication, another dataset — is a fact about the world, subject to
+  the same rule as any other fact: take it from the evidence or omit it. Do not
+  supply one you recognise but the input documents do not state. A correct
+  identifier the evidence does not contain is still an unsupported claim, and to
+  every reader who was not present it is indistinguishable from an incorrect
+  one. Naming an organisation the documents name is grounded; adding that
+  organisation's registry identifier from your own knowledge is not.
+- An identifier that names a part of this dataset, and exists nowhere outside
+  this record, is a label rather than a claim about the world — so no evidence
+  can supply it and the rule above does not reach it. Mint it as a fragment on
+  an identifier the evidence *does* supply, so the label stays traceable to
+  something attested. This is the only case in which minting is right, and the
+  test is whether the thing named has a referent outside this record: if it
+  does, the rule above governs and you take the identifier from the evidence or
+  omit it. Never invent a prefix — one the schema does not declare resolves to
+  nothing, and where no fragment is possible either, a resolvable URL is the
+  better answer. A person is identified by a personal-identifier registry entry
+  and an organisation by an organisation registry entry; a fragment appended to
+  an organisation's identifier does not identify a person, it makes a false
+  claim about that organisation.
 - Write American English throughout — characterize, organization, standardized,
   analyze, behavior, license. This governs the prose the record states, not
   quoted material: a title, a name or a direct quotation keeps the spelling its
