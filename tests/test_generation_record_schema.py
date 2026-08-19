@@ -130,41 +130,121 @@ class CorpusValidatesTest(unittest.TestCase):
             self.assertNotEqual(r.returncode, 0)
 
 
-class ModeSpecificRequirements(unittest.TestCase):
-    """#605: the schema was mode-blind, so it asserted almost nothing.
+class ValidatorControl(unittest.TestCase):
+    """Base class: prove the validator works before trusting a clean result.
 
-    Every field named here is one that *every* record of that mode already
-    carries — measured across the 195 records on disk, not chosen. So these
-    tests assert that the schema now discriminates by mode, and the corpus test
-    below asserts the requirements are not inventions that fail honest records.
+    `check_record` returns no violations both when a record conforms and when it
+    could not be checked (#613). Three tests below assert "no violations", so
+    with a dead validator they would all pass having verified nothing — the
+    vacuous-pass shape of #617. Every one of them goes through `_control`
+    first, which fails rather than skips if a known-bad record comes back clean.
     """
 
-    #: The gap that motivated the issue: each of these was absent from a `live`
-    #: record that validated anyway.
-    LIVE_REQUIRED = ("inputs", "model", "system", "validation")
-
-    def _record(self):
-        from data_sheets_schema.provenance import record_conformance
-        path = (Path("data/d4d_concatenated/claudecode_agent_core")
+    BASELINE = (Path("data/d4d_concatenated/claudecode_agent_core")
                 / "2026-08-13_claude-opus-5-api-generic-v4_rep1"
                 / "CHORUS_provenance.yaml")
-        if not (path.exists() and SCHEMA.exists()):
+
+    def _control(self):
+        """A conforming record, having first proved the validator discriminates."""
+        from data_sheets_schema.provenance import check_record
+        if not (self.BASELINE.exists() and SCHEMA.exists()):
             self.skipTest("record or schema not present in this checkout")
-        record = yaml.safe_load(path.read_text(encoding="utf-8"))
-        if record_conformance(record):
-            self.skipTest("validator unavailable or baseline record non-conforming")
+        record = yaml.safe_load(self.BASELINE.read_text(encoding="utf-8"))
+
+        # Positive control. A record with no `record_mode` cannot satisfy any
+        # schema, so findings here are the minimum proof the validator ran.
+        findings, failure = check_record(
+            {k: v for k, v in record.items() if k != "record_mode"})
+        self.assertIsNone(failure, f"the validator could not run: {failure}")
+        self.assertTrue(findings,
+                        "the validator reported a record with no record_mode as "
+                        "clean; every 'no violations' assertion below would pass "
+                        "vacuously")
+
+        findings, failure = check_record(record)
+        self.assertIsNone(failure, f"the validator could not run: {failure}")
+        self.assertEqual(findings, [],
+                         "the baseline record does not conform, so it cannot "
+                         "serve as the starting point for these mutations")
         return record
+
+
+class ModeSpecificRequirements(ValidatorControl):
+    """#605: the schema was mode-blind, so it asserted almost nothing.
+
+    The required fields are **derived from `build_record`**, the single writer
+    both runtimes go through, rather than listed here. The first version listed
+    them from the archive and so required `validation`, which no writer emits —
+    it is filled in later by `d4d runs validate`. That rejected every freshly
+    written agentic record (#612). Deriving them means the schema and the writer
+    cannot drift apart without this test noticing.
+    """
+
+    def _writer_fields(self, mode):
+        """What `build_record` actually emits for a mode, at write time."""
+        from data_sheets_schema.provenance import build_record
+        bundle = Path("data/preprocessed/concatenated/AI_READI_preprocessed.txt")
+        if not bundle.exists():
+            self.skipTest("no bundle in this checkout to build a record from")
+        return build_record("AI_READI", "claudecode_agent", "test_rep1",
+                            mode=mode, input_bundle=bundle,
+                            input_verified=True).data
+
+    def _rule_requirements(self, mode):
+        """What the schema requires of a mode, read from the rules."""
+        schema = yaml.safe_load(SCHEMA.read_text(encoding="utf-8"))
+        out = set()
+        for rule in schema["classes"]["GenerationRecord"].get("rules") or []:
+            pre = ((rule.get("preconditions") or {}).get("slot_conditions")
+                   or {}).get("record_mode") or {}
+            if pre.get("equals_string") != mode:
+                continue
+            post = ((rule.get("postconditions") or {}).get("slot_conditions")
+                    or {})
+            out |= {k for k, v in post.items() if v.get("required")}
+        return out
+
+    def test_no_rule_requires_a_field_no_writer_writes(self):
+        """The #612 defect, in its general form.
+
+        A rule requiring something the writer does not emit rejects records the
+        pipeline produces correctly — and the justification for these rules is
+        that they describe the writers.
+        """
+        if not SCHEMA.exists():
+            self.skipTest("schema not present in this checkout")
+        for mode in ("live", "reconstructed"):
+            with self.subTest(mode=mode):
+                written = set(self._writer_fields(mode))
+                missing = sorted(self._rule_requirements(mode) - written)
+                self.assertEqual(
+                    missing, [],
+                    f"the schema requires {missing} of a {mode} record, but "
+                    "build_record does not emit them, so every fresh record "
+                    "fails the gate")
+
+    def test_a_freshly_written_record_conforms(self):
+        """The same thing end to end, through the real builder."""
+        self._control()
+        from data_sheets_schema.provenance import check_record
+        for mode in ("live", "reconstructed"):
+            with self.subTest(mode=mode):
+                findings, failure = check_record(self._writer_fields(mode))
+                self.assertIsNone(failure)
+                self.assertEqual(findings, [])
 
     def test_a_live_record_must_carry_what_a_live_run_observed(self):
         from data_sheets_schema.provenance import record_conformance
-        record = self._record()
-        for field in self.LIVE_REQUIRED:
+        record = self._control()
+        required = self._rule_requirements("live")
+        self.assertTrue(required, "the live rule requires nothing at all")
+        for field in sorted(required):
             with self.subTest(field=field):
                 short = {k: v for k, v in record.items() if k != field}
                 self.assertTrue(
                     record_conformance(short),
                     f"a live record with no {field!r} validated; before #605 "
-                    "all four of these did")
+                    "all of these did")
 
     def test_a_derived_record_may_omit_them(self):
         """The requirements must be conditional, not a blanket tightening.
@@ -174,33 +254,43 @@ class ModeSpecificRequirements(unittest.TestCase):
         rules would be requiring these of everything, and four honest records
         on disk would be reclassified as defective.
         """
-        from data_sheets_schema.provenance import record_conformance
-        record = self._record()
+        from data_sheets_schema.provenance import check_record
+        record = self._control()
         derived = {k: v for k, v in record.items()
-                   if k not in self.LIVE_REQUIRED}
+                   if k not in self._rule_requirements("live")}
         derived.update(record_mode="derived",
                        record_type="d4d_derived_provenance",
                        derivation={"method": "test"},
                        sources=[{"path": "x", "sha256": "y"}],
                        not_applicable=[{"field": "model", "reason": "test"}])
-        self.assertEqual(record_conformance(derived), [])
+        findings, failure = check_record(derived)
+        self.assertIsNone(failure)
+        self.assertEqual(findings, [])
 
     def test_the_two_discriminators_cannot_disagree(self):
         from data_sheets_schema.provenance import record_conformance
-        record = self._record()
+        record = self._control()
         confused = {**record, "record_mode": "derived"}
         self.assertTrue(record_conformance(confused),
                         "a record calling itself derived while typed as a "
                         "generation record validated")
 
-    def test_every_record_on_disk_still_conforms(self):
+    def test_every_record_the_checkers_look_at_conforms(self):
         """The requirements describe the writers; they do not fail the corpus.
 
         A rule that is right in principle and rejects records nobody can
         regenerate is not an improvement — it is a schema that has to be
         ignored, which is where this started.
+
+        Scoped to the `*_core/` glob that `d4d provenance validate-records`
+        uses, and *named* for that scope rather than "every record on disk":
+        three `curated/` records sit outside it and do not conform, three of
+        those violations predating this schema (#616). Claiming disk-wide
+        conformance while checking a glob is the kind of overreach this corpus
+        keeps having to correct.
         """
-        from data_sheets_schema.provenance import record_conformance
+        self._control()
+        from data_sheets_schema.provenance import check_record
         records = sorted(Path("data/d4d_concatenated").glob(
             "*_core/*/*_provenance.yaml"))
         if not records:
@@ -208,12 +298,13 @@ class ModeSpecificRequirements(unittest.TestCase):
         failures = []
         for path in records:
             data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-            for message in record_conformance(data):
-                failures.append(f"{path}: {message}")
+            findings, failure = check_record(data)
+            self.assertIsNone(failure, f"{path}: {failure}")
+            failures += [f"{path}: {m}" for m in findings]
         self.assertEqual(failures[:5], [], f"{len(failures)} violations")
 
 
-class ConformanceIsOnTheGenerationPath(unittest.TestCase):
+class ConformanceIsOnTheGenerationPath(ValidatorControl):
     """A check that exists but does not run on the path it guards is #582.
 
     Validation used to be reachable only through `d4d provenance
@@ -234,8 +325,14 @@ class ConformanceIsOnTheGenerationPath(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             rec = ProvenanceRecord(data=good)
             rec.write(Path(d) / "ok.yaml")
-            if rec.conformance:
-                self.skipTest("validator unavailable in this environment")
+            # Fails rather than skips on a truthy result. Calling a genuinely
+            # non-conforming record an environment problem is how a real defect
+            # gets skipped past in CI (#617).
+            self.assertIsNone(rec.conformance_failure,
+                              f"the validator could not run: "
+                              f"{rec.conformance_failure}")
+            self.assertEqual(rec.conformance, [],
+                             "the baseline record does not conform")
 
             # `validation` is preserved from a prior file by `write`, so drop a
             # field that is not carried forward.
@@ -248,23 +345,66 @@ class ConformanceIsOnTheGenerationPath(unittest.TestCase):
                             "the record must still be written: it is the run's "
                             "only account of itself")
 
-    def test_the_schema_is_findable_away_from_the_repo_root(self):
+    def test_a_record_that_could_not_be_checked_is_not_reported_as_clean(self):
+        """The distinction the gate turns on (#613).
+
+        `check_record` returns no violations in both cases, so if the failure
+        were not reported separately a broken validator would pass an entire
+        sweep with every run printing a tick.
+        """
+        import tempfile
+        import unittest.mock as mock
+
+        from data_sheets_schema import provenance
+        from data_sheets_schema.provenance import ProvenanceRecord
+        if not self.BASELINE.exists():
+            self.skipTest("record not present in this checkout")
+        good = yaml.safe_load(self.BASELINE.read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as d:
+            with mock.patch.object(provenance, "record_schema_path",
+                                   lambda: Path(d) / "absent.yaml"):
+                rec = ProvenanceRecord(data=good)
+                rec.write(Path(d) / "r.yaml")
+            self.assertEqual(rec.conformance, [],
+                             "an unrunnable validator must not invent findings")
+            self.assertTrue(rec.conformance_failure,
+                            "a record that could not be checked was reported "
+                            "as conforming")
+
+    def test_the_gate_still_works_away_from_the_repo_root(self):
         """Otherwise the gate silently passes everything a sweep writes.
 
         `RECORD_SCHEMA` is repo-relative, matching its siblings, but those are
         read by commands run from the repo root and this one runs during
-        generation. `record_conformance` returns no findings when it cannot
-        run, so an unresolvable path would read as "conforms".
+        generation.
+
+        Asserts the gate *discriminates* from another directory, not merely
+        that a file exists there. A schema that resolves but is stale, or a
+        validator that fails from that cwd for any other reason, would satisfy
+        an existence check while reporting every record clean (#618).
         """
         import os
         import tempfile
 
-        from data_sheets_schema.provenance import record_schema_path
+        from data_sheets_schema.provenance import check_record
+        if not self.BASELINE.exists():
+            self.skipTest("record not present in this checkout")
+        good = yaml.safe_load(self.BASELINE.read_text(encoding="utf-8"))
+        bad = {k: v for k, v in good.items() if k != "model"}
         cwd = os.getcwd()
         try:
+            # os.chdir is process-global, so this cannot run under pytest -n
+            # without corrupting siblings. Restored in `finally`.
             with tempfile.TemporaryDirectory() as d:
                 os.chdir(d)
-                self.assertTrue(record_schema_path().exists())
+                findings, failure = check_record(bad)
+                self.assertIsNone(
+                    failure, f"the gate could not run from {d}: {failure}")
+                self.assertTrue(
+                    findings,
+                    "a live record with no model was reported clean from a "
+                    "directory that is not the repo root")
+                self.assertEqual(check_record(good), ([], None))
         finally:
             os.chdir(cwd)
 
@@ -282,51 +422,130 @@ class TheSchemaKnowsEveryFieldTheWritersWrite(unittest.TestCase):
     taken branch is caught when it is added rather than when it first fires.
     """
 
-    #: Modules that assemble a generation record. Not every module with a dict
-    #: named `data` — `src/renderer` and `src/validation` both have one and
-    #: neither writes provenance, which is why this is a list and not a glob.
-    WRITERS = ("src/data_sheets_schema/api_runner.py",
-               "src/data_sheets_schema/provenance.py")
+    #: Where record fields are set, and under which local name. The first
+    #: version scanned only for `rec.data["x"]` with a regex and so saw 14 of
+    #: 34 fields — missing both builders entirely, because each assembles its
+    #: record as a **dict literal** that no assignment regex can see (#615).
+    #: An AST scan reads the literals, so the two writers that produce the whole
+    #: agentic and derived records are covered.
+    #:
+    #: Scoped to the **functions** that build a record, not whole files. A
+    #: file-wide scan of `api_runner.py` picks up every unrelated dict called
+    #: `data` — progress files, phase payloads — and reports them as forbidden
+    #: record fields. `src/renderer` and `src/validation` have one too, and
+    #: neither writes provenance.
+    WRITERS = {
+        "src/data_sheets_schema/provenance.py": {
+            "build_record": ("data",),
+            "build_derived_record": ("data",),
+        },
+        "src/data_sheets_schema/cli/runs.py": {
+            "validate_cmd": ("data",),
+            "select_cmd": ("data", "prior"),
+        },
+    }
 
-    ASSIGNMENT = re.compile(r"""(?:rec|record)\.data\[["']([a-z_]+)["']\]""")
+    #: Attribute-style record mutation, `rec.data["x"] = …`, which `execute()`
+    #: uses and which is a subscript on an attribute rather than on a name.
+    ATTRIBUTE_WRITE = re.compile(r"""(?:rec|record)\.data\[["']([a-z_]+)["']\]""")
+
+    #: Where `execute()` sets record fields. Scanned across the whole file
+    #: because `rec.data[...]` is unambiguous — it names the record object.
+    ATTRIBUTE_WRITE_FILE = "src/data_sheets_schema/api_runner.py"
+
+    def _written_fields(self):
+        """Every record field any writer sets, by the file that sets it."""
+        import ast
+        found = {}
+        runner = Path(self.ATTRIBUTE_WRITE_FILE)
+        if runner.exists():
+            for field in self.ATTRIBUTE_WRITE.findall(
+                    runner.read_text(encoding="utf-8")):
+                found.setdefault(field, self.ATTRIBUTE_WRITE_FILE)
+        for name, functions in self.WRITERS.items():
+            path = Path(name)
+            if not path.exists():
+                continue
+            for fn in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+                if not isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    continue
+                locals_ = functions.get(fn.name)
+                if not locals_:
+                    continue
+                for node in ast.walk(fn):
+                    targets = []
+                    if isinstance(node, ast.Assign):
+                        targets = list(node.targets)
+                    elif isinstance(node, ast.AnnAssign):
+                        targets = [node.target]
+                    for target in targets:
+                        # `data = {...}` — the builders' dict literals.
+                        if (isinstance(target, ast.Name)
+                                and target.id in locals_
+                                and isinstance(node.value, ast.Dict)):
+                            for key in node.value.keys:
+                                if isinstance(key, ast.Constant) and \
+                                        isinstance(key.value, str):
+                                    found.setdefault(key.value, name)
+                        # `data["x"] = …` — cli/runs.py's idiom.
+                        if (isinstance(target, ast.Subscript)
+                                and isinstance(target.value, ast.Name)
+                                and target.value.id in locals_
+                                and isinstance(target.slice, ast.Constant)
+                                and isinstance(target.slice.value, str)):
+                            found.setdefault(target.slice.value, name)
+        return found
+
+    def test_every_named_writer_function_still_exists(self):
+        """A renamed function would silently drop out of the scan."""
+        import ast
+        for name, functions in self.WRITERS.items():
+            path = Path(name)
+            if not path.exists():
+                continue
+            present = {fn.name for fn in ast.walk(
+                ast.parse(path.read_text(encoding="utf-8")))
+                if isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef))}
+            for fn_name in functions:
+                with self.subTest(function=f"{name}:{fn_name}"):
+                    self.assertIn(fn_name, present,
+                                  "the scan names a function that no longer "
+                                  "exists, so its fields are unguarded")
 
     def test_no_writer_sets_a_field_the_schema_forbids(self):
         if not SCHEMA.exists():
             self.skipTest("schema not present in this checkout")
         schema = yaml.safe_load(SCHEMA.read_text(encoding="utf-8"))
         known = set(schema["classes"]["GenerationRecord"]["attributes"])
-        unknown = {}
-        for name in self.WRITERS:
-            path = Path(name)
-            if not path.exists():
-                continue
-            for field in self.ASSIGNMENT.findall(
-                    path.read_text(encoding="utf-8")):
-                if field not in known:
-                    unknown.setdefault(field, name)
+        unknown = {f: w for f, w in self._written_fields().items()
+                   if f not in known}
         self.assertEqual(
             unknown, {},
             "these fields are written into a generation record but the schema "
-            "does not declare them, so a run taking that branch fails the "
-            f"conformance gate: {unknown}")
+            "does not declare them, so — `additionalProperties` being false — "
+            f"a run taking that branch fails the conformance gate: {unknown}")
 
-    def test_the_check_can_see_the_writers_at_all(self):
+    def test_the_scan_sees_both_builders_and_not_just_one_idiom(self):
         """Otherwise the test above passes by finding nothing to check.
 
-        A renamed module or a changed assignment idiom would empty the scan,
-        and an empty scan trivially satisfies the assertion.
+        The previous version asserted only that `"validation"` was found, which
+        a single `rec.data["validation"]` match satisfied while 20 fields stayed
+        invisible. These three come from three different writers and three
+        different idioms, so losing any one of them empties part of the scan
+        and fails here rather than silently narrowing the guard.
         """
-        found = set()
-        for name in self.WRITERS:
-            path = Path(name)
-            if path.exists():
-                found |= set(self.ASSIGNMENT.findall(
-                    path.read_text(encoding="utf-8")))
         if not any(Path(w).exists() for w in self.WRITERS):
             self.skipTest("writers not present in this checkout")
-        self.assertIn("validation", found,
-                      "the scan found no known record field; it is not "
-                      f"reading the writers. Found: {sorted(found)}")
+        found = self._written_fields()
+        for field, why in (
+                ("validation", "rec.data[...] in api_runner.execute"),
+                ("companions", "the build_record dict literal"),
+                ("derivation", "the build_derived_record dict literal"),
+                ("canonical", "a data[...] assignment in cli/runs.py")):
+            with self.subTest(field=field):
+                self.assertIn(field, found,
+                              f"the scan no longer sees {why}; the guard has "
+                              f"narrowed. Found: {sorted(found)}")
 
 
 if __name__ == "__main__":

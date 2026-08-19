@@ -2498,14 +2498,28 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # And that the record conforms to the schema that describes it (#605).
     # `check_provenance` asks whether a usable record exists; this asks whether
     # what it contains is what a record of its mode must contain — a `live`
-    # record omitting its bundle, its model or its validation verdict passed the
+    # record omitting its bundle, its model or the machine it ran on passed the
     # first check and told a reader nothing about how it was made. Fails the run
     # for the same reason as above: an unattestable artifact left behind is the
     # defect, not the error message about it.
+    #
+    # Two failures, not one. A record that *could not be checked* is not a
+    # record that passed, and a sweep that silently stopped checking would
+    # produce a whole arm of unverified records each reported as clean (#613) —
+    # the shape `canary.verdict` refuses with UNMEASURABLE one level up. Named
+    # separately so the operator can tell a broken record from a broken gate.
+    # The path comes from `record_schema_path()`, not the repo-relative
+    # constant: when the fallback fired, naming the constant would point the
+    # operator at a file that does not exist on their filesystem (#618).
+    if rec.conformance_failure:
+        raise RuntimeError(
+            f"run {spec.label} for {spec.project} wrote a provenance record "
+            f"whose conformance could not be established, so it is unverified "
+            f"rather than valid: {rec.conformance_failure}")
     if rec.conformance:
         raise RuntimeError(
             f"run {spec.label} for {spec.project} wrote a provenance record "
-            f"that does not conform to {provenance.RECORD_SCHEMA}: "
+            f"that does not conform to {provenance.record_schema_path()}: "
             + "; ".join(rec.conformance[:5])
             + (f" (+{len(rec.conformance) - 5} more)"
                if len(rec.conformance) > 5 else ""))

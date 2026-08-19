@@ -190,6 +190,12 @@ classes:
           record on disk carries it, so validating the corpus could not have
           reached it. That is the difference the gate makes — it checks the
           writers, not the archive.
+
+          Exactly one other attribute is in the same position: `companions`,
+          which `build_record` writes unconditionally and which will appear on
+          the next record written. Named here because presenting this field as
+          the single thing the gate surfaced would overstate a real result by
+          leaving out its twin (#618).
         inlined: true
         range: AnyBlock
 
@@ -292,9 +298,26 @@ classes:
       # validated while omitting its bundle, its model, its validation verdict
       # and all three post-generation checks (#605).
       #
-      # Each list below is what *every* record of that mode already carries,
-      # measured across 195 records rather than chosen — so these fail nothing
-      # retroactively and describe the writers as they are.
+      # Each list below is what `build_record` — the single writer both runtimes
+      # go through — **emits at write time**, not what the archive happens to
+      # hold.
+      #
+      # The first version got that wrong in a way worth recording. It required
+      # `validation` on the strength of "all 158 live records carry it". They
+      # do, because `d4d runs validate` sweeps the corpus afterwards; the writer
+      # never emits it. So the rule rejected every freshly written agentic
+      # record, and the justification — "describes the writers as they are" —
+      # described the archive after a later step had touched it (#612).
+      #
+      # `tests/test_generation_record_schema.py` now derives these lists from
+      # `build_record` itself, so the two cannot drift apart again.
+      #
+      # These fail nothing **within the scope every checker uses** — the 195
+      # records under `*_core/`. Three `curated/` records sit outside that glob
+      # and do not conform; three of their five violations predate this schema
+      # and the reconstructed rule adds `system` to them (#616). Saying "fails
+      # nothing" without naming the scope would be the same overreach as
+      # measuring the archive and calling it the writers.
       - title: a live run observed its own inputs, model and machine
         preconditions:
           slot_conditions:
@@ -308,8 +331,6 @@ classes:
               required: true
             system:
               required: true
-            validation:
-              required: true
       - title: a reconstructed record names what it could not recover
         preconditions:
           slot_conditions:
@@ -322,8 +343,6 @@ classes:
             model:
               required: true
             system:
-              required: true
-            validation:
               required: true
             unrecoverable:
               required: true
