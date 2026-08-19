@@ -41,7 +41,7 @@ from typing import Any
 
 import yaml
 
-from data_sheets_schema import reasoning, schema_digest
+from data_sheets_schema import provenance, reasoning, schema_digest
 from data_sheets_schema.provenance import (
     DETERMINISTIC_CONFIG,
     load_generation_config,
@@ -2494,6 +2494,21 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         raise RuntimeError(
             f"run {spec.label} for {spec.project} finished without usable "
             f"provenance: {prov['reason']}")
+
+    # And that the record conforms to the schema that describes it (#605).
+    # `check_provenance` asks whether a usable record exists; this asks whether
+    # what it contains is what a record of its mode must contain — a `live`
+    # record omitting its bundle, its model or its validation verdict passed the
+    # first check and told a reader nothing about how it was made. Fails the run
+    # for the same reason as above: an unattestable artifact left behind is the
+    # defect, not the error message about it.
+    if rec.conformance:
+        raise RuntimeError(
+            f"run {spec.label} for {spec.project} wrote a provenance record "
+            f"that does not conform to {provenance.RECORD_SCHEMA}: "
+            + "; ".join(rec.conformance[:5])
+            + (f" (+{len(rec.conformance) - 5} more)"
+               if len(rec.conformance) > 5 else ""))
 
     # Only now is the run finished. Keeping the progress file on a validation
     # failure means a rerun resumes instead of regenerating from phase 1.

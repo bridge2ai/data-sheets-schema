@@ -788,9 +788,60 @@ def preservable_validation(path: Path,
     return v
 
 
+#: The schema a generation record must conform to. Not imported by
+#: `data_sheets_schema.yaml`: it describes the pipeline rather than a dataset,
+#: so importing it would move the `Dataset` digest an arm is frozen against.
+#:
+#: Repo-relative to match `FULL_SCHEMA` and `CORE_SCHEMA` above, but resolved
+#: against the installed package when that does not exist. The others are read
+#: by commands run from the repo root; this one is read on the *generation*
+#: path, and a gate that silently no-ops when a sweep is launched from
+#: elsewhere is the failure mode #582 recorded — a check that exists but is not
+#: on the path it guards.
+RECORD_SCHEMA = Path("src/data_sheets_schema/schema/d4d_generation_record.yaml")
+
+
+def record_schema_path() -> Path:
+    """`RECORD_SCHEMA` if it resolves from here, else the packaged copy."""
+    if RECORD_SCHEMA.exists():
+        return RECORD_SCHEMA
+    return Path(__file__).resolve().parent / "schema" / RECORD_SCHEMA.name
+
+
+def record_conformance(data: dict[str, Any]) -> list[str]:
+    """Schema violations in a record about to be written, as messages (#605).
+
+    Validation existed only as the manual `d4d provenance validate-records`, so
+    a run could declare success having written a record that does not conform —
+    the shape #582 fixed for the schema digest, reproduced for the record
+    schema in the same week.
+
+    Returns messages rather than raising, and returns none when the validator
+    itself cannot run: a record that could not be checked is not a record that
+    failed, and refusing to write one because a dependency is missing would
+    lose the run's only account of itself.
+
+    That silence is the honest answer for a missing dependency and would be the
+    wrong one for a missing schema, so `record_schema_path` makes the schema
+    findable rather than letting the two cases collapse into each other.
+    """
+    try:
+        from linkml.validator import validate
+        report = validate(data, str(record_schema_path()),
+                          "GenerationRecord")
+    except Exception:                                          # noqa: BLE001
+        return []
+    return [str(r.message) for r in getattr(report, "results", [])]
+
+
 @dataclass
 class ProvenanceRecord:
     data: dict[str, Any] = field(default_factory=dict)
+
+    #: Set by :meth:`write`. Schema violations found in what was just written;
+    #: empty when it conforms, and empty when the validator could not run,
+    #: which are different things the caller can tell apart by asking.
+    conformance: list[str] = field(default_factory=list)
 
     #: Set by :meth:`write`. True if a prior verdict was carried forward, False
     #: if one was found but dropped as stale, None if there was none. The CLI
@@ -820,6 +871,12 @@ class ProvenanceRecord:
             f"# record_version {RECORD_VERSION} — see src/data_sheets_schema/provenance.py\n"
             + yaml.safe_dump(data, sort_keys=False, allow_unicode=True),
             encoding="utf-8")
+        # Checked here, on the write path, not only by a command someone
+        # remembers to run (#605). Reported rather than raised: the record is
+        # already on disk and is the run's only account of itself, so losing it
+        # to a schema complaint would cost more than the complaint is worth.
+        # The caller decides — `d4d api run` fails the run on it.
+        self.conformance = record_conformance(data)
         return path
 
 

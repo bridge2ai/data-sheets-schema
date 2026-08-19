@@ -203,6 +203,27 @@ person answers this from the corpus instead of re-deriving it. The *limit*
 stays null and says why: no route states it and the provider does not return
 it, and a guess would make headroom computable and wrong.
 
+## VOICE_PEDIATRIC is out of the v5 arm (2026-08-18)
+
+Decided rather than deferred, closing the last open item in #590. VOICE_PEDIATRIC
+has **no v4 record**, so it has no baseline for any of the eight gated metrics.
+Under `verdict(..., baseline_requested=True)` a project whose baseline resolves
+to nothing is `unmeasurable` and stops the sweep — the #599 fix, working as
+intended. The alternatives were to run it ungated, or to gate it against another
+project's numbers.
+
+Both are worse than skipping it. An ungated run is the v4 failure exactly: a
+record that enters the "succeeded" column on schema validation alone, with
+nothing able to say whether it regressed. Borrowing VOICE's baseline would
+assert that two datasets of different size and documentation should exhibit the
+same defect counts, which nothing supports.
+
+So the v5 arm is **AI-READI, CHORUS, CM4AI, VOICE** — the four projects with a
+v4 arm to be compared against, which is also the only comparison this plan
+licenses. VOICE_PEDIATRIC is not excluded on quality grounds and needs no
+inference drawn about it; it is a project this design cannot measure, and
+running it anyway would produce a number with no bar beside it.
+
 ## What this plan does not license
 
 Comparing v5 against anything other than v4. Every earlier arm sits at a
