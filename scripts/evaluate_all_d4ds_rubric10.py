@@ -15,7 +15,7 @@ Output:
 
 import json
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Any
 from datetime import datetime
 
 # Base directory
@@ -29,7 +29,7 @@ INDIVIDUAL_METHODS = ["gpt5", "claudecode_agent", "claudecode_assistant"]
 CONCATENATED_METHODS = ["curated", "gpt5", "claudecode", "claudecode_agent", "claudecode_assistant"]
 
 
-def find_individual_files() -> Dict[str, List[str]]:
+def find_individual_files() -> Dict[str, Dict[str, Any]]:
     """Find all individual D4D files."""
     files = {}
 
@@ -41,13 +41,16 @@ def find_individual_files() -> Dict[str, List[str]]:
                 for yaml_file in yaml_files:
                     key = f"{project}_{method}_individual"
                     if key not in files:
-                        files[key] = []
-                    files[key].append(str(yaml_file.relative_to(BASE_DIR)))
+                        files[key] = {"paths": [], "project": project,
+                                      "method": method,
+                                      "granularity": "individual"}
+                    files[key]["paths"].append(
+                        str(yaml_file.relative_to(BASE_DIR)))
 
     return files
 
 
-def find_concatenated_files() -> Dict[str, str]:
+def find_concatenated_files() -> Dict[str, Dict[str, Any]]:
     """Find all concatenated D4D files."""
     files = {}
 
@@ -56,7 +59,14 @@ def find_concatenated_files() -> Dict[str, str]:
             file_path = BASE_DIR / "data" / "d4d_concatenated" / method / f"{project}_d4d.yaml"
             if file_path.exists():
                 key = f"{project}_{method}_concatenated"
-                files[key] = str(file_path.relative_to(BASE_DIR))
+                # An entry, not a bare path. Consumers used to recover the
+                # project by splitting this key on underscores, which required
+                # a special case for AI_READI and was simply wrong for any
+                # other name containing one (#622). Both values are known
+                # here, so they are carried.
+                files[key] = {"path": str(file_path.relative_to(BASE_DIR)),
+                              "project": project, "method": method,
+                              "granularity": "concatenated"}
 
     return files
 
@@ -68,7 +78,12 @@ def create_file_inventory():
     concatenated_files = find_concatenated_files()
 
     # Count statistics
-    total_individual = sum(len(files) for files in individual_files.values())
+    # The paths, not the entry's keys. When an entry became a dict this
+    # counted 4 per entry and reported 32 files where there are 64 (#632) —
+    # a number that then went into the metadata, the printed summary and the
+    # evaluation plan.
+    total_individual = sum(len(entry["paths"])
+                           for entry in individual_files.values())
     total_concatenated = len(concatenated_files)
 
     inventory = {
@@ -133,9 +148,9 @@ def create_evaluation_plan(inventory: Dict):
         for method in INDIVIDUAL_METHODS:
             key = f"{project}_{method}_individual"
             if key in project_files:
-                files = project_files[key]
-                plan += f"**{method}:** {len(files)} files\n"
-                for file_path in files:
+                paths = project_files[key]["paths"]
+                plan += f"**{method}:** {len(paths)} files\n"
+                for file_path in paths:
                     plan += f"  - `{file_path}`\n"
         plan += "\n"
 
@@ -149,7 +164,7 @@ def create_evaluation_plan(inventory: Dict):
         for method in CONCATENATED_METHODS:
             key = f"{project}_{method}_concatenated"
             if key in project_files:
-                file_path = project_files[key]
+                file_path = project_files[key]["path"]
                 plan += f"**{method}:** `{file_path}`\n"
         plan += "\n"
 

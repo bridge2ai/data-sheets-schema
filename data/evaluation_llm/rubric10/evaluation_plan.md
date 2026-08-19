@@ -1,12 +1,12 @@
 # Rubric10 Evaluation Plan
 
-**Generated:** 2025-12-07 20:36:44
+**Generated:** 2026-08-19 11:50:31
 
 ## Scope
 
-**Total files to evaluate:** 127
-- Individual files: 111
-- Concatenated files: 16
+**Total files to evaluate:** 76
+- Individual files: 64
+- Concatenated files: 12
 
 ## Evaluation Settings
 
@@ -29,21 +29,6 @@
   - `data/d4d_individual/gpt5/AI_READI/fairhub_d4d.yaml`
   - `data/d4d_individual/gpt5/AI_READI/doi_d4d.yaml`
   - `data/d4d_individual/gpt5/AI_READI/docs_aireadi_org_docs-2_d4d.yaml`
-**claudecode_agent:** 14 files
-  - `data/d4d_individual/claudecode_agent/AI_READI/fairhub_row10_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/docs_google_com_document-d_row11_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/RePORT_RePORTER_AI-READI_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/docs_aireadi_org_docs-2_row8_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/fairhub_row16_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/RePORT_RePORTER_AI_READI_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/doi_row2_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/docs_aireadi_org_docs-2_row10_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/doi_row9_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/docs_google_com_document-d_row13_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/fairhub_row13_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/fairhub_row12_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/e097449_full_row2_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/AI_READI/zenodo_org_records-10642459_row11_d4d.yaml`
 **claudecode_assistant:** 14 files
   - `data/d4d_individual/claudecode_assistant/AI_READI/fairhub_row10_d4d.yaml`
   - `data/d4d_individual/claudecode_assistant/AI_READI/docs_google_com_document-d_row11_d4d.yaml`
@@ -66,19 +51,6 @@
 **gpt5:** 2 files
   - `data/d4d_individual/gpt5/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_d4d.yaml`
   - `data/d4d_individual/gpt5/CHORUS/CHoRUS for Equitable AI - github_d4d.yaml`
-**claudecode_agent:** 12 files
-  - `data/d4d_individual/claudecode_agent/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9.txt_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.txt_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CHORUS/github_chorus_ai_row9.txt_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CHORUS/CHoRUS for Equitable AI - github.txt_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CHORUS/CHoRUS for Equitable AI.txt_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CHORUS/CHoRUS for Equitable AI_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.txt_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CHORUS/github_chorus_ai_row9_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CHORUS/CHoRUS for Equitable AI - github_d4d.yaml`
 **claudecode_assistant:** 12 files
   - `data/d4d_individual/claudecode_assistant/CHORUS/CHoRUS_for_Equitable_AI_github_d4d.yaml`
   - `data/d4d_individual/claudecode_assistant/CHORUS/CHoRUS_for_Equitable_AI_-_github.txt_d4d.yaml`
@@ -101,19 +73,6 @@
   - `data/d4d_individual/gpt5/CM4AI/dataverse_10.18130_V3_F3TD5R_d4d.yaml`
   - `data/d4d_individual/gpt5/CM4AI/doi_row3_d4d.yaml`
   - `data/d4d_individual/gpt5/CM4AI/doi_d4d.yaml`
-**claudecode_agent:** 12 files
-  - `data/d4d_individual/claudecode_agent/CM4AI/creativecommons_org_licenses-by-nc-sa_row15.txt_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CM4AI/2024.05.21.589311v1.full_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CM4AI/RePORT_RePORTER_CM4AI_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CM4AI/2024.05.21.589311v1.full.txt_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CM4AI/dataverse_10.18130_V3_F3TD5R_row19.txt_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CM4AI/doi_row3.json_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CM4AI/creativecommons_org_licenses_by_nc_sa_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CM4AI/dataverse_B35XWX_march2025_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CM4AI/doi_row3_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CM4AI/RePORT ⟩ RePORTER - CM4AI.txt_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CM4AI/dataverse_F3TD5R_june2025_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/CM4AI/dataverse_10.18130_V3_B35XWX_row16.txt_d4d.yaml`
 **claudecode_assistant:** 12 files
   - `data/d4d_individual/claudecode_assistant/CM4AI/creativecommons_org_licenses-by-nc-sa_row15_d4d.yaml`
   - `data/d4d_individual/claudecode_assistant/CM4AI/creativecommons_org_licenses-by-nc-sa_row15.txt_d4d.yaml`
@@ -135,16 +94,6 @@
   - `data/d4d_individual/gpt5/VOICE/healthnexus_d4d.yaml`
   - `data/d4d_individual/gpt5/VOICE/healthnexus_row13_d4d.yaml`
   - `data/d4d_individual/gpt5/VOICE/physionet_b2ai-voice_1.1_d4d.yaml`
-**claudecode_agent:** 9 files
-  - `data/d4d_individual/claudecode_agent/VOICE/physionet_b2ai-voice_1.1_row14_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/VOICE/B2AI-Voice_DTUA_2025_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/VOICE/B2AI-Voice DTUA 2025 2025-09-04_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/VOICE/RePORT ⟩ RePORTER - VOICE_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/VOICE/github_eipm_bridge2ai-docs_README_row22_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/VOICE/physionet_b2ai-voice_1.1_row17_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/VOICE/docs_google_com_document-d_row13_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/VOICE/healthnexus_row13_d4d.yaml`
-  - `data/d4d_individual/claudecode_agent/VOICE/github_eipm_bridge2ai-docs_row22_d4d.yaml`
 **claudecode_assistant:** 9 files
   - `data/d4d_individual/claudecode_assistant/VOICE/physionet_b2ai-voice_1.1_row14_d4d.yaml`
   - `data/d4d_individual/claudecode_assistant/VOICE/B2AI-Voice_DTUA_2025_d4d.yaml`
@@ -163,7 +112,6 @@
 
 **gpt5:** `data/d4d_concatenated/gpt5/AI_READI_d4d.yaml`
 **claudecode:** `data/d4d_concatenated/claudecode/AI_READI_d4d.yaml`
-**claudecode_agent:** `data/d4d_concatenated/claudecode_agent/AI_READI_d4d.yaml`
 **claudecode_assistant:** `data/d4d_concatenated/claudecode_assistant/AI_READI_d4d.yaml`
 
 
@@ -171,7 +119,6 @@
 
 **gpt5:** `data/d4d_concatenated/gpt5/CHORUS_d4d.yaml`
 **claudecode:** `data/d4d_concatenated/claudecode/CHORUS_d4d.yaml`
-**claudecode_agent:** `data/d4d_concatenated/claudecode_agent/CHORUS_d4d.yaml`
 **claudecode_assistant:** `data/d4d_concatenated/claudecode_assistant/CHORUS_d4d.yaml`
 
 
@@ -179,7 +126,6 @@
 
 **gpt5:** `data/d4d_concatenated/gpt5/CM4AI_d4d.yaml`
 **claudecode:** `data/d4d_concatenated/claudecode/CM4AI_d4d.yaml`
-**claudecode_agent:** `data/d4d_concatenated/claudecode_agent/CM4AI_d4d.yaml`
 **claudecode_assistant:** `data/d4d_concatenated/claudecode_assistant/CM4AI_d4d.yaml`
 
 
@@ -187,7 +133,6 @@
 
 **gpt5:** `data/d4d_concatenated/gpt5/VOICE_d4d.yaml`
 **claudecode:** `data/d4d_concatenated/claudecode/VOICE_d4d.yaml`
-**claudecode_agent:** `data/d4d_concatenated/claudecode_agent/VOICE_d4d.yaml`
 **claudecode_assistant:** `data/d4d_concatenated/claudecode_assistant/VOICE_d4d.yaml`
 
 ## Evaluation Procedure

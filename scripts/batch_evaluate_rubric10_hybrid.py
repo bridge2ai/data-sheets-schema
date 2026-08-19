@@ -364,6 +364,44 @@ def evaluate_d4d_file(file_path: Path, project: str, method: str, eval_type: str
     return result
 
 
+class LegacyInventory(RuntimeError):
+    """Raised when the inventory predates identity being carried (#632).
+
+    Falling back was the first design and it was worse than the bug it
+    replaced. The old code split the key with a special case for `AI_READI`
+    and so got *every project in the current corpus right*; the fallback got
+    every one wrong — writing `project="AI_READI_gpt5_concatenated"`,
+    `method=""` and orphan filenames into results that the summarisers read
+    straight into `all_scores.csv`, with nothing printed and exit status 0.
+
+    "Cannot establish the identity" is not "proceed with a placeholder". The
+    inventory is one command to rebuild, so this refuses and says which.
+    """
+
+
+def entry_identity(key, entry):
+    """`(project, method, path)` for one inventory entry.
+
+    Read from the entry, never parsed out of the key: a project may contain an
+    underscore and so may a method (`claudecode_agent`), so no split recovers
+    `AI_READI` + `claudecode_agent` from `AI_READI_claudecode_agent` (#622).
+
+    Raises :class:`LegacyInventory` rather than guessing — see above.
+    """
+    if not isinstance(entry, dict):
+        raise LegacyInventory(
+            f"inventory entry {key!r} is a bare path, written before identity "
+            "was carried; its project and method cannot be recovered from the "
+            "key. Re-run: poetry run python "
+            "scripts/evaluate_all_d4ds_rubric10.py")
+    project, method = entry.get("project"), entry.get("method")
+    if not project or not method:
+        raise LegacyInventory(
+            f"inventory entry {key!r} carries no project/method. Re-run: "
+            "poetry run python scripts/evaluate_all_d4ds_rubric10.py")
+    return project, method, entry.get("path")
+
+
 def main():
     print("=" * 70)
     print("Rubric10 Hybrid Batch Evaluator")
@@ -399,14 +437,12 @@ def main():
 
     concat_count = 0
     for key, file_path in inventory["concatenated_files"].items():
-        parts = key.split('_')
-        # Handle AI_READI which has underscore in project name
-        if parts[0] == "AI" and parts[1] == "READI":
-            project = "AI_READI"
-            method = '_'.join(parts[2:-1])
-        else:
-            project = parts[0]
-            method = '_'.join(parts[1:-1])
+        project, method, carried_path = entry_identity(key, file_path)
+        if carried_path is None:
+            raise LegacyInventory(
+                f"inventory entry {key!r} carries no path; without it "
+                "`BASE_DIR / file_path` would be handed a dict (#635)")
+        file_path = carried_path
 
         file_full_path = BASE_DIR / file_path
 
@@ -414,7 +450,7 @@ def main():
             print(f"⚠️  File not found: {file_path}")
             continue
 
-        print(f"📄 [{concat_count + 1}/16] {project} / {method}")
+        print(f"📄 [{concat_count + 1}/{len(inventory['concatenated_files'])}] {project} / {method}")
 
         result = evaluate_d4d_file(file_full_path, project, method, "concatenated")
 
@@ -440,17 +476,12 @@ def main():
     print("━" * 70)
 
     individual_count = 0
-    total_individual = sum(len(files) for files in inventory["individual_files"].values())
+    total_individual = sum(len(e["paths"]) for e in inventory["individual_files"].values())
 
     for key, file_list in inventory["individual_files"].items():
-        parts = key.split('_')
-        # Handle AI_READI which has underscore in project name
-        if parts[0] == "AI" and parts[1] == "READI":
-            project = "AI_READI"
-            method = '_'.join(parts[2:-1])
-        else:
-            project = parts[0]
-            method = '_'.join(parts[1:-1])
+        project, method, _ = entry_identity(key, file_list)
+        file_list = (file_list.get("paths") if isinstance(file_list, dict)
+                     else file_list)
 
         for file_path in file_list:
             file_full_path = BASE_DIR / file_path

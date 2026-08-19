@@ -155,15 +155,21 @@ def fix_evaluation_scores(eval_path: Path, dry_run: bool = False) -> Tuple[bool,
     fields_fixed = False
 
     # Infer project and method from filename if needed
-    # Pattern: {PROJECT}_{METHOD}_evaluation.json
+    # The record's own fields first. Splitting the filename on underscores gave
+    # project "AI" for every AI-READI evaluation, and these files carry
+    # `project` and `method` already (#633). The filename is the fallback, and
+    # it is named `inferred_` because that is what it is.
     filename = eval_path.stem  # e.g., "CHORUS_claudecode_agent_evaluation"
-    if filename.endswith("_evaluation"):
-        parts = filename.replace("_evaluation", "").split("_")
-        inferred_project = parts[0] if len(parts) >= 1 else "unknown"
-        inferred_method = "_".join(parts[1:]) if len(parts) > 1 else "unknown"
-    else:
-        inferred_project = "unknown"
-        inferred_method = "unknown"
+    recorded = {}
+    try:
+        with open(eval_path) as _f:
+            recorded = json.load(_f) or {}
+    except Exception:                                          # noqa: BLE001
+        recorded = {}
+    inferred_project = recorded.get("project") or "unknown"
+    inferred_method = recorded.get("method") or "unknown"
+    if inferred_project == "unknown" and filename.endswith("_evaluation"):
+        inferred_project = filename.replace("_evaluation", "")
 
     # Fix rubric field
     if eval_data.get("rubric") is None:
