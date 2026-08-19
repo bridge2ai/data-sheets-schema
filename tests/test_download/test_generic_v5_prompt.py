@@ -182,8 +182,8 @@ class TestTheConditionIsWiredComparably(unittest.TestCase):
         from data_sheets_schema.api_runner import MULTI_RULE_BASES
         from data_sheets_schema.runs import arm_confounds, arm_facts
         self.assertTrue(comparable_conditions("generic_v4", "generic_v5"))
-        # …but the step is four rules, not one.
-        self.assertEqual(MULTI_RULE_BASES["v5"], 4)
+        # …but the step is five rules, not one.
+        self.assertEqual(MULTI_RULE_BASES["v5"], 5)
         # …and the records disagree on more than the condition.
         a = arm_facts("2026-08-13_claude-opus-5-api-generic-v4")
         if not a["labels"]:

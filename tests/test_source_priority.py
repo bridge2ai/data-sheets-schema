@@ -252,3 +252,72 @@ class TheModelIsShownTheRankingTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ArmsThatDeclareTheManifestUnusedTest(unittest.TestCase):
+    """Ranking must not reach an arm that was given a single bundle (#603).
+
+    `crate_only` and `healthsheet` state "Source manifest: not used" in their own
+    header. `build_phase` called `source_ranking_block(spec.project)`
+    unconditionally, so those arms received the *baseline* arm's ranking — told
+    to prefer between documents they were never given.
+    """
+
+    def test_the_arm_declaration_decides(self):
+        from data_sheets_schema.api_runner import source_ranking_block
+        from data_sheets_schema.cli.api import ARMS
+        for arm, (_display, _method, _pattern, line) in ARMS.items():
+            block = source_ranking_block("CHORUS", line)
+            with self.subTest(arm=arm):
+                if "not used" in line.lower():
+                    self.assertIsNone(block)
+                else:
+                    self.assertIsNotNone(block)
+
+    def test_it_reads_the_spec_rather_than_a_list_of_arm_names(self):
+        """`manifest_line` is already on the spec, so a new single-source arm is
+        covered the day it declares itself — no second list to keep in step."""
+        import inspect
+
+        from data_sheets_schema.api_runner import build_phase
+        self.assertIn("spec.manifest_line", inspect.getsource(build_phase))
+
+
+class IdentifierRulesDoNotContradictTest(unittest.TestCase):
+    """Provenance and minting gave opposite answers to the same case (#603).
+
+    "take it from the evidence or omit it" against "where the evidence supplies
+    none, hang it off one it does" — a minted fragment is not in the evidence,
+    so the first forbade what the second required, on the central case.
+
+    The line is now external referent versus internal label: one is a claim
+    about the world, the other is a name for a part of this record.
+    """
+
+    def _texts(self):
+        from pathlib import Path
+
+        from data_sheets_schema.api_runner import GENERIC_PROMPT_V5
+        block = GENERIC_PROMPT_V5.read_text(encoding="utf-8")
+        block = block.split("--- ADDED IN v5 ---", 1)[1].split(
+            "--- END ADDED IN v5 ---", 1)[0]
+        playbook = Path(".claude/commands/d4d-uniform-rules.md").read_text(
+            encoding="utf-8")
+        return block, playbook
+
+    def test_the_provenance_rule_is_scoped_to_external_referents(self):
+        block, playbook = self._texts()
+        for text, where in ((block, "prompt"), (playbook, "playbook")):
+            with self.subTest(where=where):
+                self.assertIn("outside this dataset", text)
+
+    def test_minting_is_stated_as_the_case_the_rule_does_not_reach(self):
+        block, playbook = self._texts()
+        self.assertIn("does not reach it", block)
+        self.assertIn("does not reach it", playbook)
+
+    def test_the_prompt_gives_a_decidable_test(self):
+        """A model has to apply this to every identifier it writes, so "use
+        judgement" would leave the contradiction in place."""
+        block, _ = self._texts()
+        self.assertIn("referent outside this record", block)

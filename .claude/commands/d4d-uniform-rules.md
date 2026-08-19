@@ -67,7 +67,7 @@ to every project:
   rule below — and where no fragment is possible either, a resolvable URL is the
   better answer. Check the schema's `prefixes:` block rather than guessing.
 
-- **An identifier is a fact and comes from the evidence.** Take it from the
+- **An identifier that names something outside this dataset is a fact, and comes from the evidence.** Take it from the
   declared bundle or omit it; do not supply an identifier you recognise but the
   bundle does not state. A correct identifier the evidence does not contain is
   still an unsupported claim, and to a reader who was not present it is
@@ -77,8 +77,11 @@ to every project:
   names only in prose (#547). `grounding.absent` in the provenance record counts
   them.
 
-- **Where something needs an identifier and the bundle supplies none, hang it
-  off one the bundle does supply** — a fragment on the identifier of the thing
+- **An identifier for a part of this dataset, existing nowhere outside this
+  record, is a label rather than a claim about the world**, so the rule above
+  does not reach it: no evidence can supply it. The test is whether the thing
+  named has a referent outside this record. Where it does not, hang the label
+  off one the bundle does supply — a fragment on the identifier of the thing
   it is part of, `doi:10.60775/fairhub.3#split-train`, rather than a new
   namespace (#531). A person is identified by an ORCID and an organisation by a
   ROR; **a fragment appended to an organisation's ROR does not identify a

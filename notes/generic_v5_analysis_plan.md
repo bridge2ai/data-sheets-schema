@@ -45,7 +45,7 @@ differs. Against the 2026-08-13 v4 arm the differences are already known:
 So a v4-v5 difference measures **the four v5 rules, plus a schema change, plus
 `reconcile_full` gaining the core record and the audit gaining a clause**.
 `comparable_conditions('generic_v4', 'generic_v5')` now returns False, and
-`MULTI_RULE_BASES` records why: a step that adds four rules cannot have a
+`MULTI_RULE_BASES` records why: a step that adds five rules cannot have a
 difference attributed to one of them.
 
 ### What is still worth comparing
@@ -207,5 +207,5 @@ it, and a guess would make headroom computable and wrong.
 
 Comparing v5 against anything other than v4. Every earlier arm sits at a
 different schema digest and most at a different pin. And attributing any part of
-the result to one of the four rules — see above; that resolution is not
+the result to one of the five rules — see above; that resolution is not
 available from this design.
