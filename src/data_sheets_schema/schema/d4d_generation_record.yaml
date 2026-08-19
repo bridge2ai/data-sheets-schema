@@ -313,11 +313,13 @@ classes:
       # `build_record` itself, so the two cannot drift apart again.
       #
       # These fail nothing **within the scope every checker uses** — the 195
-      # records under `*_core/`. Three `curated/` records sit outside that glob
-      # and do not conform; three of their five violations predate this schema
-      # and the reconstructed rule adds `system` to them (#616). Saying "fails
-      # nothing" without naming the scope would be the same overreach as
-      # measuring the archive and calling it the writers.
+      # records under `*_core/`. Three `curated/` records sit outside the glob
+      # that `d4d provenance validate-records` uses and do not conform: three
+      # of their four violations predate this schema and the reconstructed rule
+      # adds `system` (#616). Saying "fails nothing" without naming the scope
+      # would be the same overreach as measuring the archive and calling it the
+      # writers — and the count was itself wrong at first, five rather than
+      # four, which is the same failure one level down (#620).
       - title: a live run observed its own inputs, model and machine
         preconditions:
           slot_conditions:
@@ -346,7 +348,7 @@ classes:
               required: true
             unrecoverable:
               required: true
-      - title: the two discriminators agree
+      - title: a derived mode implies a derived type
         description: >-
           `record_mode` and `record_type` are set by the same writer and must
           not disagree; a `derived` record typed as a generation record would
@@ -359,6 +361,22 @@ classes:
           slot_conditions:
             record_type:
               equals_string: d4d_derived_provenance
+      - title: a derived type implies a derived mode
+        description: >-
+          The converse, which the first version left open (#620): a record
+          typed `d4d_derived_provenance` while calling itself `live` validated.
+          The description claimed a mismatch "would tell a reader the opposite"
+          — true in both directions, checked in one. Two rules rather than one
+          because a precondition tests a single value, so neither direction
+          implies the other.
+        preconditions:
+          slot_conditions:
+            record_type:
+              equals_string: d4d_derived_provenance
+        postconditions:
+          slot_conditions:
+            record_mode:
+              equals_string: derived
       - title: a derived record declares what it was derived from
         preconditions:
           slot_conditions:

@@ -1722,25 +1722,40 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
         self._write_provenance(spec, label=label)
 
     def _write_provenance(self, spec, *, label=None):
-        """Provenance matching whatever is on disk *now*."""
+        """Provenance matching whatever is on disk *now*.
+
+        Built with `build_record`, the writer the pipeline itself uses, rather
+        than hand-assembled. It used to be a stub of four keys, and the resume
+        exit's conformance gate (#619) rejected it — correctly, since no writer
+        produces such a record. A fixture that cannot pass the gate the code
+        under test applies is testing a situation that does not arise, and
+        weakening the gate to accommodate it would have been the wrong fix.
+
+        Going through the real writer also means the fixture cannot drift away
+        from the schema again: a field the writer gains, it gains.
+        """
         import hashlib
         import yaml as _yaml
+
+        from data_sheets_schema.provenance import build_record
         def sha(p):
             return hashlib.sha256(p.read_bytes()).hexdigest()
+        rec = build_record(spec.project, spec.method, label or spec.label,
+                           mode="live", input_bundle=spec.bundle,
+                           input_verified=True, concat_dir=spec.out_dir)
+        data = dict(rec.data)
+        data["run"] = {**(data.get("run") or {}), "method": spec.method,
+                       "label": label or spec.label, "project": spec.project}
+        data["api_usage"] = [{"phase": ph, "input_tokens": 100,
+                              "output_tokens": 200} for ph in
+                             ("full", "core", "audit", "reconcile_full",
+                              "reconcile_core", "report")]
+        data["validation"] = {"artifacts": {
+            "full": {"path": str(spec.full_path), "sha256": sha(spec.full_path)},
+            "core": {"path": str(spec.core_path), "sha256": sha(spec.core_path)},
+        }}
         spec.provenance_path.parent.mkdir(parents=True, exist_ok=True)
-        spec.provenance_path.write_text(_yaml.safe_dump({
-            "record_mode": "live",
-            "run": {"method": spec.method, "label": label or spec.label,
-                    "project": spec.project},
-            "api_usage": [{"phase": ph, "input_tokens": 100,
-                           "output_tokens": 200} for ph in
-                          ("full", "core", "audit", "reconcile_full",
-                           "reconcile_core", "report")],
-            "validation": {"artifacts": {
-                "full": {"path": str(spec.full_path), "sha256": sha(spec.full_path)},
-                "core": {"path": str(spec.core_path), "sha256": sha(spec.core_path)},
-            }},
-        }))
+        spec.provenance_path.write_text(_yaml.safe_dump(data))
 
     def _no_api(self, called):
         class C:
@@ -1762,6 +1777,41 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
             execute(spec, client=self._no_api(called))
             self.assertEqual(called["n"], 0,
                              "a completed run must cost nothing to resume")
+
+    def test_resume_will_not_report_a_non_conforming_record_as_complete(self):
+        """The resume exit has now been patched three times for one omission.
+
+        It returns `already_complete: True` after `check_provenance`, which asks
+        whether a *usable* record exists — never whether it conforms. So a
+        record written by any other path (`d4d provenance record`, a backfill,
+        a run that failed the gate) came back through here as a success and
+        `d4d api batch` counted it in `ok` (#619).
+
+        The same exit previously reported `[]` validation problems about records
+        it never looked at, and `None` for all three checks (#599). This is the
+        third instance, so it gets a test rather than a comment.
+        """
+        import tempfile
+
+        import yaml as _yaml
+
+        from data_sheets_schema.api_runner import execute
+
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            self._complete_run(spec)
+            data = _yaml.safe_load(
+                spec.provenance_path.read_text(encoding="utf-8"))
+            # A live record with no `system`: rejected only by the mode rule,
+            # and exactly the kind of record another writer could leave behind.
+            data.pop("system")
+            spec.provenance_path.write_text(_yaml.safe_dump(data))
+            called = {"n": 0}
+            with self.assertRaises(RuntimeError) as caught:
+                execute(spec, client=self._no_api(called))
+            self.assertIn("system", str(caught.exception))
+            self.assertEqual(called["n"], 0,
+                             "the gate must refuse before spending anything")
 
     def test_resuming_a_completed_run_preserves_its_provenance(self):
         """Resume must not restamp the record it is resuming.

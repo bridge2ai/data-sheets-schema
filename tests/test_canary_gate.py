@@ -199,7 +199,31 @@ class GateControlFlowTest(unittest.TestCase):
     def test_the_gate_is_opt_in_and_says_how_to_bypass(self):
         src = self._source()
         self.assertIn("--no-canary-gate", src)
-        self.assertIn("canary_baseline and not no_canary_gate", src)
+        # The condition is now bound once as `gating` rather than restated at
+        # each of its three uses (#619) — it is read by the verdict block and
+        # by both paths where the first run fails without producing a verdict.
+        self.assertIn("gating = bool(canary_baseline) and not no_canary_gate",
+                      src)
+
+    def test_a_first_run_that_never_produced_a_verdict_stops_the_fan_out(self):
+        """A canary that raised has not passed (#619).
+
+        `canary_stop` used to be set only by a verdict, so a first run that
+        threw — or that produced invalid output and `continue`d — left the gate
+        unevaluated, and `--continue-on-error` fanned out to the rest of the
+        sweep. Conformance failures make this concrete: they are systematic, so
+        they recur on every run, after each is fully billed.
+
+        Asserted on the source because the alternative is driving a billed
+        sweep. Both sites are checked, since the `validation_problems` branch
+        previously jumped past the `if canary_stop: break` via its `continue`.
+        """
+        src = self._source()
+        self.assertEqual(src.count("_canary_never_ran("), 2,
+                         "both no-verdict paths must set the stop")
+        self.assertIn("if not continue_on_error and not canary_stop:", src,
+                      "the invalid-output path must not `continue` past the "
+                      "stop it just set")
 
 
 class ResolverUrlMetricTest(unittest.TestCase):

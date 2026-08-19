@@ -847,10 +847,16 @@ def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
 def record_conformance(data: dict[str, Any]) -> list[str]:
     """Violations only, for a caller that has separately handled the failure.
 
-    Kept because "what is wrong with this record" is a common question, and
-    because `d4d provenance validate-records` reports per-record findings. Do
-    not use it to decide that a record is *fine* — `check_record` is the call
-    that can say so.
+    **Never use this to decide that a record is fine.** An empty list means
+    "no violations found", which includes "found nothing because the validator
+    could not run" — `check_record` is the only call that distinguishes them,
+    and collapsing the two is #613 itself.
+
+    Kept for the narrow case of asking what is wrong with a record already
+    known to be checkable — chiefly tests, which assert on findings. The
+    justification given when this was split out named `d4d provenance
+    validate-records` as a caller; that command shells out to `linkml-validate`
+    and has never called this (#620).
     """
     return check_record(data)[0]
 

@@ -151,15 +151,24 @@ class ValidatorControl(unittest.TestCase):
             self.skipTest("record or schema not present in this checkout")
         record = yaml.safe_load(self.BASELINE.read_text(encoding="utf-8"))
 
-        # Positive control. A record with no `record_mode` cannot satisfy any
-        # schema, so findings here are the minimum proof the validator ran.
+        # Positive control, and specifically a control on the **rules**.
+        #
+        # The first version deleted `record_mode`, which is `required: true` at
+        # the attribute level — so it still produced findings with every rule
+        # stripped from the schema, and proved only that the validator was
+        # alive (#620). Since the regression this class exists to catch is a
+        # rule that stops being enforced, a control that survives the rules'
+        # removal guards nothing.
+        #
+        # A live record missing `model` is rejected *only* by the live rule.
+        # Verified by deleting the rules block: this comes back clean.
         findings, failure = check_record(
-            {k: v for k, v in record.items() if k != "record_mode"})
+            {k: v for k, v in record.items() if k != "model"})
         self.assertIsNone(failure, f"the validator could not run: {failure}")
         self.assertTrue(findings,
-                        "the validator reported a record with no record_mode as "
-                        "clean; every 'no violations' assertion below would pass "
-                        "vacuously")
+                        "a live record with no `model` was reported clean, so "
+                        "the mode rules are not being enforced and every 'no "
+                        "violations' assertion below would pass vacuously")
 
         findings, failure = check_record(record)
         self.assertIsNone(failure, f"the validator could not run: {failure}")
@@ -181,8 +190,27 @@ class ModeSpecificRequirements(ValidatorControl):
     """
 
     def _writer_fields(self, mode):
-        """What `build_record` actually emits for a mode, at write time."""
-        from data_sheets_schema.provenance import build_record
+        """What the real writer emits for a mode, at write time.
+
+        `derived` goes through `build_derived_record`, a different function —
+        covering it here rather than fabricating a derived record by mutating a
+        live one, since a fabrication proves nothing about what the writer
+        emits and `derived` has the most required fields of the three (#620).
+        """
+        import tempfile
+
+        from data_sheets_schema.provenance import (Contribution, build_record,
+                                                   build_derived_record)
+        if mode == "derived":
+            with tempfile.TemporaryDirectory() as d:
+                out = Path(d) / "X_d4d.yaml"
+                out.write_text("id: x\n", encoding="utf-8")
+                return build_derived_record(
+                    "AI_READI", "claudecode_agent", "test",
+                    sources=[Contribution(label="l", project="AI_READI",
+                                          method="claudecode_agent",
+                                          path=str(out), sha256="deadbeef")],
+                    derivation="a test record", outputs={"full": out}).data
         bundle = Path("data/preprocessed/concatenated/AI_READI_preprocessed.txt")
         if not bundle.exists():
             self.skipTest("no bundle in this checkout to build a record from")
@@ -213,7 +241,7 @@ class ModeSpecificRequirements(ValidatorControl):
         """
         if not SCHEMA.exists():
             self.skipTest("schema not present in this checkout")
-        for mode in ("live", "reconstructed"):
+        for mode in ("live", "reconstructed", "derived"):
             with self.subTest(mode=mode):
                 written = set(self._writer_fields(mode))
                 missing = sorted(self._rule_requirements(mode) - written)
@@ -227,7 +255,7 @@ class ModeSpecificRequirements(ValidatorControl):
         """The same thing end to end, through the real builder."""
         self._control()
         from data_sheets_schema.provenance import check_record
-        for mode in ("live", "reconstructed"):
+        for mode in ("live", "reconstructed", "derived"):
             with self.subTest(mode=mode):
                 findings, failure = check_record(self._writer_fields(mode))
                 self.assertIsNone(failure)
@@ -434,14 +462,28 @@ class TheSchemaKnowsEveryFieldTheWritersWrite(unittest.TestCase):
     #: `data` — progress files, phase payloads — and reports them as forbidden
     #: record fields. `src/renderer` and `src/validation` have one too, and
     #: neither writes provenance.
+    #: Round 2 (#620) found five more record-mutating functions absent from the
+    #: first version of this list, and three idioms the scan could not see.
+    #: None violated the schema, but the docstring claimed "every record field
+    #: any writer sets" — so the guard was narrower than the promise, which is
+    #: the failure mode it exists to prevent one level up.
     WRITERS = {
         "src/data_sheets_schema/provenance.py": {
             "build_record": ("data",),
             "build_derived_record": ("data",),
+            "apply_observed_effort": ("data",),
+            "apply_effort_basis": ("data",),
+            "apply_historical_prompt": ("data",),
         },
         "src/data_sheets_schema/cli/runs.py": {
             "validate_cmd": ("data",),
             "select_cmd": ("data", "prior"),
+        },
+        "src/data_sheets_schema/cli/provenance.py": {
+            "backfill_context": ("rec",),
+        },
+        "src/data_sheets_schema/backfill_checks.py": {
+            "apply": ("record",),
         },
     }
 
@@ -473,13 +515,40 @@ class TheSchemaKnowsEveryFieldTheWritersWrite(unittest.TestCase):
                 if not locals_:
                     continue
                 for node in ast.walk(fn):
+                    # `data.update({...})` / `data.setdefault("x", …)`. Both are
+                    # in use on record dicts today (`api_runner:2417`,
+                    # `provenance:542`) and the first version of this scan saw
+                    # neither, so a field introduced by either was unguarded
+                    # while the docstring claimed full coverage (#620).
+                    if (isinstance(node, ast.Call)
+                            and isinstance(node.func, ast.Attribute)
+                            and isinstance(node.func.value, ast.Name)
+                            and node.func.value.id in locals_):
+                        if node.func.attr == "setdefault" and node.args and \
+                                isinstance(node.args[0], ast.Constant) and \
+                                isinstance(node.args[0].value, str):
+                            found.setdefault(node.args[0].value, name)
+                        if node.func.attr == "update":
+                            for arg in node.args:
+                                if isinstance(arg, ast.Dict):
+                                    for key in arg.keys:
+                                        if isinstance(key, ast.Constant) and \
+                                                isinstance(key.value, str):
+                                            found.setdefault(key.value, name)
+                            for kw in node.keywords:
+                                if kw.arg:
+                                    found.setdefault(kw.arg, name)
+
                     targets = []
                     if isinstance(node, ast.Assign):
                         targets = list(node.targets)
                     elif isinstance(node, ast.AnnAssign):
                         targets = [node.target]
                     for target in targets:
-                        # `data = {...}` — the builders' dict literals.
+                        # `data = {...}` — the builders' dict literals. Also
+                        # covers `data = {**other, "x": …}`: an unpacking has a
+                        # None key, which the isinstance check skips, while the
+                        # literal keys beside it are still collected.
                         if (isinstance(target, ast.Name)
                                 and target.id in locals_
                                 and isinstance(node.value, ast.Dict)):
@@ -495,6 +564,23 @@ class TheSchemaKnowsEveryFieldTheWritersWrite(unittest.TestCase):
                                 and isinstance(target.slice.value, str)):
                             found.setdefault(target.slice.value, name)
         return found
+
+    def test_the_blocks_a_backfill_writes_are_all_declared(self):
+        """`backfill_checks.apply` writes `record[name] for name in BLOCKS`.
+
+        The key is a loop variable, so no AST scan of the assignment can name
+        it — the field list lives in a module constant instead. Adding a fifth
+        entry to `BLOCKS` would make all 195 records non-conforming, and
+        nothing else would notice (#620).
+        """
+        if not SCHEMA.exists():
+            self.skipTest("schema not present in this checkout")
+        from data_sheets_schema.backfill_checks import BLOCKS
+        schema = yaml.safe_load(SCHEMA.read_text(encoding="utf-8"))
+        known = set(schema["classes"]["GenerationRecord"]["attributes"])
+        self.assertEqual(sorted(set(BLOCKS) - known), [],
+                         "backfill_checks.BLOCKS names a field the schema does "
+                         "not declare; applying it would break every record")
 
     def test_every_named_writer_function_still_exists(self):
         """A renamed function would silently drop out of the scan."""

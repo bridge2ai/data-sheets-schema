@@ -2167,6 +2167,30 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # from exactly this field. Validation is local and free, and it
             # checks the bytes on disk now rather than a claim recorded earlier.
             problems = validate_outputs(spec)
+            # And conformance, for the third time on this exit and for the same
+            # reason as the first two (#619). `check_provenance` asks whether a
+            # usable record exists, not whether it conforms — so a record
+            # written by any other path (`d4d provenance record`, a backfill, a
+            # run that failed the gate and was resumed) came back through here
+            # as a success. That is the #582 shape the gate below refuses,
+            # reached by the exit that skips the gate.
+            #
+            # Recomputed from the bytes on disk rather than trusted from the
+            # record, exactly as validation and the three checks are.
+            conformance, conformance_failure = provenance.check_record(existing)
+            if conformance_failure:
+                raise RuntimeError(
+                    f"run {spec.label} for {spec.project} has a provenance "
+                    f"record whose conformance could not be established, so it "
+                    f"is unverified rather than valid: {conformance_failure}")
+            if conformance:
+                raise RuntimeError(
+                    f"run {spec.label} for {spec.project} has a provenance "
+                    f"record that does not conform to "
+                    f"{provenance.record_schema_path()}: "
+                    + "; ".join(conformance[:5])
+                    + (f" (+{len(conformance) - 5} more)"
+                       if len(conformance) > 5 else ""))
             # The three checks too, recomputed from the bytes on disk for the
             # same reason validation is (#599). Omitting them made every metric
             # None on a resumed batch, so the canary reported `unmeasurable`
