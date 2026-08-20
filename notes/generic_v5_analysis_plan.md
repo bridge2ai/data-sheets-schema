@@ -237,9 +237,11 @@ Four canaries, all AI-READI, and the fan-out decision.
   is false, and the top-three-of-seven permutation gives p ≈ 4/35 ≈ 0.11.
   Exchangeability is strained besides: the four v5 runs span three prompt
   texts and v4 was generated against a different schema digest (#576). So the
-  honest statement is **suggestive of a modest upward shift under the post-fix
-  prompt, not established** — which weakens the case that anything regressed
-  and correspondingly strengthens the override below. Content findings are
+  honest statement is **suggestive of a modest upward shift, not established**
+  — the p above is computed over all four runs spanning three prompt texts,
+  and the post-#644 prompt alone has contributed only {12, 12} — which weakens
+  the case that anything regressed and correspondingly strengthens the
+  override below. Content findings are
   unaffected: benign on every examined run, same slots recurring
   (`acquisition_methods` full=2 vs core=3 is byte-identical in the 08-20 and
   08-20b findings: core writes the "active collection" item, reconcile_full
@@ -250,7 +252,9 @@ Four canaries, all AI-READI, and the fan-out decision.
   `--no-canary-gate` under the `2026-08-20b` prefix, the completed canary
   resuming free as AI_READI rep1. The baseline was not adjusted and the gate's
   verdict stands on the record; the override is the documented conclusion of a
-  finding-level analysis across three post-#644 runs, not a workaround for it.
+  finding-level analysis across three runs — 08-19 pre-fix (the run that
+  produced the #644 diagnosis), 08-20 and 08-20b post-fix — not a workaround
+  for it.
   **Consequence for analysis: v5-vs-v4 pair-error counts are not comparable at
   face value** — see #650 for the finding-by-finding record. Post-arm
   engineering (absorb core's extra precision in reconcile_full) is tracked
