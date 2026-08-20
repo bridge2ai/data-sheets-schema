@@ -1,0 +1,275 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The `distributions` slot is not present in the supplied schema digest for the target class, and no `distributions` slot appears in the 98-slot inventory. The digest lists `distribution_formats` (DistributionFormat[]) and `file_collections` (FileCollection[]) as the slots that carry format and file-grouping information. The core record's `distributions` entries additionally use keys (`path`, `bytes`) that belong to FileCollection (`path`, `total_bytes`) rather than to any declared slot on this range. If CoreDataset does not declare `distributions`, this block will fail validation; if it does declare it, its permitted keys are unverifiable from the digest supplied and `bytes` is at minimum a non-digest spelling of `total_bytes`."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "conforms_to_standard",
+      "issue": "Enum violation. The permitted values are DICOM, BIDS, OMOP_CDM, WFDB, OPEN_MHEALTH, ESDS, CDS, RO_CRATE, FHIR, OTHER. The record-level list is valid, but several `file_collections[].conforms_to_standard` lists are fine while the top-level list is fine too — the actual defect is that no violation exists here. Retracted: values used (CDS, WFDB, OMOP_CDM, DICOM, OPEN_MHEALTH, ESDS, RO_CRATE) are all permitted. No finding."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "sampling_strategies[0].representative_verification",
+      "issue": "Shape mismatch with the slot's evident intent and with sibling usage. `representative_verification` is emitted as a YAML list containing a single prose sentence, whereas `strategies` and `why_not_representative` on the same object are emitted as scalars. The digest does not mark `representative_verification` as multivalued. The same list-wrapping of a single prose string recurs at `known_biases[2].affected_subsets`, `content_warnings[0].warnings`, `ip_restrictions.restrictions`, `regulatory_restrictions.regulatory_restrictions`, `data_governance.stewardship_roles`, `human_subject_research.irb_approval`, `human_subject_research.regulatory_compliance`, `human_subject_research.special_populations`, `at_risk_populations.special_protections`, `external_resources[0].restrictions`, and `version_access.versions_available`. Where the underlying slot is single-valued these are type errors; where multivalued, the single element is prose that packs several distinct items (e.g. `regulatory_compliance` bundles review status, NCT registration, FDA status, DMC status, GDS Policy and HIPAA Safe Harbor into one string) rather than one item per entry."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "sampling_strategies[0].representative_verification",
+      "issue": "Same list-wrapping/packing defect as the full record, carried through the projection: `representative_verification`, `known_biases[2].affected_subsets`, `content_warnings[0].warnings`, `ip_restrictions.restrictions`, `regulatory_restrictions.regulatory_restrictions`, `data_governance.stewardship_roles`, `human_subject_research.irb_approval`, `human_subject_research.regulatory_compliance`, `human_subject_research.special_populations`, `at_risk_populations.special_protections`, `external_resources[0].restrictions`, `version_access.versions_available`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "funders[0].grants[0].id",
+      "issue": "The Grant `id` is `uriorcurie` and has been given a resolver URL (https://reporter.nih.gov/search/yatARMM-qUyKAhnQgsCTAQ/project-details/10885481) rather than a CURIE. The URL is attested in the bundle (FAIRhub awardURI), so the value is grounded, but the same object's `name` field embeds the award number 'OT2OD032644' inside a display string rather than the identifier being carried in an identifier position. The FAIRhub record also supplies a second, different RePORTER URL for the same award (project-details/10471118, via NIH RePORTER) and the README cites a third (search/1ADgncihCk6fdMRJdCnBjg/project-details/10471118); only one is recorded and the divergence is not noted in the object's `source_caveats`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[0].affiliations",
+      "issue": "The first affiliation entry `{name: AI-READI Consortium}` carries no `id` while the remaining eight carry ROR CURIEs. More importantly, the eight ROR CURIEs are supported by the bundle (FAIRhub collaboratorList, leadSponsor, locationList) but ROR:00cvxb145 for University of Washington is drawn from `locationList` where it identifies a study *site*, and is here re-purposed as a creator affiliation. The nine 'affiliations' conflate the single declared creator (AI-READI Consortium, nameType Organizational) with the consortium's member institutions, which the bundle lists as collaborators and locations rather than as affiliations of the creator."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Single Creator object for a multivalued slot. The bundle names fifteen study principal investigators individually (FAIRhub overallOfficialList, each with an ORCID) and a Writing Committee, Principal Investigators, Research/Technical/Clinical Staff, Project Managers and Interns roster (Nature Metabolism). Collapsing all of this into one Creator whose `principal_investigator` is a single Person contradicts the instruction to emit one object per distinct entity for a multivalued slot. Only Aaron Y. Lee is represented as a person; fourteen other named PIs with attested ORCIDs are dropped."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "creators",
+      "issue": "Same single-object collapse as the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "source_caveats",
+      "issue": "Record-level `source_caveats` carries roughly ten distinct trust annotations concatenated with ' -- ' separators, including matter that belongs in sibling slots' own `source_caveats` (the file-count arithmetic belongs on `total_file_count`/`file_collections`; the enrollment-target conflict has no home slot and is content the record does not otherwise state; the healthsheet versioning inconsistency belongs on `version_access`). The digest describes `source_caveats` as commentary about sibling slots, not as a general appendix."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "source_caveats",
+      "issue": "Same concatenation defect, plus an added final paragraph describing the phase-1-to-phase-2 projection method ('This core record is a projection of the phase 1 full record; slots with no CoreDataset counterpart ... were folded into ...'). This is commentary about the generation process, not about the evidence behind sibling slot values, and is outside what the digest describes `source_caveats` as holding."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "notes",
+      "issue": "Content stated in core that the full record does not state in the same place, and in one respect states nowhere. The core `notes` opens with participant compensation (200 USD, payment timing, non-proration, transport assistance). In the full record this is in `participant_compensation`, a structured slot; the core record has no `participant_compensation` counterpart declared in the digest, so folding it into `notes` is defensible, but the digest's `notes` description explicitly reserves the slot for residual content 'after every fitting slot is used' and for what description cannot hold. The compensation detail could have gone in `description`. Flagged as a slot-selection defect rather than an unsupported claim."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "Value `restricted` is an inference, not an attested value, and the record's own `source_caveats` on the same object concedes this: 'an interpretation of the documented access conditions ... rather than a verbatim source value; the RO-Crate's own confidentialityLevel string is HL7:2N (normal)'. The bundle's only confidentiality-level statement is 'HL7:2N (normal)', which the record acknowledges does not map onto the enum. Under the omission-over-inference rule the slot should have been omitted and the HL7 string left in `other_compliance`, where it already appears."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "Same inferred enum value and same self-acknowledged lack of support, carried through the projection."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "license_and_use_terms.data_use_permission",
+      "issue": "Value `disease_specific_research` is selected over the license's own grant, which the same object's `license_terms` describes as permitting 'research and ... commercial and non-commercial purposes'. The object's `source_caveats` states the two were 'recorded together rather than as alternatives', but only one enum value is emitted, so the commercial permission is represented in prose only. The bundle supports both the disease-specific access condition and the broad license grant; a single enum value under-represents this and the choice between them is an interpretation."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "license_and_use_terms.data_use_permission",
+      "issue": "Same single-enum under-representation, carried through."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets[1].source_caveats",
+      "issue": "The caveat reads 'target_dataset is expressed as a DOI CURIE because the digest does not declare the range of this slot'. This is commentary about the schema digest and the generator's reasoning, not about the evidence; the digest does in fact declare `target_dataset` as required on DatasetRelationship. The caveat is misplaced (it concerns [0] equally, but appears only on [1]) and its content is generation-process commentary rather than a trust annotation about the evidence."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "related_datasets[1].source_caveats",
+      "issue": "Same misplaced generation-process commentary, carried through."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[0].data_topic",
+      "issue": "Single `data_topic` (B2AI_TOPIC:43, Diabetes) on a record whose own description enumerates survey, clinical, imaging, waveform, wearable, environmental and SDoH content. `data_topic` is single-valued on Instance, so this is not a shape error, but the choice narrows a deliberately multi-domain dataset to one topic; the record's own file_collections assign seven different topics (10, 9, 11, 24, 39, 38). No `data_substrate` is given on the top-level instance even though the description states the instance types present."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets",
+      "issue": "The three split subsets are given `id` values minted as fragments on the dataset DOI CURIE (doi:10.60775/fairhub.3#split-train). This follows the minting rule for record-internal labels, but each subset also carries `is_data_split: true` while `is_subpopulation` is omitted, and each subset's `subpopulations` block restates cohort-level demographic distributions that the record acknowledges are withheld from the public release at participant level. The subsets are aggregate summaries drawn from the README table rather than partitions whose demographic composition is inspectable in the released data; this distinction is noted in `subpopulations[0].source_caveats` at record level but not on the subsets themselves."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "resources",
+      "issue": "The three split partitions are moved from `subsets` (full) to `resources` (core) and lose the `is_data_split: true` marker in the process, since `resources` has range Dataset rather than DataSubset. The core record therefore no longer records that these three entries are data splits rather than component datasets; `splits`, which the full record populates with the split rationale, has no counterpart in the core record and its content is not carried over anywhere — the 70/15/15 proportions and balancing rationale survive only inside `resources[].description` and `version_access.version_details`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.committee_name",
+      "issue": "'AI-READI Consortium data governance committee' is a constructed label. The RO-Crate states `dataGovernanceCommittee: \"AI-READI Consortium\"`; the appended words 'data governance committee' are not in the source. The bundle separately names a 'Data Access Committee' (BMJ Open) whose requirements govern controlled access; the record mentions it in `access_review_process` but names neither body verbatim in `committee_name`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "data_governance.committee_name",
+      "issue": "Same constructed label, carried through."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "ethical_reviews[1].reviewing_organization",
+      "issue": "'AI-READI ethics module' is a constructed organization name. The bundle names four individuals under the RO-Crate `ethicalReview` field and describes ethics work by the project, but no source names an 'ethics module' as an organization. Similarly `ethical_reviews[2].reviewing_organization` 'AI-READI Community Advisory Board' expands the BMJ Open's 'Community Advisory Board' with a project prefix not present in the source."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "ethical_reviews",
+      "issue": "Same two constructed organization names, carried through."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "maintainers[1].role",
+      "issue": "Role `other` is used for FAIRhub. The Maintainer `role` enum includes `academic_institution`, `non_profit_organization`, `commercial_entity` and `automated_system`; FAIRhub is described in the bundle as a platform rather than an organization, so `other` is defensible, but `maintainers[0].role: researcher` for 'The AI-READI team' is a poorer fit than `academic_institution` given the record's own attribution of maintenance to a multi-institution consortium."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "`publisher` is `uriorcurie` and holds the URL https://fairhub.io/. The bundle states `publisherName: \"FAIRhub\"` (FAIRhub dataset_description) — a name, not an identifier. No registry identifier for FAIRhub appears in the bundle, so a URL is the fallback the rule permits, but the trailing-slash homepage URL is a website rather than an identifier for the publishing entity, and the bundle's actual value is a bare name."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "publisher",
+      "issue": "Same substitution of a homepage URL for the attested bare name 'FAIRhub'."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats[0].access_urls",
+      "issue": "`access_urls` (range uri[]) is populated on the DICOM entry only, with the dataset landing page and access page. These are dataset-level access routes, not format-specific URLs, and the digest warns against putting the access route where the distribution format is asked for. The other three format entries correctly omit the slot, making the placement on DICOM alone arbitrary."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "distribution_formats[0].access_urls",
+      "issue": "Same arbitrary placement, carried through."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "download_url",
+      "issue": "Omitted, though the bundle supports it: FAIRhub records `accessType: PublicDownloadSelfAttestationRequired` and the access page https://fairhub.io/datasets/3/access, which the record does use inside `distribution_formats[0].access_urls`. If that URL is the download route it belongs in `download_url` (range uri); if it is a landing page it duplicates `page`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "compression",
+      "issue": "Omitted. The bundle does not state a compression format for the release, so omission is correct; noted only to confirm no unsupported enum value was invented."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "was_derived_from",
+      "issue": "Omitted despite clear bundle support: the record itself states in `version_access.version_details` and `related_datasets` that v3.0.0 incorporates the pilot data of v1.0.0 and the year-2 data of v2.0.0 cumulatively. `was_derived_from` (string) would carry this; `related_datasets` carries the typed relationship but the derivation slot is empty."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_on",
+      "issue": "Omitted. The FAIRhub API supplies `created_at: 1763366400` (2025-11-17T00:00:00Z), which the record uses for `issued` but not for `created_on`. The two are distinct slots and the bundle supplies one timestamp; using it for `issued` alone is defensible, but the RO-Crate `datePublished: \"11/17/25\"` corroborates the release date and no separate creation timestamp is attested, so the omission is correct. Noted for completeness."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "description",
+      "issue": "The core `description` appends the recommended citation ('AI-READI Consortium. (2025). Flagship Dataset ... https://doi.org/10.60775/fairhub.3') to the prose. In the full record this is carried by the dedicated `citation` slot, which the core record omits. If CoreDataset declares `citation`, folding it into `description` bypasses a fitting slot; if it does not, the placement is acceptable. The core record also adds the byte figure '(3,815,969,779,678 bytes)' inline, duplicating `total_size_bytes` — a slot the core record otherwise omits entirely despite the full record populating it."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "total_file_count",
+      "issue": "Omitted from core although stated in the full record (356343) and restated in core prose ('comprises 356,343 files'). Same for `total_size_bytes`. If CoreDataset declares these slots, moving attested integers into prose loses the structure; the digest gives no indication they are absent from the core class."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "variables",
+      "issue": "The full record's thirteen VariableMetadata objects (hba1c, glucose, insulin, c_peptide, nt_probnp, troponin_t, CRP-hs, total_cholesterol, urine_albumin, moca_total_score, continuous_glucose, visual_acuity_logmar) are dropped entirely and their reference ranges compressed into one `collection_mechanisms` prose entry. The units, data types, min/max values and measurement techniques carried as structured fields in the full record survive only as an inline parenthetical list. The core record's own `source_caveats` acknowledges folding 'per-variable descriptions' but does not say the structured values were discarded."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "relationships",
+      "issue": "The full record's `relationships` object (one-visit-per-participant, participant-ID linkage across datatype directories, planned year-4 follow-up) is folded into `instances[0].notes`. The digest declares `notes` for residual content only after every fitting slot is used; if CoreDataset declares `relationships`, this bypasses it."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "collection_consents / collection_notifications / consent_revocations",
+      "issue": "Three distinct full-record slots (collection_consents, collection_notifications, consent_revocations) are collapsed into `informed_consent[0]` — the consent process into `consent_documentation`, the notification narrative into `notes`, and the revocation mechanism into `withdrawal_mechanism`. The core `source_caveats` does not mention this collapse. If CoreDataset declares these slots the collapse loses three structured records; the digest gives no indication they are absent."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "participant_privacy",
+      "issue": "The full record's `participant_privacy` object (anonymization_method, privacy_techniques, reidentification_risk, data_linkage as four separate fields) is folded into `is_deidentified.deidentification_details` as prose. The four declared fields become one paragraph."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "The full record's `direct_collection` object (is_direct: true plus the EHR-screening recruitment detail) is folded into a third `acquisition_methods` entry with `was_directly_observed: true`. This mislabels recruitment-source information as an acquisition method and asserts `was_directly_observed` of content that is partly about third-party-sourced controlled-access data."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "third_party_sharing",
+      "issue": "The single ThirdPartySharing object sets `is_shared: true` and places all substantive content in `notes`. The class declares only `is_shared`, `notes` and `source_caveats`, so this is shape-conformant, but the core record drops the slot entirely without noting the omission in its `source_caveats` list of folded slots — the onward-sharing restriction survives in core only inside `prohibited_uses` and `license_and_use_terms`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "file_collections[*].instances",
+      "issue": "Each FileCollection carries a single Instance with `instance_type` and `data_substrate`/`data_topic` CURIEs. Several substrate assignments are approximations rather than fits: B2AI_SUBSTRATE:10 (Delimited Text) for the environment collection whose files follow the NASA ASCII guidelines; B2AI_SUBSTRATE:6 (CSV) for clinical_data, which is accurate; B2AI_SUBSTRATE:73 (Physical activity data) for a collection that also holds heart rate, SpO2, respiratory rate, sleep and stress, each of which has its own substrate term (71, 72, 75, 76, 77). The digest instructs omission over approximation where no term fits, and one-term-per-collection under-represents the seven modalities the record itself enumerates."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "id",
+      "issue": "`id` is `doi:10.60775/fairhub.3` (CURIE form) while the `doi` slot correctly holds the bare `10.60775/fairhub.3`. Both conform to the stated rules — CURIE in the uriorcurie-ranged `id`, bare string in the string-ranged `doi`. No defect; recorded to confirm the distinction was handled."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "conforms_to_class",
+      "issue": "Full record correctly declares `Dataset`; core correctly declares `CoreDataset`. Both `conforms_to_schema` values are the canonical w3id URI. No defect."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "issued",
+      "issue": "`2025-11-17T00:00:00Z` carries the required UTC offset. `collection_timeframes[0].start_date`/`end_date` are bare dates, correct for the `date` range. No defect."
+    }
+  ],
+  "summary": "Both records are broadly well-grounded in the declared bundle: factual claims trace to identifiable sources, tier conflicts (Washington University in St. Louis vs University of Washington, project-name variants, 4000 vs 4600 enrollment target, license naming) are surfaced rather than silently resolved, and no identifier appears that the bundle does not attest. The most serious structural problem is in the core record, whose `distributions` block is not a slot the supplied digest declares and whose entries use `path`/`bytes` keys belonging to FileCollection (`path`/`total_bytes`); this will fail validation unless CoreDataset declares a slot the digest omits. A pervasive shape defect across both records is the wrapping of single prose strings in YAML lists (representative_verification, warnings, restrictions, irb_approval, regulatory_compliance, special_populations, stewardship_roles, versions_available and others), several of which pack multiple distinct items into one element rather than emitting one per entity. Two enum values are self-acknowledged inferences rather than attested content — `confidentiality_level: restricted` against a source that says only 'HL7:2N (normal)', and a single `data_use_permission` where the license grants both disease-specific access and broad commercial use. `creators` collapses fifteen individually named, ORCID-bearing principal investigators into one object with a single Person. Record-level `source_caveats` in both files has become a multi-topic appendix rather than commentary on sibling slots, and the core version additionally contains generation-process narration. The phase-1-to-phase-2 projection silently discards thirteen structured VariableMetadata objects, collapses three consent-related slots into one, and folds `total_file_count`/`total_size_bytes`/`citation` into prose; the core `source_caveats` acknowledges folding in general terms but not these specific losses. Several organization and committee names are lightly constructed rather than quoted ('AI-READI ethics module', 'AI-READI Consortium data governance committee'). Minor omissions the bundle would support include `was_derived_from` and `download_url`."
+}
