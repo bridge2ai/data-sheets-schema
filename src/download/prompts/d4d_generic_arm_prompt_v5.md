@@ -212,9 +212,9 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
 
 - In a slot whose declared range is `uriorcurie`, never write a resolver URL
   where the schema declares a prefix: write the CURIE — a prefix, a colon, and
-  the local part. `ROR:01an7q238`, not `https://ror.org/01an7q238`;
-  `ORCID:0000-0002-…`, not the orcid.org URL; `doi:10.60775/…`, not
-  `https://doi.org/…`. **`uriorcurie` is the range this rule exists for**: its
+  the local part. `ROR:01an7q238`, not `https://ror.org/01an7q238`; an
+  `ORCID:` CURIE, not the orcid.org URL; a `doi:` CURIE, not the doi.org
+  resolver form. **`uriorcurie` is the range this rule exists for**: its
   "uri" half is the fallback for an identifier that no declared prefix covers,
   never permission to expand one that a prefix does cover. Two records naming
   one thing in one form produce one identity; the same thing written as a
