@@ -227,12 +227,22 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
         # phrase, which is a check enforcing the bug.
         # Phrases below are matched against `_texts()` output, which strips
         # backticks and asterisks — so they are written without them. The
-        # second alternative names the exemption's range with its boundary
+        # required phrase names the exemption's range with its boundary
         # spelled out ("uri — not uriorcurie"), because a bare "range is uri"
         # would substring-match "range is uriorcurie" and assert nothing.
+        #
+        # The ambiguous sentence is *forbidden*, in both texts. The first fix
+        # kept "declared range is a url" as an accepted alternative because
+        # the playbook still used it — which meant reintroducing the exact
+        # #644 sentence into the prompt passed every test, and the claim that
+        # this had been mutation-tested was true only of a full rule revert.
+        # The playbook is now disambiguated too, so nothing needs the old
+        # phrase and its reappearance anywhere is a failure.
         ("a URL-ranged slot still takes a URL",
-         ("declared range is a url",
-          "range is uri — not uriorcurie — takes a url"), ()),
+         ("range is uri — not uriorcurie — takes a url",),
+         ("declared range is a url takes a url",)),
+        ("string-ranged identifier slots follow their own description",
+         ("declared range is string",), ()),
         ("prose and citations are left alone",
          ("prose or a citation",), ()),
         ("an undeclared prefix is never invented",

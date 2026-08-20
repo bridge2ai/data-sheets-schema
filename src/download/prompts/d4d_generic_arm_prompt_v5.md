@@ -212,9 +212,9 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
 
 - In a slot whose declared range is `uriorcurie`, never write a resolver URL
   where the schema declares a prefix: write the CURIE — a prefix, a colon, and
-  the local part. `ROR:01an7q238`, not `https://ror.org/01an7q238`; an
-  `ORCID:` CURIE, not the orcid.org URL; a `doi:` CURIE, not the doi.org
-  resolver form. **`uriorcurie` is the range this rule exists for**: its
+  the local part. A `ROR:` CURIE, not the ror.org URL; an `ORCID:` CURIE, not
+  the orcid.org URL; a `doi:` CURIE, not the doi.org resolver form.
+  **`uriorcurie` is the range this rule exists for**: its
   "uri" half is the fallback for an identifier that no declared prefix covers,
   never permission to expand one that a prefix does cover. Two records naming
   one thing in one form produce one identity; the same thing written as a
@@ -225,7 +225,10 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   Two things this does not govern, and they are exempt entirely: a slot whose
   declared range is `uri` — not `uriorcurie` — takes a URL (`download_url` and
   `access_urls` are declared `uri`, and a CURIE there is wrong), and a URL
-  inside prose or a citation is text. Leave both exactly as written.
+  inside prose or a citation is text. Leave both exactly as written. A slot
+  whose declared range is `string` follows its own description and pattern
+  even when it holds an identifier — the `doi` slot takes the bare DOI,
+  neither prefixed nor resolved.
 - An identifier that names something outside this dataset — an organisation, a
   person, a publication, another dataset — is a fact about the world, subject to
   the same rule as any other fact: take it from the evidence or omit it. Do not
