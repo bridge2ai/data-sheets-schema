@@ -47,19 +47,26 @@ to every project:
   relationship to any other arm or project. Apply your own judgment about what
   the evidence supports.
 - **In an identifier slot, never write a resolver URL where the schema declares
-  a prefix — write the CURIE.** `ROR:01an7q238`, not
-  `https://ror.org/01an7q238`; `ORCID:0000-0002-…`, not the orcid.org URL;
-  `doi:10.13026/…`, not `https://doi.org/…`. Two records naming one thing in
-  one form produce one identity; the same thing written as a prefix here and a
-  resolver URL there produces two. A resolver URL in such a slot is a defect
-  even though it resolves: the v5 canary wrote 45 of them and that is what
-  #591 records.
+  a prefix — write the CURIE.** A `ROR:` CURIE, not the ror.org URL; an
+  `ORCID:` CURIE, not the orcid.org URL; a `doi:` CURIE, not the doi.org
+  resolver form. (Form only, deliberately: an example carrying a real registry
+  identifier or a real DOI prefix leaks one project's identity into text every
+  project reads — one project's real publisher prefix sat here for a month,
+  #647.) Two records naming one thing in one form produce one identity;
+  the same thing written as a prefix here and a resolver URL there produces
+  two. A resolver URL in such a slot is a defect even though it resolves: the
+  v5 canary wrote 45 of them and that is what #591 records.
 
   **This governs slots whose declared range is an identifier** —
-  `uriorcurie`. A slot whose declared range is a URL takes a URL: `download_url`
-  and `access_urls` are declared `uri` and a CURIE there is wrong. A URL inside
-  prose or a citation is text, not an identifier, and must be left exactly as
-  written.
+  `uriorcurie`. A slot whose declared range is `uri` — not `uriorcurie` —
+  takes a URL: `download_url` and `access_urls` are declared `uri` and a CURIE
+  there is wrong. ("Not `uriorcurie`" is load-bearing: the 2026-08-19 canary
+  read the older wording, "declared range is a URL", as covering `uriorcurie`
+  and expanded every id to a resolver URL — #644.) A slot whose declared range
+  is `string` follows its own description and pattern even when it holds an
+  identifier — the `doi` slot takes the bare DOI, neither prefixed nor
+  resolved. A URL inside prose or a citation is text, not an identifier, and
+  must be left exactly as written.
 
   **Where no declared prefix fits, never invent one.** A prefix the schema does
   not declare resolves to nothing, so do not mint `b2ai-voice:` or similar
@@ -82,7 +89,7 @@ to every project:
   does not reach it: no evidence can supply it. The test is whether the thing
   named has a referent outside this record. Where it does not, hang the label
   off one the bundle does supply — a fragment on the identifier of the thing
-  it is part of, `doi:10.60775/fairhub.3#split-train`, rather than a new
+  it is part of, `<the dataset's own DOI CURIE>#split-train`, rather than a new
   namespace (#531). A person is identified by an ORCID and an organisation by a
   ROR; **a fragment appended to an organisation's ROR does not identify a
   person**, it asserts something false about that organisation.

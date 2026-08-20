@@ -218,8 +218,31 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
     #: the model to write a URL where no prefix is declared and the other said
     #: never to write one.
     AGREEMENTS = (
+        # "declared range is `uri`" joined this list when #644 showed the
+        # older phrasing — "declared range is a URL" — was itself the defect:
+        # a range literally named `uriorcurie` satisfies "is a URL" on a plain
+        # reading, and the canary's own report said so in as many words ("the
+        # resolver URL for the uriorcurie-ranged id"). The exemption must name
+        # the range it means. This test used to *require* the ambiguous
+        # phrase, which is a check enforcing the bug.
+        # Phrases below are matched against `_texts()` output, which strips
+        # backticks and asterisks — so they are written without them. The
+        # required phrase names the exemption's range with its boundary
+        # spelled out ("uri — not uriorcurie"), because a bare "range is uri"
+        # would substring-match "range is uriorcurie" and assert nothing.
+        #
+        # The ambiguous sentence is *forbidden*, in both texts. The first fix
+        # kept "declared range is a url" as an accepted alternative because
+        # the playbook still used it — which meant reintroducing the exact
+        # #644 sentence into the prompt passed every test, and the claim that
+        # this had been mutation-tested was true only of a full rule revert.
+        # The playbook is now disambiguated too, so nothing needs the old
+        # phrase and its reappearance anywhere is a failure.
         ("a URL-ranged slot still takes a URL",
-         ("declared range is a URL",), ()),
+         ("range is uri — not uriorcurie — takes a url",),
+         ("declared range is a url takes a url",)),
+        ("string-ranged identifier slots follow their own description",
+         ("declared range is string",), ()),
         ("prose and citations are left alone",
          ("prose or a citation",), ()),
         ("an undeclared prefix is never invented",
@@ -231,7 +254,17 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
         ("no unqualified ban on URLs",
          (), ("never as a URL", "never a URL,")),
         ("the ban that remains is scoped to identifier slots",
-         ("identifier slot", "range is an identifier"), ()),
+         ("identifier slot", "range is an identifier",
+          "range is uriorcurie"), ()),
+        # The #644 lesson as a standing requirement: both texts must name
+        # `uriorcurie` explicitly, because "identifier slot" and "URL-ranged
+        # slot" are prose categories the model has to map onto the digest's
+        # literal range names — and the one range that contains both words is
+        # exactly where that mapping inverted. The v5 canary wrote 29/29 ids
+        # as resolver URLs under a rule written to forbid them, where v4 with
+        # no rule at all wrote 62/68 as CURIEs.
+        ("the governed range is named, not paraphrased",
+         ("uriorcurie",), ()),
     )
 
     def test_the_two_texts_do_not_contradict_each_other(self):

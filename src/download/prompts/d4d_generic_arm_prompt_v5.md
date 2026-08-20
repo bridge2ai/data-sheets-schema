@@ -210,15 +210,25 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
 --- END ADDED IN v3 ---
 --- ADDED IN v5 ---
 
-- In a slot whose declared range is an identifier, never write a resolver URL
+- In a slot whose declared range is `uriorcurie`, never write a resolver URL
   where the schema declares a prefix: write the CURIE — a prefix, a colon, and
-  the local part. Two records naming one thing in one form produce one
-  identity; the same thing written as a prefix here and a resolver URL there
-  produces two. Check the schema's declared prefixes and use one whenever it
-  fits; a resolver URL in such a slot is a defect even though it resolves.
-  Two things this does not govern, and they are exempt entirely: a slot whose
-  declared range is a URL takes a URL, and a URL inside prose or a citation is
-  text. Leave both exactly as written.
+  the local part. A `ROR:` CURIE, not the ror.org URL; an `ORCID:` CURIE, not
+  the orcid.org URL; a `doi:` CURIE, not the doi.org resolver form.
+  **`uriorcurie` is the range this rule exists for**: its
+  "uri" half is the fallback for an identifier that no declared prefix covers,
+  never permission to expand one that a prefix does cover. Two records naming
+  one thing in one form produce one identity; the same thing written as a
+  prefix here and a resolver URL there produces two. Check the schema's
+  declared prefixes and use one whenever it fits; a resolver URL in a
+  `uriorcurie` slot whose prefix is declared is a defect even though it
+  resolves.
+  Three things this does not govern, and they are exempt entirely: a slot
+  whose declared range is `uri` — not `uriorcurie` — takes a URL
+  (`download_url` and `access_urls` are declared `uri`, and a CURIE there is
+  wrong); a URL inside prose or a citation is text — leave both of these
+  exactly as written; and a slot whose declared range is `string` follows its
+  own description and pattern even when it holds an identifier — the `doi`
+  slot takes the bare DOI, neither prefixed nor resolved.
 - An identifier that names something outside this dataset — an organisation, a
   person, a publication, another dataset — is a fact about the world, subject to
   the same rule as any other fact: take it from the evidence or omit it. Do not

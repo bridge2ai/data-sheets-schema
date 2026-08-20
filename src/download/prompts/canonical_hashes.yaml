@@ -121,14 +121,13 @@ files:
       retired_on: '2026-08-13'
       sha256: a47e61b52c05a0aa81c2a8629be551942ab2e6e24a39d11dc75ba96ef5b3482a
   src/download/prompts/d4d_generic_arm_prompt_v5.md:
-    body_sha256: eacd39e002e148c22c4e8012b171bcdbe59d25f2b0c94710a7eef1af446241b9
-    bytes: 13237
-    pinned_at_commit: 7c3400b7f422575c1ae81935e43562cafad88f19
-    pinned_on: '2026-08-19'
-    reason: "Rationale said \"Four rules\"; the block holds five (#638). Rationale only \u2014\
-      \ above `## Prompt body`, never sent to the model, so the body hash is unchanged and\
-      \ the condition is not re-baselined."
-    sha256: 97ccf288e22b52c7baca4fb163c60218f821b365c846e9eaa9a81b292c4b0513
+    body_sha256: bdc18672ba485dbc15a4b1f1321e61dbda0e292fde502b8b2cc568053dafef98
+    bytes: 13909
+    pinned_at_commit: 1f54bd791495038e3a8d8c8fbca3cb925502b3c3
+    pinned_on: '2026-08-20'
+    reason: 'Round-3 fix: the exemption paragraph said "Two things" while listing three, a
+      stale literal count in the paragraph #644 proved is read literally.'
+    sha256: c4bbcc41eb4f0b83704228a0bf040294dedd6edf5afbf06035c2fd9d7587ebbb
     superseded:
     - pinned_on: '2026-08-14'
       reason: "initial pin for the generic-v5 condition (#547, #531, #545): v4 plus one marked\
@@ -191,6 +190,31 @@ files:
         \ the record. Also corrects the rationale from four rules to five."
       retired_on: '2026-08-19'
       sha256: 389f7bfe6a202f3e7207e28296b87dad44de19f956c503532e2d6530768613ec
+    - pinned_on: '2026-08-19'
+      reason: "Rationale said \"Four rules\"; the block holds five (#638). Rationale only\
+        \ \u2014 above `## Prompt body`, never sent to the model, so the body hash is unchanged\
+        \ and the condition is not re-baselined."
+      retired_on: '2026-08-19'
+      sha256: 97ccf288e22b52c7baca4fb163c60218f821b365c846e9eaa9a81b292c4b0513
+    - pinned_on: '2026-08-19'
+      reason: "Rule 1 exemption said \"declared range is a URL\", which uriorcurie satisfies\
+        \ on a plain reading \u2014 the model expanded every id to a resolver URL (29/29)\
+        \ where v4 with no rule wrote 62/68 CURIEs (#644). The governed range is now named\
+        \ literally, matching the playbook wording that never had the hole."
+      retired_on: '2026-08-19'
+      sha256: 4d83f0dd032270d1f8f4a6c481a8edbb58dca3dcfe1e70febc28df0e5a0fa0a9
+    - pinned_on: '2026-08-19'
+      reason: 'The #644 fix examples leaked AI-READI DOI prefix 10.60775 into the generic
+        prompt; examples now show CURIE form without any project quantity.'
+      retired_on: '2026-08-19'
+      sha256: c7fcc2283d1d8d84c11a156b26205c93e507134ec90cccc3adb2199d29b3ada5
+    - pinned_on: '2026-08-19'
+      reason: 'Round-2 review of #645: examples are form-only (a real UC Berkeley ROR id had
+        entered the text), and string-ranged identifier slots get one sentence of guidance
+        (doi takes the bare DOI). The uri-not-uriorcurie exemption is unchanged from the #644
+        fix.'
+      retired_on: '2026-08-20'
+      sha256: d22c9084436458e67600ea0e54cd936b8705105a554d50479655123b9708fbe5
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
