@@ -222,13 +222,13 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   declared prefixes and use one whenever it fits; a resolver URL in a
   `uriorcurie` slot whose prefix is declared is a defect even though it
   resolves.
-  Two things this does not govern, and they are exempt entirely: a slot whose
-  declared range is `uri` — not `uriorcurie` — takes a URL (`download_url` and
-  `access_urls` are declared `uri`, and a CURIE there is wrong), and a URL
-  inside prose or a citation is text. Leave both exactly as written. A slot
-  whose declared range is `string` follows its own description and pattern
-  even when it holds an identifier — the `doi` slot takes the bare DOI,
-  neither prefixed nor resolved.
+  Three things this does not govern, and they are exempt entirely: a slot
+  whose declared range is `uri` — not `uriorcurie` — takes a URL
+  (`download_url` and `access_urls` are declared `uri`, and a CURIE there is
+  wrong); a URL inside prose or a citation is text — leave both of these
+  exactly as written; and a slot whose declared range is `string` follows its
+  own description and pattern even when it holds an identifier — the `doi`
+  slot takes the bare DOI, neither prefixed nor resolved.
 - An identifier that names something outside this dataset — an organisation, a
   person, a publication, another dataset — is a fact about the world, subject to
   the same rule as any other fact: take it from the evidence or omit it. Do not

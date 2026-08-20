@@ -242,8 +242,9 @@ Two canaries so far, both AI-READI, neither authorising a fan-out:
   from a lower-tier source, and the release's own citation names the AI-READI
   Consortium as sole creator — source priority working. The train/val/test
   split survives in prose rather than as `subsets[]` entities. The extra pair
-  errors (13 vs v4's worst of 10) are the same class as v4's — shared-slot
-  content divergences, 7 of 13 in `notes` paths; the run's provenance shows
+  errors (13 vs v4's worst of 10) are 12 shared-slot-content divergences (7 of
+  them in `notes` paths) plus one shared-slot-presence on `$.download_url`;
+  the run's provenance shows
   repair touched *both* records, so the first version of this sentence, which
   blamed repair rewriting the full record only, was wrong (#645 review).
   Plausibly downstream of the identifier mess above; re-measure after the fix

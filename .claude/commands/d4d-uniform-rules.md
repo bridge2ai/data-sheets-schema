@@ -51,8 +51,8 @@ to every project:
   `ORCID:` CURIE, not the orcid.org URL; a `doi:` CURIE, not the doi.org
   resolver form. (Form only, deliberately: an example carrying a real registry
   identifier or a real DOI prefix leaks one project's identity into text every
-  project reads — a PhysioNet DOI prefix, i.e. VOICE's publisher, sat here for
-  a month.) Two records naming one thing in one form produce one identity;
+  project reads — one project's real publisher prefix sat here for a month,
+  #647.) Two records naming one thing in one form produce one identity;
   the same thing written as a prefix here and a resolver URL there produces
   two. A resolver URL in such a slot is a defect even though it resolves: the
   v5 canary wrote 45 of them and that is what #591 records.
