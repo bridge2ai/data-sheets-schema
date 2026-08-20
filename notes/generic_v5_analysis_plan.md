@@ -217,6 +217,35 @@ today's source; it says nothing about whether today's source is the same one v4
 was generated against. It is not — v4 recorded `622e6d03` — and that remains a
 decision about the comparison rather than a defect to fix here.
 
+## Canary history (updated as canaries run)
+
+Two canaries so far, both AI-READI, neither authorising a fan-out:
+
+- **2026-08-16** — completed and was read as a pass, but its recorded
+  `grounding` block predates the resolver-URL finding, so its stored verdict is
+  an absence of measurement that reads like one. Recomputed from its artifacts:
+  REGRESSED, 22 resolver URLs against a v4 baseline of 0 (#640, #591).
+- **2026-08-19** — run from `main` at `0e9ff4a3` through `d4d api batch` with
+  the gate live. **REGRESSED, and the gate stopped the sweep**: resolver URLs
+  24 vs 0, pair errors 13 vs 10. Cost one run (~786k in / 250k out) instead of
+  twelve. Diagnosis (#644): rule 1's exemption said "a slot whose declared
+  range is a URL takes a URL", and the schema's identifier slots are ranged
+  `uriorcurie` — which satisfies that clause on a plain reading. The run's own
+  reconciliation report confirms the model read it exactly that way ("the
+  resolver URL for the `uriorcurie`-ranged `id`"). The result inverted the
+  rule's intent: v4, with no rule at all, wrote 62/68 ids as CURIEs; v5 wrote
+  0/29. The exemption now names the ranges literally (`uri`, not `uriorcurie`),
+  matching the agentic playbook, whose wording always did.
+
+  The same canary settled the 68→29 "entity drop" as **mostly intended**: the
+  16 dropped ORCID creators were clinical-trial investigators promoted by v4
+  from a lower-tier source, and the release's own citation names the AI-READI
+  Consortium as sole creator — source priority working. The train/val/test
+  split survives in prose rather than as `subsets[]` entities. The extra pair
+  errors are `notes` divergences from repair rewriting the full record only,
+  downstream of the identifier mess above; re-measure after the fix rather
+  than patching separately.
+
 ## The canary is AI-READI, and the context risk is smaller than first stated
 
 The v4 arm canaried CHORUS, whose largest request is 64k tokens against
