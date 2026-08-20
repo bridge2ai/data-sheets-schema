@@ -219,27 +219,42 @@ decision about the comparison rather than a defect to fix here.
 
 ## Canary history (updated as canaries run)
 
-Four entries: three canaries, all AI-READI, and the fan-out decision.
+Four canaries, all AI-READI, and the fan-out decision.
 
 - **2026-08-20b** — post-#644-fix, second independent draw. **REGRESSED on pair
   errors only: 12 vs baseline worst 10.** Everything else passed, several far
   better than baseline: resolver URLs 0, undeclared prefixes 0, British 28 vs
-  146. That made v5 = {13, 12, 12} against v4 = {10, 8, 6} — all three v5 runs
-  above v4's max, permutation p ≈ 1/20, so the shift is systematic. Content
-  verified benign on all three runs with the same slots recurring
-  (`acquisition_methods` full=2 vs core=3 appears identically in consecutive
-  runs: core writes the "active collection" item, reconcile_full never absorbs
-  it). Core carries extra grounded detail; nothing wrong, nothing lost (#650).
+  146. Its evidence directory is not yet committed — the production arm is
+  writing under that prefix; **the post-arm data commit must include it**, or
+  this paragraph cites bytes outside the repo (#649).
+
+  **On whether the pair-error shift is systematic — corrected after review
+  (#651).** The first version of this entry claimed v5 = {13, 12, 12} vs
+  v4 = {10, 8, 6}, "all three v5 runs above v4's max, p ≈ 1/20". That silently
+  dropped the fourth v5 observation: the 2026-08-16 canary's pair count is
+  **5** — below v4's *minimum* — measured live by the runner on the same
+  finding-code family. With it, v5 = {5, 13, 12, 12}, "all v5 above v4's max"
+  is false, and the top-three-of-seven permutation gives p ≈ 4/35 ≈ 0.11.
+  Exchangeability is strained besides: the four v5 runs span three prompt
+  texts and v4 was generated against a different schema digest (#576). So the
+  honest statement is **suggestive of a modest upward shift under the post-fix
+  prompt, not established** — which weakens the case that anything regressed
+  and correspondingly strengthens the override below. Content findings are
+  unaffected: benign on every examined run, same slots recurring
+  (`acquisition_methods` full=2 vs core=3 is byte-identical in the 08-20 and
+  08-20b findings: core writes the "active collection" item, reconcile_full
+  never absorbs it). Core carries extra grounded detail; nothing wrong,
+  nothing lost (#650).
 
   **Decision (2026-08-20, Marcin): fan out with a documented override** —
   `--no-canary-gate` under the `2026-08-20b` prefix, the completed canary
   resuming free as AI_READI rep1. The baseline was not adjusted and the gate's
   verdict stands on the record; the override is the documented conclusion of a
-  three-run, finding-level analysis, not a workaround for it. **Consequence for
-  analysis: v5-vs-v4 pair-error counts are not comparable at face value** —
-  v5 runs ~2–4 higher on a divergence class shown benign; see #650 for the
-  finding-by-finding record. Post-arm engineering (absorb core's extra
-  precision in reconcile_full) is tracked there.
+  finding-level analysis across three post-#644 runs, not a workaround for it.
+  **Consequence for analysis: v5-vs-v4 pair-error counts are not comparable at
+  face value** — see #650 for the finding-by-finding record. Post-arm
+  engineering (absorb core's extra precision in reconcile_full) is tracked
+  there.
 
 - **2026-08-20** — post-#644-fix. REGRESSED on pair errors (12 vs 10) with the
   identifier fix confirmed completely: resolver URLs 24 → 0, and the record's
