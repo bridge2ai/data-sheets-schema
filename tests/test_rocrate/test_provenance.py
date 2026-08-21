@@ -315,7 +315,8 @@ class TestHashUnification(unittest.TestCase):
         anchored the `doi` pattern post-arm, so the second kind now exists
         corpus-wide by design: pre-move records keep the verdicts they were
         pinned with, because re-validating them against the new pattern would
-        fail honest records (112 non-bare doi values, all in older labels).
+        fail honest records (every non-bare doi value lives in labels from
+        2026-08-12 or earlier; neither study arm carries one).
 
         So the split is enforced instead: a stale record whose artifacts no
         longer hash to what its verdict pinned is a failure here; one whose
@@ -337,7 +338,16 @@ class TestHashUnification(unittest.TestCase):
                     project, r.method, r.label).read_text(encoding="utf-8"))
                 for entry in ((rec.get("validation") or {})
                               .get("artifacts") or {}).values():
-                    if isinstance(entry, dict) and verify_entry(entry) is False:
+                    if not isinstance(entry, dict):
+                        continue
+                    # An entry that recorded a hash must verify True; None
+                    # then means the file is gone, and a validated artifact
+                    # that vanished is corruption — the first version's
+                    # `is False` let deletion pass as lawful (#657 review).
+                    # An entry that never recorded a hash has nothing to
+                    # verify and proves nothing either way.
+                    from data_sheets_schema.provenance import recorded_hash
+                    if recorded_hash(entry) and verify_entry(entry) is not True:
                         corrupted.append((r.method, r.label, project))
                         break
         self.assertEqual(corrupted, [],

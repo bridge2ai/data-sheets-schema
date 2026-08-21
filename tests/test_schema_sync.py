@@ -63,7 +63,9 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         Moves so far: `44d29023` → `580992ed` on 2026-08-21, anchoring the
         `doi` pattern (#646), after the v5 arm completed. Both study arms were
         re-validated under the new schema (24 records, all valid — they write
-        bare DOIs); the 112 non-bare doi values all live in older labels,
+        bare DOIs); every non-bare doi value in the corpus (~100–122 by
+        file scope; the count is scope-dependent, the location is not) lives
+        in labels from 2026-08-12 or earlier,
         which keep the verdicts they were pinned with (#426).
         """
         if not self.SCHEMA.exists():

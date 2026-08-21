@@ -104,7 +104,7 @@ def condition_delta(a: str, b: str) -> list[str]:
 
 
 #: Bases whose step added several rules at once, and how many. Both were
-#: deliberate change-sets registered before the run — v2's three, v5's four — so
+#: deliberate change-sets registered before the run — v2's three, v5's five — so
 #: comparing across them is legitimate; what is unavailable is attributing a
 #: difference to one rule inside the set. Recorded so an analysis can say which
 #: it is doing.
@@ -526,10 +526,12 @@ PHASE_INSTRUCTIONS = {
         "exact figure where the full record has a rounded one, an entry the "
         "core record lists separately where the full record folded it into "
         "another item, an enumeration the core record carries more completely "
-        "— absorb these too, they are content the full record lacks. In a "
-        "slot both records carry, prefer the representation that lets them "
-        "agree: if the core record itemizes what the full record merged and "
-        "both are bundle-supported, itemize. "
+        "— absorb these too, they are content the full record lacks, **under "
+        "the same bundle-support gate as everything else**: a precise figure "
+        "the bundle does not state is an invention with extra decimal places, "
+        "not precision. In a slot both records carry, prefer the "
+        "representation that lets them agree: if the core record itemizes "
+        "what the full record merged and both are bundle-supported, itemize. "
         "Absorb the content, not the wording — put it where the schema says it "
         "belongs, which may not be where core put it. "
         "Do not absorb anything the audit findings above identify as "

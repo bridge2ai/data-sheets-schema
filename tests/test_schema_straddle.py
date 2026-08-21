@@ -191,6 +191,15 @@ class TestAgainstTheRealArm(unittest.TestCase):
                             "the schema moved in #646; a pin equal to current "
                             "bytes means the pin was rewritten, which verdicts "
                             "must never be")
+        # And the exact bytes it should pin: the pre-#646 schema its verdict
+        # was reached against. `assertNotEqual(current)` alone
+        # accepts a pin rewritten to any *other* wrong value (#657 review);
+        # equality against the recorded history is the discriminating check.
+        self.assertEqual(
+            pinned["full_sha256"],
+            "0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8",
+            "the pin no longer matches the schema this verdict was actually "
+            "reached against")
         self.assertNotEqual(
             generation_digest("claudecode_agent", f"{ARM}_rep1", "AI_READI"),
             generation_digest("claudecode_agent", f"{ARM}_rep2", "AI_READI"))
@@ -249,10 +258,15 @@ class TestAgainstTheRealArm(unittest.TestCase):
                         project, "claudecode_agent", label).read_text())
                     for entry in ((rec.get("validation") or {})
                                   .get("artifacts") or {}).values():
-                        self.assertNotEqual(
-                            verify_entry(entry), False,
-                            "artifact bytes changed since the verdict — this "
-                            "is corruption, not schema movement")
+                        # `is True`, not `is not False`: verify_entry returns
+                        # None for a file that is missing or carries no hash,
+                        # and a validated artifact that has *vanished* is
+                        # corruption too — the first version let deletion slip
+                        # through as lawful staleness (#657 review).
+                        self.assertIs(
+                            verify_entry(entry), True,
+                            "artifact bytes changed or vanished since the "
+                            "verdict — corruption, not schema movement")
 
 
 class TestTheCheckReportsIt(unittest.TestCase):

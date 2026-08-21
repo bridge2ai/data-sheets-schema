@@ -901,7 +901,7 @@ def validate_cmd(method, project, label, recheck, dry_run):
         ProvenanceRecord, record_path_for,
     )
     from data_sheets_schema.runs import (
-        STALE, UNVERIFIED, discover, is_complete, validation_status,
+        UNVERIFIED, discover, is_complete, validation_status,
     )
 
     targets = []
@@ -918,9 +918,17 @@ def validate_cmd(method, project, label, recheck, dry_run):
             if not is_complete(run.method, run.label, proj):
                 continue
             status = validation_status(run.method, run.label, proj)
-            # STALE is re-validated like UNVERIFIED: its verdict
-            # describes bytes the file no longer has.
-            if not recheck and status not in (UNVERIFIED, STALE):
+            # STALE is *not* re-validated by default (#657 review). It
+            # conflates two situations, and the default action is wrong for
+            # both: a verdict whose schema pin predates a deliberate schema
+            # move (#646) is a historical fact to keep — re-validating the
+            # 2026-08-11 arm against the anchored doi pattern would flip
+            # honest verdicts to invalid (#426) — and a record whose bytes
+            # changed after its verdict is evidence of an edit, which wants
+            # investigation, not a fresh verdict quietly laundering it.
+            # Re-validation of an already-verdicted record is `--recheck`,
+            # a deliberate act naming its scope.
+            if not recheck and status != UNVERIFIED:
                 continue
             targets.append((run.method, run.label, proj))
 
