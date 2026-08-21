@@ -1238,6 +1238,23 @@
             "title": "DataProtectionImpact",
             "type": "object"
         },
+        "DataStandardEnum": {
+            "description": "Data standards and common data models a dataset's content follows.\nDeliberately **not** merged into `FormatEnum` (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would conflate them and make `format` unanswerable.\nFree-text `conforms_to` records what a source *says*; this records which registered standard that is, where one applies. Both may be populated for the same standard \u2014 one verbatim, one normalized \u2014 which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.\n\u26a0\ufe0f **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent \u2014 it is the exact failure `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is declared and is the natural home for these once the registry carries them; until it does, this is a controlled vocabulary without ontology grounding, and says so.",
+            "enum": [
+                "DICOM",
+                "BIDS",
+                "OMOP_CDM",
+                "WFDB",
+                "OPEN_MHEALTH",
+                "ESDS",
+                "CDS",
+                "RO_CRATE",
+                "FHIR",
+                "OTHER"
+            ],
+            "title": "DataStandardEnum",
+            "type": "string"
+        },
         "DataSubset": {
             "additionalProperties": false,
             "description": "A subset of a dataset, likely containing multiple files of multiple potential purposes and properties.",
@@ -1385,6 +1402,16 @@
                         "null"
                     ]
                 },
+                "conforms_to_standard": {
+                    "description": "Which registered data standard `conforms_to` names, where one applies \u2014 a term rather than prose, so the corpus can be queried for \"what standards does this follow?\" (#403).\n`conforms_to` records what the sources say, in their words. This records which standard that is. Populate both for the same standard: one is verbatim evidence, the other is the normalized term, and they answer different questions.\nUse `OTHER` when the sources name a standard this vocabulary lacks, and keep the name in `conforms_to` so nothing is lost. Never pick a near-neighbour \u2014 reporting BIDS because a dataset is neuroimaging, when the sources say otherwise, is an invention.",
+                    "items": {
+                        "$ref": "#/$defs/DataStandardEnum"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "consent_revocations": {
                     "description": "Mechanisms for individuals to revoke previously given consent. List of ConsentRevocation objects from the Ethics module describing how revocation works and what happens to data after revocation.",
                     "items": {
@@ -1413,7 +1440,7 @@
                     ]
                 },
                 "created_on": {
-                    "description": "The date and time when the resource was created.",
+                    "description": "The date and time when the resource was created. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -1509,8 +1536,8 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
-                    "pattern": "10\\.\\d{4,}\\/.+",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567'). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+                    "pattern": "^10\\.\\d{4,}\\/.+$",
                     "type": [
                         "string",
                         "null"
@@ -1703,7 +1730,7 @@
                     ]
                 },
                 "issued": {
-                    "description": "Date of formal issuance or publication of the resource.",
+                    "description": "Date of formal issuance or publication of the resource. A `datetime` renders as RFC 3339 `date-time`, which **requires a UTC offset** \u2014 write `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also rejected.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -1758,7 +1785,7 @@
                     ]
                 },
                 "last_updated_on": {
-                    "description": "The date and time when the resource was most recently modified or updated.",
+                    "description": "The date and time when the resource was most recently modified or updated. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -2334,6 +2361,16 @@
                         "null"
                     ]
                 },
+                "conforms_to_standard": {
+                    "description": "Which registered data standard `conforms_to` names, where one applies \u2014 a term rather than prose, so the corpus can be queried for \"what standards does this follow?\" (#403).\n`conforms_to` records what the sources say, in their words. This records which standard that is. Populate both for the same standard: one is verbatim evidence, the other is the normalized term, and they answer different questions.\nUse `OTHER` when the sources name a standard this vocabulary lacks, and keep the name in `conforms_to` so nothing is lost. Never pick a near-neighbour \u2014 reporting BIDS because a dataset is neuroimaging, when the sources say otherwise, is an invention.",
+                    "items": {
+                        "$ref": "#/$defs/DataStandardEnum"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "consent_revocations": {
                     "description": "Mechanisms for individuals to revoke previously given consent. List of ConsentRevocation objects from the Ethics module describing how revocation works and what happens to data after revocation.",
                     "items": {
@@ -2362,7 +2399,7 @@
                     ]
                 },
                 "created_on": {
-                    "description": "The date and time when the resource was created.",
+                    "description": "The date and time when the resource was created. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -2458,8 +2495,8 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
-                    "pattern": "10\\.\\d{4,}\\/.+",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567'). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+                    "pattern": "^10\\.\\d{4,}\\/.+$",
                     "type": [
                         "string",
                         "null"
@@ -2638,7 +2675,7 @@
                     ]
                 },
                 "issued": {
-                    "description": "Date of formal issuance or publication of the resource.",
+                    "description": "Date of formal issuance or publication of the resource. A `datetime` renders as RFC 3339 `date-time`, which **requires a UTC offset** \u2014 write `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also rejected.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -2693,7 +2730,7 @@
                     ]
                 },
                 "last_updated_on": {
-                    "description": "The date and time when the resource was most recently modified or updated.",
+                    "description": "The date and time when the resource was most recently modified or updated. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -3203,6 +3240,16 @@
                         "null"
                     ]
                 },
+                "conforms_to_standard": {
+                    "description": "Which registered data standard `conforms_to` names, where one applies \u2014 a term rather than prose, so the corpus can be queried for \"what standards does this follow?\" (#403).\n`conforms_to` records what the sources say, in their words. This records which standard that is. Populate both for the same standard: one is verbatim evidence, the other is the normalized term, and they answer different questions.\nUse `OTHER` when the sources name a standard this vocabulary lacks, and keep the name in `conforms_to` so nothing is lost. Never pick a near-neighbour \u2014 reporting BIDS because a dataset is neuroimaging, when the sources say otherwise, is an invention.",
+                    "items": {
+                        "$ref": "#/$defs/DataStandardEnum"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "created_by": {
                     "description": "The person or organization primarily responsible for creating the resource.",
                     "type": [
@@ -3211,7 +3258,7 @@
                     ]
                 },
                 "created_on": {
-                    "description": "The date and time when the resource was created.",
+                    "description": "The date and time when the resource was created. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -3226,8 +3273,8 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
-                    "pattern": "10\\.\\d{4,}\\/.+",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567'). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+                    "pattern": "^10\\.\\d{4,}\\/.+$",
                     "type": [
                         "string",
                         "null"
@@ -3245,7 +3292,7 @@
                     "type": "string"
                 },
                 "issued": {
-                    "description": "Date of formal issuance or publication of the resource.",
+                    "description": "Date of formal issuance or publication of the resource. A `datetime` renders as RFC 3339 `date-time`, which **requires a UTC offset** \u2014 write `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also rejected.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -3270,7 +3317,7 @@
                     ]
                 },
                 "last_updated_on": {
-                    "description": "The date and time when the resource was most recently modified or updated.",
+                    "description": "The date and time when the resource was most recently modified or updated. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -4501,6 +4548,16 @@
                         "null"
                     ]
                 },
+                "conforms_to_standard": {
+                    "description": "Which registered data standard `conforms_to` names, where one applies \u2014 a term rather than prose, so the corpus can be queried for \"what standards does this follow?\" (#403).\n`conforms_to` records what the sources say, in their words. This records which standard that is. Populate both for the same standard: one is verbatim evidence, the other is the normalized term, and they answer different questions.\nUse `OTHER` when the sources name a standard this vocabulary lacks, and keep the name in `conforms_to` so nothing is lost. Never pick a near-neighbour \u2014 reporting BIDS because a dataset is neuroimaging, when the sources say otherwise, is an invention.",
+                    "items": {
+                        "$ref": "#/$defs/DataStandardEnum"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "created_by": {
                     "description": "The person or organization primarily responsible for creating the resource.",
                     "type": [
@@ -4509,7 +4566,7 @@
                     ]
                 },
                 "created_on": {
-                    "description": "The date and time when the resource was created.",
+                    "description": "The date and time when the resource was created. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -4531,8 +4588,8 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
-                    "pattern": "10\\.\\d{4,}\\/.+",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567'). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+                    "pattern": "^10\\.\\d{4,}\\/.+$",
                     "type": [
                         "string",
                         "null"
@@ -4569,7 +4626,7 @@
                     "type": "string"
                 },
                 "issued": {
-                    "description": "Date of formal issuance or publication of the resource.",
+                    "description": "Date of formal issuance or publication of the resource. A `datetime` renders as RFC 3339 `date-time`, which **requires a UTC offset** \u2014 write `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also rejected.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -4594,7 +4651,7 @@
                     ]
                 },
                 "last_updated_on": {
-                    "description": "The date and time when the resource was most recently modified or updated.",
+                    "description": "The date and time when the resource was most recently modified or updated. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -4743,6 +4800,16 @@
                         "null"
                     ]
                 },
+                "conforms_to_standard": {
+                    "description": "Which registered data standard `conforms_to` names, where one applies \u2014 a term rather than prose, so the corpus can be queried for \"what standards does this follow?\" (#403).\n`conforms_to` records what the sources say, in their words. This records which standard that is. Populate both for the same standard: one is verbatim evidence, the other is the normalized term, and they answer different questions.\nUse `OTHER` when the sources name a standard this vocabulary lacks, and keep the name in `conforms_to` so nothing is lost. Never pick a near-neighbour \u2014 reporting BIDS because a dataset is neuroimaging, when the sources say otherwise, is an invention.",
+                    "items": {
+                        "$ref": "#/$defs/DataStandardEnum"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "created_by": {
                     "description": "The person or organization primarily responsible for creating the resource.",
                     "type": [
@@ -4751,7 +4818,7 @@
                     ]
                 },
                 "created_on": {
-                    "description": "The date and time when the resource was created.",
+                    "description": "The date and time when the resource was created. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -4766,8 +4833,8 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
-                    "pattern": "10\\.\\d{4,}\\/.+",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567'). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+                    "pattern": "^10\\.\\d{4,}\\/.+$",
                     "type": [
                         "string",
                         "null"
@@ -4802,7 +4869,7 @@
                     "type": "string"
                 },
                 "issued": {
-                    "description": "Date of formal issuance or publication of the resource.",
+                    "description": "Date of formal issuance or publication of the resource. A `datetime` renders as RFC 3339 `date-time`, which **requires a UTC offset** \u2014 write `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also rejected.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -4827,7 +4894,7 @@
                     ]
                 },
                 "last_updated_on": {
-                    "description": "The date and time when the resource was most recently modified or updated.",
+                    "description": "The date and time when the resource was most recently modified or updated. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -5268,7 +5335,7 @@
         },
         "HumanSubjectCompensation": {
             "additionalProperties": false,
-            "description": "Information about compensation or incentives provided to human research participants.",
+            "description": "What participants received, and \u2014 where the sources describe one \u2014 how that was structured to keep them enrolled.\nTwo different claims live here and must not be conflated (#504). **Compensation** is payment for time and burden: what was provided, of what type, of what value. **Retention incentives** are structure designed to prevent attrition \u2014 escalating amounts, completion bonuses, payments tied to later visits. The ethical reading of the two differs, which is why an Ethics and Privacy review asked for the distinction: \"$40 then $80\" reported as compensation says something different from the same figures reported as a retention design.\nRecord the incentive slots only where a source describes the structure or its purpose. Most sources describe payments and say nothing about retention intent, and an escalating schedule is not by itself evidence that retention was the goal. Inferring one from the other is the failure the evidence boundary exists to prevent.",
             "properties": {
                 "compensation_amount": {
                     "description": "What was the amount or value of compensation provided? Include currency or equivalent value.\n",
@@ -5321,6 +5388,20 @@
                 },
                 "notes": {
                     "description": "Residual content only, after every fitting slot is used (#385): structured slots first, description as the default home for narrative, notes last \u2014 solely for content description cannot hold. Never a restatement of a sibling slot's value, and never a substitute for inventing keys the schema does not declare (#380).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "retention_incentive_rationale": {
+                    "description": "The stated reason for structuring incentives to support retention, where a source gives one \u2014 an attrition rate the design responds to, an IRB condition, or a documented equity concern about who can afford to stay enrolled.\nSeparate from `retention_incentives` (the structure) for the same reason `compensation_rationale` is separate from `compensation_amount`: what was done and why it was done are different claims, and sources frequently give one without the other.\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "retention_incentives": {
+                    "description": "Where the sources describe it, how the incentive structure was designed to keep participants enrolled across the study \u2014 escalating amounts, completion bonuses, payments tied to later visits or to returning after a gap.\nDistinct from `compensation_type` and `compensation_amount`, which record what was provided. State this only where a source describes the structure. An escalating payment schedule is not by itself evidence that retention was its purpose; report the schedule under the compensation slots and leave this absent.\n\u26a0\ufe0f **\"Retention\" here means keeping participants enrolled, never keeping data.** How long the data is kept belongs in `retention_limit`, which is a different slot about a different subject. The word is treacherous in this corpus: across all five project bundles nearly every occurrence of \"retention\" is about data or specimen retention \u2014 \"limits on the retention of the data\", \"bioSpecRetention\", \"records retention requirements\" \u2014 and none so far describes an incentive structure. An empty slot is the correct outcome for those sources.\n",
                     "type": [
                         "string",
                         "null"
@@ -5626,6 +5707,16 @@
                         "null"
                     ]
                 },
+                "conforms_to_standard": {
+                    "description": "Which registered data standard `conforms_to` names, where one applies \u2014 a term rather than prose, so the corpus can be queried for \"what standards does this follow?\" (#403).\n`conforms_to` records what the sources say, in their words. This records which standard that is. Populate both for the same standard: one is verbatim evidence, the other is the normalized term, and they answer different questions.\nUse `OTHER` when the sources name a standard this vocabulary lacks, and keep the name in `conforms_to` so nothing is lost. Never pick a near-neighbour \u2014 reporting BIDS because a dataset is neuroimaging, when the sources say otherwise, is an invention.",
+                    "items": {
+                        "$ref": "#/$defs/DataStandardEnum"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "created_by": {
                     "description": "The person or organization primarily responsible for creating the resource.",
                     "type": [
@@ -5634,7 +5725,7 @@
                     ]
                 },
                 "created_on": {
-                    "description": "The date and time when the resource was created.",
+                    "description": "The date and time when the resource was created. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -5649,8 +5740,8 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
-                    "pattern": "10\\.\\d{4,}\\/.+",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567'). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+                    "pattern": "^10\\.\\d{4,}\\/.+$",
                     "type": [
                         "string",
                         "null"
@@ -5668,7 +5759,7 @@
                     "type": "string"
                 },
                 "issued": {
-                    "description": "Date of formal issuance or publication of the resource.",
+                    "description": "Date of formal issuance or publication of the resource. A `datetime` renders as RFC 3339 `date-time`, which **requires a UTC offset** \u2014 write `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also rejected.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -5693,7 +5784,7 @@
                     ]
                 },
                 "last_updated_on": {
-                    "description": "The date and time when the resource was most recently modified or updated.",
+                    "description": "The date and time when the resource was most recently modified or updated. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -8325,6 +8416,16 @@
                 "null"
             ]
         },
+        "conforms_to_standard": {
+            "description": "Which registered data standard `conforms_to` names, where one applies \u2014 a term rather than prose, so the corpus can be queried for \"what standards does this follow?\" (#403).\n`conforms_to` records what the sources say, in their words. This records which standard that is. Populate both for the same standard: one is verbatim evidence, the other is the normalized term, and they answer different questions.\nUse `OTHER` when the sources name a standard this vocabulary lacks, and keep the name in `conforms_to` so nothing is lost. Never pick a near-neighbour \u2014 reporting BIDS because a dataset is neuroimaging, when the sources say otherwise, is an invention.",
+            "items": {
+                "$ref": "#/$defs/DataStandardEnum"
+            },
+            "type": [
+                "array",
+                "null"
+            ]
+        },
         "created_by": {
             "description": "The person or organization primarily responsible for creating the resource.",
             "type": [
@@ -8333,7 +8434,7 @@
             ]
         },
         "created_on": {
-            "description": "The date and time when the resource was created.",
+            "description": "The date and time when the resource was created. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
             "format": "date-time",
             "type": [
                 "string",
@@ -8348,8 +8449,8 @@
             ]
         },
         "doi": {
-            "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
-            "pattern": "10\\.\\d{4,}\\/.+",
+            "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567'). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+            "pattern": "^10\\.\\d{4,}\\/.+$",
             "type": [
                 "string",
                 "null"
@@ -8367,7 +8468,7 @@
             "type": "string"
         },
         "issued": {
-            "description": "Date of formal issuance or publication of the resource.",
+            "description": "Date of formal issuance or publication of the resource. A `datetime` renders as RFC 3339 `date-time`, which **requires a UTC offset** \u2014 write `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also rejected.",
             "format": "date-time",
             "type": [
                 "string",
@@ -8392,7 +8493,7 @@
             ]
         },
         "last_updated_on": {
-            "description": "The date and time when the resource was most recently modified or updated.",
+            "description": "The date and time when the resource was most recently modified or updated. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
             "format": "date-time",
             "type": [
                 "string",

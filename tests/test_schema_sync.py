@@ -53,17 +53,24 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
             self.assertEqual(here, there)
 
     def test_the_committed_digest_did_not_move(self):
-        """Canonicalising the name must not re-baseline anything.
+        """A digest move must be a deliberate act, acknowledged here.
 
-        The default path already rendered the canonical string, so every digest
-        recorded in the corpus stays valid. If this fails, the corpus and the
-        code disagree about what schema every record was generated against.
+        This constant is the acknowledgment. When it fails, either the schema
+        moved by accident — investigate before touching this — or it moved on
+        purpose, in which case updating the constant is the record that
+        someone meant it.
+
+        Moves so far: `44d29023` → `580992ed` on 2026-08-21, anchoring the
+        `doi` pattern (#646), after the v5 arm completed. Both study arms were
+        re-validated under the new schema (24 records, all valid — they write
+        bare DOIs); the 112 non-bare doi values all live in older labels,
+        which keep the verdicts they were pinned with (#426).
         """
         if not self.SCHEMA.exists():
             self.skipTest("merged schema not present in this checkout")
         self.assertEqual(
             schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
-            "44d290239cedcd8bb38488f4fa11d0fb")
+            "580992ed7037762157c110fc9e671c81")
 
 
 class SyncCheckTest(unittest.TestCase):

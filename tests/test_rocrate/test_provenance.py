@@ -305,12 +305,43 @@ class TestHashUnification(unittest.TestCase):
             self.assertNotIn("md5", out)
 
     def test_the_corpus_carries_no_stale_verdicts_after_migration(self):
+        """No *artifact*-stale verdicts — schema-pin staleness is lawful.
+
+        As first written this asserted no record anywhere was STALE, which
+        silently forbade the schema from ever moving: `validation_status`
+        returns STALE both when a record's bytes changed after its verdict
+        (corruption — what this migration test exists to catch) and when the
+        schema moved after the verdict (the #426 pin doing its job). #646
+        anchored the `doi` pattern post-arm, so the second kind now exists
+        corpus-wide by design: pre-move records keep the verdicts they were
+        pinned with, because re-validating them against the new pattern would
+        fail honest records (112 non-bare doi values, all in older labels).
+
+        So the split is enforced instead: a stale record whose artifacts no
+        longer hash to what its verdict pinned is a failure here; one whose
+        artifacts verify and whose schema pin simply predates the current
+        bytes is the expected trace of schema evolution.
+        """
+        import yaml as _y
+
+        from data_sheets_schema.provenance import record_path_for, verify_entry
         from data_sheets_schema.runs import STALE, discover, validation_status
-        stale = [(r.method, r.label, p) for r in discover()
-                 if not r.is_core and not r.deterministic
-                 for p in r.projects
-                 if validation_status(r.method, r.label, p) == STALE]
-        self.assertEqual(stale, [], f"migration introduced staleness: {stale}")
+        corrupted = []
+        for r in discover():
+            if r.is_core or r.deterministic:
+                continue
+            for project in r.projects:
+                if validation_status(r.method, r.label, project) != STALE:
+                    continue
+                rec = _y.safe_load(record_path_for(
+                    project, r.method, r.label).read_text(encoding="utf-8"))
+                for entry in ((rec.get("validation") or {})
+                              .get("artifacts") or {}).values():
+                    if isinstance(entry, dict) and verify_entry(entry) is False:
+                        corrupted.append((r.method, r.label, project))
+                        break
+        self.assertEqual(corrupted, [],
+                         f"records edited after their verdict: {corrupted}")
 
 
 class TestMd5IsDeprecatedInTheSchema(unittest.TestCase):
