@@ -1,0 +1,107 @@
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators",
+      "issue": "All six leadership-team members are emitted with the declared field `principal_investigator`. Only Eric S. Rosenthal is attested as principal investigator (NIH RePORTER, award OT2OD032701). The cohort 2 webinar lists Bihorac, Jiang, Strekalova, Rashidi and Kwong only under 'Bridge2AI CHoRUS Leadership Team'; assigning them the `principal_investigator` field makes a role claim the bundle does not support, even though the accompanying source_caveats concede the role is unstated."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "funders",
+      "issue": "FundingMechanism declares a `grants` field of range Grant[], but the award number (OT2OD032701 / 1OT2OD032701-01), NIH application ID 10472824, award amount and project period are all carried as free prose inside `notes`. Structured grant content placed in a residual text field leaves the declared structure empty."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "data_governance.access_review_process",
+      "issue": "The registration form, licensing-agreement signature, compute provisioning and the '.edu' email requirement are all drawn from the AIM-AHEAD Bridge2AI for Clinical Care Training Program cohort 2 webinar, where they are stated as the access route and eligibility rule for that training program. The record presents them as the general dataset access-review process; the bundle does not state that this is how all users obtain the dataset."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "data_governance.committee_contact",
+      "issue": "Ciera McCrary is attested only as 'MGH, Program Manager' and website contact. The bundle names no access committee and no committee contact; populating `committee_contact` (and leaving `committee_name`/`committee_members` empty) asserts a governance role the evidence does not establish."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "license_and_use_terms.contact_person",
+      "issue": "Jared Houghtaling appears in the bundle under GitHub 'Contact — Request access: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org'. He is an access-request contact, not an attested license contact; the content answers a governance/access field rather than the license contact field, and the co-equal contact dbold@emory.edu is dropped entirely."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_governance.committee_contact.id / license_and_use_terms.contact_person.id",
+      "issue": "Person identifiers are `mailto:` URIs rather than personal-identifier registry entries. Permitted as a URI fallback under the uriorcurie range, but one of them (`mailto:cmccrary@mgh.havard.edu`) encodes the source's apparent typographical error into an identifier, producing a non-resolvable identity key."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "ethical_reviews[0].reviewing_organization",
+      "issue": "'CHoRUS consortium ethics pillar' is a label the bundle does not use; the NIH abstract names pillar '2) Ethics (Ethical and Trustworthy AI)'. Additionally the object records the project's ethics research program (focus groups, legal-landscape analysis) rather than an ethical review of the dataset; no IRB or ethics-committee review is attested."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[0].label / label_description",
+      "issue": "`label: true` asserts that instances carry labels. The bundle states the project 'will label data with targets important for prediction' via a visualization and annotation environment — a planned or in-development capability — and no labeling output is reported for the released 50,000 admissions."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "known_limitations[2]",
+      "issue": "The claim that published metadata for imaging, tokenized clinical notes and EEG were 'planned rather than available' rests on a table in the webinar whose columns are badly garbled in the concatenated text; the per-modality assignment of 'Yes'/'Planned' metadata values is uncertain and is not caveated anywhere in the record."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "subpopulations[0].identification / description",
+      "issue": "The bundle states '50,000 Patient admissions from ICU, PICU, and NICU'. The record renders this as 'adult intensive care units, pediatric ... and neonatal ...'; 'adult' is an inference not present in the source."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "at_risk_populations",
+      "issue": "Omitted although the bundle supports it: released admissions include PICU and NICU stays, i.e. minors. The fact is recorded only as prose under human_subject_research.special_populations while the declared AtRiskPopulations object (with `at_risk_groups_included`) is unpopulated."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "is_deidentified.identifiable_elements_present",
+      "issue": "Left unset though the bundle supports a value: clinical notes are withheld from the enclave and stored locally, imaging de-identification was 'in process', and a privacy scan tool for medical records is maintained."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "distribution_formats",
+      "issue": "Omitted although the bundle names concrete delivery formats per modality (OMOP tables, DICOM, WFDB, EDF+ and Persyst, OHNLP tokens). These are currently recorded only through `conforms_to` / `conforms_to_standard`, leaving the format slot empty where evidence exists."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "updates.frequency",
+      "issue": "'ongoing, with regular status updates from data contributing sites' describes site progress reporting to project management, not a dataset release or versioning cadence; the bundle states no update frequency for the dataset itself."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "file_collections[].collection_type",
+      "issue": "Internal inconsistency: `collection_type: processed_data` is set for the OMOP EHR and tokenized-notes collections but omitted for the imaging, waveform-telemetry and EEG collections, which are described in equivalent terms (extracted, converted, de-identified) in the same evidence."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "resources / acquisition_methods",
+      "issue": "Projection differences from the full record: the holdout test set moves from `subsets` (where it carried `is_data_split: true`) into `resources`, losing the split designation; and the content of the full record's `direct_collection` object ('rather than collected directly from patients') is folded into acquisition_methods[0] prose rather than carried in its own declared object. No new facts are introduced, but declared structure present in the full record is lost."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "description",
+      "issue": "'Data are accessed through the Bridge2AI AI/ML for Clinical Care Collaborative Cloud enclave after registration and signature of a licensing agreement' conflates the general 'OMOP and telemetry in enclave' statement with the training-program-specific registration and licensing route; the bundle does not state that all dataset access follows this path."
+    }
+  ],
+  "summary": "Both records are largely well grounded in the declared bundle, correctly report the tier-2 vs tier-4 admission-count and imaging conflicts in source_caveats, correctly omit license, DOI, citation, consent and bias slots the bundle does not support, and mint sub-resource identifiers as fragments on an attested URL. No fabricated external identifiers (no ROR/ORCID/DOI invented), no invalid enum values, no prose in list-ranged slots, and no source commentary embedded in name or affiliation values were found. The core record introduces no facts absent from the full record. The principal defects are structural rather than factual: role over-assignment in `creators` (five leadership members emitted as principal_investigator), grant identifiers held as prose in `funders[].notes` instead of a Grant object, and the training-program access route generalized into `data_governance` with the program manager cast as a committee contact. Secondary issues are a mailto-encoded identifier carrying a source typo, an invented reviewing-organization label, an over-strong `label: true`, several supportable omissions (at_risk_populations, identifiable_elements_present, distribution_formats, the second access-request contact), and minor projection loss in the core record."
+}

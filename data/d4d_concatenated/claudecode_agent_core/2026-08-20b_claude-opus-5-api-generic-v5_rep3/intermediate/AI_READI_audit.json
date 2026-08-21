@@ -1,0 +1,335 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "conforms_to_standard",
+      "issue": "Value list contains `DICOM` and `CDS`, but the top-level `conforms_to_standard` enum in the schema digest permits only DICOM, BIDS, OMOP_CDM, WFDB, OPEN_MHEALTH, ESDS, CDS, RO_CRATE, FHIR, OTHER — DICOM and CDS are in fact permitted. Re-checked: all seven values (CDS, WFDB, OMOP_CDM, DICOM, OPEN_MHEALTH, ESDS, RO_CRATE) are within the permitted set. No defect. This finding is retracted."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "funders[0].grants[0].id",
+      "issue": "Grant `id` is declared `uriorcurie`. The value is a full NIH RePORTER resolver URL (`https://reporter.nih.gov/search/yatARMM-qUyKAhnQgsCTAQ/project-details/10885481`). This is acceptable only where no declared prefix covers the identifier, but the record elsewhere uses bare grant numbers as `name`. The URL is attested in the FAIRhub API `awardURI`, so it is grounded; however the sibling grants (P30DK035816, UL1TR003096) carry only `name` and no `id`, producing an inconsistent identifier treatment across the same list."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "human_subject_research.irb_approval",
+      "issue": "The schema digest lists `irb_approval`, `regulatory_compliance` and `special_populations` among HumanSubjectResearch's accepted slots without declaring them multivalued in the digest. Both records emit them as YAML lists. If these are single-valued strings in the schema, a list value is a shape defect; if multivalued, the shape is correct. Cannot be resolved from the digest as supplied — flagged for verification against the full schema."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "at_risk_populations.special_protections",
+      "issue": "Same shape ambiguity as `human_subject_research.irb_approval`: emitted as a list where the digest does not state multivalency."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "regulatory_restrictions.regulatory_restrictions",
+      "issue": "Same shape ambiguity: emitted as a list where the digest does not state multivalency for the inner `regulatory_restrictions` key of ExportControlRegulatoryRestrictions."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "resources[].distributions",
+      "issue": "The `distributions` key with sub-keys `path`, `bytes`, `format`, `media_type`, `conforms_to`, `conforms_to_standard` is used on nine resource entries. The supplied schema digest is for the full `Dataset` class and does not describe `CoreDistribution` or a `distributions` slot on the core resource class. These values cannot be validated against the digest supplied; correctness depends on the core schema, which was not provided for audit."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "resources",
+      "issue": "In the full record, `resources` has range `Dataset` and `file_collections` has range `FileCollection` with `path`, `file_count`, `total_bytes` and `collection_type`. The core record collapses nine FileCollections and three DataSubsets into a single `resources` list. Per-directory `file_count` values (4515, 7, 2232, 7969, 56478, 173721, 93921, 15245, 2246) survive only as prose inside `description`, and `collection_type: processed_data` is dropped entirely. This is a loss of structured content relative to the full record, and the caveat acknowledges it, but the file counts now sit in a free-text field rather than a declared one."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "`publisher` is declared `uriorcurie`. The value `https://fairhub.io/` is a platform homepage rather than an identifier for the publishing organization. The bundle names the publisher as \"FAIRhub\" (FAIRhub API `publisherName`) and as \"AI-READI Consortium\" (RO-Crate). Substituting a website URL for an organizational identifier is a shape approximation; neither tier-1 source supplies a registry identifier for FAIRhub."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.accountable_organization.id",
+      "issue": "`ROR:01yc7t268` for Washington University in St. Louis is attested in the FAIRhub API (`managingOrganizationIdentifierValue: https://ror.org/01yc7t268`), so the identifier is grounded and correctly rendered as a CURIE. No defect. Noted only to record that the CURIE conversion was checked against the source."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[0].principal_investigator.id",
+      "issue": "`ORCID:0000-0002-7452-1648` for Aaron Lee is attested in the FAIRhub API `responsiblePartyInvestigatorIdentifierValue` and correctly rendered as a CURIE. No defect. Noted for the record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators",
+      "issue": "`creators` is multivalued and the bundle names sixteen study principal investigators plus a named Writing Committee in the Nature Metabolism author list. The record emits a single Creator carrying the organizational name in an `affiliations` entry and one PI. Under the rule that a multivalued slot should carry one object per distinct entity, the named PIs (Baxter, Bahmani, Chute, Contreras, Evans, Hurst, Liu, McGwin, McWeeney, Owsley, Patel, Snyder, Singer, Zangwill, C. Lee, A. Lee) are collapsed away. The FAIRhub `creator` block does record exactly one organizational creator, so the single-object choice is defensible against the tier-1 source; flagged as a judgement call rather than a clear defect."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[0].affiliations[0]",
+      "issue": "The Organization object carries only `name: AI-READI Consortium` with no `id`. The bundle supplies ROR identifiers for the seven collaborating institutions but none for the Consortium itself, so omission is correct here."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[0].data_substrate",
+      "issue": "`data_substrate` is omitted while `data_topic` is populated. The bundle describes the instance data as spanning DICOM images, waveform data, CSV/tabular data and time-series physiological data — several B2AI_SUBSTRATE terms apply but no single one fits an instance defined as a whole participant. Omission is consistent with the instruction to omit rather than approximate; noted as a deliberate gap."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables",
+      "issue": "Twenty-three VariableMetadata objects are emitted, each with the required `variable_name`. The bundle's Table 2 lists roughly forty clinical laboratory analytes with units and reference ranges; the record selects a subset. This is a completeness gap rather than an unsupported claim — every emitted variable is attested — but a reader may infer the list is exhaustive. No `notes` states that it is a selection."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables[].minimum_value / maximum_value",
+      "issue": "Laboratory reference ranges from Table 2 (e.g. HbA1c 4.0–6.0%, glucose 62–125 mg/dL, creatinine 0.38–1.02 / 0.51–1.18 mg/dL) are recorded as prose in `notes` rather than in the declared `minimum_value` and `maximum_value` float fields. For hba1c and glucose the range is unambiguous and could populate the declared fields; for creatinine it is sex-stratified and prose is the correct choice. Partial under-use of declared structure."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets[].id",
+      "issue": "Fragment identifiers `doi:10.60775/fairhub.3#train` etc. are minted on an attested DOI. These name parts of this dataset that exist nowhere outside the record, so minting is the correct treatment. No defect."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "notes",
+      "issue": "The core `notes` field absorbs content that the core schema arguably has homes for: the recommended split description, participant compensation (USD 200, payment timing, non-proration, transport reimbursement) and third-party distribution. Compensation in particular is a `HumanSubjectCompensation` object in the full record with declared fields `compensation_provided`, `compensation_amount`, `compensation_type`, `compensation_rationale`. If the core schema declares `participant_compensation`, moving this to `notes` is a misuse of the residual slot; the caveat states the slot has no core counterpart but the core schema was not supplied for verification."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "citation",
+      "issue": "The full record populates `citation` with the FAIRhub-recommended form; the core record omits it. The core caveat lists `citation` among slots with \"no core counterpart\". The core schema was not supplied, so this cannot be confirmed. If `citation` exists on CoreDataset, this is a supported omission."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "total_file_count / total_size_bytes",
+      "issue": "The full record populates both (356343 and 3815969779678). The core record omits both while stating the same figures in prose within `description`. If CoreDataset declares these slots, structured values were available and should have been carried across."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to_standard",
+      "issue": "`CDS` is emitted at the top level and on every file collection. The enum permits `CDS`. The bundle attests CDS v0.1.1 throughout. Correct."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_limitations",
+      "issue": "British spellings appear in quoted-adjacent prose: `tumour` (anomalies, data_collectors), `centimetre` (anomalies), `oedema` (data_collectors, ethical_reviews context). The v5 rule requires American English for prose the record states, exempting only titles, names and direct quotations. These occur in paraphrase, not quotation. Same defect present in the core record at the corresponding slots."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "anomalies / data_collectors",
+      "issue": "British spellings `tumour`, `centimetre`, `oedema` carried over from the full record into core prose. Same defect as above."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_biases[1].bias_description",
+      "issue": "British spelling `generalizability` is correct American form and appears correctly; but `harmonised` does not appear. Checking: `generalisability` appears in quoted BMJ text within source_caveats context only. No defect in emitted prose beyond those already flagged."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[0].data_topic",
+      "issue": "`B2AI_TOPIC:43` maps to `Diabetes` in the supplied vocabulary, which fits. However the instance is a whole participant carrying ophthalmic imaging, ECG, mHealth, SDoH and demographic data; a single topic term under-describes it. `data_topic` is single-valued in the digest, so one term is all that can be given, and Diabetes is the best fit. No defect."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "sensitive_elements[0].sensitive_elements_present",
+      "issue": "Set to `false` with details explaining that the controlled-access dataset does contain race, ethnicity, sex, zip code, genetic sequencing data, past health records, medications and accident reports. The record's declared referent is the public v3.0.0 release, for which `false` is correct per the healthsheet. But `sensitivity_details` then describes the controlled set at length, so the boolean and the prose describe different artifacts. A reader taking the boolean alone gets the right answer for the referent; a reader taking the prose may not. Recommend the prose lead with the referent scope."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "is_deidentified.identifiable_elements_present",
+      "issue": "Set to `false`. The FAIRhub API records `deIdentType: NoDeIdentification` with `deIdentDirect: true` and `deIdentHIPAA: true`, and `deIdentDetails` stating no identifiers were collected. The RO-Crate records `deidentified: true`. The record's `source_caveats` reconciles these explicitly and correctly. Supported."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "issued",
+      "issue": "`2025-11-17T00:00:00Z` carries the required UTC offset and matches the FAIRhub v3.0.0 `dateValue` of 2025-11-17 with `dateType: Available`. Correct."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "doi",
+      "issue": "`10.60775/fairhub.3` is the bare DOI in a `string`-ranged slot, per the v5 rule. Correct. Note the contrasting and also-correct `doi:` CURIE form used in `version_access.latest_version_doi` (`uriorcurie`) and in `related_datasets[].target_dataset`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets[].target_dataset",
+      "issue": "`DatasetRelationship.target_dataset` is a required key. Values mix `doi:` CURIEs (fairhub.2, fairhub.1, the two article DOIs) with bare URLs (docs.aireadi.org, aireadi.org). The digest does not state the declared range of `target_dataset`. If it is `uriorcurie`, the two URL values are acceptable as the fallback case since no prefix covers a documentation site. Consistent treatment; no clear defect."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "license",
+      "issue": "`AI-READI custom license v2.0` matches the FAIRhub `rightsName` verbatim. Correct. The archival DOI is carried in `license_and_use_terms.license_terms` prose and in `external_resources`; there is no declared slot for a license URI on Dataset, so this placement is right."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "download_url",
+      "issue": "Omitted. The bundle gives no direct data URL — access requires verified-ID login and license acceptance, and the FAIRhub `files` array is empty. Omission is correct; `page` carries the landing page."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "existing_uses",
+      "issue": "Omitted. The healthsheet answers \"No\" to whether the dataset has been used for any tasks already. The FAIRhub API records `cited: 0`. Omission rather than a negative assertion is consistent with the stated convention and is defensible."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "errata",
+      "issue": "Omitted. The healthsheet erratum question has an empty response. Omission correct."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "extension_mechanism",
+      "issue": "Omitted. The healthsheet states there is currently no mechanism for others to extend or augment the dataset outside the project team. This is a clearly-supported negative fact, and `ExtensionMechanism.extension_details` could carry it. Omitting loses a documented answer. Borderline: the convention adopted is to omit negatives, but here the bundle gives a substantive statement about governance of contribution rather than mere absence."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_protection_impacts",
+      "issue": "Omitted. The healthsheet states explicitly \"No, a data protection impact analysis has not been conducted.\" Same borderline case as `extension_mechanism`: an explicit documented negative, omitted under the stated convention."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "use_repository",
+      "issue": "Omitted. The healthsheet answers \"No\" to whether a repository links to papers using the dataset. Omission consistent with convention."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "other_tasks",
+      "issue": "Omitted. No bundle content clearly identifies tasks beyond the original intent, though `future_use_impacts` and `intended_uses` cover adjacent ground. Defensible."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "compression",
+      "issue": "Omitted. No compression format is stated for the distributed dataset in any tier-1 source. Correct omission."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_on / last_updated_on / modified_by / was_derived_from",
+      "issue": "All omitted. The FAIRhub API gives `created_at: 1763366400` (a Unix timestamp corresponding to 2025-11-17), which duplicates `issued`. Omitting `created_on` avoids asserting a distinct creation event the bundle does not separate from publication. Defensible."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "purposes[3]",
+      "issue": "\"To increase access to and quality of AI/ML research by recruiting and training personnel\" is drawn from NIH RePORTER Specific Aim 3 (tier 4, the lowest-ranked source) and from the Nature Metabolism workforce section (tier 3). It is a purpose of the *project*, not of the *dataset* — the internship program produces trained researchers, not this data. Slot description asks for purposes for which the dataset was created. Borderline scope drift from project to dataset."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "intended_uses[2]",
+      "issue": "`use_category: Training and workforce development` with usage_notes describing the internship program. Same scope issue as purposes[3]: this describes a project activity that used the data internally, not an intended use of the released dataset by downstream users. The healthsheet's uses section does not list workforce development as a dataset use."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "intended_uses[2]",
+      "issue": "Same finding as the full record — the workforce-development intended use is carried across, so the core does not introduce content the full lacks, but it inherits the scope drift."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "keywords",
+      "issue": "Seven keywords match the FAIRhub `subject` list and the RO-Crate `keywords` verbatim, with `Diabetes mellitus` capitalized as FAIRhub renders it (RO-Crate uses lowercase `diabetes mellitus`). Trivial casing difference between two tier-1 sources; either is defensible."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "ethical_reviews[1].review_details",
+      "issue": "Names four individuals (Camille Nebeker, Debra Mathews, Kadija Ferryman, Nicholas Evans) as conducting ethical review, from the RO-Crate `ethicalReview` field. `EthicalReview` declares a `contact_person` of range Person, unused here. The four are reviewers, not a single contact, so prose is the correct container. Note that Debra Mathews does not appear in the BMJ collaborator list or the Nature author list; she is attested only in the RO-Crate (tier 1), which is sufficient."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "collection_timeframes[0]",
+      "issue": "`start_date: 2023-07-19` and `end_date: 2025-05-01` match the FAIRhub `dateType: Collected` value `2023-07-19/2025-05-01`. The `timeframe_details` correctly notes the BMJ-sourced pilot window (18 July 2023 – 30 November 2023), which begins one day *before* the FAIRhub collection start. This one-day discrepancy between tier-3 and tier-1 sources is carried in prose without comment. Minor; worth a caveat line."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "source_caveats",
+      "issue": "The caveat block is thorough and correctly flags publisher, participant count, collection period, enrollment target, age eligibility, study end, project-name expansion, license versioning and blood volume. It does not flag the one-day pilot-start discrepancy noted above, nor the `Equitable` vs `Exploratory` usage *within the record itself*: `description` uses \"Equitable\" (the tier-3 BMJ/Nature form) while the caveat concludes the higher-ranked \"Exploratory\" form appears in the dataset's own metadata. The record states one form in prose and endorses the other in the caveat — an internal inconsistency."
+    },
+    {
+      "severity": "high",
+      "record": "both",
+      "slot": "description",
+      "issue": "Opens \"The Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI)\". The record's own `source_caveats` states that the higher-ranked tier-1 sources (FAIRhub study_description, healthsheet, README) expand the acronym as \"Exploratory\", and that the official study title is \"AI Ready and Exploratory Atlas for Diabetes Insights\". Under the declared ranking rule the record should state the tier-1 value and note the disagreement in the caveat; it does the reverse — states the tier-3 value in prose and records the tier-1 value only in the caveat. Same defect in both records."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "source_caveats",
+      "issue": "Core caveat correctly declares the projection choices (resources standing in for file_collections and subsets, file counts moved to prose, slots folded into notes). This is the right use of the slot. It repeats the full record's caveats verbatim including the same failure to flag the Equitable/Exploratory internal inconsistency."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "conforms_to_class",
+      "issue": "`CoreDataset` — correct for a core record, and correctly differs from the full record's `Dataset`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "header",
+      "issue": "All fifteen required header lines present and verbatim, including `# Sources:` naming both the bundle and the full-record path, and `# Phase 4 reconciliation: completed`. Correct."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "header",
+      "issue": "All thirteen required header lines present and verbatim. Correct."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "id",
+      "issue": "`doi:10.60775/fairhub.3` in a `uriorcurie` required slot, rendered as a CURIE rather than a resolver URL. Correct per v5. Identical across both records, preserving the pairing."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "informed_consent[0].consent_documentation",
+      "issue": "The core record appends notification content (invitation letters, emails, REDCap interface, FAQ) into `consent_documentation`, folding in what the full record holds in a separate `collection_notifications` object. The caveat discloses this. The content is bundle-supported and the full record supports it, so no unsupported claim — but `consent_documentation` now mixes documentation of consent with notification of collection, two distinct things the full schema separates."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "instances[0].notes",
+      "issue": "Appends \"All instances are part of the same prospective data generation project, with currently one study visit per participant\" — content the full record holds in `relationships`. Supported by the bundle and by the full record; a reasonable fold given no core `relationships` slot was used."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_governance.committee_name",
+      "issue": "`Data Access Committee` is drawn from the BMJ protocol (tier 3), which says requirements for controlled access were \"being currently developed by the Data Access Committee\". The RO-Crate (tier 1) names the governance committee as \"AI-READI Consortium\". The record uses the tier-3 name for `committee_name` and mentions the tier-1 name only inside `stewardship_roles`. This inverts the ranking, though `source_caveats` does disclose the conflict."
+    }
+  ],
+  "summary": "Two records audited against the declared bundle, the evidence boundary and the supplied schema digest. No fabricated facts were found: every value traced to the bundle, and the three registry identifiers used (ORCID:0000-0002-7452-1648, ROR:01yc7t268, the NIH RePORTER award URI) are each attested in the FAIRhub API rather than supplied from outside knowledge. Fragment identifiers for splits and file collections are correctly minted on the attested DOI. CURIE-versus-URL handling is correct throughout: bare DOI in the string-ranged `doi` slot, `doi:` CURIEs in uriorcurie slots, URLs left intact inside prose and citations. Both header blocks are verbatim-correct and the core header carries the required `# Sources:` and Phase 4 lines. Two high-severity findings: (1) both records open `description` with the tier-3 'Equitable' expansion of the AI-READI acronym while their own `source_caveats` concludes that the tier-1 dataset metadata uses 'Exploratory' — the ranking rule requires the reverse, and the record contradicts itself between prose and caveat; (2) an initial concern about enum membership in `conforms_to_standard` was checked and retracted, all seven values being permitted. Medium findings cluster around three areas: scope drift, where workforce development appears as both a dataset purpose and an intended use though it describes a project activity rather than a use of the released data; ranking inversion, where `data_governance.committee_name` prefers a tier-3 name over the tier-1 RO-Crate value (disclosed in the caveat but still inverted); and shape ambiguity on four object-internal keys (`irb_approval`, `special_protections`, `regulatory_restrictions`, and the core `distributions` block) that are emitted as lists where the supplied digest does not state multivalency — these cannot be resolved without the full and core schema files. The core record introduces no content the full record does not support; its projection choices (nine file collections and three subsets collapsed into `resources`, per-directory file counts demoted to prose, compensation and split details folded into `notes`) are disclosed in its caveat but do represent structured-to-prose loss, and three slots the full record populates as declared fields — `citation`, `total_file_count`, `total_size_bytes` — are omitted from core on the stated but unverified grounds that CoreDataset lacks them. Low-severity findings note British spellings (`tumour`, `centimetre`, `oedema`) in paraphrased prose in both records, partial under-use of `minimum_value`/`maximum_value` where unambiguous laboratory reference ranges sit in `notes` instead, a variable list that is a selection from roughly forty attested analytes without saying so, and several explicit documented negatives (no DPIA conducted, no extension mechanism, no use repository) omitted under the stated omit-negatives convention where the bundle in fact supplies substantive statements rather than mere silence."
+}

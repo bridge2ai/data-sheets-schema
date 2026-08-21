@@ -1,0 +1,227 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Five of the six Creator objects carry no personal name in any declared field. Creator declares `principal_investigator` (range Person), `affiliations` (Organization[]) and `credit_roles`; the names Azra Bihorac, Xiaoqian Jiang, Yulia Strekalova, Parisa Rashidi and Manlik Kwong are stated only in free-text `notes`, so the entities they name are not machine-readable. The bundle (cohort_2_webinar leadership slide) clearly supports each name and its institution. Either the person belongs in a declared Person-valued field or the object carries no identity at all; a note explaining that the class 'provides no personal-name slot' is source/schema commentary embedded where content belongs."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "creators",
+      "issue": "Same defect as the full record: five Creator objects hold personal names only inside `notes`, with `affiliations` as the sole populated declared field."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "funders[0].grants[0].id",
+      "issue": "Grant `id` is `uriorcurie` and is populated with the NIH RePORTER resolver URL https://reporter.nih.gov/project-details/10472824, which is the URL of the project page rather than an identifier of the grant. The grant identifier attested in the bundle is the project/core project number (1OT2OD032701-01 / OT2OD032701), which is carried only in `name` and `notes`. Using a page URL as the grant identity makes this award non-joinable with any other record naming the same award."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "funders[0].grants[0].id",
+      "issue": "Same defect as the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "id",
+      "issue": "The dataset `id` is https://chorus4ai.org/, the project homepage URL, which is also used verbatim as `page`. The record therefore gives the dataset the same identity as its landing page, and every subset id is minted as a fragment on it (e.g. #imaging). The fragment minting is defensible under the minting rule, but the base identifier conflates dataset and web page."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "id",
+      "issue": "Same as the full record: `id` equals `page` (https://chorus4ai.org/), and the nine `resources` ids are fragments on it."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "resources",
+      "issue": "The nine per-modality objects appear in the full record under `subsets` (range DataSubset) but in the core record under `resources` (range Dataset). This is a change of declared relationship, not merely of slot name: `subsets` asserts logical partitions of this dataset, `resources` asserts component datasets. The core record also drops `is_data_split: false` and `is_subpopulation: false` from each entry, which the full record states. No bundle evidence distinguishes the two readings; the two records now assert different structures for the same nine modalities."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "relationships",
+      "issue": "`relationships` is present as an empty list. An empty list populates the slot without stating anything; per the omission-over-inference rule the slot should be omitted where the bundle says nothing about inter-instance relationships. (The core record correctly omits it.)"
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_governance.committee_contact",
+      "issue": "Jared Houghtaling is placed as `committee_contact` (range Person), but the bundle (github_organization_overview, tier 5) lists him only as one of two 'Request access' email contacts alongside dbold@emory.edu, and names no committee. Elevating one of two equally-attested access contacts to the committee-contact role, and dropping the other into prose, is an inference the bundle does not support; the record's own `source_caveats` concedes no formal committee is named."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "data_governance.committee_contact",
+      "issue": "Same defect as the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "subsets[6] (Imaging) / instances",
+      "issue": "`counts: 7642` is attached to an Instance whose `instance_type` is 'Hospital admission with associated radiology imaging data' inside the Imaging subset. The bundle states 7,642 admissions with radiology data (project_documentation) and separately 1,000 images available (cohort_2_webinar). The 1,000-image figure — the count of actual imaging instances currently released — appears only in prose in `description` and `source_caveats`, so the structurally recorded count is the admission count, not the image count, while the modality subset is nominally about images."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "resources[6] (Imaging) / instances",
+      "issue": "Same defect as the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "distribution_formats",
+      "issue": "Five DistributionFormat objects each populate only `format` with prose that mixes the standard and the content it covers (e.g. 'OMOP Common Data Model tables for demographics, medication administration, procedures, nursing flowsheets and diagnoses'). `media_type`, `access_urls`, `download_url` and `checksum` are all unpopulated — correctly, as the bundle gives none — but `format` is being used to restate modality coverage already carried by the subsets rather than to name a distribution format."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "distribution_formats",
+      "issue": "Same defect as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "status",
+      "issue": "`status` is described in the schema as a short resource status (e.g. draft, published, deprecated) but holds two clauses of narrative, the second of which (the Administration-directives review notice) is also stated verbatim in `regulatory_restrictions.regulatory_restrictions[0]`. Duplicated content across two slots."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "status",
+      "issue": "Same as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "acquisition_methods[0]",
+      "issue": "`was_directly_observed: false` and `was_inferred_derived: false` are asserted as booleans. The bundle states the collection is retrospective extraction of existing clinical records but does not characterize it against these two axes; retrospective EHR extraction is arguably direct observation recorded by clinicians. Both booleans are inferences rather than attested facts, and the second acquisition_methods object leaves them unset, so the record is inconsistent about whether these axes are answerable."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "acquisition_methods[0]",
+      "issue": "Same defect as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_collectors[].role",
+      "issue": "`role` on DataCollector holds free strings 'Data contributing site' and 'Consortium sub-team'. The digest lists no enum for DataCollector.role (unlike Maintainer.role), so this is schema-conformant, but the values are role labels the bundle does not use verbatim; the bundle says 'Data Acquisition centers' and names the Standards, Data Acquisition and Tooling sub-teams."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "maintainers[].maintainer_details",
+      "issue": "Both Maintainer objects carry person and contact identity only as prose inside `maintainer_details`, including the transcription note '(cmccrary@mgh.havard.edu, as printed on the site)'. The observation that the source contains a typo is source commentary and belongs in `source_caveats`, not embedded in a details value. `role: academic_institution` is a valid enum member for both."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "maintainers[].maintainer_details",
+      "issue": "Same defect as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "is_deidentified.identifiable_elements_present",
+      "issue": "The Deidentification object populates `method` and `deidentification_details` but leaves `identifiable_elements_present` unset, although the bundle supports a value: full-text clinical notes are retained locally and imaging de-identification is still in process, i.e. identifiable elements exist in the source holdings. The declared boolean field the class exists to carry is left empty while the same information sits in prose."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "is_deidentified.identifiable_elements_present",
+      "issue": "Same omission as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "human_subject_research",
+      "issue": "`involves_human_subjects: true` is populated and the remaining declared fields (`irb_approval`, `ethics_review_board`, `regulatory_compliance`, `special_populations`) are left empty, with the absence of IRB information stated in `notes`. Recording that the documents do not report IRB approval is a statement about the evidence and belongs in `source_caveats` rather than `notes`. `special_populations` is separately supported by the bundle (PICU/NICU admissions) and is omitted here while the same fact is carried in `at_risk_populations`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "human_subject_research",
+      "issue": "Same defect as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "at_risk_populations.notes",
+      "issue": "The `notes` value carries the substantive finding (PICU and NICU admissions mean records of minors are included) that should populate the record's substantive fields; `special_protections`, `assent_procedures` and `guardian_consent` are correctly left empty as unattested, but the one attested fact sits in residual-content space rather than being expressed through a declared field."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "splits",
+      "issue": "The single Splits object describes the holdout test set as a plan ('The project will sequester...'). The bundle supports this as an intention only; the same content is also asserted under `purposes`, `tasks` and `intended_uses`, so the holdout appears four times across the record. Nothing here is unsupported, but the repetition means no single slot is authoritative."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "splits",
+      "issue": "The core record omits `splits` entirely while retaining the holdout-set claims in `purposes`, `tasks` and `intended_uses`. This is a supported omission in the sense that CoreDataset may not declare the slot, but the two records differ in whether the recommended split is structurally recorded."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_biases[0].source_caveats",
+      "issue": "The caveat correctly flags that the bundle describes bias-management intentions rather than a measured bias — but `mitigation_strategy` and `bias_description` nonetheless assert `selection_bias` as a present, characterized bias. The bundle never states that a selection bias was observed; it states which hospitals contribute. The bias_type assignment is an inference from cohort composition."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "known_biases[0]",
+      "issue": "Same as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources",
+      "issue": "Four ExternalResource objects each place a URL and a description together in the `external_resources` string field; `archival` and `future_guarantees` are unset. The nesting of a slot named `external_resources` inside objects in a slot named `external_resources` is schema-permitted, but the values are prose paragraphs rather than resource references, and the GitHub entry additionally restates repository inventory already implied elsewhere."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "external_resources",
+      "issue": "Same as the full record."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "conforms_to_standard",
+      "issue": "OTHER appears once in the top-level list but covers two distinct non-registered standards (OHNLP schema, EDF+/Persyst). This is consistent with the enum, which offers no finer term, and `conforms_to` names both in prose — noted only because a query on OTHER cannot recover which standard is meant without reading the prose."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "source_caveats (top level)",
+      "issue": "The 50,000 vs. 45,000 admission disagreement is handled correctly under the ranking rule: the tier-2 project_documentation value is stated, both figures are recorded, and the preference is explained. Likewise the imaging 7,642-vs-1,000 caveat and the MIT-license-applies-to-software caveat are properly scoped to the evidence."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "collection_consents / informed_consent / consent_revocations / collection_notifications / data_protection_impacts / participant_compensation",
+      "issue": "All omitted. Correct: the bundle describes community-facing ethics focus groups and a legal framework but states nothing about individual consent, notification, revocation, DPIA or compensation for the patients whose records comprise the dataset."
+    },
+    {
+      "severity": "info",
+      "record": "full",
+      "slot": "participant_privacy",
+      "issue": "Present in the full record and absent from the core record. Its content (tokenization, de-identification, controlled access) duplicates `is_deidentified` and `confidential_elements`; `reidentification_risk` correctly states that the documents do not quantify residual risk, though that observation would sit better in `source_caveats`."
+    },
+    {
+      "severity": "info",
+      "record": "core",
+      "slot": "—",
+      "issue": "No content was found in the core record that the full record does not also state. Slots present in full and dropped in core: subsets (recast as resources), relationships, splits, direct_collection, participant_privacy, third_party_sharing. Header block matches the required core text verbatim, including the `# Sources:` line and the phase-4 line."
+    }
+  ],
+  "summary": "Both records are broadly well-grounded in the declared bundle: the quantitative disagreements between the tier-2 project website and the tier-4 webinar are surfaced rather than silently resolved, the nine modalities are decomposed one object per modality, and the consent/IRB/compensation slots are correctly left empty rather than guessed. The dominant defect is structural rather than factual: content that declared fields exist to carry is repeatedly placed in free-text instead. Five of six creators have no name in any name-bearing field, both maintainers exist only as prose, and the at-risk-population and human-subject findings live in `notes`. Two identifier problems recur in both records — a NIH RePORTER page URL standing in as a grant `id` where the attested award number OT2OD032701 sits in `name`, and a dataset `id` identical to `page`. The records diverge in one substantive way: the nine modalities are `subsets` (DataSubset, with is_data_split/is_subpopulation set) in the full record and `resources` (Dataset) in the core record, which asserts a different relationship between the modalities and the parent; the core record also drops splits, relationships, direct_collection, participant_privacy and third_party_sharing. Smaller issues: an empty `relationships` list that should be omitted, two `was_*` booleans inferred rather than attested, an imaging count that records admissions where the subset is about images, a committee contact promoted from one of two equally-ranked access emails, and source commentary ('as printed on the site', 'the Creator class provides no personal-name slot') embedded in content fields rather than `source_caveats`. No value was found that the bundle contradicts, and no enum value outside the declared vocabularies was used."
+}

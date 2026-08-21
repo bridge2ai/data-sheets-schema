@@ -1,0 +1,83 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "Slot `distributions` is not present in the Dataset/CoreDataset slot inventory supplied in the schema digest, and neither are its child keys `path`, `format`, `media_type`, `md5`. The digest lists `distribution_formats` (range DistributionFormat, accepting `format`, `media_type`, `checksum`, `download_url`, `access_urls`, `notes`) and `file_collections` (range FileCollection, accepting `path`, `file_count`, `total_bytes`, `collection_type`). A ten-entry `distributions` block will fail validation against CoreDataset unless the core schema declares a slot the digest does not show. The same per-file content is carried in the full record as `file_collections`, which is a declared slot."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "Content-not-in-full: the core record states ten per-file MD5 checksums (6d066e6b9d762284c6aa5d0b44565568, 6c1a86520eec2696ec19444eb8a8b428, df79632753989ef23b0a3df6604d4af1, 8642317c321126213240af4837030a53, b941f28d6f19c563d1222f7aff0c57b6, f250bf0b04f516f7462d30432441fc0e, 9aed30b6e8a91b151155316aae657ea5, 291a362842a176a4fcccaf2cdc1dedde, 8bb3f365f01fb8bbbd2ac6a535059305, 318deb7c5edab0d2fa55e26fcb67b440) and ten exact file names. None of these appear anywhere in the full record. The core record is a projection of the full record and must not introduce facts the full record does not carry. (The checksums themselves are supported by the June 2026 Dataverse source; the defect is the asymmetry, resolvable either by adding them to the full record's file_collections or removing them from core.)"
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "notes",
+      "issue": "`notes` is specified as residual content only, after every fitting slot is used. Three distinct blocks of content here belong in declared slots that the core record leaves empty: the recommended citation belongs in `citation` (a declared slot, populated in the full record, dropped from core); the third-party distribution narrative belongs in `third_party_sharing` (declared, populated in the full record, dropped from core); the inter-instance linkage narrative belongs in `relationships` (declared, populated in the full record, dropped from core). Relocating this content to its fitting slots would also repair three of the omissions listed below."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "citation",
+      "issue": "Omission the bundle clearly supports and the full record carries: the recommended citation is given verbatim on the June 2026 Dataverse record. Present in the full record's `citation`; absent from the core record's `citation` and displaced into `notes`."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "third_party_sharing",
+      "issue": "Omission the bundle clearly supports and the full record carries: ThirdPartySharing with `is_shared: true` and details of MassIVE, SRA/BioProject, Figshare, NDEx and U-BRITE distribution. Present in the full record; dropped from core and displaced into `notes`, losing the boolean `is_shared` that the class declares."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "relationships",
+      "issue": "Omission the bundle clearly supports and the full record carries: Relationships describing cross-modality linkage by protein/gene and containment edges in derived cell maps. Present in the full record; dropped from core and displaced into `notes`."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "Omission relative to the full record: the full record carries a DirectCollection object with `is_direct: false` and the cell-line provenance detail (MDA-MB-468 RRID CVCL_0419, ATCC; KOLF2.1J RRID CVCL_B5P3, HipSci, MTA). The core record drops the slot and folds the same prose into `human_subject_research.regulatory_compliance`, which loses the declared `is_direct` boolean and places collection-provenance content in a regulatory-compliance field."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "total_size_bytes",
+      "issue": "Omission the bundle supports: the June 2026 Dataverse record states per-file sizes (4.6 GB, 4.2 GB, 3.8 GB, 1.1 MB, 171.8 KB, 135.8 KB, 113.3 KB, 93.9 KB, 73.3 KB, 30.2 KB). The record justifies omission in source_caveats on the grounds that exact byte counts are not given, which is a defensible reading; flagged as a borderline omission rather than a defect, since a rounded aggregate would be an approximation in an integer-typed byte slot."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[5].affiliations[0].name",
+      "issue": "Cross-record inconsistency in evidence handling for the same disputed fact. Andrej Sali's affiliation is recorded as 'University of California San Diego' per the higher-ranked Dataverse source, with the conflict noted in the sibling `source_caveats` — correct placement. However `creators[1]` (Nevan Krogan) and the `data_collectors` entries assert UCSF affiliations drawn from lower-ranked preprint/Nature sources without equivalent caveating. The Dataverse author list also gives Krogan as UCSF, so no conflict exists there; noted only because the differing treatment of the two UCSF/UCSD assignments could read as arbitrary."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[0].counts",
+      "issue": "`counts: 53788` is the project-wide immunofluorescence image total from the CM4AI portal (tier 2), not a count scoped to the June 2026 release that is this record's declared referent. The sibling `source_caveats` discloses this precisely, which mitigates the defect, but the value still sits in a slot whose semantics are per-dataset instance count while the record's referent is a single release."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "funders[0].grants[0].id",
+      "issue": "The Grant `id` is `https://reporter.nih.gov/project-details/11211616`, a resolver URL. The v5 rule permits a URL in a `uriorcurie` slot only where no declared prefix covers the identifier; no NIH RePORTER prefix is evident in the digest, so this is likely acceptable as the fallback form. Flagged for confirmation that the schema declares no applicable prefix."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "file_collections[*].id",
+      "issue": "Fragment identifiers are minted on the dataset DOI in the form `doi:10.18130/V3/HIGT4C#immunofluorescence-images`. This conforms to the minting rule (the referent exists only within this record; the fragment is anchored on an attested identifier). Noted for completeness only: no defect."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to_class",
+      "issue": "Correctly differentiated (`Dataset` in full, `CoreDataset` in core). Noted only to confirm the pairing was checked and is consistent."
+    }
+  ],
+  "summary": "Both records are well grounded in the declared bundle: the referent (June 2026 Data Release, doi:10.18130/V3/HIGT4C) is held consistently, tier-1 Dataverse values are correctly preferred over tier-2 portal and tier-3/5 sources at each of the six disclosed conflicts, and the shared source_caveats block is unusually complete. Identifier discipline is sound — ORCID and ROR CURIEs throughout, bare DOI in the `doi` string slot, URLs confined to `uri`-ranged and prose contexts, file_collection fragments minted on an attested DOI. No unsupported factual claim was found; no hallucinated registry identifier was found. The material defects are structural and concentrated in the core record. First, `distributions` is not a slot in the supplied inventory and its child keys `path`/`format`/`media_type`/`md5` are not declared on any listed class; as written this block will fail CoreDataset validation, and its content belongs in `file_collections` or `distribution_formats`. Second, that same block introduces ten MD5 checksums and ten exact filenames that appear nowhere in the full record, breaking the projection relationship even though the underlying facts are bundle-supported. Third, `notes` in the core record absorbs three bodies of content that have fitting declared slots — the recommended citation (`citation`), third-party distribution (`third_party_sharing`), and cross-modality linkage (`relationships`) — each of which the full record populates properly and the core record drops; the `third_party_sharing` loss also discards a declared boolean. A fourth, milder instance of the same pattern folds `direct_collection` (with its `is_direct: false`) into `human_subject_research.regulatory_compliance`. Remaining findings are minor: a project-scoped image count sitting in a release-scoped instance slot (disclosed in-place), an omitted `total_size_bytes` with a defensible rationale, and one resolver URL in a `uriorcurie` Grant id pending confirmation that no prefix covers NIH RePORTER."
+}

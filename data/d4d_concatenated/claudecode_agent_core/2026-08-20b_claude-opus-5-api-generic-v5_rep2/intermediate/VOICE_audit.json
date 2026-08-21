@@ -1,0 +1,149 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The slot `distributions` is not present in the supplied schema digest for Dataset, and the core record introduces it with sub-keys (`format`, `media_type`, `path`, `conforms_to`, `conforms_to_standard`, `notes`). The full record instead uses `file_collections` for the same content. Since the core record must not state content the full record does not, and since no `distributions` slot is attested in the digest, this is an unverifiable shape. Additionally `conforms_to_standard: BIDS` is written as a scalar here whereas the digest declares it multivalued, and `format: ZIP` / `media_type: application/zip` for the features folder is not supported anywhere in the bundle — PhysioNet distributes the feature files as individual .parquet and .tsv files with no stated zip archive."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions[0].format",
+      "issue": "Value `ZIP` and `media_type: application/zip` are unsupported by the bundle. No source states that the features folder is distributed as a zip archive. Likewise `distributions[2].format: JSON` / `media_type: application/json` mischaracterizes the metadata folder, which the bundle describes as 'a binary file made available as Parquet and its corresponding data dictionary'."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "data_collectors[*].role",
+      "issue": "The digest declares no enum on DataCollector.role, but the full record uses controlled-vocabulary-style values (`researcher`, `academic_institution`, `third_party`) matching the Maintainer.role enum, while the core record substitutes free prose (`Site research teams`, `Clinicians and physicians`, `Hospital staff`). The two records disagree on the same slot for the same three collectors. One of the two is wrong; they cannot both be the intended representation."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "ethical_reviews[3].contact_person",
+      "issue": "`contact_person: {name: Yael Bensoussan}` is asserted for the USF IRB review of the feasibility study. The bundle names Yael Bensoussan as corresponding author of the feasibility publication, not as the IRB contact person for the review. This is an inference the bundle does not support, and it is content the full record does not state."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "other_tasks",
+      "issue": "The core record adds `other_tasks` with content about pediatric developmental norms and early screening tools. The full record has no `other_tasks` slot. Core must not state content the full record does not."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "raw_sources",
+      "issue": "The core record adds `raw_sources` (RawData) restating raw WAV audio and its Synapse access URL. The full record populates `raw_data_sources` but not `raw_sources`. Core must not introduce a slot the full record omits."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "data_governance.committee_contact",
+      "issue": "`committee_contact: {email: DACO@b2ai-voice.org}` uses a Person object whose only populated field is `email`. The full record omits `committee_contact` entirely and carries the address inside `access_review_process` prose. A Person with no name is a degenerate object, and the address identifies an office rather than a person. Same defect at `regulatory_restrictions.governance_committee_contact`."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "regulatory_restrictions.governance_committee_contact",
+      "issue": "`{email: DACO@b2ai-voice.org}` — a Person-ranged field populated with an office mailbox and no name, and absent from the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "id",
+      "issue": "`id` is `doi:10.13026/8xbn-nq66`, the version-specific DOI for v3.1.0, while `related_datasets` declares `is_version_of` pointing at `10.13026/37yb-1t42`, the concept DOI. Naming a version DOI as the record identifier while also declaring that identity relation is defensible but should be recorded in `source_caveats`; it is not."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "subsets / resources",
+      "issue": "The full record places the five disease cohorts in `subsets` (DataSubset, with `is_subpopulation: true`, `is_data_split: false`); the core record places the same five cohorts in `resources` (Dataset). These are different slots with different semantics — a cohort is a subpopulation of this dataset, not a component sub-resource. The core projection has changed the assertion, not merely relocated it."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "file_collections[*]",
+      "issue": "All three FileCollection entries omit `file_count` and `total_bytes`, and the top-level `total_file_count` and `total_size_bytes` are omitted. This is correct — the bundle gives no byte sizes — but per-feature record counts (29,278; 32,522; 28,640; 31,855; 31,872; 29,289) are stated in `instances[1].notes` rather than being carried on the collection. Not a defect, noted for completeness."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[*].affiliations[*]",
+      "issue": "Every Organization object is populated with `name` only; no `id` is supplied. This is correct under the evidence boundary (the bundle names no ROR identifiers) but means no creator affiliation is machine-resolvable. Consistent across both records."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators[*].principal_investigator",
+      "issue": "All twenty Creator objects use `principal_investigator` for every named individual, including Isaac Bevers (described in the same object's `notes` as the developer of the b2aiprep library) and Micah Boyer (no leadership role stated). The bundle names only Bensoussan and Elemento as co-principal investigators. Using the `principal_investigator` field as a generic person slot misstates role for most entries."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "publisher",
+      "issue": "`publisher: https://physionet.org` is a bare origin URL in a `uriorcurie`-ranged slot. The bundle attests PhysioNet as publisher but the value is a homepage rather than an identifier for the publishing organization. No declared prefix covers it, so a URL is permissible, but the site root is a weak referent."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license",
+      "issue": "`license: Bridge2AI Voice Registered Access License` is attested verbatim by PhysioNet for both the adult and pediatric datasets. However `license_and_use_terms.license_terms` additionally describes the controlled-access instruments (DARF, DUA, DTUA) that govern raw audio, which is not covered by that license name. The scalar `license` therefore describes only the registered-access tier while the record's declared referent spans both tiers."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to_standard",
+      "issue": "Only `BIDS` is declared. The bundle also names FHIR profiles for voice as a biomarker among the consortium's supporting materials (`external_resources`). Those profiles are a consortium output rather than a standard this dataset's content follows, so omission is defensible — but the boundary is not recorded in `source_caveats`."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "created_on / last_updated_on",
+      "issue": "Both omitted. `issued: '2026-05-01T00:00:00Z'` is populated from the v3.1.0 publication date. The bundle supports no creation timestamp, so omission is correct; noted only to confirm the omission is deliberate rather than an oversight."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "download_url",
+      "issue": "Omitted at top level. Correct — the bundle states the files are behind credentialed access and PhysioNet exposes no direct download URI. `distribution_formats[*].access_urls` carries the landing pages instead, which is the right placement."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables[*]",
+      "issue": "Nineteen VariableMetadata entries are supplied, but the bundle documents far more columns via the per-file JSON data dictionaries. The subset chosen is representative rather than complete, and no `source_caveats` records that the variable list is partial."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "notes",
+      "issue": "The core `notes` absorbs participant compensation, splits, and instance relationships — three topics the full record carries in dedicated structured slots (`participant_compensation`, `splits`, `relationships`). Since those slots are absent from the core schema this is the correct fallback, but it inverts the structured-slots-first ordering within the core record itself."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_timeframes[0]",
+      "issue": "`start_date` and `end_date` are both omitted with the reason recorded in `source_caveats`. Correct handling. However the feasibility publication does supply a concrete window (5 June – 28 July 2023) for the app feasibility study, which is a different study and is correctly kept out of this slot; the distinction is captured in `ethical_reviews[3]` but not cross-referenced here."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "language",
+      "issue": "`language: en` is correct for the released data. The bundle notes Spanish protocols under development and, in the IRB inclusion criteria, that participants speaking 'the English or Spanish language' are eligible; the released cohort is English-only, which `known_limitations[0]` states. The scalar is right but sits in mild tension with the IRB text without a caveat."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[0].data_topic",
+      "issue": "`B2AI_TOPIC:25` (Phenotype) is chosen for the participant instance. Defensible, but `B2AI_TOPIC:36` (Voice) or `B2AI_TOPIC:6` (Demographics) are equally available and the participant record spans all three. No caveat records the choice."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[0].data_substrate",
+      "issue": "`B2AI_SUBSTRATE:41` (Tab-separated values) describes the storage format of the phenotype tables rather than the participant instance itself. The slot asks for the substrate of the instance; a participant is not a TSV. Arguably acceptable as the substrate in which the instance is realized, but the mapping is loose."
+    }
+  ],
+  "summary": "Both records are densely populated and closely tracked to the bundle, with disciplined use of source_caveats for the five known cross-source conflicts (hosting platform, award number, recording totals, compensation, healthsheet version lag) and correct restraint on identifiers — no ROR, ORCID or registry codes were invented for the twenty named creators or the twelve collaborating institutions. The dominant defect class is Phase-4 divergence: the core record introduces six things the full record does not state — a `distributions` slot absent from the schema digest and carrying two unsupported format/media-type pairs, an `other_tasks` entry, a `raw_sources` entry, an IRB contact_person inferred from a corresponding-author line, and two Person objects populated with an office mailbox and no name. A seventh divergence is a direct contradiction rather than an addition: the three data_collectors carry enum-style role values in the full record and free prose in the core record. Separately, the five disease cohorts are typed as `subsets` (DataSubset, subpopulation) in the full record but as `resources` (component Dataset) in the core, which changes the semantic claim rather than projecting it. Lower-severity issues concern role fidelity (all twenty creators occupy the `principal_investigator` field though the bundle names only two), a version-DOI identifier coexisting with an is_version_of relation to the concept DOI without a caveat, a partial variable list not flagged as partial, and a handful of loose ontology-term choices. Reconciliation should reduce the core record to a strict projection of the full record, resolve the data_collectors role representation in one direction, and either align subsets/resources or record the divergence deliberately."
+}

@@ -1,0 +1,251 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Six Creator objects are emitted, each carrying a single `principal_investigator`. The bundle (cohort_2_webinar) labels these six people as the \"Bridge2AI CHoRUS Leadership Team\", not as principal investigators; only nih_reporter_project designates a principal investigator, and it names ROSENTHAL, ERIC S. alone. Asserting Bihorac, Jiang, Strekalova, Rashidi and Kwong as principal investigators is an unsupported upgrade of 'leadership team member' to 'PI', only partly softened by the per-object source_caveats."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "creators",
+      "issue": "Same defect as the full record: five of the six Creator objects assert `principal_investigator` for people the bundle identifies only as leadership team members."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "funders[0].grants[0].id",
+      "issue": "`Grant.id` is declared `uriorcurie` and names something outside this dataset (an NIH award). A resolver URL (https://reporter.nih.gov/project-details/10472824) is used where the grant is attested in the bundle by its project number (1OT2OD032701-01 / core OT2OD032701). The URL used is also the RePORTER project-details page rather than a grant identifier, so it identifies a web page rather than the award."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "funders[0].grants[0].id",
+      "issue": "Identical defect to the full record: resolver URL for an externally-referenced grant identifier in a `uriorcurie` slot."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "data_governance.committee_contact.id",
+      "issue": "`Person.id` is `uriorcurie`. A `mailto:` URI is used to identify a person. The v5 rule requires a personal-identifier registry entry; the bundle supplies no ORCID or other registry identifier for Jared Houghtaling, so the `id` should be omitted (only `name` populated) rather than substituted with an email URI."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "data_governance.committee_contact.id",
+      "issue": "Identical defect to the full record: `mailto:` URI used as a Person identifier where no registry identifier is attested."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "id",
+      "issue": "`https://chorus4ai.org/#dataset` is a minted fragment on the project homepage URL. The fragment `#dataset` is not attested in the bundle as a dataset identifier; the homepage anchor list shows a 'Dataset' page, not an identifier. Acceptable as a label under the minting rule but weakly grounded, and it collides conceptually with the site's navigation anchor."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "`publisher` is declared `uriorcurie` and should identify the publishing organization. The value `https://chorus4ai.org/` is a website URL, not an organization identifier, and duplicates `page`. The bundle names Massachusetts General Hospital as awardee organization and 'CHoRUS Consortium' as the collective; no organization registry identifier is attested, so the slot is better omitted."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "publisher",
+      "issue": "Identical defect: website URL used as an organization identifier in a `uriorcurie` slot, duplicating `page`."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[1].counts",
+      "issue": "`counts: 1600000000` renders the website's '1.6 Billion Rows of EHR OMOP data' as an exact integer. The source states a rounded magnitude; emitting a precise count asserts a precision the bundle does not support."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "instances[1].counts",
+      "issue": "Identical over-precision: '1.6 Billion' rendered as 1600000000."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[0].counts",
+      "issue": "`counts: 50000` for the admission instance takes the tier-2 website figure, which is correct under the ranking rule, but the count is attached to an Instance object carrying no caveat; the disagreement with the tier-4 webinar figure (>45K unique admissions) is recorded only in the top-level `source_caveats`, distant from the value it qualifies. The Instance class accepts `source_caveats`; it is unused here."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "conforms_to_standard",
+      "issue": "`OTHER` is emitted without any indication of which standard it stands for. The bundle names OHNLP, EDF+ and Persyst as additional schemas; a single unqualified `OTHER` collapses three distinct standards into one enum token and is not resolvable by a reader. Also, `OMOP_CDM`, `DICOM` and `WFDB` are each attested, but the enum list gives no per-standard mapping back to `conforms_to`."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "conforms_to_standard",
+      "issue": "Identical defect: unqualified `OTHER` standing for three distinct unlisted standards."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "notes",
+      "issue": "The core `notes` appends a sentence absent from the full record's `notes`: 'A sequestered holdout portion of the dataset is provisioned for external validation of AI-developed models rather than for model development.' This is content the core states that the full record does not state in that slot — in the full record the holdout appears in `subsets` and `splits`, both of which the core drops. Core content must be a projection of the full record, not an addition to it."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "subsets",
+      "issue": "The full record's `subsets` entry (the CHoRUS holdout test set, `is_data_split: true`) is dropped from the core record without the information being carried into a structured core slot; it is demoted to a prose sentence in `notes`, which the v2 rule forbids when a fitting structured slot exists."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "splits",
+      "issue": "The full record's `splits` entry describing the sequestered holdout is dropped entirely from the core record; the holdout/development partition is a substantive fact the bundle supports and the core schema's projection should either retain it or the reconciliation should account for its loss."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "The full record's `direct_collection` object (`is_direct: false`) is dropped and its content folded as prose into `acquisition_methods[0].acquisition_details`. The boolean assertion that collection was not direct is lost, and the prose duplication places collection-directness content in a slot whose description covers acquisition method rather than collection channel."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "third_party_sharing",
+      "issue": "The full record's `third_party_sharing` (`is_shared: true` with distribution detail) is dropped from the core record with no equivalent. The bundle clearly supports it (controlled external access, licensing agreement, training-program participants), and the omission is not a schema-driven projection loss."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "participant_privacy",
+      "issue": "The full record's `participant_privacy` object (anonymization_method, reidentification_risk, data_linkage) is dropped from the core record. Its content is only partially recoverable from `is_deidentified`; the `data_linkage` statement about tokens linking to OMOP/imaging/waveform data for a given admission is lost entirely."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_by",
+      "issue": "'CHoRUS Consortium' is asserted as the entity primarily responsible for creating the resource. The bundle uses 'CHoRUS Consortium' as a website heading and mentions '60+ CHoRUS consortium members'; it does not state that the consortium is the creator of record. NIH RePORTER names Massachusetts General Hospital as the awardee organization. Weakly supported."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "status",
+      "issue": "The value is a multi-sentence narrative about release state. The slot description gives examples of short controlled-vocabulary-like values ('draft, published, deprecated'). Prose here is not a schema violation (`string` range) but the value duplicates content already in `description` and `updates`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "status",
+      "issue": "Same narrative-prose value as the full record, duplicating `description` and `updates` content."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "maintainers[2]",
+      "issue": "The third Maintainer object describes the GitHub organization and its 28 repositories rather than naming an individual or organization responsible for maintenance. This is repository/external-resource content (already covered in `external_resources[1]`) placed in a maintainer slot, and `role: academic_institution` is asserted for a code-hosting organization the bundle does not so characterize."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "maintainers[2]",
+      "issue": "Identical defect: GitHub organization description occupying a Maintainer object, duplicating `external_resources`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "maintainers[1]",
+      "issue": "The Maintainer object collapses two distinct contacts (dbold@emory.edu at Emory University and jared.houghtaling@tuftsmedicine.org at Tufts Medicine) into a single object, contrary to the v2 rule requiring one object per distinct entity in a multivalued slot."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "maintainers[1]",
+      "issue": "Identical collapsing of two distinct maintainer contacts into one object."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_biases",
+      "issue": "Only `selection_bias` is recorded. The bundle repeatedly foregrounds bias management, social determinants of health, and 'balanced and diverse cohort' sampling; the single object is defensible, but `representation_bias` is at least as directly implied by the 14-hospital academic-center composition and the explicit equity framing, and is not represented."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[2..7,11]",
+      "issue": "Several Instance objects (demographics, diagnoses, procedures, nursing flowsheets, medication administration, SDoH) carry no `counts` and no `data_substrate`, and repeat `B2AI_TOPIC:4` for three distinct data types. The topic term is being used as a catch-all where no closer term exists; the schema instructs omitting the slot rather than approximating."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "instances[2..7,11]",
+      "issue": "Identical repeated use of `B2AI_TOPIC:4` as a catch-all across procedures, nursing flowsheets and admissions."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "license",
+      "issue": "The `license` slot is omitted while `ip_restrictions.restrictions` states the MIT License for software. Omission is defensible (the data are not MIT-licensed) and the caveat explains it, but a reader querying `license` finds nothing despite the bundle stating a license for the project's code. Flagged as a borderline omission rather than an error."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_dates[0].release_dates",
+      "issue": "The value contains an en-dash ('August–September 2025') and mixes a vague window with a specific program-start date (2025-11-17). The program start date is the AIM-AHEAD training cohort start, which is an access date for one trainee group rather than a dataset distribution date; conflating the two overstates what the bundle attests about dataset release timing."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "distribution_dates[0].release_dates",
+      "issue": "Identical conflation of the AIM-AHEAD Cohort 2 program start date with a dataset distribution date."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "source_caveats",
+      "issue": "The caveat states the program manager email 'appears to contain a typographical error in the domain' (cmccrary@mgh.havard.edu). Observing the anomaly is appropriate, but the same string is then reproduced verbatim inside `maintainers[0].maintainer_details` as a usable contact without the caveat travelling with it."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "at_risk_populations",
+      "issue": "`at_risk_groups_included: true` is inferred from the presence of PICU and NICU admissions. The bundle states the cohort includes PICU/NICU admissions but never characterizes any population as at-risk or describes special protections framed as such; the `special_protections` value repurposes general de-identification and access-control statements. The accompanying source_caveats partly discloses this, but the boolean remains an inference rather than an attested fact."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "at_risk_populations",
+      "issue": "Identical inference of `at_risk_groups_included: true` from PICU/NICU presence alone."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "human_subject_research.involves_human_subjects",
+      "issue": "`true` is inferred rather than attested. The bundle never uses the phrase 'human subjects research' about the dataset and records no IRB approval; the record correctly omits `irb_approval` and `ethics_review_board`, but the boolean itself is an inference from the clinical nature of the data."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources[3]",
+      "issue": "Two distinct external resources (the Bridge2AI CHoRUS program page and the AIM-AHEAD call for applications) are collapsed into a single ExternalResource object, contrary to the one-object-per-entity rule for multivalued slots."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "external_resources[3]",
+      "issue": "Identical collapsing of two distinct external resources into one object."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "The banner text is quoted with its source misspelling ('repoitory') but without an explicit marker that the misspelling is the source's; a reader cannot distinguish transcription fidelity from a transcription error introduced here."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "description",
+      "issue": "The description mixes American and British/mixed spellings inconsistently with the v5 American-English rule in adjacent slots: 'standardized' and 'characterizing' are American, but the record elsewhere writes 'de-identification'/'re-identification' consistently while `funders` and `ethical_reviews` use 'analyzes' — no violation found, but the description asserts '9 data modalities' as a dataset property when the website presents it as an anticipated-final figure alongside 100,000 admissions; the sentence does attribute it to the anticipated final dataset, so this is borderline only."
+    }
+  ],
+  "summary": "Both records are substantially grounded in the declared bundle and no fabricated dataset facts were found: counts, modalities, formats, hospital numbers, award details, contacts and repository inventory all trace to the four input files, and the tier-2-over-tier-4 preference on the admissions count is applied correctly and disclosed. The most serious recurring defect is role inflation in `creators`: five Bridge2AI CHoRUS leadership-team members are asserted as `principal_investigator`, a designation the bundle reserves to Eric S. Rosenthal via NIH RePORTER; per-object caveats acknowledge the tension but the structured claim still overstates the evidence. Second are three identifier-shape problems repeated in both records — a resolver URL in the `uriorcurie` grant `id` where the bundle attests the award number 1OT2OD032701-01, a `mailto:` URI standing in for a Person registry identifier that the bundle does not supply, and a website URL in the `uriorcurie` `publisher` slot. The core record is not a clean projection of the full record: it adds a holdout sentence to `notes` that the full record's `notes` does not contain, and it silently drops `subsets`, `splits`, `direct_collection`, `third_party_sharing` and `participant_privacy`, losing the holdout partition, the `is_direct: false` assertion and the data-linkage statement. Remaining findings are lower-severity shape and precision issues: '1.6 Billion' rendered as an exact 1600000000, an unqualified `OTHER` enum standing for three distinct schemas (OHNLP, EDF+, Persyst), `B2AI_TOPIC:4` used as a catch-all across several distinct data types, several multivalued slots collapsing two or more distinct entities into one object (maintainers, external_resources), a GitHub-organization description occupying a Maintainer slot, and two booleans (`at_risk_groups_included`, `involves_human_subjects`) inferred from the clinical and PICU/NICU nature of the data rather than attested. No enum value outside the schema's permitted lists was emitted, no prose was placed where a list is required, and no source commentary was found embedded inside a name, identifier or affiliation value."
+}

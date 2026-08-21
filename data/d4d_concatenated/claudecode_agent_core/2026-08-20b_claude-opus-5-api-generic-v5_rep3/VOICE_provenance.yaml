@@ -1,0 +1,390 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-08-21T16:57:40+00:00'
+run:
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+  project: VOICE
+  method: claudecode_agent
+  arm: baseline
+  replicate: 3
+model:
+  generation_method: schema-grounded API, six phases
+  agent_runtime: Claude API (direct)
+  provider: LBL CBORG (proxy to Anthropic)
+  base_url: https://api.cborg.lbl.gov
+  model: claude-opus-5
+  max_tokens_by_phase:
+    full: 96000
+    reconcile_full: 96000
+    repair_full: 96000
+    core: 56000
+    reconcile_core: 56000
+    repair_core: 56000
+    audit: 24000
+    report: 24000
+  context:
+    peak_request_tokens: 271105
+    peak_phase: report
+    peak_basis: 'observed: input + cache_read + cache_write of the largest request'
+    limit_tokens: null
+    limit_basis: not stated by the route and not returned by the provider; headroom
+      cannot be computed from this record
+  temperature: null
+  temperature_basis: not applicable to this model
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt_v5.md
+    sha256: c4bbcc41eb4f0b83704228a0bf040294dedd6edf5afbf06035c2fd9d7587ebbb
+    bytes: 13909
+    exists: true
+  request:
+    sha256: 1205f6492681e592a4ad7394fdd2234012d62c5adbab1c1b96b0634251e0bd00
+    bytes: 10640
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      condition: generic_v5
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: data/preprocessed/source_manifest.yaml'
+      run_date: '2026-08-21'
+      runtime: Claude API (direct)
+      provider: LBL CBORG (proxy to Anthropic)
+      bundle: data/preprocessed/concatenated/VOICE_preprocessed.txt
+  resolved:
+    sha256: 1205f6492681e592a4ad7394fdd2234012d62c5adbab1c1b96b0634251e0bd00
+    bytes: 10640
+  assembly:
+    sha256: 7d0ce8f3c6246ca4bfc0e7a4ba9b92df336faa201f52b3f972f71aeff6e8ccf7
+    layout: schema digest, input bundle, source ranking, arm prompt, carried artifacts,
+      phase instruction
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: eaacddbddbf24cf5744d5e4451f9109ba1d996bb4d563ae6f37ae28c42d71464
+    bytes: 32310
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: a9a56cd791a6a4876e4dd756011460d6c7a24f634c928af8b0e2fc3057d6bc0d
+    bytes: 12138
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: dcc5271e6065f87dd30dd0380244df2e900af81e7ecbab523cc57954743f46db
+    bytes: 6224
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules.md
+    sha256: 064a6974b03febec147ed0b453e71750402ff9c844bac81728edd2d07abb5d2d
+    bytes: 6900
+    exists: true
+  consumed: false
+  consumed_basis: this runtime renders a condition prompt and sends nothing else,
+    so these were not read; they are hashed so an unchanged hash shows that (#545)
+phase_log: null
+schema:
+  declared_version: 2.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  merged_schema_carries_version: true
+  digest_md5: 44d290239cedcd8bb38488f4fa11d0fb
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: b6b97a667f725ee01ec6ae8734dbd958f9bda88b
+  commit_short: b6b97a66
+  branch: british-spelling-analysis
+  dirty: true
+  dirty_file_count: 7
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+  bundle_md5: dcd717170da6762569c0b4eeafc1c3d2
+  bundle_bytes: 376295
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: c0028d716155a185d7000ec6ad60352f
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml
+    bytes: 82789
+    slots: 83
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d_core.yaml
+    bytes: 68902
+    slots: 69
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_reconciliation.md
+    bytes: 16543
+    slots: null
+companions:
+  reasoning_log:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_reasoning.jsonl
+    present: true
+    md5: 1c712efa9ee9deb8a9b78b2d378518bd
+    note: one JSON line per phase; absent for a runtime that cannot report its own
+      token accounting (#400)
+  telemetry_report:
+    path: data/run_telemetry/2026-08-20b_claude-opus-5-api-generic-v5.yaml
+    present: false
+    note: derived from records like this one, per label rather than per run; `d4d
+      runs telemetry` writes it
+  prompt_registry:
+    path: src/download/prompts/canonical_hashes.yaml
+    present: true
+    md5: 65e361a8aae6e5e8323be96eaa103ecd
+    note: the pins the recorded prompt hashes were judged against
+  digest_inventory:
+    path: src/data_sheets_schema/schema/digest_inventory.yaml
+    present: true
+    md5: b2ddc34cbc16b8daa45d996ffc1b2dde
+    note: digest to slot inventory, which decides whether a slot predates a pair
+unrecoverable: null
+unverified:
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''claude-opus-5''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+- field: model.temperature
+  value: null
+  reason: 'claude-opus-5 rejects `temperature` (400: deprecated for this model), so
+    the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config is not
+    sent and does not apply. Sampling for this model family is selected by model-name
+    suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). claude-opus-5 rejects `temperature` (400: deprecated
+  for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
+- 'Resumed run; phases skipped as already present: full, core.'
+api_usage:
+- phase: audit
+  attempt: 1
+  started_at: '2026-08-21T16:47:13+00:00'
+  seconds: 82.606
+  input_tokens: 53779
+  output_tokens: 5913
+  cache_read: 0
+  cache_write: 161086
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: reconcile_full
+  attempt: 1
+  started_at: '2026-08-21T16:48:35+00:00'
+  seconds: 255.234
+  input_tokens: 59820
+  output_tokens: 27469
+  cache_read: 161086
+  cache_write: 0
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: reconcile_core
+  attempt: 1
+  started_at: '2026-08-21T16:52:53+00:00'
+  seconds: 211.642
+  input_tokens: 61402
+  output_tokens: 22806
+  cache_read: 0
+  cache_write: 157690
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: report
+  attempt: 1
+  started_at: '2026-08-21T16:56:25+00:00'
+  seconds: 74.027
+  input_tokens: 110019
+  output_tokens: 5643
+  cache_read: 0
+  cache_write: 161086
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: repair_full
+  attempt: 1
+  started_at: '2026-08-21T16:57:46+00:00'
+  seconds: 253.354
+  input_tokens: 28875
+  output_tokens: 27849
+  cache_read: 0
+  cache_write: 15912
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: repair_core
+  attempt: 1
+  started_at: '2026-08-21T17:02:05+00:00'
+  seconds: 214.567
+  input_tokens: 23943
+  output_tokens: 23440
+  cache_read: 0
+  cache_write: 12516
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: report_after_repair
+  attempt: 1
+  input_tokens: 109978
+  output_tokens: 5475
+  cache_read: 0
+  cache_write: 161086
+  stop_reason: end_turn
+phases_skipped:
+- full
+- core
+repair:
+- phase: repair_full
+  round: 1
+  outcome: applied
+  findings: 6
+- phase: repair_core
+  round: 1
+  outcome: applied
+  findings: 5
+report_regenerated_after_repair:
+  changed:
+  - core
+  - full
+  why: repair rewrote a record after the report was written; a report describing bytes
+    that no longer exist is the artifact a reviewer reads instead of the diff
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml
+      md5: 37b2eee5ba46e1f701a4807c2730b698
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d_core.yaml
+      md5: 52a53825cb23dcb22e3fa6401e6ac001
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml
+      md5: 37b2eee5ba46e1f701a4807c2730b698
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d_core.yaml
+      md5: 52a53825cb23dcb22e3fa6401e6ac001
+  errors: 7
+  warnings: 0
+  identity_slots: 79
+  schema_moved: false
+  findings:
+  - code: shared-slot-presence
+    path: $.annotation_analyses
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.distribution_formats[0].notes
+    message: 'value differs: full=''Loadable with any Parquet-capable library; the
+      release notes demonstrate loading with the HuggingFace Datasets library and
+      plotting spectrograms after conversion from power to dec'
+  - code: shared-slot-content
+    path: $.is_deidentified.identifiers_removed
+    message: 'value differs: full=''Name; civic address; social security number; state
+      and province; dates at a resolution finer than years; narrative text fields;
+      transcripts of free speech audio; select geographic'
+  - code: shared-slot-content
+    path: $.machine_annotation_tools[0].tool_descriptions
+    message: 'value differs: full=''Whisper Large generated transcriptions of the
+      recordings; openSMILE extracted acoustic features capturing temporal dynamics
+      and acoustic characteristics; Praat and parselmouth com'
+  - code: shared-slot-content
+    path: $.sampling_strategies[0].strategies
+    message: 'value differs: full=''Non-probability sampling; purposive recruitment
+      by diagnosis against per-cohort inclusion and exclusion criteria; screening
+      of clinic patient lists in the electronic health record'
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''Record counts differ between sources. The project
+      documentation states that version 3.0 contains approximately 61,937 voice-derived
+      recordings from 833 adult participants, while t'
+  - code: distribution-relation-presence
+    path: $.distributions
+    message: full file_collections exist without core distributions
+  findings_truncated: null
+report_claims:
+  checked: true
+  findings:
+  - kind: false_schema_claim
+    slot: distributions
+    detail: report says this is not a declared slot; it is declared on CoreDataset
+    claim: It carried a `distributions` block that does not appear in the supplied
+      slot inventory, relocated the disease cohorts from `subsets` to `resources`,
+      and stated content in five slots that the full record did not state.
+  claims_checked: 5
+  claims_unnamed: 3
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_reconciliation.md
+      md5: 2832782a5a765af97d555ddcb192a828
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml
+      md5: 37b2eee5ba46e1f701a4807c2730b698
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d_core.yaml
+      md5: 52a53825cb23dcb22e3fa6401e6ac001
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+grounding:
+  checked: true
+  counts:
+    grounded: 4
+    minted_fragment: 8
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 2
+    minted_fragment: 8
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/VOICE_preprocessed.txt
+      md5: dcd717170da6762569c0b4eeafc1c3d2
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml
+  - data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  british_spellings: 5
+  organisational_fragments: 0
+intermediates:
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/VOICE_audit.json
+  sha256: ac7f1cdd1a4490bc876c5b0f4c53b56ccd58a93d6b7934deb69727a8661842eb
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/VOICE_core.yaml
+  sha256: c5869b4bcb772a1ab4dda67dd6df45842f823dfb0d9c0817549b2d42e6fffba1
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/VOICE_full.yaml
+  sha256: f439468ad80e3c9e23b26ad971edc35dd2f51d00de5e6e13fe7f34bc422004c3
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/VOICE_reconcile_core.yaml
+  sha256: 539bb3af7e8b1db973544d8537e7cf45ab4f67fd0b5a73e4cb8fbbc374b29886
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/VOICE_reconcile_full.yaml
+  sha256: 3fed1d6b86bced591f15eac800d00c29a97a343dbc03513be5c38c780842507b
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/VOICE_repair_core_r1.yaml
+  sha256: 917ef47ed71837c23ec21d903938e13cc45d405e8a48c8de83054f79bf604d0c
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/VOICE_repair_full_r1.yaml
+  sha256: 36c0a8902cade6e93f97b3aa8544ec42672f48b311c7947f7437c5025ee99910
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/VOICE_report.md
+  sha256: 5ab956ccf250f207ef93c420e54bacd5faae22c7c0d78f874c55d1a1b17fc68b
