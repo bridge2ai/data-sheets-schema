@@ -219,7 +219,27 @@ decision about the comparison rather than a defect to fix here.
 
 ## Canary history (updated as canaries run)
 
-Four canaries, all AI-READI, and the fan-out decision.
+Six canaries, all AI-READI: four for the v5 arm, two validating the post-arm
+reconcile changes (#650).
+
+- **2026-08-22b** — post-#665 (symmetric mirror clause + watchdog). **PASSED
+  every metric — the first canary the gate has ever passed.** Pair errors 6 vs
+  the v5-arm baseline worst of 12 — 4 content-wording differences and one
+  mapping-key remnant in each direction (full>core on known_biases, core>full
+  on informed_consent; the first version of this bullet said "2 full>core, no
+  inversion", which the artifacts contradict — #666 review). British 12 vs
+  28, every floor held. Closes #650: the
+  symmetric clause is validated, and the reconcile instructions at assembly
+  digest `e61c07d0` are the baseline for any future arm.
+- **2026-08-22** — post-#657 (one-sided absorption clause). **REGRESSED: pair
+  errors 18 vs 12, every list-length divergence full>core (`instances`
+  12v1).** Demonstrated that one-sided absorption inverts the divergence
+  rather than closing it; reconcile_core's consistency duty had to become
+  two-directional (#665). Also produced hangs 2 and 3 of #664, and its record
+  under-counts its own cost (#656: two killed invocations' usage on no
+  record).
+
+The four arm canaries, unchanged below.
 
 - **2026-08-20b** — post-#644-fix, second independent draw. **REGRESSED on pair
   errors only: 12 vs baseline worst 10.** Everything else passed, several far

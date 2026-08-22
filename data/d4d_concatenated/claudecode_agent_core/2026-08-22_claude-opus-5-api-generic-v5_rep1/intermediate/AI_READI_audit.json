@@ -1,0 +1,227 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The slot `distributions` is not in the supplied Dataset/CoreDataset slot inventory, and the object keys used (`path`, `format`, `media_type`, `bytes`, `conforms_to`, `conforms_to_standard`, `notes`) do not correspond to any declared range in the digest. The full record carries this material in `file_collections` (range FileCollection, required key `id`, accepting `path`, `file_count`, `total_bytes`, `collection_type`). If `distributions`/`CoreDistribution` is not declared in the core schema this block will fail validation; if it is declared, the digest given does not describe it and the shape cannot be verified."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions[*].format",
+      "issue": "Values `TXT`, `CSV`, `JSON` are asserted against an enumeration the supplied digest does not define, and the record's own notes concede DICOM has no representation in that enumeration. Assigning `format: TXT` to `cardiac_ecg/` (WFDB signal + header files) and to `environment/` is additionally not supported by the bundle, which states only that these follow WFDB and the ESDS ASCII guidelines respectively; neither source calls the files TXT."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "file_collections[*].conforms_to_standard",
+      "issue": "`CDS` is used as an enum value in every file_collection (and at dataset level). The permitted values for `conforms_to_standard` per the digest are DICOM, BIDS, OMOP_CDM, WFDB, OPEN_MHEALTH, ESDS, CDS, RO_CRATE, FHIR, OTHER — CDS is present, so this is valid; however the same slot list at dataset level mixes seven values where the bundle supports them, which is fine. Flagging only that no cross-check of CDS vs. the schema's intended meaning (Clinical Data Standard vs. Clinical Dataset Structure) is possible from the digest."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators[0].id",
+      "issue": "`https://aireadi.org/` is used as the identifier for the Creator object. The bundle attests this URL as the project website, not as an identifier for the AI-READI Consortium as an agent. No registry identifier for the consortium appears in the bundle, so a project homepage is being pressed into service as an entity identifier."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators[0].affiliations",
+      "issue": "Eight organizations are listed as affiliations of the single Creator object. The bundle attests these as the lead sponsor, collaborators and study sites of the study (study_description.json), not as affiliations of the AI-READI Consortium entity. The record's own source_caveats concedes the consortium member list was not in the bundle. This is an inference beyond what the evidence states, even though the caveat is present."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "funders[1].grants[*].id",
+      "issue": "Identifiers `https://reporter.nih.gov/search/yatARMM-qUyKAhnQgsCTAQ/project-details/10885481#P30DK035816` and `...#UL1TR003096` are fragments minted on a URL that identifies a *different* award (OT2OD032644). A fragment on another grant's project-details page does not name P30DK035816 or UL1TR003096 and makes a misleading claim about that RePORTER record. Per the minting rule, these grants have referents outside this record, so the identifier should have been omitted rather than minted."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators",
+      "issue": "`credit_roles` is omitted although the bundle supplies role information for the Nature Metabolism author groupings (Writing Committee, Principal Investigators, Research/Technical/Clinical Staff, Project Managers, Interns) and BMJ Open contributor statements. More materially, the multivalued `creators` slot holds a single object collapsing an organizational consortium, a named PI and eight institutions, where the bundle names individual principal investigators with ORCIDs (Aaron Lee, Cecilia Lee, Amir Bahmani, Sally Baxter, Christopher Chute, Jorge Contreras, Nicholas Evans, Samantha Hurst, T.Y. Alvin Liu, Gerald McGwin, Shannon McWeeney, Cynthia Owsley, Bhavesh Patel, Michael Snyder, Sara Singer, Linda Zangwill) each with a stated affiliation."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "existing_uses",
+      "issue": "Omitted from the full record but present in the core record. The bundle supports it (healthsheet uses §1: 'Has the dataset been used for any tasks already?' → 'No'; FAIRhub API `cited: 0`). Core states content the full record does not."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "use_repository",
+      "issue": "Omitted from the full record but present in the core record. The bundle supports it (healthsheet uses §3: 'Is there a repository that links to any or all papers or systems that use the dataset?' → 'No'). Core states content the full record does not."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "other_tasks",
+      "issue": "Omitted from the full record but present in the core record. Core asserts reuse of the CDS specification and FAIRhub platform as an additional supported task, drawing on Nature Metabolism and the healthsheet. Core states content the full record does not."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_protection_impacts",
+      "issue": "Omitted from the full record but present in the core record. The bundle supports it directly (healthsheet collection §12: 'No, a data protection impact analysis has not been conducted'). Core states content the full record does not."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "extension_mechanism",
+      "issue": "Omitted from the full record but present in the core record. The bundle supports it (healthsheet maintenance §7: 'No, currently there is no mechanism for others to extend or augment the AI-READI dataset outside of those who are involved in the project'; GitHub organization and Zenodo community listed in README). Core states content the full record does not."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "labeling_strategies",
+      "issue": "Omitted from the full record but present in the core record. The bundle supports it (healthsheet labeling section, all items answered N/A with the rationale that the dataset is hypothesis-agnostic; RO-Crate `rai:dataAnnotationProtocol`). Core states content the full record does not."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "Omitted from the full record but populated as `restricted` in the core record, with a core note explaining the mapping from the RO-Crate's 'HL7:2N (normal)'. Core states content the full record does not, and the mapping itself is an interpretation the bundle does not make."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "citation",
+      "issue": "The full record's `citation` gives a formatted citation. The core record drops `citation` entirely and relocates the same text into `notes`. This is an inconsistency between the paired records: the core omits a slot the core schema inventory admits and the bundle supports."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "informed_consent[0].withdrawal_mechanism",
+      "issue": "The withdrawal_mechanism value has notification content appended ('Participants were notified of the data collection in advance: every individual was aware of it...'). This belongs to `collection_notifications` (populated in the full record, dropped in core) and does not answer the field it sits in."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "is_deidentified.deidentification_details",
+      "issue": "Participant-privacy content (participant identifier scheme, re-identification risk, watermarking, dissemination controls) has been folded into deidentification_details because `participant_privacy` was dropped from the core record. The full record carries this in `participant_privacy` with structured `anonymization_method`, `privacy_techniques`, `data_linkage` and `reidentification_risk` fields; the core collapses those declared fields into prose."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "notes",
+      "issue": "Participant compensation content ('a 200 US dollar stipend for the study visit, paid after final data receipt and device return...') is placed in free-text `notes`. The full record carries this in `participant_compensation` with declared fields `compensation_provided`, `compensation_amount`, `compensation_type`, `compensation_rationale`. Content the schema has a structured home for has been demoted to prose in the core record."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "id",
+      "issue": "`doi:10.60775/fairhub.3` is used as the record id, and subset/file_collection ids are minted as fragments on it (`doi:10.60775/fairhub.3#training-split`). A `doi:` CURIE does not admit a fragment component in any registered DOI resolution scheme; the fragment form is unlikely to resolve. The minting rule permits a fragment on an attested identifier, so the intent is right, but the DOI base makes the resulting strings non-resolvable."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "Declared range is `uriorcurie`. Value `https://fairhub.io/` is a website URL rather than an identifier for the publishing organization. The bundle states `publisherName: FAIRhub` with no registry identifier, so a URL is defensible under the uri half of the range, but it is a homepage rather than an entity identifier."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "related_datasets[*].target_dataset",
+      "issue": "Mixed identifier forms in one multivalued slot: `doi:10.60775/fairhub.2`, `doi:10.1038/s42255-024-01165-x` (CURIEs) alongside `https://docs.aireadi.org/` and `https://aireadi.org/` (URLs). The URLs name documentation resources rather than datasets, so `related_datasets` with relationship_type `is_documented_by` is being used to point at non-dataset targets; `external_resources` already carries these same two URLs, producing duplication across slots."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[0].data_substrate",
+      "issue": "`data_substrate` omitted while `data_topic` is populated. The bundle amply supports substrate terms for a multimodal dataset (DICOM=11, Waveform Data=49, Time-series data=69, Physiological data=70, Heart rate=71, Oxygen saturation=72, Physical activity data=73, Sleep tracking data=76, Glucose monitoring data=78, Questionnaire response data=80, Retinal Image=65, FLIO data=66, OCT data=67, OCTA data=68). Since `instances` is multivalued and the digest permits multiple Instance objects, per-substrate instances were available; a clearly supported omission."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[0].data_topic",
+      "issue": "A single topic `B2AI_TOPIC:43` (Diabetes) is chosen for a dataset the bundle describes as spanning ophthalmic imaging (24), waveform/EKG (37/10), mHealth (18), glucose monitoring (38), activity monitoring (39), SDoH (29), survey (31) and clinical observations (4). One Instance object with one topic under-represents what the evidence states."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets",
+      "issue": "Three DataSubset objects are populated with only `id`, `name`, `description`, `is_data_split`, `is_subpopulation`. The demographic composition of each split (counts by race/ethnicity, sex, diabetes status, mean age) is written into `description` prose although DataSubset accepts the full Dataset slot inventory, including `subpopulations` and `instances` with `counts`. Declared structured fields left empty while their content sits in free text."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_formats[*].format",
+      "issue": "Values `DICOM`, `CSV`, `JSON`, `Markdown` are free strings on a DistributionFormat object whose `format` range the digest does not constrain, so this is shape-valid; but the same concepts are given as `TXT`/`CSV`/`JSON` in the core `distributions` block and as `Markdown` vs `MD` across the two records. The paired records use inconsistent format vocabulary for the same files."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "distribution_formats[3]",
+      "issue": "A DistributionFormat object is emitted carrying only a `notes` value explaining that DICOM cannot be expressed in the enumeration. This populates a multivalued slot with an object that names no format — a commentary entry rather than a distribution format. The commentary belongs in `source_caveats` (where it is in fact also recorded, item 14), making this object redundant."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables[*]",
+      "issue": "`variables` lists 33 VariableMetadata objects, but the bundle's Table 2 enumerates roughly 40 laboratory analytes with units and reference ranges, and the environmental sensor records 11 named multi-spectral channels. Selection is partial and the basis for inclusion is not stated. Additionally `particulate_matter_pm2_5` has `unit` omitted with a note saying units are not stated, which is correct, but `multispectral_light_intensity` is typed `array` where the bundle describes 11 separate measurements."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "keywords",
+      "issue": "The keyword list merges the seven FAIRhub dataset subjects with two study-level keywords ('Data Sharing', 'Exploratory Data Collection') drawn from study_description.json. The bundle distinguishes dataset subjects from study keywords; merging them attributes study metadata to the dataset."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license",
+      "issue": "Value is a prose composite: 'AI-READI custom license v2.0 (AI-READI Data License Agreement, Version 2.0)'. The bundle gives `rightsName: AI-READI custom license v2.0` with `rightsURI: https://doi.org/10.5281/zenodo.17555036`; the parenthetical restates the same name from the license PDF title. The URI is not carried in this slot (it appears in license_and_use_terms prose and related_datasets)."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "The `notes` slot carries substantial content that has structured homes elsewhere in the schema: return-of-results procedures and incidental-finding referral pathways are dataset-adjacent study procedures, and the biorepository description could sit in `related_datasets` or `external_resources`. Per the notes guidance ('residual content only, after every fitting slot is used'), some of this is placeable."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "source_caveats",
+      "issue": "Item (12) states the per-directory sizes sum to 3,815,969,360,064 bytes and 356,334 files. Summing the nine directory sizes in the bundle's structure description gives 3,815,969,283,564 and the file counts give 356,334. The stated byte sum does not reconcile with the source figures; the derived arithmetic is presented as fact without being checkable against the bundle."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "total_size_bytes",
+      "issue": "3815969779678 is taken from the FAIRhub API `size` field, which is correct and attested. However the record simultaneously asserts in source_caveats that the directory sums differ, without resolving which figure the `total_size_bytes` slot is meant to represent (whole crate vs. sum of parts). Minor internal tension."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "conforms_to_class",
+      "issue": "Set to `CoreDataset`, which is correct per the digest. Noting for completeness that the full record sets `Dataset`; these are consistent."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_timeframes[1]",
+      "issue": "The second CollectionTimeframe object populates only `timeframe_details` and `source_caveats`, leaving `start_date`/`end_date` empty although the prose names 2022-09-01, 2023-07-18, 2023-11-30, 2023-12-01, 2026-11-30 and 2027-01-01. Declared date fields left empty while their content sits in free text."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_governance.committee_members",
+      "issue": "Omitted although the bundle names sixteen Principal Investigators with ORCIDs and affiliations in study_description.json `overallOfficialList`, and names four individuals as responsible for ethical review in the RO-Crate. Whether these constitute the governance committee is not stated, so omission is defensible, but the RO-Crate's `dataGovernanceCommittee: AI-READI Consortium` is used for the name without any membership being recorded."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "at_risk_populations.special_protections",
+      "issue": "The value states inclusion/exclusion criteria rather than protections. The field asks what safeguards were applied to at-risk populations; the answer given is that such populations were excluded. That is a reasonable reading given `at_risk_groups_included: false`, but the content is eligibility criteria, which has no other home in the record and could arguably sit in `sampling_strategies.strategies`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "download_url",
+      "issue": "Omitted. The bundle supplies `conditionsOfAccess: https://fairhub.io/datasets/3/access` (RO-Crate) and the FAIRhub v3 page shows an 'Access this dataset' action. Whether an access-gated landing page qualifies as a download_url (range `uri`) is arguable, so omission is defensible, but the access URL is recorded only inside `data_governance.access_review_process` prose."
+    }
+  ],
+  "summary": "Both records are densely evidenced and carry an unusually thorough source_caveats reconciling tier conflicts across the bundle. The most serious issues are structural rather than factual. First, the core record's `distributions` block uses a slot and object shape absent from the supplied schema digest, and asserts `format` enum values (TXT for WFDB and ESDS ASCII directories) that neither the digest defines nor the bundle states; the same block concedes DICOM is inexpressible and emits a format object carrying only commentary. Second, six slots appear in the core record that the full record omits entirely — existing_uses, use_repository, other_tasks, data_protection_impacts, extension_mechanism, labeling_strategies — plus regulatory_restrictions.confidentiality_level; each is supported by the bundle, so these are simultaneously full-record omissions and core-states-what-full-does-not violations. Third, two grant identifiers are minted as fragments on a different award's RePORTER URL, making a false claim about that record where omission was required. Fourth, the single Creator object collapses a consortium, a PI and eight institutions where the bundle names sixteen individually identified principal investigators with ORCIDs and affiliations, and uses a project homepage as an entity identifier. Lower-severity findings cluster around structured fields left empty while their content sits in prose (DataSubset composition, second CollectionTimeframe dates, core informed_consent and is_deidentified absorbing content from dropped slots), partial vocabulary coverage (one data_topic and no data_substrate for a nine-modality dataset), inconsistent format vocabulary between the paired records, and an unreconcilable byte-sum arithmetic claim in source_caveats item 12."
+}
