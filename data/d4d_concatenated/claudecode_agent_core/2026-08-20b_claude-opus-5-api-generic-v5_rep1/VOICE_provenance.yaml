@@ -431,3 +431,23 @@ intermediates:
   sha256: 9cc874cbc45364cb8ce7651b4d6f20cc6a97e1b1c94a1a2ceb264d60675a1250
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/VOICE_report.md
   sha256: bd0bdf3834bbeaf8c4bcaad32a6daf1d49a26b23d4654ffab900b69079473883
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+    slots: 86
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-20b_claude-opus-5-api-generic-v5_rep2
+    slots: 86
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+    slots: 83
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 0
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-11_claude-opus-5-claudecode-generic_rep2

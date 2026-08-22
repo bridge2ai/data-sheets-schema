@@ -426,3 +426,23 @@ intermediates:
   sha256: d055cd62374d1fa285224b2e72f43948b4bffc30f15b8f0a5c14e9356fb1f580
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_report.md
   sha256: 947277c9584ca1d6235f204687cb94db5e062ebea1da88dc60e2d331fda6343d
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+    slots: 83
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-20b_claude-opus-5-api-generic-v5_rep2
+    slots: 81
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+    slots: 82
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 1
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-11_claude-opus-5-claudecode-generic_rep3
