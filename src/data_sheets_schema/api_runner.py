@@ -548,16 +548,26 @@ PHASE_INSTRUCTIONS = {
         "emit the corrected core record in its entirety, header block included. "
         "It must remain consistent with the reconciled full record supplied "
         "above and assert nothing the full record does not support. "
-        "Consistency runs in both directions for a slot both schemas declare: "
+        "Consistency runs in both directions for a slot both records carry: "
         "such a slot must state what the reconciled full record states — the "
-        "same items, the same granularity, the same precision. If the full "
-        "record lists five funders, list the same five; if it itemizes what "
-        "this record merged, itemize. Asserting less than the full record in "
-        "a shared slot is a divergence, not caution — the two records are two "
-        "views of one dataset, and a reader of either must learn the same "
-        "facts where they overlap. Content the full record carries in a slot "
-        "this record's schema does not declare stays out: that is projection, "
-        "not disagreement. Every "
+        "same items, the same granularity, the same precision — **under the "
+        "same bundle-support gate as every other edit**. Mirror only content "
+        "the input bundle supports, and never copy a value an audit finding "
+        "identified as unsupported: an audit finding always outranks "
+        "mirroring, and a fabrication the two records agree on is worse than "
+        "one only one record carries, because agreement is what a reader "
+        "checks. If the full record lists five funders the bundle supports, "
+        "list the same five; if it itemizes what this record merged, "
+        "itemize. Asserting less than the full record in a shared slot is a "
+        "divergence, not caution — the two records are two views of one "
+        "dataset, and a reader of either must learn the same facts where "
+        "they overlap. Mirroring adds and aligns; it never deletes: a slot "
+        "this record carries that the reconciled full record does not "
+        "populate, and that no audit finding challenged, stays exactly as it "
+        "is — some slots exist only in this record's schema, and the full "
+        "record's silence there orders nothing. Content the full record "
+        "carries in a slot this record's schema does not declare stays out: "
+        "that is projection, not disagreement. Every "
         "value you write or change must conform to the schema digest supplied "
         "above. If no "
         "finding requires a change, emit it unchanged. Output only YAML."),
@@ -871,21 +881,19 @@ def _client():
     direct = os.environ.get("ANTHROPIC_API_KEY")
     cborg = os.environ.get("CBORG_API_KEY")
     import anthropic
-    # A hung connection is otherwise indistinguishable from a long call: three
-    # times in 24 hours a sweep sat at 0% CPU on a read that would never
-    # return, invisible to the retry loop because the call neither failed nor
-    # finished (#664). With a deadline, the hang becomes APITimeoutError — a
-    # subclass of APIConnectionError, which `_call_with_retry` already
-    # retries. Sized at 60 minutes against an observed real-phase maximum
-    # near 30: generous enough that no legitimate call has come within a
-    # factor of two of it, small enough that a stalled sweep loses under an
-    # hour instead of an operator's evening.
-    timeout = float(os.environ.get("D4D_API_TIMEOUT_SECONDS", 3600))
+    # No timeout override, deliberately (#665 review). The SDK default is
+    # already granular — connect 5s, read/write 600s — and its read timeout
+    # demonstrably fires between chunks of a byte-silent stream. The observed
+    # #664 hangs (0% CPU, 1-3 hours) survived that default, so they were NOT
+    # byte-silent reads: something kept the socket warm, most plausibly the
+    # proxy forwarding SSE keepalives while upstream stalled. A larger read
+    # timeout cannot catch that, and a bare float here would have destroyed
+    # the 5s connect timeout as a side effect. The wall-clock watchdog in
+    # `_call_with_retry` is the mechanism that can catch it.
     if direct:
-        return anthropic.Anthropic(api_key=direct, timeout=timeout)
+        return anthropic.Anthropic(api_key=direct)
     if cborg:
-        return anthropic.Anthropic(api_key=cborg, base_url=CBORG_BASE_URL,
-                                   timeout=timeout)
+        return anthropic.Anthropic(api_key=cborg, base_url=CBORG_BASE_URL)
     raise RuntimeError(
         "No API key found. Set CBORG_API_KEY (LBL proxy) or ANTHROPIC_API_KEY, "
         "or use plan() / `d4d api plan` to inspect requests without calling "
@@ -1946,8 +1954,42 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             # 64k. get_final_message() reassembles the whole Message, so
             # stop_reason and usage stay available and the truncation guard and
             # cache accounting are unaffected.
+            # The watchdog closes the stream from outside when the wall
+            # clock runs out (#664). It cannot be an httpx timeout: the hangs
+            # sat at 0% CPU for 1-3 hours *through* the SDK's 600s
+            # between-chunks read timeout, so bytes were arriving while no
+            # content did, and no idle timeout distinguishes that from
+            # progress. Nor a check between iterator events: the SDK filters
+            # pings before the iterator, so a pinged-but-stalled stream
+            # blocks in __next__ and code between events never runs. Closing
+            # the response aborts the blocked read; the abort is classified
+            # transient below and the attempt retried. Whether this ends the
+            # observed hangs is a hypothesis the next canary tests — the
+            # evidence above only shows that a timeout alone cannot.
+            import threading
+            expired = threading.Event()
             with client.messages.stream(**kwargs) as stream:
-                return stream.get_final_message()
+                def _expire():
+                    expired.set()
+                    try:
+                        stream.close()
+                    except Exception:                  # noqa: BLE001
+                        pass
+                watchdog = threading.Timer(PHASE_WALL_CLOCK_SECONDS, _expire)
+                watchdog.daemon = True
+                watchdog.start()
+                try:
+                    return stream.get_final_message()
+                except Exception as exc:               # noqa: BLE001
+                    if expired.is_set():
+                        raise RuntimeError(
+                            f"phase call exceeded the "
+                            f"{PHASE_WALL_CLOCK_SECONDS:.0f}s wall clock and "
+                            f"was aborted by the watchdog (#664); underlying: "
+                            f"{type(exc).__name__}: {exc}") from exc
+                    raise
+                finally:
+                    watchdog.cancel()
         except Exception as exc:                      # noqa: BLE001 - re-raised
             transient = isinstance(exc, (
                 getattr(anthropic, "RateLimitError", ()),
@@ -1979,6 +2021,10 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             # own type, which is where the transience is actually stated.
             if not transient and _transient_error_type(exc):
                 transient = True
+            # A watchdog abort is transient by definition: the point of
+            # cutting a stalled call is to try again.
+            if not transient and "wall clock" in str(exc) and "#664" in str(exc):
+                transient = True
             if not transient or attempt == MAX_ATTEMPTS:
                 raise
             last = exc
@@ -1991,6 +2037,28 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             sleep(_rate_limit_pause(exc) or BACKOFF_BASE_SECONDS ** attempt)
     raise last  # unreachable; keeps type checkers honest
 
+
+def _wall_clock_seconds() -> float:
+    """Per-call wall-clock budget, env-overridable, malformed-safe.
+
+    Malformed or empty D4D_PHASE_WALL_CLOCK_SECONDS falls back to the default
+    rather than crashing the sweep at client construction (#665 review).
+    """
+    raw = os.environ.get("D4D_PHASE_WALL_CLOCK_SECONDS", "")
+    try:
+        value = float(raw)
+        if value > 0:
+            return value
+    except ValueError:
+        pass
+    return 3600.0
+
+
+#: One phase call may run this long in total before the watchdog aborts it.
+#: Wall clock, not read-idle — see the watchdog comment in _call_with_retry.
+#: Sized at 60 minutes against an observed real-phase maximum near 30 and
+#: observed hangs of 1-3 hours.
+PHASE_WALL_CLOCK_SECONDS = _wall_clock_seconds()
 
 RATE_LIMIT_MAX_PAUSE = 15 * 60      # never sleep longer than this on one attempt
 RATE_LIMIT_FALLBACK = 90            # limit hit, but no reset time stated
