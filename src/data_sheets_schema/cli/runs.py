@@ -880,7 +880,12 @@ def compare(method, project, labels, require_live, require_attested):
 @click.option("--project", help="limit to one project")
 @click.option("--label", help="limit to one run label")
 @click.option("--recheck", is_flag=True,
-              help="re-validate runs whose provenance already records a result")
+              help="re-validate runs whose provenance already records a "
+                   "result. This REWRITES verdicts — including stale ones "
+                   "whose pins are the record of which schema they were "
+                   "reached against (#426); records predating a schema move "
+                   "can flip to invalid under rules that postdate them. "
+                   "Scope it with --label/--project.")
 @click.option("--dry-run", is_flag=True, help="list what would be validated")
 def validate_cmd(method, project, label, recheck, dry_run):
     """Record whether each run's records validate, into its provenance.
@@ -901,7 +906,7 @@ def validate_cmd(method, project, label, recheck, dry_run):
         ProvenanceRecord, record_path_for,
     )
     from data_sheets_schema.runs import (
-        STALE, UNVERIFIED, discover, is_complete, validation_status,
+        UNVERIFIED, discover, is_complete, validation_status,
     )
 
     targets = []
@@ -918,9 +923,17 @@ def validate_cmd(method, project, label, recheck, dry_run):
             if not is_complete(run.method, run.label, proj):
                 continue
             status = validation_status(run.method, run.label, proj)
-            # STALE is re-validated like UNVERIFIED: its verdict
-            # describes bytes the file no longer has.
-            if not recheck and status not in (UNVERIFIED, STALE):
+            # STALE is *not* re-validated by default (#657 review). It
+            # conflates two situations, and the default action is wrong for
+            # both: a verdict whose schema pin predates a deliberate schema
+            # move (#646) is a historical fact to keep — re-validating the
+            # 2026-08-11 arm against the anchored doi pattern would flip
+            # honest verdicts to invalid (#426) — and a record whose bytes
+            # changed after its verdict is evidence of an edit, which wants
+            # investigation, not a fresh verdict quietly laundering it.
+            # Re-validation of an already-verdicted record is `--recheck`,
+            # a deliberate act naming its scope.
+            if not recheck and status != UNVERIFIED:
                 continue
             targets.append((run.method, run.label, proj))
 

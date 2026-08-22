@@ -1,0 +1,191 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The slot `distributions` is not present in the supplied CoreDataset/Dataset slot inventory, and neither are the keys used inside it (`path`, `format`, `media_type`, `conforms_to` at object level). This block was invented rather than drawn from the schema digest; the same content is already carried correctly by `file_collections` (in the full record) and `distribution_formats` (in both). Under the no-invented-keys rule this block is a schema-shape defect and should be removed, with any unique content folded into `file_collections`."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions[0].format / distributions[3].format",
+      "issue": "Values `JSON` and `TSV` are asserted as enum-like tokens for an enum (`format`) that the supplied digest never defines. Additionally the accompanying `source_caveats` explicitly admits the value is wrong for the content ('The `format` enumeration does not include Parquet; JSON is recorded because...'), i.e. a knowingly inaccurate value was written to satisfy a constraint that was itself not established from the schema."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "resources",
+      "issue": "`resources` has declared range Dataset, whose only required key is `id`, but the five cohort objects here carry only `id`, `name`, `description`. In the full record these same five cohorts are correctly expressed as `subsets` (range DataSubset, with `is_subpopulation`/`is_data_split` populated). Moving them to `resources` in the core record drops the subpopulation/split flags and misrepresents cohorts as component datasets rather than composition subsets."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "subsets",
+      "issue": "Omission the bundle clearly supports and the full record carries: the five disease/control cohorts are documented as composition subsets with explicit inclusion/exclusion criteria (project documentation Table 1). The core record drops `subsets` entirely, relocating the content to `resources` (see above). `subsets` is present in the core slot inventory and should be populated."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "at_risk_populations.assent_procedures / at_risk_populations.guardian_consent",
+      "issue": "Content stated in the core record that the full record does not state. The core adds guardian consent and assent detail (one-or-both parents, verbal assent, no assent sought under age seven). The claims are supported by the IRB protocol section 22.6, but they are new relative to phase 1, violating the requirement that the core record be a projection of the full record. Either add these to the full record or drop them from core."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "is_deidentified.identifiers_removed",
+      "issue": "Content stated in the core record that the full record does not state as a structured list. The full record has only `method` and `deidentification_details`; the core adds a populated `identifiers_removed` list. The items are all supported by the project documentation de-identification section, but the list is new relative to phase 1 and should be back-propagated to the full record for parity."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "annotation_analyses",
+      "issue": "Content stated in the core record that the full record does not state. `annotation_analyses` is present in both slot inventories but populated only in core. The substance (no IAA computed; single labeler; human-level performance varies widely) is bundle-supported and duplicated from `labeling_strategies`, but its appearance only in core is a parity defect."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "other_tasks",
+      "issue": "Content stated in the core record that the full record does not state. The full record has no `other_tasks`. The claim itself is weakly supported: the bundle documents planned future releases (additional disease categories, Spanish protocols, external multimodal data) as roadmap items, not as additional tasks the present dataset supports. This reads closer to `updates` content than to OtherTask, and is a parity defect in either case."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "raw_sources",
+      "issue": "Content stated in the core record that the full record does not state. `raw_sources` (range RawData) is populated only in core; the full record carries the equivalent information in `raw_data_sources` only. Parity defect."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "`publisher` is declared `uriorcurie` and is populated with `RRID:SCR_007345`. That RRID identifies PhysioNet as a *resource/registry entry*, taken from the PhysioNet citation block where it appears as part of the citation string, not as a statement of who the publisher is. Using a research-resource identifier as the publisher identifier conflates the platform's RRID with an organisation identifier. The bundle names the publisher in prose (PhysioNet, maintained by the MIT Laboratory for Computational Physiology) but supplies no organisation identifier; the slot should be omitted or the organisation named by a supported identifier."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "publisher",
+      "issue": "Same defect as the full record: `RRID:SCR_007345` used in a `uriorcurie` publisher slot, derived from a citation string rather than from any statement of publisher identity."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "conforms_to / conforms_to_standard",
+      "issue": "BIDS is asserted as the standard the dataset's own content follows. The bundle states that raw audio files and questionnaire data 'were converted to be compliant with the Brain Imaging Data Structure v1.9.0' and shows a BIDS-style tree under `b2ai-voice-audio`. However the *released* artifact described by this record (version 3.1.0 on PhysioNet) is a features/phenotype/metadata layout of Parquet and TSV files, not the BIDS audio tree; the BIDS structure applies to the controlled-access raw audio distribution. Asserting BIDS as the conformance of this release overstates what the higher-ranked PhysioNet source supports."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[1].data_substrate",
+      "issue": "`B2AI_SUBSTRATE:30` (Parquet) is used for the recording-level instance. The instance is 'Audio recording of a single acoustic task, represented by derived features'; Parquet is the container format of the release, not the substrate of the instance. Substrate terms such as Waveform Data (49) or Time-series data (69) better fit what the instance is; alternatively the slot should be omitted rather than approximated. Same issue in the core record."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "data_substrate (instances[1])",
+      "issue": "Duplicates the full record's `B2AI_SUBSTRATE:30` choice for the recording instance; see the full-record finding."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "Asserted `false`. The dataset demonstrably enrolls adults with mild cognitive impairment, Alzheimer's disease and other dementias, and with psychiatric diagnoses including schizophrenia and bipolar disorder — populations whose capacity to consent is a standard at-risk consideration. The record's own `source_caveats` acknowledges the IRB does not classify them as such. Asserting a boolean `false` goes beyond what the bundle states (the bundle is silent, not negative); the boolean should be omitted and the caveat retained."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "confidential_elements[0].confidential_elements_present",
+      "issue": "Asserted `false` with the gloss that the documentation 'states that the released dataset does not contain' privileged data. The bundle's actual text is a bare 'No' answer to the healthsheet question about confidential data; the surrounding explanation ('material posing such risk was removed before release and is held under controlled access') is the record's own inference, not a bundle statement. The boolean is supported; the explanatory clause is not."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "known_limitations (missing pediatric-scope entry)",
+      "issue": "Internal inconsistency with the chosen referent. The record repeatedly states the pediatric cohort is 'released as a separate dataset', yet `known_limitations` never records the absence of the pediatric cohort as a coverage limitation of this dataset, while it does record the absence of imaging/genomic data. Minor asymmetry in how out-of-scope content is documented."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "description",
+      "issue": "States 'recruited across five sites in North America (United States and Canada)'. The bundle supports five recording sites and supports USA and Canada as collection countries, but does not state that the five *adult* sites span both countries; the Canadian adult sites named in the IRB (Mount Sinai, SickKids, UofT) are associated with pediatric and genomic arms. The parenthetical couples two separately-supported facts into one unsupported claim."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "description",
+      "issue": "States the consortium 'anticipates an eventual enrollment of 10,000 participants by 2027'. The bundle gives 'Enrollment Count (Anticipated by 2027): 10,000' inside the *version 2.0.0* study-metadata block, and separately gives 30,000 as the target in the IRB protocol and 30,000 human voices in the white paper. The 10,000 figure is preferred correctly (higher-ranked documentation), but the conflict with 30,000 is not recorded in `source_caveats`."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "source_caveats",
+      "issue": "The caveat states the 61,937 figure is from 'the project documentation ... for version 3.0' and prefers PhysioNet per-feature counts. This is a reasonable resolution, but the two figures are not actually in conflict (61,937 is plausibly a sum across feature types), so framing it as a source disagreement slightly overstates the discrepancy."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Sixteen Creator objects each carry a `principal_investigator` (range Person) even where the bundle describes the individual as a lead investigator or module lead rather than a principal investigator. The bundle names exactly two co-principal investigators (Bensoussan, Elemento). Using the `principal_investigator` slot as a generic person-holder for all sixteen misstates role for fourteen of them; `notes` partially compensates but the structured slot is wrong."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "creators",
+      "issue": "Same defect as the full record: `principal_investigator` used as a generic person slot for fourteen individuals the bundle does not describe as principal investigators."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "creators[*].affiliations[*].name",
+      "issue": "Affiliation names are populated but no `id` is supplied for any Organization. This is correct under the evidence boundary (the bundle supplies no ROR identifiers and none may be inferred) and is noted only to confirm the omission is deliberate rather than an oversight."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "license",
+      "issue": "`license` is declared `string` and holds 'Bridge2AI Voice Registered Access License', which matches the bundle exactly. Noted as conforming; no defect. Included for completeness because the paired `license_and_use_terms.license_terms` restates the same name plus terms, creating mild redundancy but no inconsistency."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "version_access.latest_version_doi",
+      "issue": "`doi:10.13026/37yb-1t42` is given as the latest-version DOI. This is supported by the PhysioNet pages for versions 1.1, 3.0.0 and 3.1.0, all of which show it as 'DOI (latest version)'. Noted as conforming. However the sibling `doi` slot at record top level holds the bare version DOI `10.13026/8xbn-nq66` (unprefixed, correct for a `string` slot) while this slot uses the `doi:` CURIE form (correct for `uriorcurie`) — the divergence is correct per the schema but worth confirming was intentional."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "id",
+      "issue": "`doi:10.13026/8xbn-nq66` identifies version 3.1.0 specifically, while `version_access` presents the record as covering the version series. Using the version-specific DOI as the record `id` is defensible given the record documents 3.1.0, but it means the record identity will not survive the next release; no bundle statement resolves which is intended."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_timeframes[0]",
+      "issue": "`start_date` and `end_date` are omitted and only `timeframe_details` is populated. This is correct — the bundle gives no calendar bounds for the released collection — and the accompanying `source_caveats` documents the absence. Noted as conforming."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_governance.accountable_organization",
+      "issue": "Organization object carries `name` but no `id`. Correct under the evidence boundary (no organisation identifier in the bundle). Noted as conforming."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_governance.committee_contact",
+      "issue": "Omission the bundle arguably supports: the bundle repeatedly gives DACO@b2ai-voice.org as the access-committee contact. That address is currently buried in `stewardship_roles` prose. `committee_contact` has range Person, so an email address is not a clean fit, and omission is defensible — noted rather than asserted as a defect."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "download_url",
+      "issue": "Omitted from both records. Defensible, since the PhysioNet files require credentialing and there is no direct data URL; the landing page is correctly in `page` and the Synapse route is in `distribution_formats.access_urls`. Noted as conforming."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "language",
+      "issue": "`language: en` is asserted at record level. The bundle supports English-only data collection, so this is grounded, but the slot description ('Language in which the information is expressed') is ambiguous between the datasheet's language and the data's language. Both happen to be English here, so no practical defect."
+    }
+  ],
+  "summary": "Both records are substantially well grounded: the dataset referent (adult flagship v3.1.0 on PhysioNet) is chosen consistently, source conflicts over record counts, hosting platform, award identifiers and one investigator surname are surfaced in source_caveats with the higher-ranked source preferred as the manifest requires, and organisation/person identifiers are correctly omitted where the bundle supplies none. The dominant problems are in the core record and are structural rather than factual. First, an invented `distributions` block uses four keys absent from the slot inventory and asserts enum tokens for an undefined enum, with its own source_caveats admitting one value is knowingly wrong; its content is already carried by file_collections and distribution_formats. Second, the five disease cohorts were relocated from `subsets` (full) to `resources` (core), dropping the is_subpopulation flags and recasting composition subsets as component datasets. Third, five core slots state content the full record does not — at_risk_populations assent/guardian detail, is_deidentified.identifiers_removed, annotation_analyses, other_tasks, raw_sources — breaking projection parity; four of the five are bundle-supported and should be back-propagated to the full record, while other_tasks is weakly supported and reads as roadmap content belonging in `updates`. Beyond the core/full divergence, three cross-cutting issues recur in both records: `publisher` holds an RRID lifted from a citation string rather than an organisation identifier; BIDS conformance is asserted for a release whose actual layout is Parquet/TSV features, the BIDS tree applying to the controlled-access audio distribution; and two booleans (at_risk_groups_included: false, and the explanatory gloss on confidential_elements_present: false) assert negatives where the bundle is merely silent, the former in direct tension with the enrolled dementia and psychiatric cohorts. Lower-severity items include `principal_investigator` used as a generic person-holder for fourteen individuals the bundle describes as lead or module investigators rather than PIs, a Parquet substrate term applied to a recording-level instance, and a description clause coupling five sites to two countries in a way no single bundle statement supports."
+}

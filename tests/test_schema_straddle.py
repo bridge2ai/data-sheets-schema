@@ -178,9 +178,28 @@ class TestAgainstTheRealArm(unittest.TestCase):
         self.assertTrue(pinned.get("full_sha256"),
                         "no validation pin, so this test proves nothing")
 
+        # The pin records which schema the verdict was reached against — that
+        # is its whole job, and after #646 anchored the `doi` pattern
+        # (2026-08-21, post-v5-arm) the current schema is no longer that one.
+        # This arm's records carry non-bare DOIs, so re-validating them would
+        # flip honest verdicts to invalid; instead they keep the verdict they
+        # were pinned with (#426) and the status machinery reports the pin
+        # mismatch as `stale` — checked below, because a pin that silently
+        # read as current after the bytes moved would be the #426 bug again.
         from data_sheets_schema.provenance import FULL_SCHEMA, _sha256
-        self.assertEqual(pinned["full_sha256"], _sha256(FULL_SCHEMA),
-                         "the verdict is against the current schema")
+        self.assertNotEqual(pinned["full_sha256"], _sha256(FULL_SCHEMA),
+                            "the schema moved in #646; a pin equal to current "
+                            "bytes means the pin was rewritten, which verdicts "
+                            "must never be")
+        # And the exact bytes it should pin: the pre-#646 schema its verdict
+        # was reached against. `assertNotEqual(current)` alone
+        # accepts a pin rewritten to any *other* wrong value (#657 review);
+        # equality against the recorded history is the discriminating check.
+        self.assertEqual(
+            pinned["full_sha256"],
+            "0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8",
+            "the pin no longer matches the schema this verdict was actually "
+            "reached against")
         self.assertNotEqual(
             generation_digest("claudecode_agent", f"{ARM}_rep1", "AI_READI"),
             generation_digest("claudecode_agent", f"{ARM}_rep2", "AI_READI"))
@@ -221,9 +240,33 @@ class TestAgainstTheRealArm(unittest.TestCase):
                     self.assertIn(
                         bundle_drift("claudecode_agent", label, project)[0],
                         ("current", "drifted"))
-                    self.assertEqual(
-                        validation_status("claudecode_agent", label, project),
-                        "valid")
+                    # `stale`, not `valid`, since #646 moved the schema after
+                    # this arm's verdicts — the same shape as `drifted` above:
+                    # the record states what it validated against, and the
+                    # path no longer resolves to those bytes. The distinction
+                    # that must hold is *why* it is stale: the artifacts still
+                    # hash to what the verdict pinned (nothing was edited);
+                    # only the schema pin moved. Artifact-stale would be
+                    # corruption and fails here.
+                    status = validation_status("claudecode_agent", label,
+                                               project)
+                    self.assertEqual(status, "stale")
+                    from data_sheets_schema.provenance import (record_path_for,
+                                                               verify_entry)
+                    import yaml as _y
+                    rec = _y.safe_load(record_path_for(
+                        project, "claudecode_agent", label).read_text())
+                    for entry in ((rec.get("validation") or {})
+                                  .get("artifacts") or {}).values():
+                        # `is True`, not `is not False`: verify_entry returns
+                        # None for a file that is missing or carries no hash,
+                        # and a validated artifact that has *vanished* is
+                        # corruption too — the first version let deletion slip
+                        # through as lawful staleness (#657 review).
+                        self.assertIs(
+                            verify_entry(entry), True,
+                            "artifact bytes changed or vanished since the "
+                            "verdict — corruption, not schema movement")
 
 
 class TestTheCheckReportsIt(unittest.TestCase):

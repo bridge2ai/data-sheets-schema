@@ -1,0 +1,179 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "Slot `distributions` is not present in the Dataset/CoreDataset slot inventory supplied in the schema digest. The full record does not use it; the core record adds five objects under it, using keys `format`, `media_type`, `path` and `notes`. `path` is a FileCollection key, not a distribution key. This is an invented slot and will fail validation unless the core schema declares it; if it does validate, the same content is already carried by `distribution_formats`, so the core record duplicates its own distribution description."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "Content in the core record that the full record does not state in this form: the core record folds the full record's `file_collections` entries (features/, phenotype/, metadata/ with their file inventories and file_count values) into `distributions` objects, dropping the `file_count` values (86 phenotype files, 2 metadata files) while restating the descriptive text. The projection loses structured counts and relocates file-collection content into a distribution slot."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "resources",
+      "issue": "`resources` has range Dataset, but the five objects placed here are the full record's `subsets` (DataSubset) entries with `is_subpopulation` and `is_data_split` stripped. Projecting cohort subpopulations into `resources` asserts they are component datasets rather than subpopulations of one dataset, which changes the claim. The bundle describes these as recruitment cohorts within a single dataset, not as sub-resources."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "splits",
+      "issue": "The full record populates `splits` with the statement that no predefined train/validation/test splits are provided and that users should construct their own. The core record omits `splits` and instead restates that content as free prose at the end of `notes`. If `splits` exists in CoreDataset the structured slot should have been used; the core record's own source_caveats claims the core schema has no slot for data splits, which is an assertion about the schema the digest does not support."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "annotation_analyses",
+      "issue": "Content stated in the core record but not in the full record. `annotation_analyses` with agreement_metric 'None computed' is new in Phase 2. The underlying facts (single labeler, no agreement computable, human-level performance varies widely) are supported by the bundle and appear in the full record's `labeling_strategies` and `known_limitations`, but the full/core pair is now asymmetric: the full record has no `annotation_analyses` despite the slot being available to it."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "imputation_protocols",
+      "issue": "Content stated in the core record but not in the full record. `imputation_protocols` with imputation_method 'None applied' is new in Phase 2. The fact is supported (healthsheet: no cleaning preprocessing; missingness documented not filled), but the full record omits the slot, so the pair is asymmetric. Populating a slot to record that the procedure was not performed also sits close to the rule against using a slot to state absence."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "other_tasks",
+      "issue": "Content stated in the core record but not in the full record. `other_tasks` is new in Phase 2 and its text ('Beyond disease detection, the released feature sets support study of acoustic, phonetic, prosodic and articulatory correlates of health') is an inference from the feature inventory rather than a claim the bundle makes about tasks the dataset may additionally support. The full record's `tasks` already carries the same content as a stated purpose, drawn from documented intent."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "data_protection_impacts",
+      "issue": "Content stated in the core record but not in the full record. `data_protection_impacts` is new in Phase 2 and its single object records only that no assessment was conducted. This is supported by the healthsheet ('Has an analysis of the potential impact of the dataset and its use on data subjects been conducted? No'), but populating a slot solely to state that the thing it describes does not exist is an omission case under the decision rules; the full record correctly omits it."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "use_repository",
+      "issue": "Content stated in the core record but not in the full record. `use_repository` is new in Phase 2 and records only that no such repository exists. Supported by the healthsheet ('Is there a repository that links to any or all papers or systems that use the dataset? ... No'), but again populates a slot to assert absence rather than omitting it, and creates full/core asymmetry."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "license",
+      "issue": "Content stated in the core record but not in the full record. `license` is populated with 'Bridge2AI Voice Registered Access License'. The value is supported by PhysioNet, and the full record carries the same fact inside `license_and_use_terms.license_terms`, but the full record leaves the scalar `license` slot empty. The scalar slot should have been populated in both."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "is_tabular",
+      "issue": "Content stated in the core record but not in the full record. `is_tabular: false` is new in Phase 2. It is a defensible reading (dense Parquet tensors dominate), but it is also contestable: the phenotype layer and static_features.tsv are tabular, and the bundle makes no explicit statement. The full record omits the slot; the core record asserts a single boolean the bundle does not state."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators",
+      "issue": "Source commentary is embedded in Creator objects via `source_caveats` for Rudzicz, Johnson and Ravitsky. `source_caveats` is a declared key on Creator so this conforms, but the caveat text names the disagreeing sources inside a per-creator object rather than in the record-level `source_caveats`, distributing provenance commentary across entity records. Acceptable under the digest; flagged as a stylistic inconsistency because other source disagreements (participant compensation, record counts) are handled at record level."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "funders",
+      "issue": "`funders[0].grants[0].id` is set to the resolver URL https://reporter.nih.gov/project-details/11376382 while `name` holds the grant number OT2OD032720. Grant `id` is `uriorcurie`. NIH RePORTER project pages have no declared prefix in the digest, so a URL is the permitted fallback, but the URL points to an application record (11376382, a supplement) rather than to the core project the `name` field states, so id and name identify different things."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "publisher",
+      "issue": "`publisher` is `uriorcurie` and is set to https://physionet.org/ — a website root rather than an identifier for the publishing organization. No declared prefix covers PhysioNet in the digest so the URL fallback is permitted, but a bare site root is a weak identifier and the bundle also names the MIT Laboratory for Computational Physiology as the maintaining body."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances",
+      "issue": "`instances[0].data_substrate` is B2AI_SUBSTRATE:41 (Tab-separated values) for an instance whose `instance_type` is 'participant'. The substrate term describes the serialization of the phenotype tables rather than the participant instance; B2AI_SUBSTRATE:79 (Participant response data) or :80 (Questionnaire response data) is closer to what the instance holds. Same value in both records, so consistent, but the term choice describes file format rather than instance substrate."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances",
+      "issue": "`instances[1].data_substrate` is B2AI_SUBSTRATE:30 (Parquet), again a container format rather than the substance of the recording instance. B2AI_SUBSTRATE:49 (Waveform Data) or :69 (Time-series data) would describe the derived feature content; Parquet describes only how it is stored."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "collection_timeframes",
+      "issue": "The single CollectionTimeframe object carries only `timeframe_details` prose stating a twelve-month duration and that calendar dates are unavailable. This partly uses the slot to state what is absent. The declared `start_date`/`end_date` keys are correctly left unpopulated since the bundle gives no dates, but the trailing sentence about specific dates not being stated belongs in `source_caveats` rather than in the details field."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "source_caveats",
+      "issue": "The record-level `source_caveats` closes with a list of slots the author asserts the core schema lacks (participant compensation, consent notification and revocation, participant privacy, third-party sharing, per-variable descriptions, data splits, instance relationships). This is commentary about schema coverage rather than about the evidence behind sibling slot values, and at least one item is contradicted by the record itself, which does populate `splits`-adjacent content in `notes`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "notes",
+      "issue": "`notes` carries the AI-readiness self-assessment (identical to the full record, correct) plus an appended paragraph on data splits that duplicates content the full record places in the structured `splits` slot. Under the residual-content rule, split guidance should occupy `splits`, not `notes`."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "human_subject_research",
+      "issue": "`source_caveats` inside HumanSubjectResearch correctly separates the feasibility-study IRB number 004890 from the acquisition protocol. However `irb_approval` and `regulatory_compliance` are declared multivalued and each holds a single long paragraph bundling several distinct approvals and compliance facts (HIPAA rules, Certificate of Confidentiality, partial HIPAA waiver, no DMC, not a drug or device). These are distinct entities collapsed into one list element."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "at_risk_populations",
+      "issue": "`special_protections` is multivalued but holds one paragraph combining three distinct protections: enrollment of cognitively impaired and psychiatric participants, the discomfort risk disclosure, and the consent teach-back procedure with thirty-minute allowance. `assent_procedures` and `guardian_consent` are unpopulated although the bundle documents assent and parental permission procedures for the pediatric protocol; those belong to the pediatric dataset, so omission is defensible here."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "known_biases",
+      "issue": "`affected_subsets` on the representation_bias and measurement_bias entries holds descriptive phrases ('Historically marginalized and underserved communities', 'Mood and psychiatric disorders cohort') rather than references to the declared subsets. The full record defines subsets with minted fragment identifiers including #mood-psychiatric-disorders-cohort; the bias entry names it as free text instead of referencing that identifier."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources",
+      "issue": "A single ExternalResource object holds seven distinct resources in its `external_resources` list (b2aiprep, senselab, REDCap dictionary, docs site, FHIR profiles, governance memorandum, scholars training). The digest declares `external_resources` on Dataset as multivalued ExternalResource; one object per resource would represent the distinct entities. Same collapse repeated in the core record."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to_standard",
+      "issue": "`conforms_to_standard: [BIDS]` matches `conforms_to` prose naming BIDS v1.9.0. However the bundle also states the consortium publishes FHIR profiles for voice as a biomarker, and FHIR is an enumerated value. The FHIR profiles are a consortium output rather than a standard the released data conforms to, so the single BIDS value is defensible; flagged because the distinction rests on a reading the record does not state."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables",
+      "issue": "The `variables` list documents eleven feature-file columns but omits every phenotype column despite the bundle stating that each phenotype TSV ships a JSON data dictionary with per-column descriptions, questions and data types. This is a supported omission in the sense that the bundle does not enumerate the individual phenotype columns, but the record gives no indication that the variable list covers only the features layer."
+    },
+    {
+      "severity": "info",
+      "record": "core",
+      "slot": "header",
+      "issue": "Core header block conforms to the required form: it carries `# Sources:` naming both the bundle and the Phase 1 full record, `# D4D Core Datasheet`, `# Generation Method: schema-grounded agentic, phase 2`, the core schema path, `conforms_to_class: CoreDataset`, and `# Phase 4 reconciliation: completed`. Note the last line asserts Phase 4 completion; at the time of this Phase 3 audit Phase 4 has not run, so that line must remain accurate only if Phase 4 subsequently executes."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "id",
+      "issue": "`id` is doi:10.13026/8xbn-nq66 as a CURIE, correct for a `uriorcurie` slot with a declared doi prefix; the scalar `doi` slot correctly holds the bare 10.13026/8xbn-nq66 without prefix or resolver. Minted subset and file-collection identifiers are fragments on that DOI, matching the rule for labels with no external referent. `download_url` and `access_urls` correctly hold URLs. No uriorcurie/uri confusions found beyond the funder grant id noted above."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "creators",
+      "issue": "No ORCID or ROR identifiers were supplied for any person or organization, and none appear in the bundle. Correct application of the rule that identifiers naming things outside the dataset must be taken from the evidence or omitted."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "language",
+      "issue": "Both records write American English in the record's own prose (organization, standardized, characterization, minimized) while preserving British spelling inside quoted titles and organization names such as 'Temerty Centre for Artificial Intelligence Research and Education in Medicine'. Correct."
+    }
+  ],
+  "summary": "Both records are well grounded in the declared bundle and no unsupported dataset facts were found: participant count (833), version (3.1.0), DOIs, per-feature record counts, processing parameters, governance terms, consent scope, compensation amounts, de-identification steps and release history all trace to the bundle, with higher-ranked PhysioNet entries correctly preferred over the project documentation where they disagree, and the feasibility study's 47 participants, IRB number 004890 and no-compensation statement correctly quarantined from the dataset record. The dominant defect class is full/core asymmetry: the core record introduces eight slots absent from the full record (distributions, annotation_analyses, imputation_protocols, other_tasks, data_protection_impacts, use_repository, license, is_tabular), of which five exist only to assert that a procedure was not performed or a resource does not exist, and one (other_tasks) is an inference rather than a bundle claim. The single highest-severity issue is `distributions`, a slot not present in the supplied schema inventory, populated with FileCollection-shaped objects that duplicate distribution_formats and silently drop the file_count values the full record carries. Two range-fidelity problems recur: `resources` is loaded with DataSubset content, asserting cohorts are component datasets rather than subpopulations, and `splits` is dropped from the core record with its content relocated to trailing `notes` prose against the residual-content rule. Lesser issues are collapse of distinct entities into single list elements (external_resources, irb_approval, regulatory_compliance, special_protections), substrate terms that name file formats rather than instance content, a funder grant id resolving to a supplement application rather than the core project it is named for, and free-text subset names in affected_subsets where minted subset identifiers exist. No enum violations, no CURIE/URI confusions in declared-prefix slots, no fabricated ORCIDs or RORs, and no source commentary embedded in name or affiliation values were found."
+}

@@ -1,0 +1,251 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The slot `distributions` is not present in the supplied CoreDataset/Dataset slot inventory. The digest declares `distribution_formats` (DistributionFormat[]) and `file_collections` (FileCollection[]) but no `distributions` slot. Its member keys `path`, `md5` and `notes` are likewise undeclared for any listed range (DistributionFormat accepts `access_urls`, `checksum`, `download_url`, `format`, `media_type`, `notes`, `source_caveats`; FileCollection accepts `path` but not `md5`). This block appears to be an invented slot with an invented key `md5` (checksum-bearing key in DistributionFormat is `checksum`), contravening the prohibition on inventing keys."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions[*].compression",
+      "issue": "Compression is declared per-object only on FileCollection/DataSubset/Dataset, not on the undeclared `distributions` objects; carried here as part of an unschema'd structure."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "file_collections",
+      "issue": "The full record populates `file_collections` with ten FileCollection objects carrying declared keys (`id`, `path`, `collection_type`, `compression`, `issued`, `description`). The core record drops `file_collections` entirely and re-expresses the same content through the undeclared `distributions` slot. Since the core schema was not supplied in the digest, this cannot be confirmed as a projection loss, but the per-file structure that the full record placed in a declared slot has been moved into an undeclared one."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "sampling_strategies[0].source_data",
+      "issue": "Content new to the core record: 'No data were collected from individuals. All measurements derive from two established human cell lines...'. In the full record this material is carried by `direct_collection` (DirectCollection with is_direct: false). The core record omits `direct_collection` and relocates its substance into `source_data`. Core states content the full record does not state in that slot."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "notes",
+      "issue": "Content new to the core record: the full release citation string is appended to `notes` with the preamble 'Release citation, for which the core schema declares no dedicated slot'. The full record carries this in the declared `citation` slot. Per the notes-slot description, notes is for residual content only after every fitting slot is used; the meta-commentary about schema coverage is commentary about the record rather than dataset content."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "source_caveats",
+      "issue": "Core adds caveat (12) about distribution sizes being transcribed as human-readable values with no exact byte counts asserted; this caveat does not appear in the full record. Core states content the full record does not."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "total_size_bytes",
+      "issue": "Omitted while `total_file_count: 10` is populated. The bundle supplies per-file human-readable sizes only (e.g. '3.8 GB', '113.3 KB'), not byte counts, so omission is defensible; flagged only because the core record explains this in a caveat that the full record lacks, leaving the full record's omission unexplained."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators[*]",
+      "issue": "Creator objects carry `id` (ORCID CURIE) and `affiliations` but no `name` on any of the 37 entries. The bundle states each author's name explicitly in the release citation and author list. The Creator range accepts `name` (inherited from the top-level listing), so the person's name is recoverable evidence that has been omitted, leaving each creator identified only by opaque identifier."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators[36].principal_investigator",
+      "issue": "The `principal_investigator` key is nested inside the Creator object for Trey Ideker with the same ORCID as that Creator's own `id`, producing a self-referential Person. The bundle supports Ideker as PI (NIH RePORTER: 'Principal investigator: IDEKER, TREY'), but expressing it as a Person nested inside that same person's Creator record is structurally circular."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "publisher",
+      "issue": "`publisher` is set to ROR:0153tk833. No source in the bundle states a ROR identifier for the University of Virginia as such; the string 'https://ror.org/0153tk833' appears in the June 2026 Dataverse record only as an author affiliation field value for several authors. Converting an affiliation-slot string into an organizational identifier for the publisher is an inference beyond what the evidence asserts, and the record's own caveat (11) acknowledges the transcription is indirect. An identifier naming an organization outside the dataset is a fact about the world and must be taken from evidence stating it in that role."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "instances[0].counts",
+      "issue": "counts: 53788 is attached to an Instance whose `instance_type` describes a four-channel image of MDA-MB-468 cells. The figure 53,788 is the cumulative CM4AI project-wide immunofluorescent image count from cm4ai.org, which spans the whole project and is not restricted to MDA-MB-468 or to this release. The object-level caveat discloses this, but the value still asserts a per-instance-type count the bundle does not support."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "instances[1].counts",
+      "issue": "counts: 1374 is attached to an AP-MS bait-prey interaction Instance. The bundle gives 1,374 as the project-wide 'Protein Interactions' figure on cm4ai.org without apportioning it to AP-MS specifically; the record's own caveat concedes the apportionment is unstated. Assigning the whole figure to the AP-MS instance type is unsupported."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "ethical_reviews[0].reviewing_organization",
+      "issue": "'The Hastings Center' is asserted as the reviewing organization for Vardit Ravitsky. The bundle gives only an email domain (thehastingscenter.org) in the June 2026 record and lists the Hastings Center among collaborators on cm4ai.org; the same record gives this person's affiliation as University of Montreal. The record discloses the inference in `source_caveats`, but the value itself states as fact an organizational attribution the bundle does not make."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "ethical_reviews[1].reviewing_organization",
+      "issue": "'Simon Fraser University' is asserted as reviewing organization for Jean-Christophe Belisle-Pipon on the basis of the sfu.ca email domain. The bundle names him as an ethical review contact and separately lists Simon Fraser University as his author affiliation, but does not state that SFU is the reviewing organization. Unlike finding on ethical_reviews[0], no caveat discloses this inference."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "ethical_reviews[2].reviewing_organization",
+      "issue": "'Cell Maps for Artificial Intelligence Ethics module' is placed in `reviewing_organization`. A project module is not an organization; the slot's declared sense is the body that conducted ethics review. The bundle describes the Ethics module's activities but does not present it as a reviewing organization."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "data_governance.accountable_organization",
+      "issue": "University of California San Diego is asserted as accountable organization. The record's own `source_caveats` states 'the sources do not use the phrase \"accountable organization\" themselves' and that the value rests on inference from award recipient status and personnel location. Self-identified as unsupported by the bundle."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "created_on",
+      "issue": "created_on is set to 2025-02-27T00:00:00Z, transcribed from the June 2026 Dataverse 'Data Creation Date' field. The same record gives Deposit Date 2025-02-27, and the dataset is described as covering data generated from the project's first year onward (project start 2022-09-01 per NIH RePORTER). The Dataverse field is repository metadata about the deposit workflow rather than a claim about when the dataset content was created; using it for `created_on` asserts a creation date the underlying evidence contradicts."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "last_updated_on",
+      "issue": "2026-07-15T00:00:00Z is derived from file-level publication dates on three image archives within version 2.0, which postdate the version publication date. This is disclosed in caveat (4), but the derivation is an inference from file rows rather than a stated dataset-level modification date."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "created_by",
+      "issue": "The value is a multi-clause descriptive sentence about the project and its NIH program membership rather than the name of a person or organization primarily responsible for creating the resource. Prose where a responsible-party designation is expected."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "status",
+      "issue": "Value 'published (beta, interim release)' packs three states into one string. The slot description gives examples of single-token states (draft, published, deprecated); the beta/interim qualification duplicates content already carried in `known_limitations` (scope_limitation) and in the title."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "external_resources[3]",
+      "issue": "The Nature 2025 U2OS cell-map publication is included as an external resource with a caveat noting it concerns a different cell line and is 'related methodology rather than ... documentation of this dataset'. Including a resource while simultaneously recording that it does not document the dataset weakens the slot's meaning; the bundle's ranking places this at tier 3 and the record's own referent choice excludes U2OS."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "related_datasets[*].relationship_type",
+      "issue": "All four prior releases are typed `is_new_version_of`, which asserts that this deposit is a new version of each. The record's own `source_caveats` on the last entry concedes these are 'separate Dataverse deposits with distinct DOIs rather than successive versions of one deposit'. The enum offers `supplements`, `continues`, `replaces` and `is_part_of`, any of which would fit a quarterly series of distinct deposits better; the chosen term contradicts the accompanying caveat."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "related_datasets[*].description",
+      "issue": "DatasetRelationship objects carry `target_dataset` and `description` but no `name` or `title` for the target, even though the bundle states each release's full title. Descriptive prose is used where declared naming fields exist."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "funders[0].grants",
+      "issue": "Grant objects carry only `name` holding an award number (1OT2OD032742-01, 5U54HG012513-02). The bundle also supplies, for OT2OD032742, the award amount (5,289,382), project start (2022-09-01), project end (2026-08-31) and recipient organization; these are relegated to a prose `source_caveats` rather than being placed in the Grant object's own fields."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to_standard",
+      "issue": "RO_CRATE is asserted at dataset level. The bundle supports RO-Crate packaging for the metadata package and for the FAIRSCAPE-generated provenance packages; the released ZIP archives of images and mass-spec results are not themselves stated to be RO-Crates. The dataset-level assertion overstates the scope the evidence supports, though `conforms_to` prose is accurate."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "maintainers[*]",
+      "issue": "Maintainer objects place person and organization names inside free-text `maintainer_details` prose (e.g. 'Trey Ideker, University of California San Diego, is the designated point of contact...'), while the object's own `name`/`id` fields are unpopulated. Structured identity is available in the bundle (Ideker's ORCID is used elsewhere in the record) but is expressed only as prose here."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_collectors[*]",
+      "issue": "Laboratory heads and institutions are named inside `collector_details` prose while the object's `name`/`id` fields are left empty, so no collector is machine-identifiable despite the bundle naming Krogan, Lundberg, Mali and Ideker with ORCIDs elsewhere in the same record."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "raw_sources",
+      "issue": "Six RawData objects each describe a MassIVE, SRA or Figshare deposit in `raw_data_details` prose but leave `access_url` unpopulated on all six, even though the range declares that key and the bundle names the repositories as linked from the Dataverse record."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "raw_data_sources[*].access_details",
+      "issue": "Access routes are given as prose ('Available from the American Type Culture Collection (ATCC)') with no identifier; the bundle supplies RRIDs (CVCL_0419, CVCL_B5P3) which are placed in `source_description` prose rather than in any identifier-bearing position."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "keywords",
+      "issue": "The keyword list is transcribed from the Dataverse record but drops the ontology term URIs the bundle attaches to most keywords (e.g. NCIT_C16309 for 'AI', CHEBI_45863 for 'paclitaxel', CL_0000746 for 'cardiomyocyte'). The slot range is `string` so URIs cannot be carried there, but no other slot captures this evidence, which the bundle clearly supports."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_timeframes[0]",
+      "issue": "`start_date` and `end_date` are unpopulated although the object range declares both and the bundle states project start 2022-09-01 and project end 2026-08-31 (NIH RePORTER) plus a project completion of November 2026 (Dataverse). All date content is confined to `timeframe_details` prose."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "compression",
+      "issue": "Dataset-level `compression: zip` is asserted, but the bundle also lists non-archive release artifacts in earlier releases (JSON RO-Crate metadata files, HTML datasheets and provenance graphs) and the June 2026 release includes a metadata ZIP whose contents are JSON/HTML. The dataset-level scalar flattens a mixed-format release."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[*].sampling_strategies",
+      "issue": "Instance objects declare a `sampling_strategies` key but none is populated, while dataset-level `sampling_strategies` describes two distinct sampling axes (molecular panel selection vs. cellular background selection) that apply differently to different instance types."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "relationships[0].relationship_details",
+      "issue": "Single Relationships object bundles two structurally distinct relationship kinds into one prose value: cross-modality keying by protein/gene identity, and within-modality bait-prey and co-elution edges. The slot is multivalued and the bundle distinguishes these; collapsing them into one object populates the slot without representing the distinct relations."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "relationships",
+      "issue": "Omitted from the core record although present in the full record and supported by the bundle (protein/gene keying across modalities; bait-prey and co-elution edges). If `relationships` exists in CoreDataset this is an unexplained projection loss."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "Omitted from the core record although present in the full record with is_direct: false and supported by the bundle. Its substance was relocated into `sampling_strategies[0].source_data`, which is a different declared field with a different meaning."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "third_party_sharing",
+      "issue": "Omitted from the core record although present in the full record (is_shared: true, with MassIVE/NCBI/Figshare deposits and embargo note) and clearly supported by the bundle's External Data Links section."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "citation",
+      "issue": "Omitted as a slot; the citation string is instead placed inside `notes`. If CoreDataset declares `citation` this is a misplacement; if it does not, the accompanying meta-commentary about schema coverage still does not belong in a content slot."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "total_file_count",
+      "issue": "Omitted from the core record although present in the full record (10) and directly countable from the June 2026 file table."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "id",
+      "issue": "`id` uses the CURIE form doi:10.18130/V3/HIGT4C while the string-ranged `doi` slot correctly carries the bare 10.18130/V3/HIGT4C. Consistent with the digest's guidance; noted for completeness."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "file_collections[*].id / related_datasets[*].target_dataset",
+      "issue": "Internal file-collection identifiers are minted as fragments on the dataset DOI (doi:10.18130/V3/HIGT4C#apms-...), and related-dataset targets use attested DOIs in CURIE form. Both conform to the minting and identifier rules; noted for completeness."
+    }
+  ],
+  "summary": "Both records are substantially grounded in the declared bundle, transcribe the June 2026 Dataverse release faithfully, and disclose most inference in a detailed dataset-level source_caveats block that correctly applies the source ranking (Dataverse over cm4ai.org for the release date; October 2025 over March 2025 for the protein count) and correctly excludes the U2OS Nature paper from the referent. The most serious defect is structural and confined to the core record: a `distributions` slot that the supplied schema digest does not declare, carrying an undeclared `md5` key, which duplicates content the full record placed in the declared `file_collections` slot. Three further core-only divergences state content the full record does not: a new source_caveat about byte counts, the citation relocated into `notes` with meta-commentary, and `direct_collection` content relocated into `sampling_strategies.source_data`. Four slots present in the full record (relationships, direct_collection, third_party_sharing, total_file_count) are dropped from the core without explanation. Across both records the recurring evidence issues are inferred organizational attributions presented as fact — the ROR identifier for the publisher derived from an affiliation field, the reviewing organizations for both named ethics contacts derived from email domains, and the accountable organization the record itself concedes no source names — and two Instance counts that are cumulative project-wide figures asserted at per-instance-type granularity. The recurring structural issue is that identity is repeatedly carried as prose inside detail fields while the objects' own name and id fields sit empty: no creator carries a name despite all 37 being named in the bundle, and maintainers, data collectors and raw sources name people, laboratories and repositories only inside free-text. Also notable: created_on takes a repository deposit date as a content-creation date, all four prior releases are typed is_new_version_of in direct contradiction of the record's own caveat that they are distinct deposits, and CollectionTimeframe leaves declared start_date and end_date empty although the bundle states both."
+}

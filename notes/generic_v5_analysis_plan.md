@@ -224,9 +224,8 @@ Four canaries, all AI-READI, and the fan-out decision.
 - **2026-08-20b** — post-#644-fix, second independent draw. **REGRESSED on pair
   errors only: 12 vs baseline worst 10.** Everything else passed, several far
   better than baseline: resolver URLs 0, undeclared prefixes 0, British 28 vs
-  146. Its evidence directory is not yet committed — the production arm is
-  writing under that prefix; **the post-arm data commit must include it**, or
-  this paragraph cites bytes outside the repo (#649).
+  146. Its evidence directory, with the full arm's, was committed post-arm in
+  #655, closing the pending flag this bullet carried (#649).
 
   **On whether the pair-error shift is systematic — corrected after review
   (#651).** The first version of this entry claimed v5 = {13, 12, 12} vs

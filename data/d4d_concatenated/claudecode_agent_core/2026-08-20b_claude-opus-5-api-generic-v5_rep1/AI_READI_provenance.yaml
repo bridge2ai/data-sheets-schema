@@ -1,0 +1,428 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-08-20T19:33:27+00:00'
+run:
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  project: AI_READI
+  method: claudecode_agent
+  arm: baseline
+  replicate: 1
+model:
+  generation_method: schema-grounded API, six phases
+  agent_runtime: Claude API (direct)
+  provider: LBL CBORG (proxy to Anthropic)
+  base_url: https://api.cborg.lbl.gov
+  model: claude-opus-5
+  max_tokens_by_phase:
+    full: 96000
+    reconcile_full: 96000
+    repair_full: 96000
+    core: 56000
+    reconcile_core: 56000
+    repair_core: 56000
+    audit: 24000
+    report: 24000
+  context:
+    peak_request_tokens: 325581
+    peak_phase: report
+    peak_basis: 'observed: input + cache_read + cache_write of the largest request'
+    limit_tokens: null
+    limit_basis: not stated by the route and not returned by the provider; headroom
+      cannot be computed from this record
+  temperature: null
+  temperature_basis: not applicable to this model
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt_v5.md
+    sha256: c4bbcc41eb4f0b83704228a0bf040294dedd6edf5afbf06035c2fd9d7587ebbb
+    bytes: 13909
+    exists: true
+  request:
+    sha256: 68f5ea956ed35920d0addf0d8a3bbad7cd3512d2ba7d5138dd13ba4df3542db5
+    bytes: 10679
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      condition: generic_v5
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: data/preprocessed/source_manifest.yaml'
+      run_date: '2026-08-20'
+      runtime: Claude API (direct)
+      provider: LBL CBORG (proxy to Anthropic)
+      bundle: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  resolved:
+    sha256: 68f5ea956ed35920d0addf0d8a3bbad7cd3512d2ba7d5138dd13ba4df3542db5
+    bytes: 10679
+  assembly:
+    sha256: 7d0ce8f3c6246ca4bfc0e7a4ba9b92df336faa201f52b3f972f71aeff6e8ccf7
+    layout: schema digest, input bundle, source ranking, arm prompt, carried artifacts,
+      phase instruction
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: eaacddbddbf24cf5744d5e4451f9109ba1d996bb4d563ae6f37ae28c42d71464
+    bytes: 32310
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: a9a56cd791a6a4876e4dd756011460d6c7a24f634c928af8b0e2fc3057d6bc0d
+    bytes: 12138
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: dcc5271e6065f87dd30dd0380244df2e900af81e7ecbab523cc57954743f46db
+    bytes: 6224
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules.md
+    sha256: 064a6974b03febec147ed0b453e71750402ff9c844bac81728edd2d07abb5d2d
+    bytes: 6900
+    exists: true
+  consumed: false
+  consumed_basis: this runtime renders a condition prompt and sends nothing else,
+    so these were not read; they are hashed so an unchanged hash shows that (#545)
+phase_log: null
+schema:
+  declared_version: 2.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  merged_schema_carries_version: true
+  digest_md5: 44d290239cedcd8bb38488f4fa11d0fb
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: 1551df4215ee46b46b85582648b06b84d7ae93f5
+  commit_short: 1551df42
+  branch: main
+  dirty: true
+  dirty_file_count: 7
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  bundle_bytes: 535189
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: c0028d716155a185d7000ec6ad60352f
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    bytes: 93763
+    slots: 83
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    bytes: 84589
+    slots: 70
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    bytes: 18159
+    slots: null
+companions:
+  reasoning_log:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_reasoning.jsonl
+    present: true
+    md5: 1f19a0c07f2942946b08104d0e4d5504
+    note: one JSON line per phase; absent for a runtime that cannot report its own
+      token accounting (#400)
+  telemetry_report:
+    path: data/run_telemetry/2026-08-20b_claude-opus-5-api-generic-v5.yaml
+    present: false
+    note: derived from records like this one, per label rather than per run; `d4d
+      runs telemetry` writes it
+  prompt_registry:
+    path: src/download/prompts/canonical_hashes.yaml
+    present: true
+    md5: 65e361a8aae6e5e8323be96eaa103ecd
+    note: the pins the recorded prompt hashes were judged against
+  digest_inventory:
+    path: src/data_sheets_schema/schema/digest_inventory.yaml
+    present: true
+    md5: b2ddc34cbc16b8daa45d996ffc1b2dde
+    note: digest to slot inventory, which decides whether a slot predates a pair
+unrecoverable: null
+unverified:
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''claude-opus-5''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+- field: model.temperature
+  value: null
+  reason: 'claude-opus-5 rejects `temperature` (400: deprecated for this model), so
+    the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config is not
+    sent and does not apply. Sampling for this model family is selected by model-name
+    suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). claude-opus-5 rejects `temperature` (400: deprecated
+  for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
+api_usage:
+- phase: full
+  attempt: 1
+  started_at: '2026-08-20T18:37:42+00:00'
+  seconds: 742.608
+  input_tokens: 4264
+  output_tokens: 64638
+  cache_read: 0
+  cache_write: 198549
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: core
+  attempt: 1
+  started_at: '2026-08-20T18:50:09+00:00'
+  seconds: 239.252
+  input_tokens: 35126
+  output_tokens: 25265
+  cache_read: 0
+  cache_write: 195153
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: audit
+  attempt: 1
+  started_at: '2026-08-20T18:54:09+00:00'
+  seconds: 161.873
+  input_tokens: 60450
+  output_tokens: 5883
+  cache_read: 198549
+  cache_write: 0
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: reconcile_full
+  attempt: 1
+  started_at: '2026-08-20T18:56:51+00:00'
+  seconds: 298.305
+  input_tokens: 66461
+  output_tokens: 32132
+  cache_read: 198549
+  cache_write: 0
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: reconcile_core
+  attempt: 1
+  started_at: '2026-08-20T19:01:49+00:00'
+  seconds: 273.952
+  input_tokens: 67460
+  output_tokens: 28515
+  cache_read: 0
+  cache_write: 195153
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: report
+  attempt: 1
+  started_at: '2026-08-20T19:06:24+00:00'
+  seconds: 1623.064
+  input_tokens: 127032
+  output_tokens: 6258
+  cache_read: 0
+  cache_write: 198549
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: repair_full
+  attempt: 1
+  started_at: '2026-08-20T19:33:36+00:00'
+  seconds: 303.309
+  input_tokens: 33614
+  output_tokens: 33073
+  cache_read: 0
+  cache_write: 15912
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: repair_core
+  attempt: 1
+  started_at: '2026-08-20T19:38:44+00:00'
+  seconds: 271.357
+  input_tokens: 31043
+  output_tokens: 29368
+  cache_read: 0
+  cache_write: 12516
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: report_after_repair
+  attempt: 1
+  input_tokens: 127018
+  output_tokens: 6089
+  cache_read: 0
+  cache_write: 198549
+  stop_reason: end_turn
+phases_skipped: null
+repair:
+- phase: repair_full
+  round: 1
+  outcome: applied
+  findings: 7
+- phase: repair_core
+  round: 1
+  outcome: applied
+  findings: 16
+report_regenerated_after_repair:
+  changed:
+  - core
+  - full
+  why: repair rewrote a record after the report was written; a report describing bytes
+    that no longer exist is the artifact a reviewer reads instead of the diff
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+      md5: 674a04c4dbd4e59d46d7c1fe65c8c215
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+      md5: 678fe3f5e958dbedf4de1367d41a1e2e
+  schema:
+    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: false
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+      md5: 674a04c4dbd4e59d46d7c1fe65c8c215
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+      md5: 678fe3f5e958dbedf4de1367d41a1e2e
+  errors: 12
+  warnings: 1
+  identity_slots: 79
+  schema_moved: false
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods
+    message: 'list length differs: full=2, core=3'
+  - code: shared-slot-content
+    path: $.collection_mechanisms
+    message: 'list length differs: full=20, core=21'
+  - code: shared-slot-content
+    path: $.description
+    message: 'value differs: full=''Version 3.0.0 of the flagship dataset produced
+      by the Artificial Intelligence Ready and Equitable/Exploratory Atlas for Diabetes
+      Insights (AI-READI) project, one of four Data Gene'
+  - code: shared-slot-content
+    path: $.informed_consent[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''notes'']'
+  - code: shared-slot-content
+    path: $.instances[0].notes
+    message: 'value differs: full=''Each instance is one participant and consists
+      of all data available for that individual across the modalities collected. There
+      is currently one study visit per participant; approx'
+  - code: shared-slot-content
+    path: $.is_deidentified.deidentification_details
+    message: 'value differs: full=''FAIRhub records the de-identification type as
+      "NoDeIdentification" while flagging both direct identifiers and HIPAA identifiers,
+      and explains that no identifiers were collected in'
+  - code: shared-slot-content
+    path: $.license_and_use_terms.notes
+    message: 'value differs: full=''The license was written specifically to enable
+      reuse of the AI-READI dataset, and other clinical datasets, for commercial or
+      research purposes while imposing strong requirements a'
+  - code: shared-slot-content
+    path: $.missing_data_documentation[0].missing_data_patterns
+    message: 'value differs: full=''Not all modalities are available for all participants.\n\nWithin
+      survey instruments, individual items may be unanswered.'', core=''Not all modalities
+      are available for all participa'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''The FAIRhub dataset pages and the AI-READI documentation
+      site both carry a banner stating that the repository is under review for potential
+      modification in compliance with Adminis'
+  - code: shared-slot-content
+    path: $.sampling_strategies[0].strategies
+    message: 'value differs: full="Non-probability sampling. Recruitment proceeds
+      in waves; for each wave a contact pool is drawn by screening electronic health
+      records at each site, and the composition and size of'
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''The record describes version 3.0.0 of the FAIRhub-distributed
+      dataset, the referent shared by the tier-1 FAIRhub dataset page, the FAIRhub
+      API metadata and the RO-Crate metadata. '
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+report_claims:
+  checked: true
+  findings:
+  - kind: false_schema_claim
+    slot: distributions
+    detail: report says this is not a declared slot; it is declared on CoreDataset
+    claim: The audit's highest-severity finding was that `distributions` is not declared
+      in the supplied schema digest, which lists only `file_collections` (range `FileCollection`,
+      with `path`, `file_count`, `total_bytes`, `collection_type`) as the sl
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+      md5: 2bc6cb7fbc2a81bf5368b886db49c7a9
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+      md5: 674a04c4dbd4e59d46d7c1fe65c8c215
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+      md5: 678fe3f5e958dbedf4de1367d41a1e2e
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+grounding:
+  checked: true
+  counts:
+    grounded: 22
+    minted_fragment: 18
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 9
+    minted_fragment: 14
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+      md5: 0f3abb51a333555456bedd63891fcd99
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+  - data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  british_spellings: 28
+  organisational_fragments: 0
+intermediates:
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_audit.json
+  sha256: 4c7609e8e46ff011405c5ab6574271af72fd0c889d5e2b2262a2bb0007591df5
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_core.yaml
+  sha256: a48ebf0b84cbe47472bf7c9c8fbe80cf475982469d770196d2ae5c458e8981b2
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_full.yaml
+  sha256: 4b0f60fdba01792a3292616b13326f0af750b234f015c7d461a29071c30659e8
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_reconcile_core.yaml
+  sha256: 2fffd6931b408ae39b317051f28daebab703d0a7d9c005e3a57206827b64f024
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_reconcile_full.yaml
+  sha256: af3aea3fa00016fa95bb82695f0916a639d1189deb65e8f933a7aa8d1c6afada
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_repair_core_r1.yaml
+  sha256: 153103b319ef2f2f51b5a99f15a5c82d43a0cfe653d02dc7156d88e233287aa8
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_repair_full_r1.yaml
+  sha256: d055cd62374d1fa285224b2e72f43948b4bffc30f15b8f0a5c14e9356fb1f580
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_report.md
+  sha256: 947277c9584ca1d6235f204687cb94db5e062ebea1da88dc60e2d331fda6343d

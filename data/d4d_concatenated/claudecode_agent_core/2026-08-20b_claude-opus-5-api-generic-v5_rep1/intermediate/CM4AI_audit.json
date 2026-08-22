@@ -1,0 +1,245 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The core record adds a top-level `distributions` slot (with per-file `path`, `format`, `media_type`, `compression`, `conforms_to_standard`, `md5`, `notes`, `source_caveats` keys). No slot named `distributions` appears in the supplied schema digest for Dataset, and the core schema was not supplied for inspection; the corresponding full-record content lives in `file_collections` (FileCollection objects with `id`, `collection_type`, `distribution_formats[].checksum`). If `distributions` is not a declared CoreDataset slot, or if `md5`/`path`/`conforms_to_standard` are not declared keys on its range, this block will fail validation. It also restates full-record content in a different shape rather than projecting it."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "resources",
+      "issue": "The seven cell-line/condition strata are carried in `resources` in the core record but in `subsets` (DataSubset) in the full record, and the `is_data_split: false` / `is_subpopulation: true` flags present on every full-record entry are dropped. `resources` is declared as sub-resources or component datasets, whereas these are demographic/condition partitions — the semantics DataSubset exists for. The projection changes both the slot and the meaning."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "compression",
+      "issue": "Core sets top-level `compression: zip`; the full record does not populate `compression` at all. This is content the core record states that the full record does not. It is also arguably wrong at the dataset level: `compression` on Dataset describes the dataset's own compression format, and the release is a set of independently compressed archives rather than a single compressed distribution."
+    },
+    {
+      "severity": "high",
+      "record": "both",
+      "slot": "data_governance.committee_contact.id",
+      "issue": "`committee_contact` has range Person and its `id` is `uriorcurie`. The value `mailto:jillianparker@health.ucsd.edu` is a mailto URI, not a person identifier. The bundle supplies only the email address for Jillian Parker, no ORCID. Under the v5 identifier rule a resolver-style value should not be minted where no declared prefix fits; the correct handling is to omit `id` and carry the address in prose, or to place it in a field intended for contact detail."
+    },
+    {
+      "severity": "high",
+      "record": "both",
+      "slot": "creators[16] / creators[last]",
+      "issue": "The final Creator object carries only `affiliations: [{name: KTH Royal Institute of Technology}]` plus `source_caveats` (full record also adds `notes`-style prose in the caveat). It has no `principal_investigator`, so it names no person; it is a placeholder used to hold commentary about how the creators list was constructed. This is source commentary occupying a structured object, and it asserts an affiliation entry with no agent attached. The commentary belongs in top-level `source_caveats`; the object should be removed."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators[16].notes",
+      "issue": "The full-record trailing Creator uses `notes` to explain the record-construction decision ('Creator entries are given for the corresponding and co-corresponding authors ... because the Creator class carries a principal investigator rather than a general author name'). This is commentary about the record, which the schema assigns to `source_caveats`, not `notes`. The same text is duplicated as `source_caveats` in the core record, so the two records disagree on which field holds it."
+    },
+    {
+      "severity": "high",
+      "record": "both",
+      "slot": "creators[*].principal_investigator",
+      "issue": "Fifteen of the sixteen Creator objects populate `principal_investigator` (range Person) with people who are co-authors and module leads, not principal investigators. Only Trey Ideker is attested as PI (NIH RePORTER: 'Principal investigator: IDEKER, TREY'). The bundle names Ideker as corresponding author and the other fourteen as co-corresponding authors of the preprint; it does not state that Bélisle-Pipon, Brandt, Chen, Ding, Fodeh, Krogan, Lundberg, Mali, Payne-Foster, Ratcliffe, Ravitsky, Sali, Schulz or Clark are principal investigators. The slot's declared meaning is over-claimed for fourteen entries."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators",
+      "issue": "The Creator class declares a `credit_roles` field with a controlled vocabulary (conceptualization, data_curation, supervision, project_administration, funding_acquisition, etc.). The bundle supplies explicit role evidence for several parties — e.g. the Nature contributions statement, and CM4AI module assignments naming Lundberg's lab for imaging, Krogan's lab for SEC-MS, Thaker as Program Manager — yet `credit_roles` is populated for no creator in either record. This is a clearly supported omission for at least the data-generation leads."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators[*].affiliations[*].id",
+      "issue": "Affiliation identifiers are inconsistent: `ROR:0153tk833` is supplied for the two University of Virginia creators (correctly, since the June 2026 release states that ROR), but every other affiliation — UCSD, UCSF, Stanford, Yale, Simon Fraser, UAB, UT Austin, University of Alabama, University of Montreal, KTH — carries `name` only with no `id`. That asymmetry is defensible under the evidence rule (only the UVA ROR is attested) but should be recorded in `source_caveats`; the current caveat explains the publisher ROR choice, not the affiliation asymmetry."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "instances[0].counts / instances[1].counts",
+      "issue": "`counts: 53788` and `counts: 1374` are attached to Instance objects describing this release, but both are project-wide website totals covering all releases and all cell lines, not counts of instances in the June 2026 release. Each entry's own `source_caveats` admits the figure 'is not stated as a per-release figure'. Populating a per-instance count with a figure the record simultaneously says does not apply to the referent is an internal inconsistency; the counts should be omitted and the totals carried in prose."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "instances[0].data_substrate",
+      "issue": "`B2AI_SUBSTRATE:56` is 'Immunofluorescence Image', which fits, but the paired `data_topic: B2AI_TOPIC:19` is 'Microscale Imaging' where 'Image' (15) is the more direct term for the instance described. Minor, but the substrate/topic pairing across the four Instance objects is uneven: instance 1 (protein interaction) has a topic but no substrate; instance 3 uses substrate 64 (Perturb-seq Data) with topic 34 (Transcriptome); instance 4 uses substrate 59 (SEC-MS Data) with topic 28 (Proteome). Instance 1 omits substrate where B2AI_SUBSTRATE has no protein-interaction term — correct per the digest's instruction to omit rather than approximate — but this is not noted."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "collection_timeframes[0]",
+      "issue": "`start_date: 2022-09-01` / `end_date: 2026-08-31` are the NIH award period from RePORTER, not a data collection window. The object's own `source_caveats` states 'the bundle does not state an explicit measurement window for any individual data stream'. Populating CollectionTimeframe with award dates places administrative facts in a slot declared for collection periods; the funding period already appears in `funders[0].notes`. The end date is also inconsistent with the record's repeated statement that data generation continues through November 2026."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "errata",
+      "issue": "The single Erratum entry documents a revision to the June 2025 release, and its own `source_caveats` concedes 'This erratum concerns the June 2025 release rather than the June 2026 release described by this record.' Since the declared referent is the June 2026 release, this is an erratum for a different dataset, already represented under `related_datasets`. It should be omitted from `errata` or moved into the June 2025 relationship entry."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "related_datasets[*].relationship_type",
+      "issue": "All four prior releases are typed `is_new_version_of`. That relation holds for the immediately preceding October 2025 release, but the June 2025, March 2025 and May 2024 releases stand in a transitive-ancestor relation, not a direct new-version relation; each is separately DOI'd with its own contents and its own Dataverse version numbering. The enum offers `is_previous_version_of`/`is_new_version_of` and also `references`/`continues`, but applying the same direct-successor relation to all four flattens the release chain."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "publisher",
+      "issue": "`publisher: ROR:0153tk833` asserts the University of Virginia as publisher. The bundle names 'University of Virginia Dataverse' as the repository and 'LibraData: UVa's Scholarly Research' as the collection; the ROR is attested in the bundle only as an author affiliation for five UVA-based authors, not as a publisher identifier. The record's own `source_caveats` states this reasoning. This is a defensible inference but remains an identifier applied to a role the bundle does not attach it to."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "total_file_count",
+      "issue": "`total_file_count: 10` counts the ten distributed ZIP archives, and each FileCollection carries `file_count: 1`, so the aggregate is self-consistent. But every archive contains many files (the image archives are multi-gigabyte collections of confocal images), so `file_count: 1` per collection describes the archive rather than the files within it, and the digest states total_file_count 'Can be aggregated from file_collections[].file_count'. The semantics of what is being counted are not stated anywhere in the record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "total_size_bytes",
+      "issue": "Omitted, though the bundle supplies a size for every one of the ten files in the June 2026 release (113.3 KB, 135.8 KB, 3.8 GB, 4.6 GB, 4.2 GB, 171.8 KB, 93.9 KB, 30.2 KB, 73.3 KB, 1.1 MB) and the digest states the slot can be aggregated from file_collections[].total_bytes. The sizes are instead carried only as prose inside each FileCollection description. `total_bytes` is likewise unpopulated on every FileCollection."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "annotation_analyses / labeling_strategies / machine_annotation_tools",
+      "issue": "All three are omitted, but the bundle describes CM4AI's annotation approach in detail: hierarchy evaluation by alignment to Gene Ontology and Reactome, and a large language model approach 'that we developed to name sets of proteins and assign a name confidence score'. The Nature paper describes the GPT-4 GSAI pipeline with confidence scores and reproducibility testing. At minimum `machine_annotation_tools` (LLM naming with confidence score) is supported for the pipeline that consumes these data, though it applies to the cell maps rather than to this release's contents — which is itself worth a caveat."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "cleaning_strategies",
+      "issue": "Omitted. The CM4AI preprint states single-cell CRISPR screen data 'are currently being QCed', and the FAIRSCAPE client 'validate[s] inputs' at each pipeline segment. Thin evidence, but more than nothing; the omission is defensible and noted here only for completeness."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "external_resources",
+      "issue": "Omitted from both records, although the bundle supplies dataset-level external resources that fit the class: the CM4AI web portal (cm4ai.org), the Cell Mapping Toolkit GitHub repository, the FAIRSCAPE documentation site, the MassIVE and Figshare deposits, and the two related publications. Several of these are currently carried only as prose inside `raw_data_sources` and `existing_uses`."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "use_repository",
+      "issue": "Omitted. The bundle reports Dataverse download metrics per release (405 downloads for October 2025, 181 for June 2026, 302 for March 2025, 256 for June 2025) and links the Dataverse citation-tracking facility, which is what UseRepository records. Weak but present evidence."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "extension_mechanism",
+      "issue": "Omitted, though the bundle describes contribution routes: the Cell Mapping Toolkit is presented as 'a flexible and generalizable framework for cell map construction, enabling researchers to integrate and construct cell maps via multiple input modalities', pip-installable with a GitHub repository and step-by-step guide. Applies to the toolkit rather than the data, so omission is arguable."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_consents / collection_notifications / consent_revocations / informed_consent / participant_compensation / participant_privacy / at_risk_populations",
+      "issue": "All omitted. Correct — the release states human subjects: No — but the record nowhere states affirmatively that consent slots are inapplicable because no individuals were enrolled. `direct_collection` (full record only) carries this reasoning; the core record drops `direct_collection` entirely, so the core has no statement anywhere that data were not collected from individuals."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "Present in the full record with substantive content (no data collected from individuals; cell lines obtained from ATCC and HipSci; release records human subjects as No and samples de-identified) but absent from the core record. If DirectCollection is a declared CoreDataset slot this is an unexplained loss of the record's only affirmative statement about non-collection from individuals."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "citation",
+      "issue": "Omitted from the core record but populated in the full record with the complete 47-author Dataverse citation. The full record's trailing Creator caveat explicitly relies on the citation slot to preserve full authorship ('The complete authorship of the release, which runs to 47 named authors, is preserved verbatim in the citation slot'); the core record's equivalent caveat drops that clause but the core also drops the citation, so the 47-author list is preserved nowhere in the core record."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "subsets / total_file_count / file_collections",
+      "issue": "Three full-record slots are not carried into the core record in any form recognisable as a projection: `subsets` (mapped instead to `resources`, losing the split/subpopulation flags), `total_file_count` (dropped), and `file_collections` (replaced by the non-digest `distributions` block). Phase 2 should project the full record's structure, not restructure it."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "raw_data_sources[7].source_caveats",
+      "issue": "The caveat states the June 2026 release lists the KOLF2.1J perturb-seq deposit as embargoed 'whereas the June 2025 release links Sequence Read Archive data at an NCBI BioProject'. This is a genuine disagreement, and the ranking (tier 1 June 2026 vs tier 5 June 2025) is applied correctly. However the parallel MDA-MB-468 perturb-seq entry (raw_data_sources[8]) carries no such caveat even though it is equally embargoed, and the March 2025 release separately distributed a 'CRISPR Perturbation RNA Sequences - Raw Sequences' crate — a third data point not mentioned."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "file_collections[2].source_caveats / distributions[2].source_caveats",
+      "issue": "The protein-count disagreement (464 / 523 / 563) is recorded only on the untreated image archive, though it applies identically to the paclitaxel and vorinostat archives, which carry no caveat. The disagreement is also mis-ranked in part: the CM4AI website (tier 2) is cited as giving 523, and October 2025 (tier 1, but superseded) as giving 464 — but June 2026 (tier 1, current) states no figure, so the ranking cannot actually settle it and the caveat's framing of October 2025 as 'highest ranked source stating a figure' obscures that the superseding source is silent."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "status",
+      "issue": "`status: Beta (interim release; data generation continues through November 2026)` packs a qualifier and a date into what the digest describes as a short status value (e.g. draft, published, deprecated). The parenthetical duplicates content already in `known_limitations` and `updates`."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "created_by",
+      "issue": "`created_by: Cell Maps for Artificial Intelligence (CM4AI) Data Generation Project` is a project name rather than a person or organization named in the bundle as creator of the resource. The Dataverse record gives 'Depositor: Niestroy, Justin' and 'Deposit Date: 2025-02-27', which is closer to what this slot asks for and is not recorded anywhere in either record."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "created_on / last_updated_on",
+      "issue": "`created_on: 2025-02-27T00:00:00Z` is the Dataverse deposit/creation date for the release-series entry, while `issued: 2026-06-17T00:00:00Z` is the publication date and `last_updated_on: 2026-07-15T00:00:00Z` is the image-archive publication date. Using the image publication date as the whole-record last-updated is an inference the bundle does not state; the Dataverse record does not give a modification timestamp."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to_standard",
+      "issue": "`RO_CRATE` is correct and matches an enum value. However `conforms_to` prose additionally names EVI, JSON-LD, Schema.org, FAIRSCAPE and ARK; where a second registered standard applies the enum is multivalued and could carry it. Minor — none of the additional names map to a listed enum term, so the single value is defensible."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "language",
+      "issue": "`language: en` is not attested in the bundle; it is inferred from the documents being in English. Harmless but unsupported, and inconsistent with the record's otherwise strict omission discipline."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "maintainers[*].role",
+      "issue": "Trey Ideker and Swathi Thaker are both typed `researcher`. Thaker is described in the bundle as 'Program Manager' handling project-related inquiries, which is an administrative rather than research role; the enum offers no exact match but `other` may be closer. Ideker is recorded as 'Point of Contact' in Dataverse. Neither role assignment is attested."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "known_biases",
+      "issue": "Only one bias is recorded (representation_bias from cell-line derivation). The bundle supports at least one more: the target-selection design (100 chromatin modifiers, 100 metabolic enzymes chosen for disease relevance, expanding on significant hits) is a textbook `selection_bias` in which proteins are included conditional on prior findings. The record captures this reasoning in `sampling_strategies.why_not_representative` but does not surface it as a bias."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "content_warnings / anomalies / missing_data_documentation / imputation_protocols / splits / relationships / data_protection_impacts",
+      "issue": "All omitted. Defensible — the bundle documents none of them — but the incomplete-overlap statement ('SEC-MS, IF imaging, and CRISPRi perturbSeq data interrogate sets of proteins which incompletely overlap') is arguably a missing-data pattern as well as the coverage limitation it is currently recorded as."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "description",
+      "issue": "The description asserts 'contributing authors are additionally affiliated with the University of Texas at Austin, the University of Alabama, the University of Montreal and KTH Royal Institute of Technology'. The collaboration list in the release names UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser and the Hastings Center; the additional four are read off the author affiliation list. The distinction between named collaborators and author affiliations is drawn correctly but the phrasing implies the record has reconciled two lists the bundle presents separately."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "ethical_reviews[0].reviewing_organization",
+      "issue": "'CM4AI Ethics Module (Simon Fraser University and The Hastings Center)' is a constructed label. The bundle names the Ethics module and gives two contact addresses (one @sfu.ca, one @thehastingscenter.org) but never names an organization in this form. The parenthetical is an inference from email domains."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "creators[12].source_caveats (Ravitsky)",
+      "issue": "The caveat notes the Dataverse affiliation (University of Montreal) differs from the ethical-review contact domain (thehastingscenter.org) and says 'Both are recorded here rather than reconciled' — but only University of Montreal is actually recorded in `affiliations`; The Hastings Center appears nowhere in the object. The caveat describes an action the record did not take."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "distribution_dates[0].source_caveats",
+      "issue": "The caveat correctly flags the website's 'Released on: June 17, 2025' against the Dataverse 2026-06-17 and prefers the higher-ranked Dataverse. It then adds 'the website date appears to be an error in the year' — an editorial judgment beyond what the ranking establishes. Recording the disagreement and the preference is right; diagnosing the cause is not supported."
+    }
+  ],
+  "summary": "Both records are well grounded in the bundle, disciplined about omission, and unusually careful with source-conflict caveats and the single-referent choice (June 2026 release, doi:10.18130/V3/HIGT4C). The serious problems are structural rather than factual. First, the core record is not a projection of the full record: it introduces a `distributions` block absent from the schema digest, remaps `subsets` (DataSubset, with split/subpopulation flags) onto `resources` (component datasets), drops `direct_collection`, `citation`, `total_file_count` and `file_collections`, and adds a top-level `compression` value the full record does not state — so the core asserts content the full record does not and loses content it does. Second, `principal_investigator` is over-claimed across fifteen Creator objects for people the bundle identifies as co-authors and module leads, with only Ideker attested as PI; a sixteenth Creator carries an affiliation and commentary but no person at all, and should be deleted with its note moved to top-level `source_caveats`. Third, several slots are populated with values their own caveats disown: `instances[*].counts` carry project-wide website totals the record says are not per-release figures; `collection_timeframes` carries the NIH award period the record says is not a measurement window; `errata` documents a revision to a different release. Fourth, `data_governance.committee_contact.id` uses a mailto URI in a `uriorcurie` Person id where no declared prefix fits and omission is the correct answer. Clear supported omissions include `total_size_bytes`/`total_bytes` (every file size is in the bundle), `credit_roles` (role evidence is explicit for the imaging and mass-spec labs), `external_resources` (portal, toolkit, MassIVE and Figshare deposits), and a second `known_biases` entry for the disease-relevance selection design already reasoned through in `sampling_strategies`. Remaining findings are low-severity: unattested `language`, a project name in `created_by` where the bundle names a depositor, uniform `is_new_version_of` typing across a four-release chain, and caveats that are attached to one file collection where they apply to three, or that describe reconciliation the record did not perform."
+}

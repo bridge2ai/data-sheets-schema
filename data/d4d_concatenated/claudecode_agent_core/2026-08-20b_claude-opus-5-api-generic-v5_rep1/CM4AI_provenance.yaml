@@ -1,0 +1,425 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-08-21T02:07:19+00:00'
+run:
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  project: CM4AI
+  method: claudecode_agent
+  arm: baseline
+  replicate: 1
+model:
+  generation_method: schema-grounded API, six phases
+  agent_runtime: Claude API (direct)
+  provider: LBL CBORG (proxy to Anthropic)
+  base_url: https://api.cborg.lbl.gov
+  model: claude-opus-5
+  max_tokens_by_phase:
+    full: 96000
+    reconcile_full: 96000
+    repair_full: 96000
+    core: 56000
+    reconcile_core: 56000
+    repair_core: 56000
+    audit: 24000
+    report: 24000
+  context:
+    peak_request_tokens: 257141
+    peak_phase: report
+    peak_basis: 'observed: input + cache_read + cache_write of the largest request'
+    limit_tokens: null
+    limit_basis: not stated by the route and not returned by the provider; headroom
+      cannot be computed from this record
+  temperature: null
+  temperature_basis: not applicable to this model
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt_v5.md
+    sha256: c4bbcc41eb4f0b83704228a0bf040294dedd6edf5afbf06035c2fd9d7587ebbb
+    bytes: 13909
+    exists: true
+  request:
+    sha256: 6ae83d5c68bce6884b48f7921492416a25385fba36456fb674a671498530e6d4
+    bytes: 10640
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      condition: generic_v5
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: data/preprocessed/source_manifest.yaml'
+      run_date: '2026-08-20'
+      runtime: Claude API (direct)
+      provider: LBL CBORG (proxy to Anthropic)
+      bundle: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+  resolved:
+    sha256: 6ae83d5c68bce6884b48f7921492416a25385fba36456fb674a671498530e6d4
+    bytes: 10640
+  assembly:
+    sha256: 7d0ce8f3c6246ca4bfc0e7a4ba9b92df336faa201f52b3f972f71aeff6e8ccf7
+    layout: schema digest, input bundle, source ranking, arm prompt, carried artifacts,
+      phase instruction
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: eaacddbddbf24cf5744d5e4451f9109ba1d996bb4d563ae6f37ae28c42d71464
+    bytes: 32310
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: a9a56cd791a6a4876e4dd756011460d6c7a24f634c928af8b0e2fc3057d6bc0d
+    bytes: 12138
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: dcc5271e6065f87dd30dd0380244df2e900af81e7ecbab523cc57954743f46db
+    bytes: 6224
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules.md
+    sha256: 064a6974b03febec147ed0b453e71750402ff9c844bac81728edd2d07abb5d2d
+    bytes: 6900
+    exists: true
+  consumed: false
+  consumed_basis: this runtime renders a condition prompt and sends nothing else,
+    so these were not read; they are hashed so an unchanged hash shows that (#545)
+phase_log: null
+schema:
+  declared_version: 2.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+  merged_schema_carries_version: true
+  digest_md5: 44d290239cedcd8bb38488f4fa11d0fb
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: c7363c30c5e814c04608c151bf601c6b9250d3c5
+  commit_short: c7363c30
+  branch: main
+  dirty: true
+  dirty_file_count: 7
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+  bundle_md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+  bundle_bytes: 321056
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: c0028d716155a185d7000ec6ad60352f
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d.yaml
+    bytes: 76226
+    slots: 72
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d_core.yaml
+    bytes: 72408
+    slots: 67
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_reconciliation.md
+    bytes: 17669
+    slots: null
+companions:
+  reasoning_log:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_reasoning.jsonl
+    present: true
+    md5: ad4c0e736146231ab03d84e64139ce7e
+    note: one JSON line per phase; absent for a runtime that cannot report its own
+      token accounting (#400)
+  telemetry_report:
+    path: data/run_telemetry/2026-08-20b_claude-opus-5-api-generic-v5.yaml
+    present: false
+    note: derived from records like this one, per label rather than per run; `d4d
+      runs telemetry` writes it
+  prompt_registry:
+    path: src/download/prompts/canonical_hashes.yaml
+    present: true
+    md5: 65e361a8aae6e5e8323be96eaa103ecd
+    note: the pins the recorded prompt hashes were judged against
+  digest_inventory:
+    path: src/data_sheets_schema/schema/digest_inventory.yaml
+    present: true
+    md5: b2ddc34cbc16b8daa45d996ffc1b2dde
+    note: digest to slot inventory, which decides whether a slot predates a pair
+unrecoverable: null
+unverified:
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''claude-opus-5''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+- field: model.temperature
+  value: null
+  reason: 'claude-opus-5 rejects `temperature` (400: deprecated for this model), so
+    the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config is not
+    sent and does not apply. Sampling for this model family is selected by model-name
+    suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). claude-opus-5 rejects `temperature` (400: deprecated
+  for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
+api_usage:
+- phase: full
+  attempt: 1
+  started_at: '2026-08-21T01:37:52+00:00'
+  seconds: 868.325
+  input_tokens: 4264
+  output_tokens: 76798
+  cache_read: 15862
+  cache_write: 129940
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: core
+  attempt: 1
+  started_at: '2026-08-21T01:52:21+00:00'
+  seconds: 196.795
+  input_tokens: 27285
+  output_tokens: 21486
+  cache_read: 0
+  cache_write: 142406
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: audit
+  attempt: 1
+  started_at: '2026-08-21T01:55:37+00:00'
+  seconds: 115.437
+  input_tokens: 48830
+  output_tokens: 8744
+  cache_read: 0
+  cache_write: 145802
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: reconcile_full
+  attempt: 1
+  started_at: '2026-08-21T01:57:33+00:00'
+  seconds: 265.646
+  input_tokens: 57702
+  output_tokens: 27752
+  cache_read: 145802
+  cache_write: 0
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: reconcile_core
+  attempt: 1
+  started_at: '2026-08-21T02:01:59+00:00'
+  seconds: 238.182
+  input_tokens: 62165
+  output_tokens: 25958
+  cache_read: 0
+  cache_write: 142406
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: report
+  attempt: 1
+  started_at: '2026-08-21T02:05:57+00:00'
+  seconds: 80.492
+  input_tokens: 111339
+  output_tokens: 6044
+  cache_read: 0
+  cache_write: 145802
+  max_tokens: 24000
+  stop_reason: end_turn
+- phase: repair_full
+  attempt: 1
+  started_at: '2026-08-21T02:07:29+00:00'
+  seconds: 284.774
+  input_tokens: 31258
+  output_tokens: 30459
+  cache_read: 0
+  cache_write: 15912
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: repair_core
+  attempt: 1
+  started_at: '2026-08-21T02:12:20+00:00'
+  seconds: 29.16
+  input_tokens: 28606
+  output_tokens: 3
+  cache_read: 0
+  cache_write: 12516
+  max_tokens: 56000
+  stop_reason: null
+- phase: repair_core
+  attempt: 2
+  started_at: '2026-08-21T02:12:51+00:00'
+  seconds: 249.723
+  input_tokens: 28606
+  output_tokens: 27362
+  cache_read: 12516
+  cache_write: 0
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: report_after_repair
+  attempt: 1
+  input_tokens: 111348
+  output_tokens: 7279
+  cache_read: 0
+  cache_write: 145802
+  stop_reason: end_turn
+phases_skipped: null
+repair:
+- phase: repair_full
+  round: 1
+  outcome: applied
+  findings: 28
+- phase: repair_core
+  round: 1
+  outcome: 'unusable response: response contained no parseable yaml object of the
+    expected shape. The model appears to have written prose instead of a record; first
+    200 characters: ''```yaml\n# D4D Core Datasheet for CM4AI Dataset\n# Generation
+    Method: schema-grounded agentic, phase 2\n# Agent runtime: Claude API (direct)\n#
+    Provider: LBL CBORG (proxy to Anthropic)\n# Model: claude-opu'''
+- phase: repair_core
+  round: 2
+  outcome: applied
+  findings: 19
+report_regenerated_after_repair:
+  changed:
+  - core
+  - full
+  why: repair rewrote a record after the report was written; a report describing bytes
+    that no longer exist is the artifact a reviewer reads instead of the diff
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d.yaml
+      md5: 06f675518b1d9133e27be615a643c6de
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d_core.yaml
+      md5: 5af470a9a4b3b9c600f1bf4e60608dc1
+  schema:
+    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: false
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d.yaml
+      md5: 06f675518b1d9133e27be615a643c6de
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d_core.yaml
+      md5: 5af470a9a4b3b9c600f1bf4e60608dc1
+  errors: 10
+  warnings: 1
+  identity_slots: 79
+  schema_moved: false
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods
+    message: 'list length differs: full=5, core=6'
+  - code: shared-slot-content
+    path: $.creators[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''id'']'
+  - code: shared-slot-content
+    path: $.data_governance.source_caveats
+    message: 'value differs: full=''The bundle supplies only an email address for
+      the committee contact and no personal identifier, so `committee_contact.id`
+      is omitted and the address is recorded in the access revi'
+  - code: shared-slot-content
+    path: $.distribution_formats
+    message: 'list length differs: full=12, core=2'
+  - code: shared-slot-presence
+    path: $.errata
+    message: schema-identical slot is present only in full; it must be present in
+      both or neither
+  - code: shared-slot-content
+    path: $.ethical_reviews[0].contact_person
+    message: 'value differs: full=''Vardit Ravitsky (ORCID:0000-0002-7080-8801)'',
+      core=''Vardit Ravitsky'''
+  - code: shared-slot-content
+    path: $.external_resources[1].notes
+    message: 'value differs: full=''Pip-installable Python packages implementing the
+      end-to-end MuSIC pipeline that consumes these data streams: cellmaps_imagedownloader,
+      cellmaps_ppidownloader, cellmaps_image_embed'
+  - code: shared-slot-content
+    path: $.related_datasets[2]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''notes'']'
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''Referent. The Dataset class admits one referent.
+      This record describes the CM4AI data resource as distributed in its June 2026
+      Data Release (Beta), doi:10.18130/V3/HIGT4C, which t'
+  - code: resource-projection-presence
+    path: $.resources
+    message: resources must be represented in both records when present in either
+      record
+  findings_truncated: null
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_reconciliation.md
+      md5: c192f6f89f48f22109dca967eb1619f9
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d.yaml
+      md5: 06f675518b1d9133e27be615a643c6de
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d_core.yaml
+      md5: 5af470a9a4b3b9c600f1bf4e60608dc1
+  schema:
+    full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
+    core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
+grounding:
+  checked: true
+  counts:
+    grounded: 25
+    minted_fragment: 24
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 17
+    minted_fragment: 17
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+      md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d.yaml
+  - data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  british_spellings: 0
+  organisational_fragments: 0
+intermediates:
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/CM4AI_audit.json
+  sha256: 141ce532911900a84898c49c4d15e6e3d03789062bdd4d0164c2513e5cb6ebdf
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/CM4AI_core.yaml
+  sha256: 6499c235c01448ff1486bc229d335bcf5cbc1ede66ea27bf24664a6cd96b4ff0
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/CM4AI_full.yaml
+  sha256: df301b372a4f1dd635b0f5f4fe13536a20cb57a095ecca1f33d07652d999df19
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/CM4AI_reconcile_core.yaml
+  sha256: 954cc71a7bc00ac4944747a68fd5e948403e65ec8fdd939bcaef0d452302306b
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/CM4AI_reconcile_full.yaml
+  sha256: 5d13aac9557d8f1fd06043b8dcf60b344fdebfec967c70061cb01e955d1a6866
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/CM4AI_repair_core_r2.yaml
+  sha256: 9e81cb2a252a29571d761c12cf8e390314bb17b7ff7e71e199f49b4ef04bae17
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/CM4AI_repair_full_r1.yaml
+  sha256: cef45c06225a364b9464d3cad1b5c7bb201a57df6ca5273ba29ae7e9f2c3aff7
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/CM4AI_report.md
+  sha256: 1c7b3bd849b3474ab409933eac0629249be24b6321f23642ded039354c78de29

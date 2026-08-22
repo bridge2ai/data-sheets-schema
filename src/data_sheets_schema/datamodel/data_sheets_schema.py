@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-08-11T20:04:27
+# Generation date: 2026-08-21T12:56:38
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -64,10 +64,14 @@ version = "2.0.0"
 
 # Namespaces
 AIO = CurieNamespace('AIO', 'https://w3id.org/aio/')
+B2AI_DATA = CurieNamespace('B2AI_DATA', 'https://w3id.org/bridge2ai/standards-dataset-schema/')
+B2AI_ORG = CurieNamespace('B2AI_ORG', 'https://w3id.org/bridge2ai/standards-organization-schema/')
 B2AI_STANDARD = CurieNamespace('B2AI_STANDARD', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
-B2AI_SUBSTRATE = CurieNamespace('B2AI_SUBSTRATE', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
-B2AI_TOPIC = CurieNamespace('B2AI_TOPIC', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
+B2AI_SUBSTRATE = CurieNamespace('B2AI_SUBSTRATE', 'https://w3id.org/bridge2ai/standards-datasubstrate-schema/')
+B2AI_TOPIC = CurieNamespace('B2AI_TOPIC', 'https://w3id.org/bridge2ai/standards-datatopic-schema/')
 DUO = CurieNamespace('DUO', 'http://purl.obolibrary.org/obo/DUO_')
+ORCID = CurieNamespace('ORCID', 'https://orcid.org/')
+ROR = CurieNamespace('ROR', 'https://ror.org/')
 BIOLINK = CurieNamespace('biolink', 'https://w3id.org/biolink/vocab/')
 D4D = CurieNamespace('d4d', 'https://w3id.org/bridge2ai/data-sheets-schema/')
 D4DCOMPOSITION = CurieNamespace('d4dcomposition', 'https://w3id.org/bridge2ai/data-sheets-schema/composition#')
@@ -83,6 +87,7 @@ DATA_SHEETS_SCHEMA = CurieNamespace('data_sheets_schema', 'https://w3id.org/brid
 DATASETS = CurieNamespace('datasets', 'https://w3id.org/linkml/report')
 DCAT = CurieNamespace('dcat', 'http://www.w3.org/ns/dcat#')
 DCTERMS = CurieNamespace('dcterms', 'http://purl.org/dc/terms/')
+DOI = CurieNamespace('doi', 'https://doi.org/')
 EXAMPLE = CurieNamespace('example', 'https://example.org/')
 LINKML = CurieNamespace('linkml', 'https://w3id.org/linkml/')
 MEDIATYPES = CurieNamespace('mediatypes', 'https://www.iana.org/assignments/media-types/')
@@ -342,6 +347,7 @@ class Information(NamedThing):
     conforms_to: Optional[str] = None
     conforms_to_class: Optional[str] = None
     conforms_to_schema: Optional[str] = None
+    conforms_to_standard: Optional[Union[Union[str, "DataStandardEnum"], list[Union[str, "DataStandardEnum"]]]] = empty_list()
     created_by: Optional[str] = None
     created_on: Optional[Union[str, XSDDateTime]] = None
     doi: Optional[str] = None
@@ -376,6 +382,10 @@ class Information(NamedThing):
 
         if self.conforms_to_schema is not None and not isinstance(self.conforms_to_schema, str):
             self.conforms_to_schema = str(self.conforms_to_schema)
+
+        if not isinstance(self.conforms_to_standard, list):
+            self.conforms_to_standard = [self.conforms_to_standard] if self.conforms_to_standard is not None else []
+        self.conforms_to_standard = [v if isinstance(v, DataStandardEnum) else DataStandardEnum(v) for v in self.conforms_to_standard]
 
         if self.created_by is not None and not isinstance(self.created_by, str):
             self.created_by = str(self.created_by)
@@ -2599,7 +2609,15 @@ class ParticipantPrivacy(DatasetProperty):
 @dataclass(repr=False)
 class HumanSubjectCompensation(DatasetProperty):
     """
-    Information about compensation or incentives provided to human research participants.
+    What participants received, and — where the sources describe one — how that was structured to keep them enrolled.
+    Two different claims live here and must not be conflated (#504). **Compensation** is payment for time and burden:
+    what was provided, of what type, of what value. **Retention incentives** are structure designed to prevent
+    attrition — escalating amounts, completion bonuses, payments tied to later visits. The ethical reading of the two
+    differs, which is why an Ethics and Privacy review asked for the distinction: "$40 then $80" reported as
+    compensation says something different from the same figures reported as a retention design.
+    Record the incentive slots only where a source describes the structure or its purpose. Most sources describe
+    payments and say nothing about retention intent, and an escalating schedule is not by itself evidence that
+    retention was the goal. Inferring one from the other is the failure the evidence boundary exists to prevent.
     """
     _inherited_slots: ClassVar[list[str]] = []
 
@@ -2612,6 +2630,8 @@ class HumanSubjectCompensation(DatasetProperty):
     compensation_type: Optional[str] = None
     compensation_amount: Optional[str] = None
     compensation_rationale: Optional[str] = None
+    retention_incentives: Optional[str] = None
+    retention_incentive_rationale: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self.compensation_provided is not None and not isinstance(self.compensation_provided, Bool):
@@ -2625,6 +2645,12 @@ class HumanSubjectCompensation(DatasetProperty):
 
         if self.compensation_rationale is not None and not isinstance(self.compensation_rationale, str):
             self.compensation_rationale = str(self.compensation_rationale)
+
+        if self.retention_incentives is not None and not isinstance(self.retention_incentives, str):
+            self.retention_incentives = str(self.retention_incentives)
+
+        if self.retention_incentive_rationale is not None and not isinstance(self.retention_incentive_rationale, str):
+            self.retention_incentive_rationale = str(self.retention_incentive_rationale)
 
         super().__post_init__(**kwargs)
 
@@ -3013,6 +3039,60 @@ class FileCollection(Information):
 
 
 # Enumerations
+class DataStandardEnum(EnumDefinitionImpl):
+    """
+    Data standards and common data models a dataset's content follows.
+    Deliberately **not** merged into `FormatEnum` (#403). A serialization and a data standard are different concepts:
+    CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would
+    conflate them and make `format` unanswerable.
+    Free-text `conforms_to` records what a source *says*; this records which registered standard that is, where one
+    applies. Both may be populated for the same standard — one verbatim, one normalized — which is the ordinary
+    label-plus-code pattern and is consistent with the per-slot completeness decision on #501.
+    ⚠️ **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this
+    repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent —
+    it is the exact failure `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is declared and is the
+    natural home for these once the registry carries them; until it does, this is a controlled vocabulary without
+    ontology grounding, and says so.
+    """
+    DICOM = PermissibleValue(
+        text="DICOM",
+        description="Digital Imaging and Communications in Medicine — imaging data and its acquisition metadata.")
+    BIDS = PermissibleValue(
+        text="BIDS",
+        description="""Brain Imaging Data Structure — a file and directory layout with accompanying metadata for neuroimaging and related recordings.""")
+    OMOP_CDM = PermissibleValue(
+        text="OMOP_CDM",
+        description="""Observational Medical Outcomes Partnership Common Data Model — a relational model for observational health data.""")
+    WFDB = PermissibleValue(
+        text="WFDB",
+        description="WaveForm DataBase — physiologic signal records and annotations.")
+    OPEN_MHEALTH = PermissibleValue(
+        text="OPEN_MHEALTH",
+        description="Open mHealth — schemas for mobile health and wearable measures.")
+    ESDS = PermissibleValue(
+        text="ESDS",
+        description="ASCII File Format Guidelines for Earth Science Data.")
+    CDS = PermissibleValue(
+        text="CDS",
+        description="Clinical Dataset Structure.")
+    RO_CRATE = PermissibleValue(
+        text="RO_CRATE",
+        description="RO-Crate — a packaging convention describing a dataset and its context as linked data.")
+    FHIR = PermissibleValue(
+        text="FHIR",
+        description="HL7 FHIR — a standard for exchanging healthcare information.")
+    OTHER = PermissibleValue(
+        text="OTHER",
+        description="""A standard the sources name that has no value here. Use it **with** `conforms_to` carrying the name as the source states it, so the fact is not lost to the absence of a term. A run must never pick a near-neighbour: reporting BIDS because a dataset is neuroimaging, when the sources say something else, is an invention.""")
+
+    _defn = EnumDefinition(
+        name="DataStandardEnum",
+        description="""Data standards and common data models a dataset's content follows.
+Deliberately **not** merged into `FormatEnum` (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would conflate them and make `format` unanswerable.
+Free-text `conforms_to` records what a source *says*; this records which registered standard that is, where one applies. Both may be populated for the same standard — one verbatim, one normalized — which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.
+⚠️ **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent — it is the exact failure `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is declared and is the natural home for these once the registry carries them; until it does, this is a controlled vocabulary without ontology grounding, and says so.""",
+    )
+
 class FormatEnum(EnumDefinitionImpl):
     """
     Common file format extensions for data files and documents.
@@ -4074,6 +4154,9 @@ slots.sha256 = Slot(uri=SCHEMA.sha256, name="sha256", curie=SCHEMA.curie('sha256
 slots.conforms_to = Slot(uri=DCTERMS.conformsTo, name="conforms_to", curie=DCTERMS.curie('conformsTo'),
                    model_uri=DATA_SHEETS_SCHEMA.conforms_to, domain=None, range=Optional[str])
 
+slots.conforms_to_standard = Slot(uri=DCTERMS.conformsTo, name="conforms_to_standard", curie=DCTERMS.curie('conformsTo'),
+                   model_uri=DATA_SHEETS_SCHEMA.conforms_to_standard, domain=None, range=Optional[Union[Union[str, "DataStandardEnum"], list[Union[str, "DataStandardEnum"]]]])
+
 slots.conforms_to_schema = Slot(uri=D4D.conformsToSchema, name="conforms_to_schema", curie=D4D.curie('conformsToSchema'),
                    model_uri=DATA_SHEETS_SCHEMA.conforms_to_schema, domain=None, range=Optional[str])
 
@@ -4109,7 +4192,7 @@ slots.was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="was_derived_from", 
 
 slots.doi = Slot(uri=D4D.doiIdentifier, name="doi", curie=D4D.curie('doiIdentifier'),
                    model_uri=DATA_SHEETS_SCHEMA.doi, domain=None, range=Optional[str],
-                   pattern=re.compile(r'10\.\d{4,}\/.+'))
+                   pattern=re.compile(r'^10\.\d{4,}\/.+$'))
 
 slots.external_resources = Slot(uri=DCTERMS.references, name="external_resources", curie=DCTERMS.curie('references'),
                    model_uri=DATA_SHEETS_SCHEMA.external_resources, domain=None, range=Optional[Union[str, list[str]]])
@@ -4888,6 +4971,12 @@ slots.humanSubjectCompensation__compensation_amount = Slot(uri=D4D.compensationA
 
 slots.humanSubjectCompensation__compensation_rationale = Slot(uri=D4D.compensationRationale, name="humanSubjectCompensation__compensation_rationale", curie=D4D.curie('compensationRationale'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_rationale, domain=None, range=Optional[str])
+
+slots.humanSubjectCompensation__retention_incentives = Slot(uri=D4D.retentionIncentiveStructure, name="humanSubjectCompensation__retention_incentives", curie=D4D.curie('retentionIncentiveStructure'),
+                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__retention_incentives, domain=None, range=Optional[str])
+
+slots.humanSubjectCompensation__retention_incentive_rationale = Slot(uri=D4D.retentionIncentiveRationale, name="humanSubjectCompensation__retention_incentive_rationale", curie=D4D.curie('retentionIncentiveRationale'),
+                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__retention_incentive_rationale, domain=None, range=Optional[str])
 
 slots.atRiskPopulations__at_risk_groups_included = Slot(uri=D4D.atRiskGroupsIncluded, name="atRiskPopulations__at_risk_groups_included", curie=D4D.curie('atRiskGroupsIncluded'),
                    model_uri=DATA_SHEETS_SCHEMA.atRiskPopulations__at_risk_groups_included, domain=None, range=Optional[Union[bool, Bool]])

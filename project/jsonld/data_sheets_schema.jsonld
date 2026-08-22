@@ -86,15 +86,35 @@
       "prefix_reference": "http://www.w3.org/2004/02/skos/core#"
     },
     {
-      "prefix_prefix": "B2AI_TOPIC",
-      "prefix_reference": "https://w3id.org/bridge2ai/b2ai-standards-registry/"
+      "prefix_prefix": "ROR",
+      "prefix_reference": "https://ror.org/"
     },
     {
-      "prefix_prefix": "B2AI_STANDARD",
-      "prefix_reference": "https://w3id.org/bridge2ai/b2ai-standards-registry/"
+      "prefix_prefix": "ORCID",
+      "prefix_reference": "https://orcid.org/"
+    },
+    {
+      "prefix_prefix": "doi",
+      "prefix_reference": "https://doi.org/"
+    },
+    {
+      "prefix_prefix": "B2AI_DATA",
+      "prefix_reference": "https://w3id.org/bridge2ai/standards-dataset-schema/"
+    },
+    {
+      "prefix_prefix": "B2AI_ORG",
+      "prefix_reference": "https://w3id.org/bridge2ai/standards-organization-schema/"
     },
     {
       "prefix_prefix": "B2AI_SUBSTRATE",
+      "prefix_reference": "https://w3id.org/bridge2ai/standards-datasubstrate-schema/"
+    },
+    {
+      "prefix_prefix": "B2AI_TOPIC",
+      "prefix_reference": "https://w3id.org/bridge2ai/standards-datatopic-schema/"
+    },
+    {
+      "prefix_prefix": "B2AI_STANDARD",
       "prefix_reference": "https://w3id.org/bridge2ai/b2ai-standards-registry/"
     }
   ],
@@ -476,6 +496,54 @@
     }
   ],
   "enums": [
+    {
+      "name": "DataStandardEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DataStandardEnum",
+      "description": "Data standards and common data models a dataset's content follows.\nDeliberately **not** merged into `FormatEnum` (#403). A serialization and a data standard are different concepts: CSV says how bytes are laid out, OMOP CDM says what the columns mean. Widening `FormatEnum` to absorb DICOM would conflate them and make `format` unanswerable.\nFree-text `conforms_to` records what a source *says*; this records which registered standard that is, where one applies. Both may be populated for the same standard \u2014 one verbatim, one normalized \u2014 which is the ordinary label-plus-code pattern and is consistent with the per-slot completeness decision on #501.\n\u26a0\ufe0f **No `meaning:` is asserted on any value.** Several of these standards have no stable ontology term this repository can verify, and inventing a CURIE that resolves to nothing is worse than leaving the grounding absent \u2014 it is the exact failure `d4d runs identifiers` exists to find. The `B2AI_STANDARD` prefix is declared and is the natural home for these once the registry carries them; until it does, this is a controlled vocabulary without ontology grounding, and says so.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "permissible_values": [
+        {
+          "text": "DICOM",
+          "description": "Digital Imaging and Communications in Medicine \u2014 imaging data and its acquisition metadata."
+        },
+        {
+          "text": "BIDS",
+          "description": "Brain Imaging Data Structure \u2014 a file and directory layout with accompanying metadata for neuroimaging and related recordings."
+        },
+        {
+          "text": "OMOP_CDM",
+          "description": "Observational Medical Outcomes Partnership Common Data Model \u2014 a relational model for observational health data."
+        },
+        {
+          "text": "WFDB",
+          "description": "WaveForm DataBase \u2014 physiologic signal records and annotations."
+        },
+        {
+          "text": "OPEN_MHEALTH",
+          "description": "Open mHealth \u2014 schemas for mobile health and wearable measures."
+        },
+        {
+          "text": "ESDS",
+          "description": "ASCII File Format Guidelines for Earth Science Data."
+        },
+        {
+          "text": "CDS",
+          "description": "Clinical Dataset Structure."
+        },
+        {
+          "text": "RO_CRATE",
+          "description": "RO-Crate \u2014 a packaging convention describing a dataset and its context as linked data."
+        },
+        {
+          "text": "FHIR",
+          "description": "HL7 FHIR \u2014 a standard for exchanging healthcare information."
+        },
+        {
+          "text": "OTHER",
+          "description": "A standard the sources name that has no value here. Use it **with** `conforms_to` carrying the name as the source states it, so the fact is not lost to the absence of a term. A run must never pick a near-neighbour: reporting BIDS because a dataset is neuroimaging, when the sources say something else, is an invention."
+        }
+      ]
+    },
     {
       "name": "FormatEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FormatEnum",
@@ -2005,11 +2073,11 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2024-11-15T00:00:00",
+          "value": "2024-11-15T00:00:00Z",
           "@type": "Annotation"
         }
       ],
-      "description": "Date of formal issuance or publication of the resource.",
+      "description": "Date of formal issuance or publication of the resource. A `datetime` renders as RFC 3339 `date-time`, which **requires a UTC offset** \u2014 write `2024-11-15T00:00:00Z`, not `2024-11-15T00:00:00`. A date alone is also rejected.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/dc/terms/issued"
@@ -2338,12 +2406,41 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "conforms_to_standard",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to_standard",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "BIDS",
+          "@type": "Annotation"
+        }
+      ],
+      "description": "Which registered data standard `conforms_to` names, where one applies \u2014 a term rather than prose, so the corpus can be queried for \"what standards does this follow?\" (#403).\n`conforms_to` records what the sources say, in their words. This records which standard that is. Populate both for the same standard: one is verbatim evidence, the other is the normalized term, and they answer different questions.\nUse `OTHER` when the sources name a standard this vocabulary lacks, and keep the name in `conforms_to` so nothing is lost. Never pick a near-neighbour \u2014 reporting BIDS because a dataset is neuroimaging, when the sources say otherwise, is an invention.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/conformsTo"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/conformsTo",
+      "owner": "Information",
+      "domain_of": [
+        "Information"
+      ],
+      "range": "DataStandardEnum",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "conforms_to_schema",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to_schema",
       "annotations": [
         {
           "tag": "d4d:docExample",
           "value": "https://w3id.org/bridge2ai/data-sheets-schema",
+          "@type": "Annotation"
+        },
+        {
+          "tag": "d4d:perRecord",
+          "value": true,
           "@type": "Annotation"
         }
       ],
@@ -2370,6 +2467,11 @@
         {
           "tag": "d4d:docExample",
           "value": "Dataset",
+          "@type": "Annotation"
+        },
+        {
+          "tag": "d4d:perRecord",
+          "value": true,
           "@type": "Annotation"
         }
       ],
@@ -2488,11 +2590,11 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2023-07-18T00:00:00",
+          "value": "2023-07-18T00:00:00Z",
           "@type": "Annotation"
         }
       ],
-      "description": "The date and time when the resource was created.",
+      "description": "The date and time when the resource was created. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/dc/terms/created"
@@ -2511,11 +2613,11 @@
       "annotations": [
         {
           "tag": "d4d:docExample",
-          "value": "2024-11-15T00:00:00",
+          "value": "2024-11-15T00:00:00Z",
           "@type": "Annotation"
         }
       ],
-      "description": "The date and time when the resource was most recently modified or updated.",
+      "description": "The date and time when the resource was most recently modified or updated. Requires a UTC offset (`\u2026T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/dc/terms/modified"
@@ -2610,7 +2712,7 @@
           "@type": "Annotation"
         }
       ],
-      "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
+      "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567'). The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/doiIdentifier"
@@ -2627,7 +2729,7 @@
         "Information"
       ],
       "range": "string",
-      "pattern": "10\\.\\d{4,}\\/.+",
+      "pattern": "^10\\.\\d{4,}\\/.+$",
       "@type": "SlotDefinition"
     },
     {
@@ -7775,6 +7877,45 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "humanSubjectCompensation__retention_incentives",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "Payment rises across the four annual visits, with a completion bonus at year four, described in the protocol as designed to reduce loss to follow-up.",
+          "@type": "Annotation"
+        }
+      ],
+      "description": "Where the sources describe it, how the incentive structure was designed to keep participants enrolled across the study \u2014 escalating amounts, completion bonuses, payments tied to later visits or to returning after a gap.\nDistinct from `compensation_type` and `compensation_amount`, which record what was provided. State this only where a source describes the structure. An escalating payment schedule is not by itself evidence that retention was its purpose; report the schedule under the compensation slots and leave this absent.\n\u26a0\ufe0f **\"Retention\" here means keeping participants enrolled, never keeping data.** How long the data is kept belongs in `retention_limit`, which is a different slot about a different subject. The word is treacherous in this corpus: across all five project bundles nearly every occurrence of \"retention\" is about data or specimen retention \u2014 \"limits on the retention of the data\", \"bioSpecRetention\", \"records retention requirements\" \u2014 and none so far describes an incentive structure. An empty slot is the correct outcome for those sources.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
+      "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/retentionIncentiveStructure"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/retentionIncentiveStructure",
+      "alias": "retention_incentives",
+      "owner": "HumanSubjectCompensation",
+      "domain_of": [
+        "HumanSubjectCompensation"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "humanSubjectCompensation__retention_incentive_rationale",
+      "description": "The stated reason for structuring incentives to support retention, where a source gives one \u2014 an attrition rate the design responds to, an IRB condition, or a documented equity concern about who can afford to stay enrolled.\nSeparate from `retention_incentives` (the structure) for the same reason `compensation_rationale` is separate from `compensation_amount`: what was done and why it was done are different claims, and sources frequently give one without the other.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
+      "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/retentionIncentiveRationale"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/retentionIncentiveRationale",
+      "alias": "retention_incentive_rationale",
+      "owner": "HumanSubjectCompensation",
+      "domain_of": [
+        "HumanSubjectCompensation"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "atRiskPopulations__at_risk_groups_included",
       "description": "Are any at-risk populations included (e.g., children, pregnant women, prisoners, cognitively impaired individuals)?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
@@ -8815,6 +8956,7 @@
         "conforms_to",
         "conforms_to_class",
         "conforms_to_schema",
+        "conforms_to_standard",
         "created_by",
         "created_on",
         "doi",
@@ -8865,6 +9007,7 @@
         "conforms_to",
         "conforms_to_class",
         "conforms_to_schema",
+        "conforms_to_standard",
         "created_by",
         "created_on",
         "doi",
@@ -9612,6 +9755,7 @@
         "conforms_to",
         "conforms_to_class",
         "conforms_to_schema",
+        "conforms_to_standard",
         "created_by",
         "created_on",
         "doi",
@@ -10094,6 +10238,7 @@
         "conforms_to",
         "conforms_to_class",
         "conforms_to_schema",
+        "conforms_to_standard",
         "created_by",
         "created_on",
         "doi",
@@ -13347,7 +13492,7 @@
     {
       "name": "HumanSubjectCompensation",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#HumanSubjectCompensation",
-      "description": "Information about compensation or incentives provided to human research participants.\n",
+      "description": "What participants received, and \u2014 where the sources describe one \u2014 how that was structured to keep them enrolled.\nTwo different claims live here and must not be conflated (#504). **Compensation** is payment for time and burden: what was provided, of what type, of what value. **Retention incentives** are structure designed to prevent attrition \u2014 escalating amounts, completion bonuses, payments tied to later visits. The ethical reading of the two differs, which is why an Ethics and Privacy review asked for the distinction: \"$40 then $80\" reported as compensation says something different from the same figures reported as a retention design.\nRecord the incentive slots only where a source describes the structure or its purpose. Most sources describe payments and say nothing about retention intent, and an escalating schedule is not by itself evidence that retention was the goal. Inferring one from the other is the failure the evidence boundary exists to prevent.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "is_a": "DatasetProperty",
       "slots": [
@@ -13360,7 +13505,9 @@
         "humanSubjectCompensation__compensation_provided",
         "humanSubjectCompensation__compensation_type",
         "humanSubjectCompensation__compensation_amount",
-        "humanSubjectCompensation__compensation_rationale"
+        "humanSubjectCompensation__compensation_rationale",
+        "humanSubjectCompensation__retention_incentives",
+        "humanSubjectCompensation__retention_incentive_rationale"
       ],
       "slot_usage": {},
       "attributes": [
@@ -13403,6 +13550,27 @@
           "name": "compensation_rationale",
           "description": "What was the rationale for the compensation structure? How was the amount determined to be appropriate?\n",
           "slot_uri": "d4d:compensationRationale",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "retention_incentives",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "Payment rises across the four annual visits, with a completion bonus at year four, described in the protocol as designed to reduce loss to follow-up.",
+              "@type": "Annotation"
+            }
+          ],
+          "description": "Where the sources describe it, how the incentive structure was designed to keep participants enrolled across the study \u2014 escalating amounts, completion bonuses, payments tied to later visits or to returning after a gap.\nDistinct from `compensation_type` and `compensation_amount`, which record what was provided. State this only where a source describes the structure. An escalating payment schedule is not by itself evidence that retention was its purpose; report the schedule under the compensation slots and leave this absent.\n\u26a0\ufe0f **\"Retention\" here means keeping participants enrolled, never keeping data.** How long the data is kept belongs in `retention_limit`, which is a different slot about a different subject. The word is treacherous in this corpus: across all five project bundles nearly every occurrence of \"retention\" is about data or specimen retention \u2014 \"limits on the retention of the data\", \"bioSpecRetention\", \"records retention requirements\" \u2014 and none so far describes an incentive structure. An empty slot is the correct outcome for those sources.\n",
+          "slot_uri": "d4d:retentionIncentiveStructure",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "retention_incentive_rationale",
+          "description": "The stated reason for structuring incentives to support retention, where a source gives one \u2014 an attrition rate the design responds to, an IRB condition, or a documented equity concern about who can afford to stay enrolled.\nSeparate from `retention_incentives` (the structure) for the same reason `compensation_rationale` is separate from `compensation_amount`: what was done and why it was done are different claims, and sources frequently give one without the other.\n",
+          "slot_uri": "d4d:retentionIncentiveRationale",
           "range": "string",
           "@type": "SlotDefinition"
         }
@@ -14015,6 +14183,7 @@
         "conforms_to",
         "conforms_to_class",
         "conforms_to_schema",
+        "conforms_to_standard",
         "created_by",
         "created_on",
         "doi",
@@ -14085,6 +14254,7 @@
         "conforms_to",
         "conforms_to_class",
         "conforms_to_schema",
+        "conforms_to_standard",
         "created_by",
         "created_on",
         "doi",
@@ -14156,9 +14326,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-08-11T20:04:03",
-  "source_file_size": 33278,
-  "generation_date": "2026-08-11T20:04:25",
+  "source_file_date": "2026-08-14T16:22:27",
+  "source_file_size": 34754,
+  "generation_date": "2026-08-21T12:56:36",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
