@@ -133,26 +133,6 @@ validation:
     full_sha256: 0389e9c3c16db18cf118512054a5623433633e94992ce47eb708b98f4768b2e8
     core_sha256: 54fe11036390b5aad4f7baabcf6d89bc1e2a7b391b1a3485ca48d9d7ba31d69b
   recorded_by: d4d runs validate
-canonical:
-  criterion: full and core both validate against the current schema, then most slots,
-    then lowest label
-  selected_from:
-  - label: 2026-08-11_claude-opus-5-claudecode-generic_rep1
-    slots: 80
-    validation: valid
-    validation_recorded_at_run_time: valid
-  - label: 2026-08-11_claude-opus-5-claudecode-generic_rep2
-    slots: 77
-    validation: valid
-    validation_recorded_at_run_time: valid
-  - label: 2026-08-11_claude-opus-5-claudecode-generic_rep3
-    slots: 82
-    validation: valid
-    validation_recorded_at_run_time: valid
-  margin_over_runner_up: 2
-  selected_by: d4d runs select
-  supersedes:
-  - 2026-08-07_claude-opus-5-claudecode-generic-v3_rep2
 pair_consistency:
   ran: true
   consistent: true
@@ -198,3 +178,7 @@ form:
   british_spellings: 91
   organisational_fragments: 0
   recorded_by: backfill_checks
+canonical_superseded_by:
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  at: '2026-08-22T02:19:25+00:00'
+  by: d4d runs select
