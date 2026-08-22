@@ -751,8 +751,14 @@ attributes:
       d4d:docExample:
         tag: d4d:docExample
         value: 10.5281/zenodo.10642459
-    description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
-      persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
+    description: 'Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
+      persistent identification (e.g., ''10.1038/s41586-020-2649-2'', ''10.5281/zenodo.1234567'').
+      The bare DOI only — not the doi: CURIE and not the doi.org resolver URL. The
+      pattern is anchored (#646): unanchored, JSON Schema''s search semantics accepted
+      all three surface forms, and one v5 record carried the same DOI three ways.
+      The 2026-08-20b arm already writes the bare form; records written before the
+      anchor keep the validation verdicts they were pinned with (#426) and are not
+      rewritten (#520).'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - schema:identifier
@@ -765,7 +771,7 @@ attributes:
     domain_of:
     - Information
     range: string
-    pattern: 10\.\d{4,}\/.+
+    pattern: ^10\.\d{4,}\/.+$
   download_url:
     name: download_url
     annotations:
