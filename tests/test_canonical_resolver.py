@@ -80,11 +80,22 @@ class TestCanonicalRuns(unittest.TestCase):
 
     def test_a_config_filter_narrows_it(self):
         """The config is derived from the marks, not hardcoded: it changes with
-        every sweep, and pinning it made this test expire on a schedule."""
+        every sweep, and pinning it made this test expire on a schedule.
+
+        It used to assert all marks share one config. That became factually
+        wrong the day selection moved four projects to the v5 arm while
+        VOICE_PEDIATRIC — deliberately excluded from that arm, no v4 baseline
+        (#590) — kept its 2026-08-11 canonical. Multiple configs across
+        projects is the lawful state whenever a project sits out a sweep; the
+        invariant that holds is one mark per project, and that a config
+        filter returns exactly the marks carrying it.
+        """
         configs = {e["label"].rsplit("_rep", 1)[0] for e in self.found.values()}
-        self.assertEqual(1, len(configs),
-                         f"marks span more than one config: {sorted(configs)}")
-        self.assertEqual(canonical_runs(config=configs.pop()), self.found)
+        for config in sorted(configs):
+            subset = {p: e for p, e in self.found.items()
+                      if e["label"].rsplit("_rep", 1)[0] == config}
+            with self.subTest(config=config):
+                self.assertEqual(canonical_runs(config=config), subset)
         self.assertEqual(canonical_runs(config="no-such-config"), {})
 
 

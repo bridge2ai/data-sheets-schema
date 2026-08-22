@@ -111,6 +111,18 @@ to every project:
     take from a crate or a DOI is a token, not a sentence. Only ids *you* mint
     follow house style.
 
+- **Call the project by its declared canonical label** — the manifest's
+  `naming:` block (`data/preprocessed/source_manifest.yaml`) declares one
+  label per project, taken from the B2AI Standards Explorer (#668). Use it in
+  every sentence *you* compose; one project written many ways reads as many
+  projects, and the v5 canonical records wrote one project four ways. The
+  same three carve-outs as the American-English rule apply unchanged: quoted
+  source text, proper nouns as a source states them (a consortium's name in
+  the release's own citation is a citation, not your prose), and identifiers
+  including URLs keep their form exactly. The B2AI_ORG ids in the manifest
+  are provenance of where the mapping came from — never write one into a
+  record.
+
 The rule about there being no target slot count is the load-bearing one: it is
 what makes a slot count an observation rather than a target. Named rather than
 referred to by position, so inserting a rule cannot silently point this sentence

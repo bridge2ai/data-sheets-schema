@@ -218,6 +218,49 @@ def undeclared_prefixes(record: dict[str, Any],
     return out
 
 
+#: URL-ish context: an alias inside a hostname or path (b2ai-voice.org,
+#: chorus4ai.org, github.com/chorus-ai) is an address, not prose.
+_URLISH = re.compile(r"\S*(?:://|www\.|\.org|\.com|\.io|\.gov|\.edu)\S*")
+
+
+def gc_label_variants(text: str, canonical: str,
+                      variants: list[str]) -> dict[str, int]:
+    """Occurrences of non-canonical GC labels in prose the record states (#668).
+
+    The same exemption structure as `british_spellings`: double-quoted spans
+    are quoted source text and are removed first, and URL-shaped tokens are
+    addresses rather than prose. Case-sensitive, because the variants differ
+    from the canonical exactly by case and punctuation (CHORUS vs CHoRUS), and
+    a case-blind count would count the canonical itself.
+
+    Longest-first matching, with each variant's matches blanked before shorter
+    ones are counted — "Bridge2AI-Voice" contains "Voice"-adjacent substrings
+    and "B2AI-VOICE" contains "VOICE"; without the blanking every long variant
+    would also be tallied under the short ones.
+    """
+    prose = _QUOTED.sub(" ", text)
+    prose = _URLISH.sub(" ", prose)
+    out: dict[str, int] = {}
+    for variant in sorted(variants, key=len, reverse=True):
+        if variant == canonical:
+            continue
+        n = prose.count(variant)
+        if n:
+            out[variant] = n
+            prose = prose.replace(variant, " ")
+    return out
+
+
+def declared_naming(manifest_path: Path | None = None) -> dict[str, Any]:
+    """The manifest's `naming:` block, `{}` when absent (#668)."""
+    import yaml as _yaml
+    path = manifest_path or Path("data/preprocessed/source_manifest.yaml")
+    if not path.exists():
+        return {}
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return data.get("naming") or {}
+
+
 def form_facts(full: Path, core: Path,
                slots: set[str] | None = None) -> dict[str, Any]:
     """Counts that are properties of the records alone (#602).
@@ -254,11 +297,31 @@ def form_facts(full: Path, core: Path,
                     fragments.add(found[1].lower())
     if not present:
         return {"checked": False, "reason": "neither record is on disk"}
+    # GC label variants (#668): the project is derivable from the record
+    # filename ({PROJECT}_d4d.yaml), and a project with no naming declaration
+    # contributes nothing rather than failing — absence of a declaration is
+    # not a defect in the record.
+    label_variants: dict[str, int] = {}
+    naming = declared_naming()
+    project = full.name.split("_d4d")[0] if full.name else ""
+    declared = naming.get(project) or {}
+    if declared.get("canonical_label"):
+        for path in (full, core):
+            if not path.exists():
+                continue
+            found = gc_label_variants(
+                path.read_text(encoding="utf-8", errors="replace"),
+                declared["canonical_label"],
+                list(declared.get("variants") or []))
+            for k, v in found.items():
+                label_variants[k] = label_variants.get(k, 0) + v
     return {"checked": True, "records": present,
             "undeclared_prefixes": prefixes,
             "undeclared_prefix_occurrences": sum(prefixes.values()),
             "british_spellings": british,
-            "organisational_fragments": len(fragments)}
+            "organisational_fragments": len(fragments),
+            "gc_label_variants": label_variants,
+            "gc_label_variant_occurrences": sum(label_variants.values())}
 
 
 def check_record(record: dict[str, Any], bundle_text: str,
