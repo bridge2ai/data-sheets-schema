@@ -5,7 +5,7 @@
   "project": "CM4AI",
   "method": "claudecode_agent",
   "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep1",
-  "evaluation_timestamp": "2026-08-21T00:00:00Z",
+  "evaluation_timestamp": "2026-08-22T02:58:00Z",
   "model": {
     "name": "claude-fable-5",
     "evaluator_model": "claude-fable-5",
@@ -44,35 +44,52 @@
         "type": "consistency",
         "severity": "medium",
         "description": "Internal tension on MDA-MB-468 perturb-seq coverage: the description states the June 2026 release 'contains perturb-seq data for MDA-MB-468 cells with and without treatment' and the three MDA-MB-468 subsets are marked as covered by perturb-seq, yet file_collections lists no MDA-MB-468 perturb-seq archive (only KOLF2 atlas and raw_sra packages) and raw_data_sources lists the MDA-MB-468 external perturb-seq deposit as embargoed",
-        "fields_involved": ["description", "subsets", "file_collections", "raw_data_sources"],
+        "fields_involved": [
+          "description",
+          "subsets",
+          "file_collections",
+          "raw_data_sources"
+        ],
         "recommendation": "Clarify whether MDA-MB-468 perturb-seq data are distributed in the release archives or only referenced as embargoed external deposits"
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "Donor-level consent for the two source cell lines (MDA-MB-468 from ATCC, KOLF2.1J from HipSci) is not documented; the record states the lines are 'ethically sourced' per the preprint but records no donor consent provenance",
-        "fields_involved": ["raw_data_sources", "direct_collection"],
+        "fields_involved": [
+          "raw_data_sources",
+          "direct_collection"
+        ],
         "recommendation": "If available in source documentation, record cell-line donor consent provenance (e.g., HipSci consent framework) under raw_data_sources access_details"
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "ethical_reviews documents the Ethics Module in depth but does not address conflicts of interest",
-        "fields_involved": ["ethical_reviews"],
+        "fields_involved": [
+          "ethical_reviews"
+        ],
         "recommendation": "State whether conflicts of interest were assessed, or that none were declared"
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "No dedicated download_url slot; access is documented only via the Dataverse landing page and a prose reference to the Data Access API",
-        "fields_involved": ["distribution_formats", "page"],
+        "fields_involved": [
+          "distribution_formats",
+          "page"
+        ],
         "recommendation": "Record the Dataverse Data Access API endpoint or per-file download URLs where the schema permits"
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "No variable-level metadata (variables slot absent) and no anomalies slot; is_tabular=false is correctly set, but the perturb-seq atlas and interaction tables inside the archives do have implicit column structures that are not described",
-        "fields_involved": ["variables", "is_tabular", "anomalies"],
+        "fields_involved": [
+          "variables",
+          "is_tabular",
+          "anomalies"
+        ],
         "recommendation": "Add variable/column descriptions for the tabular derived products (e.g., perturbation cell atlas) and document any known data anomalies or outliers"
       }
     ],
@@ -250,7 +267,7 @@
           "applicability_status": "applicable",
           "applicability_evidence": "Governance gate: regulatory_restrictions (E2) populated with clinical-use restriction and FDA status; data_governance committee named. Human-subjects gate NOT met (cell lines only, per E1 description and E8 mechanisms).",
           "score": 1,
-          "evidence": "ethical_reviews: CM4AI Ethics Module with two named contacts (Ravitsky, Bélisle-Pipon), Value-Sensitive Design approach, CM4AI Life Cycle governance framework, Bridge2AI Code of Conduct",
+          "evidence": "ethical_reviews: CM4AI Ethics Module with two named contacts (Ravitsky, B\u00e9lisle-Pipon), Value-Sensitive Design approach, CM4AI Life Cycle governance framework, Bridge2AI Code of Conduct",
           "quality_note": "Semantically correct: an IRB would be inapplicable (no human subjects), and the record documents the actual oversight body in depth instead"
         },
         {
@@ -452,7 +469,7 @@
           "name": "Preprocessing, Cleaning, Labeling, and Annotation Quality",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "external_resources (E10) references code repositories (idekerlab/cellmaps_pipeline, FAIRSCAPE); purposes (E7) names reusable software as an output — non-circular evidence",
+          "applicability_evidence": "external_resources (E10) references code repositories (idekerlab/cellmaps_pipeline, FAIRSCAPE); purposes (E7) names reusable software as an output \u2014 non-circular evidence",
           "score": 1,
           "evidence": "preprocessing_strategies (raw/derived separation; MuSIC pipeline with node2vec, HPA deep-learning embeddings, contrastive co-embedding, community detection); cleaning_strategies (FAIRSCAPE per-segment validation); machine_annotation_tools (GPT-4 GSAI pipeline with confidence scores and citation module)",
           "quality_note": "Pipeline is described end to end; caveats correctly note which steps apply downstream of this release"
@@ -461,7 +478,7 @@
           "name": "Software and Tools Documented",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "external_resources (E10) references code repositories; purposes (E7) names software production — non-circular evidence",
+          "applicability_evidence": "external_resources (E10) references code repositories; purposes (E7) names software production \u2014 non-circular evidence",
           "score": 1,
           "evidence": "Cell Mapping Toolkit named as 7 pip-installable packages (cellmaps_imagedownloader ... cellmaps_hierarchyeval) under BSD-3 with GitHub and ReadTheDocs links; FAIRSCAPE (MIT); Integrative Modeling Platform",
           "quality_note": "No dedicated software_and_tools slot, but tools, licenses, repositories, and documentation are fully documented under external_resources and extension_mechanism"
@@ -600,5 +617,6 @@
     "evaluator_id": "d4d-rubric10-semantic-agent",
     "rubric_hash": "e5f8b6beced5f62f6cc4b3dcf45f6e8cb1431d84f4649227831ef8ecfbf28ab7",
     "d4d_file_hash": "cef45c06225a364b9464d3cad1b5c7bb201a57df6ca5273ba29ae7e9f2c3aff7"
-  }
+  },
+  "evaluation_timestamp_basis": "file write time (2026-08-22 ~02:58Z, bounded by the sibling CHORUS evaluation at 02:56:18Z); the evaluating agent wrote the placeholder '2026-08-21T00:00:00Z', which was fabricated precision \u2014 corrected pre-merge, #661-review"
 }

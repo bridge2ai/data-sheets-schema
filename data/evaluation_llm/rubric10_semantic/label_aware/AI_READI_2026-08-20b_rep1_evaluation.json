@@ -5,7 +5,7 @@
   "project": "AI_READI",
   "method": "claudecode_agent",
   "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep1",
-  "evaluation_timestamp": "2026-08-21T00:00:00Z",
+  "evaluation_timestamp": "2026-08-22T02:58:00Z",
   "model": {
     "name": "claude-fable-5",
     "evaluator_model": "claude-fable-5",
@@ -19,49 +19,74 @@
         "type": "consistency",
         "severity": "medium",
         "description": "Internal tension on deidentification carried from sources: human_subject_research.regulatory_compliance states PHI was 'stripped ... using the Safe Harbor method' while is_deidentified.deidentification_details reports FAIRhub's 'NoDeIdentification' label and explains no active de-identification step was performed (identifiers were never collected). The record documents and reconciles the tension explicitly, but the two fields make superficially contradictory claims.",
-        "fields_involved": ["human_subject_research.regulatory_compliance", "is_deidentified.method", "is_deidentified.deidentification_details"],
+        "fields_involved": [
+          "human_subject_research.regulatory_compliance",
+          "is_deidentified.method",
+          "is_deidentified.deidentification_details"
+        ],
         "recommendation": "Consider harmonizing the wording so both fields state 'verified free of HIPAA identifiers; Safe Harbor criteria used as the verification standard rather than as an active removal procedure'."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "Sensitive-content claims disagree across sources: RO-Crate records personal sensitive information categories present (sensitive_elements_present: true) while the healthsheet states the public dataset contains no sensitive data. The record follows the RO-Crate and documents the disagreement in source_caveats.",
-        "fields_involved": ["sensitive_elements", "confidential_elements"],
+        "fields_involved": [
+          "sensitive_elements",
+          "confidential_elements"
+        ],
         "recommendation": "No change needed; the source_caveats resolution is appropriate. Upstream sources should be reconciled."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "Institutional attribution is inconsistent across tier-1 sources (Washington University in St. Louis as managing organization/lead sponsor vs University of Washington as IRB, NIH RePORTER awardee, and PI department). The record surfaces this in source_caveats and data_governance.source_caveats rather than silently picking one.",
-        "fields_involved": ["creators", "data_governance.accountable_organization", "ethical_reviews", "source_caveats"],
+        "fields_involved": [
+          "creators",
+          "data_governance.accountable_organization",
+          "ethical_reviews",
+          "source_caveats"
+        ],
         "recommendation": "Flag to the AI-READI team for upstream metadata correction; the datasheet handles it correctly."
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "DOI prefix 10.60775 is not among the rubric's example registrars (PhysioNet, Zenodo, Harvard Dataverse) but is the DataCite prefix used by FAIRhub, and is consistent with publisher https://fairhub.io/ and page https://fairhub.io/datasets/3. Treated as valid.",
-        "fields_involved": ["doi", "publisher", "page"],
+        "fields_involved": [
+          "doi",
+          "publisher",
+          "page"
+        ],
         "recommendation": "None; prefix-publisher consistency confirms plausibility."
       },
       {
         "type": "completeness",
         "severity": "medium",
         "description": "No software_and_tools field and no code repository links, despite the v3.0.0 processing chain being described as 'automated with custom steps'. Processing cannot be independently replicated from the datasheet alone.",
-        "fields_involved": ["software_and_tools", "external_resources", "preprocessing_strategies"],
+        "fields_involved": [
+          "software_and_tools",
+          "external_resources",
+          "preprocessing_strategies"
+        ],
         "recommendation": "Add software_and_tools entries (or external_resources links) for the AI-READI processing/standardization pipelines, e.g. GitHub repositories, with versions."
       },
       {
         "type": "completeness",
         "severity": "low",
         "description": "ethical_reviews is unusually rich (IRB protocol number and dates, reliance agreements, named ethics group, Community Advisory Board, Native Biodata Consortium engagement) but contains no conflict-of-interest statement, positive or negative.",
-        "fields_involved": ["ethical_reviews"],
+        "fields_involved": [
+          "ethical_reviews"
+        ],
         "recommendation": "Add an explicit conflicts-of-interest statement (even 'none declared by the sources') to ethical_reviews."
       },
       {
         "type": "completeness",
         "severity": "low",
         "description": "Character encoding is not stated for the text-based distribution formats (CSV, JSON, Markdown); only file formats and MIME types are given. Single data_topic slot on instances also cannot represent the multimodal topical breadth, a schema limit the record itself notes.",
-        "fields_involved": ["distribution_formats", "instances.data_topic"],
+        "fields_involved": [
+          "distribution_formats",
+          "instances.data_topic"
+        ],
         "recommendation": "State UTF-8/ASCII encoding for text formats; schema-level fix needed for multi-topic representation."
       }
     ],
@@ -145,7 +170,7 @@
           "name": "Keywords or Tags for Searchability",
           "score": 1,
           "evidence": "keywords: Diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal imaging, Eye exam, Data Sharing, Exploratory Data Collection",
-          "quality_note": "9 relevant keywords covering condition, methods and modalities. source_caveats notes these are only the attested keywords; 'type 2 diabetes' and 'salutogenesis' were deliberately not invented — good provenance discipline at slight cost to searchability."
+          "quality_note": "9 relevant keywords covering condition, methods and modalities. source_caveats notes these are only the attested keywords; 'type 2 diabetes' and 'salutogenesis' were deliberately not invented \u2014 good provenance discipline at slight cost to searchability."
         },
         {
           "name": "Landing Page and Resources (page, hierarchical resources)",
@@ -358,7 +383,7 @@
           "applicable": true,
           "score": 1,
           "evidence": "version_access: latest_version_doi doi:10.60775/fairhub.3; per-version DOIs and release dates for 1.0.0/2.0.0/3.0.0; version dropdown at docs.aireadi.org; v2.0.0 marked no longer accessible with redirect notice.",
-          "quality_note": "Documents both how to reach versions and which are no longer supported — including the honest statement that old versions will not be maintained."
+          "quality_note": "Documents both how to reach versions and which are no longer supported \u2014 including the honest statement that old versions will not be maintained."
         },
         {
           "name": "Change Descriptions and Errata Provided",
@@ -394,7 +419,7 @@
           "name": "Motivation or Purpose for Dataset Creation",
           "score": 1,
           "evidence": "purposes: AI-ready ethically sourced T2DM dataset; salutogenesis research; pseudotime manifold analysis; establishing standards for AI/ML health data sharing. addressing_gaps: 4 specific gaps incl. a cited meta-epidemiological finding on racial/ethnic diversity in T2DM studies 2000-2020.",
-          "quality_note": "Scientific rationale is specific and aligned with the Bridge2AI funding program named in funders — funding-purposes consistency check passes."
+          "quality_note": "Scientific rationale is specific and aligned with the Bridge2AI funding program named in funders \u2014 funding-purposes consistency check passes."
         },
         {
           "name": "Primary Research Objectives or Tasks",
@@ -428,7 +453,7 @@
       "id": 8,
       "name": "Technical Transparency (Data Collection and Processing)",
       "description": "Can data collection and processing steps be replicated or understood?",
-      "applicability_note": "Data-collection-identified and datasets-shared conditions satisfied (sub-elements 1-2, 5 scored). Software-tools condition NOT satisfied: external_resources reference only documentation sites, and description/purposes identify data and standards, not software, as outputs — sub-elements 3-4 set to applicable: false per the gating rule.",
+      "applicability_note": "Data-collection-identified and datasets-shared conditions satisfied (sub-elements 1-2, 5 scored). Software-tools condition NOT satisfied: external_resources reference only documentation sites, and description/purposes identify data and standards, not software, as outputs \u2014 sub-elements 3-4 set to applicable: false per the gating rule.",
       "sub_elements": [
         {
           "name": "Collection Mechanisms and Settings Described",
@@ -464,7 +489,7 @@
           "applicability_evidence": "Same external evidence as sub-element 3: no code repository in external_resources; software not identified as an output in description/purposes.",
           "score": null,
           "evidence": "Reported but not scored: no software_and_tools field is present. The processing chain is described as 'automated with custom steps' but no pipeline software, versions or repositories are named.",
-          "quality_note": "Excluded from denominator, but flagged as the record's main reproducibility gap — see issues_detected and recommendations."
+          "quality_note": "Excluded from denominator, but flagged as the record's main reproducibility gap \u2014 see issues_detected and recommendations."
         },
         {
           "name": "External Standards and Resources Referenced",
@@ -487,7 +512,7 @@
           "name": "Known Limitations Documented",
           "score": 1,
           "evidence": "known_limitations: 6 typed limitations (representativeness, coverage, scope, temporal, methodological, integration) each with limitation_description, scope_impact and, where available, recommended_mitigation.",
-          "quality_note": "Structured, typed, and actionable — e.g. cross-sectional design forces pseudotime rather than longitudinal approaches; multi-device non-interchangeability with a device-stratification mitigation."
+          "quality_note": "Structured, typed, and actionable \u2014 e.g. cross-sectional design forces pseudotime rather than longitudinal approaches; multi-device non-interchangeability with a device-stratification mitigation."
         },
         {
           "name": "Biases Categorized Using Standard Taxonomy (RAI-aligned)",
@@ -511,7 +536,7 @@
           "name": "Ethical Review Details Including Conflicts",
           "score": 1,
           "evidence": "ethical_reviews: IRB protocol/dates/renewal, named ethics group (Nebeker, Mathews, Ferryman, Evans), Native Biodata Consortium co-learning engagement, 11-member Community Advisory Board reflecting sample diversity.",
-          "quality_note": "Ethical review documentation is exceptional; however no conflict-of-interest statement (positive or negative) appears anywhere — recorded as a low-severity completeness issue."
+          "quality_note": "Ethical review documentation is exceptional; however no conflict-of-interest statement (positive or negative) appears anywhere \u2014 recorded as a low-severity completeness issue."
         }
       ],
       "element_score": 5,
@@ -557,7 +582,7 @@
           "name": "Related Datasets with Typed Relationships",
           "applicable": true,
           "score": 1,
-          "evidence": "related_datasets: is_new_version_of (fairhub.2, fairhub.1), is_described_by (two publication DOIs), is_documented_by (two documentation sites) — 6 typed entries.",
+          "evidence": "related_datasets: is_new_version_of (fairhub.2, fairhub.1), is_described_by (two publication DOIs), is_documented_by (two documentation sites) \u2014 6 typed entries.",
           "quality_note": "Relationship types used semantically correctly, distinguishing version lineage from description and documentation."
         }
       ],
@@ -574,7 +599,7 @@
       "Use guidance is unusually actionable: seven specific license prohibitions, the disease-specific restriction on the public tier, third-party model-vendor rules, and the mini-subset pathway for pipeline development."
     ],
     "weaknesses": [
-      "No software or code repository references: software_and_tools is absent and external_resources link only to documentation sites, despite a processing chain described as 'automated with custom steps' — the main reproducibility gap (E8 sub-elements 3-4 were gated to N/A by the rubric, but the gap is real).",
+      "No software or code repository references: software_and_tools is absent and external_resources link only to documentation sites, despite a processing chain described as 'automated with custom steps' \u2014 the main reproducibility gap (E8 sub-elements 3-4 were gated to N/A by the rubric, but the gap is real).",
       "Residual internal tension on deidentification: Safe Harbor is named as the method in two places while deidentification_details explains no active de-identification step occurred; the reconciliation is documented but the surface-level fields still disagree.",
       "No conflict-of-interest statement in ethical_reviews, and no explicit character-encoding declaration for the text-based distribution formats; the single-valued data_topic slot cannot represent the dataset's multimodal topical breadth (a schema limit the record itself flags)."
     ],
@@ -590,5 +615,6 @@
     "evaluator_id": "d4d-rubric10-semantic-subagent",
     "rubric_hash": "e5f8b6beced5f62f6cc4b3dcf45f6e8cb1431d84f4649227831ef8ecfbf28ab7",
     "d4d_file_hash": "d055cd62374d1fa285224b2e72f43948b4bffc30f15b8f0a5c14e9356fb1f580"
-  }
+  },
+  "evaluation_timestamp_basis": "file write time (2026-08-22 ~02:58Z, bounded by the sibling CHORUS evaluation at 02:56:18Z); the evaluating agent wrote the placeholder '2026-08-21T00:00:00Z', which was fabricated precision \u2014 corrected pre-merge, #661-review"
 }

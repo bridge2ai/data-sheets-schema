@@ -5,7 +5,7 @@
   "project": "VOICE",
   "method": "claudecode_agent",
   "label": "2026-08-20b_claude-opus-5-api-generic-v5_rep1",
-  "evaluation_timestamp": "2026-08-21T00:00:00Z",
+  "evaluation_timestamp": "2026-08-22T02:58:00Z",
   "model": {
     "name": "claude-fable-5",
     "evaluator_model": "claude-fable-5",
@@ -19,35 +19,47 @@
         "type": "content_accuracy",
         "severity": "low",
         "description": "ethical_reviews documents the sIRB structure and protocol amendment history in detail, but contains no conflict-of-interest disclosure, which is part of the E9 sub-element 5 look-for.",
-        "fields_involved": ["ethical_reviews"],
+        "fields_involved": [
+          "ethical_reviews"
+        ],
         "recommendation": "Add a conflicts-of-interest statement (or an explicit statement that none were declared) to ethical_reviews."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "data_protection_impacts records that no DPIA has been conducted. This is honest documentation of a gap in the dataset's governance rather than a datasheet defect; participant_privacy.reidentification_risk is nonetheless explicitly assessed (k>=2 anonymity not achieved; voice inherently identifying), so the privacy-logic expectation is satisfied.",
-        "fields_involved": ["data_protection_impacts", "participant_privacy.reidentification_risk"],
+        "fields_involved": [
+          "data_protection_impacts",
+          "participant_privacy.reidentification_risk"
+        ],
         "recommendation": "None for the datasheet; the underlying project could conduct and reference a DPIA in a future release."
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "No explicit character encoding is stated for the TSV/JSON distribution files (E3 sub-element 2 lists encoding as a look-for). Formats themselves are standard (Apache Parquet, TSV, JSON, BIDS v1.9.0 layout).",
-        "fields_involved": ["distribution_formats"],
+        "fields_involved": [
+          "distribution_formats"
+        ],
         "recommendation": "State the character encoding (presumably UTF-8) for the tab-delimited and JSON files."
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "The license is a bespoke instrument ('Bridge2AI Voice Registered Access License') rather than a standard machine-readable license (e.g., a CC or PhysioNet standard license). Terms are nonetheless spelled out in unusual detail (commercial and non-commercial research permitted, no fees, sale prohibited), so reuse conditions are clear to a human reader but not automatically interoperable.",
-        "fields_involved": ["license", "license_and_use_terms"],
+        "fields_involved": [
+          "license",
+          "license_and_use_terms"
+        ],
         "recommendation": "Consider adding a SPDX-style identifier or URL to the full license text for machine actionability."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "collection_timeframes gives a twelve-month duration with no calendar start/end dates. The record itself flags this in source_caveats as a limit of the source bundle rather than silently omitting it.",
-        "fields_involved": ["collection_timeframes"],
+        "fields_involved": [
+          "collection_timeframes"
+        ],
         "recommendation": "Add calendar collection dates if they can be sourced from the consortium."
       }
     ],
@@ -55,10 +67,10 @@
       "Scope check passed: the related-but-distinct pediatric dataset (declared in data/preprocessed/source_manifest.yaml) is correctly expressed as a related_datasets entry (relationship_type: is_supplemented_by, doi:10.13026/h995-bt35) and explicitly excluded from the record's referent in source_caveats ('recorded here as a related dataset rather than merged into this record'). No referent confusion anywhere in the record; third_party_sharing and human_subject_research.special_populations mention the pediatric release only to state it is separate.",
       "DOI hygiene is exemplary: primary DOI 10.13026/8xbn-nq66 uses the PhysioNet registrar prefix; version DOIs (10.13026/k81f-qr68, 10.13026/249v-w155, 10.57764/qb6h-em84 for Health Data Nexus), Zenodo archives (10.5281/...), and the Interspeech publication DOI (10.21437/Interspeech.2024-1926, valid ISCA prefix) are all format-valid and registrar-plausible.",
       "RRID:SCR_007345 in the citation is format-valid and semantically correct (it is PhysioNet's RRID, used exactly as PhysioNet's recommended citation prescribes).",
-      "Grant number OT2OD032720 matches the NIH pattern [Type OT2][Institute OD][6 digits] and is the correct core award for Bridge2AI-Voice; the record's funders.source_caveats explicitly reconciles four conflicting supplement-suffix renderings across sources and records only the consistent core number — a model of evidence-bounded reporting.",
+      "Grant number OT2OD032720 matches the NIH pattern [Type OT2][Institute OD][6 digits] and is the correct core award for Bridge2AI-Voice; the record's funders.source_caveats explicitly reconciles four conflicting supplement-suffix renderings across sources and records only the consistent core number \u2014 a model of evidence-bounded reporting.",
       "Cross-field ethics logic is fully consistent: involves_human_subjects=true is backed by sIRB details, written/electronic/video consent with withdrawal mechanics, HIPAA Safe Harbor plus expert review deidentification with an itemized identifiers_removed list, and an unusually candid re-identification risk assessment (k>=2 anonymity not achieved; raw audio withheld to controlled access because voice is inherently re-identifiable).",
       "Temporal ordering is coherent: collection (protocol from January 2023) precedes releases (v1.0 Nov 2024 through v3.1.0 on 2026-05-01), and issued: 2026-05-01 matches the v3.1.0 release date.",
-      "The record carries per-field source_caveats that separate the 47-participant feasibility study (its IRB number 004890 and its no-compensation statement) from the data acquisition study — a source-confusion trap the record explicitly avoids.",
+      "The record carries per-field source_caveats that separate the 47-participant feasibility study (its IRB number 004890 and its no-compensation statement) from the data acquisition study \u2014 a source-confusion trap the record explicitly avoids.",
       "Known biases use the standard taxonomy (selection_bias, representation_bias, sampling_bias, measurement_bias, annotation_bias) with per-bias mitigation strategies and one affected_subsets pointer to a declared subset ID."
     ],
     "consistency_checks": {
@@ -267,7 +279,7 @@
           "applicability_evidence": "Same external evidence as above",
           "score": 1,
           "evidence": "participant_privacy with anonymization_method, privacy_techniques (date rebasing, geographic generalization, institution-local storage, planned federated learning), reidentification_risk (voice inherently identifying; raw audio withheld), data_linkage terms",
-          "quality_note": "Explicit risk assessment tied to the mitigation decision (raw audio to controlled access) — semantically coherent, not boilerplate."
+          "quality_note": "Explicit risk assessment tied to the mitigation decision (raw audio to controlled access) \u2014 semantically coherent, not boilerplate."
         },
         {
           "name": "Informed Consent Obtained from Participants",
@@ -450,7 +462,7 @@
           "name": "Preprocessing, Cleaning, Labeling, and Annotation Quality",
           "applicable": true,
           "applicability_status": "applicable",
-          "applicability_evidence": "external_resources (E10) references code repositories github.com/sensein/b2aiprep and github.com/sensein/senselab — non-circular evidence",
+          "applicability_evidence": "external_resources (E10) references code repositories github.com/sensein/b2aiprep and github.com/sensein/senselab \u2014 non-circular evidence",
           "score": 1,
           "evidence": "7 preprocessing_strategies with STFT parameters (25 ms window, 10 ms hop, 400-point FFT, 60 Mel bins); cleaning_strategies incl. per-release audit protocol; labeling_strategies with annotations_per_item: 1, protocol, platform, and inter_annotator_agreement 'Not assessed'; annotation_analyses",
           "quality_note": "Reproducibility-grade parameter detail; the single-annotator limitation is stated rather than obscured."
@@ -563,7 +575,7 @@
           "applicability_status": "applicable",
           "applicability_evidence": "Datasets shared",
           "score": 1,
-          "evidence": "is_supplemented_by (pediatric v1.1.0), is_new_version_of (x2), is_documented_by, is_described_by — each with a resolvable DOI and description",
+          "evidence": "is_supplemented_by (pediatric v1.1.0), is_new_version_of (x2), is_documented_by, is_described_by \u2014 each with a resolvable DOI and description",
           "quality_note": "Typed relationships used exactly as the schema intends; the pediatric referent boundary is preserved."
         }
       ],
@@ -577,7 +589,7 @@
       "Identifier and funding correctness: every DOI carries a plausible registrar prefix, the RRID is valid and correctly attributed to PhysioNet, and the NIH grant OT2OD032720 is pattern-valid with a documented reconciliation of four conflicting suffix renderings across sources.",
       "Ethics documentation is complete and internally consistent: sIRB structure, multi-modality consent with withdrawal limits, HIPAA Safe Harbor plus expert review with an itemized removal list, and a candid re-identification risk statement (k>=2 anonymity not achieved) that semantically justifies the controlled-access design for raw audio.",
       "Reproducibility-grade processing detail: STFT/Mel/MFCC parameters, per-tool feature mapping (torchaudio, sparc, ppgs, openSMILE, Parselmouth, Whisper), and the generating toolkit version (b2aiprep v3.0.0), with both processing repositories linked.",
-      "Honest negative claims throughout: no DPIA conducted, no predefined splits, no inter-annotator agreement computable, no cleaning applied, transcriptions unaudited, v1.1 files no longer available — absences are named rather than papered over."
+      "Honest negative claims throughout: no DPIA conducted, no predefined splits, no inter-annotator agreement computable, no cleaning applied, transcriptions unaudited, v1.1 files no longer available \u2014 absences are named rather than papered over."
     ],
     "weaknesses": [
       "No conflict-of-interest disclosure in ethical_reviews, the one look-for of Element 9 sub-element 5 that is unmet.",
@@ -595,12 +607,13 @@
     ],
     "scope_check": {
       "pediatric_dataset_confusion": false,
-      "detail": "Checked per the source_manifest scope declaration for VOICE. The pediatric release (doi:10.13026/h995-bt35) appears only in related_datasets (is_supplemented_by), in third_party_sharing and human_subject_research.special_populations as an explicitly separate release, and in source_caveats as deliberately not merged. Its Synapse URL (syn73617068) appears only inside the related-dataset description, not in this dataset's own resources, distribution_formats, or file_collections — the exact failure mode the manifest check flags in other records does not occur here."
+      "detail": "Checked per the source_manifest scope declaration for VOICE. The pediatric release (doi:10.13026/h995-bt35) appears only in related_datasets (is_supplemented_by), in third_party_sharing and human_subject_research.special_populations as an explicitly separate release, and in source_caveats as deliberately not merged. Its Synapse URL (syn73617068) appears only inside the related-dataset description, not in this dataset's own resources, distribution_formats, or file_collections \u2014 the exact failure mode the manifest check flags in other records does not occur here."
     }
   },
   "metadata": {
     "evaluator_id": "d4d-rubric10-semantic-session-2026-08-21",
     "rubric_hash": "e5f8b6beced5f62f6cc4b3dcf45f6e8cb1431d84f4649227831ef8ecfbf28ab7",
     "d4d_file_hash": "9cc874cbc45364cb8ce7651b4d6f20cc6a97e1b1c94a1a2ceb264d60675a1250"
-  }
+  },
+  "evaluation_timestamp_basis": "file write time (2026-08-22 ~02:58Z, bounded by the sibling CHORUS evaluation at 02:56:18Z); the evaluating agent wrote the placeholder '2026-08-21T00:00:00Z', which was fabricated precision \u2014 corrected pre-merge, #661-review"
 }
