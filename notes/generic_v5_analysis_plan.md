@@ -224,8 +224,11 @@ reconcile changes (#650).
 
 - **2026-08-22b** — post-#665 (symmetric mirror clause + watchdog). **PASSED
   every metric — the first canary the gate has ever passed.** Pair errors 6 vs
-  the v5-arm baseline worst of 12 (4 content-wording, 2 full>core remnants;
-  no inversion), British 12 vs 28, every floor held. Closes #650: the
+  the v5-arm baseline worst of 12 — 4 content-wording differences and one
+  mapping-key remnant in each direction (full>core on known_biases, core>full
+  on informed_consent; the first version of this bullet said "2 full>core, no
+  inversion", which the artifacts contradict — #666 review). British 12 vs
+  28, every floor held. Closes #650: the
   symmetric clause is validated, and the reconcile instructions at assembly
   digest `e61c07d0` are the baseline for any future arm.
 - **2026-08-22** — post-#657 (one-sided absorption clause). **REGRESSED: pair
