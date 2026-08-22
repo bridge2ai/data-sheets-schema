@@ -1,0 +1,2360 @@
+label: 2026-08-20b_claude-opus-5-api-generic-v5
+method: claudecode_agent
+generated_at: '2026-08-22T02:56:19+00:00'
+schema_version: 1.3.0
+runs:
+- project: AI_READI
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T18:37:42+00:00'
+      seconds: 742.608
+      input_tokens: 4264
+      output_tokens: 64638
+      cache_read_tokens: 0
+      cache_write_tokens: 198549
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 42119
+      visible_text_chars: 90076
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T18:50:09+00:00'
+      seconds: 239.252
+      input_tokens: 35126
+      output_tokens: 25265
+      cache_read_tokens: 0
+      cache_write_tokens: 195153
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6740
+      visible_text_chars: 74101
+      reasoning_present: false
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T18:54:09+00:00'
+      seconds: 161.873
+      input_tokens: 60450
+      output_tokens: 5883
+      cache_read_tokens: 198549
+      cache_write_tokens: 0
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1715
+      visible_text_chars: 16675
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T18:56:51+00:00'
+      seconds: 298.305
+      input_tokens: 66461
+      output_tokens: 32132
+      cache_read_tokens: 198549
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8692
+      visible_text_chars: 93763
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T19:01:49+00:00'
+      seconds: 273.952
+      input_tokens: 67460
+      output_tokens: 28515
+      cache_read_tokens: 0
+      cache_write_tokens: 195153
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7368
+      visible_text_chars: 84589
+      reasoning_present: false
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T19:06:24+00:00'
+      seconds: 1623.064
+      input_tokens: 127032
+      output_tokens: 6258
+      cache_read_tokens: 0
+      cache_write_tokens: 198549
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1727
+      visible_text_chars: 18127
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T19:33:36+00:00'
+      seconds: 303.309
+      input_tokens: 33614
+      output_tokens: 33073
+      cache_read_tokens: 0
+      cache_write_tokens: 15912
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 9644
+      visible_text_chars: 93719
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T19:38:44+00:00'
+      seconds: 271.357
+      input_tokens: 31043
+      output_tokens: 29368
+      cache_read_tokens: 0
+      cache_write_tokens: 12516
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8228
+      visible_text_chars: 84560
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: report_after_repair
+    attempts:
+    - attempt: 1
+      input_tokens: 127018
+      output_tokens: 6089
+      cache_read_tokens: 0
+      cache_write_tokens: 198549
+      stop_reason: end_turn
+  replicate: 1
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-20T19:33:27+00:00'
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    sha256: d055cd62374d1fa285224b2e72f43948b4bffc30f15b8f0a5c14e9356fb1f580
+    bytes: 93707
+    lines: 1596
+    root_slot_count: 83
+    populated_root_slot_count: 83
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    sha256: 153103b319ef2f2f51b5a99f15a5c82d43a0cfe653d02dc7156d88e233287aa8
+    bytes: 84548
+    lines: 1326
+    root_slot_count: 70
+    populated_root_slot_count: 70
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    sha256: 06a83f1ec55709397665d832c6912ef628a5d9ef0d99ac47c112817ecd09591e
+    bytes: 17416
+    lines: 156
+  total_input_tokens: 552468
+  total_output_tokens: 231221
+  total_cache_read_tokens: 397098
+  total_cache_write_tokens: 1014381
+  total_reasoning_tokens_estimate: 86233
+  approx_cost_usd: 15.08
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 7
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 16
+- project: CHORUS
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T23:55:41+00:00'
+      seconds: 311.57
+      input_tokens: 4264
+      output_tokens: 27644
+      cache_read_tokens: 15862
+      cache_write_tokens: 13946
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 18639
+      visible_text_chars: 36020
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:00:53+00:00'
+      seconds: 119.464
+      input_tokens: 16632
+      output_tokens: 13116
+      cache_read_tokens: 0
+      cache_write_tokens: 26412
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4570
+      visible_text_chars: 34186
+      reasoning_present: true
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:02:53+00:00'
+      seconds: 71.304
+      input_tokens: 28598
+      output_tokens: 5608
+      cache_read_tokens: 0
+      cache_write_tokens: 29808
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1393
+      visible_text_chars: 16860
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:04:04+00:00'
+      seconds: 215.872
+      input_tokens: 34329
+      output_tokens: 20306
+      cache_read_tokens: 29808
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 10826
+      visible_text_chars: 37921
+      reasoning_present: true
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:07:40+00:00'
+      seconds: 154.894
+      input_tokens: 34720
+      output_tokens: 15894
+      cache_read_tokens: 0
+      cache_write_tokens: 26412
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6838
+      visible_text_chars: 36225
+      reasoning_present: true
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:10:15+00:00'
+      seconds: 70.108
+      input_tokens: 59816
+      output_tokens: 5359
+      cache_read_tokens: 0
+      cache_write_tokens: 29808
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1423
+      visible_text_chars: 15746
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:11:32+00:00'
+      seconds: 117.301
+      input_tokens: 14203
+      output_tokens: 13244
+      cache_read_tokens: 0
+      cache_write_tokens: 15912
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 3747
+      visible_text_chars: 37991
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:13:34+00:00'
+      seconds: 114.221
+      input_tokens: 13735
+      output_tokens: 12758
+      cache_read_tokens: 0
+      cache_write_tokens: 12516
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 3686
+      visible_text_chars: 36291
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: report_after_repair
+    attempts:
+    - attempt: 1
+      input_tokens: 59848
+      output_tokens: 4635
+      cache_read_tokens: 0
+      cache_write_tokens: 29808
+      stop_reason: end_turn
+  replicate: 1
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-21T00:11:25+00:00'
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CHORUS_d4d.yaml
+    sha256: 311add06c9fc1db42c0eeba86679013cdf9cf17db8af42b7cfdc07b55f01bdf0
+    bytes: 37979
+    lines: 729
+    root_slot_count: 53
+    populated_root_slot_count: 53
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CHORUS_d4d_core.yaml
+    sha256: 69be4eb9479a02066834fd2f881bd43a24cb7c166332c1ef819e28e33d1be46b
+    bytes: 36279
+    lines: 682
+    root_slot_count: 49
+    populated_root_slot_count: 49
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CHORUS_reconciliation.md
+    sha256: abc07d8698ac75e459b04f09d82d8dc6c71a009ba81de8b8d4a1b356c188e3e6
+    bytes: 13766
+    lines: 98
+  total_input_tokens: 266145
+  total_output_tokens: 118564
+  total_cache_read_tokens: 45670
+  total_cache_write_tokens: 184622
+  total_reasoning_tokens_estimate: 51122
+  approx_cost_usd: 5.47
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 7
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 7
+- project: CM4AI
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T01:37:52+00:00'
+      seconds: 868.325
+      input_tokens: 4264
+      output_tokens: 76798
+      cache_read_tokens: 15862
+      cache_write_tokens: 129940
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 61115
+      visible_text_chars: 62732
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T01:52:21+00:00'
+      seconds: 196.795
+      input_tokens: 27285
+      output_tokens: 21486
+      cache_read_tokens: 0
+      cache_write_tokens: 142406
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6726
+      visible_text_chars: 59042
+      reasoning_present: false
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T01:55:37+00:00'
+      seconds: 115.437
+      input_tokens: 48830
+      output_tokens: 8744
+      cache_read_tokens: 0
+      cache_write_tokens: 145802
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2401
+      visible_text_chars: 25374
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T01:57:33+00:00'
+      seconds: 265.646
+      input_tokens: 57702
+      output_tokens: 27752
+      cache_read_tokens: 145802
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8698
+      visible_text_chars: 76216
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T02:01:59+00:00'
+      seconds: 238.182
+      input_tokens: 62165
+      output_tokens: 25958
+      cache_read_tokens: 0
+      cache_write_tokens: 142406
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7857
+      visible_text_chars: 72405
+      reasoning_present: false
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T02:05:57+00:00'
+      seconds: 80.492
+      input_tokens: 111339
+      output_tokens: 6044
+      cache_read_tokens: 0
+      cache_write_tokens: 145802
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1636
+      visible_text_chars: 17633
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T02:07:29+00:00'
+      seconds: 284.774
+      input_tokens: 31258
+      output_tokens: 30459
+      cache_read_tokens: 0
+      cache_write_tokens: 15912
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 11491
+      visible_text_chars: 75872
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T02:12:20+00:00'
+      seconds: 29.16
+      input_tokens: 28606
+      output_tokens: 3
+      cache_read_tokens: 0
+      cache_write_tokens: 12516
+      max_tokens: 56000
+      reasoning_tokens_estimate: 0
+      visible_text_chars: 1702
+      reasoning_present: true
+      reasoning_available: false
+    - attempt: 2
+      started_at: '2026-08-21T02:12:51+00:00'
+      seconds: 249.723
+      input_tokens: 28606
+      output_tokens: 27362
+      cache_read_tokens: 12516
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 9316
+      visible_text_chars: 72185
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: report_after_repair
+    attempts:
+    - attempt: 1
+      input_tokens: 111348
+      output_tokens: 7279
+      cache_read_tokens: 0
+      cache_write_tokens: 145802
+      stop_reason: end_turn
+  replicate: 1
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-21T02:07:19+00:00'
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d.yaml
+    sha256: cef45c06225a364b9464d3cad1b5c7bb201a57df6ca5273ba29ae7e9f2c3aff7
+    bytes: 75864
+    lines: 1303
+    root_slot_count: 73
+    populated_root_slot_count: 73
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d_core.yaml
+    sha256: 9e81cb2a252a29571d761c12cf8e390314bb17b7ff7e71e199f49b4ef04bae17
+    bytes: 72176
+    lines: 1246
+    root_slot_count: 67
+    populated_root_slot_count: 67
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_reconciliation.md
+    sha256: 38249be80726bc9f44c75a816bc942f86d240f5d8b545e689b1f1c1129226eab
+    bytes: 20917
+    lines: 201
+  total_input_tokens: 511403
+  total_output_tokens: 231885
+  total_cache_read_tokens: 174180
+  total_cache_write_tokens: 880586
+  total_reasoning_tokens_estimate: 109240
+  approx_cost_usd: 13.94
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 28
+  - artifact: core
+    round: 1
+    outcome: 'unusable response: response contained no parseable yaml object of the
+      expected shape. The model appears to have written prose instead of a record;
+      first 200 characters: ''```yaml\n# D4D Core Datasheet for CM4AI Dataset\n# Generation
+      Method: schema-grounded agentic, phase 2\n# Agent runtime: Claude API (direct)\n#
+      Provider: LBL CBORG (proxy to Anthropic)\n# Model: claude-opu'''
+  - artifact: core
+    round: 2
+    outcome: applied
+    findings: 19
+- project: VOICE
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T07:02:52+00:00'
+      seconds: 695.363
+      input_tokens: 4251
+      output_tokens: 62618
+      cache_read_tokens: 0
+      cache_write_tokens: 161086
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 41958
+      visible_text_chars: 82641
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T07:14:31+00:00'
+      seconds: 3892.321
+      input_tokens: 31416
+      output_tokens: 24428
+      cache_read_tokens: 0
+      cache_write_tokens: 157690
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5835
+      visible_text_chars: 74374
+      reasoning_present: false
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T08:19:28+00:00'
+      seconds: 78.244
+      input_tokens: 55903
+      output_tokens: 5833
+      cache_read_tokens: 0
+      cache_write_tokens: 161086
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1401
+      visible_text_chars: 17729
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T08:20:46+00:00'
+      seconds: 257.195
+      input_tokens: 61864
+      output_tokens: 28126
+      cache_read_tokens: 161086
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6768
+      visible_text_chars: 85435
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T08:25:03+00:00'
+      seconds: 207.489
+      input_tokens: 62554
+      output_tokens: 22447
+      cache_read_tokens: 0
+      cache_write_tokens: 157690
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5249
+      visible_text_chars: 68793
+      reasoning_present: false
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T08:28:31+00:00'
+      seconds: 69.726
+      input_tokens: 112361
+      output_tokens: 5072
+      cache_read_tokens: 0
+      cache_write_tokens: 161086
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1348
+      visible_text_chars: 14899
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T08:29:48+00:00'
+      seconds: 263.989
+      input_tokens: 31899
+      output_tokens: 29046
+      cache_read_tokens: 0
+      cache_write_tokens: 15912
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7793
+      visible_text_chars: 85015
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T08:34:17+00:00'
+      seconds: 212.667
+      input_tokens: 26019
+      output_tokens: 23245
+      cache_read_tokens: 0
+      cache_write_tokens: 12516
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6140
+      visible_text_chars: 68420
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: report_after_repair
+    attempts:
+    - attempt: 1
+      input_tokens: 112091
+      output_tokens: 5472
+      cache_read_tokens: 0
+      cache_write_tokens: 161086
+      stop_reason: end_turn
+  replicate: 1
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-21T08:29:41+00:00'
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/VOICE_d4d.yaml
+    sha256: 9cc874cbc45364cb8ce7651b4d6f20cc6a97e1b1c94a1a2ceb264d60675a1250
+    bytes: 85031
+    lines: 1498
+    root_slot_count: 86
+    populated_root_slot_count: 86
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/VOICE_d4d_core.yaml
+    sha256: 432466d05c897c75676b4b902e9f14fbddfef3846a5864c189458360641754a3
+    bytes: 68436
+    lines: 1190
+    root_slot_count: 69
+    populated_root_slot_count: 69
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/VOICE_reconciliation.md
+    sha256: ee358db35a561e8caa64d46fbeb197a3d2a1b8c83f167bb51554b6d6f0967fb0
+    bytes: 16319
+    lines: 168
+  total_input_tokens: 498358
+  total_output_tokens: 206287
+  total_cache_read_tokens: 161086
+  total_cache_write_tokens: 988152
+  total_reasoning_tokens_estimate: 76492
+  approx_cost_usd: 13.91
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 24
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 23
+- project: AI_READI
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep2
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T19:59:40+00:00'
+      seconds: 799.4
+      input_tokens: 4264
+      output_tokens: 70628
+      cache_read_tokens: 0
+      cache_write_tokens: 198549
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 41840
+      visible_text_chars: 115152
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T20:13:04+00:00'
+      seconds: 343.257
+      input_tokens: 43387
+      output_tokens: 34134
+      cache_read_tokens: 0
+      cache_write_tokens: 195153
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 9142
+      visible_text_chars: 99968
+      reasoning_present: false
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T20:18:48+00:00'
+      seconds: 115.19
+      input_tokens: 77580
+      output_tokens: 8113
+      cache_read_tokens: 0
+      cache_write_tokens: 198549
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2253
+      visible_text_chars: 23443
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T20:20:43+00:00'
+      seconds: 610.61
+      input_tokens: 85821
+      output_tokens: 60179
+      cache_read_tokens: 198549
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 29320
+      visible_text_chars: 123437
+      reasoning_present: true
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T20:30:54+00:00'
+      seconds: 8834.938
+      input_tokens: 88355
+      output_tokens: 35715
+      cache_read_tokens: 0
+      cache_write_tokens: 195153
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 9401
+      visible_text_chars: 105259
+      reasoning_present: false
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T22:58:09+00:00'
+      seconds: 95.961
+      input_tokens: 163388
+      output_tokens: 6141
+      cache_read_tokens: 0
+      cache_write_tokens: 198549
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1713
+      visible_text_chars: 17714
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T22:59:52+00:00'
+      seconds: 389.832
+      input_tokens: 43141
+      output_tokens: 42280
+      cache_read_tokens: 0
+      cache_write_tokens: 15912
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 11408
+      visible_text_chars: 123491
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T23:06:26+00:00'
+      seconds: 330.194
+      input_tokens: 36970
+      output_tokens: 36049
+      cache_read_tokens: 0
+      cache_write_tokens: 12516
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 9718
+      visible_text_chars: 105325
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: report_after_repair
+    attempts:
+    - attempt: 1
+      input_tokens: 163434
+      output_tokens: 7579
+      cache_read_tokens: 0
+      cache_write_tokens: 198549
+      stop_reason: end_turn
+  replicate: 2
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-20T22:59:45+00:00'
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    sha256: 4f8ef711641ea7567991ae22d0da01891f7c388c16bc9ddbc93fbe0c7cde9f7a
+    bytes: 123479
+    lines: 2138
+    root_slot_count: 81
+    populated_root_slot_count: 81
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d_core.yaml
+    sha256: 3730611f1558e9b886ebc8146e3272eed3665f60c66603ce78f3272b691d3ff1
+    bytes: 105313
+    lines: 1736
+    root_slot_count: 67
+    populated_root_slot_count: 67
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_reconciliation.md
+    sha256: dee47124d9d64ca722691f9264c3b2b873589cc4cd6cab2bb6599da2da12bfcf
+    bytes: 21524
+    lines: 259
+  total_input_tokens: 706340
+  total_output_tokens: 300818
+  total_cache_read_tokens: 198549
+  total_cache_write_tokens: 1212930
+  total_reasoning_tokens_estimate: 114795
+  approx_cost_usd: 18.73
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 10
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 10
+- project: CHORUS
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep2
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:16:53+00:00'
+      seconds: 379.702
+      input_tokens: 4264
+      output_tokens: 32550
+      cache_read_tokens: 29808
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 25440
+      visible_text_chars: 28441
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:23:13+00:00'
+      seconds: 171.532
+      input_tokens: 13891
+      output_tokens: 11254
+      cache_read_tokens: 26412
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4229
+      visible_text_chars: 28100
+      reasoning_present: true
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:26:05+00:00'
+      seconds: 114.316
+      input_tokens: 23569
+      output_tokens: 8767
+      cache_read_tokens: 0
+      cache_write_tokens: 29808
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6525
+      visible_text_chars: 8968
+      reasoning_present: true
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:27:59+00:00'
+      seconds: 152.321
+      input_tokens: 26729
+      output_tokens: 14729
+      cache_read_tokens: 29808
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7056
+      visible_text_chars: 30695
+      reasoning_present: true
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:30:31+00:00'
+      seconds: 114.536
+      input_tokens: 27158
+      output_tokens: 12063
+      cache_read_tokens: 0
+      cache_write_tokens: 26412
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4504
+      visible_text_chars: 30237
+      reasoning_present: true
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:32:26+00:00'
+      seconds: 68.487
+      input_tokens: 47191
+      output_tokens: 5418
+      cache_read_tokens: 29808
+      cache_write_tokens: 0
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1465
+      visible_text_chars: 15814
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:33:41+00:00'
+      seconds: 94.472
+      input_tokens: 10693
+      output_tokens: 10476
+      cache_read_tokens: 0
+      cache_write_tokens: 15912
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2812
+      visible_text_chars: 30658
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T00:35:19+00:00'
+      seconds: 2282.441
+      input_tokens: 10585
+      output_tokens: 10489
+      cache_read_tokens: 0
+      cache_write_tokens: 12516
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2939
+      visible_text_chars: 30200
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: report_after_repair
+    attempts:
+    - attempt: 1
+      input_tokens: 47167
+      output_tokens: 5730
+      cache_read_tokens: 0
+      cache_write_tokens: 29808
+      stop_reason: end_turn
+  replicate: 2
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-21T00:33:35+00:00'
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CHORUS_d4d.yaml
+    sha256: 633b996f492daefad5e576e88c8b435bd3e0aaaf9e6691a9e347b19713f42352
+    bytes: 30646
+    lines: 531
+    root_slot_count: 52
+    populated_root_slot_count: 52
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CHORUS_d4d_core.yaml
+    sha256: 7180f723c87b79233c70975d7bd9232c1354c5dcbfeb27234ba3cfcabbc4ad96
+    bytes: 30188
+    lines: 515
+    root_slot_count: 49
+    populated_root_slot_count: 49
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CHORUS_reconciliation.md
+    sha256: 77796fdffb5c5dd7aa8862db8b5f025f1158663550e9637e57509cd98d277eee
+    bytes: 16969
+    lines: 173
+  total_input_tokens: 211247
+  total_output_tokens: 111476
+  total_cache_read_tokens: 115836
+  total_cache_write_tokens: 114456
+  total_reasoning_tokens_estimate: 54970
+  approx_cost_usd: 4.62
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 2
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 2
+- project: CM4AI
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep2
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T02:19:21+00:00'
+      seconds: 713.294
+      input_tokens: 4264
+      output_tokens: 64663
+      cache_read_tokens: 145802
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 50157
+      visible_text_chars: 58024
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T02:31:14+00:00'
+      seconds: 229.613
+      input_tokens: 25289
+      output_tokens: 23855
+      cache_read_tokens: 0
+      cache_write_tokens: 142406
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 9224
+      visible_text_chars: 58527
+      reasoning_present: true
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T02:35:04+00:00'
+      seconds: 52.842
+      input_tokens: 46762
+      output_tokens: 3326
+      cache_read_tokens: 0
+      cache_write_tokens: 145802
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1024
+      visible_text_chars: 9208
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T02:35:57+00:00'
+      seconds: 218.164
+      input_tokens: 50216
+      output_tokens: 23486
+      cache_read_tokens: 145802
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7617
+      visible_text_chars: 63479
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T02:39:35+00:00'
+      seconds: 260.457
+      input_tokens: 52406
+      output_tokens: 26433
+      cache_read_tokens: 0
+      cache_write_tokens: 142406
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 11102
+      visible_text_chars: 61326
+      reasoning_present: true
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T02:43:56+00:00'
+      seconds: 69.319
+      input_tokens: 96009
+      output_tokens: 5028
+      cache_read_tokens: 0
+      cache_write_tokens: 145802
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1479
+      visible_text_chars: 14198
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T02:45:13+00:00'
+      seconds: 217.872
+      input_tokens: 28959
+      output_tokens: 24141
+      cache_read_tokens: 0
+      cache_write_tokens: 15912
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8316
+      visible_text_chars: 63303
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T02:48:56+00:00'
+      seconds: 205.789
+      input_tokens: 27990
+      output_tokens: 22616
+      cache_read_tokens: 0
+      cache_write_tokens: 12516
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7332
+      visible_text_chars: 61138
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: report_after_repair
+    attempts:
+    - attempt: 1
+      input_tokens: 95847
+      output_tokens: 5362
+      cache_read_tokens: 0
+      cache_write_tokens: 145802
+      stop_reason: end_turn
+  replicate: 2
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-21T02:45:05+00:00'
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CM4AI_d4d.yaml
+    sha256: aa2097ea77a1d036931276fe274ccdd0e778715818e1b270a248bbc0c85a23b6
+    bytes: 63291
+    lines: 1126
+    root_slot_count: 72
+    populated_root_slot_count: 72
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CM4AI_d4d_core.yaml
+    sha256: 30e4b7246dc90ea16749f10f84a156fcd43c3b0172e75d76ddd8f6f1755f62b1
+    bytes: 61126
+    lines: 1089
+    root_slot_count: 68
+    populated_root_slot_count: 68
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CM4AI_reconciliation.md
+    sha256: 9a082c831199f77817369d042623c3c739d0b2701f967cd8d1ae3b03a3c2ecd6
+    bytes: 15104
+    lines: 174
+  total_input_tokens: 427742
+  total_output_tokens: 198910
+  total_cache_read_tokens: 291604
+  total_cache_write_tokens: 750646
+  total_reasoning_tokens_estimate: 96251
+  approx_cost_usd: 11.95
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 33
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 33
+- project: VOICE
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep2
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T08:39:30+00:00'
+      seconds: 597.373
+      input_tokens: 4251
+      output_tokens: 53221
+      cache_read_tokens: 161086
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 30295
+      visible_text_chars: 91704
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T08:49:28+00:00'
+      seconds: 250.695
+      input_tokens: 34896
+      output_tokens: 27347
+      cache_read_tokens: 0
+      cache_write_tokens: 157690
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6899
+      visible_text_chars: 81793
+      reasoning_present: false
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T08:53:39+00:00'
+      seconds: 60.723
+      input_tokens: 62302
+      output_tokens: 4369
+      cache_read_tokens: 0
+      cache_write_tokens: 161086
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1157
+      visible_text_chars: 12848
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T08:54:39+00:00'
+      seconds: 294.097
+      input_tokens: 66794
+      output_tokens: 32059
+      cache_read_tokens: 161086
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8186
+      visible_text_chars: 95495
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T08:59:34+00:00'
+      seconds: 291.509
+      input_tokens: 67937
+      output_tokens: 27023
+      cache_read_tokens: 157690
+      cache_write_tokens: 0
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6725
+      visible_text_chars: 81193
+      reasoning_present: false
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T09:04:25+00:00'
+      seconds: 66.695
+      input_tokens: 125800
+      output_tokens: 4862
+      cache_read_tokens: 0
+      cache_write_tokens: 161086
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1341
+      visible_text_chars: 14087
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T09:05:40+00:00'
+      seconds: 296.923
+      input_tokens: 34739
+      output_tokens: 32403
+      cache_read_tokens: 0
+      cache_write_tokens: 15912
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8506
+      visible_text_chars: 95591
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T09:10:45+00:00'
+      seconds: 250.139
+      input_tokens: 29777
+      output_tokens: 27283
+      cache_read_tokens: 0
+      cache_write_tokens: 12516
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6942
+      visible_text_chars: 81367
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: report_after_repair
+    attempts:
+    - attempt: 1
+      input_tokens: 125880
+      output_tokens: 4370
+      cache_read_tokens: 0
+      cache_write_tokens: 161086
+      stop_reason: end_turn
+  replicate: 2
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-21T09:05:32+00:00'
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml
+    sha256: 2cc6d73ee84643bb4b9f152faa13330f5fceda6e7a3de1d8ce669c8462799dd9
+    bytes: 95579
+    lines: 1632
+    root_slot_count: 86
+    populated_root_slot_count: 86
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/VOICE_d4d_core.yaml
+    sha256: 46b2c73f9f6c9d2b465f59c3363cc949b39066876d9cf69f973c5f2c50727fb3
+    bytes: 81355
+    lines: 1353
+    root_slot_count: 73
+    populated_root_slot_count: 73
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/VOICE_reconciliation.md
+    sha256: 07b7b4c88dbd2273a239135f824bbe7aa540bc28c92c2c71bf8ba0af99b5f3c4
+    bytes: 12927
+    lines: 98
+  total_input_tokens: 552376
+  total_output_tokens: 212937
+  total_cache_read_tokens: 479862
+  total_cache_write_tokens: 669376
+  total_reasoning_tokens_estimate: 70051
+  approx_cost_usd: 12.51
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 18
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 18
+- project: AI_READI
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T23:13:52+00:00'
+      seconds: 516.29
+      input_tokens: 4264
+      output_tokens: 47002
+      cache_read_tokens: 198549
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 26955
+      visible_text_chars: 80190
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T23:22:29+00:00'
+      seconds: 221.785
+      input_tokens: 31502
+      output_tokens: 23962
+      cache_read_tokens: 0
+      cache_write_tokens: 195153
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6450
+      visible_text_chars: 70049
+      reasoning_present: false
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T23:26:11+00:00'
+      seconds: 124.019
+      input_tokens: 55538
+      output_tokens: 9773
+      cache_read_tokens: 0
+      cache_write_tokens: 198549
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2930
+      visible_text_chars: 27372
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T23:28:15+00:00'
+      seconds: 710.886
+      input_tokens: 65434
+      output_tokens: 28983
+      cache_read_tokens: 0
+      cache_write_tokens: 198549
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7771
+      visible_text_chars: 84851
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T23:40:06+00:00'
+      seconds: 231.707
+      input_tokens: 66923
+      output_tokens: 25108
+      cache_read_tokens: 0
+      cache_write_tokens: 195153
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6792
+      visible_text_chars: 73266
+      reasoning_present: false
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T23:43:58+00:00'
+      seconds: 79.195
+      input_tokens: 119464
+      output_tokens: 5962
+      cache_read_tokens: 0
+      cache_write_tokens: 198549
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1588
+      visible_text_chars: 17499
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T23:45:25+00:00'
+      seconds: 268.754
+      input_tokens: 30085
+      output_tokens: 29544
+      cache_read_tokens: 0
+      cache_write_tokens: 15912
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8384
+      visible_text_chars: 84641
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-20T23:49:58+00:00'
+      seconds: 235.38
+      input_tokens: 25882
+      output_tokens: 25771
+      cache_read_tokens: 0
+      cache_write_tokens: 12516
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7472
+      visible_text_chars: 73196
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: report_after_repair
+    attempts:
+    - attempt: 1
+      input_tokens: 119371
+      output_tokens: 6259
+      cache_read_tokens: 0
+      cache_write_tokens: 198549
+      stop_reason: end_turn
+  replicate: 3
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-20T23:45:17+00:00'
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    sha256: 7aa10eb134b73792d7e189dc0fcd0f1fea94c83c8f4b24f0b37e48241382127e
+    bytes: 84671
+    lines: 1511
+    root_slot_count: 82
+    populated_root_slot_count: 82
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d_core.yaml
+    sha256: 0aace03af0c7193d088f5ab1c1f496f75843293a0b46267812d0a1eb6936ab69
+    bytes: 73222
+    lines: 1285
+    root_slot_count: 68
+    populated_root_slot_count: 68
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_reconciliation.md
+    sha256: c8e7c7703fda3b74be1e63f421f67a805ad98961ea79bd0dd8a802b6f68c4111
+    bytes: 18192
+    lines: 183
+  total_input_tokens: 518463
+  total_output_tokens: 202364
+  total_cache_read_tokens: 198549
+  total_cache_write_tokens: 1212930
+  total_reasoning_tokens_estimate: 68342
+  approx_cost_usd: 15.33
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 4
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 3
+- project: CHORUS
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T01:15:03+00:00'
+      seconds: 416.513
+      input_tokens: 4264
+      output_tokens: 36408
+      cache_read_tokens: 29808
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 27010
+      visible_text_chars: 37595
+      reasoning_present: true
+      reasoning_available: false
+  - phase: core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T01:21:59+00:00'
+      seconds: 120.475
+      input_tokens: 17255
+      output_tokens: 13561
+      cache_read_tokens: 0
+      cache_write_tokens: 26412
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4505
+      visible_text_chars: 36227
+      reasoning_present: true
+      reasoning_available: false
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T01:24:00+00:00'
+      seconds: 76.721
+      input_tokens: 29954
+      output_tokens: 6258
+      cache_read_tokens: 0
+      cache_write_tokens: 29808
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1718
+      visible_text_chars: 18162
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T01:25:17+00:00'
+      seconds: 178.03
+      input_tokens: 36335
+      output_tokens: 17894
+      cache_read_tokens: 29808
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7906
+      visible_text_chars: 39952
+      reasoning_present: true
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T01:28:15+00:00'
+      seconds: 150.948
+      input_tokens: 36849
+      output_tokens: 15842
+      cache_read_tokens: 0
+      cache_write_tokens: 26412
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6097
+      visible_text_chars: 38983
+      reasoning_present: true
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T01:30:46+00:00'
+      seconds: 66.692
+      input_tokens: 63529
+      output_tokens: 5331
+      cache_read_tokens: 0
+      cache_write_tokens: 29808
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1493
+      visible_text_chars: 15352
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T01:32:01+00:00'
+      seconds: 124.905
+      input_tokens: 15612
+      output_tokens: 14065
+      cache_read_tokens: 0
+      cache_write_tokens: 15912
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4053
+      visible_text_chars: 40048
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T01:34:12+00:00'
+      seconds: 123.281
+      input_tokens: 15376
+      output_tokens: 13781
+      cache_read_tokens: 0
+      cache_write_tokens: 12516
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 4012
+      visible_text_chars: 39079
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: report_after_repair
+    attempts:
+    - attempt: 1
+      input_tokens: 63567
+      output_tokens: 5340
+      cache_read_tokens: 0
+      cache_write_tokens: 29808
+      stop_reason: end_turn
+  replicate: 3
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-21T01:31:53+00:00'
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CHORUS_d4d.yaml
+    sha256: 3b66585a5d8a42bac5d96231e47144848f1d4b6f4510c656e71254472375eb2f
+    bytes: 40044
+    lines: 731
+    root_slot_count: 60
+    populated_root_slot_count: 60
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CHORUS_d4d_core.yaml
+    sha256: 5c66c84566ef15bf55e2c871f1075acb22aa4830f1c415c43587230641432be2
+    bytes: 39075
+    lines: 699
+    root_slot_count: 55
+    populated_root_slot_count: 55
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CHORUS_reconciliation.md
+    sha256: 8c3eb48236e5c6c353787f32c63ca5fc8e6edafde3faaafabf6273e3d7c5c971
+    bytes: 16103
+    lines: 96
+  total_input_tokens: 282741
+  total_output_tokens: 128480
+  total_cache_read_tokens: 59616
+  total_cache_write_tokens: 170676
+  total_reasoning_tokens_estimate: 56794
+  approx_cost_usd: 5.72
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 11
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 11
+- project: CM4AI
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T03:37:09+00:00'
+      seconds: 261.009
+      input_tokens: 60182
+      output_tokens: 28226
+      cache_read_tokens: 0
+      cache_write_tokens: 145802
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 9390
+      visible_text_chars: 75344
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T03:41:38+00:00'
+      seconds: 248.294
+      input_tokens: 63390
+      output_tokens: 27216
+      cache_read_tokens: 0
+      cache_write_tokens: 142406
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 8947
+      visible_text_chars: 73077
+      reasoning_present: false
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T03:45:46+00:00'
+      seconds: 121.021
+      input_tokens: 115548
+      output_tokens: 9185
+      cache_read_tokens: 0
+      cache_write_tokens: 145802
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 2636
+      visible_text_chars: 26197
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T03:47:58+00:00'
+      seconds: 259.959
+      input_tokens: 32572
+      output_tokens: 28903
+      cache_read_tokens: 0
+      cache_write_tokens: 15912
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 10106
+      visible_text_chars: 75191
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T03:52:24+00:00'
+      seconds: 260.681
+      input_tokens: 31662
+      output_tokens: 28593
+      cache_read_tokens: 0
+      cache_write_tokens: 12516
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 10358
+      visible_text_chars: 72940
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: report_after_repair
+    attempts:
+    - attempt: 1
+      input_tokens: 115432
+      output_tokens: 8730
+      cache_read_tokens: 0
+      cache_write_tokens: 145802
+      stop_reason: end_turn
+  replicate: 3
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-21T03:47:48+00:00'
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CM4AI_d4d.yaml
+    sha256: f2c39123a6b7bd7e264190fd3a597a94ccd36c3a48d077b0fc70d205f9de9794
+    bytes: 75179
+    lines: 1369
+    root_slot_count: 67
+    populated_root_slot_count: 67
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CM4AI_d4d_core.yaml
+    sha256: 829aef2d3dbc0376b40b1c92c13b33e4ac57ac05cad8b856bf827d74a60693f5
+    bytes: 72928
+    lines: 1329
+    root_slot_count: 62
+    populated_root_slot_count: 62
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CM4AI_reconciliation.md
+    sha256: b7053085331d10c34e2b265eb824d51c72827701de80a5486f125924d84a7990
+    bytes: 25443
+    lines: 218
+  total_input_tokens: 418786
+  total_output_tokens: 130853
+  total_cache_read_tokens: 0
+  total_cache_write_tokens: 608240
+  total_reasoning_tokens_estimate: 104044
+  approx_cost_usd: 9.17
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 25
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 25
+- project: VOICE
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+  validation_state: valid
+  timing_basis: file_mtime
+  phases:
+  - phase: audit
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T16:47:13+00:00'
+      seconds: 82.606
+      input_tokens: 53779
+      output_tokens: 5913
+      cache_read_tokens: 0
+      cache_write_tokens: 161086
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1484
+      visible_text_chars: 17719
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T16:48:35+00:00'
+      seconds: 255.234
+      input_tokens: 59820
+      output_tokens: 27469
+      cache_read_tokens: 161086
+      cache_write_tokens: 0
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6776
+      visible_text_chars: 82775
+      reasoning_present: false
+      reasoning_available: false
+  - phase: reconcile_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T16:52:53+00:00'
+      seconds: 211.642
+      input_tokens: 61402
+      output_tokens: 22806
+      cache_read_tokens: 0
+      cache_write_tokens: 157690
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 5585
+      visible_text_chars: 68885
+      reasoning_present: false
+      reasoning_available: false
+  - phase: report
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T16:56:25+00:00'
+      seconds: 74.027
+      input_tokens: 110019
+      output_tokens: 5643
+      cache_read_tokens: 0
+      cache_write_tokens: 161086
+      max_tokens: 24000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 1519
+      visible_text_chars: 16497
+      reasoning_present: false
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_full
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T16:57:46+00:00'
+      seconds: 253.354
+      input_tokens: 28875
+      output_tokens: 27849
+      cache_read_tokens: 0
+      cache_write_tokens: 15912
+      max_tokens: 96000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 7166
+      visible_text_chars: 82732
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: repair_core
+    attempts:
+    - attempt: 1
+      started_at: '2026-08-21T17:02:05+00:00'
+      seconds: 214.567
+      input_tokens: 23943
+      output_tokens: 23440
+      cache_read_tokens: 0
+      cache_write_tokens: 12516
+      max_tokens: 56000
+      stop_reason: end_turn
+      reasoning_tokens_estimate: 6231
+      visible_text_chars: 68837
+      reasoning_present: true
+      reasoning_available: false
+    artifact_written_at: '2026-08-22T01:05:16+00:00'
+  - phase: report_after_repair
+    attempts:
+    - attempt: 1
+      input_tokens: 109978
+      output_tokens: 5475
+      cache_read_tokens: 0
+      cache_write_tokens: 161086
+      stop_reason: end_turn
+  replicate: 3
+  model: claude-opus-5
+  provider: LBL CBORG (proxy to Anthropic)
+  arm: baseline
+  finished_at: '2026-08-21T16:57:40+00:00'
+  validation_problem_count: 0
+  records:
+  - artifact: full
+    path: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml
+    sha256: 36c0a8902cade6e93f97b3aa8544ec42672f48b311c7947f7437c5025ee99910
+    bytes: 82734
+    lines: 1439
+    root_slot_count: 83
+    populated_root_slot_count: 83
+    hollow_value_count: 0
+  - artifact: core
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d_core.yaml
+    sha256: 917ef47ed71837c23ec21d903938e13cc45d405e8a48c8de83054f79bf604d0c
+    bytes: 68842
+    lines: 1185
+    root_slot_count: 69
+    populated_root_slot_count: 69
+    hollow_value_count: 0
+  - artifact: report
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_reconciliation.md
+    sha256: 791e1e24e52bd561cb0b8fb29712c764f2037c9d17632381676111d43763508d
+    bytes: 16149
+    lines: 169
+  total_input_tokens: 447816
+  total_output_tokens: 118595
+  total_cache_read_tokens: 161086
+  total_cache_write_tokens: 669376
+  total_reasoning_tokens_estimate: 75848
+  approx_cost_usd: 9.47
+  repair_rounds:
+  - artifact: full
+    round: 1
+    outcome: applied
+    findings: 6
+  - artifact: core
+    round: 1
+    outcome: applied
+    findings: 5
+comparisons:
+- metric: full_phase_output_tokens
+  unit: tokens
+  values:
+  - subject: AI_READI rep1
+    value: 64638.0
+  - subject: CHORUS rep1
+    value: 27644.0
+  - subject: CM4AI rep1
+    value: 76798.0
+  - subject: VOICE rep1
+    value: 62618.0
+  - subject: AI_READI rep2
+    value: 70628.0
+  - subject: CHORUS rep2
+    value: 32550.0
+  - subject: CM4AI rep2
+    value: 64663.0
+  - subject: VOICE rep2
+    value: 53221.0
+  - subject: AI_READI rep3
+    value: 47002.0
+  - subject: CHORUS rep3
+    value: 36408.0
+- metric: full_phase_reasoning_tokens_estimate
+  unit: tokens
+  values:
+  - subject: AI_READI rep1
+    value: 42119.0
+  - subject: CHORUS rep1
+    value: 18639.0
+  - subject: CM4AI rep1
+    value: 61115.0
+  - subject: VOICE rep1
+    value: 41958.0
+  - subject: AI_READI rep2
+    value: 41840.0
+  - subject: CHORUS rep2
+    value: 25440.0
+  - subject: CM4AI rep2
+    value: 50157.0
+  - subject: VOICE rep2
+    value: 30295.0
+  - subject: AI_READI rep3
+    value: 26955.0
+  - subject: CHORUS rep3
+    value: 27010.0
+- metric: total_output_tokens
+  unit: tokens
+  values:
+  - subject: AI_READI rep1
+    value: 231221.0
+  - subject: CHORUS rep1
+    value: 118564.0
+  - subject: CM4AI rep1
+    value: 231885.0
+  - subject: VOICE rep1
+    value: 206287.0
+  - subject: AI_READI rep2
+    value: 300818.0
+  - subject: CHORUS rep2
+    value: 111476.0
+  - subject: CM4AI rep2
+    value: 198910.0
+  - subject: VOICE rep2
+    value: 212937.0
+  - subject: AI_READI rep3
+    value: 202364.0
+  - subject: CHORUS rep3
+    value: 128480.0
+  - subject: CM4AI rep3
+    value: 130853.0
+  - subject: VOICE rep3
+    value: 118595.0
+- metric: approx_cost_usd
+  unit: USD
+  values:
+  - subject: AI_READI rep1
+    value: 15.08
+  - subject: CHORUS rep1
+    value: 5.47
+  - subject: CM4AI rep1
+    value: 13.94
+  - subject: VOICE rep1
+    value: 13.91
+  - subject: AI_READI rep2
+    value: 18.73
+  - subject: CHORUS rep2
+    value: 4.62
+  - subject: CM4AI rep2
+    value: 11.95
+  - subject: VOICE rep2
+    value: 12.51
+  - subject: AI_READI rep3
+    value: 15.33
+  - subject: CHORUS rep3
+    value: 5.72
+  - subject: CM4AI rep3
+    value: 9.17
+  - subject: VOICE rep3
+    value: 9.47
+- metric: repair_call_count
+  unit: calls
+  values:
+  - subject: AI_READI rep1
+    value: 2.0
+  - subject: CHORUS rep1
+    value: 2.0
+  - subject: CM4AI rep1
+    value: 3.0
+  - subject: VOICE rep1
+    value: 2.0
+  - subject: AI_READI rep2
+    value: 2.0
+  - subject: CHORUS rep2
+    value: 2.0
+  - subject: CM4AI rep2
+    value: 2.0
+  - subject: VOICE rep2
+    value: 2.0
+  - subject: AI_READI rep3
+    value: 2.0
+  - subject: CHORUS rep3
+    value: 2.0
+  - subject: CM4AI rep3
+    value: 2.0
+  - subject: VOICE rep3
+    value: 2.0
+- metric: full_root_slot_count
+  unit: slots
+  values:
+  - subject: AI_READI rep1
+    value: 83.0
+  - subject: CHORUS rep1
+    value: 53.0
+  - subject: CM4AI rep1
+    value: 73.0
+  - subject: VOICE rep1
+    value: 86.0
+  - subject: AI_READI rep2
+    value: 81.0
+  - subject: CHORUS rep2
+    value: 52.0
+  - subject: CM4AI rep2
+    value: 72.0
+  - subject: VOICE rep2
+    value: 86.0
+  - subject: AI_READI rep3
+    value: 82.0
+  - subject: CHORUS rep3
+    value: 60.0
+  - subject: CM4AI rep3
+    value: 67.0
+  - subject: VOICE rep3
+    value: 83.0
+- metric: core_root_slot_count
+  unit: slots
+  values:
+  - subject: AI_READI rep1
+    value: 70.0
+  - subject: CHORUS rep1
+    value: 49.0
+  - subject: CM4AI rep1
+    value: 67.0
+  - subject: VOICE rep1
+    value: 69.0
+  - subject: AI_READI rep2
+    value: 67.0
+  - subject: CHORUS rep2
+    value: 49.0
+  - subject: CM4AI rep2
+    value: 68.0
+  - subject: VOICE rep2
+    value: 73.0
+  - subject: AI_READI rep3
+    value: 68.0
+  - subject: CHORUS rep3
+    value: 55.0
+  - subject: CM4AI rep3
+    value: 62.0
+  - subject: VOICE rep3
+    value: 69.0
+- metric: full_hollow_value_count
+  unit: hollows
+  values:
+  - subject: AI_READI rep1
+    value: 0.0
+  - subject: CHORUS rep1
+    value: 0.0
+  - subject: CM4AI rep1
+    value: 0.0
+  - subject: VOICE rep1
+    value: 0.0
+  - subject: AI_READI rep2
+    value: 0.0
+  - subject: CHORUS rep2
+    value: 0.0
+  - subject: CM4AI rep2
+    value: 0.0
+  - subject: VOICE rep2
+    value: 0.0
+  - subject: AI_READI rep3
+    value: 0.0
+  - subject: CHORUS rep3
+    value: 0.0
+  - subject: CM4AI rep3
+    value: 0.0
+  - subject: VOICE rep3
+    value: 0.0
+- metric: core_hollow_value_count
+  unit: hollows
+  values:
+  - subject: AI_READI rep1
+    value: 0.0
+  - subject: CHORUS rep1
+    value: 0.0
+  - subject: CM4AI rep1
+    value: 0.0
+  - subject: VOICE rep1
+    value: 0.0
+  - subject: AI_READI rep2
+    value: 0.0
+  - subject: CHORUS rep2
+    value: 0.0
+  - subject: CM4AI rep2
+    value: 0.0
+  - subject: VOICE rep2
+    value: 0.0
+  - subject: AI_READI rep3
+    value: 0.0
+  - subject: CHORUS rep3
+    value: 0.0
+  - subject: CM4AI rep3
+    value: 0.0
+  - subject: VOICE rep3
+    value: 0.0
+- metric: validation_problem_count
+  unit: artifacts
+  values:
+  - subject: AI_READI rep1
+    value: 0.0
+  - subject: CHORUS rep1
+    value: 0.0
+  - subject: CM4AI rep1
+    value: 0.0
+  - subject: VOICE rep1
+    value: 0.0
+  - subject: AI_READI rep2
+    value: 0.0
+  - subject: CHORUS rep2
+    value: 0.0
+  - subject: CM4AI rep2
+    value: 0.0
+  - subject: VOICE rep2
+    value: 0.0
+  - subject: AI_READI rep3
+    value: 0.0
+  - subject: CHORUS rep3
+    value: 0.0
+  - subject: CM4AI rep3
+    value: 0.0
+  - subject: VOICE rep3
+    value: 0.0

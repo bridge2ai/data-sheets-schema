@@ -39,6 +39,15 @@ enums:
         description: Validator-driven shape repair of the full record.
       repair_core:
         description: Validator-driven shape repair of the core record.
+      report_after_repair:
+        description: >-
+          The reconciliation report rewritten after repair changed a record it
+          describes (#604) — without this the report narrates bytes that no
+          longer exist. Added when the 2026-08-20b arm became the first to
+          exercise the branch and the telemetry report failed its own schema:
+          the phase enum predated the phase, the same
+          rarely-taken-branch-adds-a-value shape as #605's
+          report_regenerated_after_repair field.
   StopReasonEnum:
     description: >-
       Why the model stopped. max_tokens marks an attempt whose output was
