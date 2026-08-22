@@ -547,7 +547,17 @@ PHASE_INSTRUCTIONS = {
         "Phase 4b. Apply the audit findings that concern the CORE record and "
         "emit the corrected core record in its entirety, header block included. "
         "It must remain consistent with the reconciled full record supplied "
-        "above and assert nothing the full record does not support. Every "
+        "above and assert nothing the full record does not support. "
+        "Consistency runs in both directions for a slot both schemas declare: "
+        "such a slot must state what the reconciled full record states — the "
+        "same items, the same granularity, the same precision. If the full "
+        "record lists five funders, list the same five; if it itemizes what "
+        "this record merged, itemize. Asserting less than the full record in "
+        "a shared slot is a divergence, not caution — the two records are two "
+        "views of one dataset, and a reader of either must learn the same "
+        "facts where they overlap. Content the full record carries in a slot "
+        "this record's schema does not declare stays out: that is projection, "
+        "not disagreement. Every "
         "value you write or change must conform to the schema digest supplied "
         "above. If no "
         "finding requires a change, emit it unchanged. Output only YAML."),
@@ -861,10 +871,21 @@ def _client():
     direct = os.environ.get("ANTHROPIC_API_KEY")
     cborg = os.environ.get("CBORG_API_KEY")
     import anthropic
+    # A hung connection is otherwise indistinguishable from a long call: three
+    # times in 24 hours a sweep sat at 0% CPU on a read that would never
+    # return, invisible to the retry loop because the call neither failed nor
+    # finished (#664). With a deadline, the hang becomes APITimeoutError — a
+    # subclass of APIConnectionError, which `_call_with_retry` already
+    # retries. Sized at 60 minutes against an observed real-phase maximum
+    # near 30: generous enough that no legitimate call has come within a
+    # factor of two of it, small enough that a stalled sweep loses under an
+    # hour instead of an operator's evening.
+    timeout = float(os.environ.get("D4D_API_TIMEOUT_SECONDS", 3600))
     if direct:
-        return anthropic.Anthropic(api_key=direct)
+        return anthropic.Anthropic(api_key=direct, timeout=timeout)
     if cborg:
-        return anthropic.Anthropic(api_key=cborg, base_url=CBORG_BASE_URL)
+        return anthropic.Anthropic(api_key=cborg, base_url=CBORG_BASE_URL,
+                                   timeout=timeout)
     raise RuntimeError(
         "No API key found. Set CBORG_API_KEY (LBL proxy) or ANTHROPIC_API_KEY, "
         "or use plan() / `d4d api plan` to inspect requests without calling "
