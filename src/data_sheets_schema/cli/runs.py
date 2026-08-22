@@ -880,7 +880,12 @@ def compare(method, project, labels, require_live, require_attested):
 @click.option("--project", help="limit to one project")
 @click.option("--label", help="limit to one run label")
 @click.option("--recheck", is_flag=True,
-              help="re-validate runs whose provenance already records a result")
+              help="re-validate runs whose provenance already records a "
+                   "result. This REWRITES verdicts — including stale ones "
+                   "whose pins are the record of which schema they were "
+                   "reached against (#426); records predating a schema move "
+                   "can flip to invalid under rules that postdate them. "
+                   "Scope it with --label/--project.")
 @click.option("--dry-run", is_flag=True, help="list what would be validated")
 def validate_cmd(method, project, label, recheck, dry_run):
     """Record whether each run's records validate, into its provenance.
