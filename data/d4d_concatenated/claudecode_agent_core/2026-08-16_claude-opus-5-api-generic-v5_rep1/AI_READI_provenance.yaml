@@ -363,6 +363,8 @@ form:
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
-  instrument_note: 'form recomputed 2026-08-22 under the #653 British-spelling instrument
-    v2 (word-bounded, ''analyses'' excluded as ambiguous, colour/favour/honour added);
-    previous value british_spellings=8'
+  instrument_note: 'form recomputed 2026-08-22 under the #653 British instrument v2.1
+    (word-bounded with explicit inflections; ''analyses'' excluded as ambiguous; organise
+    family, colour, favour, honour and composed suffixes included per the #670 review)
+    and the post-#669 GC-label counter — the gc_label_variant fields date from this
+    recompute, not the run. Previous british_spellings=0'

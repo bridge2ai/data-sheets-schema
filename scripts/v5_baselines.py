@@ -27,9 +27,16 @@ BASE = Path("data/d4d_concatenated")
 
 #: Counted only in generated prose. The rule exempts quoted material, so a
 #: title or a direct quotation keeping its source's spelling is not a defect.
-BRITISH = ("licence", "analyse", "organisation", "enrolment", "programme",
-           "standardis", "labelling", "centre", "recognise", "utilise",
-           "catalogue", "summarise", "behaviour")
+#:
+#: The counting itself is `grounding.british_spellings` — the gate's own
+#: instrument — not a local copy (#670 review): this script's whole purpose
+#: is that the number and its definition travel together, and its first
+#: version carried a private v1 implementation that survived the #653
+#: instrument change, printing numbers incomparable with everything the gate
+#: reads. The per-form breakdown below uses the same patterns. The figures in
+#: `notes/generic_v5_analysis_plan.md` were produced by the superseded local
+#: implementation and stand as historical statements of that instrument.
+from data_sheets_schema.grounding import BRITISH_PATTERNS
 
 #: A quoted span: anything inside double quotes on one line. Crude, and stated
 #: as such — it is the difference between 618 and 626, not between 618 and 0.
@@ -89,8 +96,8 @@ def main() -> int:
                 if person_fragment_on_org(value):
                     frags.add(value.lower())
             prose = QUOTED.sub(" ", raw).lower()
-            for word in BRITISH:
-                british[word] += prose.count(word)
+            for pattern in BRITISH_PATTERNS:
+                british[pattern.pattern] += len(pattern.findall(prose))
 
         counts = collections.Counter(status.values())
         per[(project, rep)] = {"grounded": counts["grounded"],
