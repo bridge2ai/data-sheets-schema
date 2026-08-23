@@ -248,17 +248,27 @@ def undeclared_prefixes(record: dict[str, Any],
     the model to hang an identifier off an attested one instead of minting a
     namespace.
 
-    `urn:` and `ark:` are counted here, and the plan says so: classifying them
-    instead as no-authority URI schemes gives a lower figure, and both readings
-    are defensible as long as the same one produces both sides of a comparison.
+    Registered URI schemes — `urn:`, `ark:`, `hdl:` — are **not** counted
+    (instrument v2, 2026-08-22). The first instrument counted them, and the
+    plan noted both readings defensible "as long as the same one produces both
+    sides". The 2026-08-22c canary settled which reading measures the defect:
+    it wrote nine bundle-attested ARK identifiers into `file_collections[].id`
+    — grounded, resolvable, exactly what rules 2 and 3 ask for, with minted
+    fragments at zero for the first time — and the gate read it as nine
+    invented prefixes. `ark:` is an IANA-registered identifier scheme, not a
+    namespace anyone minted; counting it penalises the behaviour the metric
+    exists to encourage. Both sides of every comparison were recomputed under
+    this classification in the same change.
     """
     from data_sheets_schema.identifiers import (declared_prefixes,
                                                 walk_identifiers)
     declared = {p.lower() for p in declared_prefixes()}
+    registered_schemes = {"urn", "ark", "hdl"}
     out: dict[str, int] = {}
     for _path, _slot, value in walk_identifiers(record, slots):
         m = re.match(r"^([A-Za-z][\w.\-]*):(?!//)", str(value))
-        if m and m.group(1).lower() not in declared:
+        if m and m.group(1).lower() not in declared \
+                and m.group(1).lower() not in registered_schemes:
             out[m.group(1)] = out.get(m.group(1), 0) + 1
     return out
 
