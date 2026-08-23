@@ -168,6 +168,17 @@ pass.
   `urn:` and `ark:` are counted here. Classifying them instead as no-authority
   URI schemes gives 320; both are defensible and the plan previously stated
   neither, so the v5 figure could have been compared against the other one.
+
+  *(Settled 2026-08-22, after the arm: the 2026-08-22c canary wrote nine
+  bundle-attested ARKs with zero minted fragments — the intended behaviour —
+  and the counting reading scored it as nine invented prefixes.
+  Classification v2.1 (#671) excludes the `ark:` scheme and registered URN
+  NIDs, grounds arks against the bundle so a minted one counts `absent`, and
+  keeps unregistered URN NIDs counted as `urn:<nid>` — a first draft
+  blanket-excluded `urn:` and would have erased 758 minted occurrences, the
+  laundering hole the #671 review caught. All recorded blocks on both sides
+  are recomputed; the figures in this table stand as statements of the
+  instrument that produced them.)*
 - **British spellings in generated prose only** — spans inside double quotes
   are removed first, because the rule exempts quoted material. That is the
   difference between 613 and the ~626 a naive count gives.

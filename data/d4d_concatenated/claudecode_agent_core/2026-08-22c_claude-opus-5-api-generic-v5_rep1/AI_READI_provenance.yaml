@@ -365,9 +365,9 @@ form:
   gc_label_variant_occurrences: 1
   recorded_by: backfill_checks
   instrument_note: 'form recomputed 2026-08-22 under British instrument v2.1 and undeclared-prefix
-    classification v2 (registered URI schemes urn/ark/hdl not counted as prefixes
-    — #671); gc_label_variant fields date from recompute, not the run. Previous british=20,
-    undeclared=9'
+    classification v2.1 (ark scheme excluded and grounded instead; urn NID-aware —
+    a urn under an unregistered NID counts as urn:<nid>; #671). gc_label_variant fields
+    date from recompute, not the run. Previous british=20, undeclared=0'
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_audit.json
   sha256: 807cead8082d52bcd66f03754578bc1f33954779510c2af46f0c42b0159a37a1

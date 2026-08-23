@@ -432,6 +432,6 @@ form:
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
   instrument_note: 'form recomputed 2026-08-22 under British instrument v2.1 and undeclared-prefix
-    classification v2 (registered URI schemes urn/ark/hdl not counted as prefixes
-    — #671); gc_label_variant fields date from recompute, not the run. Previous british=103,
-    undeclared=15'
+    classification v2.1 (ark scheme excluded and grounded instead; urn NID-aware —
+    a urn under an unregistered NID counts as urn:<nid>; #671). gc_label_variant fields
+    date from recompute, not the run. Previous british=103, undeclared=6'

@@ -485,14 +485,17 @@ form:
   records:
   - data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep3/CM4AI_d4d.yaml
   - data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/CM4AI_d4d_core.yaml
-  undeclared_prefixes: {}
-  undeclared_prefix_occurrences: 0
+  undeclared_prefixes:
+    urn:cm4ai: 33
+    urn:nih: 6
+    urn:uva: 2
+  undeclared_prefix_occurrences: 41
   british_spellings: 2
   organisational_fragments: 0
   gc_label_variants: {}
   gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
   instrument_note: 'form recomputed 2026-08-22 under British instrument v2.1 and undeclared-prefix
-    classification v2 (registered URI schemes urn/ark/hdl not counted as prefixes
-    — #671); gc_label_variant fields date from recompute, not the run. Previous british=2,
-    undeclared=41'
+    classification v2.1 (ark scheme excluded and grounded instead; urn NID-aware —
+    a urn under an unregistered NID counts as urn:<nid>; #671). gc_label_variant fields
+    date from recompute, not the run. Previous british=2, undeclared=0'
