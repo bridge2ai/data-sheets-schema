@@ -218,36 +218,59 @@ def undeclared_prefixes(record: dict[str, Any],
     return out
 
 
-#: URL-ish context: an alias inside a hostname or path (b2ai-voice.org,
-#: chorus4ai.org, github.com/chorus-ai) is an address, not prose.
-_URLISH = re.compile(r"\S*(?:://|www\.|\.org|\.com|\.io|\.gov|\.edu)\S*")
+#: Address-ish tokens: an alias inside a hostname, path or filename
+#: (b2ai-voice.org, voicecollab.ai, data/.../AI_READI_d4d.yaml,
+#: AI_READI_preprocessed.txt) is an address, not prose. Slashes and file
+#: extensions mark paths; the TLD list covers the hosts the corpus cites.
+_URLISH = re.compile(
+    r"\S*(?:://|www\.|/|\.org|\.com|\.io|\.gov|\.edu|\.ai|\.net"
+    r"|\.yaml|\.txt|\.json|\.csv|\.md|\.pdf)\S*")
+#: Header/comment lines. The record header block is pipeline-mandated
+#: boilerplate whose {PROJECT} substitution writes the directory key verbatim
+#: ("# D4D Datasheet for AI_READI Dataset") — counting it gave the metric a
+#: permanent floor no naming rule can lower (#669 review).
+_COMMENT_LINE = re.compile(r"^\s*#.*$", re.M)
 
 
 def gc_label_variants(text: str, canonical: str,
                       variants: list[str]) -> dict[str, int]:
     """Occurrences of non-canonical GC labels in prose the record states (#668).
 
-    The same exemption structure as `british_spellings`: double-quoted spans
-    are quoted source text and are removed first, and URL-shaped tokens are
-    addresses rather than prose. Case-sensitive, because the variants differ
-    from the canonical exactly by case and punctuation (CHORUS vs CHoRUS), and
-    a case-blind count would count the canonical itself.
+    The exemption structure mirrors the rule's own carve-outs, as far as text
+    can: double-quoted spans are quoted source text; address-shaped tokens
+    (URLs, paths, filenames) are identifiers; comment lines are the
+    pipeline-mandated header, not model prose. Case-sensitive, because the
+    variants differ from the canonical exactly by case and punctuation
+    (CHORUS vs CHoRUS), and a case-blind count would count the canonical
+    itself.
 
-    Longest-first matching, with each variant's matches blanked before shorter
-    ones are counted — "Bridge2AI-Voice" contains "Voice"-adjacent substrings
-    and "B2AI-VOICE" contains "VOICE"; without the blanking every long variant
-    would also be tallied under the short ones.
+    Matching is word-bounded with underscore treated as a joining character:
+    `Chorus` inside the repository name `Chorus_SOP` and `AI_READI` inside
+    `AI_READI_d4d` are parts of identifiers, not prose mentions (#669
+    review). Hyphen stays a boundary — the hyphenated long forms are variants
+    themselves and are blanked longest-first before shorter forms are
+    counted, so "B2AI-VOICE" is never also tallied under "VOICE".
+
+    **What this cannot see**, stated rather than implied: a source-stated
+    proper noun in an unquoted slot value (`name: Bridge2AI-Voice`, the
+    release's own title) counts, though the rule's carve-outs exempt it. The
+    residual is an over-count whose exempt share requires reading the
+    matches; use it to compare records under one instrument, not as an
+    absolute deviation count.
     """
-    prose = _QUOTED.sub(" ", text)
+    prose = _COMMENT_LINE.sub(" ", text)
+    prose = _QUOTED.sub(" ", prose)
     prose = _URLISH.sub(" ", prose)
     out: dict[str, int] = {}
     for variant in sorted(variants, key=len, reverse=True):
         if variant == canonical:
             continue
-        n = prose.count(variant)
+        pattern = re.compile(
+            r"(?<![A-Za-z0-9_])" + re.escape(variant) + r"(?![A-Za-z0-9_])")
+        n = len(pattern.findall(prose))
         if n:
             out[variant] = n
-            prose = prose.replace(variant, " ")
+            prose = pattern.sub(" ", prose)
     return out
 
 

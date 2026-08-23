@@ -376,6 +376,12 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
             # first run, gating the fan-out.
             from data_sheets_schema import canary as _canary
             counts = _canary.counts_from(res.get("checks") or {})
+            # Reported-only metrics too (#669 review): the commit that added
+            # the GC-label metric said "report ... in the canary output" while
+            # nothing output it — minted fragments had the same gap since
+            # #602. Displayed after the gated ones, never gated.
+            counts.update(_canary.counts_from(res.get("checks") or {},
+                                              _canary.REPORTED_ONLY))
             click.echo("     " + "  ".join(
                 f"{name}={'—' if v is None else v}"
                 for name, v in counts.items()))

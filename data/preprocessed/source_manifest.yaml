@@ -239,9 +239,12 @@ naming:
   # 2026-08-22; they remain here as provenance of where the mapping came
   # from). Scope mirrors the American-English rule exactly: quoted source
   # text, URLs, identifiers, and formal proper nouns from a release's own
-  # citation keep their form. `variants` are the forms observed in generated
-  # records that the canonical label replaces; a variant list is evidence of
-  # what the counter should count, not an allowlist.
+  # citation keep their form. `variants` mix forms observed in generated
+  # records (Bridge2AI-Voice, "Bridge2AI Voice", VOICE, CHORUS, Chorus,
+  # AI_READI, "AI READI") with forms anticipated from the Explorer's aliases
+  # and hostnames (AIREADI, CHoRUS4AI, B2AI-VOICE, the long project names)
+  # that no record has yet written — the #669 review counted. A variant list
+  # is what the counter should count, not an allowlist.
   #
   # Like the scope block above: a declaration here is checkable and inherited;
   # the same statement in a launch prompt is a per-GC adaptation nothing

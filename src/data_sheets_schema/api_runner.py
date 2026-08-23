@@ -642,7 +642,7 @@ def naming_block(project: str,
     no naming, and None when the arm declares the manifest unused, for the
     same reason as `source_ranking_block` (#603).
     """
-    if manifest_line is not None and "not used" in manifest_line:
+    if manifest_line is not None and "not used" in manifest_line.lower():
         return None
     from data_sheets_schema.grounding import declared_naming
     declared = (declared_naming() or {}).get(project) or {}
@@ -656,7 +656,9 @@ def naming_block(project: str,
         f"\"{label}\"{context}. This governs your own wording only: quoted "
         "source text, URLs, identifiers, and proper nouns as a source states "
         "them — a consortium's name in the release's own citation, a "
-        "repository's account name — keep their form exactly. One project "
+        "repository's account name — keep their form exactly. The record "
+        "header block copies the pipeline's project key verbatim; that is "
+        "addressing, not prose. One project "
         "written many ways reads as many projects.")
 
 
