@@ -623,9 +623,11 @@ def declared_schema_version() -> str | None:
     up on the next regeneration. The version applies to both, since both derive
     from this source.
     """
-    if not SOURCE_SCHEMA.exists():
+    from data_sheets_schema.schema_digest import resolve_schema
+    source = resolve_schema(SOURCE_SCHEMA)
+    if not source.exists():
         return None
-    for line in SOURCE_SCHEMA.read_text(encoding="utf-8").splitlines():
+    for line in source.read_text(encoding="utf-8").splitlines():
         if line.startswith("version:"):
             return line.split(":", 1)[1].strip() or None
         if line and not line.startswith((" ", "-", "#")) and ":" in line:

@@ -18,16 +18,44 @@ def provenance():
     pass
 
 
-#: The names a phase log may carry: the six generation phases, the repair
-#: phases, and the post-repair report rewrite. One vocabulary for both
-#: runtimes — the agentic playbook's four phases are a subset by name.
+#: The names a phase log may carry: the API runtime's phases (the six
+#: generation phases, the repair phases, the post-repair report rewrite) and
+#: the agentic playbook's four — which are NOT a subset by name. The first
+#: version of this check assumed they were and refused every name the
+#: playbook itself instructs (`d4d-full-core.md` says --phase generate_full /
+#: generate_core / source_audit / reconcile), which would have broken the
+#: next agentic run's completion criterion — the #672 review read the
+#: template this comment's author had not.
+AGENTIC_PHASES = frozenset({"generate_full", "generate_core",
+                            "source_audit", "reconcile"})
+
+
 def _known_phases() -> frozenset[str]:
     from data_sheets_schema.api_runner import PHASES
-    # `reconciliation` is the agentic playbook's own name for its phase 4,
-    # which spans both reconcile steps — an agentic recorder saying so is
-    # honest, not a typo.
     return frozenset(PHASES) | {"repair_full", "repair_core",
-                                "report_after_repair", "reconciliation"}
+                                "report_after_repair"} | AGENTIC_PHASES
+
+
+def _require_repo_root_cwd(command: str) -> None:
+    """Refuse to record from anywhere but the repository root (#672 review).
+
+    #659's resolution fix turned an outside-the-root recorder from a loud
+    FileNotFoundError into a quietly degraded record: playbook hashes
+    exists:false, a null manifest md5 with no unrecoverable entry, repo facts
+    from whatever git repo the cwd happens to be in, and the record itself
+    written under <cwd>/data/ where no check ever reads it — with a ✓ printed.
+    A recorder that cannot see its inputs must say so, not improvise. The
+    cwd-relative constants this codebase runs on make "the repo root" the
+    only cwd a record can honestly be written from.
+    """
+    if not (Path("data/d4d_concatenated").is_dir()
+            and Path("src/data_sheets_schema").is_dir()):
+        raise click.ClickException(
+            f"{command} must run from the data-sheets-schema repository root: "
+            "the playbook hashes, manifest, schemas and output paths all "
+            "resolve relative to it, and a record written from elsewhere "
+            "would attest the wrong inputs or none. cd to the repo root and "
+            "re-run.")
 
 
 def _parse_phases(specs) -> list[dict]:
@@ -134,6 +162,9 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
            reasoning_effort, phase_specs):
     """Write a LIVE provenance record for a run just produced.
 
+    Refuses to run from anywhere but the repository root — see
+    _require_repo_root_cwd.
+
     Every field is observed at run time — hardware, software versions, input
     hashes. Use this from inside a generation process.
 
@@ -145,6 +176,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     and the prompt-condition study is precisely a comparison between prompts,
     so a record that cannot identify its own prompt cannot be placed in it.
     """
+    _require_repo_root_cwd("d4d provenance record")
     from data_sheets_schema import schema_digest
     from data_sheets_schema.provenance import build_record, record_path_for
 
@@ -219,11 +251,15 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
 def backfill(verified, dry_run):
     """Reconstruct provenance records for runs already on disk.
 
+    Refuses to run from anywhere but the repository root — see
+    _require_repo_root_cwd.
+
     Fields that cannot be honestly recovered are listed under `unrecoverable`
     rather than filled from present-day observation. Pass --verified-label for
     runs whose inputs are known unchanged, so their input hashes can be
     recorded.
     """
+    _require_repo_root_cwd("d4d provenance backfill")
     from data_sheets_schema.provenance import build_record, record_path_for
     from data_sheets_schema.runs import discover
 

@@ -82,6 +82,9 @@ class TestWhatTheRecordSays(unittest.TestCase):
         self.core_dir = self.concat / f"{self.method}_core" / self.label
         self.full_dir.mkdir(parents=True)
         self.core_dir.mkdir(parents=True)
+        # marker the repo-root guard (#672) requires; the scratch root
+        # stands in for the repo by design in these tests
+        Path("src/data_sheets_schema").mkdir(parents=True, exist_ok=True)
         self.bundle = Path("bundle.txt")
         self.bundle.write_text("source documents\n")
 
@@ -228,6 +231,9 @@ class TestTheCLIFlag(unittest.TestCase):
         core = concat / f"{self.method}_core" / self.label
         full.mkdir(parents=True)
         core.mkdir(parents=True)
+        # marker the repo-root guard (#672) requires; the scratch root
+        # stands in for the repo by design in these tests
+        Path("src/data_sheets_schema").mkdir(parents=True, exist_ok=True)
         body = yaml.safe_dump({"id": "https://example.org/x", "name": "x"})
         head = header("claude-opus-5", "Claude Code")
         (full / "P_d4d.yaml").write_text(head + body)
@@ -301,6 +307,9 @@ class TestTheGapIsVisibleFromTheCommandLine(unittest.TestCase):
         core = concat / f"{self.method}_core" / self.label
         full.mkdir(parents=True)
         core.mkdir(parents=True)
+        # marker the repo-root guard (#672) requires; the scratch root
+        # stands in for the repo by design in these tests
+        Path("src/data_sheets_schema").mkdir(parents=True, exist_ok=True)
         body = yaml.safe_dump({"id": "https://example.org/x", "name": "x"})
         head = header("claude-opus-5", "Claude Code")
         (full / "P_d4d.yaml").write_text(head + body)

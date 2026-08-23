@@ -52,6 +52,11 @@ class TestReRecordPreservesTheVerdict(unittest.TestCase):
         self.core_dir = concat / f"{self.method}_core" / self.label
         self.full_dir.mkdir(parents=True)
         self.core_dir.mkdir(parents=True)
+        # The recorder refuses any cwd that is not shaped like the repo root
+        # (#672): it needs both marker directories. The tests run in a scratch
+        # root by design — they test verdict preservation, not cwd policy —
+        # so the scratch root carries the markers.
+        (self.root / 'src' / 'data_sheets_schema').mkdir(parents=True)
 
         body = yaml.safe_dump({"id": "https://example.org/x", "name": "x"})
         self.full = self.full_dir / "TESTPROJ_d4d.yaml"
@@ -231,6 +236,35 @@ class PhaseVocabulary(unittest.TestCase):
         self.assertTrue(set(PHASES) <= _known_phases())
         self.assertIn("report_after_repair", _known_phases())
 
+    def test_the_playbook_instructed_names_are_accepted(self):
+        """The agentic playbook (d4d-full-core.md) instructs these exact
+        names in its record template; a vocabulary that refuses the only
+        names the agentic path is told to use validates nothing (#672 F1)."""
+        from data_sheets_schema.cli.provenance import _parse_phases
+        parsed = _parse_phases(
+            ["generate_full", "generate_core", "source_audit", "reconcile"])
+        self.assertEqual(
+            [p["name"] for p in parsed],
+            ["generate_full", "generate_core", "source_audit", "reconcile"])
+
+    def test_the_playbook_template_itself_parses(self):
+        """Read the names out of the playbook rather than restating them, so
+        an edited template cannot silently diverge from this vocabulary.
+        The template is not literal JSON (it carries {FILL-IN} placeholders),
+        so only the names are extracted and checked."""
+        import re
+
+        from data_sheets_schema.cli.provenance import _known_phases
+        playbook = Path(".claude/commands/d4d-full-core.md").read_text(
+            encoding="utf-8")
+        names = re.findall(r"--phase '\{\"name\":\"([a-z_]+)\"", playbook)
+        self.assertTrue(names, "the playbook no longer shows --phase examples")
+        unknown = set(names) - _known_phases()
+        self.assertFalse(
+            unknown,
+            f"the playbook instructs phase names the recorder refuses: "
+            f"{sorted(unknown)}")
+
 
 class SchemaResolutionAwayFromRepoRoot(unittest.TestCase):
     """The #659 class: cwd-relative constants on paths that run anywhere.
@@ -246,6 +280,11 @@ class SchemaResolutionAwayFromRepoRoot(unittest.TestCase):
         from data_sheets_schema import schema_digest as sd
         from data_sheets_schema.provenance import schema_facts
         cwd = os.getcwd()
+        # Clear the digest caches first: they are process-global and keyed on
+        # (class, ""), so a warm cache from any earlier test would satisfy the
+        # assertion without resolve_schema ever running (#672 review).
+        sd._BUILD_CACHE.clear()
+        sd._TEXT_CACHE.clear()
         try:
             with tempfile.TemporaryDirectory() as d:
                 os.chdir(d)
