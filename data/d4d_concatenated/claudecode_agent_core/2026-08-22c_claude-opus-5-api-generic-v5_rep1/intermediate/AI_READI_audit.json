@@ -1,0 +1,299 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "conforms_to_standard",
+      "issue": "The declared enum for `conforms_to_standard` permits only DICOM, BIDS, OMOP_CDM, WFDB, OPEN_MHEALTH, ESDS, CDS, RO_CRATE, FHIR, OTHER. The record emits `DICOM` at top level and inside several `file_collections` entries — that value is permitted, so DICOM is fine. However the top-level list order and membership are all drawn from the permitted set, so no violation there. Re-checking: all seven top-level values (CDS, WFDB, OMOP_CDM, DICOM, OPEN_MHEALTH, ESDS, RO_CRATE) are members of the enum. No violation. Withdrawn."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "`publisher` is declared `uriorcurie`. The value `https://fairhub.io/` is a bare resolver URL for a publisher named in the DataCite record only as the string \"FAIRhub\". No prefix in the schema covers FAIRhub, so a URI fallback is defensible, but the trailing-slash landing-page URL is the dataset portal home rather than an identifier for the publishing organization, and the same URL is also used as the value of `page`-adjacent content. The bundle supplies `publisherName: \"FAIRhub\"` and no publisher identifier; a URI was minted from the portal address rather than taken from the evidence."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators[0].id",
+      "issue": "`Creator.id` is `uriorcurie`. The value `https://aireadi.org/` is the project marketing website, minted by the record as a stand-in identifier for the organizational creator \"AI-READI Consortium\". The bundle supplies no identifier for the consortium as an entity. Per the v5 rule, an identifier naming something outside this dataset must be taken from the evidence or the slot omitted; the project homepage was substituted instead."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "creators[0].id",
+      "issue": "Same defect as the full record: `https://aireadi.org/` minted as an identifier for the AI-READI Consortium where the bundle supplies none."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "funders[0].grants",
+      "issue": "`grants` has range `Grant[]`, and each Grant carries `id` of range `uriorcurie`. Both entries use NIH RePORTER search-and-project-details URLs as Grant identifiers. These URLs are attested in the bundle (the FAIRhub `awardURI` and the README acknowledgement), so provenance is satisfied, but the award number itself — `OT2OD032644`, the value the slot is actually about — appears only inside `notes` prose. The Grant object's identifying content is carried in a sibling free-text field rather than in the object."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "funders[0].grants",
+      "issue": "Same as full record: award number OT2OD032644 stated only in `notes`; Grant `id` values are RePORTER page URLs."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "ethical_reviews[0].contact_person",
+      "issue": "`contact_person` has range `Person`, whose `id` is `uriorcurie`. The value `mailto:hsdrely@uw.edu` is a mailto URI for a team mailbox (the \"IRB Reliance Team\"), not a person. The RO-Crate gives this as a `ContactPoint` with `contactType: \"IRB Reliance Team\"` — an organizational contact, not an individual. Instantiating a Person from a shared team mailbox misrepresents the entity type."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "ethical_reviews[0].contact_person",
+      "issue": "Same defect as the full record: team mailbox `mailto:hsdrely@uw.edu` instantiated as a Person."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[0].source_caveats",
+      "issue": "`Creator` does not declare `source_caveats` in the object-range digest supplied (Creator accepts `affiliations`, `credit_roles`, `notes`, `principal_investigator`, `source_caveats`). Re-checking the digest: `source_caveats` IS listed among Creator's accepted slots. No violation. Withdrawn."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[0].affiliations",
+      "issue": "Eight ROR CURIEs are asserted as affiliations of the single organizational creator \"AI-READI Consortium\". Seven of the eight ROR values (01yc7t268, 008s83205, 0168r3w48, 00za53h95, 009avj582, 00f54p054, 0156zyn36) are attested in the FAIRhub collaborator and sponsor lists. `ROR:00cvxb145` (University of Washington) appears in the bundle only as a *location* identifier in the FAIRhub `locationList`, not as a collaborator or affiliation. Its inclusion in the creator's affiliation list extends the evidence."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "creators[0].affiliations",
+      "issue": "Same as full record: `ROR:00cvxb145` is attested in the bundle only as a study-site location identifier, not as an organizational affiliation of the consortium."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "known_biases[1].affected_subsets",
+      "issue": "`affected_subsets` is multivalued. Both entries in the record pack several distinct affected groups into one semicolon-delimited string ('Populations outside the four recruited race/ethnicity categories; non-English speakers; rural and non-health-system populations'). Per the v2 rule on multivalued slots, each distinct entity should be its own list element."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "known_biases[2].affected_subsets",
+      "issue": "Same collapsing defect: 'Hispanic participants; male participants; insulin-controlled participants' is one string where three list elements are called for."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "known_biases[1].affected_subsets",
+      "issue": "Same collapsing defect as the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "known_biases[2].affected_subsets",
+      "issue": "Same collapsing defect as the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "human_subject_research.irb_approval",
+      "issue": "`irb_approval` is multivalued but holds a single long prose block combining the protocol number, approval date, approval-letter URL, renewal cadence, reliance agreements and the FAIRhub review-status string. These are distinct facts that the multivalued range invites separating."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "human_subject_research.regulatory_compliance",
+      "issue": "`regulatory_compliance` is multivalued but holds one prose block covering FDA status, DMC absence, HIPAA Safe Harbor, ClinicalTrials.gov registration and NIH GDS obligations — five separable compliance facts in a single list element."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "human_subject_research.irb_approval",
+      "issue": "Same collapsing defect as the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "human_subject_research.regulatory_compliance",
+      "issue": "Same collapsing defect as the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "data_governance.stewardship_roles",
+      "issue": "`stewardship_roles` is multivalued but holds a single paragraph naming at least five distinct stewardship roles (site data managers, site PIs, central project team, AI-READI team as maintainer, Washington University as sponsor/licensor, Aaron Lee as responsible party). One list element per role is what the range asks for."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "data_governance.stewardship_roles",
+      "issue": "Same collapsing defect as the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "at_risk_populations.special_protections",
+      "issue": "`special_protections` is multivalued but carries one paragraph combining the age floor, the pregnancy and gestational-diabetes exclusions, the type 1 diabetes exclusion, the consent-capacity requirement and the rideshare transportation assistance. These are separable protections."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "at_risk_populations.special_protections",
+      "issue": "Same collapsing defect as the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "ip_restrictions.restrictions",
+      "issue": "`restrictions` is multivalued but holds a single paragraph combining title/ownership retention, the reserved-rights clause, the separate-license requirement for publishers exceeding five figures, the healthsheet's referral to the license, and the project's statement about commercial products and patents. Several distinct restrictions in one element."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "ip_restrictions.restrictions",
+      "issue": "Same collapsing defect as the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "external_resources[9].external_resources",
+      "issue": "The final ExternalResource entry bundles three unrelated documents — the REDCap forms PDF, the IRB approval letter and the participant consent form — into a single object. Each is a distinct external resource and `external_resources` is multivalued at the Dataset level."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "external_resources[9].external_resources",
+      "issue": "Same collapsing defect as the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "sampling_strategies[0].representative_verification",
+      "issue": "`representative_verification` is multivalued and carries a single element whose content is a negation ('No representativeness verification was performed') followed by mitigating context. Recording an absence in a slot that asks for the verification performed is close to the anti-pattern of populating a field with a statement that the thing is absent; omission with the fact recorded in `why_not_representative` would be cleaner."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "sampling_strategies[0].representative_verification",
+      "issue": "Same as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "license",
+      "issue": "`license` is a string slot and the value 'AI-READI Data License Agreement, Version 2.0' is supported. However the FAIRhub dataset pages label the license 'Health Data License' and the DataCite `rights` block gives `rightsName: \"AI-READI custom license v2.0\"`. Three tier-1 renderings of the license name exist in the bundle and none is flagged in `source_caveats`; the record silently composes a fourth wording from the license document's own title block."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "license",
+      "issue": "Same as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "file_collections[*].id",
+      "issue": "The nine FileCollection identifiers are minted as fragments on `https://fairhub.io/datasets/3` (e.g. `#cardiac_ecg`). Fragment-on-an-attested-identifier is the sanctioned minting pattern and these name parts of this dataset, so the approach is right. Note only that the RO-Crate supplies real ARK identifiers for nine corresponding sub-crates (e.g. `ark:59853/rocrate-b2ai-ai-readi-ecg`) which map one-to-one onto these directories; attested identifiers existed and were not used."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "subsets[*].id",
+      "issue": "Split subset identifiers minted as fragments on the FAIRhub dataset URL. The pattern is correct for labels internal to this record; no attested identifier exists for the splits, so this is compliant. Noted for completeness only."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[0].data_topic",
+      "issue": "A single `data_topic` (`B2AI_TOPIC:43`, Diabetes) is asserted for an instance that the same object's `notes` describes as spanning survey, clinical, imaging, waveform, wearable and environmental modalities. The slot is single-valued on Instance so only one term is permissible, but several bundle-supported alternatives (e.g. Clinical Observations, Ophthalmic Imaging, mHealth) are equally central; the choice is not explained. Also `data_substrate` is omitted despite the bundle clearly supporting several substrate terms (DICOM, Waveform Data, Comma-separated values, Time-series data)."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "instances[0].data_topic",
+      "issue": "Same as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "is_deidentified.identifiers_removed",
+      "issue": "The clause 'stated in the Nature Metabolism comment to be in order to prevent stigmatization of findings' embeds source attribution inside a content field. Source commentary belongs in `source_caveats` or `notes`, not inside the value the slot asks for."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "is_deidentified.identifiers_removed",
+      "issue": "Same embedded source attribution as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "known_biases[0].bias_description",
+      "issue": "'The BMJ Open protocol states explicitly that...' embeds source attribution in a content field."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "known_biases[0].bias_description",
+      "issue": "Same embedded source attribution as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "regulatory_restrictions.notes",
+      "issue": "The note explains that HL7:2N was 'mapped here to restricted'. This is a defensible editorial decision, but HL7 2N denotes *normal* confidentiality, and the schema also offers `unrestricted`. The mapping to `restricted` is driven by the access-control facts rather than by the code itself; the reasoning is disclosed, so this is transparency-adequate but worth flagging as an interpretive rather than evidenced value."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "regulatory_restrictions.notes",
+      "issue": "Same interpretive mapping as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "license_and_use_terms.data_use_permission",
+      "issue": "`disease_specific_research` is a permitted enum value and is well supported by the access condition ('agree to use the data only for type 2 diabetes related research'). However the license simultaneously grants commercial use and the DataCite consent block records `consentNoncommercial: false`, so a second permitted value would also apply; the enum is single-valued so only one can be stated. No defect, noted for completeness."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "distribution_dates[*].release_dates",
+      "issue": "`release_dates` values embed the version number and DOI inside the date string (e.g. '2024-05-03 (version 1.0.0, DOI 10.60775/fairhub.1)'). The DOI and version are content that belongs in structured slots or in `notes`, not concatenated into a date value."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "distribution_dates[*].release_dates",
+      "issue": "Same concatenation as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables[1].notes",
+      "issue": "The `Age` variable carries a `source_caveats` recording the FAIRhub-versus-BMJ disagreement about the 85-year ceiling, which is correct placement. But the same variable's `maximum_value: 85.0` is asserted as a data-range bound when the bundle gives 85 only as an *eligibility* ceiling; no observed maximum age is stated anywhere in the bundle. Treating an inclusion criterion as an observed value bound overstates what the evidence supports."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "conforms_to_class",
+      "issue": "Correctly `Dataset`. No defect; recorded to confirm the paired records differ appropriately (core states `CoreDataset`)."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "Per-directory file counts (4,515; 7; 2,232; 7,969; 56,478; 173,721; 93,921; 15,245; 2,246) are carried inside `notes` prose because CoreDistribution declares no file-count field. The `source_caveats` discloses this. Acceptable given the schema constraint, but the counts are now unqueryable and the full record's `file_collections[].file_count` values are the only structured form."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "notes",
+      "issue": "The core `notes` reproduces the full record's `notes` verbatim, including the FAIRhub view count (24,636) and citation count (0). These are platform telemetry captured at scrape time rather than durable dataset facts; they will be stale immediately and arguably do not belong in either record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "Same telemetry concern: view and citation counts are point-in-time platform statistics."
+    }
+  ],
+  "summary": "Two records audited against the AI_READI bundle. No fabricated dataset facts were found: participant counts (2,280), byte and file totals (3,815,969,779,678 / 356,343), collection window (2023-07-19 to 2025-05-01), DOI (10.60775/fairhub.3), split arithmetic (1,576+352+352=2,280; race, sex and diabetes-status subtotals all reconcile), device inventory, laboratory panel, license clauses and IRB details all trace to the bundle. The core record states nothing the full record does not; its projection decisions (file_collections to distributions, omission of subsets/splits/variables/relationships and several other non-core slots) are disclosed in source_caveats. Source-conflict handling is a strength: eleven disagreements are enumerated with tier reasoning, and the two tier-1 sensitivity accounts are represented side by side rather than silently resolved. The principal defects are identifier provenance and list granularity. Three uriorcurie values are minted rather than evidenced: the AI-READI Consortium creator id (project homepage), the publisher (portal URL for an entity the bundle names only as the string 'FAIRhub'), and an IRB team mailbox instantiated as a Person. ROR:00cvxb145 is asserted as a creator affiliation where the bundle attests it only as a study-site location. Nine multivalued slots across both records carry semicolon-delimited or paragraph-length single elements where the range invites one element per entity (affected_subsets x2, irb_approval, regulatory_compliance, stewardship_roles, special_protections, restrictions, external_resources, representative_verification). Lower-severity issues cluster around source attribution embedded in content fields, an eligibility ceiling recorded as an observed variable maximum, DOIs concatenated into date strings, and platform telemetry retained in notes. Two initially-flagged items were withdrawn on re-checking the digest (conforms_to_standard enum membership; Creator.source_caveats admissibility). Neither record contains a slot the bundle contradicts; the omissions the bundle would support are Instance.data_substrate and the RO-Crate ARK identifiers available for the nine file collections."
+}

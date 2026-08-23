@@ -57,6 +57,14 @@ _EXTERNAL = (
     # this module exists to draw.
     ("doi", re.compile(r"(?:https?://)?(?:doi\.org/|doi:)10\.\d{4,9}/[^\s\"'<>]+",
                        re.I)),
+    # ARKs ground like DOIs (#671 review): the classification change stopped
+    # counting `ark:` as an invented prefix on the strength of nine
+    # bundle-attested ARKs, and without this pattern nothing would have
+    # caught a *minted* one — `ground("ark:99999/fake")` returned None, so an
+    # unattested ark was neither an undeclared prefix nor `absent`. Now it
+    # grounds against the bundle or counts `absent` like any external id.
+    ("ark", re.compile(r"(?:https?://[^\s/]+/)?ark:/?\d{5,9}/[^\s\"'<>]+",
+                       re.I)),
 )
 
 #: A ROR names an organisation. `…/02r109517#rameau` asserts "Weill Cornell
@@ -239,6 +247,12 @@ def british_spellings(text: str) -> int:
     return sum(len(p.findall(prose)) for p in BRITISH_PATTERNS)
 
 
+#: IANA-registered URN namespace identifiers observed or plausible in this
+#: corpus. `uuid` is the only one any record has written (40 occurrences).
+URN_REGISTERED_NIDS = frozenset({"uuid", "isbn", "issn", "oid", "ietf",
+                                 "doi", "lex"})
+
+
 def undeclared_prefixes(record: dict[str, Any],
                         slots: set[str]) -> dict[str, int]:
     """`{prefix: occurrences}` for CURIE prefixes the schema does not declare.
@@ -248,18 +262,48 @@ def undeclared_prefixes(record: dict[str, Any],
     the model to hang an identifier off an attested one instead of minting a
     namespace.
 
-    `urn:` and `ark:` are counted here, and the plan says so: classifying them
-    instead as no-authority URI schemes gives a lower figure, and both readings
-    are defensible as long as the same one produces both sides of a comparison.
+    Instrument v2 (2026-08-22, refined by the #671 review). The `ark:` scheme
+    is not counted: the 2026-08-22c canary wrote nine bundle-attested ARKs
+    into `file_collections[].id` — grounded, with minted fragments at zero for
+    the first time — and the v1 instrument read the behaviour rules 2 and 3
+    exist to produce as nine invented prefixes. An *unattested* ark is still
+    caught, by grounding: `_EXTERNAL` grounds arks against the bundle, so a
+    minted ark counts `absent`.
+
+    `urn:` is **NID-aware**, not blanket-excluded — the first v2 draft
+    excluded the whole scheme and thereby erased 758 corpus occurrences of
+    minted namespaces wearing it (`urn:cm4ai:…`, `urn:chorus:…`, `urn:d4d:…`);
+    a model switching `cm4ai:x` to `urn:cm4ai:x` would have exited the metric
+    entirely. A urn under a registered NID (`urn:uuid:…`) is a real
+    identifier; a urn under an invented NID is the same minted namespace the
+    metric exists to count, reported as `urn:<nid>`.
+
+    This set deliberately differs from `identifiers.NO_AUTHORITY_SCHEMES`:
+    that answers "can this be resolved to an authority?", this answers "did
+    someone invent a namespace?" — `mailto:` has no authority yet is not a
+    minted namespace problem, and stays out of both the exclusion here and
+    the corpus (0 identifier-slot occurrences).
     """
     from data_sheets_schema.identifiers import (declared_prefixes,
                                                 walk_identifiers)
     declared = {p.lower() for p in declared_prefixes()}
     out: dict[str, int] = {}
     for _path, _slot, value in walk_identifiers(record, slots):
-        m = re.match(r"^([A-Za-z][\w.\-]*):(?!//)", str(value))
-        if m and m.group(1).lower() not in declared:
-            out[m.group(1)] = out.get(m.group(1), 0) + 1
+        text = str(value)
+        m = re.match(r"^([A-Za-z][\w.\-]*):(?!//)", text)
+        if not m:
+            continue
+        scheme = m.group(1).lower()
+        if scheme in declared or scheme == "ark":
+            continue
+        if scheme == "urn":
+            nid = (text.split(":", 2)[1].lower()
+                   if text.count(":") >= 2 else "")
+            if nid in URN_REGISTERED_NIDS:
+                continue
+            out[f"urn:{nid}"] = out.get(f"urn:{nid}", 0) + 1
+            continue
+        out[m.group(1)] = out.get(m.group(1), 0) + 1
     return out
 
 

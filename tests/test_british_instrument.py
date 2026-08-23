@@ -64,3 +64,48 @@ class Battery(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PrefixClassification(unittest.TestCase):
+    """Registered scheme vs minted namespace (#671, refined by its review).
+
+    The first v2 draft blanket-excluded `urn:` and thereby erased 758 corpus
+    occurrences of minted namespaces wearing the scheme (`urn:cm4ai:…`). The
+    NID-aware rule keeps the ark fix without that hole, and the grounding net
+    catches what classification exempts: a minted ark counts `absent`.
+    """
+
+    SLOTS = {"id", "same_as", "publisher"}
+
+    def _count(self, value):
+        from data_sheets_schema.grounding import undeclared_prefixes
+        return undeclared_prefixes({"id": value}, self.SLOTS)
+
+    def test_ark_is_a_scheme_not_a_minted_prefix(self):
+        self.assertEqual(self._count("ark:59853/rocrate-x"), {})
+        self.assertEqual(self._count("ARK:59853/x"), {},
+                         "the exclusion must be case-insensitive")
+
+    def test_a_urn_under_a_registered_nid_is_excused(self):
+        self.assertEqual(self._count("urn:uuid:1234-abcd"), {})
+
+    def test_a_urn_under_an_invented_nid_is_counted_as_that_namespace(self):
+        self.assertEqual(self._count("urn:cm4ai:creator:x"), {"urn:cm4ai": 1})
+        self.assertEqual(self._count("urn:b2ai-voice:thing"),
+                         {"urn:b2ai-voice": 1})
+
+    def test_a_bare_invented_prefix_still_counts(self):
+        self.assertEqual(self._count("chorus:admission-42"), {"chorus": 1})
+
+    def test_a_minted_ark_is_caught_by_grounding_not_classification(self):
+        """The safety net the review demanded: exempt from the prefix count,
+        an unattested ark must still fail grounding as `absent`."""
+        from data_sheets_schema.grounding import ground
+        self.assertEqual(ground("ark:99999/fake-thing", "no arks here"),
+                         ("ark", "ark:99999/fake-thing", "absent"))
+
+    def test_an_attested_ark_grounds(self):
+        from data_sheets_schema.grounding import ground
+        bundle = "the release ark:59853/rocrate-b2ai-x sits in fairhub"
+        self.assertEqual(ground("ark:59853/rocrate-b2ai-x", bundle)[2],
+                         "grounded")

@@ -376,11 +376,10 @@ form:
     Bridge2AI Voice: 14
   gc_label_variant_occurrences: 37
   recorded_by: backfill_checks
-  instrument_note: 'form recomputed 2026-08-22 under the #653 British instrument v2.1
-    (word-bounded with explicit inflections; ''analyses'' excluded as ambiguous; organise
-    family, colour, favour, honour and composed suffixes included per the #670 review)
-    and the post-#669 GC-label counter — the gc_label_variant fields date from this
-    recompute, not the run. Previous british_spellings=4'
+  instrument_note: 'form recomputed 2026-08-22 under British instrument v2.1 and undeclared-prefix
+    classification v2.1 (ark scheme excluded and grounded instead; urn NID-aware —
+    a urn under an unregistered NID counts as urn:<nid>; #671). gc_label_variant fields
+    date from recompute, not the run. Previous british=4, undeclared=0'
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/VOICE_audit.json
   sha256: ac7f1cdd1a4490bc876c5b0f4c53b56ccd58a93d6b7934deb69727a8661842eb

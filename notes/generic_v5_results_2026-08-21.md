@@ -27,7 +27,7 @@
 | 1 | ungrounded identifiers fall | **confirmed, to the floor** — 0 on all 12 records; v4 had 19 (VOICE rep1) and 10 (CM4AI rep3) |
 | 2 | minted fragments rise or hold | **confirmed as intended, with one registered test firing on its letter** — minted rose and the named failure mode (omission without anchoring) did not occur, but falsification test 1 fires on its letter via AI_READI's creators correction; see "The registered falsification tests", where the post-hoc judgment is labeled as such |
 | 3 | organisational identifiers carry no person fragments | **confirmed, to the floor** — 0 on all 12; v4 had 7 (VOICE rep1) |
-| 4 | invented-prefix population stops growing | **exceeded** — v5 records add zero undeclared-prefix occurrences on all 12; v4 worsts were 15 / 228 / 86 / 0 |
+| 4 | invented-prefix population stops growing | **exceeded** — v5 records add zero undeclared-prefix occurrences on all 12; v4 worsts were 15 / 228 / 86 / 0 as measured then. *(Amended 2026-08-22: classification v2.1 — #671 — stops counting the `ark:` scheme and registered URN NIDs, and grounds arks instead; under it the v4 AI_READI worst is 6, the others unchanged, and "0 on all 12" still holds. Both sides recomputed.)* |
 | 5 | British spellings fall on the API arm (narrowed 2026-08-19) | **confirmed and understated by the instrument** — gated 613 → 84; genuine ≈ 545 → 24 (60 of v5's 84 are the "analyses" false positive; of the 24 genuine, 22 use forms the AI_READI and VOICE bundles carry — the remaining 2, VOICE rep3's `programme`, occur nowhere in VOICE's bundle and are model-written). Full decomposition: #653 and `notes/british_spelling_analysis_2026-08-21.md`, extended to VOICE here |
 
 ## The full table — v5 replicates vs the v4 worst
