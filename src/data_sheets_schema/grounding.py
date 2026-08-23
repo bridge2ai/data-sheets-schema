@@ -177,21 +177,66 @@ def resolver_urls_in_identifier_slots(record: dict[str, Any],
 #: material — a title or a direct quotation keeps its source's spelling — so
 #: double-quoted spans are removed before counting. That is the difference
 #: between 613 and the ~626 a naive count gives for the v4 arm.
+#: The form stems, as documentation of what the patterns below cover. The
+#: patterns are the instrument; nothing counts on these strings. (A v1-era
+#: comment about "the difference between 613 and ~626" described the quote
+#: exemption's effect under the superseded substring instrument.)
 BRITISH_FORMS = ("licence", "analyse", "organisation", "enrolment", "programme",
                  "standardis", "labelling", "centre", "recognise", "utilise",
-                 "catalogue", "summarise", "behaviour")
+                 "catalogue", "summarise", "behaviour", "colour", "favour",
+                 "honour")
+#: One pattern per form, word-bounded with explicit inflections (#653).
+#:
+#: The first instrument did `prose.count(form)`, and its dominant match was
+#: "analyses" — the *American* plural of "analysis", substring-matched by
+#: `analyse`: 60 of the full v5 arm's 84 counted occurrences (71%), and every
+#: counted occurrence in CHORUS and CM4AI. "analyses" is excluded as ambiguous (US
+#: noun plural and UK verb alike); the unambiguous British inflections
+#: (analysed, analysing, bare analyse) are matched explicitly. `colour`,
+#: `favour`, `honour` join the list — a genuinely British "colour fundus" in
+#: an AI_READI record was invisible to the old instrument while American
+#: "analyses" counted against it.
+BRITISH_PATTERNS = tuple(re.compile(rx) for rx in (
+    # v2.1 (#670 review): the organise verb family — 76 occurrences in the v4
+    # arm — had escaped both instruments; bare enrol/enrols, the licenced/
+    # licencing misspellings, honourable, and the composed suffixes
+    # (favourites, favourably, unfavourable, colourings, organisationally,
+    # behaviourally) join it.
+    r"\blicenc(?:es?|ed|ing)\b",
+    r"\banalys(?:e|ed|ing)\b",
+    r"\borganis(?:e|ed|es|ing|ers?|ations?|ational(?:ly)?)\b",
+    r"\benrol(?:s|ments?)?\b",
+    r"\bprogrammes?\b",
+    r"\bstandardis(?:e|ed|es|ing|ations?)\b",
+    r"\blabell(?:ing|ed)\b",
+    r"\bcentr(?:e|es|ed|ing)\b",
+    r"\brecognis(?:e|ed|es|ing)\b",
+    r"\butilis(?:e|ed|es|ing|ations?)\b",
+    r"\bcatalogu(?:e|es|ed|ing)\b",
+    r"\bsummaris(?:e|ed|es|ing)\b",
+    r"\bbehaviours?(?:al(?:ly)?)?\b",
+    r"\bcolour(?:s|ed|ings?|ful)?\b",
+    r"\b(?:un)?favour(?:s|ed|ing|abl[ye]|ites?)?\b",
+    r"\bhonour(?:s|ed|ing|able)?\b",
+))
 _QUOTED = re.compile(r'"[^"\n]*"')
 
 
 def british_spellings(text: str) -> int:
-    """Occurrences of British forms in prose the record states (#602).
+    """Occurrences of British forms in prose the record states (#602, #653).
 
     Prediction 5 of the v5 plan is measured on this and nothing computed it at
     run time — only `scripts/v5_baselines.py`, after the fact. A prediction the
     gate cannot see is one the gate cannot protect.
+
+    Instrument v2 (#653): word-bounded patterns with explicit inflections.
+    Numbers produced by the first instrument (the v4/v5 published notes) are
+    not comparable with these; recorded form blocks for both study arms and
+    every canary were recomputed under this instrument in the same change, so
+    the corpus a gate reads speaks one instrument.
     """
     prose = _QUOTED.sub(" ", text).lower()
-    return sum(prose.count(form) for form in BRITISH_FORMS)
+    return sum(len(p.findall(prose)) for p in BRITISH_PATTERNS)
 
 
 def undeclared_prefixes(record: dict[str, Any],

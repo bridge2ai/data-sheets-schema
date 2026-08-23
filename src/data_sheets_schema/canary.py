@@ -90,9 +90,11 @@ REPORTED_ONLY = (
     # GC label variants (#668): reported, not gated, because the rule reaches
     # generation for the first time at the next condition — a gate needs a
     # baseline measured under the rule, which does not exist until that
-    # condition has an arm. The v5 canonical pairs measure 57/16/6/0
-    # (VOICE/CHORUS/AI_READI/CM4AI) without the rule; the number to watch is
-    # whether the next canary lands below its project's figure.
+    # condition has an arm. Recorded per-project worsts in the 2026-08-20b
+    # arm, post-#669-counter: VOICE 57, all others 0 (the once-quoted 16/6
+    # for CHORUS/AI_READI were the pre-fix counter reading headers and file
+    # paths). The number to watch is whether the next canary lands below its
+    # project's figure — for three projects that figure is zero.
     # Absent is None, not zero (#669 review): a record measured before the
     # counter existed has no value, and reading it as a measured 0 is the
     # not-established-is-not-fine error inside the module that names it.
