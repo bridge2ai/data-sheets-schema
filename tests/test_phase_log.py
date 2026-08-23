@@ -63,7 +63,11 @@ class ParseTest(unittest.TestCase):
                          [{"name": "audit", "completed": True}])
 
     def test_json_carries_the_detail(self):
-        got = self._parse('{"name":"reconcile","completed":true,"iterations":3}')
+        # `reconcile_full` rather than the pre-#642 arbitrary "reconcile":
+        # names are now validated against the pipeline's vocabulary, and this
+        # test is about the JSON detail carrying, not the name.
+        got = self._parse(
+            '{"name":"reconcile_full","completed":true,"iterations":3}')
         self.assertEqual(got[0]["iterations"], 3)
 
     def test_malformed_json_raises_rather_than_being_dropped(self):

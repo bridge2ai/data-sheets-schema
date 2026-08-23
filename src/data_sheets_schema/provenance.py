@@ -623,9 +623,11 @@ def declared_schema_version() -> str | None:
     up on the next regeneration. The version applies to both, since both derive
     from this source.
     """
-    if not SOURCE_SCHEMA.exists():
+    from data_sheets_schema.schema_digest import resolve_schema
+    source = resolve_schema(SOURCE_SCHEMA)
+    if not source.exists():
         return None
-    for line in SOURCE_SCHEMA.read_text(encoding="utf-8").splitlines():
+    for line in source.read_text(encoding="utf-8").splitlines():
         if line.startswith("version:"):
             return line.split(":", 1)[1].strip() or None
         if line and not line.startswith((" ", "-", "#")) and ":" in line:
@@ -634,20 +636,29 @@ def declared_schema_version() -> str | None:
 
 
 def schema_facts() -> dict[str, Any]:
-    """Schema identity: declared version plus content hashes of what was used."""
+    """Schema identity: declared version plus content hashes of what was used.
+
+    The schema paths resolve through `schema_digest.resolve_schema` (#659):
+    launched outside the repo root, the agentic recorder died on the
+    cwd-relative constants with no record written — and a record whose
+    `schema` block silently hashed nothing would have been worse.
+    """
+    from data_sheets_schema.schema_digest import resolve_schema
+    full = resolve_schema(FULL_SCHEMA)
+    core = resolve_schema(CORE_SCHEMA)
     version = declared_schema_version()
     merged_carries_version = False
-    if FULL_SCHEMA.exists():
-        head = FULL_SCHEMA.read_text(encoding="utf-8", errors="ignore")[:4000]
+    if full.exists():
+        head = full.read_text(encoding="utf-8", errors="ignore")[:4000]
         merged_carries_version = any(
             l.startswith("version:") for l in head.splitlines())
     facts: dict[str, Any] = {
         "declared_version": version,
         "declared_in": str(SOURCE_SCHEMA),
         "full_path": str(FULL_SCHEMA),
-        "full_sha256": _sha256(FULL_SCHEMA),
+        "full_sha256": _sha256(full),
         "core_path": str(CORE_SCHEMA),
-        "core_sha256": _sha256(CORE_SCHEMA),
+        "core_sha256": _sha256(core),
         "merged_schema_carries_version": merged_carries_version,
     }
     if version and not merged_carries_version:
