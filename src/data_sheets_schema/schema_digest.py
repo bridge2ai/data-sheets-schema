@@ -30,6 +30,22 @@ from linkml_runtime import SchemaView
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
 CORE_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
 
+
+def resolve_schema(path: Path) -> Path:
+    """`path` if it resolves from here, else the packaged copy (#659).
+
+    The repo-relative constants above are read by commands that may run from
+    any directory — `d4d provenance record` is the agentic arm's recorder, and
+    launched outside the repo root it died on FileNotFoundError with no record
+    written. Same class and same fix shape as `record_schema_path` (#618):
+    the packaged copy sits beside this module, so resolve against it when the
+    cwd-relative path does not exist.
+    """
+    if path.exists():
+        return path
+    packaged = Path(__file__).resolve().parent / "schema" / path.name
+    return packaged if packaged.exists() else path
+
 # Where each target class is actually defined. They are separate merged
 # artifacts; CoreDataset does not exist in the full schema.
 CLASS_SCHEMA = {"Dataset": FULL_SCHEMA, "CoreDataset": CORE_SCHEMA}
@@ -265,6 +281,7 @@ def _build_uncached(class_name: str, schema_path: Path | None = None) -> ClassDi
         raise ValueError(
             f"No schema known for class {class_name!r}; pass schema_path "
             f"explicitly. Known: {sorted(CLASS_SCHEMA)}")
+    path = resolve_schema(path)
     sv = SchemaView(str(path))
     # The digest names the schema it came from, and that name is rendered into
     # the digest text — so an identical schema read from a different location

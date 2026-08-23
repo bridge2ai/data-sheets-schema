@@ -198,3 +198,61 @@ class TestTheVerdictDoesNotOutliveItsSchema(unittest.TestCase):
     def test_a_changed_core_schema_drops_it(self):
         new = {"schema": {"full_sha256": "aaa", "core_sha256": "CHANGED"}}
         self.assertIsNone(self.fn(self.path, new))
+
+
+class PhaseVocabulary(unittest.TestCase):
+    """--phase names must be phases the pipeline has (#642).
+
+    The agentic arm's phase_log is its only phase attestation (#400), so a
+    typo used to enter the record as an accomplished phase with nothing able
+    to tell it from a real one.
+    """
+
+    def test_known_names_pass_in_both_forms(self):
+        from data_sheets_schema.cli.provenance import _parse_phases
+        parsed = _parse_phases(["full", '{"name": "audit", "completed": false}'])
+        self.assertEqual([p["name"] for p in parsed], ["full", "audit"])
+
+    def test_a_typo_is_refused_with_the_vocabulary_named(self):
+        import click
+
+        from data_sheets_schema.cli.provenance import _parse_phases
+        for bad in ("recncile_full", '{"name": "phase_7"}'):
+            with self.subTest(value=bad):
+                with self.assertRaises(click.BadParameter) as caught:
+                    _parse_phases([bad])
+                self.assertIn("full", str(caught.exception),
+                              "the refusal must name the known phases")
+
+    def test_the_vocabulary_derives_from_the_pipeline(self):
+        """Derived, not restated: a phase added to PHASES is known here."""
+        from data_sheets_schema.api_runner import PHASES
+        from data_sheets_schema.cli.provenance import _known_phases
+        self.assertTrue(set(PHASES) <= _known_phases())
+        self.assertIn("report_after_repair", _known_phases())
+
+
+class SchemaResolutionAwayFromRepoRoot(unittest.TestCase):
+    """The #659 class: cwd-relative constants on paths that run anywhere.
+
+    `d4d provenance record` is the agentic arm's recorder; launched outside
+    the repo root it died on FileNotFoundError with no record written.
+    """
+
+    def test_digest_and_schema_facts_work_from_a_temp_cwd(self):
+        import os
+        import tempfile
+
+        from data_sheets_schema import schema_digest as sd
+        from data_sheets_schema.provenance import schema_facts
+        cwd = os.getcwd()
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                os.chdir(d)
+                self.assertTrue(
+                    sd.fingerprint(sd.digest_text("Dataset")))
+                facts = schema_facts()
+                self.assertTrue(facts["full_sha256"])
+                self.assertTrue(facts["core_sha256"])
+        finally:
+            os.chdir(cwd)

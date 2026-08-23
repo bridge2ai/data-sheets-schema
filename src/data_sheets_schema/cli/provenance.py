@@ -18,6 +18,18 @@ def provenance():
     pass
 
 
+#: The names a phase log may carry: the six generation phases, the repair
+#: phases, and the post-repair report rewrite. One vocabulary for both
+#: runtimes — the agentic playbook's four phases are a subset by name.
+def _known_phases() -> frozenset[str]:
+    from data_sheets_schema.api_runner import PHASES
+    # `reconciliation` is the agentic playbook's own name for its phase 4,
+    # which spans both reconcile steps — an agentic recorder saying so is
+    # honest, not a typo.
+    return frozenset(PHASES) | {"repair_full", "repair_core",
+                                "report_after_repair", "reconciliation"}
+
+
 def _parse_phases(specs) -> list[dict]:
     """`--phase` values into phase dicts, in the order given (#562).
 
@@ -27,9 +39,19 @@ def _parse_phases(specs) -> list[dict]:
 
     A malformed value raises rather than being dropped. A phase log missing one
     phase is worse than no phase log: it reads as a run that skipped a step.
+
+    The name must be a phase the pipeline has (#642). This log is the agentic
+    arm's *only* phase attestation — that runtime cannot observe its own calls
+    (#400) — so before this check a typo (`recncile_full`) entered the record
+    as an accomplished phase and nothing downstream could tell it from a real
+    one. The API arm's phases are attested by the calls themselves, which is
+    why the same laxity there would merely be untidy; here it was the whole
+    record. Refused rather than marked: the caller is present and can fix a
+    typo now, whereas a marked-dubious phase in the record helps nobody later.
     """
     import json
 
+    known = _known_phases()
     out = []
     for raw in specs or ():
         text = str(raw).strip()
@@ -44,8 +66,16 @@ def _parse_phases(specs) -> list[dict]:
             if not isinstance(obj, dict) or not obj.get("name"):
                 raise click.BadParameter(
                     f"--phase {text!r} must be an object with a 'name'")
+            if obj["name"] not in known:
+                raise click.BadParameter(
+                    f"--phase name {obj['name']!r} is not a phase this "
+                    f"pipeline has. Known: {', '.join(sorted(known))}")
             out.append(obj)
         else:
+            if text not in known:
+                raise click.BadParameter(
+                    f"--phase {text!r} is not a phase this pipeline has. "
+                    f"Known: {', '.join(sorted(known))}")
             out.append({"name": text, "completed": True})
     return out
 
