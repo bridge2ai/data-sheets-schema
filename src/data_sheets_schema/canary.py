@@ -84,6 +84,14 @@ REPORTED_ONLY = (
     ("minted fragments", "grounding",
      lambda b: int((b.get("distinct") or b.get("counts") or {})
                    .get("minted_fragment") or 0)),
+    # GC label variants (#668): reported, not gated, because the rule reaches
+    # generation for the first time at the next condition — a gate needs a
+    # baseline measured under the rule, which does not exist until that
+    # condition has an arm. The v5 canonical pairs measure 57/16/6/0
+    # (VOICE/CHORUS/AI_READI/CM4AI) without the rule; the number to watch is
+    # whether the next canary lands below its project's figure.
+    ("GC label variants", "form",
+     lambda b: int(b.get("gc_label_variant_occurrences") or 0)),
 )
 
 
