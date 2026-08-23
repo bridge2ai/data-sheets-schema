@@ -341,7 +341,8 @@ def prompt_body(path: Path = GENERIC_PROMPT) -> str:
 # Updated by hand when build_phase() reorders its parts; the instruction texts
 # are hashed mechanically below, so wording changes cannot go unrecorded, but
 # nothing derives this ordering from the code — keep it true.
-ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, arm prompt, "
+ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
+                   "declared naming, arm prompt, "
                    "carried artifacts, phase instruction")
 
 
@@ -631,6 +632,36 @@ PHASE_NEEDS = {
 }
 
 
+def naming_block(project: str,
+                 manifest_line: str | None = None) -> str | None:
+    """The declared canonical GC label for one project, as sent to the model.
+
+    Rendered from the manifest's `naming:` block (#668) so an edit there
+    reaches the next run with no code change — and so no prompt ever hardcodes
+    a project alias, which is the #647 lesson. None when the project declares
+    no naming, and None when the arm declares the manifest unused, for the
+    same reason as `source_ranking_block` (#603).
+    """
+    if manifest_line is not None and "not used" in manifest_line.lower():
+        return None
+    from data_sheets_schema.grounding import declared_naming
+    declared = (declared_naming() or {}).get(project) or {}
+    label = declared.get("canonical_label")
+    if not label:
+        return None
+    gc = declared.get("gc_name")
+    context = f" (the Bridge2AI {gc})" if gc else ""
+    return (
+        "DECLARED NAMING — in prose you compose, call this project "
+        f"\"{label}\"{context}. This governs your own wording only: quoted "
+        "source text, URLs, identifiers, and proper nouns as a source states "
+        "them — a consortium's name in the release's own citation, a "
+        "repository's account name — keep their form exactly. The record "
+        "header block copies the pipeline's project key verbatim; that is "
+        "addressing, not prose. One project "
+        "written many ways reads as many projects.")
+
+
 def source_ranking_block(project: str,
                          manifest_line: str | None = None) -> str | None:
     """The declared source ranking for one project, as sent to the model.
@@ -716,6 +747,14 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     ranking = source_ranking_block(spec.project, spec.manifest_line)
     if ranking:
         cached.append({"type": "text", "text": ranking,
+                       "cache_control": {"type": "ephemeral"}})
+    # The declared naming, for the same reason and with the same manifest-not-
+    # used exemption (#668): the label standard lives in the manifest, and a
+    # rule the API path never received would be one condition with two
+    # behaviours.
+    naming = naming_block(spec.project, spec.manifest_line)
+    if naming:
+        cached.append({"type": "text", "text": naming,
                        "cache_control": {"type": "ephemeral"}})
 
     # Carried artifacts go BEFORE the phase instruction, so the instruction is

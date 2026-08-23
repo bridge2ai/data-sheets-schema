@@ -228,6 +228,49 @@ source_priority:
 
 default_minimum_characters: 500
 
+naming:
+  # Canonical GC project labels (#668), decided 2026-08-22 from the B2AI
+  # Standards Explorer export committed at
+  # data/standards/b2ai_gc_organization_metadata_2026-08-21.csv.
+  #
+  # `canonical_label` is what a record's *generated prose* calls the project:
+  # the Explorer's project alias, not the Grand Challenge name and not a
+  # B2AI_ORG id — the ids are deliberately kept out of records (Marcin,
+  # 2026-08-22; they remain here as provenance of where the mapping came
+  # from). Scope mirrors the American-English rule exactly: quoted source
+  # text, URLs, identifiers, and formal proper nouns from a release's own
+  # citation keep their form. `variants` mix forms observed in generated
+  # records (Bridge2AI-Voice, "Bridge2AI Voice", VOICE, CHORUS, Chorus,
+  # AI_READI, "AI READI") with forms anticipated from the Explorer's aliases
+  # and hostnames (AIREADI, CHoRUS4AI, B2AI-VOICE, the long project names)
+  # that no record has yet written — the #669 review counted. A variant list
+  # is what the counter should count, not an allowlist.
+  #
+  # Like the scope block above: a declaration here is checkable and inherited;
+  # the same statement in a launch prompt is a per-GC adaptation nothing
+  # inherits (#422).
+  AI_READI:
+    canonical_label: AI-READI
+    gc_name: Salutogenesis Grand Challenge
+    b2ai_org_id: B2AI_ORG:114
+    variants: ["AI_READI", "AIREADI", "AI READI"]
+  CHORUS:
+    canonical_label: CHoRUS
+    gc_name: AI/ML for Clinical Care Grand Challenge
+    b2ai_org_id: B2AI_ORG:115
+    variants: ["CHORUS", "Chorus", "CHoRUS4AI"]
+  CM4AI:
+    canonical_label: CM4AI
+    gc_name: Functional Genomics Grand Challenge
+    b2ai_org_id: B2AI_ORG:116
+    variants: ["CM4AI Consortium project", "Cell Maps for AI project"]
+  VOICE:
+    canonical_label: Voice
+    gc_name: Precision Public Health Grand Challenge
+    b2ai_org_id: B2AI_ORG:117
+    variants: ["VOICE", "B2AI-VOICE", "B2AI-Voice", "Bridge2AI-Voice",
+               "Bridge2AI Voice", "Voice as a Biomarker of Health project"]
+
 projects:
   AI_READI:
     - id: bmj_protocol_publication

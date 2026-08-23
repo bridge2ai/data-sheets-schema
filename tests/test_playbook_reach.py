@@ -119,9 +119,45 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
     #: Emptying it does not retire the guard. A rule added to the playbook
     #: tomorrow, mid-arm, for the same good reason, belongs here again — with
     #: its reason, so the divergence is a decision rather than a discovery.
-    PLAYBOOK_ONLY: dict[str, str] = {}
+    PLAYBOOK_ONLY: dict[str, str] = {
+        "canonical gc label": (
+            "Reaches the API path through the manifest-rendered DECLARED "
+            "NAMING block (`api_runner.naming_block`, #668), not through "
+            "prompt text — the label lives in the manifest so no prompt ever "
+            "hardcodes a project alias (#647), and v5 is a closed condition "
+            "whose file is not edited after its runs. At the next version "
+            "boundary the rule sentence belongs in the prompt body like the "
+            "source-priority rule, with the data still rendered. "
+            "`test_the_naming_rule_reaches_the_api_path` guards the render."),
+    }
 
     CURRENT_PROMPT = "d4d_generic_arm_prompt_v5.md"
+
+    def test_the_naming_rule_reaches_the_api_path(self):
+        """The render is the API path's copy of the rule; guard its substance.
+
+        PLAYBOOK_ONLY above says the naming rule reaches the API arm through
+        `naming_block` rather than prompt text. That claim is only true while
+        the block exists, carries the rule and its carve-outs, and renders for
+        every project the manifest declares — so this asserts all three, the
+        same both-runtimes-one-condition discipline as the rest of this file.
+        """
+        from data_sheets_schema.api_runner import naming_block
+        from data_sheets_schema.grounding import declared_naming
+        naming = declared_naming()
+        if not naming:
+            self.skipTest("no naming declarations in this checkout")
+        for project, declared in naming.items():
+            with self.subTest(project=project):
+                block = naming_block(project)
+                self.assertIsNotNone(block)
+                self.assertIn(declared["canonical_label"], block)
+                self.assertIn("keep their form exactly", block)
+        self.assertIsNone(naming_block("NOT_A_DECLARED_PROJECT"))
+        self.assertIsNone(
+            naming_block("VOICE", "# Source manifest: not used (crate arm)"),
+            "an arm that declares the manifest unused must not receive a "
+            "block rendered from it (#603)")
 
     def _texts(self):
         playbook = PLAYBOOK.read_text(encoding="utf-8")

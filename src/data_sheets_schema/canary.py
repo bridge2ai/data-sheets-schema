@@ -82,8 +82,23 @@ METRICS = (
 #: must not be reported as it.
 REPORTED_ONLY = (
     ("minted fragments", "grounding",
-     lambda b: int((b.get("distinct") or b.get("counts") or {})
-                   .get("minted_fragment") or 0)),
+     lambda b: (int((b.get("distinct") or b.get("counts") or {})
+                    ["minted_fragment"])
+                if "minted_fragment" in (b.get("distinct")
+                                         or b.get("counts") or {})
+                else None)),
+    # GC label variants (#668): reported, not gated, because the rule reaches
+    # generation for the first time at the next condition — a gate needs a
+    # baseline measured under the rule, which does not exist until that
+    # condition has an arm. The v5 canonical pairs measure 57/16/6/0
+    # (VOICE/CHORUS/AI_READI/CM4AI) without the rule; the number to watch is
+    # whether the next canary lands below its project's figure.
+    # Absent is None, not zero (#669 review): a record measured before the
+    # counter existed has no value, and reading it as a measured 0 is the
+    # not-established-is-not-fine error inside the module that names it.
+    ("GC label variants", "form",
+     lambda b: (int(b["gc_label_variant_occurrences"])
+                if "gc_label_variant_occurrences" in b else None)),
 )
 
 

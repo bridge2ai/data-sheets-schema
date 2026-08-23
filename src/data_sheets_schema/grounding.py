@@ -218,6 +218,72 @@ def undeclared_prefixes(record: dict[str, Any],
     return out
 
 
+#: Address-ish tokens: an alias inside a hostname, path or filename
+#: (b2ai-voice.org, voicecollab.ai, data/.../AI_READI_d4d.yaml,
+#: AI_READI_preprocessed.txt) is an address, not prose. Slashes and file
+#: extensions mark paths; the TLD list covers the hosts the corpus cites.
+_URLISH = re.compile(
+    r"\S*(?:://|www\.|/|\.org|\.com|\.io|\.gov|\.edu|\.ai|\.net"
+    r"|\.yaml|\.txt|\.json|\.csv|\.md|\.pdf)\S*")
+#: Header/comment lines. The record header block is pipeline-mandated
+#: boilerplate whose {PROJECT} substitution writes the directory key verbatim
+#: ("# D4D Datasheet for AI_READI Dataset") — counting it gave the metric a
+#: permanent floor no naming rule can lower (#669 review).
+_COMMENT_LINE = re.compile(r"^\s*#.*$", re.M)
+
+
+def gc_label_variants(text: str, canonical: str,
+                      variants: list[str]) -> dict[str, int]:
+    """Occurrences of non-canonical GC labels in prose the record states (#668).
+
+    The exemption structure mirrors the rule's own carve-outs, as far as text
+    can: double-quoted spans are quoted source text; address-shaped tokens
+    (URLs, paths, filenames) are identifiers; comment lines are the
+    pipeline-mandated header, not model prose. Case-sensitive, because the
+    variants differ from the canonical exactly by case and punctuation
+    (CHORUS vs CHoRUS), and a case-blind count would count the canonical
+    itself.
+
+    Matching is word-bounded with underscore treated as a joining character:
+    `Chorus` inside the repository name `Chorus_SOP` and `AI_READI` inside
+    `AI_READI_d4d` are parts of identifiers, not prose mentions (#669
+    review). Hyphen stays a boundary — the hyphenated long forms are variants
+    themselves and are blanked longest-first before shorter forms are
+    counted, so "B2AI-VOICE" is never also tallied under "VOICE".
+
+    **What this cannot see**, stated rather than implied: a source-stated
+    proper noun in an unquoted slot value (`name: Bridge2AI-Voice`, the
+    release's own title) counts, though the rule's carve-outs exempt it. The
+    residual is an over-count whose exempt share requires reading the
+    matches; use it to compare records under one instrument, not as an
+    absolute deviation count.
+    """
+    prose = _COMMENT_LINE.sub(" ", text)
+    prose = _QUOTED.sub(" ", prose)
+    prose = _URLISH.sub(" ", prose)
+    out: dict[str, int] = {}
+    for variant in sorted(variants, key=len, reverse=True):
+        if variant == canonical:
+            continue
+        pattern = re.compile(
+            r"(?<![A-Za-z0-9_])" + re.escape(variant) + r"(?![A-Za-z0-9_])")
+        n = len(pattern.findall(prose))
+        if n:
+            out[variant] = n
+            prose = pattern.sub(" ", prose)
+    return out
+
+
+def declared_naming(manifest_path: Path | None = None) -> dict[str, Any]:
+    """The manifest's `naming:` block, `{}` when absent (#668)."""
+    import yaml as _yaml
+    path = manifest_path or Path("data/preprocessed/source_manifest.yaml")
+    if not path.exists():
+        return {}
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return data.get("naming") or {}
+
+
 def form_facts(full: Path, core: Path,
                slots: set[str] | None = None) -> dict[str, Any]:
     """Counts that are properties of the records alone (#602).
@@ -254,11 +320,31 @@ def form_facts(full: Path, core: Path,
                     fragments.add(found[1].lower())
     if not present:
         return {"checked": False, "reason": "neither record is on disk"}
+    # GC label variants (#668): the project is derivable from the record
+    # filename ({PROJECT}_d4d.yaml), and a project with no naming declaration
+    # contributes nothing rather than failing — absence of a declaration is
+    # not a defect in the record.
+    label_variants: dict[str, int] = {}
+    naming = declared_naming()
+    project = full.name.split("_d4d")[0] if full.name else ""
+    declared = naming.get(project) or {}
+    if declared.get("canonical_label"):
+        for path in (full, core):
+            if not path.exists():
+                continue
+            found = gc_label_variants(
+                path.read_text(encoding="utf-8", errors="replace"),
+                declared["canonical_label"],
+                list(declared.get("variants") or []))
+            for k, v in found.items():
+                label_variants[k] = label_variants.get(k, 0) + v
     return {"checked": True, "records": present,
             "undeclared_prefixes": prefixes,
             "undeclared_prefix_occurrences": sum(prefixes.values()),
             "british_spellings": british,
-            "organisational_fragments": len(fragments)}
+            "organisational_fragments": len(fragments),
+            "gc_label_variants": label_variants,
+            "gc_label_variant_occurrences": sum(label_variants.values())}
 
 
 def check_record(record: dict[str, Any], bundle_text: str,
