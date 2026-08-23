@@ -341,6 +341,11 @@ form:
     chorus: 226
     nih: 2
   undeclared_prefix_occurrences: 228
-  british_spellings: 28
+  british_spellings: 20
   organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
   recorded_by: backfill_checks
+  instrument_note: 'form recomputed 2026-08-22 under the #653 British-spelling instrument
+    v2 (word-bounded, ''analyses'' excluded as ambiguous, colour/favour/honour added);
+    previous value british_spellings=28'

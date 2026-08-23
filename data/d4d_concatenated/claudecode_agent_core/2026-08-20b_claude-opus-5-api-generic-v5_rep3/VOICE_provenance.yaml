@@ -369,8 +369,16 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
-  british_spellings: 5
+  british_spellings: 4
   organisational_fragments: 0
+  gc_label_variants:
+    Bridge2AI-Voice: 23
+    Bridge2AI Voice: 14
+  gc_label_variant_occurrences: 37
+  recorded_by: backfill_checks
+  instrument_note: 'form recomputed 2026-08-22 under the #653 British-spelling instrument
+    v2 (word-bounded, ''analyses'' excluded as ambiguous, colour/favour/honour added);
+    previous value british_spellings=5'
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/VOICE_audit.json
   sha256: ac7f1cdd1a4490bc876c5b0f4c53b56ccd58a93d6b7934deb69727a8661842eb

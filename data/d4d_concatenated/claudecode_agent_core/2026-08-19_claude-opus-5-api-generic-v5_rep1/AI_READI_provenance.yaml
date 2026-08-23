@@ -672,8 +672,15 @@ form:
   - data/d4d_concatenated/claudecode_agent_core/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
   undeclared_prefixes: {}
   undeclared_prefix_occurrences: 0
-  british_spellings: 14
+  british_spellings: 4
   organisational_fragments: 0
+  gc_label_variants:
+    AI READI: 2
+  gc_label_variant_occurrences: 2
+  recorded_by: backfill_checks
+  instrument_note: 'form recomputed 2026-08-22 under the #653 British-spelling instrument
+    v2 (word-bounded, ''analyses'' excluded as ambiguous, colour/favour/honour added);
+    previous value british_spellings=14'
 intermediates:
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-19_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_audit.json
   sha256: b6bfe30a5d02f6c439964ef424142232fb337b1eb7b401b9a0002f61ee110b2c
