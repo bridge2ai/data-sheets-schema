@@ -1,0 +1,179 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The `distributions` slot is not present in the supplied schema digest for Dataset/CoreDataset, and the objects written under it carry keys (`format`, `media_type`, `path`, `notes`, `source_caveats`) that match no declared range in the digest. The digest declares `distribution_formats` (range DistributionFormat) for this content, which the core record already populates separately. Additionally, the `format: JSON` / `media_type: application/json` values used for the features and metadata folders misdescribe the actual Parquet payload — the record's own `source_caveats` on that entry concedes the declared value names only the accompanying data dictionaries. Recommend removing the `distributions` block entirely; `distribution_formats` and `file_collections` already carry this content in schema-conformant shape."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "file_collections",
+      "issue": "Content that the full record carries in `file_collections` (three FileCollection objects with `id`, `collection_type`, `path` and per-file record counts) is not present in the core record under that slot; it was instead relocated into the non-schema `distributions` slot. This is both an unsupported-shape defect and a full/core divergence in how the same evidence is represented."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "subpopulations",
+      "issue": "The second Subpopulation object states 'The five cohort categories are voice disorders, respiratory disorders, neurological and neurodegenerative disorders, mood and psychiatric disorders, and controls.' The full record's `subsets` block and the bundle's project documentation both name the fifth category as pediatric voice and speech disorders, with controls being a separate recruited group; the documentation lists 'Voice Disorders, Neurological and Neurodegenerative Disorders, Mood and Psychiatric Disorders, Respiratory disorders, Pediatric Voice and Speech Disorders' as the five cohort categories. Substituting controls for pediatrics in the enumeration is unsupported and contradicts the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "subsets",
+      "issue": "The `subsets` list presents five entries as if they were the five disease cohort categories, but substitutes 'Controls' for the pediatric cohort named in the source documentation. Since the pediatric cohort is a separate dataset and correctly excluded from this record's referent, the five-way framing should not be implied; the controls subset is legitimate but is not the consortium's fifth disease category."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "relationships",
+      "issue": "The full record populates `relationships` (healthsheet statement that instances are unrelated, plus the participant_id/session_id/task_name linkage). The core record omits it. The digest lists `relationships` among the slots CoreDataset inherits, and the evidence supports it; this is a supported omission."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "splits",
+      "issue": "The full record populates `splits` with the release's explicit statement that no recommended train/validation/test splits are provided and that researchers should create their own. The core record omits this, losing a directly stated and reuse-relevant fact."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "subsets",
+      "issue": "The full record carries five DataSubset objects describing the recruited cohorts with their diagnoses and gold-standard validation methods. The core record omits `subsets` entirely, retaining only the coarser `subpopulations` summary."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "citation",
+      "issue": "The full record carries the PhysioNet-supplied recommended citation verbatim. The core record omits `citation` although the slot is available and the bundle states the citation explicitly."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "variables",
+      "issue": "The full record populates six VariableMetadata objects (participant_id, session_id, task_name, n_frames, spectrogram, mel_spectrogram) drawn from the release's Data Description. The core record omits `variables`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "The full record populates `direct_collection` with `is_direct: true` and the healthsheet's supporting text. The core record omits it, though the bundle states plainly that data was collected 'Directly' from the individuals in question."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "collection_consents",
+      "issue": "The full record populates two CollectionConsent objects. The core record omits `collection_consents`; the substance is partly covered by `informed_consent`, but the consent-scope statement about non-restriction to commercial/geographic/disease-specific use is lost."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "collection_notifications",
+      "issue": "The full record populates `collection_notifications` with the IRB-approved notification procedure. The core record omits it."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "consent_revocations",
+      "issue": "The full record populates `consent_revocations` with the withdrawal rules, including the point at which voice data can no longer be removed. The core record omits the slot; the `informed_consent.withdrawal_mechanism` field carries overlapping content, so the loss is partial."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "participant_privacy",
+      "issue": "The full record populates a ParticipantPrivacy object with anonymization method, linkage practice, an eleven-item privacy_techniques list and a reidentification_risk statement. The core record omits `participant_privacy`; the residual-risk statement about voice never being fully de-identifiable appears in the core record only obliquely under `future_use_impacts`."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "participant_compensation",
+      "issue": "The full record records the gift-card amounts and session caps. The core record omits `participant_compensation`, although the documentation states the figures explicitly."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "third_party_sharing",
+      "issue": "The full record populates `third_party_sharing` with `is_shared: true` and the DTUA redistribution restrictions. The core record omits it."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances",
+      "issue": "The Instance object for acoustic recordings assigns `data_substrate: B2AI_SUBSTRATE:49` (Waveform Data) while the same object's note states the release contains derived feature tensors rather than waveforms, and the record elsewhere insists raw audio is withheld. The substrate term describes the underlying raw modality, not what is distributed; this is a defensible but internally uneasy choice that the object's own prose contradicts."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances",
+      "issue": "The Instance object for questionnaire and clinical records assigns `data_substrate: B2AI_SUBSTRATE:80` (Questionnaire response data), but the object's own description says the records are held as tab-separated tables and covers per-condition diagnosis and enrollment tables as well as questionnaires. The substrate term is narrower than the instance described."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "id",
+      "issue": "`id` is set to `doi:10.13026/8xbn-nq66`, the version-3.1.0 DOI, while `version_access.latest_version_doi` is `doi:10.13026/37yb-1t42`, the concept DOI PhysioNet assigns to the latest version. Both values are attested in the bundle and the choice is internally consistent, but a reader may find the record's identity pinned to a version rather than to the dataset series."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "known_biases",
+      "issue": "The DatasetBias object with `bias_type: measurement_bias` includes `affected_subsets: ['Disease cohorts recruited predominantly at a single site']`. The bundle states that participants were screened for different disorders based on site and that distinct devices were used per site, but does not name any cohort as predominantly single-site. The affected_subsets value generalizes beyond what the sources state."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_timeframes",
+      "issue": "`timeframe_details` combines a twelve-month collection window (drawn from the healthsheet, describing an earlier release) with the 2022-09-01 to 2026-11-30 project period from NIH RePORTER, a tier-4 source. The record's own source_caveats flags the mismatch, but the composite reads as a single timeframe when the two figures describe different things (data collection vs. award period). No `start_date` or `end_date` is set, which is correct given the ambiguity."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "publisher",
+      "issue": "`publisher` is set to `https://physionet.org`, a bare URL in a `uriorcurie`-ranged slot. No declared prefix in the digest covers PhysioNet as an organization, so a URL is the permitted fallback; noted only because the v5 rule directs a CURIE wherever a prefix fits, and a reader should confirm no organization-registry identifier for PhysioNet is attested in the bundle. None is."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "human_subject_research",
+      "issue": "`irb_approval` and `regulatory_compliance` are written as single-element lists whose sole element is a multi-sentence paragraph. The digest does not declare these as multivalued, so list form may be a shape mismatch; if they are multivalued, the several distinct compliance regimes named (HIPAA, Common Rule, Certificate of Confidentiality) should be separate elements rather than collapsed into one string."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "at_risk_populations",
+      "issue": "`guardian_consent` is a single-element list containing a paragraph; same shape question as human_subject_research. Substantively the object is also in tension with itself: `at_risk_groups_included: false` is asserted while the object then details guardian consent and assent procedures for children, and `special_populations` under human_subject_research names cognitively impaired participants (MCI, dementia) who are in scope for the adult dataset. The source_caveats explains the pediatric provisions are inherited from the consortium protocol, but the `false` flag sits awkwardly against the dementia and MCI cohorts that this dataset does include."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "sensitive_elements",
+      "issue": "The fourth SensitiveElement object sets `sensitive_elements_present: false` and then describes what was removed. Within a list of elements that are present, an object flagged false to describe absent content inverts the slot's sense; the removal detail belongs in `is_deidentified.deidentification_details`, where it is already stated."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_governance",
+      "issue": "`committee_contact` is unpopulated although the bundle repeatedly gives DACO@b2ai-voice.org as the access committee contact; the address appears only inside `access_review_process` prose. The digest declares `committee_contact` with range Person, so an email address alone may not fit, but the omission means the contact is not queryable as structure."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "download_url",
+      "issue": "`download_url` is unpopulated in both records. The bundle states the PhysioNet content page and the Synapse controlled-access location, but neither is a direct data URL — PhysioNet requires credentialing before files are exposed. Omission is defensible; noted for completeness."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "total_file_count",
+      "issue": "`total_file_count` and `total_size_bytes` are unpopulated. The bundle enumerates individual files and per-feature record counts but states no file total or byte total, so omission is correct."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "use_repository",
+      "issue": "Unpopulated in both records. The healthsheet answers the corresponding question with 'No' — there is no repository linking papers or systems that use the dataset — so omission is correct rather than an oversight."
+    }
+  ],
+  "summary": "Two high-severity defects, both in the core record and both structural: an undeclared `distributions` slot carrying objects of a shape the schema digest does not define, and the consequent loss of `file_collections` content that the full record represents correctly. The `distributions` entries additionally misdeclare Parquet payloads as JSON, a mismatch the record's own caveat concedes. Recommend deleting `distributions` from the core record and porting the full record's three FileCollection objects across. One medium factual defect recurs in both records: the five-cohort enumeration substitutes controls for the pediatric cohort that the project documentation names, contradicting the full record's own subsets block in the core record's case. Eleven further medium/low findings are supported omissions in the core record — relationships, splits, subsets, citation, variables, direct_collection, collection_consents, collection_notifications, consent_revocations, participant_privacy, participant_compensation and third_party_sharing all appear in the full record on evidence the bundle plainly supplies, and none is stated in the core record. No content is asserted in the core record that the full record lacks, apart from the erroneous cohort enumeration noted above. Remaining findings are minor: two B2AI substrate terms narrower or broader than the instances they annotate, an affected_subsets value generalizing past the sources, a composite collection timeframe blending a healthsheet figure with an NIH award period, a sensitive_elements object flagged false inside a list of present elements, an at_risk_populations flag sitting uneasily against the MCI and dementia cohorts, and several single-element lists holding paragraph-length prose whose multivalued status the digest does not confirm. No unsupported factual claim was found: identifiers, counts, dates, agreements and processing parameters all trace to the declared bundle, tier-1 PhysioNet v3.1.0 is preferred over the superseded v3.0.0 and over lower-tier sources where they disagree, and the disagreements the sources do contain are disclosed in source_caveats at both record and object level."
+}

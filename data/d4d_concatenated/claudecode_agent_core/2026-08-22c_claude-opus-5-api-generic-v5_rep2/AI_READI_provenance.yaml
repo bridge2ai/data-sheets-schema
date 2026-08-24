@@ -1,0 +1,430 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-08-23T23:11:21+00:00'
+run:
+  label: 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  project: AI_READI
+  method: claudecode_agent
+  arm: baseline
+  replicate: 2
+model:
+  generation_method: schema-grounded API, six phases
+  agent_runtime: Claude API (direct)
+  provider: LBL CBORG (proxy to Anthropic)
+  base_url: https://api.cborg.lbl.gov
+  model: claude-opus-5
+  max_tokens_by_phase:
+    full: 96000
+    reconcile_full: 96000
+    repair_full: 96000
+    core: 56000
+    reconcile_core: 56000
+    repair_core: 56000
+    audit: 24000
+    report: 24000
+  context:
+    peak_request_tokens: null
+    peak_phase: null
+    peak_basis: 'observed: input + cache_read + cache_write of the largest request'
+    limit_tokens: null
+    limit_basis: not stated by the route and not returned by the provider; headroom
+      cannot be computed from this record
+  temperature: null
+  temperature_basis: not applicable to this model
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt_v5.md
+    sha256: c4bbcc41eb4f0b83704228a0bf040294dedd6edf5afbf06035c2fd9d7587ebbb
+    bytes: 13909
+    exists: true
+  request:
+    sha256: 8bfdd5a9bee1b4646c730a2a1329e2396c77b66dbf66112d8c1065fa89ef2c1f
+    bytes: 10679
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      condition: generic_v5
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: data/preprocessed/source_manifest.yaml'
+      run_date: '2026-08-23'
+      runtime: Claude API (direct)
+      provider: LBL CBORG (proxy to Anthropic)
+      bundle: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  resolved:
+    sha256: 8bfdd5a9bee1b4646c730a2a1329e2396c77b66dbf66112d8c1065fa89ef2c1f
+    bytes: 10679
+  assembly:
+    sha256: e0162f60e13b948d73c43fb4b953415db865186b81c737c502f4999d6ad0b79f
+    layout: schema digest, input bundle, source ranking, declared naming, arm prompt,
+      carried artifacts, phase instruction
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: eaacddbddbf24cf5744d5e4451f9109ba1d996bb4d563ae6f37ae28c42d71464
+    bytes: 32310
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: a9a56cd791a6a4876e4dd756011460d6c7a24f634c928af8b0e2fc3057d6bc0d
+    bytes: 12138
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: dcc5271e6065f87dd30dd0380244df2e900af81e7ecbab523cc57954743f46db
+    bytes: 6224
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules.md
+    sha256: 691a4cf37b1a13ad8bbfd58998f69625d7dde3d6fb7b8858a5a434fbd91ae3b6
+    bytes: 7667
+    exists: true
+  consumed: false
+  consumed_basis: this runtime renders a condition prompt and sends nothing else,
+    so these were not read; they are hashed so an unchanged hash shows that (#545)
+phase_log: null
+schema:
+  declared_version: 2.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  merged_schema_carries_version: true
+  digest_md5: 580992ed7037762157c110fc9e671c81
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: caf74cacaa3aebac7d243202b57f463f96ffdcd7
+  commit_short: caf74cac
+  branch: main
+  dirty: true
+  dirty_file_count: 3
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  bundle_bytes: 535189
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: 6c71e8d26497a5808e09e2edd19c1ba4
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    bytes: 115277
+    slots: 85
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d_core.yaml
+    bytes: 98978
+    slots: 71
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_reconciliation.md
+    bytes: 19799
+    slots: null
+companions:
+  reasoning_log:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_reasoning.jsonl
+    present: true
+    md5: 6264ff83d3e984cdb52039704f276117
+    note: one JSON line per phase; absent for a runtime that cannot report its own
+      token accounting (#400)
+  telemetry_report:
+    path: data/run_telemetry/2026-08-22c_claude-opus-5-api-generic-v5.yaml
+    present: false
+    note: derived from records like this one, per label rather than per run; `d4d
+      runs telemetry` writes it
+  prompt_registry:
+    path: src/download/prompts/canonical_hashes.yaml
+    present: true
+    md5: 65e361a8aae6e5e8323be96eaa103ecd
+    note: the pins the recorded prompt hashes were judged against
+  digest_inventory:
+    path: src/data_sheets_schema/schema/digest_inventory.yaml
+    present: true
+    md5: 25da69bd7533b1f1b950d15a9589b7e3
+    note: digest to slot inventory, which decides whether a slot predates a pair
+unrecoverable: null
+unverified:
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''claude-opus-5''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+- field: model.temperature
+  value: null
+  reason: 'claude-opus-5 rejects `temperature` (400: deprecated for this model), so
+    the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config is not
+    sent and does not apply. Sampling for this model family is selected by model-name
+    suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). claude-opus-5 rejects `temperature` (400: deprecated
+  for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: LBL CBORG (proxy to Anthropic) at https://api.cborg.lbl.gov.'
+- 'Resumed run; phases skipped as already present: full, core, audit, reconcile_full,
+  reconcile_core, report.'
+api_usage:
+- phase: repair_full
+  attempt: 1
+  started_at: '2026-08-23T23:11:27+00:00'
+  seconds: 365.724
+  input_tokens: 45857
+  output_tokens: 40693
+  cache_read: 0
+  cache_write: 15971
+  max_tokens: 96000
+  stop_reason: end_turn
+- phase: repair_core
+  attempt: 1
+  started_at: '2026-08-23T23:17:41+00:00'
+  seconds: 325.128
+  input_tokens: 39699
+  output_tokens: 35479
+  cache_read: 0
+  cache_write: 12575
+  max_tokens: 56000
+  stop_reason: end_turn
+- phase: report_after_repair
+  attempt: 1
+  input_tokens: 143941
+  output_tokens: 5330
+  cache_read: 0
+  cache_write: 198766
+  stop_reason: end_turn
+phases_skipped:
+- full
+- core
+- audit
+- reconcile_full
+- reconcile_core
+- report
+repair:
+- phase: repair_full
+  round: 1
+  outcome: applied
+  findings: 44
+- phase: repair_core
+  round: 1
+  outcome: applied
+  findings: 45
+report_regenerated_after_repair:
+  changed:
+  - core
+  - full
+  why: repair rewrote a record after the report was written; a report describing bytes
+    that no longer exist is the artifact a reviewer reads instead of the diff
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+      md5: 3224b6be8df29beb12777db1fd68c620
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d_core.yaml
+      md5: 0ec088898f7b57ac1f55298c745a2588
+  schema:
+    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  recorded_by: api_runner.execute
+pair_consistency:
+  ran: true
+  consistent: false
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+      md5: 3224b6be8df29beb12777db1fd68c620
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d_core.yaml
+      md5: 0ec088898f7b57ac1f55298c745a2588
+  errors: 18
+  warnings: 1
+  identity_slots: 79
+  schema_moved: false
+  findings:
+  - code: shared-slot-content
+    path: $.acquisition_methods
+    message: 'list length differs: full=4, core=5'
+  - code: shared-slot-content
+    path: $.at_risk_populations.special_protections[3]
+    message: 'value differs: full=''Pregnancy and gestational diabetes are exclusionary,
+      established by the screening questionnaire before enrolment.'', core=''Pregnancy
+      and gestational diabetes are exclusionary, esta'
+  - code: shared-slot-content
+    path: $.collection_timeframes[0].source_caveats
+    message: 'value differs: full=''The FAIRhub metadata gives 19 July 2023 as the
+      start of collection; the study protocol publication states that enrolment began
+      on 18 July 2023. The tier-1 FAIRhub value is used he'
+  - code: shared-slot-content
+    path: $.creators[1].notes
+    message: 'value differs: full=''Recorded in the FAIRhub study metadata as responsible
+      party (Principal Investigator, Associate Professor) and as a study principal
+      investigator and central contact; recorded in th'
+  - code: shared-slot-content
+    path: $.data_governance.access_review_process
+    message: 'value differs: full=''Access to the public dataset requires logging
+      in through a verified ID system, agreeing to use the data only for type 2 diabetes
+      related research, and agreeing to the licence term'
+  - code: shared-slot-content
+    path: $.discouraged_uses[1].discouragement_details
+    message: 'value differs: full=''Analyses that assume a balanced distribution across
+      race/ethnicity, sex and diabetes severity in this release: enrolment is ongoing
+      and the creators state that the periodic releas'
+  - code: shared-slot-content
+    path: $.external_resources[0].restrictions[0]
+    message: 'value differs: full=''Shared under the CC-BY 4.0 licence, so there are
+      no restrictions associated with its use.'', core=''Shared under the CC-BY 4.0
+      license, so there are no restrictions associated with '
+  - code: shared-slot-content
+    path: $.future_use_impacts[1].impact_details
+    message: 'value differs: full=''AI algorithms can infer individual patient characteristics
+      and could facilitate individual-level identification. To prevent re-identification
+      attempts the project implemented a ro'
+  - code: shared-slot-content
+    path: $.informed_consent[0]
+    message: 'mapping keys differ: missing from core=[], missing from full=[''notes'']'
+  - code: shared-slot-content
+    path: $.instances[0].notes
+    message: 'value differs: full=''Each instance consists of all data available for
+      one individual participating in the study, spanning survey, clinical, retinal
+      imaging, environmental sensor, continuous glucose mo'
+  - code: shared-slot-content
+    path: $.ip_restrictions.restrictions[2]
+    message: 'value differs: full=''Publishers and conference organizers wishing to
+      reproduce more than the permitted five images or figures per paper must obtain
+      a separate licence from the Licensor.'', core=''Publis'
+  - code: shared-slot-content
+    path: $.is_deidentified.deidentification_details
+    message: 'value differs: full=''The DataCite de-identification block records direct
+      identifier removal and HIPAA de-identification as applied, with date shifting,
+      non-arrangement and k-anonymity not applied. The'
+  - code: shared-slot-content
+    path: $.known_biases[3].bias_description
+    message: 'value differs: full=''Although the study design targets balance across
+      race/ethnicity, biological sex and diabetes presence and severity, enrolment
+      is ongoing and interim releases, including this one, '
+  - code: shared-slot-content
+    path: $.license_and_use_terms.license_terms
+    message: 'value differs: full=''The AI-READI Data License Agreement version 2.0,
+      with Washington University in St. Louis as Licensor, published at https://doi.org/10.5281/zenodo.17555036.
+      It grants a non-exclusi'
+  - code: shared-slot-content
+    path: $.notes
+    message: 'value differs: full=''Both the FAIRhub dataset pages and the AI-READI
+      documentation site carry the banner "This repository is under review for potential
+      modification in compliance with Administration d'
+  - code: shared-slot-content
+    path: $.prohibited_uses[0].prohibition_reason
+    message: 'value differs: full=''Making clinical treatment decisions based on the
+      data is prohibited by the licence, as the data are intended solely as a research
+      resource.'', core=''Making clinical treatment decis'
+  - code: shared-slot-content
+    path: $.regulatory_restrictions.regulatory_restrictions[0]
+    message: 'value differs: full=''In response to the datasheet question about export
+      controls and other regulatory restrictions, the creators refer to the dataset
+      licence rather than naming any specific export-con'
+  - code: shared-slot-content
+    path: $.source_caveats
+    message: 'value differs: full=''Institutional attribution is inconsistent across
+      tier-1 sources. The FAIRhub API metadata names Washington University in St.
+      Louis as managing organization, lead sponsor, responsi'
+  findings_truncated: null
+report_claims:
+  checked: true
+  findings:
+  - kind: false_schema_claim
+    slot: distributions
+    detail: report says this is not a declared slot; it is declared on CoreDataset
+    claim: Validation against the core schema is the arbiter; if `distributions` is
+      not declared, this remains an open defect.
+  claims_checked: 0
+  claims_unnamed: 0
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_reconciliation.md
+      md5: 5373e4bc2d49ca5552eae0f0ff188bc8
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+      md5: 3224b6be8df29beb12777db1fd68c620
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d_core.yaml
+      md5: 0ec088898f7b57ac1f55298c745a2588
+  schema:
+    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+grounding:
+  checked: true
+  counts:
+    grounded: 42
+    minted_fragment: 13
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 11
+    minted_fragment: 13
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+      md5: 0f3abb51a333555456bedd63891fcd99
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+  - data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  british_spellings: 37
+  organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
+intermediates:
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/AI_READI_audit.json
+  sha256: 14b6b514469c6de8db21edfd2d53d207791a441999e00bf5b2328c6096834354
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/AI_READI_core.yaml
+  sha256: 8a0793fa259bd4dedd2b832f0309bb73aea3bf13512fac639a939fbdc5df8db7
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/AI_READI_full.yaml
+  sha256: e24e09ee07607969346752e31fd1b377e565983714ffc103fddb3101f805774e
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/AI_READI_reconcile_core.yaml
+  sha256: 4a2dbec19f7ad8b08917ab63d5ea8d213f93dfb9ce572983674fafb5e9e8392b
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/AI_READI_reconcile_full.yaml
+  sha256: 2ca87ad008062df12f938cd79df40597a30734ebb1827c71bf434e5fcb905532
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/AI_READI_repair_core_r1.yaml
+  sha256: f71c70e1edaa7a88be36e7e81d62f70e004e8fa052a73e3ddb8b928a79f190c3
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/AI_READI_repair_full_r1.yaml
+  sha256: f9cc6d589aa4ae8851e93e123f3c52f38eb63888e998c893fd3b3bae4ce3e566
+- path: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/AI_READI_report.md
+  sha256: e0da41956195acba26624c46f7a0d953d114aaa27e66d809bb5743306cac749b
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-08-22c_claude-opus-5-api-generic-v5_rep1
+    slots: 75
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+    slots: 85
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-22c_claude-opus-5-api-generic-v5_rep3
+    slots: 81
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 4
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1

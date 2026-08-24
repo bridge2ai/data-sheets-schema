@@ -1,0 +1,155 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "creators",
+      "issue": "Five of six Creator objects (Bihorac, Jiang, Strekalova, Rashidi, Kwong) place the named individual in `principal_investigator`, a Person-ranged slot reserved for the PI. The bundle names only ROSENTHAL, ERIC S. as principal investigator (NIH RePORTER, tier 4); the cohort-2 webinar slide is titled 'Bridge2AI CHoRUS Leadership Team' and does not state that these five are principal investigators. Asserting PI status for them is unsupported by the bundle, and the source_caveats acknowledging this do not repair the misplaced structural claim."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "creators",
+      "issue": "Same defect as the full record: five leadership-team members are encoded as `principal_investigator`, a role the bundle attributes only to Eric S. Rosenthal."
+    },
+    {
+      "severity": "high",
+      "record": "full",
+      "slot": "funders[0].grants[0].id",
+      "issue": "The Grant object carries only an `id` set to the NIH RePORTER URL, while the actual grant identifiers stated in the bundle (OT2OD032701, 1OT2OD032701-01, application ID 10472824, award amount 5880300, project period 2022-09-01 to 2026-11-30) are relegated to free-text `notes`. Per the v3 rule, evidence answering declared fields of a class must populate those fields rather than be restated in prose; the RePORTER URL is also a resolver URL in a uriorcurie-ranged slot identifying an external entity."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "funders[0].grants[0].id",
+      "issue": "Same defect as the full record: grant number, award amount and project period are carried in prose `notes` while the only structured field is a resolver URL."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[*].affiliations[*]",
+      "issue": "Organization objects carry `name` only, with no `id`. This is acceptable under the evidence boundary (the bundle supplies no registry identifiers), but it should be noted that no organization identifier is asserted; no defect if the schema does not require `id` on nested Organization."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "acquisition_methods[0].was_directly_observed",
+      "issue": "Set to true for retrospective extraction of pre-existing hospital records. The bundle states collection is retrospective and site-mediated; `direct_collection[0].is_direct` in the same record is set to false with the rationale that records were not gathered from individuals for this project. The two boolean assertions pull in opposite directions and the bundle does not support 'directly observed' for a retrospective chart extract."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "acquisition_methods[0].was_directly_observed",
+      "issue": "Set to true as in the full record, but the core record omits `direct_collection` entirely, so the counterbalancing statement that collection was not direct is absent. The core record therefore asserts direct observation of critical-care records with no qualification, which the bundle does not support."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "Omitted from the core record though present and evidence-supported in the full record (retrospective, site-mediated extraction from hospital source systems). Core is a projection of full; dropping this slot removes the record's only explicit statement that data were not collected directly from individuals."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "splits",
+      "issue": "Omitted from the core record although the full record populates it and the bundle clearly supports it (NIH RePORTER: 'The dataset will also provision a holdout test set, accessible for model external validation'). The holdout set is also referenced in core `purposes`, `tasks` and `intended_uses`, so its absence from `splits` is an internal gap rather than a considered projection."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "third_party_sharing",
+      "issue": "Omitted from the core record although present in the full record and supported by the bundle (controlled-access sharing with AIM-AHEAD trainees outside the contributing institutions; stated goal of a publicly available dataset)."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[2].counts",
+      "issue": "`counts: 7642` is labeled 'Admission with radiology imaging data' and takes the tier-2 figure, which is correct under the ranking rule. However the accompanying source_caveats states the two sources 'are not necessarily in conflict' while the record's top-level `source_caveats` presents them as a disagreement resolved by rank. The two caveats characterize the same evidence differently."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "instances[2].counts",
+      "issue": "Same inconsistency between the instance-level caveat ('not necessarily in conflict') and the top-level caveat ('disagree') as in the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "conforms_to_standard",
+      "issue": "Includes `OTHER` without the record making explicit which standard `OTHER` stands for. The prose in `conforms_to` names EDF+, Persyst and the OHNLP open-source schema, so the value is defensible, but the mapping from `OTHER` to those named standards is left implicit."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_collectors[*].role",
+      "issue": "`role` on DataCollector is populated with free-text values ('data contributing centers', 'data site manager', 'clinical collaborator', 'coordinating sub-teams'). The schema digest lists no enum constraint on DataCollector.role (unlike Maintainer.role), so this is not a validation defect, but the values are ad hoc descriptors rather than a controlled vocabulary."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "maintainers[*].role",
+      "issue": "All three Maintainer objects are assigned `role: academic_institution`. The first (Ciera McCrary, Program Manager) and second (two named individuals handling access requests) describe persons rather than institutions; the enum offers no 'individual' term, but `academic_institution` overstates what the bundle says about these contacts."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "maintainers[*].role",
+      "issue": "Same as the full record: individual contacts assigned the institutional enum value `academic_institution`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "external_resources[*].external_resources",
+      "issue": "Each ExternalResource object packs a URL plus a descriptive gloss into the single `external_resources` string field, using an em-dash separator. This is prose in a field the schema types as a plain string; the objects carry no `id` and no structured distinction between locator and description."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "external_resources[*].external_resources",
+      "issue": "Same combined URL-plus-gloss string construction as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "Set to true. Its own source_caveats concedes the value is 'inferred from the stated PICU and NICU admissions' rather than stated by the bundle. Inference of a boolean the sources do not assert sits at the edge of the prefer-omission rule; the caveat mitigates but does not remove the inference."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "Same inferred boolean as the full record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "created_by",
+      "issue": "'CHoRUS Consortium' is asserted as the creating entity. The bundle uses 'CHoRUS Consortium' (chorus4ai.org section heading) and 'CHoRUS Network' (GitHub), and NIH RePORTER names Massachusetts General Hospital as the awardee organization. The chosen value is attested but the record does not note the variant naming."
+    },
+    {
+      "severity": "info",
+      "record": "core",
+      "slot": "notes",
+      "issue": "The core record's `source_caveats` abridges the full record's version, dropping the specific detail about the RePORTER typographical error and truncated sentence while retaining the general statement. No content is added that the full record lacks; the abridgement is a permissible projection."
+    },
+    {
+      "severity": "info",
+      "record": "core",
+      "slot": "(whole record)",
+      "issue": "No slot in the core record states content absent from the full record. Every core value is a verbatim or lightly abridged projection of the corresponding full value; the divergences are omissions (direct_collection, splits, third_party_sharing, anomalies-adjacent slots) rather than additions."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "conforms_to_class",
+      "issue": "Correctly differentiated: `Dataset` in the full record, `CoreDataset` in the core record. Header blocks likewise match their prescribed forms, including the core-only `# Sources:` and `# Phase 4 reconciliation: completed` lines."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "id",
+      "issue": "Both records use `https://chorus4ai.org/` as the dataset identifier. This is a project website rather than a dataset identifier, but the bundle supplies no DOI, accession or repository identifier for the dataset itself, so no better-attested value is available."
+    }
+  ],
+  "summary": "Both records are broadly well grounded in the declared bundle, use the source ranking correctly on the admissions-count disagreement, and avoid importing outside identifiers. Two high-severity structural defects recur in both: five CHoRUS leadership-team members are encoded as `principal_investigator` when the bundle names only Eric S. Rosenthal in that role, and the FundingMechanism grant carries only a resolver URL as `id` while the actual grant number, award amount and project period sit in free-text `notes` instead of declared fields. Medium findings concern an unsupported `was_directly_observed: true` on a retrospective chart extract — aggravated in the core record, which drops the counterbalancing `direct_collection` slot — and three core omissions the full record supports and the bundle clearly evidences: `direct_collection`, `splits` (the holdout test set, referenced elsewhere in the core record) and `third_party_sharing`. Low findings are shape and consistency issues: an internal disagreement between instance-level and top-level caveats on whether the imaging figures conflict, free-text and overstated enum-adjacent `role` values, URL-plus-gloss strings in ExternalResource, and an acknowledged inference behind `at_risk_groups_included`. No enum value outside the schema's permitted sets was used, no prose appears where a list is required, and no source commentary is embedded in a name, identifier or affiliation value — all such commentary is correctly confined to `source_caveats` and `notes`. The core record adds no content beyond the full record."
+}

@@ -1,0 +1,113 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The slot `distributions` is not present in the supplied Dataset/CoreDataset slot inventory (98 slots listed; the inventory declares `distribution_formats`, `distribution_dates`, and `file_collections` but no `distributions`). The core record emits a `distributions` list with keys `path`, `conforms_to`, `conforms_to_standard`, `format`, `media_type`, `notes`. Additionally `conforms_to_standard` is declared multivalued at Dataset level, but here is written as a scalar string (`BIDS`). This is an invented slot and is likely to fail validation against the core schema."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "data_governance.committee_contact",
+      "issue": "`committee_contact` has declared range `Person`. The core record supplies `{email: DACO@b2ai-voice.org}`. `email` is not a documented key on Person in the digest, and the value is an office mailbox, not a person. The full record correctly omits this key. This is also content the core states that the full does not carry in that slot (though the address itself is attested in the bundle and appears in full.data_governance.access_review_process)."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "data_collectors[].role",
+      "issue": "The full record uses the permitted `DataCollector.role` enum values (`researcher`). The core record replaces them with free prose (`Research teams coordinating and administering the collection protocol`, `Clinicians providing gold standard diagnoses`). If `role` on DataCollector is enum-constrained in the core schema as it is at Dataset level, these are undefined values; if it is free text, the divergence from the full record is still an unexplained inconsistency between the paired records."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "informed_consent[].notes",
+      "issue": "Compensation content (electronic gift cards; $40 under 90 minutes, $80 over 90 minutes, max three sessions and $120) is folded into `informed_consent[0].notes` in the core record. The full record carries this in the dedicated `participant_compensation` slot (HumanSubjectCompensation). The relocation is disclosed in source_caveats, but it places compensation facts under a consent object where they are not a consent fact; the underlying facts are bundle-supported (IRB protocol §21, healthsheet)."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "preprocessing_strategies",
+      "issue": "The core record adds detail not present in the full record's corresponding slot: spectrogram dimension `201 by T`, the enumeration of the six sparc articulators, and the torchaudio pitch range 80–500 Hz / sparc range 50–550 Hz. All of these facts are attested in the bundle (PhysioNet 3.1.0 Data Description) and appear in the full record under `variables`, but the core record is meant to be a projection of the full record and here states content the full record's preprocessing_strategies does not."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "notes",
+      "issue": "The recommended citation is relocated into `notes`. The `citation` slot is present in the Dataset inventory and the full record populates it; if the core schema also declares `citation`, moving attested citation text into `notes` violates the record's own instruction to use structured slots first. The relocation is disclosed in source_caveats, which asserts the core schema does not declare `citation` — this assertion is not verifiable from the supplied digest."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "maintainers[1].maintainer_details",
+      "issue": "States that T-CAIREM is 'a data publishing platform maintained by the Temerty Center for Artificial Intelligence Research and Education in Medicine (T-CAIREM) at the University of South Florida's partner institution the University of Toronto'. The bundle (project documentation, Maintenance section) says only 'based at the University of Toronto'. 'University of South Florida's partner institution' is an unsupported characterization not present in any source. The core record corrects this to plain 'at the University of Toronto', so the two records also disagree."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "creators[3].credit_roles / creators[4].credit_roles / creators[8].credit_roles",
+      "issue": "CRediT roles are assigned to Sigaras (`software`), Ghosh (`software`, `data_curation`) and Johnson (`data_curation`, `software`) on the basis of module leadership and library contribution rather than any CRediT statement in the bundle. The feasibility publication's author-contribution block covers only EM, MB, SW, YA-A, SG, AR, AS, OE, YB and does not assign `data_curation` to Ghosh or any role to Johnson (not an author of that paper). These are inferences, not attested role assignments."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "publisher",
+      "issue": "`publisher` has declared range `uriorcurie`. The value `https://physionet.org/` is a bare site URL rather than an identifier for the publishing organization; no PhysioNet identifier appears in the bundle. Permissible under the uri fallback, but weak as an organizational identifier, and the bundle names the maintaining body as the MIT Laboratory for Computational Physiology rather than physionet.org as such."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[1].data_substrate",
+      "issue": "`B2AI_SUBSTRATE:30` (Parquet) is used for the 'Audio recording with derived acoustic features' instance. The substrate chosen describes the container format of the released features rather than the audio/waveform nature of the instance; `B2AI_SUBSTRATE:49` (Waveform Data) or `B2AI_SUBSTRATE:69` (Time-series data) would map the instance itself. Defensible but arguably a container/content conflation."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[2].data_substrate",
+      "issue": "`B2AI_SUBSTRATE:80` (Questionnaire response data) is applied to the 'Questionnaire and survey response' instance while the released artifacts are TSV tables; consistent with the content reading, but inconsistent with the container reading used for instances[1] (Parquet). The two instance objects apply different mapping conventions to the same slot within one record."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "sampling_strategies[0]",
+      "issue": "`is_representative: false` is emitted twice within the same object (once before `strategies`, once after). Duplicate mapping key in YAML — the second silently overrides the first. Values agree, so no semantic change, but the object is malformed."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "sampling_strategies[0].representative_verification",
+      "issue": "Indentation of the list under `representative_verification` is inconsistent with sibling sequences (the `- >-` item is at the same indent level as the key rather than nested as elsewhere in the file). Parses in most YAML loaders but is stylistically divergent and fragile; the same pattern appears at full.human_subject_research.irb_approval, .regulatory_compliance, full.labeling_strategies[0].annotator_demographics, full.machine_annotation_tools[0].tool_accuracy, full.annotation_analyses[0].disagreement_patterns, and full.regulatory_restrictions.regulatory_restrictions."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "conforms_to_class",
+      "issue": "Set to `CoreDataset`, which is correct per the slot description. Noted only because the paired records necessarily differ here; no defect."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "id",
+      "issue": "`id` is `doi:10.13026/8xbn-nq66` (version-specific 3.1.0 DOI) while `version_access.latest_version_doi` is `doi:10.13026/37yb-1t42` (version-independent). Internally coherent given the stated referent, but a reader resolving `id` reaches a specific version rather than the dataset concept; worth a caveat sentence that is not present."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_timeframes",
+      "issue": "Only a duration ('12 months') is recorded, with no `start_date` or `end_date`, correctly caveated as drawn from a healthsheet written against an earlier version. The bundle does supply a bounded window for the separate feasibility study (2023-06-05 to 2023-07-28), correctly excluded here. No omission the bundle clearly supports; noted as a residual gap rather than a defect."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "file_collections",
+      "issue": "`file_count` and `total_bytes` are omitted from every FileCollection, and `total_file_count` / `total_size_bytes` are omitted at Dataset level. The bundle gives per-feature record counts but no file counts or byte sizes, so omission is correct. Noted only to record that the audit checked for a supportable omission and found none."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "source_caveats",
+      "issue": "The core source_caveats asserts which slots 'the core schema does not declare' (subsets, splits, relationships, variables, file_collections, direct_collection, collection_consents, collection_notifications, consent_revocations, participant_privacy, participant_compensation, third_party_sharing, citation). No core schema digest was supplied to this audit, so this claim cannot be verified; if any of these slots is in fact declared on CoreDataset, the corresponding content has been wrongly folded into notes or dropped."
+    }
+  ],
+  "summary": "Both records are strongly grounded in the declared bundle: participant counts, per-feature record counts, feature-extraction parameters, de-identification steps, access tiers, licence and IP terms, IRB history, cohort criteria and version history all trace to tier-1 PhysioNet 3.1.0 or tier-2 project documentation / IRB / DUA, and the six main source conflicts (enrollment target, hosting platform, free-speech transcripts, award identifiers, HIPAA applicability, healthsheet staleness) are each disclosed with the ranking rationale. No prior-D4D reuse is evident. The most serious defects are structural rather than factual: the core record emits a `distributions` slot that is absent from the supplied inventory (and writes the multivalued `conforms_to_standard` as a scalar inside it), and places a bare email in `data_governance.committee_contact`, whose declared range is Person. Secondary issues are core/full divergence that the projection should not introduce — free-prose `role` values replacing the DataCollector enum, extra numeric detail in `preprocessing_strategies`, compensation relocated into an informed_consent note, and the citation relocated into notes on an unverifiable claim about the core schema. One unsupported factual embellishment appears in the full record ('University of South Florida's partner institution' attached to the University of Toronto), which the core record silently corrects. Remaining items are minor: three CRediT role assignments inferred from module leadership rather than any CRediT statement, a duplicated `is_representative` key in sampling_strategies, inconsistent sequence indentation in seven slots, and an instance/container conflation in the two `data_substrate` mappings."
+}

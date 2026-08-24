@@ -1,0 +1,221 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The slot `distributions` is not present in the CoreDataset slot inventory supplied in the schema digest, nor is it among the 98 Dataset slots. Its member keys (`path`, `format`, `media_type`) also do not correspond to any documented object range in the digest; `format` and `media_type` appear only on DistributionFormat, which has no `path` key. The two `source_caveats` inside these entries assert that `format` and `media_type` are 'enumerated' ranges with no Apache Parquet term, but the digest declares no enumeration for either. This block should be removed and its content folded into `file_collections` (full) or `distribution_formats` (both), where the same information is already partly duplicated."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "Content appears in the core record that has no counterpart in the full record's corresponding slot. The full record carries this material under `file_collections` with `id` and `collection_type` values (`raw_data`/`processed_data`/`metadata`); the core record restates it under an undeclared `distributions` slot with different keys and adds two `source_caveats` about enumerated format ranges that appear nowhere in the full record. Core must not introduce claims or commentary absent from the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[1].data_substrate",
+      "issue": "`data_substrate` is set to B2AI_SUBSTRATE:30 (Parquet) for the instance type 'Audio recording of a single acoustic task'. The substrate term describes the distribution container rather than the instance itself; the bundle describes these instances as waveform-derived feature tensors. B2AI_SUBSTRATE:49 (Waveform Data) or :42 (Tensor) is closer to what the instance is. Not clearly unsupported, but the chosen term encodes packaging rather than substrate."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "at_risk_populations.at_risk_groups_included",
+      "issue": "Set to false. The bundle states the adult cohort includes participants with mild cognitive impairment, Alzheimer's disease, other dementias, and active psychiatric conditions including bipolar disorder, schizophrenia and depression — populations whose capacity to consent is a recognized at-risk concern, and which the same record lists under `human_subject_research.special_populations`. The IRB protocol also notes that questions in the mood cohort 'can lead to possible discomfort and could trigger negative emotions.' The boolean and the accompanying `special_protections` prose are in tension; `false` is not supported by the bundle for the adult cohort."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "collection_consents",
+      "issue": "The second CollectionConsent entry ('The consent does not restrict use of the data to non-commercial purposes, to a specific geographic location...') is a restatement of the Consent Type answers from the project documentation, which the record also carries in `license_and_use_terms.data_use_permission` and, in the core record, inside `informed_consent[0].consent_scope`. The duplication is not a factual error but places the same source statement in three slots."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "collection_consents",
+      "issue": "Omitted from the core record although the full record populates it and the bundle supports it (project documentation Consent section: consent details, consent type answers). The core schema inventory is not supplied in the digest, so this may be a legitimate projection choice, but the material was instead partially merged into `informed_consent[0].consent_scope`, which changes which source statement sits in which field relative to the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "consent_revocations",
+      "issue": "Omitted from the core record while the full record populates it with the substantive withdrawal-and-retention rule ('research data, including voice recordings, cannot be removed from the database once the voice data collection process is completed') and the satisfaction-survey mechanism. Part of the rule was folded into `informed_consent[0].withdrawal_mechanism`; the satisfaction survey detail is dropped entirely. If `consent_revocations` exists in CoreDataset, this is an unsupported omission."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "collection_notifications",
+      "issue": "Omitted from the core record although the full record populates it and the bundle supports it (project documentation: 'Yes, participants went through an IRB-approved consent process'; IRB protocol §22.2 on the thirty-minute consent explanation and teach-back). No equivalent content appears anywhere in the core record."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "direct_collection",
+      "issue": "Omitted from the core record. The full record carries a DirectCollection object with `is_direct: true`; the core record folds the prose into `acquisition_methods[0].acquisition_details` but loses the structured boolean. The bundle explicitly answers this question ('Directly')."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "participant_privacy",
+      "issue": "Omitted from the core record although the full record populates it with anonymization method, five privacy techniques, data linkage and re-identification risk, all supported by the bundle. Some overlapping material survives in `is_deidentified`, but the privacy techniques (federated learning, two-tier dissemination, STRIDES hosting, per-user credentials) and the explicit re-identification risk statement about voice uniqueness are lost."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "participant_compensation",
+      "issue": "Omitted from the core record although the full record populates it and the bundle states the amounts explicitly (project documentation: $40 under 90 minutes, $80 over, maximum three sessions and $120). No compensation information appears anywhere in the core record."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "relationships",
+      "issue": "Omitted from the core record although the full record populates it with the instance-linkage description (participants unrelated; recordings linked to person and encounter via participant_id and session_id). Supported by the bundle."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "third_party_sharing",
+      "issue": "Omitted from the core record although the full record populates it with `is_shared: true` and supporting prose from the project documentation ('The dataset will be distributed broadly to individuals outside of the entity who created the dataset')."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "subsets",
+      "issue": "Omitted from the core record although the full record carries five DataSubset objects describing the disease cohorts with their inclusion criteria and gold-standard validation methods, all drawn from Table 1 of the project documentation. Partial cohort information survives in `subpopulations[1]`, but the per-cohort diagnosis lists and validation methods are lost."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "variables",
+      "issue": "Omitted from the core record although the full record carries thirteen VariableMetadata objects with data types, units and value bounds drawn from the PhysioNet Data Description section. If `variables` is present in CoreDataset, this is a supported omission; if absent from CoreDataset it is not a finding."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "file_collections",
+      "issue": "Omitted from the core record and replaced by the undeclared `distributions` block. The full record's three FileCollection objects carry `id` and `collection_type` enum values that the substitute block does not; the substitution loses schema-typed structure in favour of an undeclared shape."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "citation",
+      "issue": "Omitted from the core record although the full record populates it with the PhysioNet-supplied recommended citation, and the bundle supplies it verbatim. Citation is core-relevant discovery metadata."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "id",
+      "issue": "`id` is `doi:10.13026/8xbn-nq66`, the version-3.1.0 DOI, while `version_access.latest_version_doi` is `doi:10.13026/37yb-1t42`, the concept DOI that always resolves to the latest version. Both are supported by the bundle and the choice is defensible, but the record's referent is pinned to a version DOI while the description and `updates` slot describe an evolving dataset."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "creators[2]",
+      "issue": "A Creator object with twelve `affiliations` and no `principal_investigator` represents 'the collaborating institutions' as a single creator entity. This collapses twelve distinct organizations into one object in a multivalued slot. The accompanying `source_caveats` acknowledges the workaround, but the Organization objects are individually nameable and could be one Creator each, or the institutions could be omitted in favour of the named lead investigators."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "funders[0].grants[0].id",
+      "issue": "The Grant `id` is the NIH RePORTER project-details URL rather than a CURIE. The digest declares `id` as `uriorcurie`; no prefix for NIH RePORTER project records is shown in the digest, so a URL is the correct fallback here. Noted only because the same URL also appears as an identifier for a thing outside the dataset, and the bundle does supply it verbatim — no defect, recorded for completeness."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "subsets / file_collections ids",
+      "issue": "Minted fragment identifiers (`https://physionet.org/content/b2ai-voice/3.1.0/#cohort-voice-disorders`, `#features`, etc.) are appended to the dataset landing page URL rather than to the dataset's own DOI, which is the identifier the record uses as `id`. The fragments are traceable to an attested URL so this is within the minting rule, but anchoring on the record `id` would be more consistent."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "description",
+      "issue": "The description states 'five sites in the United States and Canada'. The bundle states 'five sites in North America' (PhysioNet) and 'There are five recording sites included in the dataset' (project documentation); the countries of collection are separately given as 'USA and Canada'. Combining the two into 'five sites in the United States and Canada' is a mild inference beyond what either source states, since neither says how the five sites distribute across the two countries."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "description",
+      "issue": "'adult eligibility is 18 to 120 years of age' is drawn from the project documentation Study Metadata section, which is explicitly written against version 2.0.0 and carries the note that eligibility metadata will be updated when the pediatric cohort is introduced. The `source_caveats` flags that the Study Metadata is v2.0.0-era, but the eligibility bounds are nonetheless stated in the description without qualification."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "creators[*].affiliations[*]",
+      "issue": "Organization objects carry only `name`. No ROR or other registry identifiers are asserted, which is correct under the evidence boundary since the bundle supplies none. Recorded as a positive check rather than a defect."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "ethical_reviews[1].reviewing_organization",
+      "issue": "A single `reviewing_organization` string names three distinct bodies ('Research Ethics Boards of Mount Sinai Hospital, the Hospital for Sick Children and the University of Toronto'). `ethical_reviews` is multivalued; three separate EthicalReview objects would represent three distinct reviewing entities rather than collapsing them into one scalar."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "maintainers[3]",
+      "issue": "The Health Data Nexus maintainer entry states it 'maintains the technical infrastructure for that earlier feature-only release' while the record's own `source_caveats` and `data_governance.source_caveats` both establish that PhysioNet is the current host and that the Health Data Nexus statement is the dispreferred tier-2 claim. Listing it as a current maintainer of this dataset, hedged with 'per the project documentation', sits awkwardly with the disagreement resolution recorded elsewhere."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_timeframes[0]",
+      "issue": "`start_date` and `end_date` are omitted and only `timeframe_details` ('twelve months') is given. This is correct — the bundle supplies no dates and HIPAA Safe Harbor removed date resolution finer than years — and the `source_caveats` explains it. Recorded as a positive check."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "notes",
+      "issue": "The `notes` slot carries the full AI-readiness rubric scoring. Per the slot description, notes is for residual content only after every fitting slot is used. The rubric is dataset-level assessment content with no better-fitting slot in the inventory, so this is defensible, but it is substantial content in a residual field."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "errata[0]",
+      "issue": "`erratum_url` points to the version 3.1.0 landing page rather than to a distinct erratum document. The bundle states there is no erratum and that changelogs are published with the dataset metadata; the `source_caveats` records this. Using the landing page as the erratum URL is a reasonable stand-in but is not an erratum location as such."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_protection_impacts",
+      "issue": "The slot is populated while its own `source_caveats` records that the bundle answers 'No' to whether an impact analysis was conducted. The prose describes ethics review and access governance rather than a DPIA. Populating a DPIA slot with adjacent-but-different activity, even when caveated, states something the bundle declines to state."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "confidential_elements[0]",
+      "issue": "`confidential_elements_present: false` is asserted while the accompanying `source_caveats` documents that raw voice is withheld and a Certificate of Confidentiality applies. The boolean follows the project documentation answer literally; the caveat is correctly attached, but the false value and the caveat pull in opposite directions."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "cleaning_strategies[0]",
+      "issue": "The audit protocol is recorded as a cleaning strategy while the attached `source_caveats` notes the bundle answers 'No' to whether pre-processing for cleaning was performed. As with `data_protection_impacts`, the slot is populated with adjacent activity contrary to the bundle's direct answer, though the caveat is correctly attached."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "source_caveats",
+      "issue": "The core record's top-level `source_caveats` truncates the full record's award-identifier discussion, dropping the two verbatim corrupted forms ('3TF-OT2ActfOD032720Projectf01S1' and 'Award #3Tf-OTOD03272001S2') that the full record quotes. The core caveat says 'in two evidently corrupted forms in the project documentation' without giving them. A minor loss of the evidence behind the claim."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to_class",
+      "issue": "Full record declares `Dataset`, core declares `CoreDataset` — correct per the digest. Recorded as a positive check."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "doi",
+      "issue": "`doi` is the bare `10.13026/8xbn-nq66`, correctly neither prefixed nor resolved, matching the anchored pattern. Recorded as a positive check."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "raw_sources[0].access_url / extension_mechanism.contribution_url / errata[0].erratum_url",
+      "issue": "All three are declared `uri` ranges and carry URLs, correctly not CURIEs. `distribution_formats[*].access_urls` likewise carries URLs in a `uri[]` range. Recorded as a positive check."
+    }
+  ],
+  "summary": "Two structural defects dominate. First, the core record contains a top-level `distributions` slot that the supplied schema digest does not declare, with member keys (`path`) that match no documented object range, and two `source_caveats` asserting enumerated ranges for `format` and `media_type` that the digest does not show as enumerated; this block will fail validation and should be replaced by `file_collections` and/or `distribution_formats`. Second, it introduces content and commentary with no counterpart in the full record, violating core-from-full projection. Beyond that, roughly a dozen slots the full record populates from the bundle are absent from the core record with no equivalent content — collection_consents, consent_revocations, collection_notifications, direct_collection, participant_privacy, participant_compensation, relationships, third_party_sharing, subsets, file_collections and citation — several of which lose structured booleans or per-cohort detail rather than merely prose. On substance, both records set `at_risk_populations.at_risk_groups_included: false` while their own `human_subject_research.special_populations` lists dementia, cognitive impairment and active psychiatric conditions in the adult cohort, which the bundle supports and the boolean contradicts. Three slots (`data_protection_impacts`, `cleaning_strategies`, `confidential_elements`) are populated with adjacent activity where the bundle gives a direct negative answer; each carries a correct caveat, but each states more than the source does. Provenance handling is otherwise strong: the tier-1/tier-2 disagreements on counts, hosting, name spellings and award identifiers are resolved in the manifest's favour and documented, no registry identifiers are invented for external organizations or people, `uri` versus `uriorcurie` ranges are respected throughout, the bare DOI form is correct, and minted subset and file-collection fragments hang off an attested URL. American spelling holds in composed prose with source spellings preserved in quoted titles."
+}
