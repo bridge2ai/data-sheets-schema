@@ -1,0 +1,149 @@
+{
+  "findings": [
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "sampling_strategies[0].is_sample",
+      "issue": "Core asserts `is_sample: true`, which the full record does not state and which contradicts both records' own prose (\"all enrolled participants for the covered period are included rather than a further sample of them\") and the tier-1 healthsheet answer (\"The dataset contains all possible instances\"). Content added in projection, not carried from the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "description",
+      "issue": "The acronym is expanded as \"Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights\", the form used only by the tier-3 BMJ Open protocol and Nature Metabolism comment. Tier-1 sources (FAIRhub API study description: \"AI Ready and Exploratory Atlas for Diabetes Insights\"; README and healthsheet: \"Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights\") give \"Exploratory\". The declared ranking requires the higher-tier value; the caveat notes the conflict but the preferred value contradicts the rule."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "ethical_reviews[0].source_caveats / human_subject_research.ethics_review_board",
+      "issue": "The caveat states \"Both are tier-1 or supporting sources and the ranking does not settle the discrepancy\". This misstates the declared ranking: the RO-Crate (tier 1, \"Washington University IRB\") outranks the dataset documentation/healthsheet (tier 2) and BMJ Open (tier 3). The lower-ranked value was preferred without the ranking rule being correctly applied."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "funders",
+      "issue": "Multivalued slot collapsed. Only one FundingMechanism object is emitted; NIH grants P30DK035816 and UL1TR003096 and Research to Prevent Blindness — distinct grantors/grants named in the bundle — are recorded inside `notes` prose rather than as separate FundingMechanism objects, contrary to the one-object-per-entity rule."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "distribution_formats[4].format",
+      "issue": "`format` holds \"FAIRhub portal with Azure Storage access\", an access route rather than a distribution format. The access conditions belong in `access_urls`/`notes` (both already populated on the same object) or in `data_governance.access_review_process`."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "variables[monofilament_test_response].categories",
+      "issue": "Two categories are collapsed into one list item, `\"yes; no\"`, rather than emitted as separate category values."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "conforms_to_standard",
+      "issue": "RO_CRATE is asserted as a standard the dataset content follows. The bundle shows the RO-Crate is a separate external description of the release (delivered via Google Drive); ro-crate-metadata.json is not among the nine root metadata files the README/CDS structure lists for the distributed dataset. The record's own `conforms_to` prose calls it \"a separate RO-Crate metadata description\"."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "Value `restricted` is not stated by any source; the tier-1 RO-Crate records confidentialityLevel \"HL7:2N (normal)\". The record's `notes` acknowledge this is its own mapping onto the enum rather than a transcribed value."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "data_governance.committee_name",
+      "issue": "\"AI-READI Data Access Committee\" is not a string any source uses. BMJ Open (tier 3) refers to \"the Data Access Committee\"; the tier-1 RO-Crate names the governance committee \"AI-READI Consortium\". The name is a coinage combining the two."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "acquisition_methods[0].acquisition_details",
+      "issue": "Internal inconsistency: \"retinal imaging on six devices\", while `collection_mechanisms` in the same record lists seven (Optomed Aurora IQ, iCare EIDON, Heidelberg Spectralis, Heidelberg FLIO, Topcon Maestro2, Topcon Triton, Zeiss Cirrus 5000), matching the seven device rows of BMJ Open Table 4."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "raw_sources[0].access_url",
+      "issue": "`access_url` is set to https://docs.aireadi.org while the same object states the raw data are not shared outside the project team. The URL is documentation, not an access point for the raw data the object describes."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "related_datasets",
+      "issue": "Supported relationship omitted. The tier-1 FAIRhub API records `\"child\": 4` (the mini-subset for pipeline development) and the v3 documentation describes it; this is recorded only as `notes` prose rather than as a DatasetRelationship (e.g. has_part / is_source_of)."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "extension_mechanism",
+      "issue": "Supported omission. The healthsheet answers the extension question directly: \"No, currently there is no mechanism for others to extend or augment the AI-READI dataset outside of those who are involved in the project.\" ExtensionMechanism.extension_details is unpopulated."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "data_protection_impacts",
+      "issue": "Supported omission. The healthsheet answers: \"No, a data protection impact analysis has not been conducted.\" DataProtectionImpact.impact_details is unpopulated."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "keywords",
+      "issue": "\"Salutogenesis\" appears as a keyword but is not in any source keyword list (FAIRhub subject list, study keywordList, RO-Crate keywords). It is a concept discussed in the prose, added here as a discovery tag."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "creators[0].id / creators[0].affiliations[0].id",
+      "issue": "The same identifier, https://aireadi.org, is used both for the Creator node and for one of its own affiliations, so two distinct nodes carry one identity. The organizational creator's name (\"AI-READI Consortium\") is expressed only as an entry inside its own affiliations list."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "known_biases[2].affected_subsets",
+      "issue": "Value is prose (\"All splits and all modalities.\") in a slot that, by name and multivalency, expects subset references; the three split subsets minted in the full record are not referenced."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "notes",
+      "issue": "The recommended citation is folded into `notes` prose. The full record carries it in the dedicated `citation` slot; if CoreDataset declares `citation`, this is residual-notes use where a fitting slot exists."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "Internal inconsistency in format assignment: clinical_data is given `format: CSV / media_type: text/csv` and the two wearable directories `JSON / application/json`, but environment (also CSV per the record's own distribution_formats note) and the DICOM/WFDB directories carry no format or media_type."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "funders[0].grants[0].name",
+      "issue": "Award number and award title are merged into one `name` value (\"OT2OD032644: Bridge2AI: Salutogenesis Data Generation Project\") rather than placed in the Grant class's declared fields."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "sampling_strategies[0].strategies",
+      "issue": "Unrecorded source conflict on the study base window: BMJ Open states patients with an encounter \"between 2020 and 2025\", while the healthsheet and IRB protocol state \"within the past 2 years\". The BMJ (tier 3) figure is stated without noting the disagreement."
+    },
+    {
+      "severity": "info",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The `distributions` slot and its keys (`path`, `bytes`, `format`, `media_type`) do not appear in the supplied Dataset digest; conformance can only be checked against the CoreDataset schema, which was not supplied. Same limitation applies to whether CoreDataset declares `citation`, `total_file_count` and `total_size_bytes`, all of which the core record omits."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "creators[*].affiliations[*].id, ethical_reviews, data_governance.accountable_organization",
+      "issue": "ROR: and ORCID: CURIEs are used in `uriorcurie` slots in place of the resolver URLs the bundle states. All local parts are evidence-backed, but the supplied digest declares only B2AI_SUBSTRATE and B2AI_TOPIC prefixes, so ROR/ORCID prefix declaration cannot be verified from the digest alone."
+    },
+    {
+      "severity": "info",
+      "record": "both",
+      "slot": "at_risk_populations.special_protections, human_subject_research.irb_approval / regulatory_compliance / special_populations, ip_restrictions.restrictions, data_governance.stewardship_roles, version_access.versions_available, external_resources[*].restrictions",
+      "issue": "These are emitted as single-item lists. The supplied digest does not declare multivalency for them, so list-versus-scalar conformance cannot be confirmed; if any is scalar-ranged, the list form will fail validation."
+    }
+  ],
+  "summary": "No fabricated dataset facts were found: participant counts, file counts, byte totals, split tables, laboratory reference ranges, device inventories, dates, DOIs and all ROR/ORCID local parts are traceable to the declared bundle and are internally arithmetically consistent (subpopulation and split totals each sum to 2,280; per-directory file counts sum to 356,334, leaving the 9 root metadata files to reach 356,343; per-directory bytes sum to within 419,614 bytes of the declared total). Three medium findings concern the declared decision rules rather than invention: the core record introduces `is_sample: true`, absent from the full record and contradicted by the tier-1 healthsheet; the acronym expansion \"Equitable\" is taken from tier-3 publications where tier-1 sources say \"Exploratory\"; and the IRB-naming caveat misstates the source ranking, preferring a tier-2/tier-3 value over the tier-1 RO-Crate without applying the rule. A fourth medium finding is a multivalued-slot collapse in `funders`, where three additional funding sources sit in prose. Remaining findings are low-severity shape and placement issues (an access route in a `format` field, two categories in one string, prose in `affected_subsets`, a documentation URL as `access_url`, a duplicated identifier across Creator and its own affiliation), two clearly supported omissions the healthsheet answers directly (`extension_mechanism`, `data_protection_impacts`), one relationship (the mini-subset child dataset) left in `notes` rather than `related_datasets`, and two enum mappings (`confidentiality_level: restricted`, `conforms_to_standard: RO_CRATE`) that are the record's own interpretation rather than transcribed values — both flagged as such in the records' own notes. Four informational items record conformance questions that cannot be settled from the supplied Dataset digest alone."
+}

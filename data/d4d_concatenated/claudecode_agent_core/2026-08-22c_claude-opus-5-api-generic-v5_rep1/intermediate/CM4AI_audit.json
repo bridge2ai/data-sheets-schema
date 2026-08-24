@@ -1,0 +1,89 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions",
+      "issue": "The `distributions` slot is not present in the supplied schema digest for `Dataset`, and no `Distribution` object range with keys `path`, `format`, `media_type`, `bytes`, `md5`, `conforms_to_standard`, `notes`, `source_caveats` is defined anywhere in the digest. The core record populates ten such objects. Unless `CoreDataset` declares a slot the digest does not show, this is an invented slot with invented keys and will fail validation. The equivalent content in the full record is carried by `file_collections` (a declared slot with a declared `FileCollection` range)."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions[*].bytes",
+      "issue": "Byte counts (116019, 139059, 175923, 96154, 30925, 75059, 1153434) are not stated anywhere in the declared bundle. The bundle gives only rounded human-readable sizes ('113.3 KB', '135.8 KB', '171.8 KB', '93.9 KB', '30.2 KB', '73.3 KB', '1.1 MB'). These integers are back-computed approximations, not transcribed facts, and they assert a precision the source does not contain. The full record correctly avoids asserting byte counts."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "distributions[9].conforms_to_standard",
+      "issue": "`conforms_to_standard` is declared multivalued in the digest (DataStandardEnum [many]). The core record supplies the bare scalar `RO_CRATE` rather than a list. The full record uses the list form correctly in both `conforms_to_standard` and `file_collections[*].conforms_to_standard`."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "distribution_formats[1].media_type",
+      "issue": "The core record changes the RO-Crate media type from `application/ld+json` (full record) to `application/json` and attaches a `source_caveats` asserting that 'the schema's media_type enumeration has no term for JSON-LD'. The supplied digest declares no enumeration on `media_type` for DistributionFormat. The caveat states a schema constraint not evidenced in the digest, and the value silently diverges from the full record without the bundle supporting the change."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "notes",
+      "issue": "The `notes` slot is used to carry content that belongs in structured slots rather than residual content. It restates the full citation (which the full record holds in `citation`), the `direct_collection` content, the `third_party_sharing` content, and a summary of `file_collections`/`subsets`. Per the digest, notes is for 'residual content only, after every fitting slot is used'. Where CoreDataset declares no counterpart slot the omission is the correct answer, not relocation into notes."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "funders[0].grants[0].id",
+      "issue": "`Grant.id` is declared `uriorcurie`. The value `https://reporter.nih.gov/project-details/11211616` is a resolver URL for an NIH RePORTER application record, used as the identifier of a grant. The bundle supplies the grant number itself (1OT2OD032742-01, core project OT2OD032742, application 11211616); the URL identifies a RePORTER page, not the grant, so the identifier and its referent are mismatched."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators[*].principal_investigator.id",
+      "issue": "Two ORCID values in the bundle are written without the `https://orcid.org/` prefix in the Dataverse source ('Marquez C ... ORCID: 0000-0003-3960-420X'). Both records normalize this to `ORCID:0000-0003-3960-420X`, which is correct; noting only that this is the one case where the transcription required normalization and it was applied consistently across both records."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[*].data_substrate",
+      "issue": "Substrate assignments are interpretive rather than transcribed. B2AI_SUBSTRATE:59 (Size Exclusion Chromatography-Mass Spectrometry Data) and B2AI_SUBSTRATE:64 (Perturb-seq Data) are well supported. B2AI_SUBSTRATE:56 (Immunofluorescence Image) for the IF images and B2AI_SUBSTRATE:58 (Mass Spectrometry Data) for AP-MS are defensible. B2AI_SUBSTRATE:63 (Single-cell RNA Sequence Data) for raw Perturb-seq reads is a reasonable but not uniquely determined choice. No defect, recorded for transparency."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "instances[3].counts",
+      "issue": "`counts: 11739` is attached to the gene-level CRISPRi perturbation instance. The bundle states 11,739 targeted genes, so the number is supported, but `counts` on an Instance denotes the number of instances of that type; equating targeted genes with atlas records is an inference the bundle does not make explicit. Low risk, since one record per targeted gene is the natural reading."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "creators",
+      "issue": "The core record reproduces all 46 creators from the full record verbatim, including the `source_caveats` on Sali A. Consistent with the full record and supported by the bundle; no divergence found."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "publisher",
+      "issue": "`publisher: ROR:0153tk833` names the University of Virginia. The ROR identifier appears verbatim in the June 2026 Dataverse release (author affiliations for Clark T, Al Manir S, Levinson MA, Niestroy J, Ratcliffe S are given as 'https://ror.org/0153tk833'), so the identifier is attested in the bundle and correctly rendered as a CURIE. Recorded as a check that passed rather than a finding."
+    },
+    {
+      "severity": "low",
+      "record": "core",
+      "slot": "distributions[*].md5",
+      "issue": "All ten MD5 checksums transcribe correctly from the June 2026 release listing. The three IF-image checksums correctly differ from the October 2025 same-named archives, and the source_caveats correctly flag that divergence. Recorded as a check that passed."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "total_file_count",
+      "issue": "`total_file_count: 10` matches the ten files listed in the June 2026 release. `total_size_bytes` is correctly omitted rather than back-computed from rounded sizes — the treatment the core record's `distributions[*].bytes` should have followed."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "issued / last_updated_on",
+      "issue": "`issued: 2026-06-17T00:00:00Z` follows the Dataverse publication date over the CM4AI portal's conflicting 'June 17, 2025', consistent with the declared ranking (tier 1 june_2026_dataverse_release over tier 2 data_release_documentation), and the conflict is disclosed in source_caveats. `last_updated_on: 2026-07-15T00:00:00Z` matches the later publication date of the three IF archives. Both correct."
+    }
+  ],
+  "summary": "Both records are grounded in the declared bundle, use the declared source ranking correctly (Dataverse June 2026 release over CM4AI portal for the release date; October 2025 treated as superseded; the Nature U2OS paper correctly quarantined as a different dataset), and disclose their conflicts in source_caveats rather than silently selecting. Three high-severity defects are all in the core record and all concern the `distributions` block: the slot and its keys do not appear in the supplied schema digest, its `bytes` values are back-computed from rounded human-readable sizes rather than transcribed, and one `conforms_to_standard` is a bare scalar where the digest declares [many]. Two medium defects also sit in the core record — an unexplained media_type divergence from the full record justified by a schema constraint the digest does not show, and use of `notes` to relocate full-record content (citation, direct_collection, third_party_sharing, file_collections/subsets summary) that CoreDataset does not declare, where omission was the correct answer. One medium defect in the full record: a NIH RePORTER resolver URL used as `Grant.id` identifies a web page rather than the grant it purports to name. No content in the core record contradicts the full record on any shared fact; the divergences are the media_type change and the notes relocation. No unsupported dataset facts, no invented identifiers for external entities, and no prior-D4D reuse detected. The minted subset and file-collection identifiers in the full record are correctly built as fragments on the release DOI."
+}

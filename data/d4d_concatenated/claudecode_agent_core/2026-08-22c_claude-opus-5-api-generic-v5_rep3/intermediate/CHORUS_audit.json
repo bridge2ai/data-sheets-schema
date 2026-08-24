@@ -1,0 +1,209 @@
+{
+  "findings": [
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "resources",
+      "issue": "Core record moves the nine data modalities from `subsets` (DataSubset, used in the full record) into `resources` (range Dataset). The declared full-record schema lists `resources` as \"Sub-resources or component datasets\" and `subsets` for logical partitions; if the core schema declares `subsets`, this is an unnecessary divergence in referent modeling between the paired records. Additionally, the two records now assign the same `id` values to objects of different classes (DataSubset vs Dataset), so an identifier such as https://chorus4ai.org/#chorus-dataset-imaging denotes a DataSubset in one record and a Dataset in the other."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "acquisition_methods[0].acquisition_details",
+      "issue": "Core adds content the full record does not state in this slot: the clause \"The data are drawn from clinical systems rather than gathered directly from patients for research purposes.\" In the full record this fact lives in `direct_collection` (is_direct: false). The core record dropped `direct_collection` and folded its content into a neighbouring slot, so the core states in acquisition_methods something the full record's acquisition_methods does not."
+    },
+    {
+      "severity": "high",
+      "record": "core",
+      "slot": "data_governance.notes",
+      "issue": "Core adds content absent from the full record's data_governance: \"The dataset is shared beyond the contributing consortium under controlled access, including with trainees provisioned compute on the Bridge2AI AI/ML for Clinical Care Collaborative Cloud.\" This is the full record's `third_party_sharing` content relocated into a notes field, i.e. core-only content relative to the corresponding full-record slot."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "notes",
+      "issue": "Core notes add a statement not present in the full record's notes: \"The project also sequesters a holdout test set for external model validation; the core schema provides no split-level slot, so this is recorded under purposes, tasks, and intended_uses.\" The underlying fact is bundle-supported and appears in the full record's `splits`, but the sentence itself is core-only prose."
+    },
+    {
+      "severity": "medium",
+      "record": "core",
+      "slot": "source_caveats",
+      "issue": "Core source_caveats add a sentence not in the full record's source_caveats: \"The nine standardized data modalities are carried in `resources` as component datasets.\" Core-only content relative to the full record."
+    },
+    {
+      "severity": "medium",
+      "record": "full",
+      "slot": "instances[0].counts",
+      "issue": "counts: 50000 is drawn from chorus4ai.org's \"Current Released Dataset\" snapshot, where 50,000 is labeled \"Patient admissions from ICU, PICU, and NICU\". The instance_type asserts each instance is a single admission in one of those three settings, which the bundle supports, but pairing this count with an `instances` entry implies 50,000 is the dataset's instance count while the bundle simultaneously reports 45K+ unique admissions (webinar, Aug 2025) and 1.6 billion OMOP rows. The disagreement is disclosed in source_caveats, so this is a transparency-mitigated risk rather than an unsupported claim."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "instances[1].counts",
+      "issue": "counts: 1600000000 renders the source's \"1.6 Billion / Rows of EHR OMOP data\" as an exact integer. The source states a rounded magnitude, not a precise count; the integer range forces precision the bundle does not assert, and no source_caveat flags the rounding on this entry (unlike instances[0] and instances[2])."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators",
+      "issue": "Five of the six Creator objects (Bihorac, Jiang, Strekalova, Rashidi, Kwong) are populated via `principal_investigator`, but the bundle identifies them only as members of the \"Bridge2AI CHoRUS Leadership Team\" slide. Only Rosenthal is stated by any source to be a principal investigator (NIH RePORTER). Placing leadership-team members in a `principal_investigator` field asserts a role the bundle does not support for five of six. The source_caveats disclose the schema-shape rationale but the asserted role remains unsupported."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "creators",
+      "issue": "The bundle does not state that these six individuals created the *dataset*; they are named as the project's leadership team and, for Rosenthal, the award PI. Attributing dataset creatorship is an inference beyond what the sources assert, though a defensible one."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "license_and_use_terms.contact_person",
+      "issue": "Jared Houghtaling is named as `contact_person` for license and use terms. The bundle lists him only under GitHub \"Contact / Request access: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org\" — an access-request contact, not a licensing contact. Selecting one of two co-equal contacts and re-scoping him to licensing is unsupported; the other contact (dbold@emory.edu) is dropped from the structured field and survives only in prose."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "data_governance.accountable_organization",
+      "issue": "Massachusetts General Hospital is asserted as the organization accountable for the data over time. The bundle states MGH is the NIH award recipient organization and hosts the program manager; it does not state that MGH is the accountable data steward. Reasonable inference, but not an evidenced claim."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "ethical_reviews[0].reviewing_organization",
+      "issue": "\"CHoRUS consortium ethics pillar\" is not a named organization in the bundle. The sources describe an Ethics pillar / \"Ethical and Trustworthy AI\" as a project component and describe ethics focus groups; no reviewing body of this name is stated. The value is a coined label placed in a field that asks for a reviewing organization, effectively asserting that a review body exists. The accompanying source_caveat concedes no IRB determination is reported, which contradicts populating the slot at all."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "data_collectors[*].role",
+      "issue": "`role` on DataCollector is populated with free strings (\"Data contributing site\", \"Site data manager\", \"Coordinating sub-team\"). The digest constrains `role` to an enum only on Maintainer, not on DataCollector, so this is not a validation failure; however the values are record-coined labels rather than anything the bundle names as a role designation."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "regulatory_restrictions.confidentiality_level",
+      "issue": "`restricted` is selected from the enum on the basis of \"controlled access\" language in the bundle. The bundle never characterizes a confidentiality level; the mapping from \"controlled access\" to the enum term `restricted` (as opposed to `confidential`) is an unstated judgment call."
+    },
+    {
+      "severity": "medium",
+      "record": "both",
+      "slot": "conforms_to_standard",
+      "issue": "`OTHER` appears once in the top-level list but stands for two distinct non-registered standards (OHNLP schema for notes, EDF+/Persyst for EEG). The enum cannot disambiguate, and the deduplicated single OTHER under-represents what `conforms_to` prose states. Minor, but the slot's queryability purpose is partially defeated."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "known_limitations[4]",
+      "issue": "limitation_type `temporal_limitation` with the description that retrospective collection means the data reflect recorded practice \"rather than prospectively designed measurements\" is a methodological characterization the bundle does not state as a limitation. The bundle states only \"Retrospective data collection\". The framing as a limitation is the record's own inference."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "known_limitations[3]",
+      "issue": "representativeness_limitation asserting the dataset \"is therefore specific to acute and critical illness rather than to general hospital or ambulatory care\" is an inference from scope, not a limitation any source states. Defensible but unstated."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "known_biases[0].bias_type",
+      "issue": "`selection_bias` is assigned by the record; no source names or categorizes any bias in the dataset. The bias_description restates cohort composition facts that are supported, but the categorization as a known bias of type selection_bias is the record's own analysis. The source_caveat partially discloses this."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "addressing_gaps[1]",
+      "issue": "\"Existing resources lack a diverse, high-resolution, ethically sourced, AI-ready dataset...\" restates the GitHub About text's goal statement as a gap assertion about the state of existing resources. The source states the project's goal, not that no such resource exists. Mild inferential inflation."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "addressing_gaps[2]",
+      "issue": "\"Sequestered holdout datasets for external validation of models have been unavailable, limiting marketplace adoption\" asserts prior unavailability. The NIH abstract states only that the dataset will provision a holdout set to aid marketplace adoption; it does not state such sets have been unavailable."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "addressing_gaps[3]",
+      "issue": "\"Contextual factors ... are commonly absent from clinical datasets\" asserts a general property of clinical datasets. The abstract states only that CHoRUS will ensure such factors are present in its own data elements."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "subsets[3] / resources[3] (Nursing flowsheets)",
+      "issue": "conforms_to \"OMOP Common Data Model, with schema extensions\" attributes the \"OMOP schema with extensions\" table cell to nursing flowsheets. The record's own source_caveats concede this attribution rests on column order alone in a garbled table extraction. The caveat is present, but the value is asserted in the structured field without a local source_caveat on the object itself."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "subsets[7] / resources[7] (Waveform telemetry)",
+      "issue": "\"The published metadata schema is described as an extended PhysioNet schema\" is attributed to telemetry on the same garbled-table column-order basis as the nursing flowsheet attribution, but carries no caveat at the object level and is not flagged in the top-level source_caveats alongside the flowsheet case."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "instances[3].notes / description",
+      "issue": "\"23 Tb\" is transcribed as stated (the source writes \"23 Tb\"), which is correct practice, but the description slot elsewhere reproduces it without noting the unit ambiguity (Tb vs TB) in a dataset-size context. Transcription fidelity is preserved; flagged only as a residual reading hazard."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "maintainers[0].maintainer_details",
+      "issue": "The email cmccrary@mgh.havard.edu is reproduced verbatim from the source (correct — it is quoted material) and the typo is disclosed in source_caveats. No defect, but note the address is non-resolving and appears in a details field where a reader may act on it; the disclosure lives only in the far-separated source_caveats block."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "external_resources[2]",
+      "issue": "\"www.bridge2ai.org/chorus\" is written without a scheme inside prose. The slot is a free-text ExternalResource field, so this is not a range violation, but it is inconsistent with the other four entries which give full URLs."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "status",
+      "issue": "The `status` slot's description gives examples of the form draft/published/deprecated — a short state token. Both records populate it with a multi-sentence narrative paragraph. Not a range violation (string), but the value carries release-progress narrative that duplicates `updates.update_details` rather than answering the field."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "splits[0]",
+      "issue": "Populated only with `split_details` describing the holdout test set. The bundle supports this. Noted only because the paired core record has no counterpart, producing a full-only fact that the core compensates for in `notes` — an asymmetry the reconciliation should record explicitly."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "direct_collection",
+      "issue": "Present in full, absent in core, with its content relocated into core's acquisition_methods[0]. If the core schema declares `direct_collection`, the omission is an unnecessary loss of a structured boolean (is_direct: false)."
+    },
+    {
+      "severity": "low",
+      "record": "full",
+      "slot": "third_party_sharing",
+      "issue": "Present in full, absent in core, with its content relocated into core's data_governance.notes. Same concern as direct_collection: structured `is_shared: true` becomes prose."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "id",
+      "issue": "The dataset id https://chorus4ai.org/#chorus-dataset is a minted fragment on an attested URL, which conforms to the minting rule. Noted for completeness: the fragment `#chorus-dataset` does not correspond to any anchor stated in the source, so the URL as written does not resolve to a dataset-specific page."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "doi / citation / version / license",
+      "issue": "Omitted. Correct — the bundle states no DOI, no recommended citation, no version identifier, and no dataset license (the MIT statement is scoped to the GitHub project and is correctly confined to ip_restrictions/license_and_use_terms prose). Recorded as a verified-correct omission, not a defect."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "collection_consents / informed_consent / consent_revocations / collection_notifications",
+      "issue": "Omitted. Correct: the bundle describes retrospective extraction from clinical systems and community ethics focus groups but states nothing about participant consent, notification, or revocation. Recorded as a verified-correct omission."
+    },
+    {
+      "severity": "low",
+      "record": "both",
+      "slot": "total_size_bytes / total_file_count / compression / download_url",
+      "issue": "Omitted. Correct: \"23 Tb\" is a modality-level figure not a total, no file counts are given, no compression is stated, and no direct download exists (access is enclave-based and controlled). Recorded as verified-correct omissions."
+    }
+  ],
+  "summary": "Both records are broadly well-grounded in the declared bundle, with unusually thorough and honest source_caveats that pre-disclose the two real source conflicts (50,000 vs 45K+ admissions; 7,642 admissions-with-radiology vs 1,000 images) and the garbled webinar table. Tier ranking was applied correctly, preferring chorus4ai.org (tier 2) over the webinar (tier 4) while recording both values. No prohibited external facts were detected: no registry identifiers, ORCIDs, RORs or DOIs were supplied beyond what the sources state, and the misspelled contact email was transcribed rather than silently corrected. The most material problems are full/core divergences. Three facts appear in the core record in slots where the full record does not carry them, because core dropped `direct_collection`, `third_party_sharing` and `splits` and folded their content into `acquisition_methods[0]`, `data_governance.notes` and `notes` respectively; under strict reconciliation these count as core-only content. Core also reclassified the nine modalities from `subsets` (DataSubset) to `resources` (Dataset), reusing identical identifiers for objects of different classes across the pair. The most significant evidence-boundary issue is `creators`: five of six people are placed in a `principal_investigator` field on the strength of a leadership-team slide, asserting a role only Rosenthal is documented to hold, and dataset creatorship itself is inferred from project leadership. Secondary unsupported assertions cluster in the interpretive slots — a coined `reviewing_organization` (\"CHoRUS consortium ethics pillar\") in a record that simultaneously concedes no IRB determination is reported, a self-assigned `selection_bias` categorization, three `addressing_gaps` entries that convert project goals into claims about deficiencies in the wider field, and two `known_limitations` that are the record's own analysis rather than anything a source states. Shape conformance is otherwise clean: no enum violations, no prose in list-ranged slots, no objects in scalar slots, no CURIE/URI range confusion, and no source commentary embedded in name or affiliation values. Recommended Phase 4 actions: restore `direct_collection`, `third_party_sharing` and (if declared) `splits` and `subsets` in core so no fact is core-only; demote the five non-PI creators out of `principal_investigator`; drop or heavily qualify `ethical_reviews.reviewing_organization`; and either soften the three inferential `addressing_gaps` entries to track what the abstract actually claims or attach local caveats."
+}

@@ -404,23 +404,7 @@ intermediates:
   sha256: 3b66585a5d8a42bac5d96231e47144848f1d4b6f4510c656e71254472375eb2f
 - path: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/CHORUS_report.md
   sha256: 21b4672082009dae113e45bb689e470bb61ff25ed76493058c91eb5c64ccec4e
-canonical:
-  criterion: full and core both validate against the current schema, then most slots,
-    then lowest label
-  selected_from:
-  - label: 2026-08-20b_claude-opus-5-api-generic-v5_rep1
-    slots: 53
-    validation: valid
-    validation_recorded_at_run_time: valid
-  - label: 2026-08-20b_claude-opus-5-api-generic-v5_rep2
-    slots: 52
-    validation: valid
-    validation_recorded_at_run_time: valid
-  - label: 2026-08-20b_claude-opus-5-api-generic-v5_rep3
-    slots: 60
-    validation: valid
-    validation_recorded_at_run_time: valid
-  margin_over_runner_up: 7
-  selected_by: d4d runs select
-  supersedes:
-  - 2026-08-11_claude-opus-5-claudecode-generic_rep2
+canonical_superseded_by:
+  label: 2026-08-22c_claude-opus-5-api-generic-v5_rep3
+  at: '2026-08-24T19:47:13+00:00'
+  by: d4d runs select
