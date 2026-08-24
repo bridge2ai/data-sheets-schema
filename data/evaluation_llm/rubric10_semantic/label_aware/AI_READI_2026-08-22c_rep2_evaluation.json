@@ -633,5 +633,6 @@
     "evaluator_id": "d4d-rubric10-semantic-subagent",
     "rubric_hash": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
     "d4d_file_hash": "f9cc6d589aa4ae8851e93e123f3c52f38eb63888e998c893fd3b3bae4ce3e566"
-  }
+  },
+  "evaluation_timestamp_basis": "analysis performed ~20:37Z per the stamp; the evaluator's session died on a connection drop at 20:53Z before writing, was resumed with context intact, and wrote this file at ~23:32Z reusing the completed analysis. The stamp is the analysis time, not the write time (#676-era discipline: state the basis rather than back-date or re-stamp)."
 }

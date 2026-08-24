@@ -631,5 +631,6 @@
     "evaluator_id": "d4d-rubric10-semantic-agent",
     "rubric_hash": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
     "d4d_file_hash": "c43c96b59466d2d20bed98287ae612c423921f57f1a5b01148b1deaf1b5f229f"
-  }
+  },
+  "evaluation_timestamp_basis": "stamped at write time (~23:30Z) by the resumed session; this evaluator re-ran its final assembly after the 20:53Z connection drop rather than reusing a pre-drop stamp, so analysis and write time coincide."
 }

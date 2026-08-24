@@ -45,49 +45,74 @@
         "type": "consistency",
         "severity": "high",
         "description": "human_subject_research.involves_human_subjects=true (patient-level ICU/PICU/NICU records explicitly including minors and neonates) but no IRB approval or reviewing committee is documented: ethical_reviews.source_caveats states the sources 'do not name a reviewing body, nor report an institutional review board determination or approval number for the dataset, so reviewing_organization is left empty'. The gap is honestly flagged as a source gap rather than fabricated over, but the human-subjects consistency expectation still fails.",
-        "fields_involved": ["human_subject_research", "ethical_reviews"],
+        "fields_involved": [
+          "human_subject_research",
+          "ethical_reviews"
+        ],
         "recommendation": "Obtain and document IRB/ethics approvals (or the applicable waiver determinations) covering the 14 data-acquisition hospitals, with protocol numbers and reviewing institutions."
       },
       {
         "type": "consistency",
         "severity": "high",
         "description": "involves_human_subjects=true but informed_consent is entirely absent; at_risk_populations.source_caveats confirms 'The sources do not describe guardian consent or assent procedures for the pediatric and neonatal admissions represented in the data', and the record-level source_caveats lists 'consent documentation' among slots omitted because nothing is stated in the bundle. For retrospective EHR data a waiver of consent is the likely mechanism, but it is not documented.",
-        "fields_involved": ["human_subject_research", "informed_consent", "at_risk_populations"],
+        "fields_involved": [
+          "human_subject_research",
+          "informed_consent",
+          "at_risk_populations"
+        ],
         "recommendation": "Document the consent basis — most plausibly an IRB-approved waiver of informed consent for retrospective records — including its application to pediatric and neonatal admissions."
       },
       {
         "type": "correctness",
         "severity": "medium",
         "description": "No DOI or RRID; the id (https://chorus4ai.org/#chorus-dataset) is self-minted — source_caveats admits 'The dataset identifier is a fragment minted on the attested project URL and does not correspond to any anchor the source publishes.' For a released dataset this materially limits citability and cross-referencing.",
-        "fields_involved": ["id", "doi", "rrid"],
+        "fields_involved": [
+          "id",
+          "doi",
+          "rrid"
+        ],
         "recommendation": "Mint a DOI (e.g., via DataCite through the hosting platform) and register an RRID for the resource."
       },
       {
         "type": "consistency",
         "severity": "medium",
         "description": "A released dataset (status: 'Released under controlled access while assembly continues') has no version number, version access method, errata, recommended citation, or formal release date; source_caveats states 'No DOI, recommended citation, version identifier, dataset license, consent documentation, file counts, total size, compression, or direct download URL is stated anywhere in the bundle.'",
-        "fields_involved": ["version", "version_access", "errata", "status"],
+        "fields_involved": [
+          "version",
+          "version_access",
+          "errata",
+          "status"
+        ],
         "recommendation": "Assign explicit version numbers to enclave releases, publish a changelog, and record the initial release date."
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "license_and_use_terms describes the access mechanism ('all participants must sign a licensing agreement before gaining access') but not the substantive reuse permissions (publication rights, redistribution, derivative-model rights), so a prospective user cannot determine what reuse is allowed. The software/data licensing distinction (MIT/Apache-2.0 for repositories vs signed agreement for data) is correctly drawn.",
-        "fields_involved": ["license_and_use_terms", "ip_restrictions"],
+        "fields_involved": [
+          "license_and_use_terms",
+          "ip_restrictions"
+        ],
         "recommendation": "Summarize the key terms of the data licensing agreement (permitted uses, publication policy, re-identification prohibition, enclave export policy)."
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "Maintainer contact email domain 'mgh.havard.edu' is a typo in the published source; the datasheet transcribes it exactly and flags it ('transcribed exactly as published and apparently containing a typographical error in the domain'). The Bridge2AI program page is given as 'www.bridge2ai.org/chorus' without a URL scheme, also transcribed as published. Neither is an evaluator-detected fabrication; both are minor.",
-        "fields_involved": ["maintainers", "external_resources"],
+        "fields_involved": [
+          "maintainers",
+          "external_resources"
+        ],
         "recommendation": "Confirm the correct contact address with the source and normalize the Bridge2AI URL with an https:// scheme."
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "No variable-level metadata or data dictionary; is_tabular=false is semantically correct for a multimodal dataset and OMOP CDM conformance implies table structure, but users get no column-level guidance for the ~1.6 billion EHR rows. The source-level per-modality metadata-schema status could not be reconstructed from the garbled webinar table, which the record transparently declines to assert.",
-        "fields_involved": ["variables", "is_tabular"],
+        "fields_involved": [
+          "variables",
+          "is_tabular"
+        ],
         "recommendation": "Add variable metadata for the OMOP tables in use (including the nursing-flowsheet schema extensions) or link the published per-modality metadata schemas as they are released."
       }
     ],
@@ -618,5 +643,6 @@
     "evaluator_id": "8d84f304-586b-4629-839b-0502a2282424",
     "rubric_hash": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
     "d4d_file_hash": "7f96465eabf9fa9ea89f5d32755699df9daf95df5678c368b08e40ee999602e0"
-  }
+  },
+  "evaluation_timestamp_basis": "analysis performed ~20:36Z per the stamp; the evaluator's session died on a connection drop at 20:53Z before writing, was resumed with context intact, and wrote this file at ~23:31Z reusing the completed analysis. The stamp is the analysis time, not the write time."
 }
