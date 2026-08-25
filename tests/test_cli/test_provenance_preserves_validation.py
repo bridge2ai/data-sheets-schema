@@ -239,13 +239,47 @@ class PhaseVocabulary(unittest.TestCase):
     def test_the_playbook_instructed_names_are_accepted(self):
         """The agentic playbook (d4d-full-core.md) instructs these exact
         names in its record template; a vocabulary that refuses the only
-        names the agentic path is told to use validates nothing (#672 F1)."""
+        names the agentic path is told to use validates nothing (#672 F1).
+        `repair` and `report_after_repair` joined when the playbook gained
+        the API pipeline's closing loop."""
         from data_sheets_schema.cli.provenance import _parse_phases
-        parsed = _parse_phases(
-            ["generate_full", "generate_core", "source_audit", "reconcile"])
-        self.assertEqual(
-            [p["name"] for p in parsed],
-            ["generate_full", "generate_core", "source_audit", "reconcile"])
+        names = ["generate_full", "generate_core", "source_audit",
+                 "reconcile", "repair", "report_after_repair"]
+        self.assertEqual([p["name"] for p in _parse_phases(names)], names)
+
+    def test_observed_totals_are_kept_and_api_fields_are_refused(self):
+        """The orchestrator may record aggregate totals it observed; the
+        phase agent's own estimates in api_usage shape are refused, because
+        a phase log that looks comparable to api_usage and is not would be
+        worse than the gap it fills (#400)."""
+        import click
+
+        from data_sheets_schema.cli.provenance import _parse_phases
+        from data_sheets_schema.provenance import phase_facts
+
+        ok = _parse_phases(['{"name": "generate_full", "completed": true, '
+                            '"observed": {"total_tokens": 48211, '
+                            '"tool_uses": 31, "duration_ms": 812000}}'])
+        block = phase_facts(ok)
+        self.assertEqual(block["phases"][0]["observed"]["total_tokens"], 48211)
+        self.assertIn("observed_basis", block)
+        self.assertIn("not billing-grade", block["observed_basis"])
+
+        for bad in ('{"name": "generate_full", "input_tokens": 5}',
+                    '{"name": "generate_full", "seconds": 3.2}',
+                    '{"name": "repair", "observed": {"cost_usd": 3}}',
+                    '{"name": "repair", "observed": {}}'):
+            with self.subTest(value=bad):
+                with self.assertRaises(click.BadParameter):
+                    _parse_phases([bad])
+
+    def test_a_log_with_no_observed_block_claims_no_observation(self):
+        """A phase log whose phases carry no observed block must not carry
+        the basis either — a basis with nothing under it reads as data."""
+        from data_sheets_schema.cli.provenance import _parse_phases
+        from data_sheets_schema.provenance import phase_facts
+        block = phase_facts(_parse_phases(["generate_full", "reconcile"]))
+        self.assertNotIn("observed_basis", block)
 
     def test_the_playbook_template_itself_parses(self):
         """Read the names out of the playbook rather than restating them, so

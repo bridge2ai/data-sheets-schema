@@ -24,6 +24,22 @@ Two execution modes are supported:
   sequentially. Phase 2 must still wait for a validated Phase 1 file and must
   read both declared inputs.
 
+### Phase artifacts are snapshots; resume by artifact, not by memory
+
+In independent mode each phase's on-disk artifact is its snapshot, exactly as
+the API runner's progress file treats its phases. A relaunched run under the
+**same version label** must skip any phase whose artifact already exists and
+passes its validation commands, and record that under `phases_skipped` — the
+same field the API path's resumed runs carry. Two rules make this safe:
+
+- **Skip on validated artifact only.** An artifact that exists but fails
+  validation is a phase that did not complete; re-run the phase rather than
+  repairing the artifact in place, because a half-written file repaired by a
+  later phase has no phase that attests it.
+- **Never resume across labels.** An artifact under another label is another
+  run's output; reading it is the prior-D4D leak the evidence boundary
+  prohibits, whether or not the bytes would be identical.
+
 ## Arguments
 
 - `$ARGUMENTS`: optional project name(s), and/or an output version label.
@@ -487,6 +503,17 @@ identical slot and proves consistency across the pair.
    sections: source/provenance findings, schema-derived shared-slot count,
    corrections, related-content mapping and review, files changed, all commands,
    and final results. If nothing diverged, say so explicitly.
+9. **Repair, then re-report — the API pipeline's closing loop, which this path
+   previously lacked.** If step 6's checkers (grounding, report claims) or the
+   final pair-consistency run reported findings that require changing either
+   record: fix both records in one pass (`repair`, recorded as its own phase
+   with `iterations` counting the fix-validate loops), re-run every validation
+   from steps 5–7, and **rewrite the reconciliation report** so it describes
+   the bytes that exist (`report_after_repair`). The API pipeline regenerates
+   its report for the same reason (#604): a report describing bytes that no
+   longer exist is the artifact a reviewer reads instead of the diff. If no
+   finding required a change, there is no repair phase — do not record an
+   empty one.
 
 In independent mode, the orchestrator may perform Phases 3 and 4 without another
 model invocation, but it must perform the same source review, deterministic
@@ -503,10 +530,12 @@ poetry run d4d provenance record \
   --prompt {EACH PROMPT FILE THE RUN CONSUMED} \
   --prompt-text {THE INSTRUCTION AS SENT} \
   --reasoning-effort {EFFORT, ONLY IF YOU KNOW IT} \
-  --phase '{"name":"generate_full","completed":true,"artifacts":["{PROJECT}_d4d.yaml"]}' \
+  --phase '{"name":"generate_full","completed":true,"artifacts":["{PROJECT}_d4d.yaml"],"observed":{"total_tokens":{IF THE ORCHESTRATOR OBSERVED THEM},"tool_uses":N,"duration_ms":N}}' \
   --phase '{"name":"generate_core","completed":true,"artifacts":["{PROJECT}_d4d_core.yaml"]}' \
   --phase '{"name":"source_audit","completed":true}' \
-  --phase '{"name":"reconcile","completed":true,"iterations":{HOW MANY TIMES YOU RAN VALIDATE-AND-ITERATE}}'
+  --phase '{"name":"reconcile","completed":true,"iterations":{HOW MANY TIMES YOU RAN VALIDATE-AND-ITERATE}}' \
+  --phase '{"name":"repair","completed":true,"iterations":N}' \
+  --phase '{"name":"report_after_repair","completed":true}'
 ```
 
 **Pass one `--phase` per phase you actually performed, in order.** The API path
@@ -518,11 +547,24 @@ between the two arms was one-sided as a result (#562).
 Record what you did, not what this file describes. A phase you skipped is
 omitted; a phase that did not complete gets `"completed": false`. `iterations`
 belongs only on a phase that actually loops — writing `1` on a phase that
-cannot iterate implies the number was measured.
+cannot iterate implies the number was measured. The `repair` and
+`report_after_repair` phases exist only when Phase 4 step 9 actually ran a
+repair; a run with no findings records neither.
 
-Timing and token counts are not asked for, and must not be estimated: this
-runtime has no access to its own accounting (#400). The record names them as
-unavailable so the gap reads as a limit rather than an oversight.
+**Token accounting has two different speakers, and only one may speak.** The
+phase agent itself has no access to its own accounting (#400) and must not
+estimate timing or tokens — that rule is unchanged. But an **orchestrator that
+launched a phase as a subagent observes aggregate totals when it completes**
+(total tokens, tool uses, wall duration), and may record what it observed by
+adding an `"observed": {...}` block to that phase. Only phases the orchestrator
+actually observed get one; a phase run inside a shared context has no
+observable boundary and gets none. The block is deliberately not shaped like
+`api_usage` — no input/output split, no per-call timing — so the two arms'
+accounting can never be silently averaged. The recorder refuses `api_usage`
+field names (`input_tokens`, `seconds`, …) inside a phase for the same reason.
+Reasoning capture remains impossible on this path either way
+(`runtime_cannot_capture`): total spend is now measurable, the reasoning share
+of it is not.
 
 Writes `{METHOD}_core/{VERSION}/{PROJECT}_provenance.yaml` capturing schema
 md5s, model and runtime identity, input bundle hash, repo commit, software

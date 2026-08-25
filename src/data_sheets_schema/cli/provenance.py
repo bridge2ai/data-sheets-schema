@@ -27,7 +27,26 @@ def provenance():
 #: next agentic run's completion criterion — the #672 review read the
 #: template this comment's author had not.
 AGENTIC_PHASES = frozenset({"generate_full", "generate_core",
-                            "source_audit", "reconcile"})
+                            "source_audit", "reconcile", "repair"})
+# `repair` is the agentic path's single-pass analogue of the API pipeline's
+# repair_full/repair_core rounds: one validator-driven pass over both records.
+# `report` and `report_after_repair` need no entry here — the API pipeline
+# already names them, so _known_phases() carries them for both runtimes.
+
+
+# What the orchestrator can honestly observe about a phase-subagent it ran:
+# the runner reports total tokens, tool-use count and wall duration when the
+# agent completes. Aggregate only — no input/output split, not billing-grade —
+# so the shape is deliberately different from api_usage and never merges with
+# it. The subagent itself must not estimate these (#400); only the launcher
+# that observed them may record them.
+_OBSERVED_FIELDS = frozenset({"total_tokens", "tool_uses", "duration_ms"})
+
+# api_usage fields no agentic phase may carry: a phase log that looks
+# comparable to the API path's accounting and is not would be worse than the
+# gap it fills (#400).
+_API_ONLY_PHASE_FIELDS = frozenset({"seconds", "input_tokens",
+                                    "output_tokens", "stop_reason"})
 
 
 def _known_phases() -> frozenset[str]:
@@ -98,6 +117,29 @@ def _parse_phases(specs) -> list[dict]:
                 raise click.BadParameter(
                     f"--phase name {obj['name']!r} is not a phase this "
                     f"pipeline has. Known: {', '.join(sorted(known))}")
+            forbidden = _API_ONLY_PHASE_FIELDS & obj.keys()
+            if forbidden:
+                raise click.BadParameter(
+                    f"--phase {obj['name']!r} carries "
+                    f"{sorted(forbidden)}: these are api_usage fields this "
+                    "runtime cannot measure (#400). Aggregate totals the "
+                    "orchestrator observed go under 'observed' — "
+                    '\'{"name":..., "observed": {"total_tokens": N}}\' — '
+                    "which is deliberately not shaped like api_usage.")
+            observed = obj.get("observed")
+            if observed is not None:
+                if (not isinstance(observed, dict) or not observed
+                        or not set(observed) <= _OBSERVED_FIELDS):
+                    raise click.BadParameter(
+                        f"--phase {obj['name']!r} 'observed' must be a "
+                        f"non-empty object with keys from "
+                        f"{sorted(_OBSERVED_FIELDS)}")
+                try:
+                    obj["observed"] = {k: int(observed[k]) for k in observed}
+                except (TypeError, ValueError) as exc:
+                    raise click.BadParameter(
+                        f"--phase {obj['name']!r} 'observed' values must be "
+                        f"integers: {exc}") from exc
             out.append(obj)
         else:
             if text not in known:
