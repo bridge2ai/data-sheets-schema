@@ -268,10 +268,35 @@ class PhaseVocabulary(unittest.TestCase):
         for bad in ('{"name": "generate_full", "input_tokens": 5}',
                     '{"name": "generate_full", "seconds": 3.2}',
                     '{"name": "repair", "observed": {"cost_usd": 3}}',
-                    '{"name": "repair", "observed": {}}'):
+                    '{"name": "repair", "observed": {}}',
+                    # observed fields misplaced at the phase's top level —
+                    # the likeliest mis-fill of the template (#681 review)
+                    '{"name": "generate_full", "total_tokens": 48211}',
+                    # any unknown key: dropped-silently was the old behavior
+                    '{"name": "generate_full", "attempt": 2}',
+                    # coercion refused: a bool or float is not a measurement
+                    '{"name": "repair", "observed": {"tool_uses": true}}',
+                    '{"name": "repair", "observed": {"duration_ms": 1.5}}'):
             with self.subTest(value=bad):
                 with self.assertRaises(click.BadParameter):
                     _parse_phases([bad])
+
+    def test_phase_skipped_reaches_the_record_and_bad_names_are_refused(self):
+        """#681 review F1: the playbook told resumed runs to record
+        phases_skipped and the recorder had no way to write it."""
+        from data_sheets_schema.cli.provenance import _known_phases
+        self.assertIn("generate_full", _known_phases())
+        # The click surface: option exists and validates names.
+        import click.testing
+
+        from data_sheets_schema.cli import provenance as prov_cli
+        runner = click.testing.CliRunner()
+        result = runner.invoke(prov_cli.provenance,
+                               ["record", "--project", "P", "--method", "m",
+                                "--label", "l",
+                                "--phase-skipped", "not_a_phase"])
+        self.assertNotEqual(result.exit_code, 0)
+        self.assertIn("not_a_phase", result.output)
 
     def test_a_log_with_no_observed_block_claims_no_observation(self):
         """A phase log whose phases carry no observed block must not carry

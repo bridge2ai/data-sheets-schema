@@ -47,8 +47,11 @@ same field the API path's resumed runs carry. Two rules make this safe:
   `2026-07-23_claude-opus-4.6-high` or
   `2026-07-23_gpt-5.6-sol-ultra-fast`). If not given, construct it from today's
   date and the selected model. All outputs for one run use the exact same label.
-- Never overwrite a populated version directory. For another run with the same
-  date and model, append `-r2`, `-r3`, and so on.
+- Never overwrite a populated version directory, **with one exception**:
+  resuming an incomplete run of the same label per the snapshots section above
+  writes that run's remaining phases into its own directory — that is
+  completion, not overwriting. A *complete* run is never resumed; for another
+  run with the same date and model, append `-r2`, `-r3`, and so on.
 - `-r{N}` means a **revision** (changed pipeline), not a replicate. For repeated
   samples of the *same* procedure, use `_rep{N}`; `d4d runs list` reports the two
   differently because runs that differ in procedure are not comparable as
@@ -530,12 +533,14 @@ poetry run d4d provenance record \
   --prompt {EACH PROMPT FILE THE RUN CONSUMED} \
   --prompt-text {THE INSTRUCTION AS SENT} \
   --reasoning-effort {EFFORT, ONLY IF YOU KNOW IT} \
-  --phase '{"name":"generate_full","completed":true,"artifacts":["{PROJECT}_d4d.yaml"],"observed":{"total_tokens":{IF THE ORCHESTRATOR OBSERVED THEM},"tool_uses":N,"duration_ms":N}}' \
+  --phase '{"name":"generate_full","completed":true,"artifacts":["{PROJECT}_d4d.yaml"],"observed":{"total_tokens":{TOTAL},"tool_uses":{COUNT},"duration_ms":{MS}}}' \
   --phase '{"name":"generate_core","completed":true,"artifacts":["{PROJECT}_d4d_core.yaml"]}' \
   --phase '{"name":"source_audit","completed":true}' \
   --phase '{"name":"reconcile","completed":true,"iterations":{HOW MANY TIMES YOU RAN VALIDATE-AND-ITERATE}}' \
-  --phase '{"name":"repair","completed":true,"iterations":N}' \
-  --phase '{"name":"report_after_repair","completed":true}'
+  --phase '{"name":"report","completed":true,"artifacts":["{PROJECT}_reconciliation.md"]}' \
+  --phase '{"name":"repair","completed":true,"iterations":{FIX-VALIDATE LOOPS}}' \
+  --phase '{"name":"report_after_repair","completed":true}' \
+  --phase-skipped {EACH PHASE A RESUME SKIPPED, IF ANY}
 ```
 
 **Pass one `--phase` per phase you actually performed, in order.** The API path
@@ -544,10 +549,13 @@ phase structure existed only as prose in the reconciliation report — and #546
 showed a report is not a reliable account of what happened. Every comparison
 between the two arms was one-sided as a result (#562).
 
-Record what you did, not what this file describes. A phase you skipped is
-omitted; a phase that did not complete gets `"completed": false`. `iterations`
+Record what you did, not what this file describes. A phase you performed is
+listed with `--phase`; a phase a **resume** skipped because its validated
+artifact already existed is listed with `--phase-skipped` (never both for one
+phase); a phase that did not complete gets `"completed": false`. `iterations`
 belongs only on a phase that actually loops — writing `1` on a phase that
-cannot iterate implies the number was measured. The `repair` and
+cannot iterate implies the number was measured. `report` attests the
+reconciliation report step 8 always writes. The `repair` and
 `report_after_repair` phases exist only when Phase 4 step 9 actually ran a
 repair; a run with no findings records neither.
 

@@ -135,6 +135,7 @@ class TestAgainstTheCorpus(unittest.TestCase):
         if not runs:
             self.skipTest("no canonical records")
         live = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+        checked = 0
         for project, info in sorted(runs.items()):
             base = (ROOT / "data/d4d_concatenated/claudecode_agent_core"
                     / info["label"])
@@ -142,8 +143,20 @@ class TestAgainstTheCorpus(unittest.TestCase):
             prov = base / f"{project}_provenance.yaml"
             if not core.exists() or not prov.exists():
                 continue
+            checked += 1
             with self.subTest(project=project):
-                rec = _yaml.safe_load(prov.read_text(encoding="utf-8")) or {}
-                recorded = (rec.get("schema") or {}).get("digest_md5")
+                # Mirror the function's own branches: absent or unreadable
+                # provenance is held to the current schema (returns False),
+                # so the test must not error where the function answers.
+                try:
+                    rec = _yaml.safe_load(
+                        prov.read_text(encoding="utf-8")) or {}
+                    recorded = (rec.get("schema") or {}).get("digest_md5")
+                except Exception:
+                    recorded = None
                 expected = bool(recorded) and recorded != live
                 self.assertEqual(expected, pair_predates_current_schema(core))
+        if not checked:
+            self.skipTest("no canonical pair has both core and provenance "
+                          "on disk — nothing was tested, and a silent green "
+                          "here would claim otherwise")
