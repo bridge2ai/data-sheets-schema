@@ -161,13 +161,15 @@ def _parse_phases(specs) -> list[dict]:
                         f"non-empty object with keys from "
                         f"{sorted(_OBSERVED_FIELDS)}")
                 bad = {k: v for k, v in observed.items()
-                       if not isinstance(v, int) or isinstance(v, bool)}
+                       if not isinstance(v, int) or isinstance(v, bool)
+                       or v < 0}
                 if bad:
                     raise click.BadParameter(
                         f"--phase {obj['name']!r} 'observed' values must be "
-                        f"integers as measured, got {bad}. Coercion is "
-                        "refused: a truncated float or a true-as-1 is a "
-                        "measurement the orchestrator did not make.")
+                        f"non-negative integers as measured, got {bad}. "
+                        "Coercion is refused: a truncated float or a "
+                        "true-as-1 is a measurement the orchestrator did "
+                        "not make, and no measurement is negative.")
             out.append(obj)
         else:
             if text not in known:
@@ -346,8 +348,11 @@ def annotate_observed(project, method, label, run_observed):
     per-phase observed blocks would claim a measurement nobody made. This
     command lets the launcher add exactly what it saw, after the run has
     written its own record, without retyping any of the run's flags: it edits
-    the phase_log in place and `ProvenanceRecord.write` carries the
-    validation verdict forward under the same rules as a re-record.
+    the phase_log in place. The record's `validation` block rides along
+    verbatim — the loaded data already carries it, so the re-record
+    carry-forward check never runs on this path; that is safe because
+    annotation changes no artifact and staleness is re-derived from the
+    artifact hashes at read time, but it is carriage, not re-verification.
     """
     import json
 
@@ -364,10 +369,11 @@ def annotate_observed(project, method, label, run_observed):
             f"--run must be a non-empty object with keys from "
             f"{sorted(_OBSERVED_FIELDS)}")
     bad = {k: v for k, v in observed.items()
-           if not isinstance(v, int) or isinstance(v, bool)}
+           if not isinstance(v, int) or isinstance(v, bool) or v < 0}
     if bad:
         raise click.BadParameter(
-            f"--run values must be integers as measured, got {bad}")
+            f"--run values must be non-negative integers as measured, "
+            f"got {bad}")
 
     path = record_path_for(project, method, label)
     if not path.exists():
@@ -377,12 +383,26 @@ def annotate_observed(project, method, label, run_observed):
             "observation to the run's own account, it does not create one.")
     import yaml as _yaml
     data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if data.get("api_usage"):
+        raise click.ClickException(
+            "this is an API-path record: api_usage already accounts for "
+            "every call, per phase and with an input/output split. A "
+            "run_observed block on top of it would double-count the same "
+            "spend under a coarser basis (#400).")
     log = data.get("phase_log")
     if not isinstance(log, dict):
         raise click.ClickException(
             "the record has no phase_log — a run that attested no phases "
-            "has no account for this observation to annotate. Re-record "
-            "with --phase first.")
+            "has no account for this observation to annotate. Have the "
+            "run re-record with --phase first (an agentic run; an API "
+            "record would have been refused above).")
+    prior = log.get("run_observed")
+    if prior is not None and prior != observed:
+        raise click.ClickException(
+            f"the record already carries run_observed {prior}. An "
+            "observation is made once; silently replacing it would drop "
+            "measurements without trace. If the prior value is wrong, "
+            "remove it in a reviewed edit that says why.")
     log["run_observed"] = observed
     log["run_observed_basis"] = (
         "aggregate totals for the whole run, observed by the orchestrator "
@@ -394,9 +414,12 @@ def annotate_observed(project, method, label, run_observed):
     rec = ProvenanceRecord(data=data)
     out = rec.write(path)
     click.echo(f"✓ {out}")
-    if rec.conformance:
-        for v in rec.conformance:
-            click.echo(f"  ⚠️  {v}")
+    for v in rec.conformance:
+        click.echo(f"  ⚠️  {v}")
+    if rec.conformance_failure:
+        click.echo(f"  ⚠️  conformance not established: "
+                   f"{rec.conformance_failure} — an unchecked record is "
+                   "not a passing one (#613)")
 
 
 @provenance.command()

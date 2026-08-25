@@ -344,9 +344,36 @@ class PhaseVocabulary(unittest.TestCase):
                 result = runner.invoke(prov_cli.provenance, args)
                 self.assertEqual(result.exit_code, 0, result.output)
 
-                # Junk keys and non-int values refused.
+                # A verdict already on the record rides along verbatim.
+                rec_path = core_dir / "TESTPROJ_provenance.yaml"
+                before = _yaml.safe_load(rec_path.read_text())
+                before["validation"] = {"status": "valid",
+                                        "checked_at": "2026-08-24T00:00:00Z"}
+                rec_path.write_text(_yaml.safe_dump(before, sort_keys=False))
+                r = runner.invoke(
+                    prov_cli.provenance,
+                    ["annotate-observed", "--project", "TESTPROJ",
+                     "--method", method, "--label", label,
+                     "--run", '{"total_tokens": 481000, "tool_uses": 7}'])
+                # First annotation above already wrote total_tokens alone, so
+                # this differing re-annotation must be refused (drop-free).
+                self.assertNotEqual(r.exit_code, 0)
+                self.assertIn("already carries", r.output)
+                # An identical re-annotation is idempotent, not an error.
+                r = runner.invoke(
+                    prov_cli.provenance,
+                    ["annotate-observed", "--project", "TESTPROJ",
+                     "--method", method, "--label", label,
+                     "--run", '{"total_tokens": 481000}'])
+                self.assertEqual(r.exit_code, 0, r.output)
+                after = _yaml.safe_load(rec_path.read_text())
+                self.assertEqual(after["validation"]["status"], "valid")
+
+                # Junk keys, non-ints and negatives refused, record unchanged.
+                snapshot = rec_path.read_bytes()
                 for bad in ('{"cost_usd": 3}', '{"total_tokens": true}',
-                            '{"total_tokens": 1.5}', "{}"):
+                            '{"total_tokens": 1.5}',
+                            '{"total_tokens": -1}', "{}"):
                     with self.subTest(value=bad):
                         r = runner.invoke(
                             prov_cli.provenance,
@@ -354,10 +381,22 @@ class PhaseVocabulary(unittest.TestCase):
                              "--method", method, "--label", label,
                              "--run", bad])
                         self.assertNotEqual(r.exit_code, 0)
+                        self.assertEqual(snapshot, rec_path.read_bytes())
+
+                # An API-path record is refused: api_usage already accounts.
+                api = _yaml.safe_load(rec_path.read_text())
+                api["api_usage"] = [{"phase": "full", "input_tokens": 1}]
+                rec_path.write_text(_yaml.safe_dump(api, sort_keys=False))
+                r = runner.invoke(
+                    prov_cli.provenance,
+                    ["annotate-observed", "--project", "TESTPROJ",
+                     "--method", method, "--label", label,
+                     "--run", '{"total_tokens": 9}'])
+                self.assertNotEqual(r.exit_code, 0)
+                self.assertIn("double-count", r.output)
             finally:
                 os.chdir(cwd)
-            data = _yaml.safe_load(
-                (core_dir / "TESTPROJ_provenance.yaml").read_text())
+            data = _yaml.safe_load(rec_path.read_text())
             self.assertEqual(
                 data["phase_log"]["run_observed"]["total_tokens"], 481000)
             self.assertIn("only observable boundary",
