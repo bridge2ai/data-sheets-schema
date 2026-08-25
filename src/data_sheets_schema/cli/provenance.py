@@ -20,14 +20,43 @@ def provenance():
 
 #: The names a phase log may carry: the API runtime's phases (the six
 #: generation phases, the repair phases, the post-repair report rewrite) and
-#: the agentic playbook's four — which are NOT a subset by name. The first
-#: version of this check assumed they were and refused every name the
+#: the agentic playbook's own names — which are NOT a subset by name. The
+#: first version of this check assumed they were and refused every name the
 #: playbook itself instructs (`d4d-full-core.md` says --phase generate_full /
 #: generate_core / source_audit / reconcile), which would have broken the
 #: next agentic run's completion criterion — the #672 review read the
 #: template this comment's author had not.
 AGENTIC_PHASES = frozenset({"generate_full", "generate_core",
-                            "source_audit", "reconcile"})
+                            "source_audit", "reconcile", "repair"})
+# `repair` is the agentic analogue of the API pipeline's repair_full +
+# repair_core rounds: one phase covering both records, whose fix-validate
+# loop may iterate (`iterations` counts those loops). `report` and
+# `report_after_repair` need no entry here — _known_phases() already carries
+# them (`report` from api_runner.PHASES, `report_after_repair` from the
+# repair-name set below), so both runtimes may record them.
+
+
+# What the orchestrator can honestly observe about a phase-subagent it ran:
+# the runner reports total tokens, tool-use count and wall duration when the
+# agent completes. Aggregate only — no input/output split, not billing-grade —
+# so the shape is deliberately different from api_usage and never merges with
+# it. The subagent itself must not estimate these (#400); only the launcher
+# that observed them may record them.
+_OBSERVED_FIELDS = frozenset({"total_tokens", "tool_uses", "duration_ms"})
+
+# api_usage fields no agentic phase may carry: a phase log that looks
+# comparable to the API path's accounting and is not would be worse than the
+# gap it fills (#400).
+_API_ONLY_PHASE_FIELDS = frozenset({"seconds", "input_tokens",
+                                    "output_tokens", "stop_reason"})
+
+# Every key a --phase object may carry. A whitelist, not a blacklist: any
+# other key is refused, because a key the parser drops makes the record
+# differ silently from what the caller typed ("a malformed value raises
+# rather than being dropped", above), and a key it passes through enters the
+# record unvalidated (#681 review).
+_PHASE_KEYS = frozenset({"name", "completed", "iterations", "artifacts",
+                         "notes", "ordinal", "observed"})
 
 
 def _known_phases() -> frozenset[str]:
@@ -98,6 +127,47 @@ def _parse_phases(specs) -> list[dict]:
                 raise click.BadParameter(
                     f"--phase name {obj['name']!r} is not a phase this "
                     f"pipeline has. Known: {', '.join(sorted(known))}")
+            forbidden = _API_ONLY_PHASE_FIELDS & obj.keys()
+            if forbidden:
+                raise click.BadParameter(
+                    f"--phase {obj['name']!r} carries "
+                    f"{sorted(forbidden)}: these are api_usage fields this "
+                    "runtime cannot measure (#400). Aggregate totals the "
+                    "orchestrator observed go under 'observed', e.g. "
+                    '{"name": "generate_full", '
+                    '"observed": {"total_tokens": 48211}}, '
+                    "which is deliberately not shaped like api_usage.")
+            misplaced = _OBSERVED_FIELDS & obj.keys()
+            if misplaced:
+                raise click.BadParameter(
+                    f"--phase {obj['name']!r} carries {sorted(misplaced)} at "
+                    "the phase's top level; observed totals go under "
+                    "'observed': {…}. Refused rather than moved, so the "
+                    "record never differs from what was typed.")
+            unknown = obj.keys() - _PHASE_KEYS
+            if unknown:
+                raise click.BadParameter(
+                    f"--phase {obj['name']!r} carries unknown keys "
+                    f"{sorted(unknown)}; allowed: {sorted(_PHASE_KEYS)}. "
+                    "A dropped key would make the record differ silently "
+                    "from what was typed, and an invented one would enter "
+                    "the record unvalidated.")
+            observed = obj.get("observed")
+            if observed is not None:
+                if (not isinstance(observed, dict) or not observed
+                        or not set(observed) <= _OBSERVED_FIELDS):
+                    raise click.BadParameter(
+                        f"--phase {obj['name']!r} 'observed' must be a "
+                        f"non-empty object with keys from "
+                        f"{sorted(_OBSERVED_FIELDS)}")
+                bad = {k: v for k, v in observed.items()
+                       if not isinstance(v, int) or isinstance(v, bool)}
+                if bad:
+                    raise click.BadParameter(
+                        f"--phase {obj['name']!r} 'observed' values must be "
+                        f"integers as measured, got {bad}. Coercion is "
+                        "refused: a truncated float or a true-as-1 is a "
+                        "measurement the orchestrator did not make.")
             out.append(obj)
         else:
             if text not in known:
@@ -157,9 +227,14 @@ def _parse_phases(specs) -> list[dict]:
                    '(\'{"name":"reconcile","completed":true,"iterations":3}\'). '
                    'Repeat once per phase. Records what the API path records '
                    'as api_usage and the agentic path recorded nowhere (#562).')
+@click.option('--phase-skipped', 'phases_skipped', multiple=True,
+              help='a phase a resumed run did not repeat because its artifact '
+                   'already existed and validated — the same field the API '
+                   'path\'s resumed runs carry. Repeat once per skipped '
+                   'phase; names are validated like --phase.')
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
-           reasoning_effort, phase_specs):
+           reasoning_effort, phase_specs, phases_skipped):
     """Write a LIVE provenance record for a run just produced.
 
     Refuses to run from anywhere but the repository root — see
@@ -216,6 +291,14 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        schema_digest_md5=digest,
                        reasoning_effort=reasoning_effort,
                        phases=_parse_phases(phase_specs))
+    if phases_skipped:
+        known = _known_phases()
+        bad = [n for n in phases_skipped if n not in known]
+        if bad:
+            raise click.BadParameter(
+                f"--phase-skipped {bad}: not phases this pipeline has. "
+                f"Known: {', '.join(sorted(known))}")
+        rec.data["phases_skipped"] = list(phases_skipped)
     out = rec.write(record_path_for(project, method, label))
     click.echo(f"✓ {out}")
 

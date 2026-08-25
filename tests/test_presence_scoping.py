@@ -117,17 +117,46 @@ class TestTheScopeComesFromEvidence(unittest.TestCase):
 
 
 class TestAgainstTheCorpus(unittest.TestCase):
-    def test_the_canonical_arm_predates_the_current_schema(self):
-        """True since #510, #504 and #403 each moved it. Those records are
-        correct and unchanged; the schema moved under them."""
+    def test_the_canonical_arm_agrees_with_its_own_recorded_digest(self):
+        """Derived from the record, not asserted about the corpus. An earlier
+        version of this test asserted the canonical arm *predates* the current
+        schema — true from #403 through the 2026-08-20b arm, and falsified the
+        day #676 selected canonicals generated under the current schema. A
+        corpus fact baked into a test breaks whenever the corpus improves; the
+        behavioural claim is that `pair_predates_current_schema` answers
+        exactly what the record's own `schema.digest_md5` says against the
+        live digest."""
+        import yaml as _yaml
+
+        from data_sheets_schema import schema_digest
         from data_sheets_schema.runs import canonical_runs
 
         runs = canonical_runs()
         if not runs:
             self.skipTest("no canonical records")
-        project, info = next(iter(sorted(runs.items())))
-        core = (ROOT / "data/d4d_concatenated/claudecode_agent_core"
-                / info["label"] / f"{project}_d4d_core.yaml")
-        if not core.exists():
-            self.skipTest("core record absent")
-        self.assertTrue(pair_predates_current_schema(core))
+        live = schema_digest.fingerprint(schema_digest.digest_text("Dataset"))
+        checked = 0
+        for project, info in sorted(runs.items()):
+            base = (ROOT / "data/d4d_concatenated/claudecode_agent_core"
+                    / info["label"])
+            core = base / f"{project}_d4d_core.yaml"
+            prov = base / f"{project}_provenance.yaml"
+            if not core.exists() or not prov.exists():
+                continue
+            checked += 1
+            with self.subTest(project=project):
+                # Mirror the function's own branches: absent or unreadable
+                # provenance is held to the current schema (returns False),
+                # so the test must not error where the function answers.
+                try:
+                    rec = _yaml.safe_load(
+                        prov.read_text(encoding="utf-8")) or {}
+                    recorded = (rec.get("schema") or {}).get("digest_md5")
+                except Exception:
+                    recorded = None
+                expected = bool(recorded) and recorded != live
+                self.assertEqual(expected, pair_predates_current_schema(core))
+        if not checked:
+            self.skipTest("no canonical pair has both core and provenance "
+                          "on disk — nothing was tested, and a silent green "
+                          "here would claim otherwise")

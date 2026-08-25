@@ -182,14 +182,25 @@ def phase_facts(phases: list[dict[str, Any]],
             entry["artifacts"] = list(ph["artifacts"])
         if ph.get("notes"):
             entry["notes"] = str(ph["notes"])
+        if ph.get("observed"):
+            entry["observed"] = dict(ph["observed"])
         out.append(entry)
-    return {"phases": out,
-            "recorded_by": "the run itself, as the playbook directs",
-            "unavailable": list(PHASE_FIELDS_UNAVAILABLE_TO_AGENTS),
-            "unavailable_basis": (
-                "this runtime has no access to its own token accounting or "
-                "per-call timing (#400); these are named rather than omitted "
-                "so the gap reads as a limit and not an oversight")}
+    block = {"phases": out,
+             "recorded_by": "the run itself, as the playbook directs",
+             "unavailable": list(PHASE_FIELDS_UNAVAILABLE_TO_AGENTS),
+             "unavailable_basis": (
+                 "this runtime has no access to its own token accounting or "
+                 "per-call timing (#400); these are named rather than omitted "
+                 "so the gap reads as a limit and not an oversight")}
+    if any("observed" in e for e in out):
+        block["observed_basis"] = (
+            "aggregate totals the orchestrator observed from the subagent "
+            "runner's completion report — total tokens, tool uses, wall "
+            "duration. Not the runtime's own accounting: no input/output "
+            "split, no per-call timing, not billing-grade. Deliberately not "
+            "shaped like api_usage, so the two can never be averaged into "
+            "one figure (#400).")
+    return block
 
 
 def repo_relative(path: Path | str) -> str:
