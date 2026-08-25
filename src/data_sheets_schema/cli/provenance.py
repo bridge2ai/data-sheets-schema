@@ -327,6 +327,78 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                    f"{label} --project {project}` before `d4d runs check`.")
 
 
+@provenance.command('annotate-observed')
+@click.option('--project', required=True)
+@click.option('--method', required=True)
+@click.option('--label', required=True)
+@click.option('--run', 'run_observed', required=True,
+              help='JSON object of aggregate totals the orchestrator observed '
+                   'for the whole run, e.g. \'{"total_tokens": 481000, '
+                   '"tool_uses": 220, "duration_ms": 5400000}\'. Keys are '
+                   'validated like a phase\'s observed block.')
+def annotate_observed(project, method, label, run_observed):
+    """Add run-level observed totals to an existing record (#681 follow-on).
+
+    The two-speakers model, applied where four-phase project-agent mode leaves
+    it: the run records its own phases (which it knows) and cannot know its
+    accounting (#400); the orchestrator that launched it as one subagent
+    observes aggregate totals for the whole run — a single boundary, so
+    per-phase observed blocks would claim a measurement nobody made. This
+    command lets the launcher add exactly what it saw, after the run has
+    written its own record, without retyping any of the run's flags: it edits
+    the phase_log in place and `ProvenanceRecord.write` carries the
+    validation verdict forward under the same rules as a re-record.
+    """
+    import json
+
+    _require_repo_root_cwd("d4d provenance annotate-observed")
+    from data_sheets_schema.provenance import (ProvenanceRecord,
+                                               record_path_for)
+    try:
+        observed = json.loads(run_observed)
+    except json.JSONDecodeError as exc:
+        raise click.BadParameter(f"--run is not valid JSON: {exc}") from exc
+    if (not isinstance(observed, dict) or not observed
+            or not set(observed) <= _OBSERVED_FIELDS):
+        raise click.BadParameter(
+            f"--run must be a non-empty object with keys from "
+            f"{sorted(_OBSERVED_FIELDS)}")
+    bad = {k: v for k, v in observed.items()
+           if not isinstance(v, int) or isinstance(v, bool)}
+    if bad:
+        raise click.BadParameter(
+            f"--run values must be integers as measured, got {bad}")
+
+    path = record_path_for(project, method, label)
+    if not path.exists():
+        raise click.ClickException(
+            f"no record at {path} — annotate after the run has recorded, "
+            "not instead of it: this command adds the orchestrator's "
+            "observation to the run's own account, it does not create one.")
+    import yaml as _yaml
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    log = data.get("phase_log")
+    if not isinstance(log, dict):
+        raise click.ClickException(
+            "the record has no phase_log — a run that attested no phases "
+            "has no account for this observation to annotate. Re-record "
+            "with --phase first.")
+    log["run_observed"] = observed
+    log["run_observed_basis"] = (
+        "aggregate totals for the whole run, observed by the orchestrator "
+        "from the subagent runner's completion report. One number per run, "
+        "not per phase: four-phase project-agent mode runs every phase in "
+        "one context, so the run is the only observable boundary. Not the "
+        "runtime's own accounting, no input/output split, not billing-grade; "
+        "deliberately not shaped like api_usage (#400).")
+    rec = ProvenanceRecord(data=data)
+    out = rec.write(path)
+    click.echo(f"✓ {out}")
+    if rec.conformance:
+        for v in rec.conformance:
+            click.echo(f"  ⚠️  {v}")
+
+
 @provenance.command()
 @click.option('--verified-label', 'verified', multiple=True,
               help='Run labels whose input bytes are known unchanged; may repeat.')

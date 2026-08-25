@@ -570,6 +570,12 @@ observable boundary and gets none. The block is deliberately not shaped like
 `api_usage` — no input/output split, no per-call timing — so the two arms'
 accounting can never be silently averaged. The recorder refuses `api_usage`
 field names (`input_tokens`, `seconds`, …) inside a phase for the same reason.
+**In four-phase project-agent mode there is no per-phase boundary to observe**
+— the condition text mandates that mode, and one subagent runs all phases —
+so record no per-phase `observed` blocks there; after the run has written its
+own record, the orchestrator adds the whole-run totals it observed with
+`d4d provenance annotate-observed --run '{"total_tokens": …}'`, which is the
+one boundary that exists.
 Reasoning capture remains impossible on this path either way
 (`runtime_cannot_capture`): total spend is now measurable, the reasoning share
 of it is not.

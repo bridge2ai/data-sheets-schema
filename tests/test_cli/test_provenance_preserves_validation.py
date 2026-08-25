@@ -298,6 +298,71 @@ class PhaseVocabulary(unittest.TestCase):
         self.assertNotEqual(result.exit_code, 0)
         self.assertIn("not_a_phase", result.output)
 
+    def test_annotate_observed_adds_run_totals_to_an_existing_record(self):
+        """Run-level observed for four-phase mode (#681 follow-on): the run
+        is the only observable boundary, so the orchestrator annotates the
+        whole-run totals after the run's own record exists."""
+        import click.testing
+        import yaml as _yaml
+
+        from data_sheets_schema.cli import provenance as prov_cli
+        runner = click.testing.CliRunner()
+        method, label = "claudecode_agent", "2026-08-24_test_rep1"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            core_dir = (root / "data" / "d4d_concatenated"
+                        / f"{method}_core" / label)
+            (root / "data" / "d4d_concatenated" / method / label).mkdir(
+                parents=True)
+            core_dir.mkdir(parents=True)
+            (root / "src" / "data_sheets_schema").mkdir(parents=True)
+            bundle = root / "bundle.txt"
+            bundle.write_text("source documents\n")
+            body = _yaml.safe_dump({"id": "https://example.org/x", "name": "x"})
+            (core_dir.parent.parent / method / label
+             / "TESTPROJ_d4d.yaml").write_text(body)
+            (core_dir / "TESTPROJ_d4d_core.yaml").write_text(body)
+            (core_dir / "TESTPROJ_reconciliation.md").write_text("# r\n")
+
+            args = ["annotate-observed", "--project", "TESTPROJ",
+                    "--method", method, "--label", label,
+                    "--run", '{"total_tokens": 481000}']
+            cwd = os.getcwd()
+            os.chdir(root)
+            try:
+                # No record yet: refused, not created.
+                result = runner.invoke(prov_cli.provenance, args)
+                self.assertNotEqual(result.exit_code, 0)
+                self.assertIn("no record", result.output)
+
+                rec = runner.invoke(
+                    prov_cli.provenance,
+                    ["record", "--project", "TESTPROJ", "--method", method,
+                     "--label", label, "--input-bundle", str(bundle),
+                     "--phase", "generate_full"])
+                self.assertEqual(rec.exit_code, 0, rec.output)
+                result = runner.invoke(prov_cli.provenance, args)
+                self.assertEqual(result.exit_code, 0, result.output)
+
+                # Junk keys and non-int values refused.
+                for bad in ('{"cost_usd": 3}', '{"total_tokens": true}',
+                            '{"total_tokens": 1.5}', "{}"):
+                    with self.subTest(value=bad):
+                        r = runner.invoke(
+                            prov_cli.provenance,
+                            ["annotate-observed", "--project", "TESTPROJ",
+                             "--method", method, "--label", label,
+                             "--run", bad])
+                        self.assertNotEqual(r.exit_code, 0)
+            finally:
+                os.chdir(cwd)
+            data = _yaml.safe_load(
+                (core_dir / "TESTPROJ_provenance.yaml").read_text())
+            self.assertEqual(
+                data["phase_log"]["run_observed"]["total_tokens"], 481000)
+            self.assertIn("only observable boundary",
+                          data["phase_log"]["run_observed_basis"])
+
     def test_a_log_with_no_observed_block_claims_no_observation(self):
         """A phase log whose phases carry no observed block must not carry
         the basis either — a basis with nothing under it reads as data."""
