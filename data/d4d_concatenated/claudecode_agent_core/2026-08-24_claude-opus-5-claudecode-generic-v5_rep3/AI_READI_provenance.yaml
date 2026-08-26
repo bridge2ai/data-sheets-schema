@@ -98,9 +98,9 @@ phase_log:
     timing (#400); these are named rather than omitted so the gap reads as a limit
     and not an oversight
   run_observed:
-    total_tokens: 26308458
-    tool_uses: 61
-    duration_ms: 1475395
+    total_tokens: 39543340
+    tool_uses: 117
+    duration_ms: 2398013
   run_observed_basis: 'aggregate totals for the whole run, observed by the orchestrator
     from the subagent runner''s completion report. One number per run, not per phase:
     four-phase project-agent mode runs every phase in one context, so the run is the

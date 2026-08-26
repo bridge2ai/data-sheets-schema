@@ -13,8 +13,21 @@
   canary (CHORUS rep1, #683) and 11 fan-out runs took the same launch path;
   fan-out runs read their rendered instruction bytes from a file rather than
   inline, the one mechanical difference.
-- **Outcome: 12 succeeded, 0 failed.** `d4d runs check --strict` exit 0 with
-  zero warnings for the arm; every record `valid`; every scope check in scope.
+- **When:** the canary ran 2026-08-25 UTC (evening of 08-24 Pacific, the
+  label's date); the 11 fan-out runs ran 2026-08-26 01:12–03:16 UTC (evening
+  of 08-25 Pacific). Records carry `run_date` accordingly. The recorded
+  `prompts.request` sha256 re-renders only while the render date matches
+  the run's — the header carries `# Generated: <date>` — so 11 of 12
+  reproduce today and CHORUS rep1 reproduces against 08-25.
+- **Outcome: 12 succeeded, 0 failed.** `d4d runs check --strict` exit 0 on
+  all three labels, with the expected informational notes only (per label,
+  8 values recorded-not-observed: `model.temperature` and
+  `model.reasoning_effort` are launcher-asserted, ×4). Every record `valid`;
+  every scope check in scope. Not zero-warning in the wider sense: 7 of 12
+  records carry `pair_consistency.warnings: 1` (`semantic-review-required`,
+  the checker marking related-content that needs the Phase 4 semantic
+  review, not a divergence), and VOICE rep1 has `report_claims.claims_unnamed:
+  1`.
 - **Interruption and resume, first live use:** three runs (AI_READI, CM4AI,
   VOICE rep3) were killed by an account session limit and relaunched as fresh
   agents on a different account. The playbook's resume-by-validated-artifact
@@ -22,13 +35,20 @@
   `generate_full`+`generate_core` (`phases_skipped` records it — the field
   #681's review found the recorder could not write), VOICE rep3 skipped
   `generate_full`, CM4AI rep3 had nothing on disk and ran in full. Their
-  `run_observed` totals sum both invocations.
-- **Spend (orchestrator-observed, cache-inclusive):** 326,590,625 total tokens
-  across the 12 runs, 5.42 h of agent wall time (runs overlapped; ~2.5 h
-  elapsed). **Not comparable to the API arm's 5.36M in / 2.26M out**: that
-  figure is billed input/output from `api_usage`; this one sums every
-  context re-read through the runner's cache, per the `run_observed_basis`
-  each record carries. The two bases must never be averaged (#400).
+  `run_observed` totals sum both invocations — **after a correction**: the
+  first annotation summed only the killed invocation, because the second
+  account's runner writes transcripts under a different config directory
+  and the launcher's glob never saw them (#686 review). The wrong blocks
+  were removed in a reviewed edit and re-annotated; `annotate-observed`'s
+  refusal to silently replace a prior value (#682) is what made the
+  correction visible rather than quiet.
+- **Spend (orchestrator-observed, cache-inclusive):** 397,855,114 total tokens
+  across the 12 runs, 6.48 h of agent wall time (runs overlapped; ~2.5 h
+  elapsed for the fan-out). **Not comparable to the API arm's 5.36M in /
+  2.26M out**: that figure is billed input/output from `api_usage`; this one
+  sums every context re-read through the runner's cache, per the
+  `run_observed_basis` each record carries. The two bases must never be
+  averaged (#400).
 
 ## The table — three replicates per cell, 2026-08-22c API arm in parens
 
@@ -55,17 +75,24 @@ PhysioNet title, per #674; lower than the API arm's, not zero.
 
 **Every gated floor held on all 12 runs, and pair errors are 0 on all 12.**
 The API arm's pair-error range across the same condition was 0–18 (11 of its
-12 runs above 0). The two runtimes reconcile differently: the agentic Phase 4
-runs the pair checker with `--sync-core` and then re-checks, so the core is
-made a byte-exact projection of the audited full record before the report is
-written; the API pipeline's separate `reconcile_full`/`reconcile_core` calls
-leave residual precision and spelling divergence (#650, #675). This is a
-procedure difference measured as a sum, not attributable to the runtime
+12 runs above 0). The two runtimes reconcile differently, and the
+reconciliation reports say how: on this path the core is **built by
+projection from the Phase-3-corrected full record** — Phase 2 starts every
+shared slot from the full record's value, Phase 3 back-ports corrections
+into the full first, and Phase 4 then verifies identity rather than
+manufacturing it. The `--sync-core` mechanical step was run on only three
+runs (VOICE rep1, AI_READI rep2, VOICE rep3) and run-but-changed-nothing on
+CM4AI rep1; the other eight reports state it was not needed. (A first draft
+of this note credited `--sync-core` for the zeros; the #686 review read the
+reports.) The API pipeline's separate `reconcile_full`/`reconcile_core`
+calls, by contrast, reconcile two independently generated records after the
+fact and leave residual precision and spelling divergence (#650, #675). This
+is a procedure difference measured as a sum, not attributable to the runtime
 alone — but it is the clearest cross-runtime result in the design so far.
 
 **British spellings are lower and flatter** (arm total 15 vs 68), with no
-run above 4 — and because the pair is synced, none of the spelling coupling
-that inflated the API arm's AI_READI rep2 (#675).
+run above 4 — and because the core is projected from the full, none of the
+spelling coupling that inflated the API arm's AI_READI rep2 (#675).
 
 **The repair loop exists now and fired once.** AI_READI rep3's Phase 4
 findings required a change; the run recorded `repair` (1 pass) and
@@ -99,12 +126,14 @@ condition boundary, not a defect in these records.
 | CM4AI | rep2 | 56 | tie, broken by label (#660) |
 | Voice | rep1 | 80 | +1 |
 
-**Not executed.** Both arms live under the `claudecode_agent` method and the
-tool keeps one canonical per project, so executing would supersede the
-2026-08-22c API canonicals selected four days earlier (popping their blocks
-per #677). Which arm's records are the project canonicals is a decision
-about what the repository ships, not a selection criterion — it is left to
-the maintainer, with the dry run recorded here so either choice is auditable.
+**Not executed, by decision.** Both arms live under the `claudecode_agent`
+method and the tool keeps one canonical per project, so executing would
+supersede the 2026-08-22c API canonicals selected on 2026-08-24 (popping
+their blocks per #677). Which arm's records are the project canonicals is a
+decision about what the repository ships, not a selection criterion. The
+maintainer's decision (2026-08-25): **defer until #677 is fixed**, so that
+whenever the switch is made it is lossless; the dry run is recorded here so
+the eventual choice is auditable against what the tool would have chosen now.
 
 ## Instrument caveats carried forward
 
