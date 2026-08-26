@@ -41,6 +41,7 @@ linkml-map = "^0.3.8"
 sssom = "^0.4.16"
 linkml-term-validator = {version = ">=0.1.1", python = ">=3.10,<4.0"}
 linkml-reference-validator = {version = ">=0.1.1", python = ">=3.10,<4.0"}
+matplotlib = ">=3.8"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
