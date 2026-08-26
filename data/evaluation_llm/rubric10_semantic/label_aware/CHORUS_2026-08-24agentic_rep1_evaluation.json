@@ -6,39 +6,13 @@
   "method": "claudecode_agent",
   "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep1",
   "evaluation_timestamp": "2026-08-26T21:22:26Z",
-  "evaluation_timestamp_basis": "stamped at write time",
+  "evaluation_timestamp_basis": "stamped at end of analysis, ~2-3 min before the file was serialised (file mtime); same session, not back-dated",
   "model": {
     "name": "claude-fable-5",
     "evaluator_model": "claude-fable-5",
     "temperature": 0.0,
     "evaluation_type": "semantic_llm_judge",
     "note": "Model identity is the actual runtime model of the evaluating session, taken from the session environment (claude-fable-5), not template text."
-  },
-  "applicability_conditions": {
-    "human_subjects": {
-      "satisfied": true,
-      "evidence": "E1 description: 'The data are collected retrospectively from patients with acute or critical illness at contributing hospitals' and 'a current released dataset of 50,000 patient admissions from intensive care, pediatric intensive care and neonatal intensive care units'; keywords include 'Critical Illness', 'Electronic Health Record', 'acute care'"
-    },
-    "governance_restrictions": {
-      "satisfied": true,
-      "evidence": "E2 regulatory_restrictions.confidentiality_level: 'restricted'; description: 'Every data type listed in the cohort 2 informational webinar ... is marked as controlled access.'"
-    },
-    "datasets_shared_available_for_reuse": {
-      "satisfied": true,
-      "evidence": "distribution_formats populated (five entries: OMOP Common Data Model, OHNLP, DICOM, WFDB, EDF+ and Persyst); third_party_sharing.is_shared: true ('The dataset is made available to users outside the contributing institutions under controlled access'). Per the ambiguity rule, approval-gated enclave access defaults to applicable."
-    },
-    "software_tools_produced": {
-      "satisfied": true,
-      "evidence": "external_resources (E10) references 'CHoRUS for Equitable AI GitHub organization' at https://github.com/chorus-ai: 'Twenty-eight public repositories holding software and tooling for clinical data'"
-    },
-    "data_collection_identified_and_shared": {
-      "satisfied": true,
-      "evidence": "acquisition_methods (1 entry) and collection_mechanisms (5 entries) populated; datasets-shared condition met"
-    },
-    "publication_identified_and_shared": {
-      "satisfied": false,
-      "evidence": "No citation field; external_resources lists the GitHub organization, the Bridge2AI program page and the NIH RePORTER award record — none is a publication reference. existing_uses 'Use in publications' carries source_caveats: 'No individual publication using the dataset is named anywhere in the declared bundle.' Gates Element 10 sub-element 2 only."
-    }
   },
   "semantic_analysis": {
     "issues_detected": [
@@ -174,6 +148,32 @@
       "grant_number_format": "valid",
       "rrid_format": "not_present",
       "url_validity": "valid_with_minor_issues"
+    },
+    "applicability_conditions": {
+      "human_subjects": {
+        "satisfied": true,
+        "evidence": "E1 description: 'The data are collected retrospectively from patients with acute or critical illness at contributing hospitals' and 'a current released dataset of 50,000 patient admissions from intensive care, pediatric intensive care and neonatal intensive care units'; keywords include 'Critical Illness', 'Electronic Health Record', 'acute care'"
+      },
+      "governance_restrictions": {
+        "satisfied": true,
+        "evidence": "E2 regulatory_restrictions.confidentiality_level: 'restricted'; description: 'Every data type listed in the cohort 2 informational webinar ... is marked as controlled access.'"
+      },
+      "datasets_shared_available_for_reuse": {
+        "satisfied": true,
+        "evidence": "distribution_formats populated (five entries: OMOP Common Data Model, OHNLP, DICOM, WFDB, EDF+ and Persyst); third_party_sharing.is_shared: true ('The dataset is made available to users outside the contributing institutions under controlled access'). Per the ambiguity rule, approval-gated enclave access defaults to applicable."
+      },
+      "software_tools_produced": {
+        "satisfied": true,
+        "evidence": "external_resources (E10) references 'CHoRUS for Equitable AI GitHub organization' at https://github.com/chorus-ai: 'Twenty-eight public repositories holding software and tooling for clinical data'"
+      },
+      "data_collection_identified_and_shared": {
+        "satisfied": true,
+        "evidence": "acquisition_methods (1 entry) and collection_mechanisms (5 entries) populated; datasets-shared condition met"
+      },
+      "publication_identified_and_shared": {
+        "satisfied": false,
+        "evidence": "No citation field; external_resources lists the GitHub organization, the Bridge2AI program page and the NIH RePORTER award record — none is a publication reference. existing_uses 'Use in publications' carries source_caveats: 'No individual publication using the dataset is named anywhere in the declared bundle.' Gates Element 10 sub-element 2 only."
+      }
     }
   },
   "overall_score": {

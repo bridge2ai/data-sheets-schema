@@ -6,7 +6,7 @@
   "method": "claudecode_agent",
   "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep2",
   "evaluation_timestamp": "2026-08-26T21:22:42Z",
-  "evaluation_timestamp_basis": "stamped at write time",
+  "evaluation_timestamp_basis": "stamped at end of analysis, ~2-3 min before the file was serialised (file mtime); same session, not back-dated",
   "model": {
     "name": "claude-fable-5",
     "evaluator_model": "claude-fable-5",

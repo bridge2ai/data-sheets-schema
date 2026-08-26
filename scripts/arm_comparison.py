@@ -11,16 +11,21 @@ arm.
 Bases, stated once and printed into the output:
 
 - **pair errors, report findings, grounding** come from each record's own
-  blocks. Pair consistency is a deterministic artifact check and grounding
-  was measured against the bundle *that run* saw (bundles have drifted since
-  the v4 arm, so recomputing grounding today would measure a different input).
+  blocks. Pair consistency is a deterministic artifact check. Grounding is
+  measured against the record's declared bundle — for every arm shown, the
+  record's `inputs.bundle_md5` still matches the bundle on disk, and the
+  block was written either by the run or by `backfill-checks` against that
+  same bundle (the record's `recorded_by` says which).
 - **form metrics** (British spellings, undeclared prefixes, organisational
   fragments, GC label variants) are recomputed live from the artifacts with
-  the current instrument (`grounding.form_facts`), because the stored `form`
-  blocks were written under whichever instrument version existed at the
-  time — the v4 records carry British counts from a counter that has since
-  been revised twice (#653, #671). One instrument for every arm, or no
-  comparison.
+  the current instrument (`grounding.form_facts`), so the basis does not
+  depend on when each record was last backfilled. As of this writing the
+  stored `form` blocks agree with the live recompute on every field for all
+  36 records (they were all re-backfilled under instrument v2.1 on
+  2026-08-22); the recompute is what keeps that true after the next
+  instrument change. **GC label variants are anachronistic for the v4 and
+  22c arms**: the manifest `naming:` declaration they are counted against
+  was decided 2026-08-22, after the v4 arm ran and the day the 22c arm did.
 - **rubric scores** come from `data/evaluation_llm/rubric10_semantic/
   label_aware/`, matched by label, and only exist for canonical (or
   would-be canonical) records.
@@ -35,8 +40,8 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import glob
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -44,6 +49,11 @@ from typing import Any
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
+# form_facts → declared_naming() reads the manifest cwd-relative (#673); run
+# from anywhere else and every GC count silently becomes 0.
+os.chdir(ROOT)
+sys.path.insert(0, str(ROOT / "src"))
+from data_sheets_schema.grounding import form_facts  # noqa: E402
 CONCAT = ROOT / "data" / "d4d_concatenated"
 EVALS = ROOT / "data" / "evaluation_llm" / "rubric10_semantic" / "label_aware"
 OUT_MD = ROOT / "notes" / "arm_comparison.md"
@@ -79,14 +89,18 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
              "that reduce it differ by runtime (#689) and it is coupled with British "
              "spellings (#675)"),
     "report": ("report findings", "record", True,
-               "the checker parses two claim forms; where claims_checked is 0 the value "
-               "is unmeasured, not held (#684) — shown as 0ᵘ"),
+               "claims_checked counts backticked removal claims only; false-schema-claim "
+               "findings come from a separate scan that counts nothing. A 0 with "
+               "claims_checked 0 is therefore unmeasured on the removal form, not held "
+               "(#684) — shown as 0ᵘ; any finding > 0 is measured"),
     "minted": ("minted fragments (reported)", "record", False,
                "reported-only; every fragment hangs off an attested base wherever "
                "ungrounded is 0. Appetite varies 3→130 within one project (#685)"),
     "gc": ("GC label variants (reported)", "live", True,
-           "reported-only; for VOICE the count is the dataset's own PhysioNet title, "
-           "lawful under the proper-noun carve-out (#674)"),
+           "reported-only; counted against the manifest naming declaration decided "
+           "2026-08-22, so anachronistic for the v4 arm and same-day for 22c. For VOICE "
+           "the count is the dataset's own PhysioNet title, lawful under the "
+           "proper-noun carve-out (#674)"),
 }
 
 
@@ -108,8 +122,6 @@ def run_metrics(prefix: str, rep: int, project: str) -> dict[str, Any] | None:
     g = (rec.get("grounding") or {}).get("distinct") or {}
 
     # Live form recomputation under the current instrument.
-    sys.path.insert(0, str(ROOT / "src"))
-    from data_sheets_schema.grounding import form_facts  # noqa: E402
     form = form_facts(full, core)
 
     def form_get(*keys: str) -> int | None:
@@ -172,6 +184,9 @@ def fmt(m: dict[str, Any], metric: str) -> str:
 
 
 def worst(reps: list[dict[str, Any]], metric: str) -> str:
+    """Per-project collapse for the baseline column: the worst value where
+    the metric has a direction, the max (labelled as such in the header) for
+    reported-only metrics that do not."""
     vals = [r[metric] for r in reps if r.get(metric) is not None]
     if not vals:
         return "–"
@@ -186,19 +201,22 @@ def write_markdown(data, scores) -> None:
              f"Generated by `scripts/arm_comparison.py` from the provenance records under "
              f"`data/d4d_concatenated/`; do not edit by hand — re-run the script.", "",
              "## Bases", "",
-             "- pair errors, report findings, grounding: each record's own blocks "
-             "(pair is a deterministic artifact check; grounding was measured against "
-             "the bundle that run saw).",
+             "- pair errors, report findings, grounding: each record's own blocks. Pair "
+             "is a deterministic artifact check; grounding is against the record's "
+             "declared bundle, whose md5 still matches disk for every arm shown "
+             "(`recorded_by` says whether the run or backfill-checks wrote it).",
              "- British spellings, undeclared prefixes, organisational fragments, GC "
              "label variants: **recomputed live** from the artifacts under the current "
-             "instrument (`grounding.form_facts`), so every arm is measured the same way. "
-             "Stored `form` blocks are not used.",
+             "instrument (`grounding.form_facts`), so the basis does not depend on when "
+             "a record was last backfilled. Stored `form` blocks are not read (today "
+             "they agree with the recompute on all 36 records). GC variants are counted "
+             "against a naming declaration decided 2026-08-22 — anachronistic for v4.",
              "- rubric scores: `data/evaluation_llm/rubric10_semantic/label_aware/`, same "
              "evaluator for every arm shown.",
              "- spend: absent by design — `api_usage` and `run_observed` are different "
              "quantities (#400).", "",
              "Arms: " + "; ".join(f"**{d}** — `{pfx}_rep{{1,2,3}}`, {rt}"
-                                   + (" (shown as per-project worst)" if role == "worst" else "")
+                                   + (" (shown as per-project worst; max for reported-only metrics)" if role == "worst" else "")
                                    for _k, d, pfx, rt, role in ARMS), ""]
 
     lines += ["## Deterministic metrics — three replicates per cell", "",
@@ -284,6 +302,12 @@ def write_figures(data, scores) -> None:
     # Rubric scores: raw points per project per arm (canonicals only).
     fig, ax = plt.subplots(figsize=(8, 3.6))
     arm_keys = [k for k, *_ in ARMS if any(scores[k][p] for p in PROJECTS)]
+    absent = [d for k, d, *_ in ARMS if k not in arm_keys]
+    for k in arm_keys:
+        for p in PROJECTS:
+            if len(scores[k][p]) > 1:
+                print(f"warning: {len(scores[k][p])} evaluations match {k}/{p}; "
+                      f"figure shows the first by filename", file=sys.stderr)
     width = 0.8 / max(1, len(arm_keys))
     for i, key in enumerate(arm_keys):
         vals = [(scores[key][p][0]["total"] if scores[key][p] else 0) for p in PROJECTS]
@@ -293,7 +317,9 @@ def write_figures(data, scores) -> None:
     ax.set_xticklabels(PROJECTS); ax.set_ylim(0, 50); ax.set_ylabel("rubric10-semantic points / 50")
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=len(arm_keys))
-    ax.set_title("Rubric10-semantic, canonical records (same evaluator model)", fontsize=10, loc="left")
+    ax.set_title("Rubric10-semantic, canonical records (same evaluator model)"
+                 + (f" — no evaluations exist for: {', '.join(absent)}" if absent else ""),
+                 fontsize=9, loc="left")
     fig.tight_layout()
     out = OUT_FIG / "arm_comparison_rubric.png"
     fig.savefig(out, dpi=150); plt.close(fig)

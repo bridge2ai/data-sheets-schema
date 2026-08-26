@@ -6,39 +6,13 @@
   "method": "claudecode_agent",
   "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep2",
   "evaluation_timestamp": "2026-08-26T21:22:51Z",
-  "evaluation_timestamp_basis": "stamped at write time",
+  "evaluation_timestamp_basis": "stamped at end of analysis, ~2-3 min before the file was serialised (file mtime); same session, not back-dated",
   "model": {
     "name": "claude-fable-5",
     "evaluator_model": "claude-fable-5",
     "temperature": 0.0,
     "evaluation_type": "semantic_llm_judge",
     "note": "Runtime model identity taken from the session environment (claude-fable-5), not from template text"
-  },
-  "applicability_conditions": {
-    "human_subjects": {
-      "satisfied": false,
-      "evidence": "description (E1) covers 'multimodal interrogation of chromatin modifiers, metabolic enzymes and other proteins' in 'disease-relevant human cell lines' with no participants, patients, or clinical research; keywords name cell lines and assays (MDA-MB-468, KOLF2.1J, SEC-MS, perturb-seq, AP-MS), not participants; collection_mechanisms (E8) describe laboratory deposition archives and 'Automated fixation and permeabilization protocols' for cell lines, not participant recruitment"
-    },
-    "governance_restrictions": {
-      "satisfied": true,
-      "evidence": "regulatory_restrictions (E2) is populated: confidentiality_level 'unrestricted', 'FDA Regulated: No', the 'Administration directives' review notice, and governance_committee_contact ORCID:0000-0003-4535-3486; data_governance names a 'Data Governance Committee'. Element 4 is applicable via the governance gate."
-    },
-    "datasets_shared_and_reusable": {
-      "satisfied": true,
-      "evidence": "distribution_formats lists ZIP, JSON and HTML with Dataverse access_urls for all four release DOIs; third_party_sharing.is_shared=true with 'Every file listed in the four release records is marked File Access: Public'; license CC BY-NC-SA 4.0 permits non-commercial reuse. Elements 3.1-3.4, 6, 8, and 10 are applicable."
-    },
-    "software_tools_produced": {
-      "satisfied": true,
-      "evidence": "external_resources (E10) references no code repository (only the cm4ai.org portal and repository names), but purposes (E7) states AI-ready data is data 'whose models and software are available and well-described for validation and reuse' and addressing_gaps states 'CM4AI generates a resource of matched data and tools'. Borderline; by the ambiguity rule E8 sub-elements 3-4 are treated as applicable and scored on what is documented."
-    },
-    "data_collection_identified": {
-      "satisfied": true,
-      "evidence": "acquisition_methods (4 entries) and collection_mechanisms (2 entries) populated, plus data_collectors and collection_timeframes, and the datasets-shared condition is met. E8 sub-elements 1-2 applicable."
-    },
-    "publication_identified": {
-      "satisfied": true,
-      "evidence": "citation present (full author-list Dataverse citation with https://doi.org/10.18130/V3/HIGT4C); related_datasets lists the CM4AI preprint (doi:10.1101/2024.05.21.589311) and the Perturbation Cell Atlas preprint (doi:10.1101/2024.11.03.621734, PMCID PMC11580897); existing_uses cites the same atlas preprint. E10 sub-element 2 applicable."
-    }
   },
   "semantic_analysis": {
     "issues_detected": [
@@ -151,6 +125,32 @@
       "grant_number_format": "valid",
       "rrid_format": "valid",
       "url_validity": "all_valid"
+    },
+    "applicability_conditions": {
+      "human_subjects": {
+        "satisfied": false,
+        "evidence": "description (E1) covers 'multimodal interrogation of chromatin modifiers, metabolic enzymes and other proteins' in 'disease-relevant human cell lines' with no participants, patients, or clinical research; keywords name cell lines and assays (MDA-MB-468, KOLF2.1J, SEC-MS, perturb-seq, AP-MS), not participants; collection_mechanisms (E8) describe laboratory deposition archives and 'Automated fixation and permeabilization protocols' for cell lines, not participant recruitment"
+      },
+      "governance_restrictions": {
+        "satisfied": true,
+        "evidence": "regulatory_restrictions (E2) is populated: confidentiality_level 'unrestricted', 'FDA Regulated: No', the 'Administration directives' review notice, and governance_committee_contact ORCID:0000-0003-4535-3486; data_governance names a 'Data Governance Committee'. Element 4 is applicable via the governance gate."
+      },
+      "datasets_shared_and_reusable": {
+        "satisfied": true,
+        "evidence": "distribution_formats lists ZIP, JSON and HTML with Dataverse access_urls for all four release DOIs; third_party_sharing.is_shared=true with 'Every file listed in the four release records is marked File Access: Public'; license CC BY-NC-SA 4.0 permits non-commercial reuse. Elements 3.1-3.4, 6, 8, and 10 are applicable."
+      },
+      "software_tools_produced": {
+        "satisfied": true,
+        "evidence": "external_resources (E10) references no code repository (only the cm4ai.org portal and repository names), but purposes (E7) states AI-ready data is data 'whose models and software are available and well-described for validation and reuse' and addressing_gaps states 'CM4AI generates a resource of matched data and tools'. Borderline; by the ambiguity rule E8 sub-elements 3-4 are treated as applicable and scored on what is documented."
+      },
+      "data_collection_identified": {
+        "satisfied": true,
+        "evidence": "acquisition_methods (4 entries) and collection_mechanisms (2 entries) populated, plus data_collectors and collection_timeframes, and the datasets-shared condition is met. E8 sub-elements 1-2 applicable."
+      },
+      "publication_identified": {
+        "satisfied": true,
+        "evidence": "citation present (full author-list Dataverse citation with https://doi.org/10.18130/V3/HIGT4C); related_datasets lists the CM4AI preprint (doi:10.1101/2024.05.21.589311) and the Perturbation Cell Atlas preprint (doi:10.1101/2024.11.03.621734, PMCID PMC11580897); existing_uses cites the same atlas preprint. E10 sub-element 2 applicable."
+      }
     }
   },
   "overall_score": {
