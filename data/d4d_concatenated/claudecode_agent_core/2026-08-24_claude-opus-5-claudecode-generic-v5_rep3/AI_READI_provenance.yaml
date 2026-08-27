@@ -98,14 +98,21 @@ phase_log:
     timing (#400); these are named rather than omitted so the gap reads as a limit
     and not an oversight
   run_observed:
-    total_tokens: 39543340
+    total_tokens: 21050455
     tool_uses: 117
     duration_ms: 2398013
+    bundle_lines_read: 6145
+    bundle_lines_total: 7376
   run_observed_basis: 'aggregate totals for the whole run, observed by the orchestrator
-    from the subagent runner''s completion report. One number per run, not per phase:
-    four-phase project-agent mode runs every phase in one context, so the run is the
-    only observable boundary. Not the runtime''s own accounting, no input/output split,
-    not billing-grade; deliberately not shaped like api_usage (#400).'
+    from the subagent runner''s transcript. One number per run, not per phase: four-phase
+    project-agent mode runs every phase in one context, so the run is the only observable
+    boundary. Not the runtime''s own accounting, no input/output split, not billing-grade;
+    deliberately not shaped like api_usage (#681/#682). total_tokens counts each API
+    message once (a response spans several transcript lines); duration_ms sums each
+    invocation''s own span, so a resumed run excludes the gap. bundle_lines_read is
+    the union of the run''s successful file-reading windows over the declared bundle
+    (#700): lines the run never opened, or opened only in a read that errored, may
+    have been reached by search, but nothing attests that.'
 schema:
   declared_version: 2.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml

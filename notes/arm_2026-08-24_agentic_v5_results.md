@@ -42,13 +42,27 @@
   were removed in a reviewed edit and re-annotated; `annotate-observed`'s
   refusal to silently replace a prior value (#682) is what made the
   correction visible rather than quiet.
-- **Spend (orchestrator-observed, cache-inclusive):** 397,855,114 total tokens
+- **Spend (orchestrator-observed, cache-inclusive):** 216,557,820 total tokens
   across the 12 runs, 6.48 h of agent wall time (runs overlapped; ~2.5 h
-  elapsed for the fan-out). **Not comparable to the API arm's 5.36M in /
+  elapsed for the fan-out). *(Corrected 2026-08-27, #702: the first
+  annotation summed transcript usage per line, and one API response spans
+  several lines sharing a message id — every total was ~2× high, 397.9M in
+  this note's first version. Recomputed once per message by
+  `scripts/agentic_observed.py`; AI_READI rep1 is additionally cut at its
+  run's completion, since that agent kept acting for 35 minutes afterwards
+  on stray re-invocations.)* **Not comparable to the API arm's 5.36M in /
   2.26M out**: that figure is billed input/output from `api_usage`; this one
   sums every context re-read through the runner's cache, per the
   `run_observed_basis` each record carries. The two bases must never be
-  averaged (#400).
+  averaged (#681/#682).
+- **Bundle read coverage (added 2026-08-27, #700):** the share of the
+  declared bundle each run actually opened in successful file reads —
+  CHORUS 100/100/100 %, AI_READI 80/80/83 %, CM4AI 90/76/85 %, VOICE
+  80/88/94 %. The API arm has the whole bundle in context on every call, so
+  its coverage is 100 % by construction. An unread window is a plausible
+  mechanism for the agentic arm's lower populated-slot counts (CHORUS 49 vs
+  58 is the exception: full coverage, still fewer slots); the next agentic
+  arm reads the bundle in full before extracting (#701).
 
 ## The table — three replicates per cell, 2026-08-22c API arm in parens
 
