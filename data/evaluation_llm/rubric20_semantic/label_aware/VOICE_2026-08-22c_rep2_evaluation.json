@@ -6,7 +6,7 @@
   "method": "claudecode_agent",
   "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep2",
   "evaluation_timestamp": "2026-08-27T01:01:35Z",
-  "evaluation_timestamp_basis": "stamped immediately before write",
+  "evaluation_timestamp_basis": "stamped at end of analysis; the file was serialised ~2-3 min later (file mtime) in the same session — not back-dated",
   "model": {
     "name": "claude-fable-5",
     "evaluator_model": "claude-fable-5",
@@ -20,56 +20,85 @@
         "type": "consistency",
         "severity": "medium",
         "description": "at_risk_populations declares 'at_risk_groups_included: false' while the neurological cohort subset enrolls 'Participants aged 44 to 85 with mild cognitive impairment, Alzheimer's disease, other dementias' and the psychiatric cohort enrolls participants with 'bipolar disorder, or depression'. The record's own notes concede: 'No special protections beyond standard informed consent are documented for adult participants with cognitive impairment, dementia or psychiatric conditions.' The boolean contradicts the documented cohort composition.",
-        "fields_involved": ["at_risk_populations.at_risk_groups_included", "subsets", "instances.label_description"],
+        "fields_involved": [
+          "at_risk_populations.at_risk_groups_included",
+          "subsets",
+          "instances.label_description"
+        ],
         "recommendation": "Set at_risk_groups_included to true and document decisional-capacity or surrogate-consent procedures for the cognitive-impairment and psychiatric cohorts, or state explicitly why these groups are not treated as vulnerable."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "regulatory_restrictions.hipaa_compliant is 'compliant' while its own source_caveats records that 'The Data Transfer and Use Agreement classifies the data as Personally Identifiable Information as defined in OMB Memorandum M-07-16 and states that it is not covered under HIPAA'. The record acknowledges the tension rather than resolving it.",
-        "fields_involved": ["regulatory_restrictions.hipaa_compliant", "regulatory_restrictions.source_caveats", "human_subject_research.regulatory_compliance"],
+        "fields_involved": [
+          "regulatory_restrictions.hipaa_compliant",
+          "regulatory_restrictions.source_caveats",
+          "human_subject_research.regulatory_compliance"
+        ],
         "recommendation": "Distinguish 'HIPAA de-identification standard applied' from 'dataset is a HIPAA-covered entity product'; consider a value that expresses de-identified-under-Safe-Harbor rather than 'compliant'."
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "data_protection_impacts states 'No analysis of the potential impact of the dataset and its use on data subjects has been conducted' for a human-subjects dataset whose participant_privacy notes that 'each person's voice is unique to them and it remains possible, though unlikely, that someone could recognize a participant's voice' and which 'does not achieve K-anonymization at k greater than or equal to 2'. A formal impact assessment would be expected given the stated residual re-identification risk.",
-        "fields_involved": ["data_protection_impacts", "participant_privacy.reidentification_risk"],
+        "fields_involved": [
+          "data_protection_impacts",
+          "participant_privacy.reidentification_risk"
+        ],
         "recommendation": "Record a data protection impact assessment, or cite the ethics memorandum on controlled access as the impact analysis it partially constitutes."
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "collection_timeframes gives only 'The data were collected over a period of 12 months.' with the caveat 'No start or end date for collection is stated in any source', while funders gives 'a project start of 2022-09-01 and a project end of 2026-11-30' and distribution_dates spans releases from November 2024 to 2026-05-01 for a growing cohort (306 to 833 participants). A 12-month window cannot cover the 3.1.0 release.",
-        "fields_involved": ["collection_timeframes", "distribution_dates", "funders"],
+        "fields_involved": [
+          "collection_timeframes",
+          "distribution_dates",
+          "funders"
+        ],
         "recommendation": "Record the collection window per release or at least bound it with the first-enrollment and data-freeze dates for version 3.1.0."
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "The primary award identifier is written six ways across sources, including one the record itself flags as corrupted: 'OT2OD032720 ... 3OT2OD032720-01S1 ... 3OT2OD032720-01S3 ... 1OT2OD032720-01 ... OT2 OD032720 ... \"3Tf-OTOD03272001S2\" (project documentation footer, apparently corrupted)'. The canonical core project number OT2OD032720 follows the NIH pattern; the variants are supplement/year suffixes and are correctly explained.",
-        "fields_involved": ["funders.notes", "funders.source_caveats"],
+        "fields_involved": [
+          "funders.notes",
+          "funders.source_caveats"
+        ],
         "recommendation": "Populate a structured grant identifier slot with the core project number OT2OD032720 and keep the variants in notes."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "Rubric mandatory slots `resources` and `parent_datasets` are absent even though the record has rich equivalents: 'was_derived_from: Raw audio waveforms and REDCap questionnaire exports' and related_datasets entries with 'relationship_type: is_new_version_of' pointing to 'doi:10.13026/k81f-qr68' and 'doi:10.57764/qb6h-em84'.",
-        "fields_involved": ["resources", "parent_datasets", "related_datasets", "was_derived_from"],
+        "fields_involved": [
+          "resources",
+          "parent_datasets",
+          "related_datasets",
+          "was_derived_from"
+        ],
         "recommendation": "Mirror the is_new_version_of targets into parent_datasets and list the PhysioNet/Synapse/GitHub locations under resources."
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "Software tools are named but only one carries a version: 'the open-source b2aiprep library version 3.0.0'. openSMILE, Praat, Parselmouth, torchaudio, sparc, ppgs and 'OpenAI's Whisper Large model' have no version, and tool_accuracy admits 'off-the-shelf models that have not been audited for correctness'.",
-        "fields_involved": ["machine_annotation_tools", "preprocessing_strategies"],
+        "fields_involved": [
+          "machine_annotation_tools",
+          "preprocessing_strategies"
+        ],
         "recommendation": "Pin versions for every extraction tool (the b2aiprep 3.0.0 lockfile likely records them)."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "The `license` slot reads 'Bridge2AI Voice Registered Access License', a bespoke agreement rather than a recognized open license, while license_and_use_terms records 'data_use_permission: general_research_use' and 'intended for both commercial and non-commercial research purposes'. Consistent in substance but not machine-resolvable to an SPDX or DUO identifier.",
-        "fields_involved": ["license", "license_and_use_terms"],
+        "fields_involved": [
+          "license",
+          "license_and_use_terms"
+        ],
         "recommendation": "Add a DUO term (e.g. DUO:0000042 general research use) alongside the bespoke agreement name and a URL to the agreement text."
       }
     ],

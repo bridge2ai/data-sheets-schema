@@ -5,7 +5,7 @@
   "project": "CHORUS",
   "method": "claudecode_agent",
   "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep3",
-  "evaluation_timestamp": "2026-08-27T01:03:36Z",
+  "evaluation_timestamp": "2026-08-27T01:17:01Z",
   "evaluation_timestamp_basis": "stamped immediately before write",
   "model": {
     "name": "claude-fable-5",
@@ -51,7 +51,8 @@
       "evidence": "No `citation` field. external_resources lists only the project website, the GitHub organization, a scheme-less Bridge2AI program page, the NIH RePORTER award record and a training-program webinar; none is a publication. existing_uses says only that datasets 'were being used for training activities and publications' without identifying any. The record's own source_caveats states 'No DOI, recommended citation ... is stated anywhere in the bundle'.",
       "gates": [
         14
-      ]
+      ],
+      "note": "Condition unmet, but its only evidence is Q14's own fields (citation, external_resources, doi); per the anti-circular rule Q14 remains applicable and is scored (0)."
     }
   },
   "semantic_analysis": {
@@ -183,10 +184,10 @@
   "overall_score": {
     "total_points": 60,
     "max_points": 88,
-    "excluded_max_points": 5,
-    "adjusted_max_points": 83,
-    "normalized_percentage": 72.3,
-    "questions_not_applicable": 1
+    "excluded_max_points": 0,
+    "adjusted_max_points": 88,
+    "normalized_percentage": 68.2,
+    "questions_not_applicable": 0
   },
   "categories": [
     {
@@ -391,16 +392,16 @@
         {
           "id": 14,
           "name": "Associated Publications",
-          "applicable": false,
-          "applicability_status": "not_applicable",
-          "applicability_evidence": "No `citation` field. external_resources lists only the project website, the GitHub organization, a scheme-less Bridge2AI program page, the NIH RePORTER award record and a training-program webinar; none is a publication. existing_uses says only that datasets 'were being used for training activities and publications' without identifying any. The record's own source_caveats states 'No DOI, recommended citation ... is stated anywhere in the bundle'.",
+          "applicable": true,
+          "applicability_status": "applicable_by_anti_circular_rule",
+          "applicability_evidence": "The publication trigger could only be evaluated from Q14's own fields (citation, external_resources, doi), so under the anti-circular rule the question stays applicable and is scored. No `citation` field. external_resources lists only the project website, the GitHub organization, a scheme-less Bridge2AI program page, the NIH RePORTER award record and a training-program webinar; none is a publication. existing_uses says only that datasets 'were being used for training activities and publications' without identifying any. The record's own source_caveats states 'No DOI, recommended citation ... is stated anywhere in the bundle'.",
           "description": "Formal citations or DOI-linked external resources",
           "score_type": "numeric",
-          "score": null,
+          "score": 0,
           "max_score": 5,
-          "score_label": "Not applicable",
-          "evidence": "No citation field; external_resources contains no publication; no DOI.",
-          "quality_note": "Excluded from denominator per 'Applies to' condition: no publication identified elsewhere in the record."
+          "score_label": "No publications cited",
+          "evidence": "No `citation` field; no doi; external_resources holds only the project website, GitHub organization, a scheme-less Bridge2AI page, the NIH RePORTER award record and a training-program webinar; existing_uses says only that datasets 'were being used for training activities and publications'; source_caveats: 'No DOI, recommended citation ... is stated anywhere in the bundle'.",
+          "quality_note": "Scored 0: the record cites no publication and provides no recommended dataset citation. The external resources are project and grant pages, not DOI-linked references, so they do not reach the 'one citation or external resource' anchor for publications."
         },
         {
           "id": 15,
@@ -509,16 +510,16 @@
     "weaknesses": [
       "No IRB approval, informed consent or waiver documentation despite pediatric and neonatal human-subjects data",
       "No DOI, version identifier, errata, publisher or long-term custodian; identifier is a self-minted fragment",
+      "No publications or recommended dataset citation",
       "No demographic distribution, per-setting counts, or inclusion/exclusion criteria for the 50,000 admissions",
-      "Tooling named without versions or repository-level links; no imputation or missing-data documentation",
-      "No prohibited or discouraged uses, no reidentification-risk statement, and only a single self-inferred bias entry"
+      "Tooling named without versions or repository-level links; no prohibited or discouraged uses; single self-inferred bias entry"
     ],
     "recommendations": [
       "Populate ethical_reviews.reviewing_organization with the IRB and approval number, and add informed_consent describing the waiver for retrospective records including pediatric/neonatal cases",
-      "Mint a DOI, record version and version_access, and name the accountable custodian and repository for the period after 2026-11-30",
+      "Mint a DOI, record version and version_access, add a citation block, and name the accountable custodian and repository for the period after 2026-11-30",
       "Report age, sex and race/ethnicity distributions and ICU/PICU/NICU counts from the demographics modality, plus cohort inclusion criteria and the encounter date range",
       "Add per-tool repository URLs and versions for OHNLP, DeGauss, CTP-deid, chorus-extract-upload and the waveform conversion scripts, and document missing-data handling",
-      "Add prohibited_uses/discouraged_uses (e.g. reidentification attempts, non-approved commercial use), a participant_privacy.reidentification_risk statement, and additional known_biases entries for measurement and site-documentation heterogeneity"
+      "Add prohibited_uses/discouraged_uses, a participant_privacy.reidentification_risk statement, and additional known_biases entries for measurement and site-documentation heterogeneity"
     ]
   },
   "metadata": {

@@ -26,9 +26,11 @@ Bases, stated once and printed into the output:
   instrument change. **GC label variants are anachronistic for the v4 and
   22c arms**: the manifest `naming:` declaration they are counted against
   was decided 2026-08-22, after the v4 arm ran and the day the 22c arm did.
-- **rubric scores** come from `data/evaluation_llm/rubric10_semantic/
+- **rubric scores** come from `data/evaluation_llm/rubric{10,20}_semantic/
   label_aware/`, matched by label, and only exist for canonical (or
-  would-be canonical) records.
+  would-be canonical) records. Applicability (N/A) is itself evaluator
+  output, so adjusted maxima can differ between evaluations of comparable
+  records; points and adjusted maximum are both shown.
 - **spend is deliberately absent**: `api_usage` (billed input/output) and
   `run_observed` (cache-inclusive runner totals) are different quantities and
   must never sit in one column (#400).
@@ -218,8 +220,9 @@ def write_markdown(data, scores) -> None:
              "a record was last backfilled. Stored `form` blocks are not read (today "
              "they agree with the recompute on all 36 records). GC variants are counted "
              "against a naming declaration decided 2026-08-22 — anachronistic for v4.",
-             "- rubric scores: `data/evaluation_llm/rubric10_semantic/label_aware/`, same "
-             "evaluator for every arm shown.",
+             "- rubric scores: `data/evaluation_llm/rubric{10,20}_semantic/label_aware/`, "
+             "same evaluator for every arm shown; N/A exclusions are evaluator "
+             "judgements, so adjusted maxima can differ between comparable records.",
              "- spend: absent by design — `api_usage` and `run_observed` are different "
              "quantities (#400).", "",
              "Arms: " + "; ".join(f"**{d}** — `{pfx}_rep{{1,2,3}}`, {rt}"
@@ -329,10 +332,20 @@ def _rubric_figure(rubric, scores, colors) -> None:
     width = 0.8 / max(1, len(arm_keys))
     for i, key in enumerate(arm_keys):
         vals = [(scores[key][p][0]["total"] if scores[key][p] else 0) for p in PROJECTS]
-        ax.bar([j + i * width for j in range(len(PROJECTS))], vals, width=width,
-               color=colors[key], label=dict((k, d) for k, d, *_ in ARMS)[key])
+        xs = [j + i * width for j in range(len(PROJECTS))]
+        ax.bar(xs, vals, width=width, color=colors[key],
+               label=dict((k, d) for k, d, *_ in ARMS)[key])
+        # Points are drawn against the unadjusted maximum; where an evaluation
+        # excluded N/A questions its adjusted maximum is written on the bar so
+        # the visual height is not read as a percentage (#696 review).
+        for x, p, v in zip(xs, PROJECTS, vals):
+            if scores[key][p]:
+                s0 = scores[key][p][0]
+                adj = s0.get("adjusted_max") or s0.get("max")
+                ax.text(x, v + 0.5, f"{v}/{adj}", ha="center", va="bottom", fontsize=7)
     ax.set_xticks([j + width * (len(arm_keys) - 1) / 2 for j in range(len(PROJECTS))])
-    ax.set_xticklabels(PROJECTS); ax.set_ylim(0, RUBRIC_MAX[rubric]); ax.set_ylabel(f"{rubric}-semantic points / {RUBRIC_MAX[rubric]}")
+    ax.set_xticklabels(PROJECTS); ax.set_ylim(0, RUBRIC_MAX[rubric] * 1.08)
+    ax.set_ylabel(f"{rubric}-semantic points (axis: unadjusted max {RUBRIC_MAX[rubric]})")
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=len(arm_keys))
     ax.set_title(f"{rubric.capitalize()}-semantic, canonical records (same evaluator model)"

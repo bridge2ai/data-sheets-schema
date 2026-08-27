@@ -6,7 +6,7 @@
   "method": "claudecode_agent",
   "label": "2026-08-22c_claude-opus-5-api-generic-v5_rep1",
   "evaluation_timestamp": "2026-08-27T01:01:31Z",
-  "evaluation_timestamp_basis": "stamped immediately before write",
+  "evaluation_timestamp_basis": "stamped at end of analysis; the file was serialised ~2-3 min later (file mtime) in the same session — not back-dated",
   "model": {
     "name": "claude-fable-5",
     "evaluator_model": "claude-fable-5",
@@ -42,49 +42,75 @@
         "type": "consistency",
         "severity": "medium",
         "description": "The description claims the release covers 'single-cell CRISPRi Perturb-seq for MDA-MB-468 cells with and without treatment' and each MDA-MB-468 subset lists 'Perturb-seq data for the untreated condition' / 'for the treated condition', but file_collections contains only KOLF2 Perturb-seq archives (cm4ai_perturb-seq_KOLF2_cell_atlas.zip, cm4ai_perturb-seq_KOLF2_raw_sra.zip) and third_party_sharing states 'the Perturb-seq deposits for KOLF2.1J iPSCs and for MDA-MB-468 cells are listed as embargoed'.",
-        "fields_involved": ["description", "subsets", "file_collections", "third_party_sharing"],
+        "fields_involved": [
+          "description",
+          "subsets",
+          "file_collections",
+          "third_party_sharing"
+        ],
         "recommendation": "State in description and subsets that MDA-MB-468 Perturb-seq data are embargoed external deposits, not part of the ten distributed archives."
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "cm4ai_perturb-seq_KOLF2_raw_sra.zip is described as a 'Raw sequence data package ... Listed as 73.3 KB' and raw_data_sources gives raw_data_format 'Sequence Read Archive submission'; 73.3 KB cannot hold raw single-cell reads, so the archive is a pointer/manifest package and the instance 'A raw single-cell sequencing read set' is not what the file contains.",
-        "fields_involved": ["file_collections", "raw_data_sources", "instances"],
+        "fields_involved": [
+          "file_collections",
+          "raw_data_sources",
+          "instances"
+        ],
         "recommendation": "Describe the archive as SRA submission metadata and point to the SRA/BioProject accession for the reads."
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "Keyword 'mass spectroscopy' is a misnomer; the record's own methods are 'size-exclusion chromatography-mass spectrometry (SEC-MS)' and 'affinity purification-mass spectrometry (AP-MS)'.",
-        "fields_involved": ["keywords"],
+        "fields_involved": [
+          "keywords"
+        ],
         "recommendation": "Use 'mass spectrometry' (source-carried keyword may be retained with a caveat)."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "Version numbering is non-monotonic across the series as recorded: this release is 'version: \"2.0\"' while related_datasets gives the October 2025 release as 'Version 2.1' and the June 2025 release as 'Version 2.1'. version_access explains each release is 'a separate versioned Dataverse dataset with its own DOI', which resolves it, but a reader of version alone would misread the ordering.",
-        "fields_involved": ["version", "related_datasets", "version_access"],
+        "fields_involved": [
+          "version",
+          "related_datasets",
+          "version_access"
+        ],
         "recommendation": "Add a note beside version that the number is per-Dataverse-dataset, not per-series."
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "Temporal ordering: created_on '2025-02-27' and a 'Deposit Date of 2025-02-27' predate the June 2026 release ('issued: 2026-06-17') by sixteen months and coincide with the March 2025 release date. The record reports the Dataverse value faithfully but does not flag the anomaly in source_caveats.",
-        "fields_involved": ["created_on", "issued", "collection_timeframes", "maintainers"],
+        "fields_involved": [
+          "created_on",
+          "issued",
+          "collection_timeframes",
+          "maintainers"
+        ],
         "recommendation": "Add a source_caveat that the Dataverse creation/deposit date appears inherited from an earlier deposit."
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "External deposits are named without resolvable identifiers: 'MassIVE repository deposits' and 'Figshare deposit of the CRISPRi Perturbation Atlas' carry no accession or URL, unlike the GitHub, FAIRSCAPE and NDEx entries which give URLs.",
-        "fields_involved": ["external_resources", "raw_data_sources"],
+        "fields_involved": [
+          "external_resources",
+          "raw_data_sources"
+        ],
         "recommendation": "Add MassIVE (MSV...) accessions and the Figshare DOI."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "errata documents a revision of a different dataset ('The June 2025 release was revised to version 2.1'), not of the June 2026 release described by this record; no erratum for doi:10.18130/V3/HIGT4C itself is recorded.",
-        "fields_involved": ["errata", "related_datasets"],
+        "fields_involved": [
+          "errata",
+          "related_datasets"
+        ],
         "recommendation": "Move the June 2025 revision note into related_datasets and state that no errata are recorded for this release."
       }
     ],

@@ -5,7 +5,7 @@
   "project": "CHORUS",
   "method": "claudecode_agent",
   "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep1",
-  "evaluation_timestamp": "2026-08-27T01:04:36Z",
+  "evaluation_timestamp": "2026-08-27T01:15:01Z",
   "evaluation_timestamp_basis": "stamped immediately before write",
   "model": {
     "name": "claude-fable-5",

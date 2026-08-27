@@ -6,7 +6,7 @@
   "method": "claudecode_agent",
   "label": "2026-08-24_claude-opus-5-claudecode-generic-v5_rep1",
   "evaluation_timestamp": "2026-08-27T01:02:19Z",
-  "evaluation_timestamp_basis": "stamped immediately before write",
+  "evaluation_timestamp_basis": "stamped at end of analysis; the file was serialised ~2-3 min later (file mtime) in the same session — not back-dated",
   "model": {
     "name": "claude-fable-5",
     "evaluator_model": "claude-fable-5",
@@ -20,77 +20,110 @@
         "type": "semantic_understanding",
         "severity": "medium",
         "description": "Every creator entry, including non-PI roles, populates the principal_investigator slot with the person's own identifier, e.g. Alexandros Sigaras described as 'Co-lead for tools, software and IT infrastructure.' carries 'principal_investigator: doi:10.13026/37yb-1t42#person-sigaras-alexandros', and Philip Payne described only as 'Investigator. PhD.' carries 'principal_investigator: doi:10.13026/37yb-1t42#person-payne-philip'. The slot is being used as a person identifier rather than to name the PI.",
-        "fields_involved": ["creators.principal_investigator", "creators.description"],
+        "fields_involved": [
+          "creators.principal_investigator",
+          "creators.description"
+        ],
         "recommendation": "Reserve principal_investigator for the investigators the record itself calls PI (Bensoussan, Elemento) or drop the slot on the other creators; the description text already names the PIs."
       },
       {
         "type": "consistency",
         "severity": "medium",
         "description": "data_protection_impacts states 'No analysis of the potential impact of the dataset and its use on data subjects has been conducted.' while human_subject_research.involves_human_subjects is true and participant_privacy.reidentification_risk records that 'The dataset does not achieve k-anonymization at k greater than or equal to two.' A dataset with an acknowledged residual re-identification risk and no impact analysis is an honest but real gap.",
-        "fields_involved": ["data_protection_impacts", "participant_privacy.reidentification_risk", "human_subject_research"],
+        "fields_involved": [
+          "data_protection_impacts",
+          "participant_privacy.reidentification_risk",
+          "human_subject_research"
+        ],
         "recommendation": "Document the controlled-access memorandum's risk reasoning as an impact analysis, or state explicitly that none is planned."
       },
       {
         "type": "consistency",
         "severity": "medium",
         "description": "collection_timeframes gives no dates for the released data: 'The data were collected over a period of 12 months.' and the caveat admits 'No start or end date for collection of the released data is stated in the bundle.' The phase milestones ('completed in November 2023', 'begun in November 2023 and still ongoing in November 2024') describe the programme rather than the 3.1.0 cohort.",
-        "fields_involved": ["collection_timeframes"],
+        "fields_involved": [
+          "collection_timeframes"
+        ],
         "recommendation": "Add the collection window of the released cohort once it is published on the release page."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "content_warnings asserts 'The dataset includes the transcription of free speech tasks.' while participant_privacy.anonymization_method states 'Transcripts of free speech audio were removed' and the same object's source_caveats records 'the transcription of free speech is not present in the current registered-access release.' The record carries both statements rather than resolving them.",
-        "fields_involved": ["content_warnings", "participant_privacy.anonymization_method", "known_limitations"],
+        "fields_involved": [
+          "content_warnings",
+          "participant_privacy.anonymization_method",
+          "known_limitations"
+        ],
         "recommendation": "Rephrase the first warning as historical (release 1.0/healthsheet) or drop it for the current release."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "regulatory_restrictions.hipaa_compliant is 'compliant' while its own source_caveats records that the Data Transfer and Use Agreement 'states instead that the data it covers are personally identifiable information as defined in OMB Memorandum M-07-16 and are not covered under HIPAA, FERPA or similar laws.' The record explains the preference but the enum value cannot carry that nuance.",
-        "fields_involved": ["regulatory_restrictions.hipaa_compliant", "regulatory_restrictions.source_caveats"],
+        "fields_involved": [
+          "regulatory_restrictions.hipaa_compliant",
+          "regulatory_restrictions.source_caveats"
+        ],
         "recommendation": "Keep 'compliant' for the released de-identified dataset and note in other_compliance that the DTUA governs raw-audio transfer under a different regime."
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "The last external_resources entry is a title string rather than a URL or identifier: 'AI-readiness for Biomedical Data - Bridge2AI Recommendations'. All other external_resources values are resolvable URLs or DOIs.",
-        "fields_involved": ["external_resources"],
+        "fields_involved": [
+          "external_resources"
+        ],
         "recommendation": "Replace with the bioRxiv DOI of the recommendations paper or drop the entry."
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "Three DOIs appear for the dataset: id/doi 'doi:10.13026/37yb-1t42' (labelled version-independent), citation 'https://doi.org/10.13026/8xbn-nq66' and version_access.latest_version_doi 'doi:10.13026/8xbn-nq66' (release 3.1.0). The record explains this in source_caveats ('Every PhysioNet release page in the bundle labels 10.13026/37yb-1t42 as the DOI of the latest version'), so it is documented rather than erroneous, but a reader of only the citation would cite the version DOI while id names another.",
-        "fields_involved": ["id", "doi", "citation", "version_access.latest_version_doi"],
+        "fields_involved": [
+          "id",
+          "doi",
+          "citation",
+          "version_access.latest_version_doi"
+        ],
         "recommendation": "State in the citation that 10.13026/8xbn-nq66 is the 3.1.0 version DOI and 10.13026/37yb-1t42 the concept DOI."
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "conforms_to_schema is 'https://w3id.org/bridge2ai/data-sheets-schema', the schema of the datasheet itself, not of the data; the data-layout standard is carried separately in conforms_to 'Brain Imaging Data Structure (BIDS) v1.9.0'. Not wrong, but conforms_to_schema adds no information about the data's interoperability.",
-        "fields_involved": ["conforms_to_schema", "conforms_to"],
+        "fields_involved": [
+          "conforms_to_schema",
+          "conforms_to"
+        ],
         "recommendation": "None required; noted so Q10 credit rests on BIDS and the JSON data dictionaries rather than on conforms_to_schema."
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "keywords lists only four terms ('health', 'biomarkers', 'bridge2ai', 'voice') although the description names 'voice disorders, neurological and neurodegenerative disorders, mood and psychiatric disorders and respiratory disorders' and the purposes name 'audiomics' and 'acoustic biomarkers'.",
-        "fields_involved": ["keywords"],
+        "fields_involved": [
+          "keywords"
+        ],
         "recommendation": "Add keywords for speech, audiomics, machine learning and the four adult disease cohorts."
       },
       {
         "type": "content_accuracy",
         "severity": "low",
         "description": "discouraged_uses reads as generic healthsheet language ('hiring decisions, insurance premium adjustments, or any form of surveillance that could lead to discrimination or harm') with no source attribution, unlike the prohibited_uses entries which each cite 'Registered Data Access Agreement' or 'Data Transfer and Use Agreement'. Cannot be verified against the bundle from the record alone.",
-        "fields_involved": ["discouraged_uses", "prohibited_uses"],
+        "fields_involved": [
+          "discouraged_uses",
+          "prohibited_uses"
+        ],
         "recommendation": "Attach a source_caveats note naming the document the discouraged-use text comes from."
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "Header comment says '# Generated: 2026-08-26' while the run label is '2026-08-24_claude-opus-5-claudecode-generic-v5_rep1'; the two dates differ by two days. This is a provenance-metadata mismatch, not a content error.",
-        "fields_involved": ["header comment"],
+        "fields_involved": [
+          "header comment"
+        ],
         "recommendation": "Reconcile the generated date with the run's provenance record."
       }
     ],
@@ -125,11 +158,26 @@
     "questions_not_applicable": 0
   },
   "applicability_conditions": {
-    "human_subjects": {"met": true, "evidence": "description: '833 adult participants collected at five sites'; collection_mechanisms: 'Charts of patients presenting at high volume expert clinics are screened for inclusion and exclusion criteria'"},
-    "datasets_shared": {"met": true, "evidence": "distribution_formats lists 'Apache Parquet' and 'Tab-separated values with JSON data dictionaries' with access_urls 'https://physionet.org/content/b2ai-voice/3.1.0/'; license_and_use_terms.data_use_permission 'general_research_use'"},
-    "software_tools_output": {"met": true, "evidence": "external_resources: 'https://github.com/sensein/b2aiprep', 'https://github.com/sensein/senselab', 'https://github.com/eipm/bridge2ai-redcap'; extension_mechanism.contribution_url 'https://github.com/sensein/b2aiprep'"},
-    "collection_and_shared": {"met": true, "evidence": "acquisition_methods, collection_mechanisms, data_collectors and collection_timeframes all populated, plus datasets_shared condition"},
-    "publication_and_shared": {"met": true, "evidence": "citation populated; external_resources includes 'doi:10.21437/Interspeech.2024-1926', plus datasets_shared condition"}
+    "human_subjects": {
+      "met": true,
+      "evidence": "description: '833 adult participants collected at five sites'; collection_mechanisms: 'Charts of patients presenting at high volume expert clinics are screened for inclusion and exclusion criteria'"
+    },
+    "datasets_shared": {
+      "met": true,
+      "evidence": "distribution_formats lists 'Apache Parquet' and 'Tab-separated values with JSON data dictionaries' with access_urls 'https://physionet.org/content/b2ai-voice/3.1.0/'; license_and_use_terms.data_use_permission 'general_research_use'"
+    },
+    "software_tools_output": {
+      "met": true,
+      "evidence": "external_resources: 'https://github.com/sensein/b2aiprep', 'https://github.com/sensein/senselab', 'https://github.com/eipm/bridge2ai-redcap'; extension_mechanism.contribution_url 'https://github.com/sensein/b2aiprep'"
+    },
+    "collection_and_shared": {
+      "met": true,
+      "evidence": "acquisition_methods, collection_mechanisms, data_collectors and collection_timeframes all populated, plus datasets_shared condition"
+    },
+    "publication_and_shared": {
+      "met": true,
+      "evidence": "citation populated; external_resources includes 'doi:10.21437/Interspeech.2024-1926', plus datasets_shared condition"
+    }
   },
   "categories": [
     {
