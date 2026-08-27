@@ -384,7 +384,12 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                    'for the whole run, e.g. \'{"total_tokens": 481000, '
                    '"tool_uses": 220, "duration_ms": 5400000}\'. Keys are '
                    'validated like a phase\'s observed block.')
-def annotate_observed(project, method, label, run_observed):
+@click.option('--until', 'until', default=None,
+              help='ISO timestamp at which the observation was cut, when the '
+                   'agent kept acting after its run completed. Recorded as '
+                   'run_observed_until so the totals can be reproduced from '
+                   'the transcript with the same cut.')
+def annotate_observed(project, method, label, run_observed, until):
     """Add run-level observed totals to an existing record (#681 follow-on).
 
     The two-speakers model, applied where four-phase project-agent mode leaves
@@ -450,6 +455,10 @@ def annotate_observed(project, method, label, run_observed):
             "measurements without trace. If the prior value is wrong, "
             "remove it in a reviewed edit that says why.")
     log["run_observed"] = observed
+    if until:
+        log["run_observed_until"] = until
+    elif "run_observed_until" in log:
+        del log["run_observed_until"]
     log["run_observed_basis"] = (
         "aggregate totals for the whole run, observed by the orchestrator "
         "from the subagent runner's transcript. One number per run, not per "
@@ -462,7 +471,9 @@ def annotate_observed(project, method, label, run_observed):
         "run excludes the gap. bundle_lines_read is the union of the run's "
         "successful file-reading windows over the declared bundle (#700): "
         "lines the run never opened, or opened only in a read that errored, "
-        "may have been reached by search, but nothing attests that.")
+        "may have been reached by search, but nothing attests that."
+        + (" Cut at run_observed_until: the agent kept acting after its run "
+           "completed, and the record describes the run." if until else ""))
     rec = ProvenanceRecord(data=data)
     out = rec.write(path)
     click.echo(f"✓ {out}")

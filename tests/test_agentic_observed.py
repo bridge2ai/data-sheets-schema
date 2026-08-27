@@ -104,6 +104,21 @@ class Observe(unittest.TestCase):
         self.assertEqual(obs["bundle_lines_read"], 500)
         self.assertEqual(obs["_bundle_reads_failed"], 1)
 
+    def test_until_cuts_post_run_activity(self):
+        """An agent that keeps acting after its run is not the run."""
+        from datetime import datetime, timezone
+        t = self._transcript("a.jsonl", [
+            _event("2026-08-27T00:00:00Z", usage={"output_tokens": 1}, msg_id="m1"),
+            _event("2026-08-27T00:10:00Z", usage={"output_tokens": 2}, msg_id="m2"),
+            _event("2026-08-27T01:00:00Z", usage={"output_tokens": 40}, msg_id="m3",
+                   tools=[("Bash", {"command": "env"})]),
+        ])
+        cut = datetime(2026, 8, 27, 0, 30, tzinfo=timezone.utc)
+        obs = ao.observe([t], None, until=cut)
+        self.assertEqual(obs["total_tokens"], 3)
+        self.assertEqual(obs["tool_uses"], 0)
+        self.assertEqual(obs["duration_ms"], 600000)
+
     def test_no_bundle_means_no_coverage_keys(self):
         t = self._transcript("a.jsonl", [_event("2026-08-27T00:00:00Z", usage={"output_tokens": 1})])
         obs = ao.observe([t], None)

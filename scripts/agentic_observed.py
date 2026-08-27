@@ -42,7 +42,8 @@ def _usage_total(u: dict) -> int:
             + u.get("cache_creation_input_tokens", 0) + u.get("output_tokens", 0))
 
 
-def observe(transcripts: list[Path], bundle: Path | None) -> dict:
+def observe(transcripts: list[Path], bundle: Path | None,
+            until: datetime | None = None) -> dict:
     """Sum across transcripts. Two traps the first version fell into (#701):
 
     - one API response is written as several JSONL lines sharing a
@@ -55,6 +56,10 @@ def observe(transcripts: list[Path], bundle: Path | None) -> dict:
 
     ``duration_ms`` is the sum of each transcript's own first-to-last span, so
     a killed-and-resumed run excludes the gap between invocations.
+
+    ``until`` cuts the observation at a timestamp: an agent that keeps acting
+    after its run completed (stray re-invocations did this to one 2026-08-24
+    agent) is not the run, and the record describes the run.
     """
     usage_by_msg: dict[str, dict] = {}
     tools = searches = 0
@@ -73,6 +78,8 @@ def observe(transcripts: list[Path], bundle: Path | None) -> dict:
                 ts = j.get("timestamp")
                 if ts:
                     t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                    if until is not None and t > until:
+                        continue
                     first = first or t
                     last = t
                 msg = j.get("message") or {}
@@ -124,12 +131,16 @@ def main() -> int:
     ap.add_argument("transcripts", nargs="+", type=Path)
     ap.add_argument("--bundle", type=Path, default=None,
                     help="the run's declared input bundle; enables coverage")
+    ap.add_argument("--until", default=None,
+                    help="ISO timestamp; ignore transcript events after it (an agent's "
+                         "activity after its run completed is not the run)")
     args = ap.parse_args()
+    until = datetime.fromisoformat(args.until.replace("Z", "+00:00")) if args.until else None
     missing = [str(t) for t in args.transcripts if not t.exists()]
     if missing:
         print(f"missing transcript(s): {missing}", file=sys.stderr)
         return 2
-    obs = observe(args.transcripts, args.bundle)
+    obs = observe(args.transcripts, args.bundle, until)
     info = {k: v for k, v in obs.items() if k.startswith("_")}
     run = {k: v for k, v in obs.items() if not k.startswith("_")}
     print(json.dumps(run))
