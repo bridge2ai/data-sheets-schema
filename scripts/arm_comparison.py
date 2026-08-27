@@ -329,6 +329,7 @@ def write_figures(data, scores) -> None:
     # error bar = sample SD (n printed under the bar). Replicates are dots.
     for mk, (disp, _src, _hiw, _cav) in METRICS.items():
         fig, axes = plt.subplots(1, len(PROJECTS), figsize=(13, 3.6), sharey=True)
+        top = 0.0
         for ax, p in zip(axes, PROJECTS):
             ns: dict[int, int] = {}
             for i, (key, *_rest) in enumerate(ARMS):
@@ -336,6 +337,7 @@ def write_figures(data, scores) -> None:
                 st = stats(reps, mk)
                 if st is not None:
                     mean, sd, n = st
+                    top = max(top, mean + (sd if n > 1 else 0))
                     ax.bar(i, mean, color=colors[key], width=0.7, alpha=0.85)
                     # Counts cannot go below zero; the lower whisker is clipped.
                     # No whisker at all for a single measured replicate.
@@ -350,20 +352,24 @@ def write_figures(data, scores) -> None:
                     if v is None:
                         continue
                     x = i + (j - 1) * 0.12
+                    top = max(top, v)
                     if measured(r, mk):
                         ax.scatter([x], [v], s=14, color="black", zorder=3)
                     else:
                         ax.scatter([x], [v], s=18, facecolors="white", edgecolors="black", zorder=3)
-            ax.set_ylim(bottom=0)
             ax.set_xticks(range(len(ARMS)))
             ax.set_xticklabels([f"{k}\nn={ns[i]}" if i in ns else f"{k}\n–"
                                 for i, (k, *_) in enumerate(ARMS)], fontsize=8)
             ax.set_title(p, fontsize=10)
             ax.spines[["top", "right"]].set_visible(False)
+        # One shared y-range for the row, floored at zero (counts) and sized to
+        # the tallest bar-plus-whisker across all panels — set once, after every
+        # panel is drawn, so no panel's autoscale freezes the top early.
+        axes[0].set_ylim(0, max(1.0, top) * 1.12)
         handles = [plt.Rectangle((0, 0), 1, 1, color=colors[k]) for k, *_ in ARMS]
-        fig.legend(handles, [d for _k, d, *_ in ARMS], loc="upper right", fontsize=8, ncol=3, frameon=False)
-        fig.suptitle(f"{disp} — mean ± SD over measured replicates; dots = replicates (hollow = unmeasured)", x=0.02, ha="left", fontsize=11)
-        fig.tight_layout(rect=(0, 0, 1, 0.9))
+        fig.legend(handles, [d for _k, d, *_ in ARMS], loc="lower center", fontsize=8, ncol=3, frameon=False)
+        fig.suptitle(f"{disp} — mean ± SD over measured replicates; dots = replicates, hollow = unmeasured", x=0.02, ha="left", fontsize=11)
+        fig.tight_layout(rect=(0, 0.07, 1, 0.92))
         out = OUT_FIG / f"arm_comparison_{mk}.png"
         fig.savefig(out, dpi=150); plt.close(fig)
         print(f"wrote {out.relative_to(ROOT)}")
