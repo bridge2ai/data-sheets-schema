@@ -44,6 +44,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import statistics
 import sys
 from pathlib import Path
 from typing import Any
@@ -68,9 +69,9 @@ OUT_FIG = ROOT / "notes" / "figures"
 PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
 METHOD = "claudecode_agent"
 
-# (key, display, label prefix, runtime, role). `role` says how the arm is
-# shown: "worst" collapses replicates to the per-project worst (the canary
-# gate's baseline convention), "reps" shows all three.
+# (key, display, label prefix, runtime, role). Every arm is shown as mean ± SD
+# over its replicates; `role == "worst"` additionally prints the per-project
+# worst, the value the canary gate holds runs against.
 ARMS = (
     ("v4", "v4 API (2026-08-13)", "2026-08-13_claude-opus-5-api-generic-v4",
      "Claude API via CBORG", "worst"),
@@ -192,12 +193,23 @@ def fmt(m: dict[str, Any], metric: str) -> str:
     return str(v)
 
 
+def measured(r: dict[str, Any], metric: str) -> bool:
+    """Is this replicate's value a measurement? A report-findings 0 with zero
+    parsed claims is unmeasured (#684) and must not enter a mean as a zero."""
+    v = r.get(metric)
+    if v is None:
+        return False
+    if metric == "report" and v == 0 and not r.get("claims_checked"):
+        return False
+    return True
+
+
 def stats(reps: list[dict[str, Any]], metric: str) -> tuple[float, float, int] | None:
-    """Mean and sample SD (ddof=1) over replicates; None when fewer than 1.
-    n is always reported beside the figure: three replicates is a small
-    sample, and an SD on n=3 is a spread, not a confidence interval."""
-    import statistics
-    vals = [r[metric] for r in reps if r.get(metric) is not None]
+    """Mean and sample SD (ddof=1) over the *measured* replicates; None when
+    there are none. n is always reported beside the figure: three replicates
+    is a small sample, an SD on n=3 is a spread rather than a confidence
+    interval, and with one outlier the SD is that outlier."""
+    vals = [r[metric] for r in reps if measured(r, metric)]
     if not vals:
         return None
     mean = statistics.fmean(vals)
@@ -208,12 +220,14 @@ def stats(reps: list[dict[str, Any]], metric: str) -> tuple[float, float, int] |
 def cell(reps: list[dict[str, Any]], metric: str, role: str) -> str:
     """mean ± SD with the replicates in brackets; the baseline arm adds its
     per-project worst, which is what the canary gate holds runs against."""
+    raw = ",".join(fmt(r, metric) for r in reps)
     st = stats(reps, metric)
     if st is None:
-        return "–"
+        return f"– [{raw}]" if raw else "–"
     mean, sd, n = st
-    raw = ",".join(fmt(r, metric) for r in reps)
-    body = f"{mean:.1f} ± {sd:.1f} [{raw}]"
+    # An SD needs two values; a single measured replicate gets its value and n.
+    centre = f"{mean:.1f} ± {sd:.1f}" if n > 1 else f"{mean:.1f}"
+    body = f"{centre} [{raw}]" + (f" (n={n})" if n != len(reps) else "")
     if role == "worst":
         body += f" worst {worst(reps, metric)}"
     return body
@@ -253,7 +267,7 @@ def write_markdown(data, scores) -> None:
              "- spend: absent by design — `api_usage` and `run_observed` are different "
              "quantities (#400).", "",
              "Arms: " + "; ".join(f"**{d}** — `{pfx}_rep{{1,2,3}}`, {rt}"
-                                   + (" (shown as per-project worst; max for reported-only metrics)" if role == "worst" else "")
+                                   + (" (also shown with its per-project worst — max for reported-only metrics — the canary-gate baseline)" if role == "worst" else "")
                                    for _k, d, pfx, rt, role in ARMS), ""]
 
     lines += ["## Deterministic metrics — mean ± SD over replicates", "",
@@ -265,11 +279,14 @@ def write_markdown(data, scores) -> None:
             for key, _d, _pfx, _rt, role in ARMS:
                 cells.append(cell(data[key][p], mk, role))
             lines.append(f"| {disp} | {p} | " + " | ".join(cells) + " |")
-    lines += ["", "Cells are mean ± sample SD over the replicates (n = 3 unless a run is "
-              "missing), with the replicate values in brackets; the baseline arm adds "
-              "its per-project worst, the value the canary gate holds runs against. "
-              "An SD over three replicates is a spread, not a confidence interval. "
-              "ᵘ = unmeasured: the report-claims checker parsed zero claims (#684).", ""]
+    lines += ["", "Cells are mean ± sample SD over the *measured* replicates, with every "
+              "replicate value in brackets; n is 3 unless stated. The baseline arm adds "
+              "its per-project worst, the value the canary gate holds runs against. Read "
+              "the SD as a spread, not a confidence interval: with n = 3 and one outlier "
+              "(e.g. [3,14,130]) the SD is that outlier, and the bracketed values are the "
+              "better summary. ᵘ = unmeasured — the report-claims checker parsed zero "
+              "claims (#684); unmeasured values are excluded from the mean and n, and a "
+              "cell with no measured replicate shows only its raw values.", ""]
 
     lines += ["## Per-metric caveats (attached, not footnoted elsewhere)", ""]
     for mk, (disp, src, _hiw, cav) in METRICS.items():
@@ -310,29 +327,42 @@ def write_figures(data, scores) -> None:
 
     # One figure per metric: 4 project panels, one bar per arm = replicate mean,
     # error bar = sample SD (n printed under the bar). Replicates are dots.
-    for mk, (disp, _src, _hiw, cav) in METRICS.items():
+    for mk, (disp, _src, _hiw, _cav) in METRICS.items():
         fig, axes = plt.subplots(1, len(PROJECTS), figsize=(13, 3.6), sharey=True)
         for ax, p in zip(axes, PROJECTS):
             ns: dict[int, int] = {}
-            for i, (key, d, _pfx, _rt, role) in enumerate(ARMS):
+            for i, (key, *_rest) in enumerate(ARMS):
                 reps = data[key][p]
                 st = stats(reps, mk)
-                if st is None:
-                    continue
-                mean, sd, n = st
-                ax.bar(i, mean, color=colors[key], width=0.7, alpha=0.85)
-                ax.errorbar(i, mean, yerr=sd, fmt="none", ecolor="black", capsize=4, lw=1)
-                vals = [r[mk] for r in reps if r.get(mk) is not None]
-                ax.scatter([i + (j - 1) * 0.12 for j in range(len(vals))], vals,
-                           s=14, color="black", zorder=3)
-                ns[i] = n
+                if st is not None:
+                    mean, sd, n = st
+                    ax.bar(i, mean, color=colors[key], width=0.7, alpha=0.85)
+                    # Counts cannot go below zero; the lower whisker is clipped.
+                    # No whisker at all for a single measured replicate.
+                    if n > 1:
+                        ax.errorbar(i, mean, yerr=[[min(sd, mean)], [sd]], fmt="none",
+                                    ecolor="black", capsize=4, lw=1)
+                    ns[i] = n
+                # Replicates as dots: filled when measured, hollow when the
+                # value is an unmeasured 0ᵘ (#684) and so not in the mean.
+                for j, r in enumerate(reps):
+                    v = r.get(mk)
+                    if v is None:
+                        continue
+                    x = i + (j - 1) * 0.12
+                    if measured(r, mk):
+                        ax.scatter([x], [v], s=14, color="black", zorder=3)
+                    else:
+                        ax.scatter([x], [v], s=18, facecolors="white", edgecolors="black", zorder=3)
+            ax.set_ylim(bottom=0)
             ax.set_xticks(range(len(ARMS)))
-            ax.set_xticklabels([f"{k}\nn={ns.get(i, 0)}" for i, (k, *_) in enumerate(ARMS)], fontsize=8)
+            ax.set_xticklabels([f"{k}\nn={ns[i]}" if i in ns else f"{k}\n–"
+                                for i, (k, *_) in enumerate(ARMS)], fontsize=8)
             ax.set_title(p, fontsize=10)
             ax.spines[["top", "right"]].set_visible(False)
         handles = [plt.Rectangle((0, 0), 1, 1, color=colors[k]) for k, *_ in ARMS]
         fig.legend(handles, [d for _k, d, *_ in ARMS], loc="upper right", fontsize=8, ncol=3, frameon=False)
-        fig.suptitle(f"{disp} — mean ± SD over replicates, dots = replicates", x=0.02, ha="left", fontsize=11)
+        fig.suptitle(f"{disp} — mean ± SD over measured replicates; dots = replicates (hollow = unmeasured)", x=0.02, ha="left", fontsize=11)
         fig.tight_layout(rect=(0, 0, 1, 0.9))
         out = OUT_FIG / f"arm_comparison_{mk}.png"
         fig.savefig(out, dpi=150); plt.close(fig)
@@ -374,9 +404,10 @@ def _rubric_figure(rubric, scores, colors) -> None:
     ax.set_ylabel(f"{rubric}-semantic points (axis: unadjusted max {RUBRIC_MAX[rubric]})")
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=len(arm_keys))
-    ax.set_title(f"{rubric.capitalize()}-semantic, canonical records (same evaluator; n = 1 per bar, no SD)"
-                 + (f" — no evaluations exist for: {', '.join(absent)}" if absent else ""),
+    ax.set_title(f"{rubric.capitalize()}-semantic, canonical records (same evaluator; n = 1 per bar, no SD)",
                  fontsize=9, loc="left")
+    if absent:
+        fig.text(0.01, 0.01, f"No evaluations exist for: {', '.join(absent)}", fontsize=7, color="#555")
     fig.tight_layout()
     out = OUT_FIG / f"arm_comparison_{rubric}.png"
     fig.savefig(out, dpi=150); plt.close(fig)
