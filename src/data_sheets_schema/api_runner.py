@@ -1875,7 +1875,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # which would let the pair diverge again (#694).
             from data_sheets_schema.derive_core import core_text
             text = normalise_multivalued(normalise_enum_aliases(
-                normalise_temporal(core_text(spec.full_path)[0])))
+                normalise_temporal(core_text(spec.full_path, phase4_complete=True)[0])))
             spec.core_path.write_text(text, encoding="utf-8")
             errors, failure = _validator_lines(path, schema, cls)
             log.append({"phase": ph, "round": 1,
@@ -2589,7 +2589,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # generated core would — written, snapshotted, carried — so
             # resume, audit and report see the artifact they always did.
             from data_sheets_schema.derive_core import core_text
-            body, facts = core_text(spec.full_path)
+            body, facts = core_text(spec.full_path,
+                                    phase4_complete=(ph == "reconcile_core"))
             core_derivation = {**facts, "phase": ph}
         else:
             body = _generate_phase(spec, ph, needed, client, settings, usage)
@@ -2759,7 +2760,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # to a fresh derivation of the full on disk.
         from data_sheets_schema.derive_core import core_text, derivation_facts
         fresh = normalise_multivalued(normalise_enum_aliases(
-            normalise_temporal(core_text(spec.full_path)[0])))
+            normalise_temporal(core_text(spec.full_path, phase4_complete=True)[0])))
         on_disk = spec.core_path.read_text(encoding="utf-8") if spec.core_path.exists() else None
         repaired = any(r.get("phase") == "repair_core" for r in (rec.data.get("repair") or []))
         if on_disk == fresh:

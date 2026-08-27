@@ -20,9 +20,9 @@ One rule. v5's fragment rule (#531) said *when* minting an identifier is right
 *how much*. Under it one replicate of one project labelled three parts and
 another labelled a hundred and thirty, every one lawful (#685). The rule is
 sound and incomplete: it lacks a density norm. The norm added here is the
-smallest one that decides every case — mint a fragment only where the record
-refers to the part — and it is a decision rule about the record's own
-structure, not an outcome expectation.
+smallest one that decides every case — mint a fragment only where another
+value in the record must point at the part — and it is a decision rule about
+the record's own structure, not an outcome expectation.
 
 ## Why the header change rides with it
 
@@ -41,8 +41,9 @@ where they can be.
 ## Why this addition is generic and not priming
 
 Measured against the taxonomy in `.claude/commands/d4d-full-core.md`: it
-applies identically to every project, naming no project, dataset, slot or
-input set; it states no target count, no expected density and no expected
+applies identically to every project, naming no project, dataset or input
+set (it names kinds of part — a split, a subset, a collection — as the
+schema does, not any dataset's); it states no target count, no expected density and no expected
 relationship to any other arm — "only where something refers to it" is a
 test the record answers about itself, not a number to hit; it concerns the
 schema, which every arm shares.
@@ -246,13 +247,13 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
 
 --- ADDED IN v6 ---
 
-- Mint a fragment identifier for a part of this dataset only where something
-  else in the record refers to that part — a split a task names, a subset a
-  distribution cites, a collection a file belongs to. A part nothing refers
-  to is described in prose, not labelled: an identifier no reader will
-  resolve or cite is not a label, it is noise that reads as structure. Name
-  the same part with the same fragment every time it is referred to, and mint
-  nothing for a part that is only described.
+- Within the rule above, mint a fragment identifier for a part of this
+  dataset only where another value in the record must point at that part —
+  a split a task names, a subset a distribution cites, a collection a file
+  belongs to. A part nothing points at is described in prose, not labeled:
+  an identifier no value in the record uses is not a label, it is noise that
+  reads as structure. Name the same part with the same fragment every time
+  a value points at it, and mint nothing for a part that is only described.
 
 --- END ADDED IN v6 ---
 

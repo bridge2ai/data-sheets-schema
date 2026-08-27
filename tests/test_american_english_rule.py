@@ -57,7 +57,6 @@ class TestItDidNotRedefineACondition(unittest.TestCase):
     #: The conditions created *with* the rule, so they re-baseline nothing:
     #: v5 introduced it and every later version inherits v5's block.
     NEW_CONDITIONS = ("d4d_generic_arm_prompt_v5.md", "d4d_generic_arm_prompt_v6.md")
-    NEW_CONDITION = NEW_CONDITIONS[0]
 
     def test_no_existing_condition_prompt_acquired_the_rule(self):
         """#502's actual constraint, which v5 does not breach.
@@ -84,7 +83,7 @@ class TestItDidNotRedefineACondition(unittest.TestCase):
         for name in self.NEW_CONDITIONS:
             with self.subTest(prompt=name):
                 self.assertIn("American English", (PROMPTS / name).read_text(encoding="utf-8"))
-        text = (PROMPTS / self.NEW_CONDITION).read_text(encoding="utf-8")
+        text = (PROMPTS / self.NEW_CONDITIONS[0]).read_text(encoding="utf-8")
         self.assertIn("American English", text)
 
     def test_no_record_yet_names_the_new_condition(self):

@@ -11,7 +11,7 @@ Two things, and they are attributable to different metrics:
 1. **The minting density norm** (#685) — the one rule in the `ADDED IN v6`
    block. v5's fragment rule said when minting is right and nothing about how
    much; under it VOICE minted 3 / 14 / 130 across three agentic replicates
-   and CM4AI 42 / 55 / 51 (API: 0–14 and 10–16). The norm: mint a fragment
+   and CM4AI 42 / 55 / 51 (v5 API: 0–8 and 10–16). The norm: mint a fragment
    only where something else in the record refers to the part.
 2. **The derived core** (#694, landed in #704 before this version) — the core
    is a projection of the audited full record on both runtimes, and v6's
@@ -28,10 +28,10 @@ is that they touch different metrics, below.
 
 | # | metric | attributed to | prediction |
 |---|---|---|---|
-| 1 | minted fragments (reported) | the norm | falls on the projects that minted most (VOICE, CM4AI) and the within-project spread collapses: no project's replicates should differ by more than a few, where v5 differed by 127 |
+| 1 | minted fragments (reported) | the norm | falls on the projects that minted most (VOICE, CM4AI) and the within-project spread collapses: on every project the replicates' max − min is ≤ 5, where v5's agentic VOICE spread was 127 |
 | 2 | ungrounded identifiers (gated) | neither | stays at 0 — the norm removes fragments, it does not push identifiers anywhere else |
 | 3 | pair errors (gated) | the derivation | 0 on every run of both arms, by construction — the API arm's 0–18 disappears for a procedural reason, not a modelling one |
-| 4 | British spellings (gated) | the derivation, partly | the API arm's full/core spelling splits (#675) cannot occur, so its count falls toward the agentic arm's; the full-record count itself is not predicted to move |
+| 4 | British spellings (gated) | the derivation, partly | the API arm's full/core spelling splits (#675) cannot occur, so no API run exceeds its v5 arm's per-project worst (30/0/0/4); the full-record count itself is not predicted to move |
 | 5 | populated slots | neither, and watched | should not fall: the norm removes identifiers on parts, not the parts. A fall would mean the norm was read as "omit the part", which is the failure mode to name |
 | 6 | core-only content | the derivation | zero by construction; the generated core's ability to add bundle-supported fields the full lacked is gone, and the audit phase's back-port into the full is the only route (stated in `derive_core.py`) |
 

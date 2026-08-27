@@ -9,8 +9,10 @@ generation that no longer happens would be a false attestation. Those are
 counted here as the *only* other differences, so a third cannot arrive
 quietly.
 
-The genericity assertions are the v5 file's, unchanged: the norm must name no
-project, dataset, slot, quantity or prior run.
+The genericity assertions follow the v5 file's intent, adapted to this
+block: no project, dataset, identifier, backticked slot, quantity (digit or
+number-word) or prior-run reference. The block names kinds of part — a
+split, a subset, a collection — which is schema vocabulary, not a dataset's.
 """
 
 import re
@@ -47,11 +49,16 @@ class TestV6IsV5PlusTheAddedBlockAndTheDerivedHeader(unittest.TestCase):
 
     #: The header lines that name the version, which must differ (#337).
     VERSION_STAMP = re.compile(r"#\s*(?:Mode|Prompt):[^\n]*")
-    #: The two counted header differences (#694) and the Phase 2 sentence.
+    #: The counted differences (#694), anchored to their exact expected text
+    #: on both sides so an unintended edit to those lines cannot hide behind
+    #: the exemption.
     DERIVED_LINES = re.compile(
-        r"#\s*Generation Method: (?:schema-grounded agentic, phase 2|derived by projection[^\n]*)"
-        r"|#\s*Sources:[^\n]*"
-        r"|Execution mode: four-phase project agent\.[^.]*\.[^.]*\.")
+        r"# Generation Method: schema-grounded agentic, phase 2"
+        r"|# Generation Method: derived by projection from the full record \(#694\)"
+        r"|# Sources: \{BUNDLE\} \+ data/d4d_concatenated/\{METHOD\}/\{LABEL\}/\{PROJECT\}_d4d\.yaml"
+        r"|# Sources: data/d4d_concatenated/\{METHOD\}/\{LABEL\}/\{PROJECT\}_d4d\.yaml"
+        r"|Phase 2 core\ngeneration, Phase 3 source/provenance audit, Phase 4 strict reconciliation\."
+        r"|Phase 2 core\nderivation from the validated full record, Phase 3 source/provenance audit,\nPhase 4 strict reconciliation\.")
 
     def test_body_differs_from_v5_only_by_the_block_and_the_counted_lines(self):
         v5 = prompt_body(GENERIC_PROMPT_V5)
@@ -118,7 +125,7 @@ class TestTheAddedRuleIsGeneric(unittest.TestCase):
         self.assertNotIn("`", self.block, "a slot in backticks would tie the rule to one schema shape")
 
     def test_no_expected_quantities(self):
-        self.assertIsNone(re.search(r"\b\d+\b|\bhundred\b|\bthree\b|\bdozen\b", self.block),
+        self.assertIsNone(re.search(r"\b\d+\b|\b(?:one|two|three|four|five|six|seven|eight|nine|ten|dozen|hundred|thousand)\b", self.block),
                           "a quantity in the rule is an outcome expectation")
 
     def test_no_reference_to_prior_runs(self):

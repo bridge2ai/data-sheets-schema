@@ -171,45 +171,56 @@ def _header_lines(text: str) -> list[str]:
     return out
 
 
-def core_header(full_text: str, full_path: Path) -> list[str]:
-    """The core's header, derived from the full record's: the same identity
-    lines, with the method line saying what this record is and a `Sources:`
-    line naming the full record it was projected from (the provenance guard
-    reads it)."""
+def core_header(full_text: str, full_path: Path, phase4_complete: bool = False) -> list[str]:
+    """The core's header, derived from the full record's, in the order the
+    generic-v6 condition text mandates: the same identity lines, the method
+    line saying what this record is, `Sources:` naming the full record it was
+    projected from (placed after `Source bundle:`, as the pinned CORE HEADER
+    BLOCK has it — the provenance guard reads it), the core schema, and —
+    only once Phase 4 has actually run — its completion line."""
+    from data_sheets_schema.provenance import repo_relative
     out = []
+    sources = f"# Sources: {repo_relative(full_path)}"
     sources_written = False
     for line in _header_lines(full_text):
         if line.startswith("# D4D Datasheet for"):
             out.append(line.replace("# D4D Datasheet for", "# D4D Core Datasheet for", 1))
         elif line.startswith("# Generation Method:"):
             out.append("# Generation Method: derived by projection from the full record (#694)")
-        elif line.startswith("# Schema:"):
-            out.append(f"# Schema: {CORE_SCHEMA_REL}")
-            out.append(f"# Sources: {full_path}")
+        elif line.startswith("# Source bundle:"):
+            out.append(line)
+            out.append(sources)
             sources_written = True
+        elif line.startswith("# Schema:"):
+            if not sources_written:
+                out.append(sources)
+                sources_written = True
+            out.append(f"# Schema: {CORE_SCHEMA_REL}")
         else:
             out.append(line)
     if not sources_written:
-        # The provenance guard reads `Sources:`; it must exist whatever the
-        # full record's header carried.
+        out.append(sources)
         out.append(f"# Schema: {CORE_SCHEMA_REL}")
-        out.append(f"# Sources: {full_path}")
+    if phase4_complete:
+        out.append("# Phase 4 reconciliation: completed")
     return out
 
 
-def core_text(full_path: Path, pair_schema=None) -> tuple[str, dict[str, Any]]:
+def core_text(full_path: Path, pair_schema=None,
+              phase4_complete: bool = False) -> tuple[str, dict[str, Any]]:
     """The derived core as text (header + YAML) and its derivation facts."""
     text = full_path.read_text(encoding="utf-8")
     full = yaml.safe_load(text) or {}
     core = derive_core(full, pair_schema)
     body = yaml.safe_dump(core, sort_keys=False, allow_unicode=True, width=88)
-    header = "\n".join(core_header(text, full_path))
+    header = "\n".join(core_header(text, full_path, phase4_complete))
     return (header + "\n\n" if header else "") + body, derivation_facts(full_path, pair_schema)
 
 
-def write_core(full_path: Path, core_path: Path, pair_schema=None) -> dict[str, Any]:
+def write_core(full_path: Path, core_path: Path, pair_schema=None,
+               phase4_complete: bool = False) -> dict[str, Any]:
     """Derive and write the core beside its full record; return the facts."""
-    text, facts = core_text(full_path, pair_schema)
+    text, facts = core_text(full_path, pair_schema, phase4_complete)
     core_path.parent.mkdir(parents=True, exist_ok=True)
     core_path.write_text(text, encoding="utf-8")
     return facts

@@ -516,7 +516,9 @@ identical slot and proves consistency across the pair.
    - distinguish a historical release from a current release rather than
      treating their different values as a contradiction.
 5. **Re-derive the core from the corrected full record** (Phase 2's command
-   again) after every Phase 3/4 correction to the full — the core is a
+   again, now with `--phase4-complete`, which writes the
+   `# Phase 4 reconciliation: completed` header line the condition text
+   mandates) after every Phase 3/4 correction to the full — the core is a
    function of the full and is never edited on its own. `--sync-core` is
    superseded by derivation and should not be needed; if it changes
    anything, the derivation is wrong and that is a bug to report, not a

@@ -110,7 +110,7 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
             ("ranks higher", "ranks higher"),
         # v6 (#685): the density norm on minting.
         "minting density":
-            ("refers to that part", "refers to that part"),
+            ("must point at that part", "must point at that part"),
     }
 
     #: Rules the playbook carries that the condition prompts deliberately do

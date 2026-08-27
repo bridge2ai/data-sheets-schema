@@ -94,15 +94,15 @@ to every project:
   ROR; **a fragment appended to an organisation's ROR does not identify a
   person**, it asserts something false about that organisation.
 
-- **Mint a fragment only where something else in the record refers to that
-  part** (v6, #685) — a split a task names, a subset a distribution cites, a
-  collection a file belongs to. A part nothing refers to is described in
-  prose, not labelled: an identifier no reader will resolve or cite is not a
-  label, it is noise that reads as structure. Name the same part with the
-  same fragment every time it is referred to, and mint nothing for a part
-  that is only described. Under v5 one replicate labelled three parts and
-  another a hundred and thirty, all lawfully; this is the density norm the
-  rule above lacked.
+- **Within the rule above, mint a fragment only where another value in the
+  record must point at that part** (v6, #685) — a split a task names, a
+  subset a distribution cites, a collection a file belongs to. A part nothing
+  points at is described in prose, not labeled: an identifier no value in the
+  record uses is not a label, it is noise that reads as structure. Name the
+  same part with the same fragment every time a value points at it, and mint
+  nothing for a part that is only described. This is the density norm the
+  rule above lacked; the evidence for it is in the v6 analysis plan, not
+  here, because this file is read by a generating model.
 
 - **Write generated prose in American English** — `program`, `organization`,
   `analyze`, `license`, `center`, `labeling`, `enrollment`. This is house style
