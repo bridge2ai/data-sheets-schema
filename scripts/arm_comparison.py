@@ -313,6 +313,7 @@ def write_figures(data, scores) -> None:
     for mk, (disp, _src, _hiw, cav) in METRICS.items():
         fig, axes = plt.subplots(1, len(PROJECTS), figsize=(13, 3.6), sharey=True)
         for ax, p in zip(axes, PROJECTS):
+            ns: dict[int, int] = {}
             for i, (key, d, _pfx, _rt, role) in enumerate(ARMS):
                 reps = data[key][p]
                 st = stats(reps, mk)
@@ -324,16 +325,15 @@ def write_figures(data, scores) -> None:
                 vals = [r[mk] for r in reps if r.get(mk) is not None]
                 ax.scatter([i + (j - 1) * 0.12 for j in range(len(vals))], vals,
                            s=14, color="black", zorder=3)
-                ax.text(i, -0.06, f"n={n}", ha="center", va="top", fontsize=7,
-                        transform=ax.get_xaxis_transform())
+                ns[i] = n
             ax.set_xticks(range(len(ARMS)))
-            ax.set_xticklabels([k for k, *_ in ARMS], fontsize=8)
+            ax.set_xticklabels([f"{k}\nn={ns.get(i, 0)}" for i, (k, *_) in enumerate(ARMS)], fontsize=8)
             ax.set_title(p, fontsize=10)
             ax.spines[["top", "right"]].set_visible(False)
         handles = [plt.Rectangle((0, 0), 1, 1, color=colors[k]) for k, *_ in ARMS]
         fig.legend(handles, [d for _k, d, *_ in ARMS], loc="upper right", fontsize=8, ncol=3, frameon=False)
         fig.suptitle(f"{disp} — mean ± SD over replicates, dots = replicates", x=0.02, ha="left", fontsize=11)
-        fig.tight_layout(rect=(0, 0.04, 1, 0.9))
+        fig.tight_layout(rect=(0, 0, 1, 0.9))
         out = OUT_FIG / f"arm_comparison_{mk}.png"
         fig.savefig(out, dpi=150); plt.close(fig)
         print(f"wrote {out.relative_to(ROOT)}")
