@@ -115,7 +115,9 @@ phase_log:
     invocation''s own span, so a resumed run excludes the gap. bundle_lines_read is
     the union of the run''s successful file-reading windows over the declared bundle
     (#700): lines the run never opened, or opened only in a read that errored, may
-    have been reached by search, but nothing attests that.'
+    have been reached by search, but nothing attests that. Cut at run_observed_until:
+    the agent kept acting after its run completed, and the record describes the run.'
+  run_observed_until: '2026-08-26T01:20:00Z'
 schema:
   declared_version: 2.0.0
   declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml

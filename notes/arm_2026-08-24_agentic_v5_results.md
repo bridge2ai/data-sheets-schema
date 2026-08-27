@@ -44,7 +44,7 @@
   correction visible rather than quiet.
 - **Spend (orchestrator-observed, cache-inclusive):** 216,557,820 total tokens
   across the 12 runs, 6.48 h of agent wall time (runs overlapped; ~2.5 h
-  elapsed for the fan-out). *(Corrected 2026-08-27, #702: the first
+  elapsed for the fan-out). *(Corrected 2026-08-26, #702: the first
   annotation summed transcript usage per line, and one API response spans
   several lines sharing a message id — every total was ~2× high, 397.9M in
   this note's first version. Recomputed once per message by
@@ -55,7 +55,7 @@
   sums every context re-read through the runner's cache, per the
   `run_observed_basis` each record carries. The two bases must never be
   averaged (#681/#682).
-- **Bundle read coverage (added 2026-08-27, #700):** the share of the
+- **Bundle read coverage (added 2026-08-26, #700):** the share of the
   declared bundle each run actually opened in successful file reads —
   CHORUS 100/100/100 %, AI_READI 80/80/83 %, CM4AI 90/76/85 %, VOICE
   80/88/94 %. The API arm has the whole bundle in context on every call, so

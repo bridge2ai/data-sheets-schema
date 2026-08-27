@@ -79,7 +79,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
                 if ts:
                     t = datetime.fromisoformat(ts.replace("Z", "+00:00"))
                     if until is not None and t > until:
-                        break
+                        continue
                     first = first or t
                     last = t
                 msg = j.get("message") or {}
