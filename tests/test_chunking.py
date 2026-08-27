@@ -110,6 +110,28 @@ class ManifestOnDisk(unittest.TestCase):
             st, why = manifest_status("P", concat, chunks)
             self.assertEqual(st, "stale"); self.assertIn("md5", why)
             self.assertEqual(manifest_status("Q", concat, chunks)[0], "no_bundle")
+            # a manifest under another rule reproduces but is not the instrument (#714)
+            write_manifest("P", {**m["rule"], "max_lines": 5}, concat_dir=concat, chunks_dir=chunks)
+            self.assertEqual(manifest_status("P", concat, chunks)[0], "off_rule")
+            out.write_text("- not\n- a mapping\n", encoding="utf-8")
+            self.assertEqual(manifest_status("P", concat, chunks)[0], "unreadable")
+
+    def test_the_manifest_does_not_depend_on_how_the_bundle_was_addressed(self):
+        """#713: same bytes, same rule, same file — whatever path spelled it."""
+        from data_sheets_schema.chunking import build_manifest, dump_manifest
+        with tempfile.TemporaryDirectory() as tmp:
+            concat, _ = self._dirs(tmp)
+            rel = concat / "P_preprocessed.txt"
+            self.assertEqual(dump_manifest(build_manifest(rel)),
+                             dump_manifest(build_manifest(rel.resolve())))
+
+    def test_a_quoted_file_line_is_content_not_a_boundary(self):
+        """#718: only a FILE: line followed by PATH: starts a document."""
+        from data_sheets_schema.chunking import chunk_text, chunk_texts
+        text = _bundle(3, 3).replace("a1\n", "FILE: quoted in prose\nmore\n")
+        chunks = chunk_text(text)
+        self.assertEqual([c["source"] for c in chunks], ["<preamble>", "a.txt", "b.txt"])
+        self.assertEqual("".join(chunk_texts(text, chunks)), text)
 
     def test_chunks_input_attaches_only_for_the_same_bytes(self):
         from data_sheets_schema.chunking import chunks_input, file_sha256, write_manifest
@@ -124,6 +146,10 @@ class ManifestOnDisk(unittest.TestCase):
             self.assertEqual(got["rule"], m["rule"]); self.assertEqual(got["chunk_count"], m["chunk_count"])
             self.assertIsNone(chunks_input(bundle, "0" * 32, chunks))     # other bytes
             self.assertIsNone(chunks_input(None, md5, chunks))
+            out.write_text("- broken\n", encoding="utf-8")                  # #715
+            self.assertIsNone(chunks_input(bundle, md5, chunks))
+            out.write_text(": not yaml: [", encoding="utf-8")
+            self.assertIsNone(chunks_input(bundle, md5, chunks))
 
     def test_the_cli_writes_and_checks(self):
         import click.testing
@@ -162,8 +188,9 @@ class CorpusManifests(unittest.TestCase):
                 st, detail = manifest_status(name)
                 if st == "no_bundle":
                     continue
-                self.assertEqual(st, "current", detail)
+                self.assertEqual(st, "current", detail)   # also asserts the default rule (#714)
                 m = load_manifest(CHUNKS_DIR / f"{name}_chunks.yaml")
+                self.assertEqual(m["bundle"], f"{name}_preprocessed.txt")
                 self.assertFalse([c for c in m["chunks"] if c.get("oversize")],
                                  "a line above max_bytes cannot be read in one call")
                 self.assertEqual(m["chunks"][0]["source"], "<preamble>")

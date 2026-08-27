@@ -1,4 +1,4 @@
-bundle: data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt
+bundle: VOICE_PEDIATRIC_preprocessed.txt
 bundle_md5: 008212accc7ec95bf3f0121566b588c2
 bundle_sha256: d4905f0b2d52fb91097ec2f52bc6b23e56e396276146da0044be34158bc05d97
 bundle_lines: 2870

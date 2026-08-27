@@ -38,9 +38,10 @@ def chunk(project, check, strict, max_lines, max_bytes):
         bad = 0
         for name in targets:
             st, detail = manifest_status(name)
-            mark = {"current": "✓", "stale": "❌", "missing": "❌", "no_bundle": "·"}[st]
-            click.echo(f"   {mark} {st:<9} {name}: {detail}")
-            bad += st in ("stale", "missing")
+            mark = {"current": "✓", "stale": "❌", "missing": "❌", "off_rule": "❌",
+                    "unreadable": "❌", "no_bundle": "·"}[st]
+            click.echo(f"   {mark} {st:<10} {name}: {detail}")
+            bad += st in ("stale", "missing", "off_rule", "unreadable")
         if strict and bad:
             sys.exit(1)
         return

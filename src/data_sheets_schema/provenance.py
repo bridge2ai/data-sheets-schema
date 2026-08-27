@@ -1152,7 +1152,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         declared = header.get("Source bundle") or header.get("Source")
         bundle = Path(declared) if declared else None
 
-    inputs: dict[str, Any] = {"bundle_path": str(bundle) if bundle else None}
+    inputs: dict[str, Any] = {"bundle_path": str(bundle) if bundle else None,
+                              "chunks": None}
     if bundle and bundle.exists() and input_verified:
         inputs.update({"bundle_md5": _md5(bundle),
                        "bundle_bytes": bundle.stat().st_size,
@@ -1164,6 +1165,7 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         inputs["chunks"] = chunks_input(bundle, inputs["bundle_md5"])
     elif bundle:
         inputs["bundle_md5"] = None
+        inputs["chunks"] = None      # nothing anchors chunk ids to unverified bytes (#716)
         if mode == "live":
             # A live run knows its own input. Failing to hash it is a defect in
             # the capture, not an unrecoverable historical fact.

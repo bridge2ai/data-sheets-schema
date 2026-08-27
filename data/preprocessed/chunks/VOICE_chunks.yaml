@@ -1,4 +1,4 @@
-bundle: data/preprocessed/concatenated/VOICE_preprocessed.txt
+bundle: VOICE_preprocessed.txt
 bundle_md5: dcd717170da6762569c0b4eeafc1c3d2
 bundle_sha256: a075e1124b91c58283113f6d8d1198daee295e84d585f7e8b35a098bbdd7c7ea
 bundle_lines: 5746

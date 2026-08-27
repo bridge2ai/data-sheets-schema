@@ -412,7 +412,7 @@ def audit_bundles(project, strict, manifest):
     targets = [project] if project else list(PROJECTS)
     md5 = lambda p: hashlib.md5(p.read_bytes()).hexdigest()  # noqa: E731
 
-    stale, checked, unchecked = [], 0, []
+    stale, checked, unchecked, manifests = [], 0, [], 0
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         for name in targets:
@@ -482,14 +482,17 @@ def audit_bundles(project, strict, manifest):
             # recorded rule, so it goes stale exactly when the bundle changes.
             from data_sheets_schema.chunking import manifest_path, manifest_status
             st, detail = manifest_status(name)
-            if st in ('current', 'stale'):
-                checked += 1
-            if st == 'stale':
+            if st in ('current', 'stale', 'off_rule'):
+                manifests += 1
+            if st in ('stale', 'off_rule'):
                 stale.append((manifest_path(name), f'd4d bundle chunk --project {name}'))
             elif st == 'missing' and current.exists():
                 unchecked.append((manifest_path(name), 'no chunk manifest; ' + detail))
+            elif st == 'unreadable':
+                unchecked.append((manifest_path(name), detail))
 
-    click.echo(f"📦 {checked} derived bundle(s) rebuilt and compared")
+    click.echo(f"📦 {checked} derived bundle(s) rebuilt and compared; "
+               f"{manifests} chunk manifest(s) rebuilt under their recorded rule (#707)")
     for path, cmd in stale:
         click.echo(f"   ❌ stale  {path}\n      rebuild: {cmd}")
     if not stale:

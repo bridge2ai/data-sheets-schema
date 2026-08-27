@@ -403,9 +403,13 @@ document bundle's bytes and a recorded rule (`unit: source-document`, windows
 bounded in both lines and bytes, the summary/TOC preamble as its own chunk):
 same bytes + same rule = same file, and the chunks' texts concatenate back to
 the bundle. A coverage receipt (#708) names these chunk ids; the manifest is
-what anchors them to bytes. `d4d provenance record` writes `inputs.chunks:
-{path, sha256, rule, chunk_count}` only when a manifest exists for exactly
-the md5 the record hashed, and `null` otherwise.
+what anchors them to bytes. The manifest names the bundle by basename, so the file — and the sha256
+provenance records — is the same wherever the bundle was read from (#713).
+`d4d provenance record` writes `inputs.chunks: {path, sha256, rule,
+chunk_count}` only when a readable manifest exists for exactly the md5 the
+record hashed, and `null` otherwise. `--check` reports `off_rule` for a
+manifest that reproduces under a non-default rule (#714) — reproducible, but
+not the instrument the other manifests use.
 
 ```bash
 d4d bundle chunk                     # (re)write every project's manifest

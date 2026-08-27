@@ -1,4 +1,4 @@
-bundle: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+bundle: CHORUS_preprocessed.txt
 bundle_md5: 9b2ef4b65d67957f79362266cab0bc7a
 bundle_sha256: 27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c
 bundle_lines: 1698

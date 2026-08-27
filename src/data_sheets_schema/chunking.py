@@ -21,7 +21,6 @@ than nobody's, so a coverage receipt has one entry per byte of the bundle.
 from __future__ import annotations
 
 import hashlib
-import json
 from pathlib import Path
 from typing import Any
 
@@ -65,7 +64,11 @@ def _documents(lines: list[str]) -> list[tuple[str, int, int]]:
     the separator that follows its content belongs to it — deterministic,
     and it keeps the union of the documents equal to the bundle.
     """
-    marks = [i for i, l in enumerate(lines) if l.startswith(FILE_MARK)]
+    # A boundary is a `FILE:` line *followed by* a `PATH:` line, as the
+    # concatenator writes them; a document quoting "FILE: …" at the start of a
+    # line is content, not a boundary (#718).
+    marks = [i for i, l in enumerate(lines)
+             if l.startswith(FILE_MARK) and i + 1 < len(lines) and lines[i + 1].startswith("PATH: ")]
     docs: list[tuple[str, int, int]] = []
     if not marks:
         return [(PREAMBLE, 1, len(lines))] if lines else []
@@ -146,7 +149,9 @@ def build_manifest(bundle: Path, rule: dict[str, Any] | None = None) -> dict[str
     chunks = chunk_text(text, rule)
     lines, _ = _split_lines(text)
     return {
-        "bundle": str(bundle),
+        # The basename, not the path: the manifest must be the same bytes
+        # wherever the bundle was read from (#713).
+        "bundle": bundle.name,
         "bundle_md5": hashlib.md5(raw).hexdigest(),
         "bundle_sha256": hashlib.sha256(raw).hexdigest(),
         "bundle_lines": len(lines),
@@ -209,14 +214,22 @@ def manifest_status(project: str, concat_dir: Path | None = None,
         return "no_bundle", str(bundle)
     if not path.exists():
         return "missing", f"d4d bundle chunk --project {project}"
-    recorded = load_manifest(path)
-    fresh = build_manifest(bundle, recorded.get("rule") or DEFAULT_RULE)
-    fresh["bundle"] = recorded.get("bundle")   # the path is a label, not a fact
-    if dump_manifest(fresh) == path.read_text(encoding="utf-8"):
-        return "current", path.name
-    why = ("bundle md5 changed" if fresh["bundle_md5"] != recorded.get("bundle_md5")
-           else "chunking differs under the recorded rule")
-    return "stale", f"{why}; rebuild: d4d bundle chunk --project {project}"
+    try:
+        recorded = load_manifest(path)
+        if not isinstance(recorded, dict):
+            raise ValueError("manifest is not a mapping")
+        fresh = build_manifest(bundle, recorded.get("rule") or DEFAULT_RULE)
+    except (ValueError, UnicodeDecodeError, OSError) as exc:      # #715
+        return "unreadable", f"{type(exc).__name__}: {exc}"
+    if dump_manifest(fresh) != path.read_text(encoding="utf-8"):
+        why = ("bundle md5 changed" if fresh["bundle_md5"] != recorded.get("bundle_md5")
+               else "chunking differs under the recorded rule")
+        return "stale", f"{why}; rebuild: d4d bundle chunk --project {project}"
+    if recorded.get("rule") != DEFAULT_RULE:
+        # Reproducible, but not the instrument every other manifest uses; a
+        # receipt over these chunks is not comparable with the others (#714).
+        return "off_rule", f"rule {recorded.get('rule')} is not the default; rebuild: d4d bundle chunk --project {project}"
+    return "current", path.name
 
 
 def chunks_input(bundle: Path | None, bundle_md5: str | None,
@@ -236,12 +249,13 @@ def chunks_input(bundle: Path | None, bundle_md5: str | None,
     path = manifest_path(name[: -len("_preprocessed.txt")], chunks_dir)
     if not path.exists():
         return None
-    m = load_manifest(path)
-    if m.get("bundle_md5") != bundle_md5:
+    try:
+        m = load_manifest(path)
+        if not isinstance(m, dict) or m.get("bundle_md5") != bundle_md5:
+            return None
+        return {"path": str(path), "sha256": file_sha256(path),
+                "rule": m.get("rule"), "chunk_count": m.get("chunk_count")}
+    except Exception:                                               # noqa: BLE001
+        # A broken manifest must not abort a live provenance record (#715);
+        # "no manifest attests this input" is the true statement then.
         return None
-    return {"path": str(path), "sha256": file_sha256(path),
-            "rule": m.get("rule"), "chunk_count": m.get("chunk_count")}
-
-
-def rule_json(rule: dict[str, Any]) -> str:
-    return json.dumps(rule, sort_keys=True)

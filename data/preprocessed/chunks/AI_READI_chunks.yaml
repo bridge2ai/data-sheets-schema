@@ -1,4 +1,4 @@
-bundle: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+bundle: AI_READI_preprocessed.txt
 bundle_md5: 0f3abb51a333555456bedd63891fcd99
 bundle_sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
 bundle_lines: 7376
