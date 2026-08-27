@@ -21,6 +21,18 @@ tell the agent to read the corresponding command file before execution.
 /d4d-add-mapping  # Add D4D ↔ RO-Crate SSSOM mappings for new classes
 ```
 
+### Skills
+
+```
+review-open-issues   # Read-only, full-queue triage of open issues against the
+                     # records, gates and instruments; answers "does anything
+                     # block the next arm?" — never closes, launches, or fixes
+```
+
+Lives under `.claude/skills/review-open-issues/SKILL.md`; adapted from the
+MicroGrowLink skill of the same name with this repository's pipeline stages,
+stop-the-line checks, and measurement discipline.
+
 ### Conversational Agents
 
 Invoke agents by mentioning their purpose in conversation or using the Skill tool:
