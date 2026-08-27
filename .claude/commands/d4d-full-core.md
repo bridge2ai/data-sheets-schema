@@ -381,9 +381,31 @@ Print the JSON the command emits into the reconciliation report; the
 provenance recorder needs nothing else, the API path records the same facts
 under `core_derivation`.
 
+**Where the pinned condition text says otherwise, derivation wins.** The
+generic ≤ v5 prompts predate #694: they describe "Phase 2 core generation"
+and mandate a CORE HEADER BLOCK reading `schema-grounded agentic, phase 2`
+with `Sources: {bundle} + {full}`. Under those conditions the derived
+header (`derived by projection from the full record (#694)`,
+`Sources: {full}`) supersedes that block — a header claiming a generation
+that did not happen would be the false attestation this playbook exists to
+prevent — and the run records it under `derive_core`. generic-v6 carries the
+derived wording in its own text.
+
+This is not the derivation the evidence boundary forbids. That rule
+(*"A generation phase may never derive"*, above) is about consuming *other
+runs'* records; a core projected from this run's own audited full record
+consumes nothing the run did not itself generate from the declared bundle.
+
+Anything the bundle supports that the full record lacks is added **to the
+full record** in Phase 3's back-port, and the core inherits it on
+re-derivation. That is where the former Phase 2 instruction "consult the
+source documents to fill core fields the full record left empty" now lives;
+a core field can no longer be filled by any path the full record's evidence
+trail does not cover.
+
 The rules below describe the generated core this phase replaced; they remain
-the specification a derived core must satisfy (and does, by construction),
-and they still govern a run that for a stated reason cannot derive.
+the specification a derived core satisfies by construction, and they still
+govern a run that for a stated reason cannot derive.
 
 Inputs to this phase: the current source documents AND the exact same-run Phase
 1 full D4D. No older full or core YAML is permitted. The core record is the

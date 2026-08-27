@@ -186,8 +186,8 @@ PHASES = ("full", "core", "audit", "reconcile_full", "reconcile_core", "report")
 #: `reconcile_core` from the reconciled full), and `repair_core` re-derives
 #: after `repair_full` instead of calling the model. No API call, no usage
 #: entry; the record carries `core_derivation` instead. On the 2026-08-24
-#: arm a projection reproduced 98.5% of the generated cores' slot values and
-#: the remainder was the two CoreDataset-only slots; on the API arm the
+#: arm a projection reproduced 98.5% of the generated cores' top-level slot
+#: values (the differences sat in distributions and resources); on the API arm the
 #: generated core is where 0–18 pair errors and the #675 spelling splits came
 #: from. Pair consistency now holds by construction.
 CORE_DERIVED = True
@@ -849,6 +849,10 @@ def plan(spec: RunSpec) -> dict[str, Any]:
     sizes, basis = _carry_sizes(spec)
     phases = []
     for ph in PHASES:
+        if CORE_DERIVED and ph in DERIVED_PHASES:
+            # No call is made for a derived phase (#694); costing it would
+            # overstate the run by the two largest phases it no longer has.
+            continue
         # Every input the phase declares, at a realistic size. The old version
         # carried a nine-character placeholder for the full record after phase
         # 1 and nothing else ever, so `audit` was costed without core,
@@ -1864,8 +1868,10 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # The core is a function of the full record; a repaired full is
             # re-projected rather than the core being repaired on its own,
             # which would let the pair diverge again (#694).
-            from data_sheets_schema.derive_core import write_core
-            write_core(spec.full_path, spec.core_path)
+            from data_sheets_schema.derive_core import core_text
+            text = normalise_multivalued(normalise_enum_aliases(
+                normalise_temporal(core_text(spec.full_path)[0])))
+            spec.core_path.write_text(text, encoding="utf-8")
             errors, failure = _validator_lines(path, schema, cls)
             log.append({"phase": ph, "round": 1,
                         "outcome": ("re-derived from the repaired full record"
@@ -2574,7 +2580,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         if CORE_DERIVED and ph in DERIVED_PHASES:
             # A projection, not a call (#694). Derived from the full record
             # as it stands now: the completed full for `core`, the reconciled
-            # full for `reconcile_full`. The text then takes the same path a
+            # full for `reconcile_core`. The text then takes the same path a
             # generated core would — written, snapshotted, carried — so
             # resume, audit and report see the artifact they always did.
             from data_sheets_schema.derive_core import core_text
@@ -2665,7 +2671,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         "provider": ident["provider"] or PROVIDER,
         "base_url": ident["base_url"],
         "model": settings["name"],
-        "max_tokens_by_phase": PHASE_MAX_TOKENS,
+        "max_tokens_by_phase": ({k: v for k, v in PHASE_MAX_TOKENS.items()
+                                 if k not in DERIVED_PHASES and k != "repair_core"}
+                                if CORE_DERIVED else PHASE_MAX_TOKENS),
         # What the run sent, and what it was allowed to send. The second is
         # usually unknown, and #568 exists because that could not be told from
         # the record: AI-READI's reconcile_full ran at 249,015 tokens under a
@@ -2691,12 +2699,6 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         }]
     rec.data["api_usage"] = usage
     rec.data["phases_skipped"] = skipped or None
-    if CORE_DERIVED:
-        # Re-derived from the final full record below if repair rewrote it;
-        # recorded here so a run that skipped both derived phases on resume
-        # still says how its core came to be.
-        from data_sheets_schema.derive_core import derivation_facts
-        rec.data["core_derivation"] = core_derivation or derivation_facts(spec.full_path)
     rec.data["record_generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
     # Validate before declaring success. The first live run completed all six
@@ -2741,8 +2743,34 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     else:
         rec.data["repair"] = prior_repair or None
     rec.data["validation"] = validation_block(spec, problems)
-    # After repair, not before: repair rewrites both records, so a pair checked
-    # earlier would describe bytes that no longer exist (#544).
+    if CORE_DERIVED:
+        # After repair, for the same reason validation is: repair rewrites the
+        # full and re-derives the core, so facts computed earlier would name a
+        # full record that no longer exists (#704 review). And verified, not
+        # assumed: a resumed run whose core on disk was written by a model
+        # (pre-#694) or edited since is not a derivation, and stamping
+        # `derived: true` on it would contradict the pair check in the same
+        # record. The claim is made only when the core on disk is byte-equal
+        # to a fresh derivation of the full on disk.
+        from data_sheets_schema.derive_core import core_text, derivation_facts
+        fresh = normalise_multivalued(normalise_enum_aliases(
+            normalise_temporal(core_text(spec.full_path)[0])))
+        on_disk = spec.core_path.read_text(encoding="utf-8") if spec.core_path.exists() else None
+        repaired = any(r.get("phase") == "repair_core" for r in (rec.data.get("repair") or []))
+        if on_disk == fresh:
+            rec.data["core_derivation"] = {
+                **derivation_facts(spec.full_path),
+                "phase": ("repair_core" if repaired else
+                          (core_derivation or {}).get("phase", "reconcile_core")),
+            }
+        else:
+            rec.data["core_derivation"] = {
+                "derived": False,
+                "reason": ("the core on disk is not the projection of the full "
+                           "record on disk — a core generated before #694 or "
+                           "edited since was carried by resume; re-run with "
+                           "--no-resume to derive it"),
+            }
     rec.data["pair_consistency"] = pair_consistency(spec)
     rec.data["report_claims"] = report_claims_block(spec)
     rec.data["grounding"] = grounding_block(spec)

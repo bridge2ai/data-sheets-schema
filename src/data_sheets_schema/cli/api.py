@@ -1,4 +1,4 @@
-"""API generation commands — six-phase D4D runs over the Anthropic API."""
+"""API generation commands — D4D runs over the Anthropic API (four model phases; the core is derived, #694)."""
 
 import json
 import sys
@@ -108,7 +108,7 @@ def _canary_never_ran(spec, baseline, what_happened: str) -> str:
 
 @click.group()
 def api():
-    """Generate D4D records via the Anthropic API (six-phase)."""
+    """Generate D4D records via the Anthropic API (four model phases plus a derived core)."""
 
 
 @api.command("render-prompt")
@@ -231,7 +231,7 @@ def plan_cmd(project, arm, label, condition, bundle, out_dir, as_json):
               help="flat output directory (the assistant layout)")
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
 def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
-    """Execute all six phases and write outputs plus a live provenance record."""
+    """Execute every phase (four model calls; the core is derived from the full) and write outputs plus a live provenance record."""
     from data_sheets_schema.api_runner import execute, plan
     spec = _spec(project, arm, label, condition, bundle, out_dir)
     _require_bundle(spec, project, bundle)

@@ -226,7 +226,9 @@ class TestPlan(unittest.TestCase):
     def test_plan_needs_no_api_key(self):
         p = plan(spec())
         self.assertEqual(p["runtime"], RUNTIME)
-        self.assertEqual(len(p["phases"]), len(PHASES))
+        from data_sheets_schema.api_runner import DERIVED_PHASES
+        # Only phases that make a call are costed (#694).
+        self.assertEqual(len(p["phases"]), len(PHASES) - len(DERIVED_PHASES))
 
     def test_plan_reports_the_shared_config_model(self):
         """Whatever the config pins is what a run will use."""
@@ -240,6 +242,13 @@ class TestPlan(unittest.TestCase):
         self.assertTrue(p["outputs"]["full"].endswith("CHORUS_d4d.yaml"))
         self.assertIn("claudecode_agent_core", p["outputs"]["core"])
         self.assertIn(spec().label, p["outputs"]["report"])
+
+    def test_plan_does_not_cost_the_derived_phases(self):
+        """#704 review F4: a phase that makes no call must not be estimated."""
+        from data_sheets_schema.api_runner import DERIVED_PHASES, plan
+        p = plan(spec())
+        costed = {row["phase"] for row in p.get("phases", [])} if isinstance(p.get("phases"), list) else set(p.get("phases", {}))
+        self.assertFalse(costed & DERIVED_PHASES, costed)
 
     def test_token_estimate_scales_with_the_bundle(self):
         small = plan(spec())["approx_total_input_tokens"]
@@ -843,6 +852,25 @@ class TestValidatorDrivenRepair(unittest.TestCase):
                          ["applied", "applied"],
                          "prior invocation's repair rounds must survive")
         self.assertEqual(len(third["api_usage"]), 6)
+
+    def test_a_resumed_model_written_core_is_not_stamped_derived(self):
+        """#704 review F3: a completed run resumed with a pre-#694 core on
+        disk must not claim derivation the pair check would contradict."""
+        import yaml as _yaml
+        from data_sheets_schema import api_runner
+        s = spec(out_dir=self.out)
+        keep = api_runner._client
+        api_runner._client = lambda: FakeClient()
+        self.addCleanup(lambda: setattr(api_runner, "_client", keep))
+        self.api.execute(s)
+        # A core that a model wrote: not the projection of the full on disk.
+        s.core_path.write_text(s.core_path.read_text() + "notes:\n- model-written core-only note\n")
+        self.api._save_progress(s, list(self.api.PHASES), None)
+        with unittest.mock.patch.object(self.api, "_validator_lines", lambda *a: ([], None)):
+            self.api.execute(s)
+        d = _yaml.safe_load((self.out / "CHORUS_provenance.yaml").read_text())
+        self.assertFalse(d["core_derivation"]["derived"])
+        self.assertIn("not the projection", d["core_derivation"]["reason"])
 
     def test_execute_snapshots_every_intermediate(self):
         """#369: reconcile and repair overwrite artifacts in place, and the
