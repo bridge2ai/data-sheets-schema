@@ -178,6 +178,21 @@ PROVIDER = "Anthropic"
 # something, so a failure costs one call rather than the whole run.
 PHASES = ("full", "core", "audit", "reconcile_full", "reconcile_core", "report")
 
+#: The core record is derived from the full record, not generated (#694).
+#: The `core` and `reconcile_core` phases keep their names and their place in
+#: the dataflow — they still produce the core artifact that `audit` and
+#: `report` consume — but they are deterministic projections of the full
+#: record as it stands at that point (`core` from the completed full,
+#: `reconcile_core` from the reconciled full), and `repair_core` re-derives
+#: after `repair_full` instead of calling the model. No API call, no usage
+#: entry; the record carries `core_derivation` instead. On the 2026-08-24
+#: arm a projection reproduced 98.5% of the generated cores' top-level slot
+#: values (the differences sat in distributions and resources); on the API arm the
+#: generated core is where 0–18 pair errors and the #675 spelling splits came
+#: from. Pair consistency now holds by construction.
+CORE_DERIVED = True
+DERIVED_PHASES = frozenset({"core", "reconcile_core"})
+
 # Derived from the largest artifact of each kind across 112 full, 104 core and
 # 97 report records already generated, plus ~40% headroom. A guessed ceiling is
 # how the previous design truncated five of six projects mid-YAML.
@@ -343,7 +358,8 @@ def prompt_body(path: Path = GENERIC_PROMPT) -> str:
 # nothing derives this ordering from the code — keep it true.
 ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
                    "declared naming, arm prompt, "
-                   "carried artifacts, phase instruction")
+                   "carried artifacts, phase instruction; "
+                   "core derived from the full record, not generated (#694)")
 
 
 def assembly_digest() -> dict[str, Any]:
@@ -833,6 +849,10 @@ def plan(spec: RunSpec) -> dict[str, Any]:
     sizes, basis = _carry_sizes(spec)
     phases = []
     for ph in PHASES:
+        if CORE_DERIVED and ph in DERIVED_PHASES:
+            # No call is made for a derived phase (#694); costing it would
+            # overstate the run by the two largest phases it no longer has.
+            continue
         # Every input the phase declares, at a realistic size. The old version
         # carried a nine-character placeholder for the full record after phase
         # 1 and nothing else ever, so `audit` was costed without core,
@@ -1844,6 +1864,20 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
         if not path.exists():
             continue
         ph = f"repair_{artifact}"
+        if CORE_DERIVED and artifact == "core":
+            # The core is a function of the full record; a repaired full is
+            # re-projected rather than the core being repaired on its own,
+            # which would let the pair diverge again (#694).
+            from data_sheets_schema.derive_core import core_text
+            text = normalise_multivalued(normalise_enum_aliases(
+                normalise_temporal(core_text(spec.full_path)[0])))
+            spec.core_path.write_text(text, encoding="utf-8")
+            errors, failure = _validator_lines(path, schema, cls)
+            log.append({"phase": ph, "round": 1,
+                        "outcome": ("re-derived from the repaired full record"
+                                    + ("; validates" if not errors and failure is None
+                                       else f"; still {len(errors)} validator finding(s) — the full record carries a shape the core schema rejects"))})
+            continue
         # The count the last APPLIED repair was working from. Compared only
         # against applied rounds: a truncated or unusable round rewrote
         # nothing, so its unchanged count says nothing about convergence and
@@ -2221,6 +2255,88 @@ def _dependents_of(carry_name: str, produced_by: tuple[str, ...]) -> set[str]:
     return dependents
 
 
+
+def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
+                    settings: dict[str, Any], usage: list[dict[str, Any]]) -> str:
+    """One model phase: build, call with retries, capture reasoning and usage,
+    return the usable body. Split out of execute() so a derived phase can
+    take the artifact path without a call (#694)."""
+    req = build_phase(spec, ph, carry=needed)
+
+    # A 200 whose body is unusable is not a permanent failure, and treating
+    # it as one is expensive. A live CHORUS run returned the whole of
+    # `**Phase 2 — Core record.**` for phase 2 — stop_reason `end_turn`,
+    # nine tokens of reasoning, no record — and killed a run whose phase 1
+    # had already spent ~16k reasoning tokens. `_call_with_retry` cannot see
+    # this: at the transport layer the call succeeded. So the *usability* of
+    # the body is retried here, on the same budget, and only a phase that
+    # fails every attempt takes the run down with it.
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        # Stamped per attempt so telemetry can reconstruct wall time; file
+        # mtimes only date the artifact a phase wrote, not the attempts
+        # that failed on the way there.
+        attempt_started = datetime.now(timezone.utc).isoformat(
+            timespec="seconds")
+        attempt_t0 = time.monotonic()
+        resp = _call_with_retry(
+            client,
+            model=settings["name"],
+            max_tokens=PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
+            temperature=settings["temperature"],
+            system=req.system,
+            messages=req.messages)
+
+        text = "".join(b.text for b in resp.content
+                       if getattr(b, "type", "") == "text")
+
+        # Written before the checks below, so a phase that dies of
+        # max_tokens still leaves the record showing where its budget went —
+        # that is exactly the case where the thinking share is the diagnosis.
+        cap = reasoning.capture(resp)
+        reasoning.append(_reasoning_path(spec),
+                         {"phase": ph, "label": spec.label,
+                          "project": spec.project, "model": settings["name"],
+                          "attempt": attempt, **cap.to_dict()})
+
+        usage.append({
+            "phase": ph,
+            "attempt": attempt,
+            "started_at": attempt_started,
+            "seconds": round(time.monotonic() - attempt_t0, 3),
+            "input_tokens": getattr(resp.usage, "input_tokens", None),
+            "output_tokens": getattr(resp.usage, "output_tokens", None),
+            "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
+            "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
+            "max_tokens": PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
+            "stop_reason": getattr(resp, "stop_reason", None),
+        })
+
+        # A truncated record is worse than none: it validates as broken YAML
+        # or, worse, as a shorter valid record. Never write it — but a
+        # ceiling that one attempt overran is not a fact about the phase, so
+        # this is retried too rather than ending the run outright.
+        truncated = getattr(resp, "stop_reason", None) == "max_tokens"
+        problem = (f"hit max_tokens ({PHASE_MAX_TOKENS.get(ph)}); output "
+                   f"truncated" if truncated else None)
+        if not truncated:
+            try:
+                body = _extract(
+                    text, "json" if ph == "audit" else
+                    ("md" if ph == "report" else "yaml"),
+                    *PHASE_SCHEMA.get(ph, (FULL_SCHEMA_PATH, "Dataset")))
+                break
+            except RuntimeError as exc:
+                problem = str(exc)
+        if attempt == MAX_ATTEMPTS:
+            raise RuntimeError(
+                f"phase {ph!r} produced no usable output in "
+                f"{MAX_ATTEMPTS} attempts. Last problem: {problem}")
+        print(f"   phase {ph} attempt {attempt} unusable "
+              f"({problem.splitlines()[0][:70]}); retrying")
+        time.sleep(BACKOFF_BASE_SECONDS ** attempt)
+    return body
+
+
 def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             client=None) -> dict[str, Any]:
     """Run the phases, writing each artifact as it completes.
@@ -2437,6 +2553,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     if "reconcile_full" in done and "Completed full record" in carry:
         carry["Reconciled full record"] = carry["Completed full record"]
 
+    core_derivation: dict[str, Any] | None = None
     for ph in PHASES:
         artifact = PHASE_ARTIFACT.get(ph)
         target = _artifact_path(spec, artifact) if artifact else None
@@ -2459,79 +2576,18 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                 "continuing would write a record that cannot be told from one "
                 "produced with the full context.")
         needed = {k: carry[k] for k in PHASE_NEEDS[ph]}
-        req = build_phase(spec, ph, carry=needed)
 
-        # A 200 whose body is unusable is not a permanent failure, and treating
-        # it as one is expensive. A live CHORUS run returned the whole of
-        # `**Phase 2 — Core record.**` for phase 2 — stop_reason `end_turn`,
-        # nine tokens of reasoning, no record — and killed a run whose phase 1
-        # had already spent ~16k reasoning tokens. `_call_with_retry` cannot see
-        # this: at the transport layer the call succeeded. So the *usability* of
-        # the body is retried here, on the same budget, and only a phase that
-        # fails every attempt takes the run down with it.
-        for attempt in range(1, MAX_ATTEMPTS + 1):
-            # Stamped per attempt so telemetry can reconstruct wall time; file
-            # mtimes only date the artifact a phase wrote, not the attempts
-            # that failed on the way there.
-            attempt_started = datetime.now(timezone.utc).isoformat(
-                timespec="seconds")
-            attempt_t0 = time.monotonic()
-            resp = _call_with_retry(
-                client,
-                model=settings["name"],
-                max_tokens=PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
-                temperature=settings["temperature"],
-                system=req.system,
-                messages=req.messages)
-
-            text = "".join(b.text for b in resp.content
-                           if getattr(b, "type", "") == "text")
-
-            # Written before the checks below, so a phase that dies of
-            # max_tokens still leaves the record showing where its budget went —
-            # that is exactly the case where the thinking share is the diagnosis.
-            cap = reasoning.capture(resp)
-            reasoning.append(_reasoning_path(spec),
-                             {"phase": ph, "label": spec.label,
-                              "project": spec.project, "model": settings["name"],
-                              "attempt": attempt, **cap.to_dict()})
-
-            usage.append({
-                "phase": ph,
-                "attempt": attempt,
-                "started_at": attempt_started,
-                "seconds": round(time.monotonic() - attempt_t0, 3),
-                "input_tokens": getattr(resp.usage, "input_tokens", None),
-                "output_tokens": getattr(resp.usage, "output_tokens", None),
-                "cache_read": getattr(resp.usage, "cache_read_input_tokens", None),
-                "cache_write": getattr(resp.usage, "cache_creation_input_tokens", None),
-                "max_tokens": PHASE_MAX_TOKENS.get(ph, settings["max_tokens"]),
-                "stop_reason": getattr(resp, "stop_reason", None),
-            })
-
-            # A truncated record is worse than none: it validates as broken YAML
-            # or, worse, as a shorter valid record. Never write it — but a
-            # ceiling that one attempt overran is not a fact about the phase, so
-            # this is retried too rather than ending the run outright.
-            truncated = getattr(resp, "stop_reason", None) == "max_tokens"
-            problem = (f"hit max_tokens ({PHASE_MAX_TOKENS.get(ph)}); output "
-                       f"truncated" if truncated else None)
-            if not truncated:
-                try:
-                    body = _extract(
-                        text, "json" if ph == "audit" else
-                        ("md" if ph == "report" else "yaml"),
-                        *PHASE_SCHEMA.get(ph, (FULL_SCHEMA_PATH, "Dataset")))
-                    break
-                except RuntimeError as exc:
-                    problem = str(exc)
-            if attempt == MAX_ATTEMPTS:
-                raise RuntimeError(
-                    f"phase {ph!r} produced no usable output in "
-                    f"{MAX_ATTEMPTS} attempts. Last problem: {problem}")
-            print(f"   phase {ph} attempt {attempt} unusable "
-                  f"({problem.splitlines()[0][:70]}); retrying")
-            time.sleep(BACKOFF_BASE_SECONDS ** attempt)
+        if CORE_DERIVED and ph in DERIVED_PHASES:
+            # A projection, not a call (#694). Derived from the full record
+            # as it stands now: the completed full for `core`, the reconciled
+            # full for `reconcile_core`. The text then takes the same path a
+            # generated core would — written, snapshotted, carried — so
+            # resume, audit and report see the artifact they always did.
+            from data_sheets_schema.derive_core import core_text
+            body, facts = core_text(spec.full_path)
+            core_derivation = {**facts, "phase": ph}
+        else:
+            body = _generate_phase(spec, ph, needed, client, settings, usage)
         if ph == "audit":
             carry["Audit findings"] = body
             # The progress file that carries the findings is deleted on
@@ -2608,12 +2664,16 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     rec.data["prompts"]["assembly"] = assembly_digest()
     ident = provider_identity()
     rec.data["model"] = {
-        "generation_method": "schema-grounded API, six phases",
+        "generation_method": ("schema-grounded API, four model phases with the "
+                              "core derived from the full record (#694)"
+                              if CORE_DERIVED else "schema-grounded API, six phases"),
         "agent_runtime": RUNTIME,
         "provider": ident["provider"] or PROVIDER,
         "base_url": ident["base_url"],
         "model": settings["name"],
-        "max_tokens_by_phase": PHASE_MAX_TOKENS,
+        "max_tokens_by_phase": ({k: v for k, v in PHASE_MAX_TOKENS.items()
+                                 if k not in DERIVED_PHASES and k != "repair_core"}
+                                if CORE_DERIVED else PHASE_MAX_TOKENS),
         # What the run sent, and what it was allowed to send. The second is
         # usually unknown, and #568 exists because that could not be told from
         # the record: AI-READI's reconcile_full ran at 249,015 tokens under a
@@ -2683,8 +2743,34 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     else:
         rec.data["repair"] = prior_repair or None
     rec.data["validation"] = validation_block(spec, problems)
-    # After repair, not before: repair rewrites both records, so a pair checked
-    # earlier would describe bytes that no longer exist (#544).
+    if CORE_DERIVED:
+        # After repair, for the same reason validation is: repair rewrites the
+        # full and re-derives the core, so facts computed earlier would name a
+        # full record that no longer exists (#704 review). And verified, not
+        # assumed: a resumed run whose core on disk was written by a model
+        # (pre-#694) or edited since is not a derivation, and stamping
+        # `derived: true` on it would contradict the pair check in the same
+        # record. The claim is made only when the core on disk is byte-equal
+        # to a fresh derivation of the full on disk.
+        from data_sheets_schema.derive_core import core_text, derivation_facts
+        fresh = normalise_multivalued(normalise_enum_aliases(
+            normalise_temporal(core_text(spec.full_path)[0])))
+        on_disk = spec.core_path.read_text(encoding="utf-8") if spec.core_path.exists() else None
+        repaired = any(r.get("phase") == "repair_core" for r in (rec.data.get("repair") or []))
+        if on_disk == fresh:
+            rec.data["core_derivation"] = {
+                **derivation_facts(spec.full_path),
+                "phase": ("repair_core" if repaired else
+                          (core_derivation or {}).get("phase", "reconcile_core")),
+            }
+        else:
+            rec.data["core_derivation"] = {
+                "derived": False,
+                "reason": ("the core on disk is not the projection of the full "
+                           "record on disk — a core generated before #694 or "
+                           "edited since was carried by resume; re-run with "
+                           "--no-resume to derive it"),
+            }
     rec.data["pair_consistency"] = pair_consistency(spec)
     rec.data["report_claims"] = report_claims_block(spec)
     rec.data["grounding"] = grounding_block(spec)
