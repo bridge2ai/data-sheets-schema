@@ -1,0 +1,86 @@
+bundle: CHORUS_preprocessed.txt
+bundle_md5: 9b2ef4b65d67957f79362266cab0bc7a
+bundle_sha256: 27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c
+bundle_lines: 1698
+bundle_bytes: 35920
+rule:
+  version: 1
+  unit: source-document
+  boundary: 'FILE: header line'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 8
+chunks:
+- id: c001
+  source: <preamble>
+  lines:
+  - 1
+  - 18
+  bytes: 816
+  sha256: 726c659f978e17aae9e9051224dd74c484e6b18d87a058005459e019ed57a7e9
+- id: c002
+  source: reporter_nih_gov_project-details-10472824_row7.txt
+  lines:
+  - 19
+  - 54
+  bytes: 5825
+  sha256: 635b28dccf617547dda689a417c43e3d242a317bdbe12bf4e74b5c8e2525f361
+- id: c003
+  source: bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt
+  lines:
+  - 55
+  - 454
+  bytes: 6275
+  sha256: 7dc281080f359050015dba0a1b8c72ad97340ef64709296d51a0872de86c09c3
+  part:
+  - 1
+  - 3
+- id: c004
+  source: bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt
+  lines:
+  - 455
+  - 854
+  bytes: 7739
+  sha256: 64adc1a37d2a772d017ea0eb39f8b751c75f7adae796dce0a8730445c4a03fb3
+  part:
+  - 2
+  - 3
+- id: c005
+  source: bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt
+  lines:
+  - 855
+  - 1031
+  bytes: 2611
+  sha256: 3b2989ee48e73860e1bd54675ae17785d619dba1a73f7ccec37356f334bdc4d8
+  part:
+  - 3
+  - 3
+- id: c006
+  source: chorus4ai_org_row11.txt
+  lines:
+  - 1032
+  - 1112
+  bytes: 3155
+  sha256: f8c36105b4b3f46415a6fc304396a88b9b6740216a506949527bb90b24f060d9
+- id: c007
+  source: github_chorus_ai_overview_2025-11-14.txt
+  lines:
+  - 1113
+  - 1512
+  bytes: 7961
+  sha256: 53dc2cad4ae923e7fbc47c13b2461a3d598dc5834152a0c967159fddb82f5f1a
+  part:
+  - 1
+  - 2
+- id: c008
+  source: github_chorus_ai_overview_2025-11-14.txt
+  lines:
+  - 1513
+  - 1698
+  bytes: 1538
+  sha256: 54489f4b36803baceeb5e3bfdc5f2c04302a4fd76d750c507a4a902d8ff4ecdd
+  part:
+  - 2
+  - 2

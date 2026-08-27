@@ -1152,13 +1152,20 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         declared = header.get("Source bundle") or header.get("Source")
         bundle = Path(declared) if declared else None
 
-    inputs: dict[str, Any] = {"bundle_path": str(bundle) if bundle else None}
+    inputs: dict[str, Any] = {"bundle_path": str(bundle) if bundle else None,
+                              "chunks": None}
     if bundle and bundle.exists() and input_verified:
         inputs.update({"bundle_md5": _md5(bundle),
                        "bundle_bytes": bundle.stat().st_size,
                        "hash_basis": "verified identical to the bytes consumed"})
+        # The chunk manifest that anchors a coverage receipt's ids to these
+        # bytes (#707) — only when one exists for exactly this md5; a manifest
+        # of some other version of the bundle would attest the wrong file.
+        from data_sheets_schema.chunking import chunks_input
+        inputs["chunks"] = chunks_input(bundle, inputs["bundle_md5"])
     elif bundle:
         inputs["bundle_md5"] = None
+        inputs["chunks"] = None      # nothing anchors chunk ids to unverified bytes (#716)
         if mode == "live":
             # A live run knows its own input. Failing to hash it is a defect in
             # the capture, not an unrecoverable historical fact.

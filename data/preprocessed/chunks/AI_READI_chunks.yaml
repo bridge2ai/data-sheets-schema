@@ -1,0 +1,274 @@
+bundle: AI_READI_preprocessed.txt
+bundle_md5: 0f3abb51a333555456bedd63891fcd99
+bundle_sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
+bundle_lines: 7376
+bundle_bytes: 535189
+rule:
+  version: 1
+  unit: source-document
+  boundary: 'FILE: header line'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 28
+chunks:
+- id: c001
+  source: <preamble>
+  lines:
+  - 1
+  - 25
+  bytes: 1078
+  sha256: 529d248ece6c2ef49779be03493b0bc7bcc20bcf52ca1458e4d291cec9a23d5f
+- id: c002
+  source: bmjopen-2024-097449_row2.txt
+  lines:
+  - 26
+  - 425
+  bytes: 16924
+  sha256: 1b6787e524c3e209dcda59bfe4b3fdb41b740fb2ee9b59a2769381f4d67620f6
+  part:
+  - 1
+  - 5
+- id: c003
+  source: bmjopen-2024-097449_row2.txt
+  lines:
+  - 426
+  - 825
+  bytes: 7517
+  sha256: 06bcd88e9cee6fcb5a0cd5cea2b9eee81bc070f8e3417ce681d85a848ed571d9
+  part:
+  - 2
+  - 5
+- id: c004
+  source: bmjopen-2024-097449_row2.txt
+  lines:
+  - 826
+  - 1225
+  bytes: 9766
+  sha256: 6be4638fa5e11bae6eadfdb099388b60d1f079ba8a49ddafa4a515d554751b53
+  part:
+  - 3
+  - 5
+- id: c005
+  source: bmjopen-2024-097449_row2.txt
+  lines:
+  - 1226
+  - 1625
+  bytes: 13316
+  sha256: 98a88d41440c28e232572bf41abe6d5a81a7a257afe9342ff8315b7045c69e1f
+  part:
+  - 4
+  - 5
+- id: c006
+  source: bmjopen-2024-097449_row2.txt
+  lines:
+  - 1626
+  - 1704
+  bytes: 2943
+  sha256: 9fe57d4d18aa48262e4e78e98cb4aeafd59e86d9e5d387cecd70101751eb314e
+  part:
+  - 5
+  - 5
+- id: c007
+  source: s42255-024-01165-x_row3.txt
+  lines:
+  - 1705
+  - 2104
+  bytes: 17060
+  sha256: 04e5b4f7dd3c70f0de0e82fadc9c525dcf56509532f9612226032723203c06e7
+  part:
+  - 1
+  - 2
+- id: c008
+  source: s42255-024-01165-x_row3.txt
+  lines:
+  - 2105
+  - 2160
+  bytes: 1395
+  sha256: 4ccb757e233500a89cc9673bb15c52b9c3c06f4ee1943679ae91610251d26292
+  part:
+  - 2
+  - 2
+- id: c009
+  source: reporter_nih_gov_project-details-10471118_row7.txt
+  lines:
+  - 2161
+  - 2197
+  bytes: 5127
+  sha256: ccc1f2259b28536f25e4092d42602bf6cf80080c32176a3e599d8313979b6164
+- id: c010
+  source: docs_aireadi_org_docs-2_row10.txt
+  lines:
+  - 2198
+  - 2289
+  bytes: 5035
+  sha256: d8520f3776f2ea5dca181e1f1224de64dd84b1f6a5b13bff1bd265feed27d18a
+- id: c011
+  source: docs_aireadi_org_docs-3_2026-07-24.txt
+  lines:
+  - 2290
+  - 2375
+  bytes: 4949
+  sha256: ad44f0497855f24cc4cac94429650bda51b70bbd9f03859343c8de5a547e4bf6
+- id: c012
+  source: AI-READI-LICENSE-v2.0_2026-08-12.txt
+  lines:
+  - 2376
+  - 2661
+  bytes: 14941
+  sha256: 4abe14aa7a94a326d5c41a321982e127c13a93e0b101f5a4d235fdb30dd2de92
+- id: c013
+  source: fairhub_dataset_2_row12.txt
+  lines:
+  - 2662
+  - 2740
+  bytes: 1920
+  sha256: 69dad28786b9dafcc9ac40c06182185630bcf3f7994c7064a8085c398aa7a73b
+- id: c014
+  source: fairhub_dataset_3_2026-07-24.txt
+  lines:
+  - 2741
+  - 2813
+  bytes: 1870
+  sha256: 27308894e8ca59ff597706dfdb0b0bcedf8e8660a7c80ad253a06ce0922c368a
+- id: c015
+  source: fairhub_api_dataset_3_2026-07-27.txt
+  lines:
+  - 2814
+  - 3213
+  bytes: 17306
+  sha256: e2d6af016157feb5e26209f763a89668859942380866212a358cfa2d97085563
+  part:
+  - 1
+  - 7
+- id: c016
+  source: fairhub_api_dataset_3_2026-07-27.txt
+  lines:
+  - 3214
+  - 3613
+  bytes: 20098
+  sha256: 84349d8d6bc58f30192248e342bc409acea47108732f9c8ad19e92ba3849491c
+  part:
+  - 2
+  - 7
+- id: c017
+  source: fairhub_api_dataset_3_2026-07-27.txt
+  lines:
+  - 3614
+  - 4013
+  bytes: 17511
+  sha256: db874b0c3749f34435b698ad1729506142e6c2f452addff58c7fdd6f1168a4b4
+  part:
+  - 3
+  - 7
+- id: c018
+  source: fairhub_api_dataset_3_2026-07-27.txt
+  lines:
+  - 4014
+  - 4413
+  bytes: 47591
+  sha256: edb0ce22f469ba36f1625d083b46ff23d03dc97b4efcb19e0c4842693beaf20a
+  part:
+  - 4
+  - 7
+- id: c019
+  source: fairhub_api_dataset_3_2026-07-27.txt
+  lines:
+  - 4414
+  - 4813
+  bytes: 43518
+  sha256: 2e01e462052cc2725ddd4ae08bcfc6fcd9b439502686a2bcf0e40b36cb1e5817
+  part:
+  - 5
+  - 7
+- id: c020
+  source: fairhub_api_dataset_3_2026-07-27.txt
+  lines:
+  - 4814
+  - 5213
+  bytes: 18107
+  sha256: de26a3b5010c136af47119fc4ab0daf179f7094b0c2cfa9b391e76f47d272b65
+  part:
+  - 6
+  - 7
+- id: c021
+  source: fairhub_api_dataset_3_2026-07-27.txt
+  lines:
+  - 5214
+  - 5316
+  bytes: 3654
+  sha256: 44779731d1ad42a8e55500e0269db8671143b366417c2aa514161a10fd4e70b0
+  part:
+  - 7
+  - 7
+- id: c022
+  source: aireadi_ro_crate_metadata_2026-08-12.txt
+  lines:
+  - 5317
+  - 5716
+  bytes: 38747
+  sha256: 28e1e99f929d583a807b96e68d6cec76a11fdd0611a44450de36c338c71a56cc
+  part:
+  - 1
+  - 3
+- id: c023
+  source: aireadi_ro_crate_metadata_2026-08-12.txt
+  lines:
+  - 5717
+  - 6116
+  bytes: 47274
+  sha256: 986c66138dfb783f08dbc5510d4ec61961ef168352ec83dce695a72d611d8083
+  part:
+  - 2
+  - 3
+- id: c024
+  source: aireadi_ro_crate_metadata_2026-08-12.txt
+  lines:
+  - 6117
+  - 6337
+  bytes: 26053
+  sha256: e5eaeb4b46d46f29d22bcaa21f3f31d045e753466cc01849353911e429a02f4d
+  part:
+  - 3
+  - 3
+- id: c025
+  source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  lines:
+  - 6338
+  - 6647
+  bytes: 47918
+  sha256: 86e8e9fdb79cf43023102e40a1116e0254ffe0521049502c1a8d2cadb67bbb65
+  part:
+  - 1
+  - 4
+- id: c026
+  source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  lines:
+  - 6648
+  - 6943
+  bytes: 47934
+  sha256: 513821547b216259599e79c9124202f015bd86daade65cc9dd86974279fa404f
+  part:
+  - 2
+  - 4
+- id: c027
+  source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  lines:
+  - 6944
+  - 7318
+  bytes: 47986
+  sha256: 37ecf96ef69504d68977e8615625de8691e5de8bd18adfa031a320b48154a3d7
+  part:
+  - 3
+  - 4
+- id: c028
+  source: gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt
+  lines:
+  - 7319
+  - 7376
+  bytes: 7651
+  sha256: 678ef5a9ff2f213945716ba567be3cb018cfbe5989bfac3a00245abf10c3ab79
+  part:
+  - 4
+  - 4
