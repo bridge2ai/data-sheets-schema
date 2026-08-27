@@ -108,6 +108,9 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
             ("American English", "American English"),
         "source priority":
             ("ranks higher", "ranks higher"),
+        # v6 (#685): the density norm on minting.
+        "minting density":
+            ("refers to that part", "refers to that part"),
     }
 
     #: Rules the playbook carries that the condition prompts deliberately do
@@ -131,7 +134,7 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
             "`test_the_naming_rule_reaches_the_api_path` guards the render."),
     }
 
-    CURRENT_PROMPT = "d4d_generic_arm_prompt_v5.md"
+    CURRENT_PROMPT = "d4d_generic_arm_prompt_v6.md"
 
     def test_the_naming_rule_reaches_the_api_path(self):
         """The render is the API path's copy of the rule; guard its substance.

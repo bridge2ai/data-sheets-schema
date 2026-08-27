@@ -94,6 +94,14 @@ to every project:
   ROR; **a fragment appended to an organisation's ROR does not identify a
   person**, it asserts something false about that organisation.
 
+  **Mint a fragment only where something else in the record refers to that
+  part** (v6, #685) — a split a task names, a subset a distribution cites, a
+  collection a file belongs to. A part nothing refers to is described in
+  prose, not labelled. Name the same part with the same fragment
+  every time it is referred to, and mint nothing for a part that is only
+  described. Under v5 one replicate labelled three parts and another a
+  hundred and thirty, all lawfully; this is the density norm that rule lacked.
+
 - **Write generated prose in American English** — `program`, `organization`,
   `analyze`, `license`, `center`, `labeling`, `enrollment`. This is house style
   for the text *you* compose, and it applies to identifiers you mint as well as

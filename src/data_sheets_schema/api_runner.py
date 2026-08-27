@@ -68,11 +68,15 @@ GENERIC_PROMPT_V3 = PROMPTS / "d4d_generic_arm_prompt_v3.md"
 # before any run naming that one rule (#338).
 GENERIC_PROMPT_V4 = PROMPTS / "d4d_generic_arm_prompt_v4.md"
 GENERIC_PROMPT_V5 = PROMPTS / "d4d_generic_arm_prompt_v5.md"
+# v6 (#685): v5 plus a minting density norm, and the core header rewritten
+# for the derived core (#694). Two counted differences; see the file.
+GENERIC_PROMPT_V6 = PROMPTS / "d4d_generic_arm_prompt_v6.md"
 CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
                      "generic_v2": GENERIC_PROMPT_V2,
                      "generic_v3": GENERIC_PROMPT_V3,
                      "generic_v4": GENERIC_PROMPT_V4,
                      "generic_v5": GENERIC_PROMPT_V5,
+                     "generic_v6": GENERIC_PROMPT_V6,
                      "tuned": GENERIC_PROMPT}
 
 # Which generic base each condition is built on. The generic/tuned comparison
@@ -91,6 +95,7 @@ CONDITION_AXES = {
     "generic_v3": {"base": "v3", "tuned": False},
     "generic_v4": {"base": "v4", "tuned": False},
     "generic_v5": {"base": "v5", "tuned": False},
+    "generic_v6": {"base": "v6", "tuned": False},
     "tuned":      {"base": "v1", "tuned": True},
 }
 
