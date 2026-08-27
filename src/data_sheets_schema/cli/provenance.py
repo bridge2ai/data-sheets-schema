@@ -26,8 +26,11 @@ def provenance():
 #: generate_core / source_audit / reconcile), which would have broken the
 #: next agentic run's completion criterion — the #672 review read the
 #: template this comment's author had not.
-AGENTIC_PHASES = frozenset({"generate_full", "generate_core",
+AGENTIC_PHASES = frozenset({"generate_full", "generate_core", "derive_core",
                             "source_audit", "reconcile", "repair"})
+# `derive_core`: the core produced by `d4d derive core` from the audited full
+# (#694) — a deterministic step, recorded as a phase so the log says the core
+# was derived and not generated. `generate_core` stays for pre-#694 runs.
 # `repair` is the agentic analogue of the API pipeline's repair_full +
 # repair_core rounds: one phase covering both records, whose fix-validate
 # loop may iterate (`iterations` counts those loops). `report` and

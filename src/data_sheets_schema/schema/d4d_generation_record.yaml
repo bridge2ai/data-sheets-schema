@@ -172,6 +172,18 @@ classes:
         description: Phases a resumed run did not repeat.
         multivalued: true
 
+      core_derivation:
+        description: >-
+          Present when the core record was derived from the audited full
+          record rather than generated (#694): the rule, the full record's
+          path and md5 it was projected from, the identity-slot count and
+          projection list, and the slots deliberately not derived. A run
+          carrying this block made no `core`, `reconcile_core` or
+          `repair_core` model call; its api_usage has no such phases and
+          that is not a gap.
+        inlined: true
+        range: AnyBlock
+
       repair:
         description: Validator-driven repair rounds, in order.
         multivalued: true

@@ -356,7 +356,34 @@ File header:
 In independent mode, the Phase 1 agent writes only the full YAML. It must not
 create a core record.
 
-## Phase 2 - D4D-core from input documents + full D4D
+## Phase 2 - D4D-core derived from the full D4D
+
+**The core is derived, not generated (#694).** `CoreDataset` is a subset of
+`Dataset`; on the 2026-08-24 arm a deterministic projection reproduced 98.5%
+of every generated core's slot values and the rest was the two core-only
+slots. Generating it was where the API arm's pair errors came from. So Phase
+2 is one command, run on the validated Phase 1 file:
+
+```bash
+poetry run d4d derive core \
+  --full data/d4d_concatenated/claudecode_agent/{VERSION}/{PROJECT}_d4d.yaml \
+  --out  data/d4d_concatenated/claudecode_agent_core/{VERSION}/{PROJECT}_d4d_core.yaml
+```
+
+It copies every schema-identical shared slot, projects `resources` by id,
+builds `distributions` from `file_collections` over the slots the two classes
+share, leaves `dialect` absent (it has no full-record source), writes the
+core header from the full record's, and validates the result. A derived core
+that fails validation means the *full* record carries a shape the core schema
+rejects — fix the full record and re-derive; never edit the core by hand,
+because Phase 4 will re-derive it anyway. Record the phase as `derive_core`.
+Print the JSON the command emits into the reconciliation report; the
+provenance recorder needs nothing else, the API path records the same facts
+under `core_derivation`.
+
+The rules below describe the generated core this phase replaced; they remain
+the specification a derived core must satisfy (and does, by construction),
+and they still govern a run that for a stated reason cannot derive.
 
 Inputs to this phase: the current source documents AND the exact same-run Phase
 1 full D4D. No older full or core YAML is permitted. The core record is the
@@ -466,13 +493,12 @@ identical slot and proves consistency across the pair.
      version history, distributions, and repeated statements;
    - distinguish a historical release from a current release rather than
      treating their different values as a contradiction.
-5. Use the schema-derived validator. After Phase 3 has made full canonical,
-   synchronization may be performed once:
-   ```bash
-   poetry run python -m data_sheets_schema.d4d_pair_consistency \
-     --full <full_file> --core <core_file> --sync-core
-   ```
-   Then run it without `--sync-core` as the final independent check:
+5. **Re-derive the core from the corrected full record** (Phase 2's command
+   again) after every Phase 3/4 correction to the full — the core is a
+   function of the full and is never edited on its own. `--sync-core` is
+   superseded by derivation and should not be needed; if it changes
+   anything, the derivation is wrong and that is a bug to report, not a
+   record to fix. Then run the pair checker as the final independent check:
    ```bash
    poetry run python -m data_sheets_schema.d4d_pair_consistency \
      --full <full_file> --core <core_file>
@@ -584,7 +610,7 @@ poetry run d4d provenance record \
   --prompt-text {THE INSTRUCTION AS SENT} \
   --reasoning-effort {EFFORT, ONLY IF YOU KNOW IT} \
   --phase '{"name":"generate_full","completed":true,"artifacts":["{PROJECT}_d4d.yaml"],"observed":{"total_tokens":{TOTAL},"tool_uses":{COUNT},"duration_ms":{MS}}}' \
-  --phase '{"name":"generate_core","completed":true,"artifacts":["{PROJECT}_d4d_core.yaml"]}' \
+  --phase '{"name":"derive_core","completed":true,"artifacts":["{PROJECT}_d4d_core.yaml"]}' \
   --phase '{"name":"source_audit","completed":true}' \
   --phase '{"name":"reconcile","completed":true,"iterations":{HOW MANY TIMES YOU RAN VALIDATE-AND-ITERATE}}' \
   --phase '{"name":"report","completed":true,"artifacts":["{PROJECT}_reconciliation.md"]}' \

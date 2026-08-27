@@ -605,7 +605,10 @@ class TestExecuteOffline(unittest.TestCase):
             self.assertTrue(p.exists(), f"missing {p}")
         self.assertTrue((self.out / "CHORUS_provenance.yaml").exists(),
                         "provenance record not written")
-        self.assertEqual(len(res["usage"]), 6)
+        # Four model phases: the core is derived, not generated (#694).
+        self.assertEqual(len(res["usage"]), 4)
+        self.assertEqual([u["phase"] for u in res["usage"]],
+                         ["full", "audit", "reconcile_full", "report"])
 
     def test_progress_file_is_removed_on_success(self):
         s = spec(out_dir=self.out)
@@ -629,14 +632,17 @@ class TestExecuteOffline(unittest.TestCase):
                             for u in (d.get("unverified") or [])))
         self.assertEqual(len(d["prompts"]["files"]), 1)
         self.assertEqual(len(d["prompts"]["files"][0]["sha256"]), 64)
-        self.assertEqual(len(d["api_usage"]), 6)
+        self.assertEqual(len(d["api_usage"]), 4)
+        self.assertTrue(d["core_derivation"]["derived"])
+        self.assertEqual(d["core_derivation"]["phase"], "reconcile_core")
+        self.assertIn("derived from the full record", d["model"]["generation_method"])
 
     def test_every_phase_sends_the_cached_prefix(self):
         s = spec(out_dir=self.out)
         client = FakeClient()
         self.api._client = lambda: client
         self.api.execute(s)
-        self.assertEqual(len(client.messages.calls), 6)
+        self.assertEqual(len(client.messages.calls), 4)
         for kw in client.messages.calls:
             parts = kw["messages"][0]["content"]
             cached = [p for p in parts if p.get("cache_control")]
@@ -706,8 +712,11 @@ class TestValidatorDrivenRepair(unittest.TestCase):
             log = self.api._repair_invalid(s, FakeClient(), self.settings,
                                            usage)
         self.assertIn("repaired", s.full_path.read_text())
-        self.assertIn("original", s.core_path.read_text())
-        self.assertEqual([x["outcome"] for x in log], ["applied"])
+        # The core is re-derived from the repaired full, never repaired itself.
+        self.assertIn("repaired", s.core_path.read_text())
+        self.assertEqual([x["outcome"] for x in log if x["phase"] == "repair_full"], ["applied"])
+        self.assertTrue(log[-1]["phase"] == "repair_core"
+                        and log[-1]["outcome"].startswith("re-derived"))
         self.assertEqual([u["phase"] for u in usage], ["repair_full"])
 
     def test_unusable_repair_leaves_the_record_untouched(self):
@@ -735,8 +744,9 @@ class TestValidatorDrivenRepair(unittest.TestCase):
             log = self.api._repair_invalid(s, ProseClient(), self.settings, [])
         self.assertIn("original", s.full_path.read_text(),
                       "a failed repair must never overwrite the record")
-        self.assertEqual(len(log), self.api.REPAIR_ROUNDS)
-        self.assertTrue(all(x["outcome"].startswith("unusable") for x in log))
+        full_log = [x for x in log if x["phase"] == "repair_full"]
+        self.assertEqual(len(full_log), self.api.REPAIR_ROUNDS)
+        self.assertTrue(all(x["outcome"].startswith("unusable") for x in full_log))
 
     def test_repair_stops_when_an_applied_round_makes_no_progress(self):
         """#364: strict decrease is the convergence test, but only across
@@ -748,9 +758,10 @@ class TestValidatorDrivenRepair(unittest.TestCase):
                 lambda path, schema, cls: (["[ERROR] a", "[ERROR] b"], None)
                 if "core" not in str(path) else ([], None)):
             log = self.api._repair_invalid(s, FakeClient(), self.settings, [])
-        self.assertEqual([x["outcome"] for x in log][:1], ["applied"])
-        self.assertEqual(len(log), 2, log)
-        self.assertIn("not converging", log[1]["outcome"])
+        full_log = [x for x in log if x["phase"] == "repair_full"]
+        self.assertEqual([x["outcome"] for x in full_log][:1], ["applied"])
+        self.assertEqual(len(full_log), 2, log)
+        self.assertIn("not converging", full_log[1]["outcome"])
 
     def test_execute_repairs_through_the_real_call_path(self):
         """The repair branch in execute() must be exercised end to end: it
@@ -775,16 +786,18 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         self.assertEqual(res["validation_problems"], [])
         self.assertIn("repaired", s.full_path.read_text())
         d = _yaml.safe_load((self.out / "CHORUS_provenance.yaml").read_text())
-        self.assertEqual([x["outcome"] for x in d["repair"]], ["applied"])
+        self.assertEqual([x["outcome"] for x in d["repair"] if x["phase"] == "repair_full"], ["applied"])
+        self.assertTrue(d["repair"][-1]["outcome"].startswith("re-derived"))
         # Repair rewrote the full record *after* the report was written in
         # phase 6, so the report is regenerated against the repaired bytes and
         # is the last call (#604). Before that, `report_claims` checked a stale
         # report against records it no longer described.
         phases = [u["phase"] for u in d["api_usage"]]
         self.assertEqual(phases[-2:], ["repair_full", "report_after_repair"])
-        self.assertEqual(len(phases), 8)
+        self.assertEqual(len(phases), 6)
+        # The core is re-derived from the repaired full, so both changed.
         self.assertEqual(
-            d["report_regenerated_after_repair"]["changed"], ["full"])
+            d["report_regenerated_after_repair"]["changed"], ["core", "full"])
 
     def test_resume_of_a_completed_run_keeps_the_prior_accounting(self):
         """#362: re-running an invalid-but-complete run is how repair is
@@ -797,10 +810,10 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         keep = api_runner._client
         api_runner._client = lambda: FakeClient()
         self.addCleanup(lambda: setattr(api_runner, "_client", keep))
-        self.api.execute(s)                      # full pass: 6 usage rows
+        self.api.execute(s)                      # full pass: 4 usage rows
         prov = self.out / "CHORUS_provenance.yaml"
         first = _yaml.safe_load(prov.read_text())
-        self.assertEqual(len(first["api_usage"]), 6)
+        self.assertEqual(len(first["api_usage"]), 4)
         # Keep resume state, as a validation failure would have.
         self.api._save_progress(s, list(self.api.PHASES), None)
         # Re-run: all phases skip, repair runs once on the full record.
@@ -813,8 +826,8 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         self.assertEqual(len(res["skipped"]), 6)
         second = _yaml.safe_load(prov.read_text())
         phases = [u["phase"] for u in second["api_usage"]]
-        self.assertEqual(len(phases), 7, phases)
-        self.assertEqual(phases[:6], [u["phase"] for u in first["api_usage"]])
+        self.assertEqual(len(phases), 5, phases)
+        self.assertEqual(phases[:4], [u["phase"] for u in first["api_usage"]])
         self.assertEqual(phases[-1], "repair_full")
         # #366: a third invocation must keep the second's repair rounds in
         # the record, exactly as api_usage keeps every billed call.
@@ -826,10 +839,10 @@ class TestValidatorDrivenRepair(unittest.TestCase):
                 self.api, "_validator_lines", lambda *a: next(verdicts2)):
             self.api.execute(s)
         third = _yaml.safe_load(prov.read_text())
-        self.assertEqual([r["outcome"] for r in third["repair"]],
+        self.assertEqual([r["outcome"] for r in third["repair"] if r["phase"] == "repair_full"],
                          ["applied", "applied"],
                          "prior invocation's repair rounds must survive")
-        self.assertEqual(len(third["api_usage"]), 8)
+        self.assertEqual(len(third["api_usage"]), 6)
 
     def test_execute_snapshots_every_intermediate(self):
         """#369: reconcile and repair overwrite artifacts in place, and the
@@ -884,7 +897,7 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         d = _yaml.safe_load((self.out / "CHORUS_provenance.yaml").read_text())
         self.assertIn("repair", d)
         self.assertIsNone(d["repair"])
-        self.assertEqual(len(d["api_usage"]), 6)
+        self.assertEqual(len(d["api_usage"]), 4)
 
 
 class TestResumeAndRetry(unittest.TestCase):
@@ -901,7 +914,8 @@ class TestResumeAndRetry(unittest.TestCase):
     def test_failure_midway_keeps_completed_artifacts(self):
         s = spec(out_dir=self.out)
         client = FakeClient()
-        client.messages = FakeMessages(fail_on="reconcile_core")
+        # reconcile_core is derived now (#694); the last model phase is report.
+        client.messages = FakeMessages(fail_on="report")
         with self.assertRaises(RuntimeError):
             self.api.execute(s, client=client)
         self.assertTrue(s.full_path.exists(), "phase 1 output was discarded")
@@ -928,7 +942,7 @@ class TestResumeAndRetry(unittest.TestCase):
         self.api.execute(s, client=FakeClient())
         again = FakeClient()
         self.api.execute(s, client=again, resume=False)
-        self.assertEqual(len(again.messages.calls), 6)
+        self.assertEqual(len(again.messages.calls), 4)
 
     def test_corrupt_progress_file_is_ignored_not_fatal(self):
         s = spec(out_dir=self.out)
@@ -936,7 +950,7 @@ class TestResumeAndRetry(unittest.TestCase):
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text("{not json", encoding="utf-8")
         res = self.api.execute(s, client=FakeClient())
-        self.assertEqual(len(res["usage"]), 6)
+        self.assertEqual(len(res["usage"]), 4)
 
     def test_truncated_output_raises_rather_than_writing(self):
         """A truncated record can validate while being silently incomplete."""
@@ -1940,8 +1954,14 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
             finally:
                 m.build_phase = original
 
-            self.assertEqual(ran[0], "core",
-                             f"expected core to re-run, resumed at {ran[:1]}")
+            # The core is derived, not generated (#694): re-running it makes no
+            # model call, so the first *model* phase reached is audit — and by
+            # then the fragment must have been replaced by a derived record.
+            self.assertEqual(ran[0], "audit",
+                             f"expected core to re-derive then audit to run, resumed at {ran[:1]}")
+            import yaml as _yaml
+            core = _yaml.safe_load(spec.core_path.read_text())
+            self.assertEqual(core.get("id"), "x", "corrupt core was not re-derived")
 
     def test_a_partial_run_is_not_inferred_from_artifacts(self):
         """`full` and `reconcile_full` write the same file.
