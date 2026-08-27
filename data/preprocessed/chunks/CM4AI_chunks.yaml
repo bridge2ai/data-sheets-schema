@@ -1,0 +1,280 @@
+bundle: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+bundle_md5: 1dfd34e5610fed7c22bea1f09c0bc60c
+bundle_sha256: f138e6d5841609841994e0b3e91b2477c824f5675eb91c83d51db0b8d11504d2
+bundle_lines: 7866
+bundle_bytes: 321056
+rule:
+  version: 1
+  unit: source-document
+  boundary: 'FILE: header line'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 28
+chunks:
+- id: c001
+  source: <preamble>
+  lines:
+  - 1
+  - 24
+  bytes: 1065
+  sha256: 70e86ead5829060e5c61b3aba1219628e70b8cabfe72615bb1a51dc3c1537c6d
+- id: c002
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 25
+  - 424
+  bytes: 14834
+  sha256: 0a21353ca32a94454b39451c7ad871be33e638c3783e6e2dfe22c9c8540f36ea
+  part:
+  - 1
+  - 8
+- id: c003
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 425
+  - 824
+  bytes: 29256
+  sha256: 9fbd71fc29fccba883d227d94b174b28cf1d5659ce2336fa105e1a064fb00703
+  part:
+  - 2
+  - 8
+- id: c004
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 825
+  - 1224
+  bytes: 22281
+  sha256: 25765998c5dfdc5ea5ff6f79801d09f5de53d0bb3ed3baed615f902fe3701a48
+  part:
+  - 3
+  - 8
+- id: c005
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 1225
+  - 1624
+  bytes: 24423
+  sha256: 54b97ebc1ccf405805052c8952ebccc8b0084cc145628130999c13580b1b72a1
+  part:
+  - 4
+  - 8
+- id: c006
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 1625
+  - 2024
+  bytes: 9125
+  sha256: 30baa79daf339fed899fa82040bc326ae8451093b2582be26b69a91e7e3ffcf9
+  part:
+  - 5
+  - 8
+- id: c007
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 2025
+  - 2424
+  bytes: 12895
+  sha256: 8bc49bc0d4f5b7cdd9ac340ed15464e0c156a0cdd02feffdd8a67fb0a73f0d19
+  part:
+  - 6
+  - 8
+- id: c008
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 2425
+  - 2824
+  bytes: 18004
+  sha256: f4d2a60c9a11a089f9dab34d7eb3c1124e77c8cbd4e317be3575121e3a4e5e70
+  part:
+  - 7
+  - 8
+- id: c009
+  source: www_nature_com_articles-s41586-025-08878-3_row2.txt
+  lines:
+  - 2825
+  - 2893
+  bytes: 1272
+  sha256: 912d5c23dc5f966beb48ab2b1e4946b790285d7808d54c552336b73c759cc0c1
+  part:
+  - 8
+  - 8
+- id: c010
+  source: biorxiv_2024.05.21.589311v1_row4.txt
+  lines:
+  - 2894
+  - 3293
+  bytes: 17986
+  sha256: 0ec9e9009f76d400fe041a0726f62b5a4c905c8790994c1a0d823601e09ad45c
+  part:
+  - 1
+  - 4
+- id: c011
+  source: biorxiv_2024.05.21.589311v1_row4.txt
+  lines:
+  - 3294
+  - 3693
+  bytes: 17402
+  sha256: 9bf180d0fbe2d8421519cfa7a8958e9e655a25771c96e2ce8bdfc76d316bb33a
+  part:
+  - 2
+  - 4
+- id: c012
+  source: biorxiv_2024.05.21.589311v1_row4.txt
+  lines:
+  - 3694
+  - 4093
+  bytes: 15700
+  sha256: 02b0a873220c69e8124074f9ccf1942961a779a38e93ad3adc68ef0847528613
+  part:
+  - 3
+  - 4
+- id: c013
+  source: biorxiv_2024.05.21.589311v1_row4.txt
+  lines:
+  - 4094
+  - 4182
+  bytes: 3012
+  sha256: 152f308ffd98279bf3d4b6c75c60487a405450804bf42efea17922535bc220a9
+  part:
+  - 4
+  - 4
+- id: c014
+  source: reporter_nih_gov_project-details-11211616_row7.txt
+  lines:
+  - 4183
+  - 4238
+  bytes: 3592
+  sha256: 08e1d00e8af532298b73ad2e42439344c892c3e213b70ccec7d48a9bb5ee3a8c
+- id: c015
+  source: cm4ai_org_row10.txt
+  lines:
+  - 4239
+  - 4359
+  bytes: 3814
+  sha256: 4aa9c3c8d18d524088272e43d2d8c2f377efdadb8232155e148f0eda9ffb33f4
+- id: c016
+  source: cm4ai_org_data-releases_row11.txt
+  lines:
+  - 4360
+  - 4484
+  bytes: 4480
+  sha256: e204e658e0086c688fb7de73b8773c33956471d0851f3189ee7d9cb20b56e111
+- id: c017
+  source: creativecommons_org_licenses-by-nc-sa_row15.txt
+  lines:
+  - 4485
+  - 4740
+  bytes: 6073
+  sha256: 969d2d577222cccaa20ba25b4587947d5bb1bca8033f379064cfd85307c37c19
+- id: c018
+  source: dataverse_10.18130_V3_B35XWX_row16.txt
+  lines:
+  - 4741
+  - 5140
+  bytes: 19551
+  sha256: c4b70727c37a87d02772ba09bbc0f1a935e1cf6a95ff4967455093885e08c4d4
+  part:
+  - 1
+  - 2
+- id: c019
+  source: dataverse_10.18130_V3_B35XWX_row16.txt
+  lines:
+  - 5141
+  - 5361
+  bytes: 8626
+  sha256: fb070a067d92e9c72e4ef5bd45325245e0a1afdb682c724c47b8223b85b9701f
+  part:
+  - 2
+  - 2
+- id: c020
+  source: dataverse_10.18130_V3_F3TD5R_row19.txt
+  lines:
+  - 5362
+  - 5761
+  bytes: 14143
+  sha256: 147a4351b49f6975821dd04531dd6b7c69a9c590f658cd96755c5f95d647b5af
+  part:
+  - 1
+  - 3
+- id: c021
+  source: dataverse_10.18130_V3_F3TD5R_row19.txt
+  lines:
+  - 5762
+  - 6161
+  bytes: 15674
+  sha256: ef8c0922455b505853a6842c2dae4177d887f8a5c282534408493a090229631a
+  part:
+  - 2
+  - 3
+- id: c022
+  source: dataverse_10.18130_V3_F3TD5R_row19.txt
+  lines:
+  - 6162
+  - 6166
+  bytes: 91
+  sha256: c89b260726c11f9aec15311199a2a7d274eaa569741d04fea62e5f8555901c3c
+  part:
+  - 3
+  - 3
+- id: c023
+  source: dataverse_10.18130_V3_K7TGEM_row16.txt
+  lines:
+  - 6167
+  - 6566
+  bytes: 14364
+  sha256: a52130ba08aae4d3be8169404e7bc07695f2b644614ba48a87f406a6f9ef805a
+  part:
+  - 1
+  - 3
+- id: c024
+  source: dataverse_10.18130_V3_K7TGEM_row16.txt
+  lines:
+  - 6567
+  - 6966
+  bytes: 14646
+  sha256: 3cb935d02f07490102ae9cd674498b1106c8fac7a2abcbfbf573dc53bc4f880b
+  part:
+  - 2
+  - 3
+- id: c025
+  source: dataverse_10.18130_V3_K7TGEM_row16.txt
+  lines:
+  - 6967
+  - 7001
+  bytes: 728
+  sha256: 0388f0414d9ca2d63b86f27dcc64d93fe6d516222cd5428fd01b17071bf61ac8
+  part:
+  - 3
+  - 3
+- id: c026
+  source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
+  lines:
+  - 7002
+  - 7401
+  bytes: 11821
+  sha256: cb24148a28557dfe600c07644aa805f34f7016de9fefd4979169d23cb33c5c73
+  part:
+  - 1
+  - 3
+- id: c027
+  source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
+  lines:
+  - 7402
+  - 7801
+  bytes: 14646
+  sha256: 170c8aebadaf66e50a385cfcb1be8e49f7650fdf67287eacdafc2c134ae1e2e2
+  part:
+  - 2
+  - 3
+- id: c028
+  source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
+  lines:
+  - 7802
+  - 7866
+  bytes: 1552
+  sha256: 23ca0d8c55a3e2b51579dd338221c2296d591d90075c686b451da252665c574a
+  part:
+  - 3
+  - 3

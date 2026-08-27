@@ -1,0 +1,220 @@
+bundle: data/preprocessed/concatenated/VOICE_preprocessed.txt
+bundle_md5: dcd717170da6762569c0b4eeafc1c3d2
+bundle_sha256: a075e1124b91c58283113f6d8d1198daee295e84d585f7e8b35a098bbdd7c7ea
+bundle_lines: 5746
+bundle_bytes: 376295
+rule:
+  version: 1
+  unit: source-document
+  boundary: 'FILE: header line'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 22
+chunks:
+- id: c001
+  source: <preamble>
+  lines:
+  - 1
+  - 25
+  bytes: 1161
+  sha256: 975fee44674efbb18ff5e67f521a5dbf37a515fecdcc2cc37b3d7fb8b0366643
+- id: c002
+  source: pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt
+  lines:
+  - 26
+  - 425
+  bytes: 21288
+  sha256: 0d6896cf4da4376fe5854c35d7f5f8e83846750c429454f0ba418f42cdc40f1d
+  part:
+  - 1
+  - 3
+- id: c003
+  source: pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt
+  lines:
+  - 426
+  - 825
+  bytes: 25104
+  sha256: ea3c76a6af36389619426d2d34f0004f5dff562e6195c5c2d44a3e9f1f84cd68
+  part:
+  - 2
+  - 3
+- id: c004
+  source: pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt
+  lines:
+  - 826
+  - 895
+  bytes: 1279
+  sha256: 89a612c776401a3149248908816b315d8d4d40651729c9a2fd20e972db4f01f7
+  part:
+  - 3
+  - 3
+- id: c005
+  source: gdrive_1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5_row5.txt
+  lines:
+  - 896
+  - 1237
+  bytes: 13999
+  sha256: bacdaeaae54010c0dc831617da6614f88632f4ed72ba4365b828ae5fc7ab21bf
+- id: c006
+  source: reporter_nih_gov_project-details-11376382_row7.txt
+  lines:
+  - 1238
+  - 1294
+  bytes: 6814
+  sha256: b2ab2863be46ba00c529684ea8a1476056733fffa459fd14ced6090acb5e5964
+- id: c007
+  source: docs_b2ai-voice_org_row10.txt
+  lines:
+  - 1295
+  - 1694
+  bytes: 20371
+  sha256: 552d711069bd4a33b257fe4277c4094c0c98b838ec81e5d78790bb7c5523ca9a
+  part:
+  - 1
+  - 4
+- id: c008
+  source: docs_b2ai-voice_org_row10.txt
+  lines:
+  - 1695
+  - 2094
+  bytes: 23663
+  sha256: e44d35f4a97dc07689beed8bcb5b2ee88f4f8b84b64329374660b20ee88cfe04
+  part:
+  - 2
+  - 4
+- id: c009
+  source: docs_b2ai-voice_org_row10.txt
+  lines:
+  - 2095
+  - 2494
+  bytes: 24499
+  sha256: 7ce385094acb63c7c5a04d241f757c89d862b7728f291726d7a2a1367a12f919
+  part:
+  - 3
+  - 4
+- id: c010
+  source: docs_b2ai-voice_org_row10.txt
+  lines:
+  - 2495
+  - 2587
+  bytes: 1934
+  sha256: 2de4849329b7c594d64b7db3956166cfa6d3d33367adbe7c9a2c892392dc9752
+  part:
+  - 4
+  - 4
+- id: c011
+  source: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
+  lines:
+  - 2588
+  - 2829
+  bytes: 47742
+  sha256: 49097cd09aaf725c17a32be50890375c6bb728ad1c6563a2a71bd0d050559c88
+  part:
+  - 1
+  - 2
+- id: c012
+  source: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
+  lines:
+  - 2830
+  - 3082
+  bytes: 29792
+  sha256: 6f32cc9ceda9894cb8d4e02da65557e7f06c5aa5daf7cd9875d251f115f5eb88
+  part:
+  - 2
+  - 2
+- id: c013
+  source: gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt
+  lines:
+  - 3083
+  - 3482
+  bytes: 15555
+  sha256: 8f6bcdf6ac6438ee976517922ff1b504f69f7a89fa74191f3c9fae06746772fb
+  part:
+  - 1
+  - 2
+- id: c014
+  source: gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt
+  lines:
+  - 3483
+  - 3531
+  bytes: 1589
+  sha256: 48c02b415883e14d01619b09b7561c153c23e9dd9941fcc23e7d7bb107ab9877
+  part:
+  - 2
+  - 2
+- id: c015
+  source: physionet_b2ai-voice_1.1_row17.txt
+  lines:
+  - 3532
+  - 3852
+  bytes: 23538
+  sha256: 11db4b98b1ba1227c07c94427a6453d7abcda011e07b62e087b1e3973017f8c6
+- id: c016
+  source: physionet_b2ai-voice_3.0.0_row18.txt
+  lines:
+  - 3853
+  - 4252
+  bytes: 25545
+  sha256: c707beb1a666ce6e8d4b5d3df0bebfc3219cac8de87711e0c187b399f4dc3749
+  part:
+  - 1
+  - 2
+- id: c017
+  source: physionet_b2ai-voice_3.0.0_row18.txt
+  lines:
+  - 4253
+  - 4518
+  bytes: 16351
+  sha256: 3ae0a74407197ca8e006f69afef7b4ece64f2bcd5c88230107a23681fb69a877
+  part:
+  - 2
+  - 2
+- id: c018
+  source: physionet_b2ai-voice_3.1.0_2026-07-24.txt
+  lines:
+  - 4519
+  - 4918
+  bytes: 25471
+  sha256: 4ed4ba310cf7606fb57c8957129892e472a758353f1bc4cfb0a1d79cf338bfc7
+  part:
+  - 1
+  - 2
+- id: c019
+  source: physionet_b2ai-voice_3.1.0_2026-07-24.txt
+  lines:
+  - 4919
+  - 5190
+  bytes: 17622
+  sha256: 63b2e29ba70d4b7a6975ef172870e73b6a426ad32d8b1637905f2fc27c07e94d
+  part:
+  - 2
+  - 2
+- id: c020
+  source: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt
+  lines:
+  - 5191
+  - 5590
+  bytes: 25545
+  sha256: e1a5c764be4e78e6033c70bf44b92a476b48a3fdc3acb67c2aadd6700c6cc62f
+  part:
+  - 1
+  - 2
+- id: c021
+  source: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt
+  lines:
+  - 5591
+  - 5704
+  bytes: 5578
+  sha256: 9054f042c02bdbc8ab6fd884f14b1049dd4a198e964a2a01cfb371641c5ff0c2
+  part:
+  - 2
+  - 2
+- id: c022
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 5705
+  - 5746
+  bytes: 1855
+  sha256: 4875084509427d8422493623c52c957caba39bade4d6fa99b00570a64ac4eb1e

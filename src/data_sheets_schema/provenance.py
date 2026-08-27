@@ -1157,6 +1157,11 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         inputs.update({"bundle_md5": _md5(bundle),
                        "bundle_bytes": bundle.stat().st_size,
                        "hash_basis": "verified identical to the bytes consumed"})
+        # The chunk manifest that anchors a coverage receipt's ids to these
+        # bytes (#707) — only when one exists for exactly this md5; a manifest
+        # of some other version of the bundle would attest the wrong file.
+        from data_sheets_schema.chunking import chunks_input
+        inputs["chunks"] = chunks_input(bundle, inputs["bundle_md5"])
     elif bundle:
         inputs["bundle_md5"] = None
         if mode == "live":

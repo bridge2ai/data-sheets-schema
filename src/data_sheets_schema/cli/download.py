@@ -478,6 +478,17 @@ def audit_bundles(project, strict, manifest):
                 if other.exists():
                     unchecked.append((other, 'no rebuild route registered here'))
 
+            # Chunk manifest (#707): derived from the document bundle under its
+            # recorded rule, so it goes stale exactly when the bundle changes.
+            from data_sheets_schema.chunking import manifest_path, manifest_status
+            st, detail = manifest_status(name)
+            if st in ('current', 'stale'):
+                checked += 1
+            if st == 'stale':
+                stale.append((manifest_path(name), f'd4d bundle chunk --project {name}'))
+            elif st == 'missing' and current.exists():
+                unchecked.append((manifest_path(name), 'no chunk manifest; ' + detail))
+
     click.echo(f"📦 {checked} derived bundle(s) rebuilt and compared")
     for path, cmd in stale:
         click.echo(f"   ❌ stale  {path}\n      rebuild: {cmd}")

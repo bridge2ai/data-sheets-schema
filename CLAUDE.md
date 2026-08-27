@@ -396,6 +396,28 @@ Citing the related dataset's page is legitimate; absorbing it into this
 dataset's distribution is not, and the line between them is a judgement the
 check surfaces rather than settles.
 
+## Chunk Manifests (receipts substrate, #707)
+
+`data/preprocessed/chunks/{PROJECT}_chunks.yaml` is a pure function of the
+document bundle's bytes and a recorded rule (`unit: source-document`, windows
+bounded in both lines and bytes, the summary/TOC preamble as its own chunk):
+same bytes + same rule = same file, and the chunks' texts concatenate back to
+the bundle. A coverage receipt (#708) names these chunk ids; the manifest is
+what anchors them to bytes. `d4d provenance record` writes `inputs.chunks:
+{path, sha256, rule, chunk_count}` only when a manifest exists for exactly
+the md5 the record hashed, and `null` otherwise.
+
+```bash
+d4d bundle chunk                     # (re)write every project's manifest
+d4d bundle chunk --check --strict    # rebuild under the recorded rule and compare
+d4d download audit-bundles           # also reports a stale or missing manifest
+```
+
+The byte bound (48,000) is what keeps a chunk readable in one file-tool call
+(~25k-token cap, #700); a line count alone does not, since AI_READI has
+13k-character lines. A single line above the bound becomes its own chunk
+marked `oversize`, and a test fails if a committed manifest has one.
+
 ## Canonical Prompt Registry
 
 Each condition's prompt files are pinned by hash in
