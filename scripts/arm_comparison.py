@@ -103,6 +103,15 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
     "minted": ("minted fragments (reported)", "record", False,
                "reported-only; every fragment hangs off an attested base wherever "
                "ungrounded is 0. Appetite varies 3→130 within one project (#685)"),
+    "unreviewed": ("chunks unreviewed", "record", True,
+                   "receipts (#708): manifest chunks with no receipt entry. Only arms whose "
+                   "procedure wrote a coverage receipt carry a value; earlier arms are –, "
+                   "not 0"),
+    "unverified": ("snippets unverified", "record", True,
+                   "receipts (#708): mismatched + unchecked snippets; same caveat"),
+    "noreceipt": ("slots without a receipt", "record", True,
+                  "receipts (#708): receiptable populated leaves with no receipt; exempt "
+                  "slots (runner-set, minted, commentary) are outside the denominator"),
     "gc": ("GC label variants (reported)", "live", True,
            "reported-only; counted against the manifest naming declaration decided "
            "2026-08-22, so anachronistic for the v4 arm and same-day for 22c. For VOICE "
@@ -138,8 +147,19 @@ def run_metrics(prefix: str, rep: int, project: str) -> dict[str, Any] | None:
                 return sum(v.values()) if isinstance(v, dict) else int(v)
         return None
 
+    rcp = rec.get("receipts") or {}
+    if rcp.get("checked"):
+        from data_sheets_schema.canary import receipt_floors
+        floors = receipt_floors(rcp)
+        receipt_vals = {"unreviewed": floors["chunks unreviewed"],
+                        "unverified": floors["snippets unverified"],
+                        "noreceipt": len((rcp.get("slots") or {}).get("without_receipt") or [])
+                        + int((rcp.get("slots") or {}).get("without_receipt_truncated") or 0)}
+    else:
+        receipt_vals = {"unreviewed": None, "unverified": None, "noreceipt": None}
     return {
         "label": label,
+        **receipt_vals,
         "ungrounded": g.get("absent"),
         "minted": g.get("minted_fragment"),
         "pair": pc.get("errors"),

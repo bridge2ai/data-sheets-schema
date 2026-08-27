@@ -41,7 +41,7 @@ import yaml
 #: without it, so absence means "attested by the run".
 RECORDED_BY = "backfill_checks"
 
-BLOCKS = ("pair_consistency", "report_claims", "grounding", "form")
+BLOCKS = ("pair_consistency", "report_claims", "grounding", "form", "receipts")
 
 
 def _split_header(text: str) -> tuple[str, str]:
@@ -200,6 +200,18 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None
                     block["bundle_hash_basis"] = "the record pinned no hash"
             block["recorded_by"] = RECORDED_BY
             out["grounding"] = block
+
+    # --- receipts (#708) --------------------------------------------------
+    # Whether the run's procedure wrote a coverage receipt is the record's
+    # claim (`inputs.receipt_expected`); the block carries it so the gate can
+    # tell "none from a procedure that writes none" from "none from one that
+    # does". A receipt that exists is checked either way.
+    from data_sheets_schema.receipts import block_for, receipt_path
+    inputs = record.get("inputs") or {}
+    out["receipts"] = {**block_for(full, receipt_path(provenance.parent, paths["project"]),
+                                   bundle, inputs.get("bundle_md5"),
+                                   bool(inputs.get("receipt_expected"))),
+                       "recorded_by": RECORDED_BY}
     return out
 
 
@@ -252,4 +264,10 @@ def summarise(blocks: dict[str, Any]) -> str:
         bits.append(f"ungrounded {absent}")
     else:
         bits.append("grounding —")
+    rcp = blocks.get("receipts") or {}
+    if rcp.get("checked"):
+        bits.append(f"receipts {rcp['chunks']['reviewed']}/{rcp['chunks']['total']} chunks, "
+                    f"{rcp['snippets']['verified']}/{rcp['snippets']['total']} snippets")
+    else:
+        bits.append("receipts —" if rcp.get("expected") else "receipts n/a")
     return " · ".join(bits)

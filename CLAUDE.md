@@ -422,6 +422,37 @@ The byte bound (48,000) is what keeps a chunk readable in one file-tool call
 13k-character lines. A single line above the bound becomes its own chunk
 marked `oversize`, and a test fails if a committed manifest has one.
 
+## Coverage Receipts (#708)
+
+`{PROJECT}_coverage_receipt.yaml` beside the core record: one entry per
+manifest chunk with a closed status — `extracted` (verbatim `{slot,
+snippet}` pairs from *that* chunk), `redundant_with` (relevant, already
+receipted from named chunks), `nothing_relevant` (with a reason),
+`duplicate_of`. Inverted by slot it is the claim receipt
+(`{PROJECT}_receipts.yaml`, each claim naming its derived-core path).
+
+```bash
+d4d receipts check --label L --project P [--write] [--strict]
+d4d receipts invert --receipt R --full F
+```
+
+The validator is deterministic and offline and reports **affirmative
+counts** — `chunks N/N reviewed · snippets M/M verified · slots S/T with a
+receipt` — written as the `receipts` block of the provenance record (also
+by `backfill-checks` and inline at `d4d provenance record`). Snippet outcomes
+are verified / mismatched / unchecked; no "relaxed". The slot denominator
+excludes `EXEMPT_SLOTS` (runner-set, minted ids, the run's own commentary).
+Named non-checks: that `nothing_relevant` was true, and that a real snippet
+supports its value.
+
+**The gate** (`canary.verdict`): when `inputs.receipt_expected` is true — set
+by `d4d provenance record --receipt-expected`, which the receipt-writing
+playbook passes — an unchecked receipt is UNMEASURABLE and any unreviewed
+chunk, unverified snippet, finding, or vacuous receipt (zero snippets over a
+non-empty bundle) is a regression against a floor of 0. When false, the
+block is not a metric for that run: earlier arms and the API arm before v7
+(#710) wrote none, and "no receipt" from them is not a measurement.
+
 ## Canonical Prompt Registry
 
 Each condition's prompt files are pinned by hash in

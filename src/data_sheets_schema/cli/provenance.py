@@ -282,9 +282,13 @@ def _parse_phases(specs) -> list[dict]:
                    'already existed and validated — the same field the API '
                    'path\'s resumed runs carry. Repeat once per skipped '
                    'phase; names are validated like --phase.')
+@click.option('--receipt-expected', 'receipt_expected', is_flag=True, default=False,
+              help='this run\'s procedure wrote a coverage receipt (#708); the '
+                   'canary gate then treats a missing or failing one as a stop '
+                   'rather than as not-applicable')
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
-           reasoning_effort, phase_specs, phases_skipped):
+           reasoning_effort, phase_specs, phases_skipped, receipt_expected):
     """Write a LIVE provenance record for a run just produced.
 
     Refuses to run from anywhere but the repository root — see
@@ -340,7 +344,8 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        prompt_request_spec=spec,
                        schema_digest_md5=digest,
                        reasoning_effort=reasoning_effort,
-                       phases=_parse_phases(phase_specs))
+                       phases=_parse_phases(phase_specs),
+                       receipt_expected=receipt_expected)
     if phases_skipped:
         known = _known_phases()
         bad = [n for n in phases_skipped if n not in known]
