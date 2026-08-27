@@ -402,6 +402,75 @@ class PhaseVocabulary(unittest.TestCase):
             self.assertIn("only observable boundary",
                           data["phase_log"]["run_observed_basis"])
 
+    def test_bundle_coverage_fields_are_observed_fields(self):
+        """#700: coverage rides in the same observed block, same rules."""
+        from data_sheets_schema.cli.provenance import _parse_phases
+        ok = _parse_phases(['{"name": "generate_full", "observed": '
+                            '{"bundle_lines_read": 4570, "bundle_lines_total": 5746}}'])
+        self.assertEqual(ok[0]["observed"]["bundle_lines_read"], 4570)
+
+    def test_record_writes_check_blocks_or_says_why_not(self):
+        """#687: the recorder computes the four deterministic blocks inline.
+        In a scratch root the schemas are absent, so the honest outcome is the
+        fail-soft branch: the record stands and the reason is printed."""
+        import click.testing
+        import yaml as _yaml
+
+        from data_sheets_schema.cli import provenance as prov_cli
+        runner = click.testing.CliRunner()
+        method, label = "claudecode_agent", "2026-08-27_test_rep1"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            core_dir = root / "data" / "d4d_concatenated" / f"{method}_core" / label
+            (root / "data" / "d4d_concatenated" / method / label).mkdir(parents=True)
+            core_dir.mkdir(parents=True)
+            (root / "src" / "data_sheets_schema").mkdir(parents=True)
+            bundle = root / "bundle.txt"; bundle.write_text("docs\n")
+            body = _yaml.safe_dump({"id": "https://example.org/x", "name": "x"})
+            (root / "data" / "d4d_concatenated" / method / label / "TESTPROJ_d4d.yaml").write_text(body)
+            (core_dir / "TESTPROJ_d4d_core.yaml").write_text(body)
+            (core_dir / "TESTPROJ_reconciliation.md").write_text("# r\n")
+            cwd = os.getcwd(); os.chdir(root)
+            try:
+                r = runner.invoke(prov_cli.provenance,
+                                  ["record", "--project", "TESTPROJ", "--method", method,
+                                   "--label", label, "--input-bundle", str(bundle),
+                                   "--phase", "generate_full"])
+            finally:
+                os.chdir(cwd)
+            self.assertEqual(r.exit_code, 0, r.output)
+            rec = _yaml.safe_load((core_dir / "TESTPROJ_provenance.yaml").read_text())
+            self.assertEqual(rec["record_mode"], "live")
+            # In a scratch root the schemas are absent: the fail-soft branch
+            # must run, say so, and leave the record standing.
+            self.assertIn("deterministic checks not computed", r.output)
+            self.assertNotIn("form", rec)
+
+            # The success path, pinned by substituting compute() (#701 F4):
+            # the blocks land, marked as this recorder's, and validation
+            # rides along.
+            from unittest import mock
+
+            from data_sheets_schema import backfill_checks as bc
+            fake = {"pair_consistency": {"ran": True, "consistent": True, "errors": 0},
+                    "report_claims": {"checked": True, "findings": [], "claims_checked": 0},
+                    "grounding": {"checked": True, "distinct": {"absent": 0}},
+                    "form": {"checked": True, "british_spellings": 0}}
+            os.chdir(root)
+            try:
+                with mock.patch.object(bc, "compute", return_value={k: dict(v) for k, v in fake.items()}):
+                    r2 = runner.invoke(prov_cli.provenance,
+                                       ["record", "--project", "TESTPROJ", "--method", method,
+                                        "--label", label, "--input-bundle", str(bundle),
+                                        "--phase", "generate_full"])
+            finally:
+                os.chdir(cwd)
+            self.assertEqual(r2.exit_code, 0, r2.output)
+            rec2 = _yaml.safe_load((core_dir / "TESTPROJ_provenance.yaml").read_text())
+            for k in fake:
+                self.assertEqual(rec2[k]["recorded_by"], "d4d provenance record")
+            self.assertIn("pair ok", r2.output)
+
     def test_a_log_with_no_observed_block_claims_no_observation(self):
         """A phase log whose phases carry no observed block must not carry
         the basis either — a basis with nothing under it reads as data."""
