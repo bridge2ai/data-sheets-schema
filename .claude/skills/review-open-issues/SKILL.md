@@ -6,7 +6,6 @@ metadata:
   requires_database: false
   requires_internet: true
   version: 1.0.0
-  adapted_from: MicroGrowLink .claude/skills/review-open-issues v1.1.0
 ---
 
 # Review and prioritize open issues
@@ -25,7 +24,8 @@ backlog; asks "any open issues affecting generation?" before an arm; or a
 review pass has just filed a batch of issues that need sorting.
 
 **When NOT to use**: picking the next unit of work to implement, or acting on
-a single known issue. This skill produces a ranking, not a fix.
+a single known issue. This skill produces a ranking, not a fix. It is
+expensive enough that it should not run on every "what's next" question.
 
 ## Sources of truth
 
@@ -100,8 +100,9 @@ records. Group issues that share a root cause without hiding the numbers.
 For each issue, record when applicable:
 
 - pipeline stage and which arm(s)/labels/projects it touches;
-- the instrument version it was measured under (British v2.1, prefix
-  classification v2.1, gc counter, report-claims parser) and whether a fix is
+- the instrument it was measured under (British spellings v2.1 (#653), the
+  undeclared-prefix count (ark/URN handling per #671), the
+  `gc_label_variants` counter, the `report_claims` parser) and whether a fix is
   an **instrument change** (condition boundary, both sides recomputed) or a
   **defect** (fix now);
 - whether it affects **what gets generated**, **what gets recorded**, or
@@ -109,7 +110,7 @@ For each issue, record when applicable:
 - prerequisites, blockers, duplicates, superseding issues;
 - cheapest decisive evidence and the acceptance test;
 - execution class: read-only audit; local deterministic recompute
-  (`backfill-checks`, `arm_comparison.py`, `runs check`); one canary run
+  (`backfill-checks` without `--execute`, `arm_comparison.py`, `runs check`); one canary run
   (billed CBORG or one Opus subagent); a full 12-run arm; a schema change
   requiring `make gen-project`.
 
@@ -137,7 +138,7 @@ For each issue, record when applicable:
 - Verify artifacts by content and provenance, not by prose: a metric without
   its label, instrument version, and record hash is not a canonical number.
   Recompute rather than trust where the repo makes that cheap
-  (`backfill-checks` dry run, `arm_comparison.py`).
+  (`backfill-checks` without `--execute`, `arm_comparison.py`).
 
 ### 4. Apply stop-the-line checks
 
@@ -148,8 +149,9 @@ Treat these as P0 when live or externally consequential:
 - a prompt edited without its pin rotated, or a labelled condition whose
   record hashes no pinned text (`uncanonical`, #432/#436);
 - a record attesting inputs it did not consume — wrong bundle md5, wrong
-  schema digest, a run recorded from the wrong cwd (#659/#672), a dropped
-  validation verdict (#396);
+  schema digest, a dropped validation verdict (#396) — or no record at all
+  because the recorder was run outside the repo root (refused since #672;
+  before that it crashed, #659);
 - two sweeps writing one label (#513), or a resumed run that skipped an
   artifact that does not validate;
 - an instrument changed mid-condition with only one side recomputed, or a
@@ -161,9 +163,11 @@ Treat these as P0 when live or externally consequential:
 - an outward claim (note, deck, README) that a review has shown to rest on
   any of the above.
 
-Spend figures from `api_usage` and `run_observed` are different quantities
-and must never be averaged or ranked together (#400); an issue that does is a
-correctness issue, not a style one.
+Spend figures from `api_usage` (billed input/output) and `run_observed`
+(cache-inclusive runner totals, #681/#682) are different quantities and must
+never be averaged or ranked together; a total summed from the wrong transcript
+directory has already misreported one arm (#688). An issue that conflates
+them is a correctness issue, not a style one.
 
 ### 5. Assign priority and execution order
 
@@ -246,8 +250,11 @@ The recurring failure in this repository is mismeasuring, not misreading.
 Before citing any of the following, confirm how it was obtained:
 
 - **Exit codes through pipes.** `cmd | tail -1; echo $?` reports `tail`'s
-  status; a failing regeneration looked like success this way once. Use
-  `cmd > /tmp/o 2>&1; echo $?` or `${PIPESTATUS[0]}`.
+  status, not `cmd`'s. Use `cmd > /tmp/o 2>&1; echo $?` or `${PIPESTATUS[0]}`.
+- **Whitespace-splitting file lists.** `git status --porcelain | awk '{print $2}'`
+  splits a path containing spaces. Use `--porcelain -z | tr '\0' '\n'`.
+- **Glob patterns tested by shape.** `git check-ignore --no-index <path>`
+  tests what a pattern does; a regex over the pattern tests what it looks like.
 - **Stored check blocks vs live recompute.** `form`, `grounding`, and
   `report_claims` blocks carry `recorded_by` and an instrument note; compare
   arms only under one instrument (`arm_comparison.py` recomputes form live).
@@ -257,8 +264,9 @@ Before citing any of the following, confirm how it was obtained:
 - **Two config directories.** Subagent transcripts live under `~/.claude`
   *or* `~/.claude-work` depending on the account; a `run_observed` total
   summed from one of them undercounted a resumed run once (#688).
-- **Transcript dumps.** `TaskOutput` on an agent task returns its JSONL, not
-  its result; wait for the notification.
+- **A running agent's transcript is not its result.** Wait for the
+  completion notification rather than reading a background agent's output
+  file, which is its raw JSONL.
 - **Backticks in a double-quoted `-m`.** Write commit messages with a quoted
   heredoc (`<<'EOF'`) and read them back.
 - **Truncated tool output.** Re-read the cited file at the cited line.
@@ -280,8 +288,8 @@ Before citing any of the following, confirm how it was obtained:
 - `d4d runs check --strict`, `d4d api prompts check --strict`,
   `d4d download audit-bundles --strict`, `d4d download scope --check` — the
   deterministic gates; run them before trusting an issue's "still broken".
-- `d4d provenance backfill-checks` (dry run) — recompute a record's check
-  blocks without writing.
+- `d4d provenance backfill-checks` without `--execute` — recompute a
+  record's check blocks and report them without writing.
 - `scripts/arm_comparison.py` — regenerates the cross-arm table and figures.
 - `d4d provenance reasoning` — distinguishes runtime-cannot-capture from a
   missing log.
