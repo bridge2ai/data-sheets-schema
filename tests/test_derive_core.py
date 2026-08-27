@@ -95,7 +95,11 @@ class DeriveCore(unittest.TestCase):
             text = out.read_text()
             self.assertTrue(text.startswith("# D4D Core Datasheet for VOICE Dataset"))
             self.assertIn("# Generation Method: derived by projection", text)
-            self.assertIn(f"# Sources: {FULL}", text)
+            # Repo-relative, as the pinned CORE HEADER BLOCK has it (#706 review).
+            self.assertIn(f"# Sources: {FULL.relative_to(ROOT)}", text)
+            self.assertNotIn("# Phase 4 reconciliation: completed", text)
+            phase4, _ = __import__("data_sheets_schema.derive_core", fromlist=["core_text"]).core_text(FULL, self.ps, phase4_complete=True)
+            self.assertTrue(phase4.split("\n\n", 1)[0].endswith("# Phase 4 reconciliation: completed"))
             core = yaml.safe_load(text)
             full = yaml.safe_load(FULL.read_text())
             self.assertFalse(validate_pair_data(full, core, self.ps).errors)

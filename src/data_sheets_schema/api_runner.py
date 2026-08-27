@@ -68,11 +68,15 @@ GENERIC_PROMPT_V3 = PROMPTS / "d4d_generic_arm_prompt_v3.md"
 # before any run naming that one rule (#338).
 GENERIC_PROMPT_V4 = PROMPTS / "d4d_generic_arm_prompt_v4.md"
 GENERIC_PROMPT_V5 = PROMPTS / "d4d_generic_arm_prompt_v5.md"
+# v6 (#685): v5 plus a minting density norm, and the core header rewritten
+# for the derived core (#694). Two counted differences; see the file.
+GENERIC_PROMPT_V6 = PROMPTS / "d4d_generic_arm_prompt_v6.md"
 CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
                      "generic_v2": GENERIC_PROMPT_V2,
                      "generic_v3": GENERIC_PROMPT_V3,
                      "generic_v4": GENERIC_PROMPT_V4,
                      "generic_v5": GENERIC_PROMPT_V5,
+                     "generic_v6": GENERIC_PROMPT_V6,
                      "tuned": GENERIC_PROMPT}
 
 # Which generic base each condition is built on. The generic/tuned comparison
@@ -91,6 +95,7 @@ CONDITION_AXES = {
     "generic_v3": {"base": "v3", "tuned": False},
     "generic_v4": {"base": "v4", "tuned": False},
     "generic_v5": {"base": "v5", "tuned": False},
+    "generic_v6": {"base": "v6", "tuned": False},
     "tuned":      {"base": "v1", "tuned": True},
 }
 
@@ -1870,7 +1875,7 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # which would let the pair diverge again (#694).
             from data_sheets_schema.derive_core import core_text
             text = normalise_multivalued(normalise_enum_aliases(
-                normalise_temporal(core_text(spec.full_path)[0])))
+                normalise_temporal(core_text(spec.full_path, phase4_complete=True)[0])))
             spec.core_path.write_text(text, encoding="utf-8")
             errors, failure = _validator_lines(path, schema, cls)
             log.append({"phase": ph, "round": 1,
@@ -2584,7 +2589,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # generated core would — written, snapshotted, carried — so
             # resume, audit and report see the artifact they always did.
             from data_sheets_schema.derive_core import core_text
-            body, facts = core_text(spec.full_path)
+            body, facts = core_text(spec.full_path,
+                                    phase4_complete=(ph == "reconcile_core"))
             core_derivation = {**facts, "phase": ph}
         else:
             body = _generate_phase(spec, ph, needed, client, settings, usage)
@@ -2754,7 +2760,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # to a fresh derivation of the full on disk.
         from data_sheets_schema.derive_core import core_text, derivation_facts
         fresh = normalise_multivalued(normalise_enum_aliases(
-            normalise_temporal(core_text(spec.full_path)[0])))
+            normalise_temporal(core_text(spec.full_path, phase4_complete=True)[0])))
         on_disk = spec.core_path.read_text(encoding="utf-8") if spec.core_path.exists() else None
         repaired = any(r.get("phase") == "repair_core" for r in (rec.data.get("repair") or []))
         if on_disk == fresh:

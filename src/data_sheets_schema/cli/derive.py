@@ -18,7 +18,10 @@ def derive():
               help="where to write the derived core record")
 @click.option("--validate/--no-validate", default=True, show_default=True,
               help="run linkml-validate on the result against CoreDataset")
-def derive_core_cmd(full_path, core_path, validate):
+@click.option("--phase4-complete", is_flag=True, default=False,
+              help="write the `# Phase 4 reconciliation: completed` header line — "
+                   "only when re-deriving after Phase 4 has actually run")
+def derive_core_cmd(full_path, core_path, validate, phase4_complete):
     """Write the core record implied by a full record.
 
     Every schema-identical shared slot is copied from the full record,
@@ -35,7 +38,7 @@ def derive_core_cmd(full_path, core_path, validate):
     from data_sheets_schema.derive_core import write_core
 
     full, core = Path(full_path), Path(core_path)
-    facts = write_core(full, core)
+    facts = write_core(full, core, phase4_complete=phase4_complete)
     click.echo(f"✓ {core}")
     click.echo(json.dumps(facts))
     if validate:

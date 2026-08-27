@@ -54,8 +54,9 @@ class TestTheRuleIsStated(unittest.TestCase):
 class TestItDidNotRedefineACondition(unittest.TestCase):
     """The reason it is in the playbook rather than the prompts."""
 
-    #: The condition created *with* the rule, so it re-baselines nothing.
-    NEW_CONDITION = "d4d_generic_arm_prompt_v5.md"
+    #: The conditions created *with* the rule, so they re-baseline nothing:
+    #: v5 introduced it and every later version inherits v5's block.
+    NEW_CONDITIONS = ("d4d_generic_arm_prompt_v5.md", "d4d_generic_arm_prompt_v6.md")
 
     def test_no_existing_condition_prompt_acquired_the_rule(self):
         """#502's actual constraint, which v5 does not breach.
@@ -70,7 +71,7 @@ class TestItDidNotRedefineACondition(unittest.TestCase):
         where a playbook-only rule is allowed to move.
         """
         for path in sorted(PROMPTS.glob("d4d_*_arm_prompt*.md")):
-            if path.name == self.NEW_CONDITION:
+            if path.name in self.NEW_CONDITIONS:
                 continue
             with self.subTest(prompt=path.name):
                 self.assertNotIn("American English",
@@ -79,7 +80,10 @@ class TestItDidNotRedefineACondition(unittest.TestCase):
     def test_the_new_condition_does_carry_it(self):
         """Otherwise the exemption above is an unguarded hole rather than a
         statement about one file."""
-        text = (PROMPTS / self.NEW_CONDITION).read_text(encoding="utf-8")
+        for name in self.NEW_CONDITIONS:
+            with self.subTest(prompt=name):
+                self.assertIn("American English", (PROMPTS / name).read_text(encoding="utf-8"))
+        text = (PROMPTS / self.NEW_CONDITIONS[0]).read_text(encoding="utf-8")
         self.assertIn("American English", text)
 
     def test_no_record_yet_names_the_new_condition(self):
