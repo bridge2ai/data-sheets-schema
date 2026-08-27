@@ -66,8 +66,17 @@ Arms: **v4 API (2026-08-13)** — `2026-08-13_claude-opus-5-api-generic-v4_rep{1
 | project | v4 API (2026-08-13) | v5 API (2026-08-22c) | v5 agentic (2026-08-24) |
 |---|---|---|---|
 | AI_READI | – | 49/50 (98.0%, rep2) | 48/50 (96.0%, rep2) |
-| CHORUS | – | 36/50 (73.5%, rep3) | 32/50 (65.3%, rep1) |
+| CHORUS | – | 36/49 (73.5%, rep3) | 32/49 (65.3%, rep1) |
 | CM4AI | – | 47/50 (94.0%, rep1) | 47/50 (94.0%, rep2) |
 | VOICE | – | 50/50 (100.0%, rep2) | 49/50 (98.0%, rep1) |
 
-Evaluator model(s) recorded: claude-fable-5. Raw points are the comparable figure; normalized percentages are denominator-sensitive where a record has N/A sub-elements. No gold standard exists (#177); the rubric is not domain-neutral (#627).
+## Rubric20-semantic scores (canonical / would-be canonical records only)
+
+| project | v4 API (2026-08-13) | v5 API (2026-08-22c) | v5 agentic (2026-08-24) |
+|---|---|---|---|
+| AI_READI | – | 81/88 (92.0%, rep2) | 79/88 (89.8%, rep2) |
+| CHORUS | – | 60/83 (72.3%, rep3) | 59/88 (67.0%, rep1) |
+| CM4AI | – | 70/78 (89.7%, rep1) | 66/78 (84.6%, rep2) |
+| VOICE | – | 81/88 (92.0%, rep2) | 78/88 (88.6%, rep1) |
+
+Evaluator model(s) recorded: claude-fable-5. Scores are shown as points / adjusted maximum after N/A exclusions; raw points are comparable within a rubric, percentages are denominator-sensitive. No gold standard exists (#177); the rubrics are not domain-neutral (#627); rubric20's N/A convention is #155's.

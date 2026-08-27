@@ -55,7 +55,11 @@ os.chdir(ROOT)
 sys.path.insert(0, str(ROOT / "src"))
 from data_sheets_schema.grounding import form_facts  # noqa: E402
 CONCAT = ROOT / "data" / "d4d_concatenated"
-EVALS = ROOT / "data" / "evaluation_llm" / "rubric10_semantic" / "label_aware"
+EVAL_DIRS = {
+    "rubric10": ROOT / "data" / "evaluation_llm" / "rubric10_semantic" / "label_aware",
+    "rubric20": ROOT / "data" / "evaluation_llm" / "rubric20_semantic" / "label_aware",
+}
+RUBRIC_MAX = {"rubric10": 50, "rubric20": 88}
 OUT_MD = ROOT / "notes" / "arm_comparison.md"
 OUT_FIG = ROOT / "notes" / "figures"
 
@@ -146,9 +150,12 @@ def run_metrics(prefix: str, rep: int, project: str) -> dict[str, Any] | None:
     }
 
 
-def rubric_scores(prefix: str, project: str) -> list[dict[str, Any]]:
+def rubric_scores(prefix: str, project: str, rubric: str = "rubric10") -> list[dict[str, Any]]:
     out = []
-    for path in sorted(EVALS.glob(f"{project}_*_evaluation.json")):
+    evals = EVAL_DIRS[rubric]
+    if not evals.exists():
+        return out
+    for path in sorted(evals.glob(f"{project}_*_evaluation.json")):
         d = json.loads(path.read_text(encoding="utf-8"))
         if str(d.get("label", "")).startswith(prefix):
             s = d.get("overall_score") or {}
@@ -238,22 +245,25 @@ def write_markdown(data, scores) -> None:
         lines.append(f"- **{disp}** — {basis}." + (f" {cav}." if cav else ""))
     lines.append("")
 
-    lines += ["## Rubric10-semantic scores (canonical / would-be canonical records only)", "",
-              "| project | " + " | ".join(d for _k, d, *_ in ARMS) + " |",
-              "|---|" + "|".join("---" for _ in ARMS) + "|"]
-    for p in PROJECTS:
-        cells = []
-        for key, _d, pfx, _rt, _role in ARMS:
-            ss = scores[key][p]
-            cells.append("; ".join(
-                f"{s['total']}/{s['max']} ({s['pct']}%, {s['label'].rsplit('_', 1)[-1]})"
-                for s in ss) or "–")
-        lines.append(f"| {p} | " + " | ".join(cells) + " |")
-    evaluators = sorted({s["evaluator"] for arm in scores.values() for ss in arm.values() for s in ss if s.get("evaluator")})
-    lines += ["", f"Evaluator model(s) recorded: {', '.join(evaluators) or 'none'}. "
-              "Raw points are the comparable figure; normalized percentages are "
-              "denominator-sensitive where a record has N/A sub-elements. No gold "
-              "standard exists (#177); the rubric is not domain-neutral (#627).", ""]
+    for rubric, rscores in scores.items():
+        lines += [f"## {rubric.capitalize()}-semantic scores (canonical / would-be canonical records only)", "",
+                  "| project | " + " | ".join(d for _k, d, *_ in ARMS) + " |",
+                  "|---|" + "|".join("---" for _ in ARMS) + "|"]
+        for p in PROJECTS:
+            cells = []
+            for key, _d, pfx, _rt, _role in ARMS:
+                ss = rscores[key][p]
+                cells.append("; ".join(
+                    f"{s['total']}/{s['adjusted_max'] or s['max']} ({s['pct']}%, {s['label'].rsplit('_', 1)[-1]})"
+                    for s in ss) or "–")
+            lines.append(f"| {p} | " + " | ".join(cells) + " |")
+        lines.append("")
+    evaluators = sorted({s["evaluator"] for rs in scores.values() for arm in rs.values() for ss in arm.values() for s in ss if s.get("evaluator")})
+    lines += [f"Evaluator model(s) recorded: {', '.join(evaluators) or 'none'}. "
+              "Scores are shown as points / adjusted maximum after N/A exclusions; "
+              "raw points are comparable within a rubric, percentages are "
+              "denominator-sensitive. No gold standard exists (#177); the rubrics are "
+              "not domain-neutral (#627); rubric20's N/A convention is #155's.", ""]
     OUT_MD.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {OUT_MD.relative_to(ROOT)}")
 
@@ -299,9 +309,17 @@ def write_figures(data, scores) -> None:
         fig.savefig(out, dpi=150); plt.close(fig)
         print(f"wrote {out.relative_to(ROOT)}")
 
+    for rubric, rscores in scores.items():
+        _rubric_figure(rubric, rscores, colors)
+
+
+def _rubric_figure(rubric, scores, colors) -> None:
+    import matplotlib.pyplot as plt
     # Rubric scores: raw points per project per arm (canonicals only).
     fig, ax = plt.subplots(figsize=(8, 3.6))
     arm_keys = [k for k, *_ in ARMS if any(scores[k][p] for p in PROJECTS)]
+    if not arm_keys:
+        plt.close(fig); return
     absent = [d for k, d, *_ in ARMS if k not in arm_keys]
     for k in arm_keys:
         for p in PROJECTS:
@@ -314,14 +332,14 @@ def write_figures(data, scores) -> None:
         ax.bar([j + i * width for j in range(len(PROJECTS))], vals, width=width,
                color=colors[key], label=dict((k, d) for k, d, *_ in ARMS)[key])
     ax.set_xticks([j + width * (len(arm_keys) - 1) / 2 for j in range(len(PROJECTS))])
-    ax.set_xticklabels(PROJECTS); ax.set_ylim(0, 50); ax.set_ylabel("rubric10-semantic points / 50")
+    ax.set_xticklabels(PROJECTS); ax.set_ylim(0, RUBRIC_MAX[rubric]); ax.set_ylabel(f"{rubric}-semantic points / {RUBRIC_MAX[rubric]}")
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=len(arm_keys))
-    ax.set_title("Rubric10-semantic, canonical records (same evaluator model)"
+    ax.set_title(f"{rubric.capitalize()}-semantic, canonical records (same evaluator model)"
                  + (f" — no evaluations exist for: {', '.join(absent)}" if absent else ""),
                  fontsize=9, loc="left")
     fig.tight_layout()
-    out = OUT_FIG / "arm_comparison_rubric.png"
+    out = OUT_FIG / f"arm_comparison_{rubric}.png"
     fig.savefig(out, dpi=150); plt.close(fig)
     print(f"wrote {out.relative_to(ROOT)}")
 
@@ -331,7 +349,8 @@ def main() -> int:
     ap.add_argument("--no-figures", action="store_true")
     args = ap.parse_args()
     data = collect()
-    scores = {key: {p: rubric_scores(pfx, p) for p in PROJECTS} for key, _d, pfx, *_ in ARMS}
+    scores = {rubric: {key: {p: rubric_scores(pfx, p, rubric) for p in PROJECTS}
+                       for key, _d, pfx, *_ in ARMS} for rubric in EVAL_DIRS}
     missing = [(k, p) for k in data for p in PROJECTS if not data[k][p]]
     if missing:
         print(f"note: no complete runs for {missing}", file=sys.stderr)
