@@ -294,6 +294,22 @@ reasoning effort, and mode.
 
 ## Phase 1 - Full D4D from input documents
 
+**Read the whole declared bundle before extracting anything.** The API path
+has every byte of the bundle in context on every call; this path reads it
+through a file tool whose default window is 2,000 lines, and the 2026-08-24
+arm's agents read AI_READI, CM4AI and VOICE piecewise and never opened 7–20%
+of each (#700). A slot whose evidence sits in an unread window is recorded
+as absent, indistinguishable from "the bundle does not support it". So:
+
+1. count the bundle's lines (`wc -l`), then read it sequentially in
+   consecutive windows (`offset`/`limit`) until every line has been read
+   once — no gaps, no reliance on search to fill them;
+2. only then extract. Search (`grep`) is for *re-finding* a passage you have
+   already read, never a substitute for reading it;
+3. the launcher records how much you read (`bundle_lines_read` in
+   `run_observed`, from your transcript), so an unread window is visible in
+   the record rather than silently absent from it.
+
 Follow the method in `.claude/commands/d4d-agent.md` (read it first). Summary of the
 non-negotiables:
 
@@ -506,6 +522,27 @@ identical slot and proves consistency across the pair.
    sections: source/provenance findings, schema-derived shared-slot count,
    corrections, related-content mapping and review, files changed, all commands,
    and final results. If nothing diverged, say so explicitly.
+
+   **Two sections have a fixed shape, because a checker reads them.** The
+   report-claims checker (`d4d provenance backfill-checks`; #546) parses
+   exactly two claim forms, and a report written in free prose registers
+   zero claims — its "0 findings" is then unmeasured, not clean (#684; 11 of
+   12 reports in the 2026-08-24 arm). Write:
+
+   - `## Claims` — one markdown table row per slot you removed from either
+     record, the slot name in backticks in the first cell and the word
+     **Removed** in the second: `| \`distributions\` | Removed | not declared on CoreDataset |`.
+     Where you assert that a slot is not declared in the schema, say it in an
+     `**Action:**` line naming the slot in backticks, so the checker can test
+     the assertion against the schema (`false_schema_claim` is what it
+     reports when the slot *is* declared). If you removed nothing, write the
+     section with the single line `No slots were removed.`
+   - `## Semantic review` — one line per `semantic-review-required` warning
+     the pair checker emitted (related-content pairs such as
+     `file_collections` ↔ `distributions`), each ending in **reviewed:
+     consistent** or **reviewed: corrected** with what changed. The warning
+     is the checker saying the review is required; this section is the only
+     evidence it happened (#691). If the checker emitted none, say so.
 9. **Repair, then re-report — the API pipeline's closing loop, which this path
    previously lacked.** If step 6's checkers (grounding, report claims) or the
    final pair-consistency run reported findings that require changing either
@@ -576,13 +613,26 @@ so record no per-phase `observed` blocks there; after the run has written its
 own record, the orchestrator adds the whole-run totals it observed with
 
 ```bash
+poetry run python scripts/agentic_observed.py --bundle {EXACT INPUT BUNDLE PATH} \
+  {EVERY TRANSCRIPT FILE FOR THIS RUN, INCLUDING A KILLED FIRST INVOCATION}
 d4d provenance annotate-observed --project {PROJECT} --method {METHOD} \
-  --label {VERSION} --run '{"total_tokens": {TOTAL}, "tool_uses": {COUNT}, "duration_ms": {MS}}'
+  --label {VERSION} --run '{THE JSON THE SCRIPT PRINTED}'
 ```
 
-which is the one boundary that exists. Annotate once: a second annotation
-with different values is refused, because an observation silently replaced
-is a measurement dropped without trace.
+which is the one boundary that exists. The script sums token usage, tool
+uses and wall duration across the transcripts and computes
+`bundle_lines_read` / `bundle_lines_total` — the union of the run's
+file-reading windows over the declared bundle (#700). Transcripts live under
+the runner's config directory, which differs by account (`~/.claude` or
+`~/.claude-work`); pass every invocation's transcript, or the total is the
+killed run's (#688). Annotate once: a second annotation with different
+values is refused, because an observation silently replaced is a measurement
+dropped without trace.
+
+`d4d provenance record` now writes the four deterministic check blocks
+(pair consistency, report claims, grounding, form) into the record itself
+(#687); `backfill-checks --execute` remains the repair route if that step
+reports it could not compute them.
 Reasoning capture remains impossible on this path either way
 (`runtime_cannot_capture`): total spend is now measurable, the reasoning share
 of it is not.

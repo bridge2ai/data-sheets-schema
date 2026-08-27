@@ -42,7 +42,15 @@ AGENTIC_PHASES = frozenset({"generate_full", "generate_core",
 # so the shape is deliberately different from api_usage and never merges with
 # it. The subagent itself must not estimate these (#400); only the launcher
 # that observed them may record them.
-_OBSERVED_FIELDS = frozenset({"total_tokens", "tool_uses", "duration_ms"})
+_OBSERVED_FIELDS = frozenset({"total_tokens", "tool_uses", "duration_ms",
+                              "bundle_lines_read", "bundle_lines_total"})
+# bundle_lines_read / bundle_lines_total: how much of the declared bundle the
+# run actually opened through its file-reading tool, as the union of its read
+# windows over the bundle's line count (#700). The API path has the whole
+# bundle in context on every call; the agentic path reads it piecewise, and
+# an unread window is indistinguishable in the record from "the bundle does
+# not support it" unless this is recorded. scripts/agentic_observed.py
+# computes both from the runner's transcript.
 
 # api_usage fields no agentic phase may carry: a phase log that looks
 # comparable to the API path's accounting and is not would be worse than the
@@ -63,6 +71,33 @@ def _known_phases() -> frozenset[str]:
     from data_sheets_schema.api_runner import PHASES
     return frozenset(PHASES) | {"repair_full", "repair_core",
                                 "report_after_repair"} | AGENTIC_PHASES
+
+
+def _inline_checks(path: Path) -> None:
+    """Write the four deterministic check blocks into a just-written record.
+
+    The API runner computes pair consistency, report claims, grounding and
+    form in-process; this recorder did not, so every agentic record depended
+    on a separate `backfill-checks --execute` the playbook never named (#687)
+    and a launcher that forgot it shipped records without the metrics the
+    canary gate reads. Computed here from the same functions, marked as
+    recorded by this command rather than by a retroactive backfill. A failure
+    to compute is reported and does not un-write the record: a record without
+    its check blocks is recoverable by backfill; a run without a record is not.
+    """
+    from data_sheets_schema import backfill_checks as bc
+    try:
+        blocks = bc.compute(path)
+    except Exception as exc:  # noqa: BLE001 — reported, never fatal
+        click.echo(f"  ⚠️  deterministic checks not computed ({exc}); the "
+                   "record stands — run `d4d provenance backfill-checks "
+                   "--execute` once the cause is fixed")
+        return
+    for block in blocks.values():
+        if isinstance(block, dict):
+            block["recorded_by"] = "d4d provenance record"
+    bc.apply(path, blocks, overwrite=True)
+    click.echo("  " + bc.summarise(blocks))
 
 
 def _require_repo_root_cwd(command: str) -> None:
@@ -303,6 +338,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         rec.data["phases_skipped"] = list(phases_skipped)
     out = rec.write(record_path_for(project, method, label))
     click.echo(f"✓ {out}")
+    _inline_checks(out)
 
     # Say it here, but do not refuse. Recording an uncanonical prompt is the
     # honest act — it is what puts the evidence in the record for `d4d runs
@@ -406,11 +442,14 @@ def annotate_observed(project, method, label, run_observed):
     log["run_observed"] = observed
     log["run_observed_basis"] = (
         "aggregate totals for the whole run, observed by the orchestrator "
-        "from the subagent runner's completion report. One number per run, "
-        "not per phase: four-phase project-agent mode runs every phase in "
-        "one context, so the run is the only observable boundary. Not the "
+        "from the subagent runner's transcript. One number per run, not per "
+        "phase: four-phase project-agent mode runs every phase in one "
+        "context, so the run is the only observable boundary. Not the "
         "runtime's own accounting, no input/output split, not billing-grade; "
-        "deliberately not shaped like api_usage (#400).")
+        "deliberately not shaped like api_usage (#681/#682). "
+        "bundle_lines_read is the union of the run's file-reading windows "
+        "over the declared bundle (#700): lines the run never opened may "
+        "have been reached by search, but nothing attests that.")
     rec = ProvenanceRecord(data=data)
     out = rec.write(path)
     click.echo(f"✓ {out}")
