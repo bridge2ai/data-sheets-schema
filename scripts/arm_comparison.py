@@ -192,6 +192,33 @@ def fmt(m: dict[str, Any], metric: str) -> str:
     return str(v)
 
 
+def stats(reps: list[dict[str, Any]], metric: str) -> tuple[float, float, int] | None:
+    """Mean and sample SD (ddof=1) over replicates; None when fewer than 1.
+    n is always reported beside the figure: three replicates is a small
+    sample, and an SD on n=3 is a spread, not a confidence interval."""
+    import statistics
+    vals = [r[metric] for r in reps if r.get(metric) is not None]
+    if not vals:
+        return None
+    mean = statistics.fmean(vals)
+    sd = statistics.stdev(vals) if len(vals) > 1 else 0.0
+    return mean, sd, len(vals)
+
+
+def cell(reps: list[dict[str, Any]], metric: str, role: str) -> str:
+    """mean ± SD with the replicates in brackets; the baseline arm adds its
+    per-project worst, which is what the canary gate holds runs against."""
+    st = stats(reps, metric)
+    if st is None:
+        return "–"
+    mean, sd, n = st
+    raw = ",".join(fmt(r, metric) for r in reps)
+    body = f"{mean:.1f} ± {sd:.1f} [{raw}]"
+    if role == "worst":
+        body += f" worst {worst(reps, metric)}"
+    return body
+
+
 def worst(reps: list[dict[str, Any]], metric: str) -> str:
     """Per-project collapse for the baseline column: the worst value where
     the metric has a direction, the max (labelled as such in the header) for
@@ -229,18 +256,20 @@ def write_markdown(data, scores) -> None:
                                    + (" (shown as per-project worst; max for reported-only metrics)" if role == "worst" else "")
                                    for _k, d, pfx, rt, role in ARMS), ""]
 
-    lines += ["## Deterministic metrics — three replicates per cell", "",
+    lines += ["## Deterministic metrics — mean ± SD over replicates", "",
               "| metric | project | " + " | ".join(d for _k, d, *_ in ARMS) + " |",
               "|---|---|" + "|".join("---" for _ in ARMS) + "|"]
     for mk, (disp, _src, _hiw, _cav) in METRICS.items():
         for p in PROJECTS:
             cells = []
             for key, _d, _pfx, _rt, role in ARMS:
-                reps = data[key][p]
-                cells.append(worst(reps, mk) if role == "worst"
-                             else ",".join(fmt(r, mk) for r in reps) or "–")
+                cells.append(cell(data[key][p], mk, role))
             lines.append(f"| {disp} | {p} | " + " | ".join(cells) + " |")
-    lines += ["", "ᵘ = unmeasured: the report-claims checker parsed zero claims (#684).", ""]
+    lines += ["", "Cells are mean ± sample SD over the replicates (n = 3 unless a run is "
+              "missing), with the replicate values in brackets; the baseline arm adds "
+              "its per-project worst, the value the canary gate holds runs against. "
+              "An SD over three replicates is a spread, not a confidence interval. "
+              "ᵘ = unmeasured: the report-claims checker parsed zero claims (#684).", ""]
 
     lines += ["## Per-metric caveats (attached, not footnoted elsewhere)", ""]
     for mk, (disp, src, _hiw, cav) in METRICS.items():
@@ -249,7 +278,7 @@ def write_markdown(data, scores) -> None:
     lines.append("")
 
     for rubric, rscores in scores.items():
-        lines += [f"## {rubric.capitalize()}-semantic scores (canonical / would-be canonical records only)", "",
+        lines += [f"## {rubric.capitalize()}-semantic scores (canonical / would-be canonical records only; n = 1 per arm and project, so no SD)", "",
                   "| project | " + " | ".join(d for _k, d, *_ in ARMS) + " |",
                   "|---|" + "|".join("---" for _ in ARMS) + "|"]
         for p in PROJECTS:
@@ -279,35 +308,32 @@ def write_figures(data, scores) -> None:
     OUT_FIG.mkdir(parents=True, exist_ok=True)
     colors = {"v4": "#9e9e9e", "v5api": "#4e79a7", "v5agentic": "#f28e2b"}
 
-    # One figure per metric: 4 project panels, bars per arm (worst) or per rep.
+    # One figure per metric: 4 project panels, one bar per arm = replicate mean,
+    # error bar = sample SD (n printed under the bar). Replicates are dots.
     for mk, (disp, _src, _hiw, cav) in METRICS.items():
-        fig, axes = plt.subplots(1, len(PROJECTS), figsize=(13, 3.4), sharey=True)
+        fig, axes = plt.subplots(1, len(PROJECTS), figsize=(13, 3.6), sharey=True)
         for ax, p in zip(axes, PROJECTS):
-            xs, hs, cs, labels = [], [], [], []
-            x = 0
-            for key, d, _pfx, _rt, role in ARMS:
+            for i, (key, d, _pfx, _rt, role) in enumerate(ARMS):
                 reps = data[key][p]
-                if role == "worst":
-                    vals = [r[mk] for r in reps if r.get(mk) is not None]
-                    if vals:
-                        xs.append(x); hs.append(max(vals)); cs.append(colors[key]); labels.append("worst")
-                        x += 1
-                else:
-                    for r in reps:
-                        if r.get(mk) is None:
-                            continue
-                        xs.append(x); hs.append(r[mk]); cs.append(colors[key])
-                        labels.append(r["label"].rsplit("_", 1)[-1] + ("ᵘ" if mk == "report" and r[mk] == 0 and not r.get("claims_checked") else ""))
-                        x += 1
-                x += 0.6
-            ax.bar(xs, hs, color=cs, width=0.8)
-            ax.set_xticks(xs); ax.set_xticklabels(labels, fontsize=7, rotation=60)
+                st = stats(reps, mk)
+                if st is None:
+                    continue
+                mean, sd, n = st
+                ax.bar(i, mean, color=colors[key], width=0.7, alpha=0.85)
+                ax.errorbar(i, mean, yerr=sd, fmt="none", ecolor="black", capsize=4, lw=1)
+                vals = [r[mk] for r in reps if r.get(mk) is not None]
+                ax.scatter([i + (j - 1) * 0.12 for j in range(len(vals))], vals,
+                           s=14, color="black", zorder=3)
+                ax.text(i, -0.06, f"n={n}", ha="center", va="top", fontsize=7,
+                        transform=ax.get_xaxis_transform())
+            ax.set_xticks(range(len(ARMS)))
+            ax.set_xticklabels([k for k, *_ in ARMS], fontsize=8)
             ax.set_title(p, fontsize=10)
             ax.spines[["top", "right"]].set_visible(False)
         handles = [plt.Rectangle((0, 0), 1, 1, color=colors[k]) for k, *_ in ARMS]
         fig.legend(handles, [d for _k, d, *_ in ARMS], loc="upper right", fontsize=8, ncol=3, frameon=False)
-        fig.suptitle(disp, x=0.02, ha="left", fontsize=11)
-        fig.tight_layout(rect=(0, 0, 1, 0.9))
+        fig.suptitle(f"{disp} — mean ± SD over replicates, dots = replicates", x=0.02, ha="left", fontsize=11)
+        fig.tight_layout(rect=(0, 0.04, 1, 0.9))
         out = OUT_FIG / f"arm_comparison_{mk}.png"
         fig.savefig(out, dpi=150); plt.close(fig)
         print(f"wrote {out.relative_to(ROOT)}")
@@ -348,7 +374,7 @@ def _rubric_figure(rubric, scores, colors) -> None:
     ax.set_ylabel(f"{rubric}-semantic points (axis: unadjusted max {RUBRIC_MAX[rubric]})")
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=len(arm_keys))
-    ax.set_title(f"{rubric.capitalize()}-semantic, canonical records (same evaluator model)"
+    ax.set_title(f"{rubric.capitalize()}-semantic, canonical records (same evaluator; n = 1 per bar, no SD)"
                  + (f" — no evaluations exist for: {', '.join(absent)}" if absent else ""),
                  fontsize=9, loc="left")
     fig.tight_layout()
