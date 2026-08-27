@@ -17,8 +17,10 @@ including a killed first invocation, and the totals are summed across them.
         --bundle data/preprocessed/concatenated/CHORUS_preprocessed.txt \\
         ~/.claude-work/projects/<project>/<session>/subagents/agent-a<name>-*.jsonl
 
-Bundle coverage counts only the file-reading tool's windows over the bundle
-(a read with no limit is the tool's default window of READ_DEFAULT_LINES).
+Bundle coverage counts only the file-reading tool's *successful* windows over
+the bundle (a read with no limit is the tool's default window of
+READ_DEFAULT_LINES; a read that errored — the tool caps one response at
+~25k tokens — counts as unread).
 Searches (grep, shell) over the bundle are counted separately and reported,
 but a line reached only by search is not counted as read: nothing attests
 that the run saw its context.
@@ -41,9 +43,24 @@ def _usage_total(u: dict) -> int:
 
 
 def observe(transcripts: list[Path], bundle: Path | None) -> dict:
-    total = tools = searches = 0
+    """Sum across transcripts. Two traps the first version fell into (#701):
+
+    - one API response is written as several JSONL lines sharing a
+      ``message.id``, each repeating the input/cache counts with a running
+      ``output_tokens`` — summing per line roughly doubles the total. Usage is
+      taken once per message id (max output seen);
+    - a file-reading call can fail (the tool caps a response at ~25k tokens)
+      and return nothing; its window must not count as read. Windows are
+      kept only when their ``tool_result`` is not an error.
+
+    ``duration_ms`` is the sum of each transcript's own first-to-last span, so
+    a killed-and-resumed run excludes the gap between invocations.
+    """
+    usage_by_msg: dict[str, dict] = {}
+    tools = searches = 0
     duration_ms = 0
-    windows: list[tuple[int, int]] = []
+    read_windows: dict[str, tuple[int, int]] = {}   # tool_use_id -> window
+    failed: set[str] = set()
     bundle_name = bundle.name if bundle else None
     for path in transcripts:
         first = last = None
@@ -60,9 +77,18 @@ def observe(transcripts: list[Path], bundle: Path | None) -> dict:
                     last = t
                 msg = j.get("message") or {}
                 usage = msg.get("usage") or {}
-                total += _usage_total(usage)
+                if usage:
+                    mid = msg.get("id") or f"{path}:{j.get('uuid')}"
+                    prev = usage_by_msg.get(mid)
+                    if prev is None or usage.get("output_tokens", 0) >= prev.get("output_tokens", 0):
+                        usage_by_msg[mid] = usage
                 for c in msg.get("content") or []:
-                    if not (isinstance(c, dict) and c.get("type") == "tool_use"):
+                    if not isinstance(c, dict):
+                        continue
+                    if c.get("type") == "tool_result" and c.get("is_error"):
+                        failed.add(c.get("tool_use_id"))
+                        continue
+                    if c.get("type") != "tool_use":
                         continue
                     tools += 1
                     inp = c.get("input") or {}
@@ -70,23 +96,26 @@ def observe(transcripts: list[Path], bundle: Path | None) -> dict:
                         continue
                     if c.get("name") == "Read" and bundle_name in str(inp.get("file_path", "")):
                         start = int(inp.get("offset") or 0)
-                        # The tool's offset is 1-indexed for humans and 0 means
-                        # "from the top"; a limit is a line count.
+                        # offset is 1-indexed; 0/absent means from the top.
                         start = max(start - 1, 0) if start else 0
-                        windows.append((start, start + int(inp.get("limit") or READ_DEFAULT_LINES)))
+                        read_windows[c.get("id")] = (start, start + int(inp.get("limit") or READ_DEFAULT_LINES))
                     elif bundle_name in json.dumps(inp):
                         searches += 1
         if first and last:
             duration_ms += int((last - first).total_seconds() * 1000)
+    total = sum(_usage_total(u) for u in usage_by_msg.values())
     out = {"total_tokens": total, "tool_uses": tools, "duration_ms": duration_ms}
     if bundle:
         n_lines = sum(1 for _ in bundle.open(encoding="utf-8"))
         covered = set()
-        for a, b in windows:
+        for tid, (a, b) in read_windows.items():
+            if tid in failed:
+                continue
             covered.update(range(a, min(b, n_lines)))
         out["bundle_lines_read"] = len(covered)
         out["bundle_lines_total"] = n_lines
-        out["_bundle_search_touches"] = searches   # informational; not an observed field
+        out["_bundle_search_touches"] = searches          # informational; not an observed field
+        out["_bundle_reads_failed"] = sum(1 for t in read_windows if t in failed)
     return out
 
 
@@ -106,7 +135,8 @@ def main() -> int:
     print(json.dumps(run))
     if info:
         print(f"note: bundle search touches (not counted as read): "
-              f"{info['_bundle_search_touches']}", file=sys.stderr)
+              f"{info['_bundle_search_touches']}; bundle reads that errored "
+              f"(not counted as read): {info['_bundle_reads_failed']}", file=sys.stderr)
     return 0
 
 

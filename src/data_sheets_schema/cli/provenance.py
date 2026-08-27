@@ -82,13 +82,23 @@ def _inline_checks(path: Path) -> None:
     and a launcher that forgot it shipped records without the metrics the
     canary gate reads. Computed here from the same functions, marked as
     recorded by this command rather than by a retroactive backfill. A failure
-    to compute is reported and does not un-write the record: a record without
-    its check blocks is recoverable by backfill; a run without a record is not.
+    to compute is reported on stdout with exit 0 and does not un-write the
+    record: a record without its check blocks is recoverable by backfill; a
+    run without a record is not. Downstream, the canary gate reads
+    report_claims and refuses a record that lacks it, so the gap cannot pass
+    silently into a fan-out. The one exception is an artifact that does not
+    parse, which is re-raised.
     """
+    import yaml as _yaml
+
     from data_sheets_schema import backfill_checks as bc
     try:
         blocks = bc.compute(path)
-    except Exception as exc:  # noqa: BLE001 — reported, never fatal
+    except _yaml.YAMLError:
+        # An artifact that does not parse is a run failure, not a checks
+        # failure; hiding it behind a ⚠️ would let a launcher ship it.
+        raise
+    except Exception as exc:  # noqa: BLE001 — reported on stdout, exit 0
         click.echo(f"  ⚠️  deterministic checks not computed ({exc}); the "
                    "record stands — run `d4d provenance backfill-checks "
                    "--execute` once the cause is fixed")
@@ -446,10 +456,13 @@ def annotate_observed(project, method, label, run_observed):
         "phase: four-phase project-agent mode runs every phase in one "
         "context, so the run is the only observable boundary. Not the "
         "runtime's own accounting, no input/output split, not billing-grade; "
-        "deliberately not shaped like api_usage (#681/#682). "
-        "bundle_lines_read is the union of the run's file-reading windows "
-        "over the declared bundle (#700): lines the run never opened may "
-        "have been reached by search, but nothing attests that.")
+        "deliberately not shaped like api_usage (#681/#682). total_tokens "
+        "counts each API message once (a response spans several transcript "
+        "lines); duration_ms sums each invocation's own span, so a resumed "
+        "run excludes the gap. bundle_lines_read is the union of the run's "
+        "successful file-reading windows over the declared bundle (#700): "
+        "lines the run never opened, or opened only in a read that errored, "
+        "may have been reached by search, but nothing attests that.")
     rec = ProvenanceRecord(data=data)
     out = rec.write(path)
     click.echo(f"✓ {out}")

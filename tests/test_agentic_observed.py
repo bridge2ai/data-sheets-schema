@@ -11,12 +11,23 @@ ao = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ao)
 
 
-def _event(ts, usage=None, tools=()):
-    content = [{"type": "tool_use", "name": n, "input": i} for n, i in tools]
+_IDS = iter(range(1, 10_000))
+
+
+def _event(ts, usage=None, tools=(), msg_id=None, results=(), ids=None):
+    """One transcript line. Tool-use ids are unique per call, as in real
+    transcripts; pass `ids` to fix them when a later event must reference one."""
+    ids = list(ids) if ids else [f"tu-{next(_IDS)}" for _ in tools]
+    content = [{"type": "tool_use", "name": n, "input": i, "id": tid}
+               for tid, (n, i) in zip(ids, tools)]
+    content += [{"type": "tool_result", "tool_use_id": tid, "is_error": err, "content": "x"}
+                for tid, err in results]
     msg = {"role": "assistant", "content": content}
     if usage is not None:
         msg["usage"] = usage
-    return json.dumps({"timestamp": ts, "message": msg})
+    if msg_id:
+        msg["id"] = msg_id
+    return json.dumps({"timestamp": ts, "message": msg, "uuid": ts})
 
 
 class Observe(unittest.TestCase):
@@ -63,6 +74,35 @@ class Observe(unittest.TestCase):
         self.assertEqual(obs["total_tokens"], 12)
         self.assertEqual(obs["duration_ms"], 30000)   # each transcript's own span
         self.assertEqual(obs["bundle_lines_read"], 1500)   # 0..1000 ∪ 500..1500
+
+    def test_one_api_message_over_several_lines_is_counted_once(self):
+        """#701 review F1: a response spans several JSONL lines sharing a
+        message id, each repeating the input counts — summing per line
+        roughly doubled every run_observed total in the corpus."""
+        u1 = {"input_tokens": 100, "cache_read_input_tokens": 1000, "output_tokens": 1}
+        u2 = {"input_tokens": 100, "cache_read_input_tokens": 1000, "output_tokens": 227}
+        t = self._transcript("a.jsonl", [
+            _event("2026-08-27T00:00:00Z", usage=u1, msg_id="msg_1"),
+            _event("2026-08-27T00:00:01Z", usage=u2, msg_id="msg_1"),
+            _event("2026-08-27T00:00:02Z", usage={"output_tokens": 3}, msg_id="msg_2"),
+        ])
+        obs = ao.observe([t], None)
+        self.assertEqual(obs["total_tokens"], 100 + 1000 + 227 + 3)
+
+    def test_an_errored_read_does_not_count_as_read(self):
+        """#701 review F2: the tool caps a read at ~25k tokens and returns an
+        error; 17 such reads in the v5 arm were counted as coverage."""
+        t = self._transcript("a.jsonl", [
+            _event("2026-08-27T00:00:00Z", usage={"output_tokens": 1}, ids=["big"],
+                   tools=[("Read", {"file_path": str(self.bundle), "limit": 2000})]),
+            _event("2026-08-27T00:00:01Z", results=[("big", True)]),
+            _event("2026-08-27T00:00:02Z", usage={"output_tokens": 1}, ids=["small"],
+                   tools=[("Read", {"file_path": str(self.bundle), "limit": 500})]),
+            _event("2026-08-27T00:00:03Z", results=[("small", False)]),
+        ])
+        obs = ao.observe([t], self.bundle)
+        self.assertEqual(obs["bundle_lines_read"], 500)
+        self.assertEqual(obs["_bundle_reads_failed"], 1)
 
     def test_no_bundle_means_no_coverage_keys(self):
         t = self._transcript("a.jsonl", [_event("2026-08-27T00:00:00Z", usage={"output_tokens": 1})])
