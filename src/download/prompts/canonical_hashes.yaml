@@ -231,13 +231,19 @@ files:
       retired_on: '2026-08-27'
       sha256: 5613df5aa699e5c1007f09ed658c5a6debe15c641c31fb949234ab17d3b5170a
   src/download/prompts/d4d_generic_arm_prompt_v7.md:
-    body_sha256: 5f3e0f8fb3cb183740678773523960c85a35b17cda16d02e5eeecf0e6a2a79c8
-    bytes: 13140
-    pinned_at_commit: f8620ae7d7f83893f75378167e5864c50ee75d6b
+    body_sha256: d8e8e86df24182d14b9ece6cf27e262a4f45b92ad23457297eb5ef968ef9e1be
+    bytes: 13203
+    pinned_at_commit: f09e620238fb085e9214eab704cbcbcc6f2fb910
     pinned_on: '2026-08-27'
-    reason: 'generic_v7: v6 plus the coverage-receipt rule (#710); registered as the v7 condition
-      text before any run'
-    sha256: 2291399646298845e0ee4c406bc2b2b5c1ccddbc00eceb7abf9a6cbe2db9d37e
+    reason: 'generic_v7 rotated before any run: the receipt rule names each status''s key
+      and drops the uniqueness claim and backticked slot paths (#737 review)'
+    sha256: 08a26ae430cc7d145a6906c3457d5deaeac499d3d3be3edf965718f674d43fbf
+    superseded:
+    - pinned_on: '2026-08-27'
+      reason: 'generic_v7: v6 plus the coverage-receipt rule (#710); registered as the v7
+        condition text before any run'
+      retired_on: '2026-08-27'
+      sha256: 2291399646298845e0ee4c406bc2b2b5c1ccddbc00eceb7abf9a6cbe2db9d37e
   src/download/prompts/d4d_tuned_arm_prompt.md:
     bytes: 2877
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
