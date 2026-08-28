@@ -35,7 +35,12 @@ same field the API path's resumed runs carry. Two rules make this safe:
 - **Skip on validated artifact only.** An artifact that exists but fails
   validation is a phase that did not complete; re-run the phase rather than
   repairing the artifact in place, because a half-written file repaired by a
-  later phase has no phase that attests it.
+  later phase has no phase that attests it. Phase 1 has two artifacts and
+  two validations: the full YAML (schema and term validation) **and** the
+  coverage receipt (`d4d receipts check --strict`, which needs no record).
+  A receipt with 10 of 28 entries is a Phase 1 that did not complete, however
+  valid the YAML beside it; resume Phase 1 from the first chunk the receipt
+  lacks, never skip it.
 - **Never resume across labels.** An artifact under another label is another
   run's output; reading it is the prior-D4D leak the evidence boundary
   prohibits, whether or not the bytes would be identical.
@@ -310,7 +315,9 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
    anchored). It lists every chunk with its `id` and `lines: [start, end]`,
    sized to fit one file-tool call.
 2. **For each chunk, in manifest order:** read it with the **file-reading
-   tool** (`Read` with `offset: start` and `limit: end − start + 1`) — never
+   tool** (`Read` with `offset: start` and `limit: end - start + 1`; a
+   chunk read in several smaller windows counts as opened once they cover
+   it) — never
    through a shell (`sed -n`, `cat`, `head`): the transcript cross-check
    counts file-tool windows only, and a shell read is honest but invisible
    to it, so it is recorded as a chunk you claimed without opening. **A read
@@ -324,8 +331,9 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
    - `extracted` with `extracted: [{slot, snippet}, …]` — the record slot
      path the fact fills (`funders[0].grant_id`, or an entry path such as
      `funders[0]` when one passage attests a whole entry) and a **verbatim**
-     snippet from *this* chunk, at least a phrase long; a one-word snippet
-     attests nothing and fails the check;
+     snippet from *this* chunk of at least 8 characters after normalisation
+     per `...`-separated part (a grant number or an identifier qualifies; a
+     short common word does not, and fails the check);
    - `redundant_with: [chunk ids]` — relevant, but every fact it holds is
      already receipted from those chunks;
    - `nothing_relevant` with a `reason`;
@@ -333,8 +341,11 @@ a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
 4. Only then extract into the record. Search (`grep`) is for re-finding a
    passage you have already receipted, never a substitute for a chunk entry.
 5. Before Phase 2, run `poetry run d4d receipts check --label {VERSION}
-   --project {PROJECT} --strict` (after the provenance record exists it can
-   be re-run with `--write`). It must report `chunks N/N reviewed`, every
+   --project {PROJECT} --strict`. No provenance record exists yet; the
+   command then reads the bundle named in the full record's `# Source
+   bundle:` header as it is on disk (pass `--bundle` if the header is not
+   written yet). It is re-run with `--write` after the record step, which
+   is what puts the block in the record. It must report `chunks N/N reviewed`, every
    snippet verified and no findings. `slots without a receipt` is reported,
    not gated: a populated slot whose receipt you cannot name is one to
    re-examine, not one to pad. The validator cannot tell that a
@@ -385,8 +396,8 @@ File header:
 # Generated: {DATE}
 ```
 
-In independent mode, the Phase 1 agent writes only the full YAML. It must not
-create a core record.
+In independent mode, the Phase 1 agent writes the full YAML and the coverage
+receipt, nothing else. It must not create a core record.
 
 ## Phase 2 - D4D-core derived from the full D4D
 
@@ -512,7 +523,11 @@ in either generated record.
      `notes`, or evidence commentary outside `source_caveats`.
 4. Back-port every source-supported Phase 2 discovery into the full record in
    the correct full-schema slot. Correct the full record first whenever the
-   source audit changes a fact.
+   source audit changes a fact. **Every back-ported or repaired value gets
+   its receipt**: add the `{slot, snippet}` pair to the *existing* entry of
+   the chunk the passage sits in (edit that entry in place — a second entry
+   for the same chunk is a finding), and re-run `d4d receipts check`. A
+   value you cannot receipt from a chunk is not source-supported.
 5. Apply the same corrected facts to core where its schema permits them, but do
    not shorten or paraphrase shared values in preparation for Phase 4.
 6. Re-validate both files after every correction and record the source and
@@ -710,10 +725,17 @@ own record, the orchestrator adds the whole-run totals it observed with
 
 ```bash
 poetry run python scripts/agentic_observed.py --bundle {EXACT INPUT BUNDLE PATH} \
+  --receipt data/d4d_concatenated/{METHOD}_core/{VERSION}/{PROJECT}_coverage_receipt.yaml \
+  --manifest data/preprocessed/chunks/{PROJECT}_chunks.yaml \
   {EVERY TRANSCRIPT FILE FOR THIS RUN, INCLUDING A KILLED FIRST INVOCATION}
 d4d provenance annotate-observed --project {PROJECT} --method {METHOD} \
   --label {VERSION} --run '{THE JSON THE SCRIPT PRINTED}'
 ```
+
+`--receipt`/`--manifest` add `receipt_chunks_total` / `receipt_chunks_unopened`
+to the JSON — of the manifest's chunks, how many the receipt claims but no
+file-tool window fully covers — and print any receipt ids the manifest lacks,
+duplicates, and manifest chunks the receipt never mentions.
 
 which is the one boundary that exists. The script sums token usage, tool
 uses and wall duration across the transcripts and computes

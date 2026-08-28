@@ -53,18 +53,21 @@ def receipt_cross_check(covered: set[int], receipt: Path, manifest: Path) -> dic
     import yaml
     rec = yaml.safe_load(receipt.read_text(encoding="utf-8")) or {}
     man = yaml.safe_load(manifest.read_text(encoding="utf-8")) or {}
-    spans = {c["id"]: c["lines"] for c in man.get("chunks") or [] if isinstance(c, dict)}
-    reviewed = [e.get("id") for e in rec.get("chunks") or [] if isinstance(e, dict)]
-    unopened = []
-    for cid in reviewed:
-        if cid not in spans:
-            continue
-        a, b = spans[cid]
-        if any(i not in covered for i in range(a - 1, b)):
-            unopened.append(cid)
-    return {"receipt_chunks_total": len([c for c in reviewed if c in spans]),
+    spans = {c["id"]: c["lines"] for c in man.get("chunks") or []
+             if isinstance(c, dict) and isinstance(c.get("id"), str) and isinstance(c.get("lines"), list)}
+    claimed = [e.get("id") for e in rec.get("chunks") or [] if isinstance(e, dict)]
+    strangers = sorted({str(c) for c in claimed if c not in spans})
+    dupes = sorted({c for c in claimed if claimed.count(c) > 1 and c in spans})
+    unopened = [cid for cid in spans if cid in claimed
+                and any(i not in covered for i in range(spans[cid][0] - 1, spans[cid][1]))]
+    unclaimed = [cid for cid in spans if cid not in claimed]
+    # The denominator is the manifest, not the receipt (#732): a receipt of
+    # bogus ids must not read as 0/0. Strangers, duplicates and unclaimed
+    # chunks are reported beside it; the validator (#708) fails them.
+    return {"receipt_chunks_total": len(spans),
             "receipt_chunks_unopened": len(unopened),
-            "_receipt_unopened_ids": unopened}
+            "_receipt_unopened_ids": unopened, "_receipt_strangers": strangers,
+            "_receipt_duplicates": dupes, "_receipt_unclaimed": unclaimed}
 
 
 def observe(transcripts: list[Path], bundle: Path | None,
@@ -171,6 +174,9 @@ def main() -> int:
     if (args.receipt is None) != (args.manifest is None):
         print("--receipt and --manifest go together", file=sys.stderr)
         return 2
+    if args.receipt is not None and args.bundle is None:
+        print("--receipt needs --bundle: the cross-check is against the bundle's read windows", file=sys.stderr)
+        return 2
     until = datetime.fromisoformat(args.until.replace("Z", "+00:00")) if args.until else None
     missing = [str(t) for t in args.transcripts if not t.exists()]
     if missing:
@@ -187,6 +193,11 @@ def main() -> int:
         if info.get("_receipt_unopened_ids"):
             print(f"receipt chunks marked reviewed but never opened by the file tool: "
                   f"{info['_receipt_unopened_ids']}", file=sys.stderr)
+        for key, what in (("_receipt_strangers", "receipt ids not in the manifest"),
+                          ("_receipt_duplicates", "receipt ids entered more than once"),
+                          ("_receipt_unclaimed", "manifest chunks the receipt never mentions")):
+            if info.get(key):
+                print(f"{what}: {info[key]}", file=sys.stderr)
     return 0
 
 

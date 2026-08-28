@@ -224,11 +224,47 @@ class Playbook(unittest.TestCase):
     TEXT = (Path(__file__).resolve().parent.parent / ".claude/commands/d4d-full-core.md").read_text(encoding="utf-8")
 
     def test_phase_one_reads_the_manifest_receipts_each_chunk_and_mandates_the_file_tool(self):
-        p1 = self.TEXT.split("## Phase 1", 1)[1].split("## Phase 2", 1)[0]
+        import re
+        p1 = re.sub(r"\s+", " ", self.TEXT.split("## Phase 1", 1)[1].split("## Phase 2", 1)[0])
         for needle in ("_chunks.yaml", "coverage-receipt entry before reading the next",
-                       "file-reading\n   tool", "never\n   through a shell", "redundant_with",
+                       "file-reading tool", "never through a shell", "redundant_with",
                        "nothing_relevant", "duplicate_of", "d4d receipts check"):
             self.assertIn(needle, p1, needle)
+        # the rule the validator enforces, not a looser paraphrase of it (#733)
+        self.assertIn(f"at least {rc.MIN_SNIPPET_CHARS} characters after normalisation", p1)
+        for status in rc.STATUSES:
+            self.assertIn(status, p1)
+
+    def test_the_check_is_executable_before_the_record_exists(self):
+        """#730: Phase 1 runs the check before Phase 2, when no provenance
+        record exists; the command must work from what is on disk."""
+        from data_sheets_schema import provenance as pv
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            bundle = tmp / "P_preprocessed.txt"; bundle.write_text(BUNDLE, encoding="utf-8")
+            from data_sheets_schema.chunking import build_manifest, dump_manifest
+            (tmp / "chunks").mkdir(); (tmp / "chunks/P_chunks.yaml").write_text(dump_manifest(build_manifest(bundle)))
+            core = tmp / "concat/claudecode_agent_core/L"; full_dir = tmp / "concat/claudecode_agent/L"
+            core.mkdir(parents=True); full_dir.mkdir(parents=True)
+            (full_dir / "P_d4d.yaml").write_text(f"# D4D Datasheet for P Dataset\n# Source bundle: {bundle}\n\n"
+                                                 + yaml.safe_dump(FULL), encoding="utf-8")
+            (core / "P_coverage_receipt.yaml").write_text(yaml.safe_dump(_receipt(hashlib.md5(BUNDLE.encode()).hexdigest())))
+            from data_sheets_schema import chunking
+            old = pv.CONCAT_DIR, chunking.CHUNKS_DIR
+            pv.CONCAT_DIR, chunking.CHUNKS_DIR = tmp / "concat", tmp / "chunks"
+            try:
+                # --project is a closed choice, so the command's record-less
+                # path is exercised through the same calls it makes
+                from data_sheets_schema.cli import receipts as mod
+                p = mod._run_paths("claudecode_agent", "L", "P")
+                self.assertFalse(p["provenance"].exists())
+                header = pv.parse_header(p["full"])
+                self.assertEqual(header.get("Source bundle"), str(bundle))
+                block = rc.block_for(p["full"], rc.receipt_path(p["core_dir"], "P"), Path(header["Source bundle"]),
+                                     pv._md5(bundle), True)
+                self.assertTrue(block["checked"]); self.assertEqual(block["findings"], [])
+            finally:
+                pv.CONCAT_DIR, chunking.CHUNKS_DIR = old
 
     def test_the_record_step_passes_receipt_expected_and_names_the_receipt_artifact(self):
         self.assertIn("--receipt-expected", self.TEXT)

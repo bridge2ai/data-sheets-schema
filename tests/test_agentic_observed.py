@@ -138,9 +138,24 @@ class Observe(unittest.TestCase):
                    tools=[("Bash", {"command": f"sed -n 2001,3000p {self.bundle}"})]),
         ])
         obs = ao.observe([t], self.bundle, receipt=receipt, manifest=manifest)
-        self.assertEqual(obs["receipt_chunks_total"], 3)          # c999 is not a manifest chunk
+        self.assertEqual(obs["receipt_chunks_total"], 3)          # the manifest's count (#732)
         self.assertEqual(obs["receipt_chunks_unopened"], 1)
         self.assertEqual(obs["_receipt_unopened_ids"], ["c003"])
+        self.assertEqual(obs["_receipt_strangers"], ["c999"])
+        # a receipt of bogus ids is not 0/0
+        receipt.write_text(yaml.safe_dump({"chunks": [{"id": "zzz"}, {"id": "c001"}, {"id": "c001"}]}))
+        obs = ao.observe([t], self.bundle, receipt=receipt, manifest=manifest)
+        self.assertEqual(obs["receipt_chunks_total"], 3)
+        self.assertEqual(obs["_receipt_duplicates"], ["c001"]); self.assertEqual(obs["_receipt_unclaimed"], ["c002", "c003"])
+        receipt.write_text(yaml.safe_dump({"chunks": [
+            {"id": "c001", "status": "extracted"}, {"id": "c002", "status": "nothing_relevant"},
+            {"id": "c003", "status": "nothing_relevant"}]}))
+        # a chunk read in two smaller windows that cover it is opened (#736)
+        t3 = self._transcript("c.jsonl", [
+            _event("2026-08-27T00:00:00Z", usage={"output_tokens": 1},
+                   tools=[("Read", {"file_path": str(self.bundle), "offset": 1, "limit": 1500}),
+                          ("Read", {"file_path": str(self.bundle), "offset": 1501, "limit": 1500})])])
+        self.assertEqual(ao.observe([t3], self.bundle, receipt=receipt, manifest=manifest)["receipt_chunks_unopened"], 0)
         # a partly-opened chunk is unopened: the receipt claims the whole chunk
         t2 = self._transcript("b.jsonl", [
             _event("2026-08-27T00:00:00Z", usage={"output_tokens": 1},
