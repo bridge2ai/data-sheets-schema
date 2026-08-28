@@ -649,7 +649,10 @@ PHASE_NEEDS = {
     # ignore. The report phase still receives both, because it narrates both.
     "audit": ("Completed full record",),
     "reconcile_full": ("Completed full record", "Audit findings"),
-    "reconcile_core": ("Reconciled full record", "Completed core record", "Audit findings"),
+    # A derived phase reads the full record on disk and nothing else (#694);
+    # declaring the audit or the old core as inputs made a resume refuse a
+    # projection for want of context it does not use (#749).
+    "reconcile_core": ("Reconciled full record",),
     # The reconciled records too (#580). The report is asked what changed in
     # each record and why, and it received only the audit findings — so it had
     # to reconstruct actions it never observed. #546 found every record that
@@ -2372,6 +2375,13 @@ def _dependents_of(carry_name: str, produced_by: tuple[str, ...]) -> set[str]:
 
     stale = {carry_name}
     dependents: set[str] = set(produced_by)
+    # What the producing phases themselves publish is stale too: a discarded
+    # full record makes `reconcile_full` re-run, and everything that reads
+    # its "Reconciled full record" must follow. Until #749 that edge was
+    # masked by reconcile_core also reading the core carry.
+    for phase in produced_by:
+        if publishes.get(phase):
+            stale.add(publishes[phase])
     changed = True
     while changed:
         changed = False

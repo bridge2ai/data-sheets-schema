@@ -2041,7 +2041,7 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
                 "_distributions: []\ncompression: none\ndialect: x\n")
             _progress_path(spec).parent.mkdir(parents=True, exist_ok=True)
             _progress_path(spec).write_text(json.dumps(
-                {"completed": ["full", "core", "audit", "reconcile_full"]}))
+                {"completed": ["full", "core"]}))
 
             ran = []
 
