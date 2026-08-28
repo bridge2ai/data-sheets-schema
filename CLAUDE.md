@@ -453,6 +453,13 @@ receipt exists or the record claims one (#726). Manifests exist for the
 document bundle only; a run reading a crate/healthsheet bundle cannot be
 receipt-checked until that bundle is chunked (#725).
 
+**The agentic protocol** (#709, `.claude/commands/d4d-full-core.md` Phase 1):
+read the manifest, then per chunk read it with the file tool (never a
+shell — the transcript cross-check counts `Read` windows only) and write
+its receipt entry before the next chunk. `scripts/agentic_observed.py
+--receipt R --manifest M` reports `receipt_chunks_unopened`: chunks marked
+reviewed that no read window covers — recorded under `run_observed`.
+
 **The gate** (`canary.verdict`): when `inputs.receipt_expected` is true — set
 by `d4d provenance record --receipt-expected`, which the receipt-writing
 playbook passes — an unchecked receipt is UNMEASURABLE and any unreviewed

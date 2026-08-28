@@ -218,6 +218,24 @@ class OnDisk(unittest.TestCase):
             self.assertIn("unreadable", rc.block_for(full, receipt, bundle, md5, True, manifest)["reason"])
 
 
+class Playbook(unittest.TestCase):
+    """#709: the agentic Phase 1 is the receipt protocol, and the record says
+    a receipt was expected."""
+    TEXT = (Path(__file__).resolve().parent.parent / ".claude/commands/d4d-full-core.md").read_text(encoding="utf-8")
+
+    def test_phase_one_reads_the_manifest_receipts_each_chunk_and_mandates_the_file_tool(self):
+        p1 = self.TEXT.split("## Phase 1", 1)[1].split("## Phase 2", 1)[0]
+        for needle in ("_chunks.yaml", "coverage-receipt entry before reading the next",
+                       "file-reading\n   tool", "never\n   through a shell", "redundant_with",
+                       "nothing_relevant", "duplicate_of", "d4d receipts check"):
+            self.assertIn(needle, p1, needle)
+
+    def test_the_record_step_passes_receipt_expected_and_names_the_receipt_artifact(self):
+        self.assertIn("--receipt-expected", self.TEXT)
+        self.assertIn('"{PROJECT}_coverage_receipt.yaml"', self.TEXT)
+        self.assertIn("_coverage_receipt.yaml`", self.TEXT.split("## Outputs", 1)[1].split("## Factual", 1)[0])
+
+
 class Gate(unittest.TestCase):
     """The canary gate reads the block: absent-but-expected is UNMEASURABLE,
     an unreviewed chunk or an unverified snippet is a regression, and a run

@@ -111,6 +111,8 @@ record identifies itself as a dataset its project declares distinct.
 - Core: `data/d4d_concatenated/claudecode_agent_core/{VERSION}/{PROJECT}_d4d_core.yaml`
 - Required production reconciliation report:
   `data/d4d_concatenated/claudecode_agent_core/{VERSION}/{PROJECT}_reconciliation.md`
+- Required coverage receipt (#708/#709), written during Phase 1:
+  `data/d4d_concatenated/claudecode_agent_core/{VERSION}/{PROJECT}_coverage_receipt.yaml`
 
 Never overwrite a previous version's directory; a new run gets a new `{VERSION}`.
 
@@ -294,26 +296,56 @@ reasoning effort, and mode.
 
 ## Phase 1 - Full D4D from input documents
 
-**Read the whole declared bundle before extracting anything.** The API path
+**Phase 1 is a receipt protocol, not a reading instruction.** The API path
 has every byte of the bundle in context on every call; this path reads it
-through a file tool, and the 2026-08-24 arm's agents read AI_READI, CM4AI
-and VOICE piecewise and never opened roughly a fifth of each (#700). A slot
-whose evidence sits in an unread window is recorded as absent,
-indistinguishable from "the bundle does not support it". So:
+through a file tool, and the 2026-08-24 arm's agents never opened roughly a
+fifth of AI_READI, CM4AI and VOICE (#700). "Read the whole bundle" was the
+rule; nothing could tell laziness from compliance. So the reading now leaves
+a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
 
-1. count the bundle's lines (`wc -l`), then read it sequentially in
-   consecutive `offset`/`limit` windows until every line has been read
-   once — no gaps, no reliance on search to fill them;
-2. **size windows by tokens, not lines.** The tool refuses any single read
-   over ~25,000 tokens and returns nothing; in that arm 17 bundle reads
-   failed this way and the lines they covered were never re-read. For these
-   bundles ~400–500 lines per window is safe. **A read that errors counts as
-   unread**: re-read that range in smaller windows before moving on;
-3. only then extract. Search (`grep`) is for *re-finding* a passage you have
-   already read, never a substitute for reading it;
-4. the launcher records how much you actually read (`bundle_lines_read` in
-   `run_observed`, from your transcript, counting successful reads only), so
-   an unread window is visible in the record rather than silently absent.
+1. **Read the chunk manifest first**:
+   `data/preprocessed/chunks/{PROJECT}_chunks.yaml` (`d4d bundle chunk
+   --check --project {PROJECT}` must say `current`; if it does not, stop —
+   the bundle and its manifest disagree and nothing you write can be
+   anchored). It lists every chunk with its `id` and `lines: [start, end]`,
+   sized to fit one file-tool call.
+2. **For each chunk, in manifest order:** read it with the **file-reading
+   tool** (`Read` with `offset: start` and `limit: end − start + 1`) — never
+   through a shell (`sed -n`, `cat`, `head`): the transcript cross-check
+   counts file-tool windows only, and a shell read is honest but invisible
+   to it, so it is recorded as a chunk you claimed without opening. **A read
+   that errors is unread**: re-read that range in smaller windows before
+   writing the entry.
+3. **Write the chunk's coverage-receipt entry before reading the next
+   chunk** — where the reading happens, not reconstructed at the end — into
+   `{PROJECT}_coverage_receipt.yaml` (path under Outputs), which begins
+   with the manifest's `bundle_md5`. One entry per chunk, a closed status,
+   each with its predicate:
+   - `extracted` with `extracted: [{slot, snippet}, …]` — the record slot
+     path the fact fills (`funders[0].grant_id`, or an entry path such as
+     `funders[0]` when one passage attests a whole entry) and a **verbatim**
+     snippet from *this* chunk, at least a phrase long; a one-word snippet
+     attests nothing and fails the check;
+   - `redundant_with: [chunk ids]` — relevant, but every fact it holds is
+     already receipted from those chunks;
+   - `nothing_relevant` with a `reason`;
+   - `duplicate_of: <chunk id>` — the same content as another chunk.
+4. Only then extract into the record. Search (`grep`) is for re-finding a
+   passage you have already receipted, never a substitute for a chunk entry.
+5. Before Phase 2, run `poetry run d4d receipts check --label {VERSION}
+   --project {PROJECT} --strict` (after the provenance record exists it can
+   be re-run with `--write`). It must report `chunks N/N reviewed`, every
+   snippet verified and no findings. `slots without a receipt` is reported,
+   not gated: a populated slot whose receipt you cannot name is one to
+   re-examine, not one to pad. The validator cannot tell that a
+   `nothing_relevant` chunk truly had nothing, or that a real snippet
+   supports the value it sits under — those stay review work, made specific
+   by chunk id and slot path.
+
+The launcher still records what you actually opened (`bundle_lines_read`)
+and, with the receipt, which reviewed chunks the transcript never opened
+(`receipt_chunks_unopened`); a receipt that claims a chunk no window covers
+is the cheap cheat this protocol exists to make deliberate.
 
 Follow the method in `.claude/commands/d4d-agent.md` (read it first). Summary of the
 non-negotiables:
@@ -633,7 +665,8 @@ poetry run d4d provenance record \
   --prompt {EACH PROMPT FILE THE RUN CONSUMED} \
   --prompt-text {THE INSTRUCTION AS SENT} \
   --reasoning-effort {EFFORT, ONLY IF YOU KNOW IT} \
-  --phase '{"name":"generate_full","completed":true,"artifacts":["{PROJECT}_d4d.yaml"],"observed":{"total_tokens":{TOTAL},"tool_uses":{COUNT},"duration_ms":{MS}}}' \
+  --receipt-expected \
+  --phase '{"name":"generate_full","completed":true,"artifacts":["{PROJECT}_d4d.yaml","{PROJECT}_coverage_receipt.yaml"],"observed":{"total_tokens":{TOTAL},"tool_uses":{COUNT},"duration_ms":{MS}}}' \
   --phase '{"name":"derive_core","completed":true,"artifacts":["{PROJECT}_d4d_core.yaml"]}' \
   --phase '{"name":"source_audit","completed":true}' \
   --phase '{"name":"reconcile","completed":true,"iterations":{HOW MANY TIMES YOU RAN VALIDATE-AND-ITERATE}}' \
@@ -769,6 +802,10 @@ reconciliation report rather than pinning the edit to make the check pass.
   distinct from this project.
 - The core header contains `Phase 4 reconciliation: completed`.
 - The Phase 3/4 reconciliation report is present.
+- The coverage receipt is present and `d4d receipts check --strict` passes:
+  every manifest chunk reviewed, every snippet verified, no findings. The
+  provenance record carries `inputs.receipt_expected: true` (the
+  `--receipt-expected` flag) so the canary gate holds the run to it.
 - The live provenance record is present and its `record_mode` is `live`, and it
   names both the prompt files and the instruction as sent.
 - `d4d runs check --strict` passes for the run. **Recording provenance is not the

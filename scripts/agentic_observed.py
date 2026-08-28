@@ -42,8 +42,34 @@ def _usage_total(u: dict) -> int:
             + u.get("cache_creation_input_tokens", 0) + u.get("output_tokens", 0))
 
 
+def receipt_cross_check(covered: set[int], receipt: Path, manifest: Path) -> dict:
+    """Chunks the receipt marks reviewed whose lines the transcript never
+    opened (#709). The receipt is the agent's claim; the read windows are
+    the observation; a reviewed chunk with no window over it is the cheap
+    cheat — or a read through a shell tool, which this counts as unopened:
+    the playbook mandates the file tool for chunk reads for exactly this
+    reason (#711 review F5), and parsing `sed -n`/`cat` is a known gap.
+    `covered` is 0-based line indexes."""
+    import yaml
+    rec = yaml.safe_load(receipt.read_text(encoding="utf-8")) or {}
+    man = yaml.safe_load(manifest.read_text(encoding="utf-8")) or {}
+    spans = {c["id"]: c["lines"] for c in man.get("chunks") or [] if isinstance(c, dict)}
+    reviewed = [e.get("id") for e in rec.get("chunks") or [] if isinstance(e, dict)]
+    unopened = []
+    for cid in reviewed:
+        if cid not in spans:
+            continue
+        a, b = spans[cid]
+        if any(i not in covered for i in range(a - 1, b)):
+            unopened.append(cid)
+    return {"receipt_chunks_total": len([c for c in reviewed if c in spans]),
+            "receipt_chunks_unopened": len(unopened),
+            "_receipt_unopened_ids": unopened}
+
+
 def observe(transcripts: list[Path], bundle: Path | None,
-            until: datetime | None = None) -> dict:
+            until: datetime | None = None, receipt: Path | None = None,
+            manifest: Path | None = None) -> dict:
     """Sum across transcripts. Two traps the first version fell into (#701):
 
     - one API response is written as several JSONL lines sharing a
@@ -123,6 +149,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
         out["bundle_lines_total"] = n_lines
         out["_bundle_search_touches"] = searches          # informational; not an observed field
         out["_bundle_reads_failed"] = sum(1 for t in read_windows if t in failed)
+        if receipt is not None and manifest is not None:
+            out.update(receipt_cross_check(covered, receipt, manifest))
     return out
 
 
@@ -134,13 +162,21 @@ def main() -> int:
     ap.add_argument("--until", default=None,
                     help="ISO timestamp; ignore transcript events after it (an agent's "
                          "activity after its run completed is not the run)")
+    ap.add_argument("--receipt", type=Path, default=None,
+                    help="the run's coverage receipt; with --manifest, reports chunks "
+                         "marked reviewed that the transcript never opened (#709)")
+    ap.add_argument("--manifest", type=Path, default=None,
+                    help="the bundle's chunk manifest (data/preprocessed/chunks/)")
     args = ap.parse_args()
+    if (args.receipt is None) != (args.manifest is None):
+        print("--receipt and --manifest go together", file=sys.stderr)
+        return 2
     until = datetime.fromisoformat(args.until.replace("Z", "+00:00")) if args.until else None
     missing = [str(t) for t in args.transcripts if not t.exists()]
     if missing:
         print(f"missing transcript(s): {missing}", file=sys.stderr)
         return 2
-    obs = observe(args.transcripts, args.bundle, until)
+    obs = observe(args.transcripts, args.bundle, until, args.receipt, args.manifest)
     info = {k: v for k, v in obs.items() if k.startswith("_")}
     run = {k: v for k, v in obs.items() if not k.startswith("_")}
     print(json.dumps(run))
@@ -148,6 +184,9 @@ def main() -> int:
         print(f"note: bundle search touches (not counted as read): "
               f"{info['_bundle_search_touches']}; bundle reads that errored "
               f"(not counted as read): {info['_bundle_reads_failed']}", file=sys.stderr)
+        if info.get("_receipt_unopened_ids"):
+            print(f"receipt chunks marked reviewed but never opened by the file tool: "
+                  f"{info['_receipt_unopened_ids']}", file=sys.stderr)
     return 0
 
 

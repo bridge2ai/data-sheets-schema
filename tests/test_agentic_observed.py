@@ -119,6 +119,34 @@ class Observe(unittest.TestCase):
         self.assertEqual(obs["tool_uses"], 0)
         self.assertEqual(obs["duration_ms"], 600000)
 
+    def test_receipt_chunks_the_transcript_never_opened_are_counted(self):
+        """#709: the receipt is the claim, the read windows the observation."""
+        import yaml
+        manifest = self.root / "P_chunks.yaml"
+        manifest.write_text(yaml.safe_dump({"chunks": [
+            {"id": "c001", "lines": [1, 1000]}, {"id": "c002", "lines": [1001, 2000]},
+            {"id": "c003", "lines": [2001, 3000]}]}))
+        receipt = self.root / "P_coverage_receipt.yaml"
+        receipt.write_text(yaml.safe_dump({"chunks": [
+            {"id": "c001", "status": "extracted"}, {"id": "c002", "status": "nothing_relevant"},
+            {"id": "c003", "status": "nothing_relevant"}, {"id": "c999", "status": "nothing_relevant"}]}))
+        t = self._transcript("a.jsonl", [
+            _event("2026-08-27T00:00:00Z", usage={"output_tokens": 1},
+                   tools=[("Read", {"file_path": str(self.bundle), "offset": 1, "limit": 2000})]),
+            # c003 read through a shell: honest, invisible, counted as unopened
+            _event("2026-08-27T00:01:00Z", usage={"output_tokens": 1},
+                   tools=[("Bash", {"command": f"sed -n 2001,3000p {self.bundle}"})]),
+        ])
+        obs = ao.observe([t], self.bundle, receipt=receipt, manifest=manifest)
+        self.assertEqual(obs["receipt_chunks_total"], 3)          # c999 is not a manifest chunk
+        self.assertEqual(obs["receipt_chunks_unopened"], 1)
+        self.assertEqual(obs["_receipt_unopened_ids"], ["c003"])
+        # a partly-opened chunk is unopened: the receipt claims the whole chunk
+        t2 = self._transcript("b.jsonl", [
+            _event("2026-08-27T00:00:00Z", usage={"output_tokens": 1},
+                   tools=[("Read", {"file_path": str(self.bundle), "offset": 1, "limit": 1500})])])
+        self.assertEqual(ao.observe([t2], self.bundle, receipt=receipt, manifest=manifest)["receipt_chunks_unopened"], 2)
+
     def test_no_bundle_means_no_coverage_keys(self):
         t = self._transcript("a.jsonl", [_event("2026-08-27T00:00:00Z", usage={"output_tokens": 1})])
         obs = ao.observe([t], None)

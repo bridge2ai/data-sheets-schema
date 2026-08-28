@@ -46,7 +46,13 @@ AGENTIC_PHASES = frozenset({"generate_full", "generate_core", "derive_core",
 # it. The subagent itself must not estimate these (#400); only the launcher
 # that observed them may record them.
 _OBSERVED_FIELDS = frozenset({"total_tokens", "tool_uses", "duration_ms",
-                              "bundle_lines_read", "bundle_lines_total"})
+                              "bundle_lines_read", "bundle_lines_total",
+                              "receipt_chunks_total", "receipt_chunks_unopened"})
+# receipt_chunks_total / receipt_chunks_unopened (#709): of the chunks the
+# coverage receipt marks reviewed, how many the transcript shows no file-tool
+# window over. The receipt is the agent's claim and the windows are the
+# observation; a reviewed-but-unopened chunk is the laziness the receipt
+# exists to make deliberate rather than easy.
 # bundle_lines_read / bundle_lines_total: how much of the declared bundle the
 # run actually opened through its file-reading tool, as the union of its read
 # windows over the bundle's line count (#700). The API path has the whole
