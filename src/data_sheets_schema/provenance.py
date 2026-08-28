@@ -1116,7 +1116,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                  reasoning_effort: str | None = None,
                  phases: list[dict[str, Any]] | None = None,
                  outputs: dict[str, Path] | None = None,
-                 extra_notes: list[str] | None = None) -> ProvenanceRecord:
+                 extra_notes: list[str] | None = None,
+                 receipt_expected: bool = False) -> ProvenanceRecord:
     """Assemble a provenance record for one project-run.
 
     ``mode`` is ``live`` or ``reconstructed``. ``input_verified`` must be True
@@ -1153,7 +1154,12 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         bundle = Path(declared) if declared else None
 
     inputs: dict[str, Any] = {"bundle_path": str(bundle) if bundle else None,
-                              "chunks": None}
+                              "chunks": None,
+                              # Whether the procedure wrote a coverage receipt
+                              # (#708) — the run's claim about itself, which the
+                              # gate reads to tell an absent receipt from one
+                              # that was never part of the procedure.
+                              "receipt_expected": bool(receipt_expected)}
     if bundle and bundle.exists() and input_verified:
         inputs.update({"bundle_md5": _md5(bundle),
                        "bundle_bytes": bundle.stat().st_size,

@@ -101,6 +101,11 @@ REPORTED_ONLY = (
     ("GC label variants", "form",
      lambda b: (int(b["gc_label_variant_occurrences"])
                 if "gc_label_variant_occurrences" in b else None)),
+    # Receipts (#708) are shown on every run and gated by `verdict` against
+    # floors when the run's procedure wrote one; `_ran` reads `checked`, so
+    # an unchecked block prints — (#727).
+    ("chunks unreviewed", "receipts", lambda b: receipt_floors(b)["chunks unreviewed"]),
+    ("snippets unverified", "receipts", lambda b: receipt_floors(b)["snippets unverified"]),
 )
 
 
@@ -119,6 +124,23 @@ PREDICTION_METRICS = {
     4: "undeclared prefixes",
     5: "British spellings",
 }
+
+
+def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
+    """Defect counts read from a checked receipts block; each must be 0."""
+    ch, sn = block.get("chunks") or {}, block.get("snippets") or {}
+    total, reviewed = int(ch.get("total") or 0), int(ch.get("reviewed") or 0)
+    return {
+        "chunks unreviewed": max(0, total - reviewed),
+        "snippets unverified": int(sn.get("mismatched") or 0) + int(sn.get("unchecked") or 0),
+        # A receipt over a non-empty bundle that extracted nothing is not a
+        # clean receipt; it is `checked: 0` wearing a pass (#684, DisMech #7252).
+        "receipts vacuous": int(total > 0 and int(sn.get("total") or 0) == 0),
+        # Findings not already counted above: a mismatched snippet is one
+        # defect, not two lines (#727).
+        "receipt findings": len([f for f in block.get("findings") or []
+                                 if f.get("kind") not in ("snippet_mismatch", "snippet_empty")]),
+    }
 
 
 def _ran(block: Any) -> bool:
@@ -194,6 +216,25 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
             row["regressed"] = True
             regressions.append(f"{name}: {value} against a baseline worst of {bar}")
         rows.append(row)
+
+    # Receipts (#708) are gated against absolute floors, not a baseline: no
+    # earlier arm wrote one, and the floors are the receipt's own definition —
+    # every chunk reviewed, every snippet verified. Three cases: the block says
+    # the procedure wrote no receipt → not a metric for this run; it says one
+    # was expected and none could be checked → blind (UNMEASURABLE, #613); it
+    # was checked → floors.
+    rb = (checks or {}).get("receipts")
+    if isinstance(rb, dict) and rb.get("expected"):
+        if not rb.get("checked"):
+            blind.append("receipts")
+            rows.append({"metric": "receipts", "run": None, "baseline_worst": None})
+        else:
+            for name, value in receipt_floors(rb).items():
+                row = {"metric": name, "run": value, "baseline_worst": 0}
+                if value > 0:
+                    row["regressed"] = True
+                    regressions.append(f"{name}: {value} against a floor of 0")
+                rows.append(row)
 
     if blind:
         status = UNMEASURABLE

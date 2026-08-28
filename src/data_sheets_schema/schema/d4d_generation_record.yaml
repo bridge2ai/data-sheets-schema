@@ -255,6 +255,16 @@ classes:
         inlined: true
         range: AnyBlock
 
+      receipts:
+        description: >-
+          The coverage receipt checked against the chunk manifest, the bundle
+          and the full record (#708): chunks reviewed N/N, snippets verified
+          M/M, slots with a receipt S/T, findings, and the non-checks named.
+          `expected` says whether the run's procedure wrote one; an expected
+          receipt that could not be checked is unmeasurable, not clean.
+        inlined: true
+        range: AnyBlock
+
       unverified:
         description: >-
           Values recorded but not observed. Named rather than silently trusted.
