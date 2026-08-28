@@ -98,6 +98,17 @@ class TestTheAddedRuleIsGeneric(unittest.TestCase):
         text = re.sub(r"\[\d+\]", "[]", self.block)
         self.assertIsNone(re.search(r"\b\d+\b", text), "a quantity in the rule is an outcome expectation")
 
+    def test_no_slot_path_is_named_in_backticks(self):
+        """The v5/v6 convention (a backticked slot ties the rule to one schema
+        shape), narrowed: the marker line, the status names and the receipt's
+        own keys are the rule's vocabulary and may be backticked; a record
+        slot path may not (#742)."""
+        from data_sheets_schema.receipts import STATUSES
+        allowed = set(STATUSES) | {"[cNNN]", "--- COVERAGE RECEIPT ---", "bundle_md5", "chunks",
+                                   "id", "status", "extracted", "{slot, snippet}", "reason", "of"}
+        for tok in re.findall(r"`([^`]+)`", self.block):
+            self.assertIn(tok, allowed, f"`{tok}` is not receipt vocabulary")
+
     def test_no_reference_to_prior_runs(self):
         low = self.block.lower()
         for word in ("replicate", "earlier run", "previous", "arm ", "v6", "#708", "#710"):

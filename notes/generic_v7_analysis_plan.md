@@ -1,6 +1,6 @@
 # generic v7 — the receipt rule on the API arm, and what it can be held to
 
-Written 2026-08-28, before any v7 generation. Same purpose as the v5 and v6
+Written 2026-08-27, before any v7 generation. Same purpose as the v5 and v6
 plans: predictions out of the prompt, and a statement of what a v6-against-v7
 comparison can and cannot attribute.
 

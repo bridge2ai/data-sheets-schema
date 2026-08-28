@@ -106,6 +106,16 @@ def _canary_never_ran(spec, baseline, what_happened: str) -> str:
             "--no-canary-gate to proceed anyway.")
 
 
+
+def _plan_or_refuse(spec):
+    """A plan that cannot be assembled is a refusal with a reason, not a
+    traceback (#742): a receipt condition on a bundle with no chunk manifest."""
+    from data_sheets_schema.api_runner import plan
+    try:
+        return plan(spec)
+    except RuntimeError as exc:
+        raise click.ClickException(str(exc))
+
 @click.group()
 def api():
     """Generate D4D records via the Anthropic API (four model phases plus a derived core)."""
@@ -197,7 +207,7 @@ def plan_cmd(project, arm, label, condition, bundle, out_dir, as_json):
     from data_sheets_schema.api_runner import plan
     spec = _spec(project, arm, label, condition, bundle, out_dir)
     _require_bundle(spec, project, bundle)
-    p = plan(spec)
+    p = _plan_or_refuse(spec)
     if as_json:
         click.echo(json.dumps(p, indent=2))
         return
@@ -240,7 +250,7 @@ def run_cmd(project, arm, label, condition, bundle, out_dir, yes):
         raise click.ClickException(
             f"{spec.full_path} already exists; a run label is never reused")
 
-    p = plan(spec)
+    p = _plan_or_refuse(spec)
     click.echo(f"~{p['approx_total_input_tokens']:,} input tokens across 6 phases "
                f"on {p['model']['name']}")
     if not yes and not click.confirm("Proceed with billed API calls?"):
@@ -310,7 +320,7 @@ def batch_cmd(projects, arm, condition, replicates, label_prefix, dry_run,
             _require_canonical_prompts(s)
             specs.append(s)
 
-    plans = [plan(s) for s in specs]
+    plans = [_plan_or_refuse(s) for s in specs]
     total = sum(x["approx_total_input_tokens"] for x in plans)
     click.echo(f"📦 {len(specs)} runs — {len(names)} projects x {replicates} "
                f"replicates, arm={arm}, condition={condition}")

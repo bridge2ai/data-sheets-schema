@@ -2083,6 +2083,16 @@ class TestReceiptCondition(unittest.TestCase):
         self.assertIn("id: x", rec)
         self.assertEqual(yaml.safe_load(_extract_receipt(rcpt))["chunks"][0]["id"], "c001")
         self.assertEqual(split_receipt("no marker")[1], None)
+        # #740: a marker echoed inside the record does not split it; the
+        # receipt follows the last marker *line*; a single fence around both
+        # documents still yields the receipt
+        echoed = (f"```yaml\nid: x\nnotes: the instruction said {RECEIPT_MARK} here\n```\n"
+                  f"{RECEIPT_MARK}\nbundle_md5: m\nchunks:\n- id: c001\n  status: nothing_relevant\n  reason: r\n```\n")
+        rec, rcpt = split_receipt(echoed)
+        self.assertIn("notes: the instruction said", rec)
+        self.assertEqual(yaml.safe_load(_extract_receipt(rcpt))["chunks"][0]["id"], "c001")
+        with self.assertRaisesRegex(RuntimeError, "not a receipt"):
+            _extract_receipt("chunks:\n- just a string\n")
         with self.assertRaisesRegex(RuntimeError, "not a receipt"):
             _extract_receipt("chunks: []\n")
         with self.assertRaisesRegex(RuntimeError, "not a receipt"):

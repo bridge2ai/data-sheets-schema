@@ -532,11 +532,22 @@ PHASE_INSTRUCTIONS = {
     # Appended to `full` only under RECEIPT_CONDITIONS (#710). Keyed here so
     # the assembly digest covers its wording.
     "full_receipt": (
-        f" Then, on its own line, write exactly `{RECEIPT_MARK}` and follow it "
+        f" Then, on its own line, write exactly {RECEIPT_MARK} and follow it "
         "with the coverage receipt as a second YAML document, per the arm "
         "prompt's receipt rule: `bundle_md5` as given with the bundle, and one "
-        "`chunks` entry per `[cNNN]` marker in the bundle, in order. No other "
-        "text after the receipt."),
+        "`chunks` entry per `[cNNN]` marker in the bundle, in order, in exactly "
+        "this shape (#738):\n"
+        "bundle_md5: <as given>\n"
+        "chunks:\n"
+        "- id: c001\n  status: extracted\n  extracted:\n"
+        "  - slot: funders[0].grant_id\n    snippet: \"<verbatim text from c001>\"\n"
+        "  - slot: funders[0]\n    snippet: \"<one passage attesting the whole entry>\"\n"
+        "- id: c002\n  status: nothing_relevant\n  reason: <why>\n"
+        "- id: c003\n  status: redundant_with\n  chunks: [c001]\n"
+        "- id: c004\n  status: duplicate_of\n  of: c001\n"
+        "Every snippet part (split on `...`) must be at least 8 characters "
+        "after case and punctuation folding; shorter snippets fail the check "
+        "(#739). No other text after the receipt."),
     "core": (
         "Phase 2. Produce the CORE D4D record for class `CoreDataset`, using "
         "the declared bundle and the completed full record supplied above. The "
@@ -788,18 +799,33 @@ def chunk_marked_bundle(bundle: Path) -> tuple[str, str]:
     return "\n".join(out), m["bundle_md5"]
 
 
+_RECEIPT_MARK_LINE = re.compile(r"^[ \t]*" + re.escape(RECEIPT_MARK) + r"[ \t]*$", re.M)
+
+
 def split_receipt(text: str) -> tuple[str, str | None]:
-    """(record text, receipt text) — the receipt part after RECEIPT_MARK, or
-    None when the response carries no marker."""
-    if RECEIPT_MARK not in text:
+    """(record text, receipt text) — the receipt part after the *last* line
+    that is exactly RECEIPT_MARK, or None when there is no such line. Line-
+    anchored and last, so a record value that echoes the marker (or the
+    instruction quoting it) does not split the record (#740)."""
+    hits = list(_RECEIPT_MARK_LINE.finditer(text))
+    if not hits:
         return text, None
-    head, tail = text.split(RECEIPT_MARK, 1)
-    return head, tail
+    m = hits[-1]
+    return text[:m.start()], text[m.end():]
 
 
 def _receipt_path(spec: RunSpec) -> Path:
     from data_sheets_schema.receipts import receipt_path
     return receipt_path(spec.core_path.parent, spec.project)
+
+
+def _receipts_block(spec: RunSpec, record: dict[str, Any]) -> dict[str, Any]:
+    """The receipts check recomputed from disk — like pair, report, grounding
+    and form on a resumed batch (#599), never read back from the record."""
+    from data_sheets_schema.receipts import block_for
+    return block_for(spec.full_path, _receipt_path(spec), spec.bundle,
+                     (record.get("inputs") or {}).get("bundle_md5"),
+                     spec.condition in RECEIPT_CONDITIONS)
 
 
 def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseRequest:
@@ -1160,13 +1186,18 @@ def _extract_receipt(text: str) -> str:
     mapping with a `chunks` list, fenced or bare. Anything else is unusable."""
     fences = re.findall(r"```(?:ya?ml)?\s*\n(.*?)```", text, re.S | re.I)
     unclosed = re.findall(r"```(?:ya?ml)?\s*\n(.*)\Z", text, re.S | re.I)
-    for cand in fences + unclosed + [re.sub(r"\A\s*ya?ml\s*\n", "", text, flags=re.I)]:
+    # A single fence closed after both documents leaves a bare receipt that
+    # ends in ``` — strip a trailing fence before the bare parse (#740).
+    bare = re.sub(r"\A\s*ya?ml\s*\n", "", text, flags=re.I)
+    bare = re.sub(r"\n\s*```\s*\Z", "\n", bare)
+    for cand in fences + unclosed + [bare]:
         cand = cand.strip()
         try:
             parsed = yaml.safe_load(cand)
         except yaml.YAMLError:
             continue
-        if isinstance(parsed, dict) and isinstance(parsed.get("chunks"), list) and parsed["chunks"]:
+        if (isinstance(parsed, dict) and isinstance(parsed.get("chunks"), list) and parsed["chunks"]
+                and all(isinstance(c, dict) and isinstance(c.get("id"), str) for c in parsed["chunks"])):
             return cand + "\n"
     raise RuntimeError("the text after the receipt marker is not a receipt "
                        "(a YAML mapping with a non-empty `chunks` list)")
@@ -1938,7 +1969,7 @@ def _intermediates_block(spec: RunSpec) -> list[dict[str, Any]] | None:
         # prefix glob would claim the other project's snapshots.
         rest = p.name[len(spec.project) + 1:]
         if not rest.startswith(("full", "core", "audit", "reconcile",
-                                "repair", "report")):
+                                "repair", "report", "coverage_receipt")):
             continue
         out.append({"path": str(p),
                     "sha256": hashlib.sha256(
@@ -2590,7 +2621,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                                "report": report_claims_block(spec),
                                "grounding": grounding_block(spec),
                                "form": _form_block(spec),
-                               "receipts": existing.get("receipts")},
+                               "receipts": _receipts_block(spec, existing)},
                     "already_complete": True,
                     "outputs": {"full": str(spec.full_path),
                                 "core": str(spec.core_path),
@@ -2640,6 +2671,15 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # having absorbed from it.
             done -= set(produced_by)
             done -= _dependents_of(name, produced_by)
+    # Under a receipt condition the receipt is part of the `full` artifact
+    # (#741): a full record on disk with no receipt beside it is a Phase 1
+    # that did not complete, and resuming past it would reach the gate
+    # unmeasurable with no phase to re-run.
+    if spec.condition in RECEIPT_CONDITIONS and "full" in done and not _receipt_path(spec).exists():
+        print("   full artifact present but its coverage receipt is missing; "
+              "re-running the full phase and what depended on it")
+        done -= {"full"}
+        done -= _dependents_of("Completed full record", ("full", "reconcile_full"))
     # The pre-reconciliation states, recovered from the snapshots the `full`
     # and `core` phases wrote (#639). They are not artifacts — reconciliation
     # overwrites those in place — so a resumed run cannot rebuild them from
@@ -2901,11 +2941,11 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # The coverage receipt checked against the manifest and the bundle
     # (#708/#710). Under a receipt condition an absent or failing receipt is
     # what the canary gate stops on; under any other it is not a metric.
-    from data_sheets_schema.receipts import block_for
-    rec.data["receipts"] = block_for(
-        spec.full_path, _receipt_path(spec), spec.bundle,
-        (rec.data.get("inputs") or {}).get("bundle_md5"),
-        spec.condition in RECEIPT_CONDITIONS)
+    # The receipt describes the record the `full` phase wrote; reconcile_full
+    # and repair rewrite that record afterwards, and on this path nothing
+    # adds a receipt for what they change — their slots are receiptless,
+    # reported under `slots.without_receipt`, never gated (#742).
+    rec.data["receipts"] = _receipts_block(spec, rec.data)
     rec.data["intermediates"] = _intermediates_block(spec)
 
     rec.write(spec.provenance_path)

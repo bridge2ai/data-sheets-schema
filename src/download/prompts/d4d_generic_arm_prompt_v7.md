@@ -230,16 +230,17 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   a marker of the form `[cNNN]` on its own line. Write the record, then a
   line reading exactly `--- COVERAGE RECEIPT ---`, then a YAML document with
   `bundle_md5` (as given with the bundle) and `chunks`: one entry per marker,
-  in order, with `id` and a `status` from exactly these — `extracted`, with
-  `extracted` listing every `{slot, snippet}` pair the chunk supplied, the
-  slot being the record path filled (a leaf such as `funders[0].grant_id`,
-  or an entry such as `funders[0]` where one passage attests the whole
-  entry) and the snippet a verbatim phrase from that chunk, long enough to
-  be found only where it came from; `redundant_with` naming the chunks that
-  already receipted everything it holds; `nothing_relevant` with a reason;
-  or `duplicate_of` naming the chunk it repeats. Every value in the record
-  that the bundle supplied appears in some chunk's receipt; a value with no
-  receipt is one the record must not carry.
+  in order, each with `id` and a `status` from exactly these, each status
+  with its own key — `extracted`, whose `extracted` key lists every
+  `{slot, snippet}` pair the chunk supplied, the slot being the record path
+  the value fills (a leaf, or an entry where one passage attests the whole
+  entry) and the snippet a verbatim phrase copied from that chunk, never a
+  lone short word; `redundant_with`, whose `chunks` key names the chunks
+  that already receipted everything it holds; `nothing_relevant`, with a
+  `reason`; or `duplicate_of`, whose `of` key names the chunk it repeats.
+  Every value in the record that the bundle supplied appears in some
+  chunk's receipt; a value with no receipt is one the record must not
+  carry. The phase instruction shows the exact shape.
 
 --- END ADDED IN v7 ---
 
