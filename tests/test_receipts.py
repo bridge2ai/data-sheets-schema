@@ -102,6 +102,23 @@ class Validator(unittest.TestCase):
         self.assertGreaterEqual(b["snippets"]["mismatched"], 1)
         self.assertEqual(b["slots"]["unresolved"], ["nowhere.at_all"])
 
+    def test_a_path_reshaped_after_the_receipt_is_reported_not_a_finding(self):
+        """#758: reconcile flattened principal_investigator: {name} to a
+        string on the v7 canary; the receipt's path resolved in the phase-1
+        snapshot and not in the final record."""
+        r = _receipt(self.md5)
+        r["chunks"][1]["extracted"].append({"slot": "funders[0].contact.name", "snippet": "NIH Common Fund's"})
+        original = {**FULL, "funders": [{**FULL["funders"][0], "contact": {"name": "x"}}]}
+        b = rc.check(r, self.manifest, self.texts, FULL, self.md5, original)
+        self.assertEqual(b["slots"]["reshaped_by_reconcile"], ["funders[0].contact.name"])
+        self.assertNotIn("slot_not_in_record", {f["kind"] for f in b["findings"]})
+        self.assertIn("reshaped by reconcile", b["summary"])
+        b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
+        self.assertIn("slot_not_in_record", {f["kind"] for f in b["findings"]})
+        r["chunks"][1]["extracted"].append({"slot": "never.there", "snippet": "NIH Common Fund's"})
+        b = rc.check(r, self.manifest, self.texts, FULL, self.md5, original)
+        self.assertEqual(b["slots"]["unresolved"], ["never.there"])
+
     def test_a_receipt_on_a_list_covers_only_itself_and_an_entry_covers_its_leaves(self):
         """#721: `funders` must not attest every funder; `funders[0]` attests
         funder 0's leaves (which is how a boolean or enum gets a receipt)."""
