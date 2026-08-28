@@ -71,12 +71,20 @@ GENERIC_PROMPT_V5 = PROMPTS / "d4d_generic_arm_prompt_v5.md"
 # v6 (#685): v5 plus a minting density norm, and the core header rewritten
 # for the derived core (#694). Two counted differences; see the file.
 GENERIC_PROMPT_V6 = PROMPTS / "d4d_generic_arm_prompt_v6.md"
+GENERIC_PROMPT_V7 = PROMPTS / "d4d_generic_arm_prompt_v7.md"
+#: Conditions whose `full` phase emits a coverage receipt (#710). The bundle
+#: they see carries chunk markers and the phase instruction asks for the
+#: second document, so this is a condition boundary, never a flag on an
+#: existing condition.
+RECEIPT_CONDITIONS = frozenset({"generic_v7"})
+RECEIPT_MARK = "--- COVERAGE RECEIPT ---"
 CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
                      "generic_v2": GENERIC_PROMPT_V2,
                      "generic_v3": GENERIC_PROMPT_V3,
                      "generic_v4": GENERIC_PROMPT_V4,
                      "generic_v5": GENERIC_PROMPT_V5,
                      "generic_v6": GENERIC_PROMPT_V6,
+                     "generic_v7": GENERIC_PROMPT_V7,
                      "tuned": GENERIC_PROMPT}
 
 # Which generic base each condition is built on. The generic/tuned comparison
@@ -96,6 +104,7 @@ CONDITION_AXES = {
     "generic_v4": {"base": "v4", "tuned": False},
     "generic_v5": {"base": "v5", "tuned": False},
     "generic_v6": {"base": "v6", "tuned": False},
+    "generic_v7": {"base": "v7", "tuned": False},
     "tuned":      {"base": "v1", "tuned": True},
 }
 
@@ -364,7 +373,10 @@ def prompt_body(path: Path = GENERIC_PROMPT) -> str:
 ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
                    "declared naming, arm prompt, "
                    "carried artifacts, phase instruction; "
-                   "core derived from the full record, not generated (#694)")
+                   "core derived from the full record, not generated (#694); "
+                   "under a receipt condition the bundle carries [cNNN] chunk "
+                   "markers and the full phase instruction asks for the "
+                   "coverage receipt after the record (#710)")
 
 
 def assembly_digest() -> dict[str, Any]:
@@ -517,6 +529,25 @@ PHASE_INSTRUCTIONS = {
         "`notes`. Never restate a sibling slot's value, and never invent a "
         "key. Output only the YAML, beginning with the header comment block "
         "specified above. No commentary before or after."),
+    # Appended to `full` only under RECEIPT_CONDITIONS (#710). Keyed here so
+    # the assembly digest covers its wording.
+    "full_receipt": (
+        f" Then, on its own line, write exactly {RECEIPT_MARK} and follow it "
+        "with the coverage receipt as a second YAML document, per the arm "
+        "prompt's receipt rule: `bundle_md5` as given with the bundle, and one "
+        "`chunks` entry per `[cNNN]` marker in the bundle, in order, in exactly "
+        "this shape (#738):\n"
+        "bundle_md5: <as given>\n"
+        "chunks:\n"
+        "- id: c001\n  status: extracted\n  extracted:\n"
+        "  - slot: funders[0].grant_id\n    snippet: \"<verbatim text from c001>\"\n"
+        "  - slot: funders[0]\n    snippet: \"<one passage attesting the whole entry>\"\n"
+        "- id: c002\n  status: nothing_relevant\n  reason: <why>\n"
+        "- id: c003\n  status: redundant_with\n  chunks: [c001]\n"
+        "- id: c004\n  status: duplicate_of\n  of: c001\n"
+        "Every snippet part (split on `...`) must be at least 8 characters "
+        "after case and punctuation folding; shorter snippets fail the check "
+        "(#739). No other text after the receipt."),
     "core": (
         "Phase 2. Produce the CORE D4D record for class `CoreDataset`, using "
         "the declared bundle and the completed full record supplied above. The "
@@ -733,6 +764,70 @@ def source_ranking_block(project: str,
     return "\n".join(lines)
 
 
+def chunk_marked_bundle(bundle: Path) -> tuple[str, str]:
+    """The bundle's text with a `[cNNN]` marker line opening each chunk of
+    its manifest (#710), and the manifest's md5.
+
+    Refuses a bundle whose manifest is absent or stale: markers the receipt
+    validator cannot resolve back to bytes would make every receipt
+    unmeasurable, and that is a fact to learn before a token is spent.
+    """
+    import hashlib
+
+    from data_sheets_schema.chunking import (bundle_path, load_manifest,
+                                              manifest_path, manifest_status)
+    name = bundle.name
+    if not name.endswith("_preprocessed.txt"):
+        raise RuntimeError(f"a receipt condition needs a chunk manifest, and manifests exist "
+                           f"for the document bundle only (#725): {bundle}")
+    project = name[: -len("_preprocessed.txt")]
+    raw = bundle.read_bytes()
+    mpath = manifest_path(project)
+    if not mpath.exists():
+        raise RuntimeError(f"no chunk manifest for {bundle}; run `d4d bundle chunk --project {project}`")
+    m = load_manifest(mpath)
+    if m.get("bundle_md5") != hashlib.md5(raw).hexdigest():
+        raise RuntimeError(f"chunk manifest {mpath} is not of the bytes at {bundle}; "
+                           f"run `d4d bundle chunk --project {project}`")
+    lines = raw.decode("utf-8", errors="ignore").split("\n")
+    starts = {c["lines"][0]: c["id"] for c in m["chunks"]}
+    out = []
+    for i, line in enumerate(lines, 1):
+        if i in starts:
+            out.append(f"[{starts[i]}]")
+        out.append(line)
+    return "\n".join(out), m["bundle_md5"]
+
+
+_RECEIPT_MARK_LINE = re.compile(r"^[ \t]*" + re.escape(RECEIPT_MARK) + r"[ \t]*$", re.M)
+
+
+def split_receipt(text: str) -> tuple[str, str | None]:
+    """(record text, receipt text) — the receipt part after the *last* line
+    that is exactly RECEIPT_MARK, or None when there is no such line. Line-
+    anchored and last, so a record value that echoes the marker (or the
+    instruction quoting it) does not split the record (#740)."""
+    hits = list(_RECEIPT_MARK_LINE.finditer(text))
+    if not hits:
+        return text, None
+    m = hits[-1]
+    return text[:m.start()], text[m.end():]
+
+
+def _receipt_path(spec: RunSpec) -> Path:
+    from data_sheets_schema.receipts import receipt_path
+    return receipt_path(spec.core_path.parent, spec.project)
+
+
+def _receipts_block(spec: RunSpec, record: dict[str, Any]) -> dict[str, Any]:
+    """The receipts check recomputed from disk — like pair, report, grounding
+    and form on a resumed batch (#599), never read back from the record."""
+    from data_sheets_schema.receipts import block_for
+    return block_for(spec.full_path, _receipt_path(spec), spec.bundle,
+                     (record.get("inputs") or {}).get("bundle_md5"),
+                     spec.condition in RECEIPT_CONDITIONS)
+
+
 def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseRequest:
     """Assemble one phase's request.
 
@@ -748,13 +843,22 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     # run produced a core record that failed validation for exactly that.
     cls = "CoreDataset" if PHASE_ARTIFACT.get(phase) == "core" else "Dataset"
     digest = schema_digest.digest_text(cls)
-    bundle_text = spec.bundle.read_text(encoding="utf-8", errors="ignore")
+    receipted = spec.condition in RECEIPT_CONDITIONS
+    if receipted:
+        bundle_text, bundle_md5 = chunk_marked_bundle(spec.bundle)
+        bundle_head = (f"# Declared input bundle — {spec.bundle}\n"
+                       f"# bundle_md5: {bundle_md5}\n"
+                       "# Chunk markers: a line of the form [cNNN] opens each chunk; "
+                       "the markers are not part of the bundle's text.\n\n")
+    else:
+        bundle_text = spec.bundle.read_text(encoding="utf-8", errors="ignore")
+        bundle_head = f"# Declared input bundle — {spec.bundle}\n\n"
 
     cached = [
         {"type": "text", "text": digest,
          "cache_control": {"type": "ephemeral"}},
         {"type": "text",
-         "text": f"# Declared input bundle — {spec.bundle}\n\n{bundle_text}",
+         "text": bundle_head + bundle_text,
          "cache_control": {"type": "ephemeral"}},
     ]
     # The ranking the rules tell the model to consult (#596). Without it the
@@ -789,7 +893,10 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str]) -> PhaseReq
     for name, text in carry.items():
         parts.append({"type": "text",
                       "text": f"# {name}\n\n{text}"})
-    parts.append({"type": "text", "text": PHASE_INSTRUCTIONS[phase]})
+    instruction = PHASE_INSTRUCTIONS[phase]
+    if receipted and phase == "full":
+        instruction += PHASE_INSTRUCTIONS["full_receipt"]
+    parts.append({"type": "text", "text": instruction})
 
     return PhaseRequest(
         phase=phase,
@@ -1072,6 +1179,28 @@ def _audit_is_well_formed(parsed: dict) -> bool:
                and str(f.get("record", "")).strip().lower()
                in AUDIT_RECORD_VALUES
                for f in findings)
+
+
+def _extract_receipt(text: str) -> str:
+    """The receipt document out of the tail of a full-phase response: a YAML
+    mapping with a `chunks` list, fenced or bare. Anything else is unusable."""
+    fences = re.findall(r"```(?:ya?ml)?\s*\n(.*?)```", text, re.S | re.I)
+    unclosed = re.findall(r"```(?:ya?ml)?\s*\n(.*)\Z", text, re.S | re.I)
+    # A single fence closed after both documents leaves a bare receipt that
+    # ends in ``` — strip a trailing fence before the bare parse (#740).
+    bare = re.sub(r"\A\s*ya?ml\s*\n", "", text, flags=re.I)
+    bare = re.sub(r"\n\s*```\s*\Z", "\n", bare)
+    for cand in fences + unclosed + [bare]:
+        cand = cand.strip()
+        try:
+            parsed = yaml.safe_load(cand)
+        except yaml.YAMLError:
+            continue
+        if (isinstance(parsed, dict) and isinstance(parsed.get("chunks"), list) and parsed["chunks"]
+                and all(isinstance(c, dict) and isinstance(c.get("id"), str) for c in parsed["chunks"])):
+            return cand + "\n"
+    raise RuntimeError("the text after the receipt marker is not a receipt "
+                       "(a YAML mapping with a non-empty `chunks` list)")
 
 
 def _extract(text: str, kind: str,
@@ -1840,7 +1969,7 @@ def _intermediates_block(spec: RunSpec) -> list[dict[str, Any]] | None:
         # prefix glob would claim the other project's snapshots.
         rest = p.name[len(spec.project) + 1:]
         if not rest.startswith(("full", "core", "audit", "reconcile",
-                                "repair", "report")):
+                                "repair", "report", "coverage_receipt")):
             continue
         out.append({"path": str(p),
                     "sha256": hashlib.sha256(
@@ -2325,10 +2454,25 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
                    f"truncated" if truncated else None)
         if not truncated:
             try:
+                receipt_text = None
+                if ph == "full" and spec.condition in RECEIPT_CONDITIONS:
+                    # The receipt is the phase's second document (#710). A
+                    # response without it is unusable — the record alone is
+                    # not what this condition asks for — and is retried like
+                    # any other unusable body.
+                    text, receipt_text = split_receipt(text)
+                    if receipt_text is None:
+                        raise RuntimeError(f"response carries no `{RECEIPT_MARK}` document")
                 body = _extract(
                     text, "json" if ph == "audit" else
                     ("md" if ph == "report" else "yaml"),
                     *PHASE_SCHEMA.get(ph, (FULL_SCHEMA_PATH, "Dataset")))
+                if receipt_text is not None:
+                    receipt_body = _extract_receipt(receipt_text)
+                    rp = _receipt_path(spec)
+                    rp.parent.mkdir(parents=True, exist_ok=True)
+                    rp.write_text(receipt_body, encoding="utf-8")
+                    _snapshot(spec, f"{spec.project}_coverage_receipt.yaml", receipt_body)
                 break
             except RuntimeError as exc:
                 problem = str(exc)
@@ -2477,7 +2621,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                                "report": report_claims_block(spec),
                                "grounding": grounding_block(spec),
                                "form": _form_block(spec),
-                               "receipts": existing.get("receipts")},
+                               "receipts": _receipts_block(spec, existing)},
                     "already_complete": True,
                     "outputs": {"full": str(spec.full_path),
                                 "core": str(spec.core_path),
@@ -2527,6 +2671,15 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # having absorbed from it.
             done -= set(produced_by)
             done -= _dependents_of(name, produced_by)
+    # Under a receipt condition the receipt is part of the `full` artifact
+    # (#741): a full record on disk with no receipt beside it is a Phase 1
+    # that did not complete, and resuming past it would reach the gate
+    # unmeasurable with no phase to re-run.
+    if spec.condition in RECEIPT_CONDITIONS and "full" in done and not _receipt_path(spec).exists():
+        print("   full artifact present but its coverage receipt is missing; "
+              "re-running the full phase and what depended on it")
+        done -= {"full"}
+        done -= _dependents_of("Completed full record", ("full", "reconcile_full"))
     # The pre-reconciliation states, recovered from the snapshots the `full`
     # and `core` phases wrote (#639). They are not artifacts — reconciliation
     # overwrites those in place — so a resumed run cannot rebuild them from
@@ -2650,6 +2803,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
                  "report": spec.report_path,
                  "reasoning": _reasoning_path(spec)},
         schema_digest_md5=schema_digest.fingerprint(schema_digest.digest_text("Dataset")),
+        receipt_expected=spec.condition in RECEIPT_CONDITIONS,
         extra_notes=[
             (f"Generated via {RUNTIME}; temperature {settings['temperature']} "
              "was set on the request and is therefore observed, not asserted."
@@ -2784,6 +2938,14 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     # Properties of the records alone, so they survive a drifted bundle (#602).
     from data_sheets_schema.grounding import form_facts
     rec.data["form"] = form_facts(spec.full_path, spec.core_path)
+    # The coverage receipt checked against the manifest and the bundle
+    # (#708/#710). Under a receipt condition an absent or failing receipt is
+    # what the canary gate stops on; under any other it is not a metric.
+    # The receipt describes the record the `full` phase wrote; reconcile_full
+    # and repair rewrite that record afterwards, and on this path nothing
+    # adds a receipt for what they change — their slots are receiptless,
+    # reported under `slots.without_receipt`, never gated (#742).
+    rec.data["receipts"] = _receipts_block(spec, rec.data)
     rec.data["intermediates"] = _intermediates_block(spec)
 
     rec.write(spec.provenance_path)

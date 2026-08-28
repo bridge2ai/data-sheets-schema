@@ -460,6 +460,18 @@ its receipt entry before the next chunk. `scripts/agentic_observed.py
 --receipt R --manifest M` reports `receipt_chunks_unopened`: chunks marked
 reviewed that no read window covers — recorded under `run_observed`.
 
+**The API condition** (#710, `generic_v7`): under `RECEIPT_CONDITIONS` the
+cached bundle carries `[cNNN]` marker lines at each manifest chunk's start
+(refused if the manifest is absent or stale) and the `full` phase must end
+with `--- COVERAGE RECEIPT ---` and the receipt document; a response without
+it is retried as unusable. The receipt is written beside the core record
+and checked into the provenance record in-process; `receipt_expected` is
+true for those conditions. Both the prompt pin and the assembly digest move.
+The receipt describes the record the `full` phase wrote: `reconcile_full`
+and repair rewrite it afterwards with no receipt route on this path, so
+their slots are reported under `slots.without_receipt`, never gated (#742).
+A full record with no receipt beside it does not resume past `full`.
+
 **The gate** (`canary.verdict`): when `inputs.receipt_expected` is true — set
 by `d4d provenance record --receipt-expected`, which the receipt-writing
 playbook passes — an unchecked receipt is UNMEASURABLE and any unreviewed
