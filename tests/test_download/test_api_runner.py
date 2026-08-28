@@ -2074,8 +2074,10 @@ class TestReceiptCondition(unittest.TestCase):
             other.write_text("not the bytes the manifest chunked\n", encoding="utf-8")
             with self.assertRaisesRegex(RuntimeError, "not of the bytes"):
                 chunk_marked_bundle(other)
-            with self.assertRaisesRegex(RuntimeError, "document bundle only"):
-                chunk_marked_bundle(Path(tmp) / "CHORUS_crate_only.txt")
+            missing = Path(tmp) / "NOPE_crate_only.txt"
+            missing.write_text("x\n", encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "no chunk manifest"):
+                chunk_marked_bundle(missing)
 
     def test_the_response_is_split_into_record_and_receipt(self):
         from data_sheets_schema.api_runner import RECEIPT_MARK, _extract_receipt, split_receipt

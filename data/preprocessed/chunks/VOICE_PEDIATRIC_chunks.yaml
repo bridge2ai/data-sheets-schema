@@ -4,9 +4,9 @@ bundle_sha256: d4905f0b2d52fb91097ec2f52bc6b23e56e396276146da0044be34158bc05d97
 bundle_lines: 2870
 bundle_bytes: 205857
 rule:
-  version: 1
+  version: 2
   unit: source-document
-  boundary: 'FILE: header line'
+  boundary: 'FILE: line followed by PATH: or ROLE:'
   preamble: own-chunk
   split: line-window
   max_lines: 400

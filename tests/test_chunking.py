@@ -125,6 +125,18 @@ class ManifestOnDisk(unittest.TestCase):
             self.assertEqual(dump_manifest(build_manifest(rel)),
                              dump_manifest(build_manifest(rel.resolve())))
 
+    def test_a_crate_evidence_section_is_a_boundary_and_the_hint_names_the_project(self):
+        """#745/#744: crate sections open with FILE: + ROLE:, and the rebuild hint
+        strips the kind suffix rather than splitting on '_'."""
+        from data_sheets_schema.chunking import chunk_text, manifest_status_for
+        text = _bundle(3, 3) + "FILE: P_crate_metadata_reduced.json\nROLE: crate evidence\n" + "-" * 80 + "\n{}\n"
+        self.assertEqual([c["source"] for c in chunk_text(text)],
+                         ["<preamble>", "a.txt", "b.txt", "P_crate_metadata_reduced.json"])
+        with tempfile.TemporaryDirectory() as tmp:
+            b = Path(tmp) / "AI_READI_healthsheet_only.txt"; b.write_text("x\n", encoding="utf-8")
+            st, hint = manifest_status_for(b, Path(tmp) / "chunks")
+            self.assertEqual(st, "missing"); self.assertIn("--project AI_READI", hint)
+
     def test_a_quoted_file_line_is_content_not_a_boundary(self):
         """#718: only a FILE: line followed by PATH: starts a document."""
         from data_sheets_schema.chunking import chunk_text, chunk_texts
@@ -175,25 +187,58 @@ class ManifestOnDisk(unittest.TestCase):
                 chunking.CONCAT_DIR, chunking.CHUNKS_DIR = old
 
 
+class ManifestNaming(unittest.TestCase):
+    def test_every_bundle_kind_has_its_own_manifest_and_an_unsegmented_bundle_chunks(self):
+        """#725: crate, with-crate and healthsheet bundles are chunked too,
+        each to a manifest of its own name; a bundle with no FILE: headers is
+        one unsegmented document, windowed like any other."""
+        from data_sheets_schema.chunking import (UNSEGMENTED, chunk_text, chunks_input, manifest_for,
+                                                  project_bundles, write_manifest_for)
+        self.assertEqual(manifest_for(Path("x/CHORUS_preprocessed.txt")).name, "CHORUS_chunks.yaml")
+        self.assertEqual(manifest_for(Path("x/CHORUS_crate_only.txt")).name, "CHORUS_crate_only_chunks.yaml")
+        self.assertEqual(manifest_for(Path("x/AI_READI_healthsheet_only.txt")).name,
+                         "AI_READI_healthsheet_only_chunks.yaml")
+        chunks = chunk_text("no file headers here\n" * 3)
+        self.assertEqual([c["source"] for c in chunks], [UNSEGMENTED])
+        with tempfile.TemporaryDirectory() as tmp:
+            concat, chunks_dir = Path(tmp) / "concat", Path(tmp) / "chunks"
+            concat.mkdir()
+            for suffix in ("_preprocessed.txt", "_crate_only.txt"):
+                (concat / f"P{suffix}").write_text(_bundle(5, 5), encoding="utf-8")
+            (concat / "P_unknown_kind.txt").write_text("x\n", encoding="utf-8")
+            found = project_bundles("P", concat)
+            self.assertEqual([b.name for b in found], ["P_preprocessed.txt", "P_crate_only.txt"])
+            for b in found:
+                write_manifest_for(b, chunks_dir=chunks_dir)
+            crate = concat / "P_crate_only.txt"
+            got = chunks_input(crate, hashlib.md5(crate.read_bytes()).hexdigest(), chunks_dir)
+            self.assertEqual(Path(got["path"]).name, "P_crate_only_chunks.yaml")
+
+
 @unittest.skipUnless((ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt").exists(),
                      "corpus bundle absent")
 class CorpusManifests(unittest.TestCase):
     def test_committed_manifests_are_current_and_under_the_read_cap(self):
-        """Every committed manifest reproduces from its bundle, and no chunk
-        exceeds the bound that keeps it readable in one tool call."""
-        from data_sheets_schema.chunking import CHUNKS_DIR, load_manifest, manifest_status
+        """Every bundle of every kind has a committed manifest that reproduces
+        from its bytes, and no chunk exceeds the bound that keeps it readable
+        in one tool call."""
+        from data_sheets_schema.chunking import (load_manifest, manifest_for, manifest_status_for,
+                                                  project_bundles)
         from data_sheets_schema.constants import PROJECTS
+        seen = 0
         for name in PROJECTS:
-            with self.subTest(project=name):
-                st, detail = manifest_status(name)
-                if st == "no_bundle":
-                    continue
-                self.assertEqual(st, "current", detail)   # also asserts the default rule (#714)
-                m = load_manifest(CHUNKS_DIR / f"{name}_chunks.yaml")
-                self.assertEqual(m["bundle"], f"{name}_preprocessed.txt")
-                self.assertFalse([c for c in m["chunks"] if c.get("oversize")],
-                                 "a line above max_bytes cannot be read in one call")
-                self.assertEqual(m["chunks"][0]["source"], "<preamble>")
+            for b in project_bundles(name):
+                with self.subTest(bundle=b.name):
+                    seen += 1
+                    st, detail = manifest_status_for(b)
+                    self.assertEqual(st, "current", detail)   # also asserts the default rule (#714)
+                    m = load_manifest(manifest_for(b))
+                    self.assertEqual(m["bundle"], b.name)
+                    self.assertFalse([c for c in m["chunks"] if c.get("oversize")],
+                                     "a line above max_bytes cannot be read in one call")
+                    self.assertIn(m["chunks"][0]["source"], ("<preamble>", "<unsegmented>"))
+        self.assertEqual(seen, len(list((ROOT / "data/preprocessed/concatenated").glob("*.txt"))),
+                         "every .txt bundle in the concatenated directory is covered")
 
 
 if __name__ == "__main__":

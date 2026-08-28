@@ -1,0 +1,36 @@
+bundle: CHORUS_crate_only.txt
+bundle_md5: 06ad867c85e1d1ba0818c34e5bbaec29
+bundle_sha256: 4de5dfda961363be1a4f109933668f4abe9936514f5e990402858177660681dc
+bundle_lines: 357
+bundle_bytes: 29696
+rule:
+  version: 2
+  unit: source-document
+  boundary: 'FILE: line followed by PATH: or ROLE:'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 3
+chunks:
+- id: c001
+  source: <preamble>
+  lines:
+  - 1
+  - 29
+  bytes: 1701
+  sha256: ad8929972d8015a9752c1ad40b6fdc539959b79c97b62cdb9354113d0cc58338
+- id: c002
+  source: CHORUS_crate_metadata_reduced.json
+  lines:
+  - 30
+  - 224
+  bytes: 20175
+  sha256: a0097e533bb2ed881ba68bbcff36dd3a9a5c4a948c516629994ff56e5a4d01b3
+- id: c003
+  source: ai_ready_score.json
+  lines:
+  - 225
+  - 357
+  bytes: 7820
+  sha256: b3b714e5d024e63d19edd3c88c88145079ac8e4a822d7c7d29cbdc142d21f7b6

@@ -1,8 +1,8 @@
-bundle: CM4AI_preprocessed.txt
-bundle_md5: 1dfd34e5610fed7c22bea1f09c0bc60c
-bundle_sha256: f138e6d5841609841994e0b3e91b2477c824f5675eb91c83d51db0b8d11504d2
-bundle_lines: 7866
-bundle_bytes: 321056
+bundle: CM4AI_preprocessed_with_crate.txt
+bundle_md5: c62ede765a0cd1f925aab35d4c2e22ee
+bundle_sha256: c7e8db5c220ff8c301a3b5e96ca192f704547e969ee6f7be181994b1a65cca38
+bundle_lines: 10077
+bundle_bytes: 436792
 rule:
   version: 2
   unit: source-document
@@ -11,20 +11,20 @@ rule:
   split: line-window
   max_lines: 400
   max_bytes: 48000
-chunk_count: 28
+chunk_count: 35
 chunks:
 - id: c001
   source: <preamble>
   lines:
   - 1
-  - 24
-  bytes: 1065
-  sha256: 70e86ead5829060e5c61b3aba1219628e70b8cabfe72615bb1a51dc3c1537c6d
+  - 49
+  bytes: 2633
+  sha256: fd3efd12d3b35bbdd1b679a7b3295dba2a926f1816b4be7eec834c129c86b3a6
 - id: c002
   source: www_nature_com_articles-s41586-025-08878-3_row2.txt
   lines:
-  - 25
-  - 424
+  - 50
+  - 449
   bytes: 14834
   sha256: 0a21353ca32a94454b39451c7ad871be33e638c3783e6e2dfe22c9c8540f36ea
   part:
@@ -33,8 +33,8 @@ chunks:
 - id: c003
   source: www_nature_com_articles-s41586-025-08878-3_row2.txt
   lines:
-  - 425
-  - 824
+  - 450
+  - 849
   bytes: 29256
   sha256: 9fbd71fc29fccba883d227d94b174b28cf1d5659ce2336fa105e1a064fb00703
   part:
@@ -43,8 +43,8 @@ chunks:
 - id: c004
   source: www_nature_com_articles-s41586-025-08878-3_row2.txt
   lines:
-  - 825
-  - 1224
+  - 850
+  - 1249
   bytes: 22281
   sha256: 25765998c5dfdc5ea5ff6f79801d09f5de53d0bb3ed3baed615f902fe3701a48
   part:
@@ -53,8 +53,8 @@ chunks:
 - id: c005
   source: www_nature_com_articles-s41586-025-08878-3_row2.txt
   lines:
-  - 1225
-  - 1624
+  - 1250
+  - 1649
   bytes: 24423
   sha256: 54b97ebc1ccf405805052c8952ebccc8b0084cc145628130999c13580b1b72a1
   part:
@@ -63,8 +63,8 @@ chunks:
 - id: c006
   source: www_nature_com_articles-s41586-025-08878-3_row2.txt
   lines:
-  - 1625
-  - 2024
+  - 1650
+  - 2049
   bytes: 9125
   sha256: 30baa79daf339fed899fa82040bc326ae8451093b2582be26b69a91e7e3ffcf9
   part:
@@ -73,8 +73,8 @@ chunks:
 - id: c007
   source: www_nature_com_articles-s41586-025-08878-3_row2.txt
   lines:
-  - 2025
-  - 2424
+  - 2050
+  - 2449
   bytes: 12895
   sha256: 8bc49bc0d4f5b7cdd9ac340ed15464e0c156a0cdd02feffdd8a67fb0a73f0d19
   part:
@@ -83,8 +83,8 @@ chunks:
 - id: c008
   source: www_nature_com_articles-s41586-025-08878-3_row2.txt
   lines:
-  - 2425
-  - 2824
+  - 2450
+  - 2849
   bytes: 18004
   sha256: f4d2a60c9a11a089f9dab34d7eb3c1124e77c8cbd4e317be3575121e3a4e5e70
   part:
@@ -93,8 +93,8 @@ chunks:
 - id: c009
   source: www_nature_com_articles-s41586-025-08878-3_row2.txt
   lines:
-  - 2825
-  - 2893
+  - 2850
+  - 2918
   bytes: 1272
   sha256: 912d5c23dc5f966beb48ab2b1e4946b790285d7808d54c552336b73c759cc0c1
   part:
@@ -103,8 +103,8 @@ chunks:
 - id: c010
   source: biorxiv_2024.05.21.589311v1_row4.txt
   lines:
-  - 2894
-  - 3293
+  - 2919
+  - 3318
   bytes: 17986
   sha256: 0ec9e9009f76d400fe041a0726f62b5a4c905c8790994c1a0d823601e09ad45c
   part:
@@ -113,8 +113,8 @@ chunks:
 - id: c011
   source: biorxiv_2024.05.21.589311v1_row4.txt
   lines:
-  - 3294
-  - 3693
+  - 3319
+  - 3718
   bytes: 17402
   sha256: 9bf180d0fbe2d8421519cfa7a8958e9e655a25771c96e2ce8bdfc76d316bb33a
   part:
@@ -123,8 +123,8 @@ chunks:
 - id: c012
   source: biorxiv_2024.05.21.589311v1_row4.txt
   lines:
-  - 3694
-  - 4093
+  - 3719
+  - 4118
   bytes: 15700
   sha256: 02b0a873220c69e8124074f9ccf1942961a779a38e93ad3adc68ef0847528613
   part:
@@ -133,8 +133,8 @@ chunks:
 - id: c013
   source: biorxiv_2024.05.21.589311v1_row4.txt
   lines:
-  - 4094
-  - 4182
+  - 4119
+  - 4207
   bytes: 3012
   sha256: 152f308ffd98279bf3d4b6c75c60487a405450804bf42efea17922535bc220a9
   part:
@@ -143,36 +143,36 @@ chunks:
 - id: c014
   source: reporter_nih_gov_project-details-11211616_row7.txt
   lines:
-  - 4183
-  - 4238
+  - 4208
+  - 4263
   bytes: 3592
   sha256: 08e1d00e8af532298b73ad2e42439344c892c3e213b70ccec7d48a9bb5ee3a8c
 - id: c015
   source: cm4ai_org_row10.txt
   lines:
-  - 4239
-  - 4359
+  - 4264
+  - 4384
   bytes: 3814
   sha256: 4aa9c3c8d18d524088272e43d2d8c2f377efdadb8232155e148f0eda9ffb33f4
 - id: c016
   source: cm4ai_org_data-releases_row11.txt
   lines:
-  - 4360
-  - 4484
+  - 4385
+  - 4509
   bytes: 4480
   sha256: e204e658e0086c688fb7de73b8773c33956471d0851f3189ee7d9cb20b56e111
 - id: c017
   source: creativecommons_org_licenses-by-nc-sa_row15.txt
   lines:
-  - 4485
-  - 4740
+  - 4510
+  - 4765
   bytes: 6073
   sha256: 969d2d577222cccaa20ba25b4587947d5bb1bca8033f379064cfd85307c37c19
 - id: c018
   source: dataverse_10.18130_V3_B35XWX_row16.txt
   lines:
-  - 4741
-  - 5140
+  - 4766
+  - 5165
   bytes: 19551
   sha256: c4b70727c37a87d02772ba09bbc0f1a935e1cf6a95ff4967455093885e08c4d4
   part:
@@ -181,8 +181,8 @@ chunks:
 - id: c019
   source: dataverse_10.18130_V3_B35XWX_row16.txt
   lines:
-  - 5141
-  - 5361
+  - 5166
+  - 5386
   bytes: 8626
   sha256: fb070a067d92e9c72e4ef5bd45325245e0a1afdb682c724c47b8223b85b9701f
   part:
@@ -191,8 +191,8 @@ chunks:
 - id: c020
   source: dataverse_10.18130_V3_F3TD5R_row19.txt
   lines:
-  - 5362
-  - 5761
+  - 5387
+  - 5786
   bytes: 14143
   sha256: 147a4351b49f6975821dd04531dd6b7c69a9c590f658cd96755c5f95d647b5af
   part:
@@ -201,8 +201,8 @@ chunks:
 - id: c021
   source: dataverse_10.18130_V3_F3TD5R_row19.txt
   lines:
-  - 5762
-  - 6161
+  - 5787
+  - 6186
   bytes: 15674
   sha256: ef8c0922455b505853a6842c2dae4177d887f8a5c282534408493a090229631a
   part:
@@ -211,8 +211,8 @@ chunks:
 - id: c022
   source: dataverse_10.18130_V3_F3TD5R_row19.txt
   lines:
-  - 6162
-  - 6166
+  - 6187
+  - 6191
   bytes: 91
   sha256: c89b260726c11f9aec15311199a2a7d274eaa569741d04fea62e5f8555901c3c
   part:
@@ -221,8 +221,8 @@ chunks:
 - id: c023
   source: dataverse_10.18130_V3_K7TGEM_row16.txt
   lines:
-  - 6167
-  - 6566
+  - 6192
+  - 6591
   bytes: 14364
   sha256: a52130ba08aae4d3be8169404e7bc07695f2b644614ba48a87f406a6f9ef805a
   part:
@@ -231,8 +231,8 @@ chunks:
 - id: c024
   source: dataverse_10.18130_V3_K7TGEM_row16.txt
   lines:
-  - 6567
-  - 6966
+  - 6592
+  - 6991
   bytes: 14646
   sha256: 3cb935d02f07490102ae9cd674498b1106c8fac7a2abcbfbf573dc53bc4f880b
   part:
@@ -241,8 +241,8 @@ chunks:
 - id: c025
   source: dataverse_10.18130_V3_K7TGEM_row16.txt
   lines:
-  - 6967
-  - 7001
+  - 6992
+  - 7026
   bytes: 728
   sha256: 0388f0414d9ca2d63b86f27dcc64d93fe6d516222cd5428fd01b17071bf61ac8
   part:
@@ -251,8 +251,8 @@ chunks:
 - id: c026
   source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
   lines:
-  - 7002
-  - 7401
+  - 7027
+  - 7426
   bytes: 11821
   sha256: cb24148a28557dfe600c07644aa805f34f7016de9fefd4979169d23cb33c5c73
   part:
@@ -261,8 +261,8 @@ chunks:
 - id: c027
   source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
   lines:
-  - 7402
-  - 7801
+  - 7427
+  - 7826
   bytes: 14646
   sha256: 170c8aebadaf66e50a385cfcb1be8e49f7650fdf67287eacdafc2c134ae1e2e2
   part:
@@ -271,10 +271,77 @@ chunks:
 - id: c028
   source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
   lines:
-  - 7802
-  - 7866
-  bytes: 1552
-  sha256: 23ca0d8c55a3e2b51579dd338221c2296d591d90075c686b451da252665c574a
+  - 7827
+  - 7898
+  bytes: 1813
+  sha256: 459b0f52b1cc2037fe0e24075ab3cc27efacf5cdec55c4398aa93ccfc79906b3
   part:
   - 3
   - 3
+- id: c029
+  source: CM4AI_crate_metadata_reduced.json
+  lines:
+  - 7899
+  - 8298
+  bytes: 15784
+  sha256: 53a2d5cd273b29471cb18bc8affe7bcf639febc5b5b3e82d6093ea881c3c66eb
+  part:
+  - 1
+  - 6
+- id: c030
+  source: CM4AI_crate_metadata_reduced.json
+  lines:
+  - 8299
+  - 8698
+  bytes: 10370
+  sha256: 47a005fa3868e698cb87d7afa2095f5b810f6bcdb4ec6b66e14febd388eae253
+  part:
+  - 2
+  - 6
+- id: c031
+  source: CM4AI_crate_metadata_reduced.json
+  lines:
+  - 8699
+  - 9098
+  bytes: 23761
+  sha256: 35cc7fba97b6b87c8e398822efaca1179d10793bc0510af039149e7956d8354a
+  part:
+  - 3
+  - 6
+- id: c032
+  source: CM4AI_crate_metadata_reduced.json
+  lines:
+  - 9099
+  - 9498
+  bytes: 26253
+  sha256: 67e1e713f6bab77b1c9f9bc05fd62710533841f248162494549810e1901faa06
+  part:
+  - 4
+  - 6
+- id: c033
+  source: CM4AI_crate_metadata_reduced.json
+  lines:
+  - 9499
+  - 9898
+  bytes: 27393
+  sha256: 370b7d77c53cda1af5ba2062482a83dfc001ccc16e337d0e7d27863c9c2af5e7
+  part:
+  - 5
+  - 6
+- id: c034
+  source: CM4AI_crate_metadata_reduced.json
+  lines:
+  - 9899
+  - 9943
+  bytes: 4177
+  sha256: 941cdd3a7adfcc52aaf7d15e9b944e4e1d0f5236a27ebea9e470245a8adba19a
+  part:
+  - 6
+  - 6
+- id: c035
+  source: ai_ready_score.json
+  lines:
+  - 9944
+  - 10077
+  bytes: 6169
+  sha256: dc66f18977e3fed2419e88d3b9a43d0c713a068d4898e15619108ce09d15197c

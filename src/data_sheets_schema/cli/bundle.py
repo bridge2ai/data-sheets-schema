@@ -31,17 +31,22 @@ def chunk(project, check, strict, max_lines, max_bytes):
     text. A coverage receipt (#708) names these ids; this file is what
     anchors them to bytes.
     """
-    from data_sheets_schema.chunking import DEFAULT_RULE, manifest_status, write_manifest
+    from data_sheets_schema.chunking import (DEFAULT_RULE, manifest_status_for,
+                                              project_bundles, write_manifest_for)
 
     targets = [project] if project else list(PROJECTS)
     if check:
         bad = 0
         for name in targets:
-            st, detail = manifest_status(name)
-            mark = {"current": "✓", "stale": "❌", "missing": "❌", "off_rule": "❌",
-                    "unreadable": "❌", "no_bundle": "·"}[st]
-            click.echo(f"   {mark} {st:<10} {name}: {detail}")
-            bad += st in ("stale", "missing", "off_rule", "unreadable")
+            bundles = project_bundles(name)
+            if not bundles:
+                click.echo(f"   · no_bundle  {name}")
+            for b in bundles:
+                st, detail = manifest_status_for(b)
+                mark = {"current": "✓", "stale": "❌", "missing": "❌", "off_rule": "❌",
+                        "unreadable": "❌", "no_bundle": "·"}[st]
+                click.echo(f"   {mark} {st:<10} {b.name}: {detail}")
+                bad += st in ("stale", "missing", "off_rule", "unreadable")
         if strict and bad:
             sys.exit(1)
         return
@@ -56,13 +61,13 @@ def chunk(project, check, strict, max_lines, max_bytes):
         # in the rule itself rather than letting it pass as the default.
         rule["version"] = f"{DEFAULT_RULE['version']}-custom"
     for name in targets:
-        try:
-            out, m = write_manifest(name, rule)
-        except FileNotFoundError as exc:
-            click.echo(f"   · {name}: no bundle ({exc.filename})")
-            continue
-        oversize = sum(1 for c in m["chunks"] if c.get("oversize"))
-        largest = max(c["bytes"] for c in m["chunks"]) if m["chunks"] else 0
-        click.echo(f"   ✓ {out}  {m['chunk_count']} chunks over {m['bundle_lines']} lines; "
-                   f"largest {largest} bytes"
-                   + (f"; {oversize} oversize (a single line above max_bytes)" if oversize else ""))
+        bundles = project_bundles(name)
+        if not bundles:
+            click.echo(f"   · {name}: no bundle")
+        for b in bundles:            # every kind a run may declare (#725)
+            out, m = write_manifest_for(b, rule)
+            oversize = sum(1 for c in m["chunks"] if c.get("oversize"))
+            largest = max(c["bytes"] for c in m["chunks"]) if m["chunks"] else 0
+            click.echo(f"   ✓ {out}  {m['chunk_count']} chunks over {m['bundle_lines']} lines; "
+                       f"largest {largest} bytes"
+                       + (f"; {oversize} oversize (a single line above max_bytes)" if oversize else ""))

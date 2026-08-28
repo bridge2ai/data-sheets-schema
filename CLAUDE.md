@@ -398,8 +398,11 @@ check surfaces rather than settles.
 
 ## Chunk Manifests (receipts substrate, #707)
 
-`data/preprocessed/chunks/{PROJECT}_chunks.yaml` is a pure function of the
-document bundle's bytes and a recorded rule (`unit: source-document`, windows
+`data/preprocessed/chunks/{PROJECT}_chunks.yaml` (document bundle) and
+`{bundle stem}_chunks.yaml` for every other kind — `_crate_only`,
+`_preprocessed_with_crate`, `_healthsheet_only` (#725; a bundle with no
+`FILE:` headers is one `<unsegmented>` document) — is a pure function of the
+bundle's bytes and a recorded rule (`unit: source-document`, windows
 bounded in both lines and bytes, the summary/TOC preamble as its own chunk):
 same bytes + same rule = same file, and the chunks' texts concatenate back to
 the bundle. A coverage receipt (#708) names these chunk ids; the manifest is
@@ -449,9 +452,8 @@ denominator excludes `conforms_to_schema`/`conforms_to_class`, `notes` and
 `source_caveats` at any depth, and ids minted on the record's own id (#722).
 Named non-checks: that `nothing_relevant` was true, and that a real snippet
 supports its value. `backfill-checks` writes a `receipts` block only where a
-receipt exists or the record claims one (#726). Manifests exist for the
-document bundle only; a run reading a crate/healthsheet bundle cannot be
-receipt-checked until that bundle is chunked (#725).
+receipt exists or the record claims one (#726). Every bundle kind a run may declare has a manifest (#725), so
+receipts are checkable on any arm.
 
 **The agentic protocol** (#709, `.claude/commands/d4d-full-core.md` Phase 1):
 read the manifest, then per chunk read it with the file tool (never a
