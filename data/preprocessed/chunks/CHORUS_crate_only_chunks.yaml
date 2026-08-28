@@ -1,0 +1,22 @@
+bundle: CHORUS_crate_only.txt
+bundle_md5: 06ad867c85e1d1ba0818c34e5bbaec29
+bundle_sha256: 4de5dfda961363be1a4f109933668f4abe9936514f5e990402858177660681dc
+bundle_lines: 357
+bundle_bytes: 29696
+rule:
+  version: 1
+  unit: source-document
+  boundary: 'FILE: header line'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 1
+chunks:
+- id: c001
+  source: <unsegmented>
+  lines:
+  - 1
+  - 357
+  bytes: 29696
+  sha256: 4de5dfda961363be1a4f109933668f4abe9936514f5e990402858177660681dc

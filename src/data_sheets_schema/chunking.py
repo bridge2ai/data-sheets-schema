@@ -41,7 +41,14 @@ DEFAULT_RULE: dict[str, Any] = {
 }
 
 PREAMBLE = "<preamble>"
+#: A bundle with no `FILE:` boundaries at all (the healthsheet bundles) is
+#: one unsegmented document, windowed like any other (#725).
+UNSEGMENTED = "<unsegmented>"
 FILE_MARK = "FILE: "
+#: Every bundle kind a run may declare, by name suffix. Manifests are built
+#: for all of them, not only the document bundle (#725).
+BUNDLE_SUFFIXES = ("_preprocessed.txt", "_preprocessed_with_crate.txt",
+                   "_crate_only.txt", "_healthsheet_only.txt")
 
 
 def _split_lines(text: str) -> tuple[list[str], bool]:
@@ -71,7 +78,7 @@ def _documents(lines: list[str]) -> list[tuple[str, int, int]]:
              if l.startswith(FILE_MARK) and i + 1 < len(lines) and lines[i + 1].startswith("PATH: ")]
     docs: list[tuple[str, int, int]] = []
     if not marks:
-        return [(PREAMBLE, 1, len(lines))] if lines else []
+        return [(UNSEGMENTED, 1, len(lines))] if lines else []
     if marks[0] > 0:
         docs.append((PREAMBLE, 1, marks[0]))
     for k, start in enumerate(marks):
@@ -163,12 +170,31 @@ def build_manifest(bundle: Path, rule: dict[str, Any] | None = None) -> dict[str
 
 
 def manifest_path(project: str, chunks_dir: Path | None = None) -> Path:
+    """The document bundle's manifest: `{PROJECT}_chunks.yaml`."""
     # Resolved at call time so a test (or a caller) can repoint the module dirs.
     return (chunks_dir or CHUNKS_DIR) / f"{project}_chunks.yaml"
 
 
+def manifest_for(bundle: Path, chunks_dir: Path | None = None) -> Path:
+    """The manifest for any bundle kind (#725): the document bundle keeps
+    `{PROJECT}_chunks.yaml`; every other kind is `{bundle stem}_chunks.yaml`
+    (`CHORUS_crate_only_chunks.yaml`). Two bundles never share a manifest."""
+    name = bundle.name
+    if name.endswith("_preprocessed.txt"):
+        return manifest_path(name[: -len("_preprocessed.txt")], chunks_dir)
+    stem = name[:-4] if name.endswith(".txt") else name
+    return (chunks_dir or CHUNKS_DIR) / f"{stem}_chunks.yaml"
+
+
 def bundle_path(project: str, concat_dir: Path | None = None) -> Path:
     return (concat_dir or CONCAT_DIR) / f"{project}_preprocessed.txt"
+
+
+def project_bundles(project: str, concat_dir: Path | None = None) -> list[Path]:
+    """Every bundle of a known kind that exists for the project, document
+    bundle first."""
+    base = concat_dir or CONCAT_DIR
+    return [p for s in BUNDLE_SUFFIXES if (p := base / f"{project}{s}").exists()]
 
 
 def dump_manifest(manifest: dict[str, Any]) -> str:
@@ -178,14 +204,19 @@ def dump_manifest(manifest: dict[str, Any]) -> str:
     return yaml.safe_dump(manifest, sort_keys=False, allow_unicode=True, width=10_000)
 
 
-def write_manifest(project: str, rule: dict[str, Any] | None = None,
-                   concat_dir: Path | None = None, chunks_dir: Path | None = None) -> tuple[Path, dict[str, Any]]:
-    bundle = bundle_path(project, concat_dir)
+def write_manifest_for(bundle: Path, rule: dict[str, Any] | None = None,
+                       chunks_dir: Path | None = None) -> tuple[Path, dict[str, Any]]:
     manifest = build_manifest(bundle, rule)
-    out = manifest_path(project, chunks_dir)
+    out = manifest_for(bundle, chunks_dir)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(dump_manifest(manifest), encoding="utf-8")
     return out, manifest
+
+
+def write_manifest(project: str, rule: dict[str, Any] | None = None,
+                   concat_dir: Path | None = None, chunks_dir: Path | None = None) -> tuple[Path, dict[str, Any]]:
+    """The document bundle's manifest (kept for callers and tests)."""
+    return write_manifest_for(bundle_path(project, concat_dir), rule, chunks_dir)
 
 
 def load_manifest(path: Path) -> dict[str, Any]:
@@ -199,7 +230,12 @@ def file_sha256(path: Path) -> str:
 
 def manifest_status(project: str, concat_dir: Path | None = None,
                     chunks_dir: Path | None = None) -> tuple[str, str]:
-    """(status, detail) for a project's manifest on disk.
+    """(status, detail) for the project's *document* bundle manifest."""
+    return manifest_status_for(bundle_path(project, concat_dir), chunks_dir)
+
+
+def manifest_status_for(bundle: Path, chunks_dir: Path | None = None) -> tuple[str, str]:
+    """(status, detail) for any bundle's manifest on disk.
 
     `current` — rebuilding the bundle under the manifest's own recorded rule
     reproduces the file byte for byte. `stale` — it does not (the bundle
@@ -209,7 +245,8 @@ def manifest_status(project: str, concat_dir: Path | None = None,
     match; whether the rule is the current default is a separate question the
     caller can ask.
     """
-    bundle, path = bundle_path(project, concat_dir), manifest_path(project, chunks_dir)
+    path = manifest_for(bundle, chunks_dir)
+    project = bundle.name.split("_")[0] if not bundle.name.startswith("VOICE_PEDIATRIC") else "VOICE_PEDIATRIC"
     if not bundle.exists():
         return "no_bundle", str(bundle)
     if not path.exists():
@@ -239,14 +276,12 @@ def chunks_input(bundle: Path | None, bundle_md5: str | None,
     Returned only when a manifest exists for this bundle *and* it was built
     from the same bytes the record hashed — otherwise a receipt naming its
     chunk ids would be anchored to a different file. `None` means "no
-    manifest attests this input", which the record states as such.
+    manifest attests this input", which the record states as such. Any
+    bundle kind (#725).
     """
     if bundle is None or bundle_md5 is None:
         return None
-    name = bundle.name
-    if not name.endswith("_preprocessed.txt"):
-        return None
-    path = manifest_path(name[: -len("_preprocessed.txt")], chunks_dir)
+    path = manifest_for(bundle, chunks_dir)
     if not path.exists():
         return None
     try:

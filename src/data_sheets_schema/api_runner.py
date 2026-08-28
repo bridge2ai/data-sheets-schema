@@ -774,21 +774,15 @@ def chunk_marked_bundle(bundle: Path) -> tuple[str, str]:
     """
     import hashlib
 
-    from data_sheets_schema.chunking import (bundle_path, load_manifest,
-                                              manifest_path, manifest_status)
-    name = bundle.name
-    if not name.endswith("_preprocessed.txt"):
-        raise RuntimeError(f"a receipt condition needs a chunk manifest, and manifests exist "
-                           f"for the document bundle only (#725): {bundle}")
-    project = name[: -len("_preprocessed.txt")]
+    from data_sheets_schema.chunking import load_manifest, manifest_for
     raw = bundle.read_bytes()
-    mpath = manifest_path(project)
+    mpath = manifest_for(bundle)               # any bundle kind (#725)
     if not mpath.exists():
-        raise RuntimeError(f"no chunk manifest for {bundle}; run `d4d bundle chunk --project {project}`")
+        raise RuntimeError(f"no chunk manifest for {bundle} (expected {mpath}); run `d4d bundle chunk`")
     m = load_manifest(mpath)
     if m.get("bundle_md5") != hashlib.md5(raw).hexdigest():
         raise RuntimeError(f"chunk manifest {mpath} is not of the bytes at {bundle}; "
-                           f"run `d4d bundle chunk --project {project}`")
+                           "run `d4d bundle chunk`")
     lines = raw.decode("utf-8", errors="ignore").split("\n")
     starts = {c["lines"][0]: c["id"] for c in m["chunks"]}
     out = []

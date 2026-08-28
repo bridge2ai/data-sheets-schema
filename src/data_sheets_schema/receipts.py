@@ -429,7 +429,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     import hashlib
 
     from data_sheets_schema.chunking import chunk_texts as _texts
-    from data_sheets_schema.chunking import load_manifest, manifest_path
+    from data_sheets_schema.chunking import load_manifest, manifest_for
 
     base = {"expected": expected, "non_checks": list(NON_CHECKS)}
     if not receipt.exists():
@@ -440,17 +440,11 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         return {**base, "checked": False, "reason": f"receipt unreadable: {exc}"}
     if bundle is None or not bundle.exists():
         return {**base, "checked": False, "reason": "the record's bundle is absent; chunk texts cannot be loaded"}
-    if manifest is not None:
-        mpath = manifest
-    elif bundle.name.endswith("_preprocessed.txt"):
-        mpath = manifest_path(bundle.name[: -len("_preprocessed.txt")])
-    else:
-        mpath = None
-    if mpath is None or not mpath.exists():
+    mpath = manifest if manifest is not None else manifest_for(bundle)
+    if not mpath.exists():
         return {**base, "checked": False,
-                "reason": (f"no chunk manifest for {bundle.name}: manifests are built for the "
-                           "document bundle {PROJECT}_preprocessed.txt only (#725); a run that "
-                           "reads another bundle needs it chunked first")}
+                "reason": f"no chunk manifest for {bundle.name} at {mpath}; run "
+                          "`d4d bundle chunk` (every bundle kind is chunked, #725)"}
     try:
         m = load_manifest(mpath)
         if not isinstance(m, dict) or not isinstance(m.get("chunks"), list):

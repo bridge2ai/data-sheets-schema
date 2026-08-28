@@ -1,0 +1,265 @@
+bundle: VOICE_crate_only.txt
+bundle_md5: e0da1c226b05e944a617e2b0cdf9b6a0
+bundle_sha256: da2bddfa78b1591ce695ddceae57f08d74c693b521f89bf9d8c83cf2efc37f31
+bundle_lines: 9966
+bundle_bytes: 320923
+rule:
+  version: 1
+  unit: source-document
+  boundary: 'FILE: header line'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 25
+chunks:
+- id: c001
+  source: <unsegmented>
+  lines:
+  - 1
+  - 400
+  bytes: 28640
+  sha256: 106ff7d0512385d83de78ca08e6e5dee29e3db74a4e8f00ad5c5353447683d18
+  part:
+  - 1
+  - 25
+- id: c002
+  source: <unsegmented>
+  lines:
+  - 401
+  - 800
+  bytes: 10457
+  sha256: 7fd05e2d3a743e2a928c1cb5217cb19140d3a89bd5484327f8c8c05adfacb6b8
+  part:
+  - 2
+  - 25
+- id: c003
+  source: <unsegmented>
+  lines:
+  - 801
+  - 1200
+  bytes: 9750
+  sha256: 36d5202ba4788043bba64dad46cf6fc922e79aabf26346a6ac435e6236abc849
+  part:
+  - 3
+  - 25
+- id: c004
+  source: <unsegmented>
+  lines:
+  - 1201
+  - 1600
+  bytes: 9773
+  sha256: 34ecbdd972d5e347300846ef635e436cfc54f871af6b665aea9620a78fcd1c7d
+  part:
+  - 4
+  - 25
+- id: c005
+  source: <unsegmented>
+  lines:
+  - 1601
+  - 2000
+  bytes: 10486
+  sha256: af772d6ab4de8dacad61348cbbb553b9f268a9a67283f751ffef80ab1a9bfec3
+  part:
+  - 5
+  - 25
+- id: c006
+  source: <unsegmented>
+  lines:
+  - 2001
+  - 2400
+  bytes: 9856
+  sha256: 046c5fe2588b78a9e1377834ec89bbe3aec6f0e00c173a03476d0e49cdb3003b
+  part:
+  - 6
+  - 25
+- id: c007
+  source: <unsegmented>
+  lines:
+  - 2401
+  - 2800
+  bytes: 9771
+  sha256: 45748e76f66ed8e38d8c9dd71788d506915e6df57a5e00db7be1eb02b5a8fc06
+  part:
+  - 7
+  - 25
+- id: c008
+  source: <unsegmented>
+  lines:
+  - 2801
+  - 3200
+  bytes: 9990
+  sha256: 2c8d3b6ddd0b00d165f4a471adb7cad2177f1389d3b0fbd0e1f47a1e010ed0de
+  part:
+  - 8
+  - 25
+- id: c009
+  source: <unsegmented>
+  lines:
+  - 3201
+  - 3600
+  bytes: 11687
+  sha256: fffa2815862d779036260981d8ac5b4f78d40e3d813ec107691f653b51de75bd
+  part:
+  - 9
+  - 25
+- id: c010
+  source: <unsegmented>
+  lines:
+  - 3601
+  - 4000
+  bytes: 9670
+  sha256: df0d5816b3f043bc4e34a25363654e5a2c08bd05c1a54dd90a5977b937209919
+  part:
+  - 10
+  - 25
+- id: c011
+  source: <unsegmented>
+  lines:
+  - 4001
+  - 4400
+  bytes: 9761
+  sha256: 5e4daab713ba8680f6a597ef128c4d304b7540687587e04b103fd3ea39ed8521
+  part:
+  - 11
+  - 25
+- id: c012
+  source: <unsegmented>
+  lines:
+  - 4401
+  - 4800
+  bytes: 9626
+  sha256: 89b2a425c522e34daa6eb146fae4758bbc420bee178498a04936eb0704c23657
+  part:
+  - 12
+  - 25
+- id: c013
+  source: <unsegmented>
+  lines:
+  - 4801
+  - 5200
+  bytes: 9567
+  sha256: af957d553d93affeedcb84d0cb5702e3f1cad8baecc203767b5dd777bc693c93
+  part:
+  - 13
+  - 25
+- id: c014
+  source: <unsegmented>
+  lines:
+  - 5201
+  - 5600
+  bytes: 12799
+  sha256: 1e1d9fab4ca1e3407c60d1654a18683fa1b838fff635b4e0b426af4f7156ad9a
+  part:
+  - 14
+  - 25
+- id: c015
+  source: <unsegmented>
+  lines:
+  - 5601
+  - 6000
+  bytes: 17070
+  sha256: 48a950db6e214b38d479e83429e9b9c795d949d478e297953a8a496d668b98a4
+  part:
+  - 15
+  - 25
+- id: c016
+  source: <unsegmented>
+  lines:
+  - 6001
+  - 6400
+  bytes: 16545
+  sha256: 2ec9973743bf3bac0184901eaf214f1f771b61890ab69ba53025d524774b541c
+  part:
+  - 16
+  - 25
+- id: c017
+  source: <unsegmented>
+  lines:
+  - 6401
+  - 6800
+  bytes: 16133
+  sha256: e510218eb01bddf669706660ac8217dbf10d37d3aca700613719ff97d34b749e
+  part:
+  - 17
+  - 25
+- id: c018
+  source: <unsegmented>
+  lines:
+  - 6801
+  - 7200
+  bytes: 15971
+  sha256: c701b00c2d0ac4738e9e02678bf78fe286e66b4ef66530c30ebb9447bcd14f16
+  part:
+  - 18
+  - 25
+- id: c019
+  source: <unsegmented>
+  lines:
+  - 7201
+  - 7600
+  bytes: 18118
+  sha256: 7ae616c7dae6e3cad32fa042868e608a02f55f0b49eda9495e171cd81e7c36e6
+  part:
+  - 19
+  - 25
+- id: c020
+  source: <unsegmented>
+  lines:
+  - 7601
+  - 8000
+  bytes: 13263
+  sha256: 19a98a5f6e0d7568c67dd5ce2a5f2b2c3e845fb913e4010737b12751260dc763
+  part:
+  - 20
+  - 25
+- id: c021
+  source: <unsegmented>
+  lines:
+  - 8001
+  - 8400
+  bytes: 11467
+  sha256: 6d878e9b566fe41f36439b12cccec91ed597b29824ec6cc4ced8b3f76349040a
+  part:
+  - 21
+  - 25
+- id: c022
+  source: <unsegmented>
+  lines:
+  - 8401
+  - 8800
+  bytes: 11423
+  sha256: 04d56cf28800b98923d715367af2b2fc8ccea9c9cd6078ffd375a3c54cbcb72b
+  part:
+  - 22
+  - 25
+- id: c023
+  source: <unsegmented>
+  lines:
+  - 8801
+  - 9200
+  bytes: 11550
+  sha256: d8eea4b8bc22c7c643b4c35563fe3ef5f0f3675646ebcdf68c78ea9ef6fdcd12
+  part:
+  - 23
+  - 25
+- id: c024
+  source: <unsegmented>
+  lines:
+  - 9201
+  - 9600
+  bytes: 11920
+  sha256: 0144d5f0a141e309e6039f6d010f2626715c005af95d062d19b29c9200758e22
+  part:
+  - 24
+  - 25
+- id: c025
+  source: <unsegmented>
+  lines:
+  - 9601
+  - 9966
+  bytes: 15630
+  sha256: 441196e8d2df4c821c8b5a74416f81392913387f689b970f52b5d00dda06dd8e
+  part:
+  - 25
+  - 25

@@ -480,16 +480,18 @@ def audit_bundles(project, strict, manifest):
 
             # Chunk manifest (#707): derived from the document bundle under its
             # recorded rule, so it goes stale exactly when the bundle changes.
-            from data_sheets_schema.chunking import manifest_path, manifest_status
-            st, detail = manifest_status(name)
-            if st in ('current', 'stale', 'off_rule'):
-                manifests += 1
-            if st in ('stale', 'off_rule'):
-                stale.append((manifest_path(name), f'd4d bundle chunk --project {name}'))
-            elif st == 'missing' and current.exists():
-                unchecked.append((manifest_path(name), 'no chunk manifest; ' + detail))
-            elif st == 'unreadable':
-                unchecked.append((manifest_path(name), detail))
+            from data_sheets_schema.chunking import (manifest_for, manifest_status_for,
+                                                      project_bundles)
+            for b in project_bundles(name):        # every kind (#725)
+                st, detail = manifest_status_for(b)
+                if st in ('current', 'stale', 'off_rule'):
+                    manifests += 1
+                if st in ('stale', 'off_rule'):
+                    stale.append((manifest_for(b), f'd4d bundle chunk --project {name}'))
+                elif st == 'missing':
+                    unchecked.append((manifest_for(b), 'no chunk manifest; ' + detail))
+                elif st == 'unreadable':
+                    unchecked.append((manifest_for(b), detail))
 
     click.echo(f"📦 {checked} derived bundle(s) rebuilt and compared; "
                f"{manifests} chunk manifest(s) rebuilt under their recorded rule (#707)")

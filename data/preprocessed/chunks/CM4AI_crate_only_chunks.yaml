@@ -1,0 +1,75 @@
+bundle: CM4AI_crate_only.txt
+bundle_md5: 965b0aa654facd9992fda14ff4535a25
+bundle_sha256: eceaa90c6d9e93afb37c9dfa91a28d23af620c4cdad7ad9d868321028820b02c
+bundle_lines: 2208
+bundle_bytes: 115604
+rule:
+  version: 1
+  unit: source-document
+  boundary: 'FILE: header line'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 6
+chunks:
+- id: c001
+  source: <unsegmented>
+  lines:
+  - 1
+  - 400
+  bytes: 16721
+  sha256: bd087c1073df87a5cdc1086f70107cd554bedf1179480f5b1aeffd3dc1011e4c
+  part:
+  - 1
+  - 6
+- id: c002
+  source: <unsegmented>
+  lines:
+  - 401
+  - 800
+  bytes: 10475
+  sha256: f4f39c34afd3c7f4c0ee08469ba9a4e50c51add957be91975ef23c9d6df4c12f
+  part:
+  - 2
+  - 6
+- id: c003
+  source: <unsegmented>
+  lines:
+  - 801
+  - 1200
+  bytes: 22273
+  sha256: e2523f904bb792bafe5a156e31c24e83512313617af142b5dbb6dd6f161c2737
+  part:
+  - 3
+  - 6
+- id: c004
+  source: <unsegmented>
+  lines:
+  - 1201
+  - 1600
+  bytes: 26230
+  sha256: 28d299ccea5543e1945fb4f5d7150ac781418adb7bbf8fe41b90e63f50093d89
+  part:
+  - 4
+  - 6
+- id: c005
+  source: <unsegmented>
+  lines:
+  - 1601
+  - 2000
+  bytes: 27641
+  sha256: 22786db57775d887fceedcdd094f821234ca2f0fc1c152d4d286c7831f3a3518
+  part:
+  - 5
+  - 6
+- id: c006
+  source: <unsegmented>
+  lines:
+  - 2001
+  - 2208
+  bytes: 12264
+  sha256: 68ab4c18ee42b845d1660863c71d6105a827a30c957a97ee68cc24b7e466ba35
+  part:
+  - 6
+  - 6

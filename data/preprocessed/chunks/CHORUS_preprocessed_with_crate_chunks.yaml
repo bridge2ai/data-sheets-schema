@@ -1,0 +1,96 @@
+bundle: CHORUS_preprocessed_with_crate.txt
+bundle_md5: 5cb3905016c337ee63ffd263416e43aa
+bundle_sha256: 433e7cb6c9e9b109a4b6e810ab07b400c987420d6acecb7fd5dcbc5d8732c77a
+bundle_lines: 2058
+bundle_bytes: 65749
+rule:
+  version: 1
+  unit: source-document
+  boundary: 'FILE: header line'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 9
+chunks:
+- id: c001
+  source: <preamble>
+  lines:
+  - 1
+  - 43
+  bytes: 2389
+  sha256: 38062c37f1fcbcb8d13b7210c97b15ffb38a1d78078121bed3dd67943743aafe
+- id: c002
+  source: reporter_nih_gov_project-details-10472824_row7.txt
+  lines:
+  - 44
+  - 79
+  bytes: 5825
+  sha256: 635b28dccf617547dda689a417c43e3d242a317bdbe12bf4e74b5c8e2525f361
+- id: c003
+  source: bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt
+  lines:
+  - 80
+  - 479
+  bytes: 6275
+  sha256: 7dc281080f359050015dba0a1b8c72ad97340ef64709296d51a0872de86c09c3
+  part:
+  - 1
+  - 3
+- id: c004
+  source: bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt
+  lines:
+  - 480
+  - 879
+  bytes: 7739
+  sha256: 64adc1a37d2a772d017ea0eb39f8b751c75f7adae796dce0a8730445c4a03fb3
+  part:
+  - 2
+  - 3
+- id: c005
+  source: bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt
+  lines:
+  - 880
+  - 1056
+  bytes: 2611
+  sha256: 3b2989ee48e73860e1bd54675ae17785d619dba1a73f7ccec37356f334bdc4d8
+  part:
+  - 3
+  - 3
+- id: c006
+  source: chorus4ai_org_row11.txt
+  lines:
+  - 1057
+  - 1137
+  bytes: 3155
+  sha256: f8c36105b4b3f46415a6fc304396a88b9b6740216a506949527bb90b24f060d9
+- id: c007
+  source: github_chorus_ai_overview_2025-11-14.txt
+  lines:
+  - 1138
+  - 1537
+  bytes: 7961
+  sha256: 53dc2cad4ae923e7fbc47c13b2461a3d598dc5834152a0c967159fddb82f5f1a
+  part:
+  - 1
+  - 3
+- id: c008
+  source: github_chorus_ai_overview_2025-11-14.txt
+  lines:
+  - 1538
+  - 1937
+  bytes: 22356
+  sha256: 07640d5209981b5ed39ab1cec58f945024e6e2a0debb32a8d330596530ec25bc
+  part:
+  - 2
+  - 3
+- id: c009
+  source: github_chorus_ai_overview_2025-11-14.txt
+  lines:
+  - 1938
+  - 2058
+  bytes: 7438
+  sha256: b1f0af14b265d78501b84b7ec3e9b7aae2c552975389f42a336a350ae747d45b
+  part:
+  - 3
+  - 3

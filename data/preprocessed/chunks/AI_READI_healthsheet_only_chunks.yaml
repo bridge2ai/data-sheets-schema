@@ -1,0 +1,35 @@
+bundle: AI_READI_healthsheet_only.txt
+bundle_md5: a66b16818139bca4018efe11cae5cc7a
+bundle_sha256: ef2f5a5c98c56f565728c09305ecee10f47586472533b3648c2421c637ed210a
+bundle_lines: 539
+bundle_bytes: 56453
+rule:
+  version: 1
+  unit: source-document
+  boundary: 'FILE: header line'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 2
+chunks:
+- id: c001
+  source: <unsegmented>
+  lines:
+  - 1
+  - 400
+  bytes: 41565
+  sha256: 6e66915f96792737e0ecd5d5ea17ab357a8609846f076b3847eabdbe99ad2806
+  part:
+  - 1
+  - 2
+- id: c002
+  source: <unsegmented>
+  lines:
+  - 401
+  - 539
+  bytes: 14888
+  sha256: 874488d66c7d5ff6861341e2a1d519eb539ee1db1d8f148a66aedaed20e90f86
+  part:
+  - 2
+  - 2

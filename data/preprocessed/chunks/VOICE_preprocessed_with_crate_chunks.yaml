@@ -1,0 +1,463 @@
+bundle: VOICE_preprocessed_with_crate.txt
+bundle_md5: ebca872f3275e7bd0e685c0486ee4881
+bundle_sha256: 7ec9268db70504ded2eb36639e0f55f02b11a816ec627b56648ee4162e743089
+bundle_lines: 15715
+bundle_bytes: 697350
+rule:
+  version: 1
+  unit: source-document
+  boundary: 'FILE: header line'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+chunk_count: 46
+chunks:
+- id: c001
+  source: <preamble>
+  lines:
+  - 1
+  - 49
+  bytes: 2553
+  sha256: f15446bd680278f7b2a422e454d0ee3d0dd919c3393fe1c955d4f509add71faf
+- id: c002
+  source: pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt
+  lines:
+  - 50
+  - 449
+  bytes: 21288
+  sha256: 0d6896cf4da4376fe5854c35d7f5f8e83846750c429454f0ba418f42cdc40f1d
+  part:
+  - 1
+  - 3
+- id: c003
+  source: pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt
+  lines:
+  - 450
+  - 849
+  bytes: 25104
+  sha256: ea3c76a6af36389619426d2d34f0004f5dff562e6195c5c2d44a3e9f1f84cd68
+  part:
+  - 2
+  - 3
+- id: c004
+  source: pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt
+  lines:
+  - 850
+  - 919
+  bytes: 1279
+  sha256: 89a612c776401a3149248908816b315d8d4d40651729c9a2fd20e972db4f01f7
+  part:
+  - 3
+  - 3
+- id: c005
+  source: gdrive_1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5_row5.txt
+  lines:
+  - 920
+  - 1261
+  bytes: 13999
+  sha256: bacdaeaae54010c0dc831617da6614f88632f4ed72ba4365b828ae5fc7ab21bf
+- id: c006
+  source: reporter_nih_gov_project-details-11376382_row7.txt
+  lines:
+  - 1262
+  - 1318
+  bytes: 6814
+  sha256: b2ab2863be46ba00c529684ea8a1476056733fffa459fd14ced6090acb5e5964
+- id: c007
+  source: docs_b2ai-voice_org_row10.txt
+  lines:
+  - 1319
+  - 1718
+  bytes: 20371
+  sha256: 552d711069bd4a33b257fe4277c4094c0c98b838ec81e5d78790bb7c5523ca9a
+  part:
+  - 1
+  - 4
+- id: c008
+  source: docs_b2ai-voice_org_row10.txt
+  lines:
+  - 1719
+  - 2118
+  bytes: 23663
+  sha256: e44d35f4a97dc07689beed8bcb5b2ee88f4f8b84b64329374660b20ee88cfe04
+  part:
+  - 2
+  - 4
+- id: c009
+  source: docs_b2ai-voice_org_row10.txt
+  lines:
+  - 2119
+  - 2518
+  bytes: 24499
+  sha256: 7ce385094acb63c7c5a04d241f757c89d862b7728f291726d7a2a1367a12f919
+  part:
+  - 3
+  - 4
+- id: c010
+  source: docs_b2ai-voice_org_row10.txt
+  lines:
+  - 2519
+  - 2611
+  bytes: 1934
+  sha256: 2de4849329b7c594d64b7db3956166cfa6d3d33367adbe7c9a2c892392dc9752
+  part:
+  - 4
+  - 4
+- id: c011
+  source: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
+  lines:
+  - 2612
+  - 2853
+  bytes: 47742
+  sha256: 49097cd09aaf725c17a32be50890375c6bb728ad1c6563a2a71bd0d050559c88
+  part:
+  - 1
+  - 2
+- id: c012
+  source: gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt
+  lines:
+  - 2854
+  - 3106
+  bytes: 29792
+  sha256: 6f32cc9ceda9894cb8d4e02da65557e7f06c5aa5daf7cd9875d251f115f5eb88
+  part:
+  - 2
+  - 2
+- id: c013
+  source: gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt
+  lines:
+  - 3107
+  - 3506
+  bytes: 15555
+  sha256: 8f6bcdf6ac6438ee976517922ff1b504f69f7a89fa74191f3c9fae06746772fb
+  part:
+  - 1
+  - 2
+- id: c014
+  source: gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt
+  lines:
+  - 3507
+  - 3555
+  bytes: 1589
+  sha256: 48c02b415883e14d01619b09b7561c153c23e9dd9941fcc23e7d7bb107ab9877
+  part:
+  - 2
+  - 2
+- id: c015
+  source: physionet_b2ai-voice_1.1_row17.txt
+  lines:
+  - 3556
+  - 3876
+  bytes: 23538
+  sha256: 11db4b98b1ba1227c07c94427a6453d7abcda011e07b62e087b1e3973017f8c6
+- id: c016
+  source: physionet_b2ai-voice_3.0.0_row18.txt
+  lines:
+  - 3877
+  - 4276
+  bytes: 25545
+  sha256: c707beb1a666ce6e8d4b5d3df0bebfc3219cac8de87711e0c187b399f4dc3749
+  part:
+  - 1
+  - 2
+- id: c017
+  source: physionet_b2ai-voice_3.0.0_row18.txt
+  lines:
+  - 4277
+  - 4542
+  bytes: 16351
+  sha256: 3ae0a74407197ca8e006f69afef7b4ece64f2bcd5c88230107a23681fb69a877
+  part:
+  - 2
+  - 2
+- id: c018
+  source: physionet_b2ai-voice_3.1.0_2026-07-24.txt
+  lines:
+  - 4543
+  - 4942
+  bytes: 25471
+  sha256: 4ed4ba310cf7606fb57c8957129892e472a758353f1bc4cfb0a1d79cf338bfc7
+  part:
+  - 1
+  - 2
+- id: c019
+  source: physionet_b2ai-voice_3.1.0_2026-07-24.txt
+  lines:
+  - 4943
+  - 5214
+  bytes: 17622
+  sha256: 63b2e29ba70d4b7a6975ef172870e73b6a426ad32d8b1637905f2fc27c07e94d
+  part:
+  - 2
+  - 2
+- id: c020
+  source: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt
+  lines:
+  - 5215
+  - 5614
+  bytes: 25545
+  sha256: e1a5c764be4e78e6033c70bf44b92a476b48a3fdc3acb67c2aadd6700c6cc62f
+  part:
+  - 1
+  - 2
+- id: c021
+  source: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt
+  lines:
+  - 5615
+  - 5728
+  bytes: 5578
+  sha256: 9054f042c02bdbc8ab6fd884f14b1049dd4a198e964a2a01cfb371641c5ff0c2
+  part:
+  - 2
+  - 2
+- id: c022
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 5729
+  - 6128
+  bytes: 28793
+  sha256: 689a1bc3a48da86a826ef7874e18b2fdd85e3840a027f86e27410dc0575c8b11
+  part:
+  - 1
+  - 25
+- id: c023
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 6129
+  - 6528
+  bytes: 10426
+  sha256: a606ee7bcd4e9dc7a461c09cc576855c38937f06c406365210e673a737dbd37f
+  part:
+  - 2
+  - 25
+- id: c024
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 6529
+  - 6928
+  bytes: 9684
+  sha256: 42d936669dcd359d64fd8df8fb59a0ba65199ca01eabfd58a7fd389b314285cb
+  part:
+  - 3
+  - 25
+- id: c025
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 6929
+  - 7328
+  bytes: 9849
+  sha256: b99b54270c5dc654ebd7c7f700eea8c0ed4e5d01506c93a3c28a138605e35154
+  part:
+  - 4
+  - 25
+- id: c026
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 7329
+  - 7728
+  bytes: 10499
+  sha256: fb70c9e36a232fa76ebbeedd82847214e09cf9da3494a832fc867a2187ea36eb
+  part:
+  - 5
+  - 25
+- id: c027
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 7729
+  - 8128
+  bytes: 9797
+  sha256: e4335ad2b47dd6f2d613b03775482a32310c6480daac0b5e1081c5158863ca20
+  part:
+  - 6
+  - 25
+- id: c028
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 8129
+  - 8528
+  bytes: 9817
+  sha256: af9eb4ed20688b751f66938095adecb6472d35727523624671543c3cc23b352d
+  part:
+  - 7
+  - 25
+- id: c029
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 8529
+  - 8928
+  bytes: 9975
+  sha256: eff27e1ca38c2dce44e53dc21d8791f56fe4bd7eafc3de055901cd01f7c93d97
+  part:
+  - 8
+  - 25
+- id: c030
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 8929
+  - 9328
+  bytes: 11521
+  sha256: e7682298179f081a979b07898d3888da606e9ad858aa2abf9413d0cfa2205084
+  part:
+  - 9
+  - 25
+- id: c031
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 9329
+  - 9728
+  bytes: 9859
+  sha256: 0f455fea8f3fcab73b1e99cb43be22e06118d33c469c8c6fcb3f64ba9a7781b2
+  part:
+  - 10
+  - 25
+- id: c032
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 9729
+  - 10128
+  bytes: 9745
+  sha256: e49913eaa1bc4ed002d45a93216a7fadf83ed84c5dd0826e5a3e251e85641895
+  part:
+  - 11
+  - 25
+- id: c033
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 10129
+  - 10528
+  bytes: 9630
+  sha256: 2dea8dc89cb955ecc0c958f95d6f30cacee9ab216c2af8f7c93fbd262e20e619
+  part:
+  - 12
+  - 25
+- id: c034
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 10529
+  - 10928
+  bytes: 9568
+  sha256: 64bf581ef64b75f41a5917de6377e8bcb360b851f7179fbcbdcf212fb24276ee
+  part:
+  - 13
+  - 25
+- id: c035
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 10929
+  - 11328
+  bytes: 12385
+  sha256: 0c8e8fcce2e6925e8b23054e4ff19e0a9ddf409563e1baf746658a2ca28cda3b
+  part:
+  - 14
+  - 25
+- id: c036
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 11329
+  - 11728
+  bytes: 17226
+  sha256: e230e30738209bd12ae6aa5547476c2dd45daa3ddbb257490ee6221f761bafeb
+  part:
+  - 15
+  - 25
+- id: c037
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 11729
+  - 12128
+  bytes: 16337
+  sha256: 0b200f53fff3727d3df93c8962a55dfe800b37a988707ded131e57fd3a5fcf54
+  part:
+  - 16
+  - 25
+- id: c038
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 12129
+  - 12528
+  bytes: 16326
+  sha256: 0cfb1027a1f54f3cfae0bc42ea89629b8877725c1c5c5521c48c6bf509584431
+  part:
+  - 17
+  - 25
+- id: c039
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 12529
+  - 12928
+  bytes: 16053
+  sha256: 34af037f41b0f3b8198c9cc5524e4bcbc54df5117067540c58b68ed10fb709fc
+  part:
+  - 18
+  - 25
+- id: c040
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 12929
+  - 13328
+  bytes: 18056
+  sha256: 197c5c9bd81c04f819290d6603f5c4a6a67c01e4c890eebd43005f001acedab7
+  part:
+  - 19
+  - 25
+- id: c041
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 13329
+  - 13728
+  bytes: 13392
+  sha256: 39930f065d666bc8d1fad2b6b457001db73e868b88397fd55627674d1c644215
+  part:
+  - 20
+  - 25
+- id: c042
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 13729
+  - 14128
+  bytes: 11445
+  sha256: 1c46543729496178c2c565d139aa7b7b80a05a63c74735617de78f4be928bae7
+  part:
+  - 21
+  - 25
+- id: c043
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 14129
+  - 14528
+  bytes: 11436
+  sha256: a30382ec5774d47f85e93aad75e0ea24cfdc0a70427ec99ca261f00f0e11ee8f
+  part:
+  - 22
+  - 25
+- id: c044
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 14529
+  - 14928
+  bytes: 11528
+  sha256: 028d4a647a7533c329fbd3d5565ae11fad75e181838e389f9b8cd46cb2f46cc2
+  part:
+  - 23
+  - 25
+- id: c045
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 14929
+  - 15328
+  bytes: 11320
+  sha256: e1026cf011f4ddc0074d7f0e768aab678c5ab14c3c6adb61dc94576096aa51d2
+  part:
+  - 24
+  - 25
+- id: c046
+  source: github_eipm_bridge2ai-docs_README_row22.txt
+  lines:
+  - 15329
+  - 15715
+  bytes: 16851
+  sha256: f0fcf84764db048cd110c7488726910db741339763f430d6ebd97668567fe5d6
+  part:
+  - 25
+  - 25
