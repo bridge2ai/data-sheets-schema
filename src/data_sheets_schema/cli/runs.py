@@ -1284,6 +1284,14 @@ def select_cmd(method, project, config, allow_unverified, execute):
                            other, prior))
 
     data = _yaml.safe_load(prov_path.read_text(encoding="utf-8")) or {}
+    stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    # The winner's own prior block, if it was canonical already (#748): its
+    # chain is carried and the block itself goes to history like any other,
+    # so an idempotent re-run neither drops the chain nor loses the earlier
+    # selection's evidence. A record being re-promoted after a displacement
+    # sheds the pointer that said it was displaced.
+    own_prior = data.pop("canonical", None) or {}
+    data.pop("canonical_superseded_by", None)
     data["canonical"] = {
         "criterion": "full and core both validate against the current schema, then most slots, then lowest label",
         "selected_from": [
@@ -1307,9 +1315,19 @@ def select_cmd(method, project, config, allow_unverified, execute):
                 if earlier not in chain:
                     chain.append(earlier)
         data["canonical"]["supersedes"] = chain
+    chain = list(data["canonical"].get("supersedes") or [])
+    for earlier in own_prior.get("supersedes") or []:
+        if earlier not in chain:
+            chain.append(earlier)
+    chain = [c for c in chain if c != winner[0]]      # never itself (#748)
+    if chain:
+        data["canonical"]["supersedes"] = chain
+    if own_prior:
+        data.setdefault("canonical_history", []).insert(
+            0, {**own_prior, "superseded_by": {"label": winner[0], "at": stamp,
+                                                "by": "d4d runs select", "reason": "re-selected"}})
     ProvenanceRecord(data=data).write(prov_path)
 
-    stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
     for label, other, prior in superseded:
         # Demoted, not popped (#677): the displaced selection's evidence —
         # criterion, candidates, margin (VOICE 20b's outright tie) — stays in

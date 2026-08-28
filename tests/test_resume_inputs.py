@@ -78,9 +78,12 @@ class DeclaredInputsTest(unittest.TestCase):
                 source.count(f'carry["{key}"] = '), 1,
                 f"{key} is assigned more than once, so it is not an original")
 
-    def test_reconcile_full_declares_the_core_record(self):
-        """The dependency #566 added, and the one #575 can strand."""
-        self.assertIn("Completed core record", PHASE_NEEDS["reconcile_full"])
+    def test_reconcile_full_no_longer_declares_the_core_record(self):
+        """#566 added the dependency for a generated core; a derived core
+        (#694) holds nothing the full lacks, so it is not carried (#749).
+        The report phase, which narrates both records, still declares it."""
+        self.assertNotIn("Completed core record", PHASE_NEEDS["reconcile_full"])
+        self.assertIn("Completed core record", PHASE_NEEDS["report"])
 
 
 class ResumeGuardTest(unittest.TestCase):
@@ -144,8 +147,10 @@ class ArtifactConsumerTest(unittest.TestCase):
         `reconcile_full`, or they resume against a record that is gone."""
         consumers = {ph for ph in PHASES
                      if "Completed core record" in PHASE_NEEDS.get(ph, ())}
-        self.assertIn("audit", consumers)
-        self.assertIn("reconcile_full", consumers)
+        # Under derivation the core's consumers are the phases that re-derive
+        # or narrate it (#749); audit and reconcile_full read the full only.
+        self.assertIn("report", consumers)
+        self.assertNotIn("audit", consumers)
         self.assertEqual(PHASE_ARTIFACT.get("core"), "core")
 
 
@@ -167,13 +172,14 @@ class InvalidationBoundsTest(unittest.TestCase):
                          _dependents_of("Completed core record",
                                         ("core", "reconcile_core")))
 
-    def test_discarding_core_does_discard_reconcile_full(self):
-        """Since #566 `reconcile_full` consumes the core record, so a replaced
-        core invalidates the absorption it performed."""
+    def test_discarding_core_does_not_discard_reconcile_full(self):
+        """#566 made `reconcile_full` consume the core; under derivation it
+        does not (#749), so a replaced core invalidates only the phases that
+        read it — the report — and never the full-record repair."""
         from data_sheets_schema.api_runner import _dependents_of
-        self.assertIn("reconcile_full",
-                      _dependents_of("Completed core record",
-                                     ("core", "reconcile_core")))
+        deps = _dependents_of("Completed core record", ("core", "reconcile_core"))
+        self.assertNotIn("reconcile_full", deps)
+        self.assertIn("report", deps)
 
     def test_it_terminates_on_a_self_dependency(self):
         """A fixed-point walk over a graph nobody guarantees is acyclic."""

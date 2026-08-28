@@ -206,6 +206,28 @@ class TestSelect(unittest.TestCase):
         rep2 = yaml.safe_load((core / "cfg_rep2" / "P_provenance.yaml").read_text())
         self.assertEqual(rep2["canonical_superseded_by"]["label"], "cfg_rep3")   # its own displacer, unchanged
 
+    def test_a_same_winner_rerun_keeps_the_chain_and_re_promotion_is_clean(self):
+        """#748: re-selecting the current canonical must not drop its chain;
+        a record promoted again after a displacement must not name itself
+        and must shed the pointer that said it was displaced."""
+        core = self.root / "claudecode_agent_core"
+        rd = lambda l: yaml.safe_load((core / l / "P_provenance.yaml").read_text())  # noqa: E731
+        self._run("--execute")                                   # rep2
+        self._run("--execute", valid={"cfg_rep2": False})        # rep3 supersedes rep2
+        self._run("--execute")                                   # rep2 again: re-promotion
+        rep2 = rd("cfg_rep2")
+        self.assertEqual(rep2["canonical"]["supersedes"], ["cfg_rep3"])
+        self.assertNotIn("canonical_superseded_by", rep2)
+        self.assertEqual(len(rep2["canonical_history"]), 1)     # its first mark, displaced by rep3
+        self.assertEqual(rep2["canonical_history"][0]["superseded_by"]["label"], "cfg_rep3")
+        self._run("--execute")                                   # idempotent re-run, same winner
+        rep2 = rd("cfg_rep2")
+        self.assertEqual(rep2["canonical"]["supersedes"], ["cfg_rep3"])
+        self.assertEqual(len(rep2["canonical_history"]), 2)
+        self.assertEqual(rep2["canonical_history"][0]["superseded_by"]["reason"], "re-selected")
+        rep3 = rd("cfg_rep3")
+        self.assertEqual(rep3["canonical_superseded_by"]["label"], "cfg_rep2")
+
     def test_a_first_selection_supersedes_nothing(self):
         self._run("--execute")
         first = yaml.safe_load((self.root / "claudecode_agent_core" /

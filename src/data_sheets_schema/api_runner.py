@@ -641,15 +641,14 @@ PHASE_ARTIFACT = {
 PHASE_NEEDS = {
     "full": (),
     "core": ("Completed full record",),
-    "audit": ("Completed full record", "Completed core record"),
-    # The core record too (#566). Without it there was no path by which a fact
-    # the core phase found in the bundle could reach the full record, and 10 of
-    # the 12 v4 records ended with core-only prose the full record lacks —
-    # 25,417 characters, including AI-READI's recommended train/validation/test
-    # split and CHORUS's holdout test set. The full record is the comprehensive
-    # one; a reader of it never saw them.
-    "reconcile_full": ("Completed full record", "Completed core record",
-                       "Audit findings"),
+    # The full record only (#705/#749). #566 carried the core into audit and
+    # reconcile_full because a *generated* core could hold a bundle fact the
+    # full lacked — 25,417 characters of it across the v4 arm. A derived core
+    # (#694) is a projection of the full and can hold nothing the full does
+    # not, so carrying it was ~10.6k tokens per phase the model was told to
+    # ignore. The report phase still receives both, because it narrates both.
+    "audit": ("Completed full record",),
+    "reconcile_full": ("Completed full record", "Audit findings"),
     "reconcile_core": ("Reconciled full record", "Completed core record", "Audit findings"),
     # The reconciled records too (#580). The report is asked what changed in
     # each record and why, and it received only the audit findings — so it had
@@ -2163,7 +2162,11 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             box: dict[str, Any] = {}
             holder: dict[str, Any] = {}
 
-            def _run() -> None:
+            # Bound per attempt, not closed over (#747): an abandoned worker
+            # that completes late must land in *its* box, never in the live
+            # attempt's, where an error checked before the result would
+            # discard a good response.
+            def _run(box: dict[str, Any] = box, holder: dict[str, Any] = holder) -> None:
                 try:
                     with client.messages.stream(**kwargs) as stream:
                         holder["stream"] = stream
@@ -2254,8 +2257,12 @@ def _wall_clock_seconds() -> float:
 
 #: One phase call may run this long in total before the watchdog aborts it.
 #: Wall clock, not read-idle — see the watchdog comment in _call_with_retry.
-#: Sized at 60 minutes against an observed real-phase maximum near 30 and
-#: observed hangs of 1-3 hours.
+#: Sized at 60 minutes. Under the four-phase derived-core regime (22c, n=90
+#: calls) the longest completed call was 14.7 min (CM4AI `full`); the
+#: generated-core regime saw 147 min (20b AI_READI `reconcile_core`, a real
+#: completion) and 65 min, which this budget would have abandoned and
+#: re-billed — the figure is right for the phases that exist now, not for
+#: ones that no longer run. Observed hangs were 1-3 hours (#664).
 PHASE_WALL_CLOCK_SECONDS = _wall_clock_seconds()
 
 RATE_LIMIT_MAX_PAUSE = 15 * 60      # never sleep longer than this on one attempt
@@ -2659,7 +2666,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             # the phases that *consumed* it too (#575). Dropping only the
             # producers left `audit` marked done with findings computed against
             # the artifact just discarded, and `reconcile_full` marked done
-            # having absorbed from it.
+            # having been told what it may not copy from it.
             done -= set(produced_by)
             done -= _dependents_of(name, produced_by)
     # Under a receipt condition the receipt is part of the `full` artifact
@@ -2715,7 +2722,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         # Every declared input, or none. Filtering to whatever happened to be
         # present let a phase run short of its context and write a record
         # indistinguishable from one where there was nothing to use — the
-        # resumed `reconcile_full` that silently absorbs nothing because the
+        # resumed `reconcile_full` that silently repairs nothing because the
         # core record never reached it (#575).
         absent = [k for k in PHASE_NEEDS[ph] if k not in carry]
         if absent:

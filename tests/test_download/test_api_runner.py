@@ -1304,6 +1304,44 @@ class TestTransportErrorsAreRetried(unittest.TestCase):
         self.assertLess(time.monotonic() - t0, 5, "the caller must not wait for the hung read")
         release.set()
 
+    def test_a_late_abandoned_worker_cannot_poison_the_live_attempt(self):
+        """#747: the abandoned attempt's thread completes (with an error, as a
+        closed stream would) *while* the next attempt is running; the live
+        attempt's good response must survive."""
+        import threading
+        from data_sheets_schema.api_runner import _call_with_retry
+        first_started = threading.Event(); second_running = threading.Event()
+        calls = {"n": 0}
+
+        class Stream:
+            def __init__(self, n): self.n = n
+            def __enter__(self): return self
+            def __exit__(self, *e): return False
+            def get_final_message(self):
+                if self.n == 1:
+                    first_started.set()
+                    second_running.wait(10)          # wake once attempt 2 is live…
+                    raise RuntimeError("stream closed")   # …and fail into *our* box
+                second_running.set()
+                time.sleep(0.3)                       # give the late thread time to land
+                return FakeResponse("ok")
+            def close(self): pass
+
+        class Messages:
+            @staticmethod
+            def stream(**kw):
+                calls["n"] += 1
+                return Stream(calls["n"])
+
+        class Client:
+            messages = Messages()
+
+        out = _call_with_retry(Client(), model="claude-opus-5", max_tokens=10,
+                               temperature=None, system="s", messages=[],
+                               sleep=lambda _: None, wall_clock=1.0)
+        self.assertEqual(calls["n"], 2)
+        self.assertEqual(out.content[0].text, "ok")
+
     def test_a_bad_request_is_not_retried(self):
         """400s are deterministic; retrying only delays the real error."""
         from data_sheets_schema.api_runner import _call_with_retry
