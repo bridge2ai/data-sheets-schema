@@ -185,6 +185,27 @@ class TestSelect(unittest.TestCase):
         self.assertEqual(loser["canonical_superseded_by"]["label"], "cfg_rep3")
         self.assertIn("at", loser["canonical_superseded_by"])
 
+    def test_the_displaced_mark_is_demoted_and_the_chain_is_transitive(self):
+        """#677: the displaced selection's evidence stays in the live corpus
+        under canonical_history, and the winner's `supersedes` walks back to
+        the first mark ever made, not one hop."""
+        self._run("--execute")                                   # rep2
+        self._run("--execute", valid={"cfg_rep2": False})        # rep3 supersedes rep2
+        self._run("--execute", valid={"cfg_rep2": False, "cfg_rep3": False})   # rep1 supersedes rep3 (and rep2)
+        core = self.root / "claudecode_agent_core"
+        rep3 = yaml.safe_load((core / "cfg_rep3" / "P_provenance.yaml").read_text())
+        self.assertNotIn("canonical", rep3)
+        self.assertEqual(len(rep3["canonical_history"]), 1)
+        h = rep3["canonical_history"][0]
+        self.assertEqual(h["supersedes"], ["cfg_rep2"])           # its own evidence, intact
+        self.assertIn("selected_from", h); self.assertIn("margin_over_runner_up", h)
+        self.assertEqual(h["superseded_by"]["label"], "cfg_rep1")
+        self.assertEqual(rep3["canonical_superseded_by"]["label"], "cfg_rep1")
+        rep1 = yaml.safe_load((core / "cfg_rep1" / "P_provenance.yaml").read_text())
+        self.assertEqual(rep1["canonical"]["supersedes"], ["cfg_rep3", "cfg_rep2"])
+        rep2 = yaml.safe_load((core / "cfg_rep2" / "P_provenance.yaml").read_text())
+        self.assertEqual(rep2["canonical_superseded_by"]["label"], "cfg_rep3")   # its own displacer, unchanged
+
     def test_a_first_selection_supersedes_nothing(self):
         self._run("--execute")
         first = yaml.safe_load((self.root / "claudecode_agent_core" /

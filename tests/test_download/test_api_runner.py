@@ -7,6 +7,7 @@ anything is billed, so the tests exercise exactly what a real run would send.
 
 import json
 import re
+import time
 import unittest
 
 import yaml
@@ -1262,6 +1263,46 @@ class TestTransportErrorsAreRetried(unittest.TestCase):
                              temperature=None, system="s", messages=[],
                              sleep=lambda _: None)
         self.assertEqual(calls["n"], MAX_ATTEMPTS)
+
+    def test_a_hung_call_is_abandoned_and_retried_not_waited_on(self):
+        """#664: the first watchdog closed the stream from a timer thread and
+        the blocked SSL read never woke. The call now runs on a worker the
+        caller abandons at the wall clock; the next attempt proceeds while
+        the dead one stays blocked."""
+        import threading
+        from data_sheets_schema.api_runner import _call_with_retry
+        release = threading.Event()
+        calls = {"n": 0}
+
+        class Stream:
+            def __init__(self, hang):
+                self.hang = hang
+            def __enter__(self): return self
+            def __exit__(self, *e): return False
+            def get_final_message(self):
+                if self.hang:
+                    release.wait(30)            # blocks like a dead socket read
+                return FakeResponse("ok")
+            def close(self):
+                pass
+
+        class Messages:
+            @staticmethod
+            def stream(**kw):
+                calls["n"] += 1
+                return Stream(hang=calls["n"] == 1)
+
+        class Client:
+            messages = Messages()
+
+        t0 = time.monotonic()
+        out = _call_with_retry(Client(), model="claude-opus-5", max_tokens=10,
+                               temperature=None, system="s", messages=[],
+                               sleep=lambda _: None, wall_clock=0.3)
+        self.assertIsNotNone(out)
+        self.assertEqual(calls["n"], 2)
+        self.assertLess(time.monotonic() - t0, 5, "the caller must not wait for the hung read")
+        release.set()
 
     def test_a_bad_request_is_not_retried(self):
         """400s are deterministic; retrying only delays the real error."""

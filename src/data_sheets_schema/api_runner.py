@@ -374,6 +374,8 @@ ASSEMBLY_LAYOUT = ("schema digest, input bundle, source ranking, "
                    "declared naming, arm prompt, "
                    "carried artifacts, phase instruction; "
                    "core derived from the full record, not generated (#694); "
+                   "audit and reconcile_full address the full record only, the "
+                   "core being its projection (#705); "
                    "under a receipt condition the bundle carries [cNNN] chunk "
                    "markers and the full phase instruction asks for the "
                    "coverage receipt after the record (#710)")
@@ -557,45 +559,33 @@ PHASE_INSTRUCTIONS = {
         "`description` cannot hold; evidence commentary in `source_caveats` "
         "— never an invented key. Output only the YAML."),
     "audit": (
-        "Phase 3. Audit both records against the declared bundle and the "
-        "evidence boundary. Report, as a JSON object with keys `findings` (a "
-        "list of {severity, record, slot, issue}) and `summary`: any slot whose "
-        "value the bundle does not support, any omission the bundle clearly "
-        "supports, any content the core record states that the full record "
-        "does not, any internal inconsistency, and any value whose shape does "
-        "not conform to the schema digest supplied above — prose where the "
-        "schema requires a list, enum values the schema does not define, or "
-        "source commentary embedded inside a name, identifier or affiliation "
-        "value. Output only JSON."),
+        "Phase 3. Audit the FULL record against the declared bundle and the "
+        "evidence boundary. The core record supplied above is a projection "
+        "derived from the full record, not a second source: it cannot state "
+        "anything the full record does not, so every finding concerns the "
+        "full record (`record: full`) and is repaired there. Report, as a "
+        "JSON object with keys `findings` (a list of {severity, record, slot, "
+        "issue}) and `summary`: any slot whose value the bundle does not "
+        "support, any omission the bundle clearly supports, any internal "
+        "inconsistency, and any value whose shape does not conform to the "
+        "schema digest supplied above — prose where the schema requires a "
+        "list, enum values the schema does not define, or source commentary "
+        "embedded inside a name, identifier or affiliation value. Output only "
+        "JSON."),
     "reconcile_full": (
-        "Phase 4a. Apply the audit findings that concern the FULL record and "
-        "emit the corrected full record in its entirety, header block included. "
-        "The core record is supplied above. Anything it states that the full "
-        "record does not, **and that the input bundle supports**, absorb into "
-        "the full record, in the slot that fits it: the core record is a "
-        "projection of the full one and cannot outrank it, so a bundle-"
-        "supported fact reaching only core is a fact the full record lost. "
-        "'States' includes precision and granularity, not only new facts: an "
-        "exact figure where the full record has a rounded one, an entry the "
-        "core record lists separately where the full record folded it into "
-        "another item, an enumeration the core record carries more completely "
-        "— absorb these too, they are content the full record lacks, **under "
-        "the same bundle-support gate as everything else**: a precise figure "
-        "the bundle does not state is an invention with extra decimal places, "
-        "not precision. In a slot both records carry, prefer the "
-        "representation that lets them agree: if the core record itemizes "
-        "what the full record merged and both are bundle-supported, itemize. "
-        "Absorb the content, not the wording — put it where the schema says it "
-        "belongs, which may not be where core put it. "
-        "Do not absorb anything the audit findings above identify as "
-        "unsupported: content the core record invented must be removed from "
-        "core, never copied into full. A fabrication the two records agree on "
-        "is worse than one only core carries, because agreement is what a "
-        "reader checks. "
-        "Every value you write or change must conform to the schema digest "
-        "supplied above — a repair that fixes evidence but breaks shape is "
-        "still a defect. If no finding requires a change, emit it unchanged. "
-        "Output only YAML."),
+        "Phase 4a. Apply the audit findings and emit the corrected full "
+        "record in its entirety, header block included. The core record "
+        "supplied above is a projection of the full record and will be "
+        "re-derived from what you emit: it has nothing to absorb from and "
+        "nothing to reconcile against, so do not copy from it or edit toward "
+        "it. Repair only what a finding names, only with content the input "
+        "bundle supports, and remove what a finding identifies as "
+        "unsupported. Where a repair adds an item — an exact figure the bundle "
+        "states, an entry the record had folded into another — put it in the "
+        "slot the schema says it belongs in. Every value you write or change "
+        "must conform to the schema digest supplied above — a repair that "
+        "fixes evidence but breaks shape is still a defect. If no finding "
+        "requires a change, emit it unchanged. Output only YAML."),
     "reconcile_core": (
         "Phase 4b. Apply the audit findings that concern the CORE record and "
         "emit the corrected core record in its entirety, header block included. "
@@ -2127,7 +2117,7 @@ def _declared_error_type(exc: Exception) -> str | None:
 
 
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages,
-                     sleep=time.sleep):
+                     sleep=time.sleep, wall_clock: float | None = None):
     """One API call, retrying transient failures.
 
     Retries rate limits, connection errors and 5xx. Does not retry 4xx other
@@ -2155,42 +2145,49 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             # 64k. get_final_message() reassembles the whole Message, so
             # stop_reason and usage stay available and the truncation guard and
             # cache accounting are unaffected.
-            # The watchdog closes the stream from outside when the wall
-            # clock runs out (#664). It cannot be an httpx timeout: the hangs
-            # sat at 0% CPU for 1-3 hours *through* the SDK's 600s
-            # between-chunks read timeout, so bytes were arriving while no
-            # content did, and no idle timeout distinguishes that from
-            # progress. Nor a check between iterator events: the SDK filters
-            # pings before the iterator, so a pinged-but-stalled stream
-            # blocks in __next__ and code between events never runs. Closing
-            # the response aborts the blocked read; the abort is classified
-            # transient below and the attempt retried. Whether this ends the
-            # observed hangs is a hypothesis the next canary tests — the
-            # evidence above only shows that a timeout alone cannot.
+            # The call runs in a worker thread the caller can abandon (#664).
+            # The first watchdog closed the stream from a timer thread when
+            # the wall clock ran out; on its first live firing (2026-08-22c,
+            # AI_READI rep2) the main thread stayed blocked inside
+            # `_ssl__SSLSocket_read` on a socket the peer had already dropped
+            # — closing from another thread neither wakes the poller nor
+            # takes the SSL lock, and no httpx timeout fires on a byte-warm
+            # stall. So the blocked read is not interrupted, it is *left
+            # behind*: the worker owns the stream, the caller waits on it for
+            # the wall clock, and on expiry raises the transient watchdog
+            # error and moves on to the retry. The abandoned daemon thread
+            # holds one socket until the process exits — the cost of never
+            # again waiting on a dead one.
             import threading
-            expired = threading.Event()
-            with client.messages.stream(**kwargs) as stream:
-                def _expire():
-                    expired.set()
-                    try:
-                        stream.close()
-                    except Exception:                  # noqa: BLE001
-                        pass
-                watchdog = threading.Timer(PHASE_WALL_CLOCK_SECONDS, _expire)
-                watchdog.daemon = True
-                watchdog.start()
+            budget = PHASE_WALL_CLOCK_SECONDS if wall_clock is None else wall_clock
+            box: dict[str, Any] = {}
+            holder: dict[str, Any] = {}
+
+            def _run() -> None:
                 try:
-                    return stream.get_final_message()
-                except Exception as exc:               # noqa: BLE001
-                    if expired.is_set():
-                        raise RuntimeError(
-                            f"phase call exceeded the "
-                            f"{PHASE_WALL_CLOCK_SECONDS:.0f}s wall clock and "
-                            f"was aborted by the watchdog (#664); underlying: "
-                            f"{type(exc).__name__}: {exc}") from exc
-                    raise
-                finally:
-                    watchdog.cancel()
+                    with client.messages.stream(**kwargs) as stream:
+                        holder["stream"] = stream
+                        box["result"] = stream.get_final_message()
+                except BaseException as exc:           # noqa: BLE001 - re-raised on the caller's side
+                    box["error"] = exc
+
+            worker = threading.Thread(target=_run, name=f"phase-call-{attempt}", daemon=True)
+            worker.start()
+            worker.join(budget)
+            if worker.is_alive():
+                # Best effort, off the caller's thread: closing may block on
+                # the same lock the reader holds, and the caller must not.
+                stream = holder.get("stream")
+                if stream is not None:
+                    threading.Thread(target=lambda: getattr(stream, "close", lambda: None)(),
+                                     daemon=True).start()
+                raise RuntimeError(
+                    f"phase call exceeded the {budget:.0f}s wall clock and was "
+                    f"abandoned by the watchdog (#664); the blocked read is left "
+                    f"on a daemon thread")
+            if "error" in box:
+                raise box["error"]
+            return box["result"]
         except Exception as exc:                      # noqa: BLE001 - re-raised
             transient = isinstance(exc, (
                 getattr(anthropic, "RateLimitError", ()),
@@ -2222,8 +2219,8 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             # own type, which is where the transience is actually stated.
             if not transient and _transient_error_type(exc):
                 transient = True
-            # A watchdog abort is transient by definition: the point of
-            # cutting a stalled call is to try again.
+            # A watchdog abandonment is transient by definition: the point of
+            # leaving a stalled call is to try again.
             if not transient and "wall clock" in str(exc) and "#664" in str(exc):
                 transient = True
             if not transient or attempt == MAX_ATTEMPTS:
