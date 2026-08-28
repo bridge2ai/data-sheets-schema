@@ -6,7 +6,10 @@ anything is billed, so the tests exercise exactly what a real run would send.
 """
 
 import json
+import re
 import unittest
+
+import yaml
 import unittest.mock
 from pathlib import Path
 
@@ -2020,3 +2023,72 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
                 execute(spec, client=C())
             self.assertGreater(calls["n"], 0,
                                "a partial run must not be treated as complete")
+
+
+class TestReceiptCondition(unittest.TestCase):
+    """Under a receipt condition the bundle carries chunk markers, the full
+    phase asks for the receipt, and the response's second document is the
+    receipt file (#710). Under any other condition none of that happens."""
+
+    def _spec(self, condition):
+        from pathlib import Path
+
+        from data_sheets_schema.api_runner import RunSpec
+        return RunSpec(project="CHORUS", arm="baseline", method="claudecode_agent",
+                       bundle=Path("data/preprocessed/concatenated/CHORUS_preprocessed.txt"),
+                       label="t", condition=condition)
+
+    def setUp(self):
+        from pathlib import Path
+        if not Path("data/preprocessed/chunks/CHORUS_chunks.yaml").exists():
+            self.skipTest("corpus manifest absent")
+
+    def test_markers_and_instruction_only_under_the_receipt_condition(self):
+        from data_sheets_schema.api_runner import RECEIPT_MARK, build_phase
+        from data_sheets_schema.chunking import load_manifest
+        from pathlib import Path
+        m = load_manifest(Path("data/preprocessed/chunks/CHORUS_chunks.yaml"))
+        v7 = build_phase(self._spec("generic_v7"), "full", carry={})
+        text = v7.cached_blocks[1]["text"]
+        for c in m["chunks"]:
+            self.assertIn(f"\n[{c['id']}]\n", text)
+        self.assertIn(f"bundle_md5: {m['bundle_md5']}", text)
+        self.assertIn(RECEIPT_MARK, v7.messages[0]["content"][-1]["text"])
+        # markers are additions only: removing them gives the bundle back
+        stripped = "\n".join(l for l in text.split("\n\n", 1)[1].split("\n") if not re.fullmatch(r"\[c\d+\]", l))
+        self.assertEqual(stripped, Path("data/preprocessed/concatenated/CHORUS_preprocessed.txt").read_text(encoding="utf-8"))
+        v6 = build_phase(self._spec("generic_v6"), "full", carry={})
+        self.assertNotIn("\n[c001]\n", v6.cached_blocks[1]["text"])
+        self.assertNotIn(RECEIPT_MARK, v6.messages[0]["content"][-1]["text"])
+        # the receipt request rides only on the full phase
+        audit = build_phase(self._spec("generic_v7"), "audit", carry={"Completed full record": "x"})
+        self.assertNotIn(RECEIPT_MARK, audit.messages[0]["content"][-1]["text"])
+
+    def test_a_stale_or_missing_manifest_refuses_before_a_token_is_spent(self):
+        import tempfile
+        from pathlib import Path
+
+        from data_sheets_schema.api_runner import chunk_marked_bundle
+        with tempfile.TemporaryDirectory() as tmp:
+            other = Path(tmp) / "CHORUS_preprocessed.txt"
+            other.write_text("not the bytes the manifest chunked\n", encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "not of the bytes"):
+                chunk_marked_bundle(other)
+            with self.assertRaisesRegex(RuntimeError, "document bundle only"):
+                chunk_marked_bundle(Path(tmp) / "CHORUS_crate_only.txt")
+
+    def test_the_response_is_split_into_record_and_receipt(self):
+        from data_sheets_schema.api_runner import RECEIPT_MARK, _extract_receipt, split_receipt
+        rec, rcpt = split_receipt(f"```yaml\nid: x\n```\n{RECEIPT_MARK}\n```yaml\nbundle_md5: m\nchunks:\n- id: c001\n  status: nothing_relevant\n  reason: r\n```\n")
+        self.assertIn("id: x", rec)
+        self.assertEqual(yaml.safe_load(_extract_receipt(rcpt))["chunks"][0]["id"], "c001")
+        self.assertEqual(split_receipt("no marker")[1], None)
+        with self.assertRaisesRegex(RuntimeError, "not a receipt"):
+            _extract_receipt("chunks: []\n")
+        with self.assertRaisesRegex(RuntimeError, "not a receipt"):
+            _extract_receipt("- a list\n")
+
+    def test_the_assembly_digest_covers_the_receipt_instruction(self):
+        from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS, assembly_digest
+        self.assertIn("full_receipt", PHASE_INSTRUCTIONS)
+        self.assertIn("#710", assembly_digest()["layout"])
