@@ -60,12 +60,17 @@ STATUSES = ("extracted", "redundant_with", "nothing_relevant", "duplicate_of")
 #: minted by the rule that allows minting, or the run's own commentary. Data,
 #: not a review-time judgement — without this list the "slots without a
 #: receipt" count is never zero and means nothing (#711 review F2).
-EXEMPT_SLOTS = frozenset({
-    "conforms_to", "conforms_to_standard", "conforms_to_schema", "conforms_to_class",
-    "notes", "source_caveats",
-})
-#: Leaf keys exempt wherever they appear (nested entries carry their own).
-EXEMPT_LEAVES = frozenset({"conforms_to_class", "conforms_to_schema", "notes"})
+EXEMPT_SLOTS = frozenset({"conforms_to_schema", "conforms_to_class"})
+#: Leaf keys exempt wherever they appear: the run's own commentary on an
+#: entry ("No IRB approval is stated in the bundle") has no snippet by
+#: construction — CHORUS v5 carries 28 nested `source_caveats` (#722).
+#: `conforms_to`/`conforms_to_standard` are *not* exempt: on CHORUS they are
+#: bundle facts (OMOP, DICOM). Dates are not exempt either — a normalised
+#: date is receipted by the text it was normalised from.
+EXEMPT_LEAVES = frozenset({"conforms_to_class", "conforms_to_schema", "notes", "source_caveats"})
+#: A snippet must carry at least this much after normalisation (#720): "a"
+#: verifies against any chunk, and an agent could receipt every slot with it.
+MIN_SNIPPET_CHARS = 8
 
 NON_CHECKS = (
     "that a chunk marked nothing_relevant truly held nothing for the record — a "
@@ -76,28 +81,34 @@ NON_CHECKS = (
 
 
 # ---------------------------------------------------------------- normalise
-_EDITORIAL = re.compile(r"\[[^\]]*\]")
 _NONWORD = re.compile(r"[^\w\s]+", re.UNICODE)
 _WS = re.compile(r"\s+")
+_ELLIPSIS = re.compile(r"\[\s*\.{3}\s*\]|\.{3}|…")
 
 
 def normalise(text: str) -> str:
-    """DisMech's folding, minus the Greek-letter table: editorial `[...]`
-    stripped, Unicode compatibility-normalised, case folded, punctuation to
-    space, whitespace collapsed."""
-    t = unicodedata.normalize("NFKC", _EDITORIAL.sub(" ", text))
-    t = _NONWORD.sub(" ", t.casefold())
+    """DisMech's folding without its editorial `[...]` stripping: Unicode
+    compatibility-normalised, case folded, punctuation to space, whitespace
+    collapsed. No stripping because the chunk *is* the source bytes — there
+    are no editorial insertions to excuse, and stripping ate 23% of
+    AI_READI's characters (its JSON arrays) so verbatim values could not
+    verify while bracket-padded fabrications could (#720)."""
+    t = _NONWORD.sub(" ", unicodedata.normalize("NFKC", text).casefold())
     return _WS.sub(" ", t).strip()
 
 
 def snippet_in(snippet: str, chunk_text: str) -> tuple[bool, str]:
-    """(verified, reason). `...` splits the snippet into parts matched
-    independently, in order."""
+    """(verified, reason). `...` (or `[...]`) splits the snippet into parts
+    matched independently, in order; every part must be at least
+    MIN_SNIPPET_CHARS after normalisation."""
     hay = normalise(chunk_text)
-    parts = [normalise(p) for p in re.split(r"\.{3}|…", snippet)]
+    parts = [normalise(p) for p in _ELLIPSIS.split(snippet)]
     parts = [p for p in parts if p]
     if not parts:
         return False, "empty after normalisation"
+    short = [p for p in parts if len(p) < MIN_SNIPPET_CHARS]
+    if short:
+        return False, f"too short to attest anything: {short[0]!r} (< {MIN_SNIPPET_CHARS} chars)"
     pos = 0
     for p in parts:
         i = hay.find(p, pos)
@@ -118,8 +129,14 @@ def _populated(value: Any) -> bool:
     return value not in (None, [], {}, "")
 
 
-def _minted(value: Any) -> bool:
-    return isinstance(value, str) and (value.startswith("urn:") or "#" in value)
+def _minted(value: Any, record_id: str | None = None) -> bool:
+    """A urn, or a fragment on the record's own id — the form the rules allow
+    minting in. A `#` on some other base is a real anchor, not a minting."""
+    if not isinstance(value, str):
+        return False
+    if value.startswith("urn:"):
+        return True
+    return bool(record_id) and "#" in value and value.split("#", 1)[0] == str(record_id)
 
 
 def populated_leaves(record: dict[str, Any]) -> list[tuple[str, Any]]:
@@ -143,18 +160,20 @@ def populated_leaves(record: dict[str, Any]) -> list[tuple[str, Any]]:
     return out
 
 
-def exempt(path: str, value: Any) -> bool:
+def exempt(path: str, value: Any, record_id: str | None = None) -> bool:
     top = re.split(r"[.\[]", path, maxsplit=1)[0]
     leaf = path.rsplit(".", 1)[-1]
     if top in EXEMPT_SLOTS or leaf in EXEMPT_LEAVES:
         return True
-    if leaf == "id" and _minted(value):
+    if leaf == "id" and _minted(value, record_id):
         return True                      # a minted fragment or urn has no source
     return False
 
 
 def resolve(record: Any, path: str) -> bool:
     parts = re.findall(r"[\w]+|\[\d+\]", path)
+    if not parts or not re.fullmatch(r"\w+(\[\d+\])*(\.\w+(\[\d+\])*)*", path):
+        return False                     # "" and malformed paths resolve to nothing (#721)
     cur = record
     for part in parts:
         if part.startswith("["):
@@ -170,10 +189,12 @@ def resolve(record: Any, path: str) -> bool:
 
 
 def _covers(receipt_path: str, leaf_path: str) -> bool:
-    """A receipt on a container path covers every leaf beneath it — one
-    snippet may attest a whole entry (a funder, a file)."""
-    return leaf_path == receipt_path or leaf_path.startswith(receipt_path + ".") \
-        or leaf_path.startswith(receipt_path + "[")
+    """A receipt on an *entry* (a dict: `funders[0]`) covers the leaves
+    beneath it — one snippet may attest a funder or a file, which is also how
+    a boolean or enum leaf gets its receipt. A receipt on a *list*
+    (`funders`) covers only itself: it must not attest every entry at once
+    (#721)."""
+    return leaf_path == receipt_path or leaf_path.startswith(receipt_path + ".")
 
 
 # ---------------------------------------------------------------- derived core
@@ -184,21 +205,38 @@ def core_path_map(full: dict[str, Any]) -> dict[str, str]:
     recursively under `resources[r]`; every other shared slot keeps its path.
     A receipt on `file_collections[0].resources[1].md5` therefore resolves in
     the core as `distributions[2].md5`."""
+    from data_sheets_schema.derive_core import derive_core
     out: dict[str, str] = {}
 
-    def walk(node: dict[str, Any], prefix: str) -> None:
-        j = 0
-        for i, coll in enumerate(node.get("file_collections") or []):
-            out[f"{prefix}file_collections[{i}]"] = f"{prefix}distributions[{j}]"
-            j += 1
-            for k, _f in enumerate((coll or {}).get("resources") or []):
-                out[f"{prefix}file_collections[{i}].resources[{k}]"] = f"{prefix}distributions[{j}]"
-                j += 1
-        for r, res in enumerate(node.get("resources") or []):
-            if isinstance(res, dict):
-                walk(res, f"{prefix}resources[{r}].")
+    def index_by_id(items: Any) -> dict[str, int]:
+        return {e["id"]: j for j, e in enumerate(items or [])
+                if isinstance(e, dict) and isinstance(e.get("id"), str)}
 
-    walk(full, "")
+    def walk(node: dict[str, Any], core_node: dict[str, Any], prefix: str) -> None:
+        # By id against the core the derivation actually produces, not by
+        # counting: the derivation skips an entry that projects to nothing
+        # and recurses only into resources with a string id (#723).
+        dists = index_by_id(core_node.get("distributions"))
+        out[f"{prefix}file_collections"] = f"{prefix}distributions"
+        for i, coll in enumerate(node.get("file_collections") or []):
+            if not isinstance(coll, dict):
+                continue
+            j = dists.get(coll.get("id"))
+            if j is not None:
+                out[f"{prefix}file_collections[{i}]"] = f"{prefix}distributions[{j}]"
+            for k, f in enumerate(coll.get("resources") or []):
+                jf = dists.get(f.get("id")) if isinstance(f, dict) else None
+                if jf is not None:
+                    out[f"{prefix}file_collections[{i}].resources[{k}]"] = f"{prefix}distributions[{jf}]"
+        core_res = index_by_id(core_node.get("resources"))
+        for r, res in enumerate(node.get("resources") or []):
+            if isinstance(res, dict) and res.get("id") in core_res:
+                cr = core_res[res["id"]]
+                if cr != r:
+                    out[f"{prefix}resources[{r}]"] = f"{prefix}resources[{cr}]"
+                walk(res, core_node["resources"][cr], f"{prefix}resources[{r}].")
+
+    walk(full, derive_core(full), "")
     return out
 
 
@@ -206,9 +244,12 @@ def core_path(full_path: str, pmap: dict[str, str]) -> str | None:
     """The derived-core path for a full-record receipt path, or None when the
     slot is full-only (no core counterpart)."""
     for pre in sorted(pmap, key=len, reverse=True):
-        if _covers(pre, full_path):
-            return pmap[pre] + full_path[len(pre):]
-    if full_path.split(".", 1)[0].split("[", 1)[0] == "file_collections":
+        if full_path == pre or full_path.startswith(pre + ".") or full_path.startswith(pre + "["):
+            rest = full_path[len(pre):]
+            if rest.startswith("["):
+                return None              # an entry the derivation did not carry
+            return pmap[pre] + rest
+    if "file_collections" in full_path:
         return None
     return full_path
 
@@ -246,12 +287,28 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
           full: dict[str, Any], record_bundle_md5: str | None) -> dict[str, Any]:
     """The validator. Pure: receipt + manifest + chunk texts + record → block."""
     findings: list[dict[str, Any]] = []
-    manifest_ids = [c["id"] for c in manifest.get("chunks") or []]
-    entries = receipt.get("chunks") or []
+    manifest_ids = [c["id"] for c in manifest.get("chunks") or [] if isinstance(c, dict) and "id" in c]
+
+    # A malformed entry is a finding, never a traceback (#724): the receipt is
+    # model output, and the validator's job is to say what is wrong with it.
+    entries: list[dict[str, Any]] = []
+    for n, e in enumerate(receipt.get("chunks") or []):
+        if not isinstance(e, dict) or not isinstance(e.get("id"), str):
+            findings.append({"kind": "malformed_entry", "index": n,
+                             "reason": "not a mapping with a string id"})
+            continue
+        pairs = e.get("extracted")
+        if e.get("status") == "extracted" and pairs is not None and not (
+                isinstance(pairs, list) and all(isinstance(p, dict) for p in pairs)):
+            findings.append({"kind": "malformed_entry", "chunk": e["id"],
+                             "reason": "extracted is not a list of {slot, snippet} mappings"})
+            e = {**e, "extracted": []}
+        entries.append(e)
 
     # --- chunks: exactly once each, no strangers, a status with its predicate
     seen: dict[str, int] = {}
     by_status: dict[str, int] = {s: 0 for s in STATUSES}
+    status_of = {e["id"]: e.get("status") for e in entries}
     for e in entries:
         cid = e.get("id")
         seen[cid] = seen.get(cid, 0) + 1
@@ -268,6 +325,11 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             refs = e.get("chunks") or []
             if not refs or any(r not in manifest_ids for r in refs):
                 findings.append({"kind": "redundant_with_unknown_chunks", "chunk": cid, "chunks": refs})
+            elif any(status_of.get(r) != "extracted" for r in refs):
+                # "already receipted from c001" where c001 extracted nothing
+                # is a contradiction, not a redundancy (#724).
+                findings.append({"kind": "redundant_with_a_chunk_that_extracted_nothing",
+                                 "chunk": cid, "chunks": [r for r in refs if status_of.get(r) != "extracted"]})
         elif st == "duplicate_of":
             of = e.get("of")
             if of not in manifest_ids or of == cid:
@@ -303,6 +365,9 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                 snippets["mismatched"] += 1
                 findings.append({"kind": "snippet_empty", "chunk": e.get("id"), "slot": pair.get("slot")})
                 continue
+            if e.get("id") not in manifest_ids:
+                snippets["mismatched"] += 1      # nothing it could be verified against
+                continue
             if text is None:
                 snippets["unchecked"] += 1
                 continue
@@ -315,13 +380,14 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                                  "slot": pair.get("slot"), "snippet": snippet[:60], "reason": why})
 
     # --- slots: paths resolve; every receiptable populated leaf has one
-    receipt_paths = sorted({str(p.get("slot", "")) for e in entries if e.get("status") == "extracted"
+    receipt_paths = sorted({str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
                             for p in (e.get("extracted") or [])})
     unresolved = [p for p in receipt_paths if not resolve(full, p)]
     for p in unresolved:
-        findings.append({"kind": "slot_not_in_record", "slot": p})
+        findings.append({"kind": "slot_not_in_record" if p else "slot_empty", "slot": p})
     leaves = populated_leaves(full)
-    receiptable = [(p, v) for p, v in leaves if not exempt(p, v)]
+    record_id = full.get("id") if isinstance(full.get("id"), str) else None
+    receiptable = [(p, v) for p, v in leaves if not exempt(p, v, record_id)]
     without = [p for p, _v in receiptable if not any(_covers(r, p) for r in receipt_paths)]
     slots = {"populated": len(leaves), "exempt": len(leaves) - len(receiptable),
              "receiptable": len(receiptable), "with_receipt": len(receiptable) - len(without),
@@ -331,8 +397,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
 
     chunks = {"total": len(manifest_ids), "reviewed": reviewed, "unreviewed": missing[:50],
               "by_status": by_status}
-    measured = snippets["total"] > 0 or len(manifest_ids) > 0
-    return {"checked": True, "measured": measured,
+    return {"checked": True,
             "chunks": chunks, "snippets": snippets, "slots": slots,
             "findings": findings[:100], "findings_truncated": max(0, len(findings) - 100) or None,
             "summary": (f"chunks {reviewed}/{len(manifest_ids)} reviewed · snippets "
@@ -382,8 +447,16 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     else:
         mpath = None
     if mpath is None or not mpath.exists():
-        return {**base, "checked": False, "reason": f"no chunk manifest for {bundle.name}"}
-    m = load_manifest(mpath)
+        return {**base, "checked": False,
+                "reason": (f"no chunk manifest for {bundle.name}: manifests are built for the "
+                           "document bundle {PROJECT}_preprocessed.txt only (#725); a run that "
+                           "reads another bundle needs it chunked first")}
+    try:
+        m = load_manifest(mpath)
+        if not isinstance(m, dict) or not isinstance(m.get("chunks"), list):
+            raise ValueError("manifest is not a mapping with a chunks list")
+    except (ValueError, yaml.YAMLError) as exc:
+        return {**base, "checked": False, "reason": f"manifest unreadable: {exc}"}
     raw = bundle.read_bytes()
     if hashlib.md5(raw).hexdigest() != m.get("bundle_md5"):
         return {**base, "checked": False,

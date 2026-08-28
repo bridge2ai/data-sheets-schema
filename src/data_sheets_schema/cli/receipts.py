@@ -75,9 +75,13 @@ def check(method, label, project, write, strict):
             out.write_text(yaml.safe_dump(rc.claim_receipts(receipt, full), sort_keys=False,
                                           allow_unicode=True), encoding="utf-8")
             click.echo(f"   ✓ claim receipts written to {out}")
-    if strict and (not block.get("checked") or block["findings"]
-                   or block["chunks"]["reviewed"] < block["chunks"]["total"]
-                   or block["snippets"]["verified"] < block["snippets"]["total"]):
+    # A run whose procedure wrote no receipt is not failed by --strict: the
+    # block is not a metric for it (#727). Expected-and-unchecked is.
+    if strict and block.get("expected") and not block.get("checked"):
+        sys.exit(1)
+    if strict and block.get("checked") and (
+            block["findings"] or block["chunks"]["reviewed"] < block["chunks"]["total"]
+            or block["snippets"]["verified"] < block["snippets"]["total"]):
         sys.exit(1)
 
 

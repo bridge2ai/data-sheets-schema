@@ -440,10 +440,18 @@ The validator is deterministic and offline and reports **affirmative
 counts** — `chunks N/N reviewed · snippets M/M verified · slots S/T with a
 receipt` — written as the `receipts` block of the provenance record (also
 by `backfill-checks` and inline at `d4d provenance record`). Snippet outcomes
-are verified / mismatched / unchecked; no "relaxed". The slot denominator
-excludes `EXEMPT_SLOTS` (runner-set, minted ids, the run's own commentary).
+are verified / mismatched / unchecked; no "relaxed", no editorial `[...]`
+stripping (the chunk is the source bytes), and a snippet part shorter than
+8 normalised characters attests nothing (#720). A receipt on an *entry*
+(`funders[0]`) covers its leaves — that is how a boolean or enum gets one —
+but a receipt on a *list* (`funders`) covers only itself (#721). The slot
+denominator excludes `conforms_to_schema`/`conforms_to_class`, `notes` and
+`source_caveats` at any depth, and ids minted on the record's own id (#722).
 Named non-checks: that `nothing_relevant` was true, and that a real snippet
-supports its value.
+supports its value. `backfill-checks` writes a `receipts` block only where a
+receipt exists or the record claims one (#726). Manifests exist for the
+document bundle only; a run reading a crate/healthsheet bundle cannot be
+receipt-checked until that bundle is chunked (#725).
 
 **The gate** (`canary.verdict`): when `inputs.receipt_expected` is true — set
 by `d4d provenance record --receipt-expected`, which the receipt-writing

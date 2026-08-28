@@ -41,8 +41,8 @@ def _receipt(md5):
             {"slot": "title", "snippet": "AI-READI"},
             {"slot": "name", "snippet": "ai-readi"},
             {"slot": "id", "snippet": "AI-READI dataset"},
-            {"slot": "keywords", "snippet": "study"},
-            {"slot": "file_collections[0]", "snippet": "multimodal"}]},
+            {"slot": "keywords", "snippet": "multimodal study"},
+            {"slot": "file_collections[0]", "snippet": "longitudinal, multimodal"}]},
         {"id": "c003", "status": "nothing_relevant", "reason": "references only"}]}
 
 
@@ -50,11 +50,19 @@ class Normalisation(unittest.TestCase):
     def test_exact_and_folded_matches_verify_and_paraphrase_does_not(self):
         text = "The Bridge2AI program — [NIH] “Common Fund”, 2024."
         self.assertTrue(rc.snippet_in("bridge2ai program", text)[0])
-        self.assertTrue(rc.snippet_in('Bridge2AI program — "Common Fund"', text)[0])
-        self.assertTrue(rc.snippet_in("Bridge2AI ... 2024", text)[0])          # split parts, in order
-        self.assertFalse(rc.snippet_in("2024 ... Bridge2AI", text)[0])         # out of order
+        self.assertTrue(rc.snippet_in('program — [NIH] “Common Fund”', text)[0])
+        self.assertTrue(rc.snippet_in("Bridge2AI program ... Common Fund, 2024", text)[0])   # parts, in order
+        self.assertTrue(rc.snippet_in("Bridge2AI program [...] Common Fund, 2024", text)[0])
+        self.assertFalse(rc.snippet_in("Common Fund, 2024 ... Bridge2AI program", text)[0])  # out of order
         self.assertFalse(rc.snippet_in("the Bridge to AI programme", text)[0])
-        self.assertFalse(rc.snippet_in("[only editorial]", text)[0])
+        # #720: no editorial stripping — bracketed text is text, so a
+        # bracket-padded fabrication fails and a real bracket verifies
+        self.assertFalse(rc.snippet_in("Bridge2AI program [funded by the Gates Foundation]", text)[0])
+        self.assertTrue(rc.snippet_in("[1] Something else", "References\n[1] Something else entirely.")[0])
+        # #720: a snippet that could match anywhere attests nothing
+        for short in ("a", "the", "…a…", "Fund", "Bridge2AI ... a"):
+            ok, why = rc.snippet_in(short, text)
+            self.assertFalse(ok, short); self.assertIn("short", why)
 
 
 class Validator(unittest.TestCase):
@@ -65,8 +73,8 @@ class Validator(unittest.TestCase):
     def test_a_clean_receipt_counts_affirmatively(self):
         b = rc.check(_receipt(self.md5), self.manifest, self.texts, FULL, self.md5)
         self.assertEqual(b["findings"], [])
-        self.assertEqual(b["chunks"]["reviewed"], b["chunks"]["total"], 3)
-        self.assertEqual(b["snippets"]["verified"], b["snippets"]["total"], 8)
+        self.assertEqual((b["chunks"]["reviewed"], b["chunks"]["total"]), (3, 3))
+        self.assertEqual((b["snippets"]["verified"], b["snippets"]["total"]), (8, 8))
         # conforms_to_class, notes and the minted ids are exempt; every other
         # populated leaf has a receipt — the container receipt on
         # file_collections[0] covers its name and its file's md5
@@ -91,8 +99,49 @@ class Validator(unittest.TestCase):
                   "bundle_md5_disagreement"):
             self.assertIn(k, kinds, k)
         self.assertEqual(b["chunks"]["unreviewed"], ["c003"])
-        self.assertEqual(b["snippets"]["mismatched"], 1)
+        self.assertGreaterEqual(b["snippets"]["mismatched"], 1)
         self.assertEqual(b["slots"]["unresolved"], ["nowhere.at_all"])
+
+    def test_a_receipt_on_a_list_covers_only_itself_and_an_entry_covers_its_leaves(self):
+        """#721: `funders` must not attest every funder; `funders[0]` attests
+        funder 0's leaves (which is how a boolean or enum gets a receipt)."""
+        r = _receipt(self.md5)
+        r["chunks"][1]["extracted"] = [p for p in r["chunks"][1]["extracted"] if not p["slot"].startswith("funders")]
+        r["chunks"][1]["extracted"].append({"slot": "funders", "snippet": "NIH Common Fund's"})
+        b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
+        self.assertIn("funders[0].grant_id", b["slots"]["without_receipt"])
+        r["chunks"][1]["extracted"][-1]["slot"] = "funders[0]"
+        b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
+        self.assertNotIn("funders[0].grant_id", b["slots"]["without_receipt"])
+        r["chunks"][1]["extracted"].append({"slot": "", "snippet": "NIH Common Fund's"})
+        b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
+        self.assertIn("slot_empty", {f["kind"] for f in b["findings"]})
+
+    def test_exemptions_follow_the_records(self):
+        """#722: commentary is exempt at any depth; conforms_to is a bundle
+        fact; a fragment is minted only on the record's own id."""
+        full = {**FULL, "conforms_to": "OMOP CDM",
+                "funders": [{"id": "https://x/ds#funder-1", "name": "NIH", "source_caveats": "not stated"}],
+                "external_resources": [{"id": "https://other.org/page#section", "name": "p"}]}
+        leaves = dict(rc.populated_leaves(full))
+        ex = {p for p, v in leaves.items() if rc.exempt(p, v, full["id"])}
+        self.assertIn("funders[0].source_caveats", ex); self.assertIn("notes", ex)
+        self.assertIn("funders[0].id", ex)                     # minted on the record's id
+        self.assertNotIn("external_resources[0].id", ex)       # a real anchor elsewhere
+        self.assertNotIn("conforms_to", ex)
+
+    def test_malformed_entries_are_findings_not_tracebacks(self):
+        r = _receipt(self.md5)
+        r["chunks"][1]["extracted"] = "Grant OT2OD032644"
+        r["chunks"].append("not an entry"); r["chunks"].append({"id": [1], "status": "extracted"})
+        b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
+        self.assertEqual(sum(f["kind"] == "malformed_entry" for f in b["findings"]), 3)
+
+    def test_redundant_with_a_chunk_that_extracted_nothing_is_a_contradiction(self):
+        r = _receipt(self.md5)
+        r["chunks"][2] = {"id": "c003", "status": "redundant_with", "chunks": ["c001"]}   # c001: nothing_relevant
+        kinds = {f["kind"] for f in rc.check(r, self.manifest, self.texts, FULL, self.md5)["findings"]}
+        self.assertIn("redundant_with_a_chunk_that_extracted_nothing", kinds)
 
     def test_a_receipt_without_the_slot_lists_it_by_path(self):
         r = _receipt(self.md5)
@@ -126,10 +175,22 @@ class ClaimReceipts(unittest.TestCase):
         self.assertEqual(claims["slots"]["description"]["core_path"], "description")
         pmap = rc.core_path_map(FULL)
         self.assertEqual(rc.core_path("file_collections[0].resources[0].md5", pmap), "distributions[1].md5")
-        nested = {"resources": [{"file_collections": [{"id": "c", "resources": [{"id": "f"}, {"id": "g"}]}]}]}
+        self.assertEqual(rc.core_path("file_collections", pmap), "distributions")
+        nested = {"id": "https://x/ds", "name": "n",
+                  "resources": [{"id": "https://x/sub", "name": "s",
+                                 "file_collections": [{"id": "https://x/sub#c", "name": "c", "resources": [
+                                     {"id": "https://x/sub#f", "name": "f"}, {"id": "https://x/sub#g", "name": "g"}]}]}]}
         pm = rc.core_path_map(nested)
-        self.assertEqual(rc.core_path("resources[0].file_collections[0].resources[1].sha256", pm),
-                         "resources[0].distributions[2].sha256")
+        self.assertEqual(rc.core_path("resources[0].file_collections[0].resources[1].name", pm),
+                         "resources[0].distributions[2].name")
+        # #723: an entry the derivation drops (nothing projectable) shifts
+        # nothing — the map is by id against the derived core
+        skipped = {"id": "https://x/ds", "name": "n",
+                   "file_collections": [{"unknown_slot_only": 1, "resources": [{"id": "https://x/ds#f", "name": "f"}]},
+                                        {"id": "https://x/ds#c2", "name": "c2"}]}
+        pm = rc.core_path_map(skipped)
+        self.assertEqual(rc.core_path("file_collections[1].name", pm), "distributions[1].name")
+        self.assertIsNone(rc.core_path("file_collections[0].unknown_slot_only", pm))
 
 
 class OnDisk(unittest.TestCase):
@@ -188,6 +249,24 @@ class Gate(unittest.TestCase):
         # a receipt with zero snippets over a non-empty manifest is not clean
         self.assertEqual(verdict({**self.GOOD, "receipts": {**clean, "snippets": {"total": 0, "verified": 0, "mismatched": 0, "unchecked": 0}}},
                                  self.BAR)["status"], REGRESSED)
+        # #727: one mismatched snippet is one regression line, not two
+        from data_sheets_schema.canary import receipt_floors
+        one = {**clean, "snippets": {"total": 8, "verified": 7, "mismatched": 1, "unchecked": 0},
+               "findings": [{"kind": "snippet_mismatch"}]}
+        self.assertEqual(receipt_floors(one)["receipt findings"], 0)
+        self.assertEqual(len(verdict({**self.GOOD, "receipts": one}, self.BAR)["regressions"]), 1)
+
+    def test_backfill_apply_does_not_rewrite_a_record_with_an_empty_receipts_block(self):
+        """#726: 235 records would otherwise change for no information."""
+        from data_sheets_schema import backfill_checks as bc
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "P_provenance.yaml"
+            p.write_text("# header\nrun_id: x\n", encoding="utf-8")
+            empty = {"receipts": {"checked": False, "expected": False, "reason": "none"}}
+            self.assertFalse(bc.apply(p, empty))
+            self.assertNotIn("receipts", p.read_text())
+            self.assertTrue(bc.apply(p, {"receipts": {"checked": False, "expected": True, "reason": "none"}}))
+            self.assertIn("receipts", p.read_text())
 
 
 if __name__ == "__main__":

@@ -101,6 +101,11 @@ REPORTED_ONLY = (
     ("GC label variants", "form",
      lambda b: (int(b["gc_label_variant_occurrences"])
                 if "gc_label_variant_occurrences" in b else None)),
+    # Receipts (#708) are shown on every run and gated by `verdict` against
+    # floors when the run's procedure wrote one; `_ran` reads `checked`, so
+    # an unchecked block prints — (#727).
+    ("chunks unreviewed", "receipts", lambda b: receipt_floors(b)["chunks unreviewed"]),
+    ("snippets unverified", "receipts", lambda b: receipt_floors(b)["snippets unverified"]),
 )
 
 
@@ -131,7 +136,10 @@ def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
         # A receipt over a non-empty bundle that extracted nothing is not a
         # clean receipt; it is `checked: 0` wearing a pass (#684, DisMech #7252).
         "receipts vacuous": int(total > 0 and int(sn.get("total") or 0) == 0),
-        "receipt findings": len(block.get("findings") or []),
+        # Findings not already counted above: a mismatched snippet is one
+        # defect, not two lines (#727).
+        "receipt findings": len([f for f in block.get("findings") or []
+                                 if f.get("kind") not in ("snippet_mismatch", "snippet_empty")]),
     }
 
 

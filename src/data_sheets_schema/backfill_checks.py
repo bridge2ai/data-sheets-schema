@@ -235,9 +235,18 @@ def apply(provenance: Path, blocks: dict[str, Any],
     for name in BLOCKS:
         if name in record and not overwrite:
             continue
-        if name in blocks:
-            record[name] = blocks[name]
-            changed = True
+        if name not in blocks:
+            continue
+        if name == "receipts" and name not in record:
+            # A receipts block saying "none, and none was expected" adds
+            # nothing to a record that predates receipts, and writing it into
+            # all 235 would be a corpus rewrite with no information in it
+            # (#726). Written once there is a receipt, or the run claims one.
+            b = blocks[name] or {}
+            if not (b.get("checked") or b.get("expected")):
+                continue
+        record[name] = blocks[name]
+        changed = True
     if not changed:
         return False
     provenance.write_text(
