@@ -76,13 +76,17 @@ Forbidden:
 Construct and constrain structure from the schema. Do not read an older D4D as
 a template.
 
-### Phase 2: Core
+### Phase 2: Core (derived, #694)
 
 Allowed:
 
-- the same current source bundle and manifest used in Phase 1
-- core schema files
-- the exact full D4D produced and validated in Phase 1 of the same run
+- the exact full D4D produced and validated in Phase 1 of the same run —
+  the only input; `d4d derive core` projects it and reads nothing else
+- core schema files (read by the command, not by an agent)
+
+The bundle is not an input to this phase: a derived core cannot take a fact
+from the bundle that the full record lacks. Such a fact is added to the full
+record in Phase 3, with its receipt, and reaches the core on re-derivation.
 
 Forbidden:
 
@@ -108,24 +112,28 @@ Forbidden:
 Resolve disagreements from the current source bundle. Never choose a value
 because an older generated record agrees with it.
 
-### Phase 4: Strict full/core reconciliation
+### Phase 4: Re-derivation, checks, report, repair
 
 Allowed:
 
 - the same allowed inputs as Phase 3
 - Phase 3 findings for the exact same-run pair
-- `data_sheets_schema.d4d_pair_consistency`
+- `d4d derive core --phase4-complete`, `data_sheets_schema.d4d_pair_consistency`,
+  the grounding, report-claims and receipts checkers
 
 Forbidden:
 
 - records or reports from an earlier run
 - evaluation artifacts as factual evidence
-- paraphrasing shared values merely to make core shorter
+- editing the core record by hand, including `--sync-core`: every change is
+  made to the full record and the core is re-derived from it
 
-Phase 4 may copy a shared value from full to core only after Phase 3 has checked
-that value against the current sources. For schema-identical slots, parsed YAML
-content must be deeply identical. For schema-projected or related fields,
-reconcile semantics from current sources and document the mapping.
+Nothing is copied from full to core by an agent: shared slots are identical
+because the core is a projection, and the pair checker is the proof. What
+remains for judgement is the semantic review of related content (the
+checker's `semantic-review-required` warning and the unprompted count,
+dialect and release-scope reviews the playbook names), written as rows of
+the report's `## Semantic review` section.
 
 ## Runtime-Specific Controls
 
@@ -169,8 +177,9 @@ Before declaring a record complete:
 3. Confirm every emitted slot and nested object is permitted by the applicable
    schema, including inherited and `slot_usage` constraints.
 4. Confirm the core input full record has the same run label.
-5. Confirm facts discovered in Phase 2 were back-ported to full only when the
-   current source bundle supports them.
+5. Confirm every value the Phase 3 audit back-ported or the Phase 4 repair
+   changed is in the full record only, is supported by the current source
+   bundle, and carries its receipt (`d4d receipts check --strict` passes).
 6. Validate schema and ontology terms.
 7. Run the schema-derived full/core pair validator.
 8. Confirm all projected and related content received semantic review.
