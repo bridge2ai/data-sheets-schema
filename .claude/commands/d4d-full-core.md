@@ -19,12 +19,12 @@ Before any phase, read and enforce
 
 Two execution modes are supported:
 
-- **Independent mode:** one fresh agent context for Phase 1 and another for
-  Phase 2, followed by orchestrator-controlled Phase 3 and Phase 4.
+- **Independent mode:** one fresh agent context for Phase 1; the
+  orchestrator runs Phase 2 (a command, no agent), Phase 3 and Phase 4.
 - **Four-phase project-agent mode:** one project agent runs full generation,
-  core generation, source/provenance audit, and strict reconciliation
-  sequentially. Phase 2 must still wait for a validated Phase 1 file and must
-  read both declared inputs.
+  core derivation, source/provenance audit, and re-derivation with checks
+  sequentially. Phase 2 must still wait for a validated Phase 1 file; its
+  only input is that file.
 
 ### Phase artifacts are snapshots; resume by artifact, not by memory
 
@@ -170,9 +170,11 @@ because the failure they prevent cannot occur:
 
 Conditions, all of which must hold:
 
-1. **A generation phase may never derive.** Phases 1–4 remain bound by the rules
-   above without exception. Derivation runs after a set of complete runs exists,
-   as a separate operation with its own method directory.
+1. **A generation phase may never derive from other runs.** Phases 1–4 remain
+   bound by the rules above without exception (Phase 2's projection of this
+   run's own full record is not this kind of derivation — see Phase 2). Derivation
+   from *other runs* happens after a set of complete runs exists, as a separate
+   operation with its own method directory.
 2. **Only complete, attested runs may contribute.** A partially-attested run
    cannot be placed, so combining it would produce a record whose inputs cannot
    be established. See `attestation()` in `runs.py`.
@@ -199,7 +201,7 @@ they are derived from — read it rather than trusting a list written here, whic
 is how this section came to claim only two conditions existed long after
 `generic_v2` through `generic_v5` were registered (#603).
 
-- **generic**, currently `generic` (v1) through `generic_v5`. Every project and
+- **generic**, currently `generic` (v1) through `generic_v7`. Every project and
   every arm receives *the exact text of that version*; only mechanical fields
   are substituted (project, arm, method, bundle, label, runtime, provider,
   model). Nothing in any of them is specific to a project, dataset, or input
@@ -287,8 +289,8 @@ For another run, replace them only with values reported as supported by the
 current local model catalog. Omit `service_tier="priority"` and `fast_mode`
 unless the selected model supports the fast tier.
 
-For independent mode, use one fresh `codex exec` invocation per project per
-generation phase and run the two audits with exact-path handoff. For four-phase
+For independent mode, use one fresh `codex exec` invocation per project for
+Phase 1 and run Phases 2–4 from the orchestrator with exact-path handoff. For four-phase
 project-agent mode, use one invocation per project and enforce explicit phase
 gates. In either mode, Phase 2 must begin only after Phase 1 has produced and
 validated the full YAML.
@@ -516,27 +518,16 @@ the repair of what the checkers find.
    ```
    An error from the checker on a derived pair is a defect in the
    derivation or a shape in the full record the core schema rejects — fix
-   the full record, re-derive, re-run; never the core. Validator warnings
-   mark related content (`file_collections` ↔ `distributions`, counts and
-   sizes against distribution-level values, `dialect` and `is_tabular`
-   against the files) that still requires semantic review; warnings are
-   not evidence that review occurred. Review each: the projection carries
-   values, it does not check that a top-level count agrees with the entries
-   beneath it or that a historical release is not read as the current one.
- (Phase 2's command
-   again, now with `--phase4-complete`, which writes the
-   `# Phase 4 reconciliation: completed` header line the condition text
-   mandates) after every Phase 3/4 correction to the full — the core is a
-   function of the full and is never edited on its own. `--sync-core` is
-   superseded by derivation and should not be needed; if it changes
-   anything, the derivation is wrong and that is a bug to report, not a
-   record to fix. Then run the pair checker as the final independent check:
-   ```bash
-   poetry run python -m data_sheets_schema.d4d_pair_consistency \
-     --full <full_file> --core <core_file>
-   ```
-   Validator warnings mark related content that still requires the semantic
-   review in step 1; warnings are not evidence that review occurred.
+   the full record, re-derive, re-run; never the core. Never pass
+   `--sync-core`: it rewrites the core file, and the core is re-derived.
+   The checker emits exactly one semantic warning, `semantic-review-required`
+   on `file_collections` ↔ `distributions`; it checks nothing about
+   `total_file_count`/`total_size_bytes` against the entries beneath them,
+   `dialect`/`is_tabular` against the files, or a historical release read as
+   the current one. Those reviews are **unprompted**: perform them and write
+   each as its own row of the `## Semantic review` section, because no
+   warning will remind you and the projection carries values without
+   checking them. A warning is not evidence that review occurred.
 2. **Check the identifiers against the bundle, and the report against the
    record.** The API path runs both automatically at the end of every run; this
    path ran neither, so the arm that reads the rules was the arm that did not
@@ -606,20 +597,25 @@ the repair of what the checkers find.
      `claims_checked: 0`; write it anyway so the count is measured the day
      the checker learns it.
    - `## Semantic review` — one line per `semantic-review-required` warning
-     the pair checker emitted (related-content pairs such as
-     `file_collections` ↔ `distributions`), each ending in **reviewed:
-     consistent** or **reviewed: corrected** with what changed. The warning
-     is the checker saying the review is required; this section is the only
-     evidence it happened (#691). No checker reads this section yet; it is
-     for the human reviewer and for the parser #691 proposes. If the checker
-     emitted no warnings, say so.
+     the pair checker emitted (today only `file_collections` ↔
+     `distributions`), **plus one line each for the unprompted reviews step 1
+     names** (counts and sizes against the entries beneath them, `dialect`
+     and `is_tabular` against the files, historical vs current release),
+     each ending in **reviewed: consistent** or **reviewed: corrected** with
+     what changed. The warning is the checker saying the review is
+     required; this section is the only evidence any of it happened (#691).
+     No checker reads this section yet; it is for the human reviewer and for
+     the parser #691 proposes. If the checker emitted no warnings, say so —
+     and still write the unprompted rows.
 
 5. **Repair, then re-report — the API pipeline's closing loop, which this path
    previously lacked.** If step 2's checkers (grounding, report claims) or the
-   final pair-consistency run reported findings that require changing either
-   record: fix both records in one pass (`repair`, recorded as its own phase
-   with `iterations` counting the fix-validate loops), re-run every validation
-   from steps 1–3, and **rewrite the reconciliation report** so it describes
+   final pair-consistency run reported findings that require a change: fix
+   the **full record** (`repair`, recorded as its own phase with
+   `iterations` counting the fix-validate loops) — never the core, which
+   step 1 re-derives — give every repaired value its receipt as Phase 3 step
+   4 prescribes and re-run `d4d receipts check --strict`, re-run every
+   validation from steps 1–3, and **rewrite the reconciliation report** so it describes
    the bytes that exist (`report_after_repair`). The API pipeline regenerates
    its report for the same reason (#604): a report describing bytes that no
    longer exist is the artifact a reviewer reads instead of the diff. If no
@@ -664,9 +660,13 @@ artifact already existed is listed with `--phase-skipped` (never both for one
 phase); a phase that did not complete gets `"completed": false`. `iterations`
 belongs only on a phase that actually loops — writing `1` on a phase that
 cannot iterate implies the number was measured. `report` attests the
-reconciliation report step 8 always writes. The `repair` and
-`report_after_repair` phases exist only when Phase 4 step 9 actually ran a
-repair; a run with no findings records neither.
+reconciliation report Phase 4 step 4 always writes. The `repair` and
+`report_after_repair` phases exist only when Phase 4 step 5 actually ran a
+repair; a run with no findings records neither. The phase named `reconcile`
+is Phase 4 steps 1–3 — re-derivation, the checkers and the semantic review —
+not a manual reconciliation; the name is kept because the recorder's phase
+vocabulary and every earlier agentic record use it, and `iterations` counts
+its fix-full/re-derive/re-check loops.
 
 **Token accounting has two different speakers, and only one may speak.** The
 phase agent itself has no access to its own accounting (#400) and must not
@@ -773,10 +773,11 @@ reconciliation report rather than pinning the edit to make the check pass.
 - Both YAML files pass their schema and term validations.
 - Every emitted structure is derived from and permitted by its applicable
   schema.
-- Every schema-identical shared slot has deeply identical parsed YAML content
-  and identical presence in full and core.
-- Every projected or semantically related field has been mapped and reviewed
-  with zero unresolved contradictions within or between the two records.
+- The pair checker reports no errors on the re-derived pair (shared-slot
+  identity holds by construction; the checker is the proof, not the agent).
+- Every semantically related field — the checker's warning and the
+  unprompted reviews Phase 4 step 1 names — has a row in `## Semantic
+  review` ending **reviewed: consistent** or **reviewed: corrected**.
 - The core file header names both its source-document bundle and full YAML input.
 - Both headers state that prior D4D factual reuse is prohibited.
 - The provenance audit confirms that no older full/core YAML was used.

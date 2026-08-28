@@ -26,8 +26,9 @@ def derive_core_cmd(full_path, core_path, validate, phase4_complete):
 
     Every schema-identical shared slot is copied from the full record,
     `resources` is projected by id, `distributions` is built from
-    `file_collections` over the slots the two classes share, and `dialect`
-    is left absent (no full-record source). The result is a pure function of
+    `file_collections` and their `File` entries over the slots the classes
+    share, and `dialect` is derived only where every file agrees on one
+    (else absent). The result is a pure function of
     the full record and the two schemas: pair consistency holds by
     construction and no fact is introduced. Prints the derivation facts the
     provenance record should carry.
