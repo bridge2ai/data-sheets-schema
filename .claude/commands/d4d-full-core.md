@@ -2,11 +2,13 @@ Generate paired full D4D and D4D-core records for Bridge2AI Grand Challenge
 projects using a model-neutral, schema-grounded agent workflow with four ordered
 phases:
 
-1. Generate the full D4D directly from the input documents.
-2. Generate D4D-core from the same input documents plus the completed full D4D.
-3. Audit both records against the current sources and provenance boundary.
-4. Reconcile the full/core pair using schema-derived identity and consistency
-   rules.
+1. Generate the full D4D directly from the input documents, writing its
+   coverage receipt as you read.
+2. Derive D4D-core from the validated full D4D (one command, no model).
+3. Audit the full record against the current sources and provenance boundary;
+   the core is its projection and is not audited as a second source.
+4. Re-derive the core, run the deterministic checks and the semantic review
+   the pair checker asks for, report, and repair.
 
 Phases 3 and 4 are required for production runs. Write a reconciliation report
 even when no discrepancies are found. Run the requested phases for all four
@@ -405,7 +407,8 @@ receipt, nothing else. It must not create a core record.
 `Dataset`; on the 2026-08-24 arm a deterministic projection reproduced 98.5%
 of every generated core's slot values and the rest was the two core-only
 slots. Generating it was where the API arm's pair errors came from. So Phase
-2 is one command, run on the validated Phase 1 file:
+2 is one command, run on the validated Phase 1 file, and involves no model
+judgement:
 
 ```bash
 poetry run d4d derive core \
@@ -414,15 +417,15 @@ poetry run d4d derive core \
 ```
 
 It copies every schema-identical shared slot, projects `resources` by id,
-builds `distributions` from `file_collections` over the slots the two classes
-share, leaves `dialect` absent (it has no full-record source), writes the
-core header from the full record's, and validates the result. A derived core
-that fails validation means the *full* record carries a shape the core schema
-rejects — fix the full record and re-derive; never edit the core by hand,
-because Phase 4 will re-derive it anyway. Record the phase as `derive_core`.
-Print the JSON the command emits into the reconciliation report; the
-provenance recorder needs nothing else, the API path records the same facts
-under `core_derivation`.
+builds `distributions` from `file_collections` and their `File` entries over
+the slots the classes share, derives `dialect` only where every file agrees
+on one, writes the core header from the full record's, and validates the
+result. A derived core that fails validation means the *full* record carries
+a shape the core schema rejects — fix the full record and re-derive; never
+edit the core by hand, because Phase 4 re-derives it anyway. Record the
+phase as `derive_core`. Print the JSON the command emits into the
+reconciliation report; the provenance recorder needs nothing else, the API
+path records the same facts under `core_derivation`.
 
 **Where the pinned condition text says otherwise, derivation wins.** The
 generic ≤ v5 prompts predate #694: they describe "Phase 2 core generation"
@@ -431,87 +434,44 @@ with `Sources: {bundle} + {full}`. Under those conditions the derived
 header (`derived by projection from the full record (#694)`,
 `Sources: {full}`) supersedes that block — a header claiming a generation
 that did not happen would be the false attestation this playbook exists to
-prevent — and the run records it under `derive_core`. generic-v6 carries the
-derived wording in its own text.
+prevent — and the run records it under `derive_core`. generic-v6 and later
+carry the derived wording in their own text.
 
 This is not the derivation the evidence boundary forbids. That rule
 (*"A generation phase may never derive"*, above) is about consuming *other
 runs'* records; a core projected from this run's own audited full record
 consumes nothing the run did not itself generate from the declared bundle.
 
-Anything the bundle supports that the full record lacks is added **to the
-full record** in Phase 3's back-port, and the core inherits it on
-re-derivation. That is where the former Phase 2 instruction "consult the
-source documents to fill core fields the full record left empty" now lives;
-a core field can no longer be filled by any path the full record's evidence
-trail does not cover.
+**What the core can no longer do.** The generated core was allowed to read
+the bundle and fill core fields the full record left empty; a derived core
+cannot, by design. Anything the bundle supports that the full record lacks
+is added **to the full record** in Phase 3's back-port, with its receipt,
+and the core inherits it on re-derivation. No fact enters the pair through a
+path the full record's evidence trail does not cover. Do not read the old
+core-generation rules into this phase: there is no core field inventory to
+derive, no value to start from, and no discrepancy to report — the command
+is the whole phase.
 
-The rules below describe the generated core this phase replaced; they remain
-the specification a derived core satisfies by construction, and they still
-govern a run that for a stated reason cannot derive.
-
-Inputs to this phase: the current source documents AND the exact same-run Phase
-1 full D4D. No older full or core YAML is permitted. The core record is the
-semantic exchange layer subset (CoreDataset, ~79 fields), not a fresh
-independent extraction:
-
-1. Read `src/data_sheets_schema/schema/D4D_Core.yaml` and the merged core schema
-   to derive the exact `CoreDataset` field inventory and every nested class
-   shape. Follow inherited slots, ranges, cardinality, inlining, `slot_usage`,
-   and enums rather than copying a full-record structure mechanically.
-2. For every core field that also exists in the full D4D, START from the full D4D's
-   value. Consult the source documents to (a) fill core fields the full record left
-   empty, and (b) catch anything the full extraction missed. If the documents
-   support a value that is missing or different in the full D4D, use the source
-   documents as ground truth and report the discrepancy for Phase 3.
-3. Do not include facts in core that are absent from both the full D4D and the
-   source documents.
-4. Do not inspect an older core for field selection, wording, IDs, or values.
-   Derive core structure from `D4D_Core.yaml`.
-5. Validate (NON-SKIPPABLE):
-   ```bash
-   poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml -C CoreDataset <core_file>
-   poetry run linkml-term-validator validate-data <core_file> \
-     --schema src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml \
-     --target-class CoreDataset
-   ```
-
-File header:
-```yaml
-# D4D Core Datasheet for {PROJECT} Dataset
-# Generation Method: schema-grounded agentic, phase 2
-# Agent runtime: {RUNTIME}
-# Provider: {PROVIDER}
-# Schema: D4D Core (CoreDataset class), semantic exchange layer subset
-# Schema path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
-# Model: {MODEL}
-# Reasoning effort: {EFFORT}
-# Mode: {MODE}, {CONDITION} prompt
-# Prompt: {PROMPT_PATHS}
-# Sources: data/preprocessed/concatenated/{PROJECT}_preprocessed.txt + {full D4D path}
-# Source manifest: data/preprocessed/source_manifest.yaml
-# Prior D4D factual reuse: prohibited
-# Temperature: 0.0
-# Generated: {DATE}
-```
-
-In independent mode, the Phase 2 agent writes only the core YAML. It must not
-rewrite the full YAML.
+In independent mode, the orchestrator runs the command; no Phase 2 agent is
+launched. It must not rewrite the full YAML.
 
 ## Phase 3 - Source and provenance audit
 
-Phase 3 establishes the canonical factual content before mechanical
-reconciliation. It is not allowed to prefer a value merely because it appears
-in either generated record.
+Phase 3 establishes the canonical factual content of the **full record**
+before the mechanical checks. The core is its projection and is not a
+second source: it cannot state anything the full record does not, so every
+finding concerns the full record and is repaired there (the API pipeline's
+audit phase carries the same instruction since #705). Phase 3 is not
+allowed to prefer a value merely because the full record already states it.
 
-1. Re-run schema and term validation for both outputs.
-2. Confirm from the agent's read history that no prior-run D4D, evaluation, or
-   reconciliation report was used.
-3. Check both records against the current source bundle and manifest:
+1. Re-run schema and term validation for the full record.
+2. Confirm from the agent's read history that no prior-run D4D, evaluation,
+   or reconciliation report was used.
+3. Check the full record against the current source bundle and manifest:
    - resolve source disagreements using authority, version, date, and scope;
    - identify unsupported, stale, omitted, or mis-scoped assertions;
    - verify repeated identifiers, versions, dates, counts, licenses, access
-     rules, people, and organizations are internally consistent in each file;
+     rules, people, and organizations are internally consistent;
    - keep historical values only when their historical scope is explicit;
    - audit shape as well as evidence (same contract as the API pipeline's
      audit phase): flag any value whose shape does not conform to the
@@ -521,48 +481,49 @@ in either generated record.
      slots left empty while their content sits in prose, narrative in
      `notes` that belongs in `description`, sibling values restated in
      `notes`, or evidence commentary outside `source_caveats`.
-4. Back-port every source-supported Phase 2 discovery into the full record in
-   the correct full-schema slot. Correct the full record first whenever the
-   source audit changes a fact. **Every back-ported or repaired value gets
-   its receipt**: add the `{slot, snippet}` pair to the *existing* entry of
-   the chunk the passage sits in (edit that entry in place — a second entry
-   for the same chunk is a finding), and re-run `d4d receipts check`. A
-   value you cannot receipt from a chunk is not source-supported.
-5. Apply the same corrected facts to core where its schema permits them, but do
-   not shorten or paraphrase shared values in preparation for Phase 4.
-6. Re-validate both files after every correction and record the source and
-   provenance findings for the reconciliation report.
+4. Back-port every source-supported omission into the full record in the
+   correct full-schema slot, and correct the full record wherever the audit
+   changes a fact. **Every back-ported or repaired value gets its receipt**:
+   add the `{slot, snippet}` pair to the *existing* entry of the chunk the
+   passage sits in (edit that entry in place — a second entry for the same
+   chunk is a finding), and re-run `d4d receipts check`. A value you cannot
+   receipt from a chunk is not source-supported.
+5. Re-validate the full record after every correction and record the
+   source and provenance findings for the reconciliation report. Nothing is
+   applied to the core here: Phase 4 re-derives it.
 
-## Phase 4 - Strict full/core reconciliation
+## Phase 4 - Re-derivation, checks, report, repair
 
-Phase 4 makes the Phase 3-audited full record canonical for every schema-
-identical slot and proves consistency across the pair.
+Phase 4 turns the audited full record into the shipped pair and proves it.
+There is no full/core reconciliation for a model to perform: the shared
+slots agree because the core is projected from the full record, the
+projection rules (`resources` by id, `file_collections` → `distributions`,
+`dialect` when files agree) are code, and the pair checker is the proof.
+What remains for judgement is the semantic review the checker asks for and
+the repair of what the checkers find.
 
-1. Derive the shared slots at runtime from `Dataset` and `CoreDataset` with
-   LinkML `SchemaView`. Do not maintain a hand-written field list.
-2. For every shared slot with the same induced range and cardinality:
-   - it must be present in both records or absent from both;
-   - its parsed YAML value must be deeply identical, including every nested
-     mapping value and list item in the same order;
-   - this rule includes narrative fields. Core must not condense, paraphrase,
-     reorder, or omit shared content.
-3. Handle shared slots whose schema ranges differ as explicit projections.
-   `resources` is `Dataset` in full and `CoreDataset` in core: match resources
-   by `id`, require equal coverage, and require deep identity for every nested
-   schema-identical slot. Full-only nested slots are omitted from the core
-   projection.
-4. Reconcile related, non-identical representations semantically:
-   - map full `file_collections` to core `distributions` and verify names,
-     descriptions, paths, formats, compression, checksums, byte counts, access
-     URLs, and release scope do not conflict;
-   - compare `total_file_count` and `total_size_bytes` with distribution-level
-     values when the represented scopes are the same;
-   - check `dialect`, formats, and `is_tabular` agree;
-   - check top-level identity/version/access facts agree with resources,
-     version history, distributions, and repeated statements;
-   - distinguish a historical release from a current release rather than
-     treating their different values as a contradiction.
-5. **Re-derive the core from the corrected full record** (Phase 2's command
+1. **Re-derive the core from the corrected full record** (Phase 2's command
+   again, now with `--phase4-complete`, which writes the
+   `# Phase 4 reconciliation: completed` header line the condition text
+   mandates) after every Phase 3 correction to the full — the core is a
+   function of the full and is never edited on its own. `--sync-core` is
+   superseded by derivation and should not be needed; if it changes
+   anything, the derivation is wrong and that is a bug to report, not a
+   record to fix. Then run the pair checker as the independent proof:
+   ```bash
+   poetry run python -m data_sheets_schema.d4d_pair_consistency \
+     --full <full_file> --core <core_file>
+   ```
+   An error from the checker on a derived pair is a defect in the
+   derivation or a shape in the full record the core schema rejects — fix
+   the full record, re-derive, re-run; never the core. Validator warnings
+   mark related content (`file_collections` ↔ `distributions`, counts and
+   sizes against distribution-level values, `dialect` and `is_tabular`
+   against the files) that still requires semantic review; warnings are
+   not evidence that review occurred. Review each: the projection carries
+   values, it does not check that a top-level count agrees with the entries
+   beneath it or that a historical release is not read as the current one.
+ (Phase 2's command
    again, now with `--phase4-complete`, which writes the
    `# Phase 4 reconciliation: completed` header line the condition text
    mandates) after every Phase 3/4 correction to the full — the core is a
@@ -575,8 +536,8 @@ identical slot and proves consistency across the pair.
      --full <full_file> --core <core_file>
    ```
    Validator warnings mark related content that still requires the semantic
-   review in step 4; warnings are not evidence that review occurred.
-6. **Check the identifiers against the bundle, and the report against the
+   review in step 1; warnings are not evidence that review occurred.
+2. **Check the identifiers against the bundle, and the report against the
    record.** The API path runs both automatically at the end of every run; this
    path ran neither, so the arm that reads the rules was the arm that did not
    verify them (#563).
@@ -599,7 +560,7 @@ identical slot and proves consistency across the pair.
    does not contain is still an unsupported claim. `minted_fragment` is fine:
    the base is attested and the fragment is ours.
 
-   After writing the reconciliation report in step 8, check its claims against
+   After writing the reconciliation report in step 4, check its claims against
    the record you actually produced:
    ```bash
    poetry run python -c "
@@ -619,11 +580,11 @@ identical slot and proves consistency across the pair.
    still there; `false_schema_claim` means the report says a slot is not
    declared and it is. Both are decidable, and in the 2026-08-13 API arm every
    record that emitted a `distributions` block claimed to have removed it (#546).
-7. Re-run schema and term validation for both records.
-8. Write `{PROJECT}_reconciliation.md` with separate Phase 3 and Phase 4
-   sections: source/provenance findings, schema-derived shared-slot count,
-   corrections, related-content mapping and review, files changed, all commands,
-   and final results. If nothing diverged, say so explicitly.
+3. Re-run schema and term validation for both records.
+4. Write `{PROJECT}_reconciliation.md` with separate Phase 3 and Phase 4
+   sections: source/provenance findings, the derivation facts the Phase 2
+   command printed, corrections, related-content review, files changed, all
+   commands, and final results. If nothing needed correcting, say so explicitly.
 
    **Two sections have a fixed shape.** The report-claims checker
    (`d4d provenance backfill-checks`; #546) parses exactly two claim forms,
@@ -653,12 +614,12 @@ identical slot and proves consistency across the pair.
      for the human reviewer and for the parser #691 proposes. If the checker
      emitted no warnings, say so.
 
-9. **Repair, then re-report — the API pipeline's closing loop, which this path
-   previously lacked.** If step 6's checkers (grounding, report claims) or the
+5. **Repair, then re-report — the API pipeline's closing loop, which this path
+   previously lacked.** If step 2's checkers (grounding, report claims) or the
    final pair-consistency run reported findings that require changing either
    record: fix both records in one pass (`repair`, recorded as its own phase
    with `iterations` counting the fix-validate loops), re-run every validation
-   from steps 5–7, and **rewrite the reconciliation report** so it describes
+   from steps 1–3, and **rewrite the reconciliation report** so it describes
    the bytes that exist (`report_after_repair`). The API pipeline regenerates
    its report for the same reason (#604): a report describing bytes that no
    longer exist is the artifact a reviewer reads instead of the diff. If no
@@ -666,8 +627,8 @@ identical slot and proves consistency across the pair.
    empty one.
 
 In independent mode, the orchestrator may perform Phases 3 and 4 without another
-model invocation, but it must perform the same source review, deterministic
-validation, semantic related-content review, and reporting.
+model invocation, but it must perform the same source review, re-derivation,
+deterministic checks, semantic related-content review, and reporting.
 
 ## Provenance record (required, per project)
 
