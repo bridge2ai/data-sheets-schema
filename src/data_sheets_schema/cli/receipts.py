@@ -32,7 +32,10 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
                    "claim-receipt sidecar beside it")
 @click.option("--strict", is_flag=True,
               help="exit 1 on any unreviewed chunk, unverified snippet or finding")
-def check(method, label, project, write, strict):
+@click.option("--bundle", "bundle_opt", default=None, type=click.Path(exists=True, dir_okay=False),
+              help="the bundle the run read; needed only before the provenance record "
+                   "exists and the full record's header does not name it")
+def check(method, label, project, write, strict, bundle_opt):
     """Validate `{PROJECT}_coverage_receipt.yaml` against the chunk manifest,
     the bundle and the full record, with affirmative counts.
 
@@ -48,13 +51,29 @@ def check(method, label, project, write, strict):
     from data_sheets_schema import receipts as rc
 
     p = _run_paths(method, label, project)
-    if not p["provenance"].exists():
-        raise click.ClickException(f"no provenance record at {p['provenance']}")
-    record = yaml.safe_load(bc._split_header(p["provenance"].read_text(encoding="utf-8"))[1]) or {}
-    inputs = record.get("inputs") or {}
-    bundle = bc.declared_bundle(record)
-    block = rc.block_for(p["full"], rc.receipt_path(p["core_dir"], project), bundle,
-                         inputs.get("bundle_md5"), bool(inputs.get("receipt_expected")))
+    if p["provenance"].exists():
+        record = yaml.safe_load(bc._split_header(p["provenance"].read_text(encoding="utf-8"))[1]) or {}
+        inputs = record.get("inputs") or {}
+        bundle = bc.declared_bundle(record)
+        md5, expected = inputs.get("bundle_md5"), bool(inputs.get("receipt_expected"))
+    else:
+        # Before the record exists — Phase 1 runs this before Phase 2 (#730).
+        # Everything the check needs is on disk; the bundle comes from the
+        # full record's own header, and its md5 from the bytes there now.
+        if write:
+            raise click.ClickException(f"no provenance record at {p['provenance']} to write into; "
+                                       "run without --write until the record step")
+        from data_sheets_schema.provenance import _md5, parse_header
+        header = parse_header(p["full"])
+        declared = bundle_opt or header.get("Source bundle") or header.get("Source")
+        if not declared:
+            raise click.ClickException(f"no provenance record yet and {p['full']} names no "
+                                       "`# Source bundle:`; pass --bundle")
+        bundle = Path(declared)
+        md5 = _md5(bundle) if bundle.exists() else None
+        expected = True
+        click.echo(f"   · no provenance record yet; checking against {bundle} as on disk")
+    block = rc.block_for(p["full"], rc.receipt_path(p["core_dir"], project), bundle, md5, expected)
     if not block.get("checked"):
         click.echo(f"   · unchecked: {block['reason']}"
                    + ("" if block["expected"] else " (this run's procedure wrote none)"))
