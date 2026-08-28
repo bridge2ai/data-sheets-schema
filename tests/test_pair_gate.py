@@ -302,13 +302,17 @@ class ReconcileFullSeesCoreTest(unittest.TestCase):
         import dataclasses
 
         from data_sheets_schema.api_runner import PHASE_NEEDS, build_phase
-        self.assertIn("Completed core record", PHASE_NEEDS["reconcile_full"])
+        # #566 carried the core here so a generated core's bundle facts could
+        # reach the full record. A derived core (#694) has none the full
+        # lacks, so it is not carried (#705/#749) — ~10.6k tokens a phase.
+        self.assertNotIn("Completed core record", PHASE_NEEDS["reconcile_full"])
+        self.assertNotIn("Completed core record", PHASE_NEEDS["audit"])
+        self.assertIn("Completed core record", PHASE_NEEDS["report"])
         req = build_phase(self._spec(), "reconcile_full", carry={
             "Completed full record": "FULL-MARKER",
-            "Completed core record": "CORE-MARKER",
             "Audit findings": "AUDIT-MARKER"})
         blob = str(dataclasses.asdict(req))
-        for marker in ("FULL-MARKER", "CORE-MARKER", "AUDIT-MARKER"):
+        for marker in ("FULL-MARKER", "AUDIT-MARKER"):
             with self.subTest(marker=marker):
                 self.assertIn(marker, blob)
 
@@ -317,8 +321,11 @@ class ReconcileFullSeesCoreTest(unittest.TestCase):
         guess, and the guess that matches the old behaviour is to ignore it."""
         from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS
         text = PHASE_INSTRUCTIONS["reconcile_full"]
-        self.assertIn("absorb into", text)
-        self.assertIn("cannot outrank it", text)
+        # Under derivation (#694/#705) what to do with the carried core is:
+        # nothing — it is a projection that will be re-derived. The
+        # instruction says so rather than leaving the model to guess.
+        self.assertIn("projection of the full record", text)
+        self.assertIn("do not copy from it", text)
 
     def test_absorption_is_conditioned_on_the_evidence(self):
         """#574: as first written this said "anything it states", full stop.
@@ -336,7 +343,7 @@ class ReconcileFullSeesCoreTest(unittest.TestCase):
         from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS
         text = PHASE_INSTRUCTIONS["reconcile_full"]
         self.assertIn("the input bundle supports", text)
-        self.assertIn("identify as unsupported", text)
+        self.assertIn("identifies as unsupported", text)
 
     def test_the_audit_supplies_the_finding_this_relies_on(self):
         """The exclusion is only enforceable because the audit already looks.
@@ -353,8 +360,13 @@ class ReconcileFullSeesCoreTest(unittest.TestCase):
         """The audit already reads both records, so it is the cheapest place to
         catch a recurrence — and it is the phase that should have caught this."""
         from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS
-        self.assertIn("core record states that the full record does not",
+        # A derived core cannot state anything the full does not (#705); the
+        # audit is told that, and told where every finding lands.
+        self.assertIn("cannot state anything the full record does not",
                       PHASE_INSTRUCTIONS["audit"])
+        self.assertIn("`record: full`", PHASE_INSTRUCTIONS["audit"])
+        self.assertNotIn("core record states that the full record does not",
+                         PHASE_INSTRUCTIONS["audit"])
 
     def test_the_change_is_attestable(self):
         """`assembly_digest` covers the phase instructions and their order

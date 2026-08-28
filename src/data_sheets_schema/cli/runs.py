@@ -1284,6 +1284,14 @@ def select_cmd(method, project, config, allow_unverified, execute):
                            other, prior))
 
     data = _yaml.safe_load(prov_path.read_text(encoding="utf-8")) or {}
+    stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    # The winner's own prior block, if it was canonical already (#748): its
+    # chain is carried and the block itself goes to history like any other,
+    # so an idempotent re-run neither drops the chain nor loses the earlier
+    # selection's evidence. A record being re-promoted after a displacement
+    # sheds the pointer that said it was displaced.
+    own_prior = data.pop("canonical", None) or {}
+    data.pop("canonical_superseded_by", None)
     data["canonical"] = {
         "criterion": "full and core both validate against the current schema, then most slots, then lowest label",
         "selected_from": [
@@ -1297,18 +1305,40 @@ def select_cmd(method, project, config, allow_unverified, execute):
     # the project used to ship, and "this replaced that" is the fact a reader
     # of either record wants.
     if superseded:
-        data["canonical"]["supersedes"] = [lab for lab, _p, _d in superseded]
+        # The full backward chain, not one hop (#677): each displaced mark's
+        # own `supersedes` is appended, so walking back from the current
+        # canonical reaches the first one ever marked.
+        chain: list[str] = []
+        for lab, _p, prior in superseded:
+            chain.append(lab)
+            for earlier in (prior.get("canonical") or {}).get("supersedes") or []:
+                if earlier not in chain:
+                    chain.append(earlier)
+        data["canonical"]["supersedes"] = chain
+    chain = list(data["canonical"].get("supersedes") or [])
+    for earlier in own_prior.get("supersedes") or []:
+        if earlier not in chain:
+            chain.append(earlier)
+    chain = [c for c in chain if c != winner[0]]      # never itself (#748)
+    if chain:
+        data["canonical"]["supersedes"] = chain
+    if own_prior:
+        data.setdefault("canonical_history", []).insert(
+            0, {**own_prior, "superseded_by": {"label": winner[0], "at": stamp,
+                                                "by": "d4d runs select", "reason": "re-selected"}})
     ProvenanceRecord(data=data).write(prov_path)
 
     for label, other, prior in superseded:
-        prior.pop("canonical", None)
-        prior["canonical_superseded_by"] = {
-            "label": winner[0],
-            "at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "by": "d4d runs select",
-        }
+        # Demoted, not popped (#677): the displaced selection's evidence —
+        # criterion, candidates, margin (VOICE 20b's outright tie) — stays in
+        # the live corpus under `canonical_history`, newest first, with the
+        # pointer that says what replaced it.
+        displaced = prior.pop("canonical", None) or {}
+        pointer = {"label": winner[0], "at": stamp, "by": "d4d runs select"}
+        prior["canonical_superseded_by"] = pointer
+        prior.setdefault("canonical_history", []).insert(0, {**displaced, "superseded_by": pointer})
         ProvenanceRecord(data=prior).write(other)
-        click.echo(f"   cleared the prior mark on {label}")
+        click.echo(f"   demoted the prior mark on {label} to canonical_history")
 
     click.echo(f"\nRecorded in {prov_path}")
     if superseded:

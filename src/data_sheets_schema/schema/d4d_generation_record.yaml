@@ -314,6 +314,16 @@ classes:
         inlined: true
         range: AnyBlock
 
+      canonical_history:
+        description: >-
+          Every `canonical` block this record once carried, newest first, each
+          with the pointer that displaced it (#677). Demoted rather than
+          deleted, so the displaced selection's evidence — criterion,
+          candidates, margin — stays in the live corpus.
+        multivalued: true
+        inlined_as_list: true
+        range: AnyBlock
+
     rules:
       # Conditional by mode, because the modes genuinely differ and blanket
       # optionality made the schema assert almost nothing: a `live` record

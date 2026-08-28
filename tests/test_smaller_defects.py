@@ -55,8 +55,11 @@ class PlannerTest(unittest.TestCase):
         """The change whose size was the open question (#568) — the planner
         could not see it at all."""
         phases = {p["phase"]: p for p in self._plan()["phases"]}
-        carried = phases["reconcile_full"]["carried"]
-        self.assertGreater(carried["Completed core record"], 1000)
+        # Under derivation the core reaches the report phase only (#749); the
+        # planner must still see its real size there, and cost nothing for it
+        # in reconcile_full.
+        self.assertNotIn("Completed core record", phases["reconcile_full"]["carried"])
+        self.assertGreater(phases["report"]["carried"]["Completed core record"], 1000)
 
     def test_later_phases_cost_more_than_the_first(self):
         phases = {p["phase"]: p["approx_input_tokens"] for p in self._plan()["phases"]}
