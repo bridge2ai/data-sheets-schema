@@ -4,14 +4,14 @@ bundle_sha256: c7e8db5c220ff8c301a3b5e96ca192f704547e969ee6f7be181994b1a65cca38
 bundle_lines: 10077
 bundle_bytes: 436792
 rule:
-  version: 1
+  version: 2
   unit: source-document
-  boundary: 'FILE: header line'
+  boundary: 'FILE: line followed by PATH: or ROLE:'
   preamble: own-chunk
   split: line-window
   max_lines: 400
   max_bytes: 48000
-chunk_count: 33
+chunk_count: 35
 chunks:
 - id: c001
   source: <preamble>
@@ -257,7 +257,7 @@ chunks:
   sha256: cb24148a28557dfe600c07644aa805f34f7016de9fefd4979169d23cb33c5c73
   part:
   - 1
-  - 8
+  - 3
 - id: c027
   source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
   lines:
@@ -267,64 +267,81 @@ chunks:
   sha256: 170c8aebadaf66e50a385cfcb1be8e49f7650fdf67287eacdafc2c134ae1e2e2
   part:
   - 2
-  - 8
+  - 3
 - id: c028
   source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
   lines:
   - 7827
-  - 8226
-  bytes: 15463
-  sha256: 101cc5b9d6b1740a255fb4d9a5bd2bdb06b83cc3968b7be70929e0ed2c1d7252
+  - 7898
+  bytes: 1813
+  sha256: 459b0f52b1cc2037fe0e24075ab3cc27efacf5cdec55c4398aa93ccfc79906b3
   part:
   - 3
-  - 8
+  - 3
 - id: c029
-  source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
+  source: CM4AI_crate_metadata_reduced.json
   lines:
-  - 8227
-  - 8626
-  bytes: 10759
-  sha256: 2fd8ede53e320c3f1400e2cf4a3c38780acc4178ce9b843d2f7ca3177174bbe3
+  - 7899
+  - 8298
+  bytes: 15784
+  sha256: 53a2d5cd273b29471cb18bc8affe7bcf639febc5b5b3e82d6093ea881c3c66eb
+  part:
+  - 1
+  - 6
+- id: c030
+  source: CM4AI_crate_metadata_reduced.json
+  lines:
+  - 8299
+  - 8698
+  bytes: 10370
+  sha256: 47a005fa3868e698cb87d7afa2095f5b810f6bcdb4ec6b66e14febd388eae253
+  part:
+  - 2
+  - 6
+- id: c031
+  source: CM4AI_crate_metadata_reduced.json
+  lines:
+  - 8699
+  - 9098
+  bytes: 23761
+  sha256: 35cc7fba97b6b87c8e398822efaca1179d10793bc0510af039149e7956d8354a
+  part:
+  - 3
+  - 6
+- id: c032
+  source: CM4AI_crate_metadata_reduced.json
+  lines:
+  - 9099
+  - 9498
+  bytes: 26253
+  sha256: 67e1e713f6bab77b1c9f9bc05fd62710533841f248162494549810e1901faa06
   part:
   - 4
-  - 8
-- id: c030
-  source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
+  - 6
+- id: c033
+  source: CM4AI_crate_metadata_reduced.json
   lines:
-  - 8627
-  - 9026
-  bytes: 21329
-  sha256: 5d6bf3582cdf834d0f81fa77761719d56fd55ff84b20ee0cb21a4a358716a7d3
+  - 9499
+  - 9898
+  bytes: 27393
+  sha256: 370b7d77c53cda1af5ba2062482a83dfc001ccc16e337d0e7d27863c9c2af5e7
   part:
   - 5
-  - 8
-- id: c031
-  source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
+  - 6
+- id: c034
+  source: CM4AI_crate_metadata_reduced.json
   lines:
-  - 9027
-  - 9426
-  bytes: 24847
-  sha256: 4c5ac320ebc287ed67619c8f4a5fe8a79eec7cc0d3541ef6268d6d0dcc7a823b
+  - 9899
+  - 9943
+  bytes: 4177
+  sha256: 941cdd3a7adfcc52aaf7d15e9b944e4e1d0f5236a27ebea9e470245a8adba19a
   part:
   - 6
-  - 8
-- id: c032
-  source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
+  - 6
+- id: c035
+  source: ai_ready_score.json
   lines:
-  - 9427
-  - 9826
-  bytes: 28748
-  sha256: 61ad5fda624424f319282e330f0082ab56d52ff37b76e57546fd21c3a2921b84
-  part:
-  - 7
-  - 8
-- id: c033
-  source: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt
-  lines:
-  - 9827
+  - 9944
   - 10077
-  bytes: 14574
-  sha256: 06d0afd336ebd25234da4643973150f4e3d8f9d99c5cc9aeb86806179d72603b
-  part:
-  - 8
-  - 8
+  bytes: 6169
+  sha256: dc66f18977e3fed2419e88d3b9a43d0c713a068d4898e15619108ce09d15197c

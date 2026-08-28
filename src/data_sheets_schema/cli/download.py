@@ -478,8 +478,9 @@ def audit_bundles(project, strict, manifest):
                 if other.exists():
                     unchecked.append((other, 'no rebuild route registered here'))
 
-            # Chunk manifest (#707): derived from the document bundle under its
-            # recorded rule, so it goes stale exactly when the bundle changes.
+            # Chunk manifests (#707, every kind #725): derived from the bundle
+            # under the recorded rule, so one goes stale exactly when its
+            # bundle changes.
             from data_sheets_schema.chunking import (manifest_for, manifest_status_for,
                                                       project_bundles)
             for b in project_bundles(name):        # every kind (#725)

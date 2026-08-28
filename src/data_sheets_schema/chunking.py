@@ -31,9 +31,9 @@ CONCAT_DIR = Path("data/preprocessed/concatenated")
 #: (`inputs.chunks.rule`), so two manifests are comparable only when their
 #: rules are equal. Change the rule → change `version`.
 DEFAULT_RULE: dict[str, Any] = {
-    "version": 1,
+    "version": 2,
     "unit": "source-document",
-    "boundary": "FILE: header line",
+    "boundary": "FILE: line followed by PATH: or ROLE:",
     "preamble": "own-chunk",
     "split": "line-window",
     "max_lines": 400,
@@ -72,10 +72,12 @@ def _documents(lines: list[str]) -> list[tuple[str, int, int]]:
     and it keeps the union of the documents equal to the bundle.
     """
     # A boundary is a `FILE:` line *followed by* a `PATH:` line, as the
-    # concatenator writes them; a document quoting "FILE: …" at the start of a
-    # line is content, not a boundary (#718).
+    # concatenator writes them, or by a `ROLE:` line, as the crate bundler
+    # writes its evidence sections (#745); a document quoting "FILE: …" at
+    # the start of a line is content, not a boundary (#718).
     marks = [i for i, l in enumerate(lines)
-             if l.startswith(FILE_MARK) and i + 1 < len(lines) and lines[i + 1].startswith("PATH: ")]
+             if l.startswith(FILE_MARK) and i + 1 < len(lines)
+             and lines[i + 1].startswith(("PATH: ", "ROLE: "))]
     docs: list[tuple[str, int, int]] = []
     if not marks:
         return [(UNSEGMENTED, 1, len(lines))] if lines else []
@@ -246,7 +248,10 @@ def manifest_status_for(bundle: Path, chunks_dir: Path | None = None) -> tuple[s
     caller can ask.
     """
     path = manifest_for(bundle, chunks_dir)
-    project = bundle.name.split("_")[0] if not bundle.name.startswith("VOICE_PEDIATRIC") else "VOICE_PEDIATRIC"
+    # The project is the name minus its kind suffix, never a split on "_"
+    # (AI_READI is not "AI", #744).
+    project = next((bundle.name[: -len(s)] for s in BUNDLE_SUFFIXES if bundle.name.endswith(s)),
+                   bundle.name)
     if not bundle.exists():
         return "no_bundle", str(bundle)
     if not path.exists():

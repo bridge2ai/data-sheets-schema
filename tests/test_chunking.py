@@ -125,6 +125,18 @@ class ManifestOnDisk(unittest.TestCase):
             self.assertEqual(dump_manifest(build_manifest(rel)),
                              dump_manifest(build_manifest(rel.resolve())))
 
+    def test_a_crate_evidence_section_is_a_boundary_and_the_hint_names_the_project(self):
+        """#745/#744: crate sections open with FILE: + ROLE:, and the rebuild hint
+        strips the kind suffix rather than splitting on '_'."""
+        from data_sheets_schema.chunking import chunk_text, manifest_status_for
+        text = _bundle(3, 3) + "FILE: P_crate_metadata_reduced.json\nROLE: crate evidence\n" + "-" * 80 + "\n{}\n"
+        self.assertEqual([c["source"] for c in chunk_text(text)],
+                         ["<preamble>", "a.txt", "b.txt", "P_crate_metadata_reduced.json"])
+        with tempfile.TemporaryDirectory() as tmp:
+            b = Path(tmp) / "AI_READI_healthsheet_only.txt"; b.write_text("x\n", encoding="utf-8")
+            st, hint = manifest_status_for(b, Path(tmp) / "chunks")
+            self.assertEqual(st, "missing"); self.assertIn("--project AI_READI", hint)
+
     def test_a_quoted_file_line_is_content_not_a_boundary(self):
         """#718: only a FILE: line followed by PATH: starts a document."""
         from data_sheets_schema.chunking import chunk_text, chunk_texts
@@ -225,7 +237,8 @@ class CorpusManifests(unittest.TestCase):
                     self.assertFalse([c for c in m["chunks"] if c.get("oversize")],
                                      "a line above max_bytes cannot be read in one call")
                     self.assertIn(m["chunks"][0]["source"], ("<preamble>", "<unsegmented>"))
-        self.assertGreaterEqual(seen, 11, "the corpus has eleven bundles")
+        self.assertEqual(seen, len(list((ROOT / "data/preprocessed/concatenated").glob("*.txt"))),
+                         "every .txt bundle in the concatenated directory is covered")
 
 
 if __name__ == "__main__":

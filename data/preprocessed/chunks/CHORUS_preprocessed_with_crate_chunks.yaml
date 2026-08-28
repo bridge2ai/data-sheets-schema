@@ -4,14 +4,14 @@ bundle_sha256: 433e7cb6c9e9b109a4b6e810ab07b400c987420d6acecb7fd5dcbc5d8732c77a
 bundle_lines: 2058
 bundle_bytes: 65749
 rule:
-  version: 1
+  version: 2
   unit: source-document
-  boundary: 'FILE: header line'
+  boundary: 'FILE: line followed by PATH: or ROLE:'
   preamble: own-chunk
   split: line-window
   max_lines: 400
   max_bytes: 48000
-chunk_count: 9
+chunk_count: 10
 chunks:
 - id: c001
   source: <preamble>
@@ -73,24 +73,28 @@ chunks:
   sha256: 53dc2cad4ae923e7fbc47c13b2461a3d598dc5834152a0c967159fddb82f5f1a
   part:
   - 1
-  - 3
+  - 2
 - id: c008
   source: github_chorus_ai_overview_2025-11-14.txt
   lines:
   - 1538
-  - 1937
-  bytes: 22356
-  sha256: 07640d5209981b5ed39ab1cec58f945024e6e2a0debb32a8d330596530ec25bc
+  - 1730
+  bytes: 1799
+  sha256: 1715ead30ae34f9d9b5179fb615bbe6a830115d006552e01198ddb2f84aa629e
   part:
   - 2
-  - 3
+  - 2
 - id: c009
-  source: github_chorus_ai_overview_2025-11-14.txt
+  source: CHORUS_crate_metadata_reduced.json
   lines:
-  - 1938
+  - 1731
+  - 1925
+  bytes: 20175
+  sha256: a0097e533bb2ed881ba68bbcff36dd3a9a5c4a948c516629994ff56e5a4d01b3
+- id: c010
+  source: ai_ready_score.json
+  lines:
+  - 1926
   - 2058
-  bytes: 7438
-  sha256: b1f0af14b265d78501b84b7ec3e9b7aae2c552975389f42a336a350ae747d45b
-  part:
-  - 3
-  - 3
+  bytes: 7820
+  sha256: b3b714e5d024e63d19edd3c88c88145079ac8e4a822d7c7d29cbdc142d21f7b6

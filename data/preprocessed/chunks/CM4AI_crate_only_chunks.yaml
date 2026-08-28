@@ -4,72 +4,86 @@ bundle_sha256: eceaa90c6d9e93afb37c9dfa91a28d23af620c4cdad7ad9d868321028820b02c
 bundle_lines: 2208
 bundle_bytes: 115604
 rule:
-  version: 1
+  version: 2
   unit: source-document
-  boundary: 'FILE: header line'
+  boundary: 'FILE: line followed by PATH: or ROLE:'
   preamble: own-chunk
   split: line-window
   max_lines: 400
   max_bytes: 48000
-chunk_count: 6
+chunk_count: 8
 chunks:
 - id: c001
-  source: <unsegmented>
+  source: <preamble>
   lines:
   - 1
-  - 400
-  bytes: 16721
-  sha256: bd087c1073df87a5cdc1086f70107cd554bedf1179480f5b1aeffd3dc1011e4c
+  - 29
+  bytes: 1697
+  sha256: 0ae5ecdaa8495eb4d3d2c607152639839a02d107eb90d77a844874259e887c68
+- id: c002
+  source: CM4AI_crate_metadata_reduced.json
+  lines:
+  - 30
+  - 429
+  bytes: 15784
+  sha256: 53a2d5cd273b29471cb18bc8affe7bcf639febc5b5b3e82d6093ea881c3c66eb
   part:
   - 1
   - 6
-- id: c002
-  source: <unsegmented>
+- id: c003
+  source: CM4AI_crate_metadata_reduced.json
   lines:
-  - 401
-  - 800
-  bytes: 10475
-  sha256: f4f39c34afd3c7f4c0ee08469ba9a4e50c51add957be91975ef23c9d6df4c12f
+  - 430
+  - 829
+  bytes: 10370
+  sha256: 47a005fa3868e698cb87d7afa2095f5b810f6bcdb4ec6b66e14febd388eae253
   part:
   - 2
   - 6
-- id: c003
-  source: <unsegmented>
+- id: c004
+  source: CM4AI_crate_metadata_reduced.json
   lines:
-  - 801
-  - 1200
-  bytes: 22273
-  sha256: e2523f904bb792bafe5a156e31c24e83512313617af142b5dbb6dd6f161c2737
+  - 830
+  - 1229
+  bytes: 23761
+  sha256: 35cc7fba97b6b87c8e398822efaca1179d10793bc0510af039149e7956d8354a
   part:
   - 3
   - 6
-- id: c004
-  source: <unsegmented>
+- id: c005
+  source: CM4AI_crate_metadata_reduced.json
   lines:
-  - 1201
-  - 1600
-  bytes: 26230
-  sha256: 28d299ccea5543e1945fb4f5d7150ac781418adb7bbf8fe41b90e63f50093d89
+  - 1230
+  - 1629
+  bytes: 26253
+  sha256: 67e1e713f6bab77b1c9f9bc05fd62710533841f248162494549810e1901faa06
   part:
   - 4
   - 6
-- id: c005
-  source: <unsegmented>
+- id: c006
+  source: CM4AI_crate_metadata_reduced.json
   lines:
-  - 1601
-  - 2000
-  bytes: 27641
-  sha256: 22786db57775d887fceedcdd094f821234ca2f0fc1c152d4d286c7831f3a3518
+  - 1630
+  - 2029
+  bytes: 27393
+  sha256: 370b7d77c53cda1af5ba2062482a83dfc001ccc16e337d0e7d27863c9c2af5e7
   part:
   - 5
   - 6
-- id: c006
-  source: <unsegmented>
+- id: c007
+  source: CM4AI_crate_metadata_reduced.json
   lines:
-  - 2001
-  - 2208
-  bytes: 12264
-  sha256: 68ab4c18ee42b845d1660863c71d6105a827a30c957a97ee68cc24b7e466ba35
+  - 2030
+  - 2074
+  bytes: 4177
+  sha256: 941cdd3a7adfcc52aaf7d15e9b944e4e1d0f5236a27ebea9e470245a8adba19a
   part:
   - 6
   - 6
+- id: c008
+  source: ai_ready_score.json
+  lines:
+  - 2075
+  - 2208
+  bytes: 6169
+  sha256: dc66f18977e3fed2419e88d3b9a43d0c713a068d4898e15619108ce09d15197c
