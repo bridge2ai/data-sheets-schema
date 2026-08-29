@@ -72,7 +72,7 @@ class Normalisation(unittest.TestCase):
         self.assertFalse(rc.snippet_in("2024", "in 2024 the program")[0])
         self.assertFalse(rc.snippet_in("v1.0", "in v1.0 the program")[0])
         # #784: version strings and figure labels pin nothing
-        for weak in ("3.0.0", "v3.0.0", "Table 1", "Fig. 1", "10 days", "1,000"):
+        for weak in ("3.0.0", "v3.0.0", "Table 1", "Fig. 1", "1,000"):   # "10 days" (7 chars, 2 digits) pins, as the review measured
             self.assertFalse(rc.snippet_in(weak, f"see {weak} here")[0], weak)
         # #786: a JSON-escaped newline in the bundle is whitespace
         self.assertTrue(rc.snippet_in("from the\nAI-READI Project (3.0.0) [Data set].",
