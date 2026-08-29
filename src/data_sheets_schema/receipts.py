@@ -70,7 +70,11 @@ EXEMPT_SLOTS = frozenset({"conforms_to_schema", "conforms_to_class"})
 EXEMPT_LEAVES = frozenset({"conforms_to_class", "conforms_to_schema", "notes", "source_caveats"})
 #: A snippet must carry at least this much after normalisation (#720): "a"
 #: verifies against any chunk, and an agent could receipt every slot with it.
+#: Summed over the `...`-parts, each of which must carry MIN_PART_CHARS: the
+#: second v7 canary receipted "50,000...Patient admissions from ICU" and a
+#: per-part minimum of 8 rejected the number that anchored it (#763).
 MIN_SNIPPET_CHARS = 8
+MIN_PART_CHARS = 3
 
 NON_CHECKS = (
     "that a chunk marked nothing_relevant truly held nothing for the record — a "
@@ -106,9 +110,10 @@ def snippet_in(snippet: str, chunk_text: str) -> tuple[bool, str]:
     parts = [p for p in parts if p]
     if not parts:
         return False, "empty after normalisation"
-    short = [p for p in parts if len(p) < MIN_SNIPPET_CHARS]
-    if short:
-        return False, f"too short to attest anything: {short[0]!r} (< {MIN_SNIPPET_CHARS} chars)"
+    short = [p for p in parts if len(p) < MIN_PART_CHARS]
+    if short or sum(len(p) for p in parts) < MIN_SNIPPET_CHARS:
+        return False, (f"too short to attest anything: {(short or parts)[0]!r} "
+                       f"(parts < {MIN_PART_CHARS} chars, or < {MIN_SNIPPET_CHARS} in all)")
     pos = 0
     for p in parts:
         i = hay.find(p, pos)
@@ -362,8 +367,15 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     if len({v for v in md5s.values() if v}) > 1 or not md5s["receipt"]:
         findings.append({"kind": "bundle_md5_disagreement", **md5s})
 
-    # --- snippets, each against its own chunk
-    snippets = {"total": 0, "verified": 0, "mismatched": 0, "unchecked": 0}
+    # --- snippets, each against its own chunk. A snippet that is verbatim
+    # in the bundle but in a chunk other than the one cited is a wrong
+    # attribution, not a fabrication: both v7 API canaries showed ~2% of
+    # these, every one a neighbouring chunk (#763). They are counted apart —
+    # `adjacent` (the chunk before or after), `elsewhere` (any other) — and
+    # reported, never gated; the floor of 0 is for text found nowhere.
+    snippets = {"total": 0, "verified": 0, "adjacent": 0, "elsewhere": 0,
+                "mismatched": 0, "unchecked": 0}
+    order = {cid: i for i, cid in enumerate(manifest_ids)}
     for e in entries:
         if e.get("status") != "extracted":
             continue
@@ -384,6 +396,14 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             ok, why = snippet_in(snippet, text)
             if ok:
                 snippets["verified"] += 1
+                continue
+            where = [cid for cid, t in chunk_texts.items() if cid != e.get("id") and snippet_in(snippet, t)[0]]
+            if where and not why.startswith("too short"):
+                near = any(abs(order.get(cid, -9) - order.get(e.get("id"), 9)) == 1 for cid in where)
+                kind = "adjacent" if near else "elsewhere"
+                snippets[kind] += 1
+                findings.append({"kind": f"snippet_{kind}_chunk", "chunk": e.get("id"), "found_in": where,
+                                 "slot": pair.get("slot"), "snippet": snippet[:60]})
             else:
                 snippets["mismatched"] += 1
                 findings.append({"kind": "snippet_mismatch", "chunk": e.get("id"),
@@ -416,6 +436,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             "summary": (f"chunks {reviewed}/{len(manifest_ids)} reviewed · snippets "
                         f"{snippets['verified']}/{snippets['total']} verified"
                         + (f" ({snippets['unchecked']} unchecked)" if snippets["unchecked"] else "")
+                        + (f" ({snippets['adjacent']} in an adjacent chunk)" if snippets["adjacent"] else "")
+                        + (f" ({snippets['elsewhere']} in another chunk)" if snippets["elsewhere"] else "")
                         + f" · slots {slots['with_receipt']}/{slots['receiptable']} with a receipt"
                         + (f" ({slots['exempt']} exempt)" if slots["exempt"] else "")
                         + (f" · {len(reshaped)} receipt path(s) reshaped by reconcile" if reshaped else "")),

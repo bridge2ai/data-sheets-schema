@@ -63,6 +63,9 @@ class Normalisation(unittest.TestCase):
         for short in ("a", "the", "…a…", "Fund", "Bridge2AI ... a"):
             ok, why = rc.snippet_in(short, text)
             self.assertFalse(ok, short); self.assertIn("short", why)
+        # #763: a short numeric part anchors a phrase; the minimum is over all parts
+        self.assertTrue(rc.snippet_in("2024", "in 2024 the program")[0] is False)
+        self.assertTrue(rc.snippet_in("50,000...admissions from ICU", "50,000\nPatient admissions from ICU, PICU")[0])
 
 
 class Validator(unittest.TestCase):
@@ -176,6 +179,24 @@ class Validator(unittest.TestCase):
         r["chunks"][2] = {"id": "c003", "status": "duplicate_of", "of": "c003"}
         self.assertEqual(rc.check(r, self.manifest, self.texts, FULL, self.md5)["findings"][0]["kind"],
                          "duplicate_of_unknown_chunk")
+
+    def test_a_snippet_in_a_neighbouring_chunk_is_reported_not_gated(self):
+        """#763: both v7 canaries cited the chunk next door for ~2% of
+        snippets. The text is in the bundle, so support holds; attribution
+        is its own number and the gate keeps its floor for text found nowhere."""
+        from data_sheets_schema.canary import receipt_floors
+        r = _receipt(self.md5)
+        r["chunks"][2] = {"id": "c003", "status": "extracted",
+                          "extracted": [{"slot": "title", "snippet": "Grant OT2OD032644"}]}   # text is in c002
+        b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
+        self.assertEqual((b["snippets"]["adjacent"], b["snippets"]["mismatched"]), (1, 0))
+        self.assertEqual(b["findings"][0]["kind"], "snippet_adjacent_chunk"); self.assertEqual(b["findings"][0]["found_in"], ["c002"])
+        self.assertIn("adjacent chunk", b["summary"])
+        f = receipt_floors({**b, "expected": True})
+        self.assertEqual((f["snippets unverified"], f["receipt findings"]), (0, 0))
+        r["chunks"][0] = {"id": "c001", "status": "extracted", "extracted": [{"slot": "title", "snippet": "Something else entirely"}]}  # in c003, two away
+        b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
+        self.assertEqual(b["snippets"]["elsewhere"], 1)
 
     def test_a_chunk_whose_text_is_missing_is_unchecked_not_verified(self):
         texts = {k: v for k, v in self.texts.items() if k != "c002"}

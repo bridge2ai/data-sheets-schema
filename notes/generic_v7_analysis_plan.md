@@ -58,6 +58,21 @@ would separate them and is not planned unless prediction 3 fails.
   the third is recorded in the record's `receipts.artifacts.manifest`.
 - The instrument caveats of the v6 plan carry over.
 
+## Canary outcome and a revised gate (2026-08-28)
+
+Two CHORUS canaries (`2026-08-28_…v7_rep1`, `2026-08-28b_…v7_rep1`) held
+every floor except one: **2/109 and 3/98 snippets did not verify against the
+chunk cited**, and every such snippet is verbatim in the bundle one chunk
+away (one of the three was an instrument defect, a per-part minimum
+rejecting a numeric anchor). **Prediction 1 is falsified at ~2%** on the
+attribution half of the receipt, and holds on the support half. The gate is
+revised accordingly, recorded here before the fan-out: a snippet found in a
+chunk other than the one cited is `adjacent` or `elsewhere` — reported
+under "snippets in another chunk", never gated — and the floor of 0 stays
+for text found nowhere in the bundle. The fan-out proceeds under the
+revised gate with the canary records re-checked offline, not with a third
+run: the instrument changed, the procedure did not.
+
 ## Canary rule
 
 One run before any fan-out, gated against the v6 API worst-of-arm on the
