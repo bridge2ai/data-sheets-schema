@@ -2187,6 +2187,13 @@ class TestReceiptCondition(unittest.TestCase):
         self.assertEqual(phase_max_tokens(self._spec("generic_v6"), "full", 1), PHASE_MAX_TOKENS["full"])
         self.assertEqual(phase_max_tokens(self._spec("generic_v7"), "reconcile_full", 1), PHASE_MAX_TOKENS["reconcile_full"])
         self.assertEqual(phase_max_tokens(self._spec("generic_v7"), "nope", 7), 7)
+        # the record's per-phase map says the same number api_usage does (#770)
+        from data_sheets_schema.api_runner import _model_settings
+        import data_sheets_schema.api_runner as api
+        settings = _model_settings()
+        blk = api._model_block(self._spec("generic_v7"), settings) if hasattr(api, "_model_block") else None
+        if blk is not None:
+            self.assertEqual(blk["max_tokens_by_phase"]["full"], 128000)
 
     def test_the_assembly_digest_covers_the_receipt_instruction(self):
         from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS, assembly_digest

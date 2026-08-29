@@ -213,8 +213,14 @@ DERIVED_PHASES = frozenset({"core", "reconcile_core"})
 #: Under a receipt condition the `full` phase emits the record *and* its
 #: coverage receipt: on the first v7 AI_READI run that was 95,342 output
 #: tokens against a 96,000 cap, after an attempt truncated at the cap (#768).
-#: Raised to the route's ceiling for that phase only; every other phase and
-#: condition keeps the budget below. Clamped by `output_limit()` like the rest.
+#: The reasoning log says what filled it: thinking was 65–68k of the 95k
+#: (~72%), the record ~18k and the receipt ~9k — so the receipt is the
+#: smaller part and 128,000 leaves about a third of headroom; a further
+#: overrun needs a shorter receipt or a thinking budget, not a higher cap
+#: (#770). Raised to the route's ceiling for that phase only; every other
+#: phase and condition keeps the budget below. Clamped by `output_limit()`
+#: like the rest. Within v7 this is a silent instrument change — earlier
+#: records carry 96000 on the full phase — and no check flags it (#771).
 RECEIPT_PHASE_MAX_TOKENS = {"full": 128000}
 
 
@@ -2854,9 +2860,11 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         "provider": ident["provider"] or PROVIDER,
         "base_url": ident["base_url"],
         "model": settings["name"],
-        "max_tokens_by_phase": ({k: v for k, v in PHASE_MAX_TOKENS.items()
-                                 if k not in DERIVED_PHASES and k != "repair_core"}
-                                if CORE_DERIVED else PHASE_MAX_TOKENS),
+        # Through phase_max_tokens, so a receipt condition's raised `full`
+        # budget is the one the record states — the same number api_usage
+        # carries per call (#770).
+        "max_tokens_by_phase": {k: phase_max_tokens(spec, k, v) for k, v in PHASE_MAX_TOKENS.items()
+                                if not (CORE_DERIVED and (k in DERIVED_PHASES or k == "repair_core"))},
         # What the run sent, and what it was allowed to send. The second is
         # usually unknown, and #568 exists because that could not be told from
         # the record: AI-READI's reconcile_full ran at 249,015 tokens under a
