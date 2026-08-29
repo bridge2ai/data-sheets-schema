@@ -106,6 +106,8 @@ REPORTED_ONLY = (
     # an unchecked block prints — (#727).
     ("chunks unreviewed", "receipts", lambda b: receipt_floors(b)["chunks unreviewed"]),
     ("snippets unverified", "receipts", lambda b: receipt_floors(b)["snippets unverified"]),
+    ("snippets in another chunk", "receipts",
+     lambda b: int((b.get("snippets") or {}).get("adjacent") or 0) + int((b.get("snippets") or {}).get("elsewhere") or 0)),
 )
 
 
@@ -138,8 +140,12 @@ def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
         "receipts vacuous": int(total > 0 and int(sn.get("total") or 0) == 0),
         # Findings not already counted above: a mismatched snippet is one
         # defect, not two lines (#727).
+        # Wrong-chunk attributions are reported, never gated (#763): the
+        # text is in the bundle, so support holds; attribution precision is
+        # its own reported number.
         "receipt findings": len([f for f in block.get("findings") or []
-                                 if f.get("kind") not in ("snippet_mismatch", "snippet_empty")]),
+                                 if f.get("kind") not in ("snippet_mismatch", "snippet_empty",
+                                                          "snippet_adjacent_chunk", "snippet_elsewhere_chunk")]),
     }
 
 

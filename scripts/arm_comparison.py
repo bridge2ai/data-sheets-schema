@@ -109,6 +109,9 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                    "not 0"),
     "unverified": ("snippets unverified", "record", True,
                    "receipts (#708): mismatched + unchecked snippets; same caveat"),
+    "wrongchunk": ("snippets in another chunk", "record", True,
+                   "receipts (#763): verbatim in the bundle but not in the chunk cited — "
+                   "attribution precision, reported not gated; ~2% on the v7 API canaries"),
     "noreceipt": ("slots without a receipt", "record", True,
                   "receipts (#708): receiptable populated leaves with no receipt; exempt "
                   "slots (runner-set, minted, commentary) are outside the denominator"),
@@ -151,12 +154,14 @@ def run_metrics(prefix: str, rep: int, project: str) -> dict[str, Any] | None:
     if rcp.get("checked"):
         from data_sheets_schema.canary import receipt_floors
         floors = receipt_floors(rcp)
+        sn = rcp.get("snippets") or {}
         receipt_vals = {"unreviewed": floors["chunks unreviewed"],
                         "unverified": floors["snippets unverified"],
+                        "wrongchunk": int(sn.get("adjacent") or 0) + int(sn.get("elsewhere") or 0),
                         "noreceipt": len((rcp.get("slots") or {}).get("without_receipt") or [])
                         + int((rcp.get("slots") or {}).get("without_receipt_truncated") or 0)}
     else:
-        receipt_vals = {"unreviewed": None, "unverified": None, "noreceipt": None}
+        receipt_vals = {"unreviewed": None, "unverified": None, "wrongchunk": None, "noreceipt": None}
     return {
         "label": label,
         **receipt_vals,

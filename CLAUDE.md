@@ -478,7 +478,11 @@ A full record with no receipt beside it does not resume past `full`.
 by `d4d provenance record --receipt-expected`, which the receipt-writing
 playbook passes — an unchecked receipt is UNMEASURABLE and any unreviewed
 chunk, unverified snippet, finding, or vacuous receipt (zero snippets over a
-non-empty bundle) is a regression against a floor of 0. When false, the
+non-empty bundle) is a regression against a floor of 0. A snippet that is
+verbatim in the bundle but in a chunk other than the one cited is
+`adjacent`/`elsewhere` — reported as "snippets in another chunk", never
+gated (#763; ~2% on the v7 API canaries): support holds, attribution
+precision is its own number. When false, the
 block is not a metric for that run: earlier arms and the API arm before v7
 (#710) wrote none, and "no receipt" from them is not a measurement.
 
