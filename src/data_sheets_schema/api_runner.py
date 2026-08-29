@@ -226,6 +226,16 @@ RECEIPT_PHASE_MAX_TOKENS = {"full": 128000}
 
 def phase_max_tokens(spec: "RunSpec", ph: str, default: int) -> int:
     if spec.condition in RECEIPT_CONDITIONS and ph in RECEIPT_PHASE_MAX_TOKENS:
+        # Env-overridable (#777): three consecutive full-phase stalls on the
+        # AI_READI v7 re-canary followed the raise to 128k, where two runs at
+        # 96k had completed; the value a run used is in its api_usage either
+        # way, so the override changes nothing about what the record attests.
+        raw = os.environ.get("D4D_RECEIPT_FULL_MAX_TOKENS", "")
+        try:
+            if ph == "full" and int(raw) > 0:
+                return int(raw)
+        except ValueError:
+            pass
         return RECEIPT_PHASE_MAX_TOKENS[ph]
     return PHASE_MAX_TOKENS.get(ph, default)
 

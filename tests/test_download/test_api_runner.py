@@ -2187,6 +2187,15 @@ class TestReceiptCondition(unittest.TestCase):
         self.assertEqual(phase_max_tokens(self._spec("generic_v6"), "full", 1), PHASE_MAX_TOKENS["full"])
         self.assertEqual(phase_max_tokens(self._spec("generic_v7"), "reconcile_full", 1), PHASE_MAX_TOKENS["reconcile_full"])
         self.assertEqual(phase_max_tokens(self._spec("generic_v7"), "nope", 7), 7)
+        # #777: the receipt-condition full budget is env-overridable, malformed-safe
+        import os
+        for raw, want in (("96000", 96000), ("junk", 128000), ("0", 128000)):
+            os.environ["D4D_RECEIPT_FULL_MAX_TOKENS"] = raw
+            try:
+                self.assertEqual(phase_max_tokens(self._spec("generic_v7"), "full", 1), want, raw)
+                self.assertEqual(phase_max_tokens(self._spec("generic_v6"), "full", 1), PHASE_MAX_TOKENS["full"])
+            finally:
+                del os.environ["D4D_RECEIPT_FULL_MAX_TOKENS"]
         # the record's per-phase map says the same number api_usage does (#770)
         from data_sheets_schema.api_runner import _model_settings
         import data_sheets_schema.api_runner as api
