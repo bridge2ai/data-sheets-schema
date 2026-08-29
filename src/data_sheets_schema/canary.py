@@ -107,7 +107,8 @@ REPORTED_ONLY = (
     ("chunks unreviewed", "receipts", lambda b: receipt_floors(b)["chunks unreviewed"]),
     ("snippets unverified", "receipts", lambda b: receipt_floors(b)["snippets unverified"]),
     ("snippets in another chunk", "receipts",
-     lambda b: int((b.get("snippets") or {}).get("adjacent") or 0) + int((b.get("snippets") or {}).get("elsewhere") or 0)),
+     lambda b: int((b.get("snippets") or {}).get("adjacent") or 0) + int((b.get("snippets") or {}).get("elsewhere") or 0)
+     + int((b.get("snippets") or {}).get("spans_boundary") or 0)),
 )
 
 
@@ -145,7 +146,8 @@ def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
         # its own reported number.
         "receipt findings": len([f for f in block.get("findings") or []
                                  if f.get("kind") not in ("snippet_mismatch", "snippet_empty",
-                                                          "snippet_adjacent_chunk", "snippet_elsewhere_chunk")]),
+                                                          "snippet_adjacent_chunk", "snippet_elsewhere_chunk",
+                                                          "snippet_spans_boundary")]),
     }
 
 

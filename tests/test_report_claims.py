@@ -205,6 +205,13 @@ class SchemaClaimTest(Harness):
                          [("false_schema_claim", "md5"),
                           ("false_schema_claim", "path")])
 
+    def test_an_element_removal_is_not_tested_as_a_slot_removal(self):
+        """#782: the 2026-08-28c AI_READI report's two findings."""
+        md = ("## `sensitive_elements`\n\n`description` was removed from all eleven objects. "
+              "The content was redistributed into declared fields.\n\n"
+              "The second object was removed. The single remaining object asserts `false`.\n")
+        self.assertEqual(self.kinds(md), [])
+
     def test_prose_about_a_value_not_appearing_is_not_a_schema_claim(self):
         """#757: the v7 API canary's only report finding. The sentence is
         about a value, and the previous sentence's slot must not be borrowed

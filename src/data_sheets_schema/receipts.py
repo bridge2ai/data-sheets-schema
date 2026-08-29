@@ -76,6 +76,7 @@ EXEMPT_LEAVES = frozenset({"conforms_to_class", "conforms_to_schema", "notes", "
 MIN_SNIPPET_CHARS = 8          # at least one part carries this much
 MIN_PART_CHARS = 3             # every part carries this much
 MIN_MULTIPART_CHARS = 12       # a multi-part snippet carries this much in all
+MIN_NUMERIC_PART_CHARS = 5     # a part with a digit pins a passage at this length (#780)
 # "the ... and ... for" verified in 25 of 28 AI_READI chunks under a
 # parts>=3/total>=8 rule (#765); one part of 8 is what pins a snippet to
 # a passage, and the numeric anchor rides beside it.
@@ -115,7 +116,11 @@ def snippet_in(snippet: str, chunk_text: str, hay: str | None = None) -> tuple[b
     if not parts:
         return False, "empty after normalisation"
     short = [p for p in parts if len(p) < MIN_PART_CHARS]
-    if (short or max(len(p) for p in parts) < MIN_SNIPPET_CHARS
+    # A part that carries a digit pins a passage at five characters —
+    # "165,051", "3.82 TB" are exact slot values, not common words (#780).
+    def pins(p: str) -> bool:
+        return len(p) >= MIN_SNIPPET_CHARS or (len(p) >= MIN_NUMERIC_PART_CHARS and any(ch.isdigit() for ch in p))
+    if (short or not any(pins(p) for p in parts)
             or (len(parts) > 1 and sum(len(p) for p in parts) < MIN_MULTIPART_CHARS)):
         return False, (f"too short to attest anything: {(short or parts)[0]!r} "
                        f"(every part >= {MIN_PART_CHARS}, one part >= {MIN_SNIPPET_CHARS}, "
@@ -380,7 +385,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # `adjacent` (the chunk before or after), `elsewhere` (any other) — and
     # reported, never gated; the floor of 0 is for text found nowhere.
     snippets = {"total": 0, "verified": 0, "adjacent": 0, "elsewhere": 0,
-                "mismatched": 0, "unchecked": 0}
+                "spans_boundary": 0, "mismatched": 0, "unchecked": 0}
     order = {cid: i for i, cid in enumerate(manifest_ids)}
     hays = {cid: normalise(t) for cid, t in chunk_texts.items()}      # once per chunk (#766)
     for e in entries:
@@ -408,6 +413,17 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             # snippet is found nowhere and stays `mismatched`.
             where = [] if why.startswith("too short") else [
                 cid for cid, h in hays.items() if cid != e.get("id") and snippet_in(snippet, "", h)[0]]
+            # A passage the chunk boundary cuts is in no single chunk (#781):
+            # test the cited chunk joined with its neighbours, and report it
+            # as spanning rather than as found nowhere.
+            if not where and not why.startswith("too short"):
+                i = order.get(e.get("id"), -1)
+                joined = "".join(chunk_texts.get(manifest_ids[j], "") for j in (i - 1, i, i + 1) if 0 <= j < len(manifest_ids))
+                if i >= 0 and snippet_in(snippet, joined)[0]:
+                    snippets["spans_boundary"] += 1
+                    findings.append({"kind": "snippet_spans_boundary", "chunk": e.get("id"),
+                                     "slot": pair.get("slot"), "snippet": snippet[:60]})
+                    continue
             if where:
                 near = any(abs(order.get(cid, -9) - order.get(e.get("id"), 9)) == 1 for cid in where)
                 kind = "adjacent" if near else "elsewhere"
@@ -448,6 +464,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         + (f" ({snippets['unchecked']} unchecked)" if snippets["unchecked"] else "")
                         + (f" ({snippets['adjacent']} in an adjacent chunk)" if snippets["adjacent"] else "")
                         + (f" ({snippets['elsewhere']} in another chunk)" if snippets["elsewhere"] else "")
+                        + (f" ({snippets['spans_boundary']} spanning a chunk boundary)" if snippets["spans_boundary"] else "")
                         + f" · slots {slots['with_receipt']}/{slots['receiptable']} with a receipt"
                         + (f" ({slots['exempt']} exempt)" if slots["exempt"] else "")
                         + (f" · {len(reshaped)} receipt path(s) reshaped by reconcile" if reshaped else "")),

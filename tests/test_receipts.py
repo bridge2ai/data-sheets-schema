@@ -66,6 +66,11 @@ class Normalisation(unittest.TestCase):
         # #763: a short numeric part anchors a phrase — one part of 8 pins it
         self.assertFalse(rc.snippet_in("2024", "in 2024 the program")[0])
         self.assertTrue(rc.snippet_in("50,000...admissions from ICU", "50,000\nPatient admissions from ICU, PICU")[0])
+        # #780: an exact numeric value pins a passage at five characters
+        self.assertTrue(rc.snippet_in("165,051", "a total of 165,051 files")[0])
+        self.assertTrue(rc.snippet_in("3.82 TB", "size 3.82 TB in all")[0])
+        self.assertFalse(rc.snippet_in("2024", "in 2024 the program")[0])
+        self.assertFalse(rc.snippet_in("v1.0", "in v1.0 the program")[0])
         # #765: three common words do not, however many parts they are split into
         ok, why = rc.snippet_in("the ... and ... for", "the cat and the dog for a walk")
         self.assertFalse(ok); self.assertIn("short", why)
@@ -201,6 +206,19 @@ class Validator(unittest.TestCase):
         r["chunks"][0] = {"id": "c001", "status": "extracted", "extracted": [{"slot": "title", "snippet": "Something else entirely"}]}  # in c003, two away
         b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
         self.assertEqual(b["snippets"]["elsewhere"], 1)
+
+    def test_a_snippet_cut_by_a_chunk_boundary_is_reported_as_spanning(self):
+        """#781: the passage exists in the bundle across c002/c003; no single
+        chunk holds it, and it must not read as found nowhere."""
+        from data_sheets_schema.canary import receipt_floors
+        r = _receipt(self.md5)
+        # the last content line of a.txt (end of c002) and the first line of c003
+        r["chunks"][1]["extracted"].append({"slot": "title", "snippet": "Bridge2AI program. FILE: b.txt"})
+        assert "Bridge2AI program." in self.texts["c002"] and self.texts["c003"].startswith("FILE: b.txt")
+        b = rc.check(r, self.manifest, self.texts, FULL, self.md5)
+        self.assertEqual(b["snippets"]["spans_boundary"], 1)
+        self.assertEqual(b["snippets"]["mismatched"], 0)
+        self.assertEqual(receipt_floors({**b, "expected": True})["snippets unverified"], 0)
 
     def test_a_chunk_whose_text_is_missing_is_unchecked_not_verified(self):
         texts = {k: v for k, v in self.texts.items() if k != "c002"}
