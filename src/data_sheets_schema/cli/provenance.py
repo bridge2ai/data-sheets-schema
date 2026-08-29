@@ -389,6 +389,76 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                    f"{label} --project {project}` before `d4d runs check`.")
 
 
+@provenance.command("backfill-spec")
+@click.option("--project", required=True)
+@click.option("--method", default="claudecode_agent", show_default=True)
+@click.option("--label", required=True)
+@click.option("--condition", required=True, help="the condition the instruction was rendered under")
+@click.option("--runtime", default="Claude Code", show_default=True)
+@click.option("--arm", type=click.Choice(sorted(_ARMS)), default="baseline", show_default=True)
+@click.option("--execute", is_flag=True, help="write the spec; without it, report only")
+def backfill_spec(project, method, label, condition, runtime, arm, execute):
+    """Attach the render spec to a record that recorded its request hash
+    without one (#772).
+
+    A launcher that passes --prompt-text but not --condition leaves the record
+    `unverifiable`: the hash of what was sent is there, the spec that would
+    re-render it is not. This reconstructs the spec from the arguments given
+    and the record's own inputs, and writes it **only when re-rendering it
+    reproduces the recorded hash** — the same test `d4d runs check` applies —
+    trying the record's own date and its neighbours for the `# Generated:`
+    line. A spec that does not re-render to the hash is not written: that
+    would assert a condition the run may not have used.
+    """
+    import hashlib
+    from datetime import date, timedelta
+
+    import yaml as _yaml
+
+    from data_sheets_schema import provenance as pv
+    from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+
+    path = pv.record_path_for(project, method, label, pv.CONCAT_DIR)   # resolved at call time
+    if not path.exists():
+        raise click.ClickException(f"no provenance record at {path}")
+    data = _yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    req = ((data.get("prompts") or {}).get("request")) or {}
+    if not req.get("sha256"):
+        raise click.ClickException("the record carries no request hash; nothing to attach a spec to")
+    if isinstance(req.get("spec"), dict) and req["spec"].get("condition"):
+        click.echo(f"   · {label}/{project}: spec already present ({req['spec']['condition']})")
+        return
+    bundle = ((data.get("inputs") or {}).get("bundle_path"))
+    if not bundle:
+        raise click.ClickException("the record names no input bundle; the spec needs one")
+    stamp = (data.get("record_generated_at") or "")[:10]
+    base = date.fromisoformat(stamp) if stamp else date.today()
+    # The provider the record itself states — `d4d prompt render` writes the
+    # runtime's provider (Anthropic for Claude Code), not the proxy identity
+    # the API path's default spec carries, and the header line differs.
+    provider = (data.get("model") or {}).get("provider") or None
+    for delta in (0, -1, 1, -2):
+        spec = RunSpec(project=project, arm=_ARMS[arm][0], method=method, bundle=Path(bundle),
+                       label=label, condition=condition, runtime=runtime, provider=provider,
+                       run_date=(base + timedelta(days=delta)).isoformat())
+        got = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
+        if got == req["sha256"]:
+            rendered = spec.render_spec()
+            click.echo(f"   ✓ {label}/{project}: {condition} on {rendered['run_date']} re-renders to the recorded hash")
+            if execute:
+                data["prompts"]["request"]["spec"] = rendered
+                data["prompts"]["request"]["spec_basis"] = ("backfilled by d4d provenance backfill-spec: "
+                                                            "verified by re-rendering to the recorded hash (#772)")
+                pv.ProvenanceRecord(data=data).write(path)
+                click.echo(f"     written to {path}")
+            return
+    raise click.ClickException(
+        f"{label}/{project}: no spec under {condition}/{runtime}/{arm}/provider {provider!r} "
+        f"(from the record's model.provider) re-renders to the recorded hash "
+        f"{req['sha256'][:12]}… on {base}±2 days; not written. A run under another arm "
+        f"needs its --method too (the {{METHOD}} substitution differs).")
+
+
 @provenance.command('annotate-observed')
 @click.option('--project', required=True)
 @click.option('--method', required=True)

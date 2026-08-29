@@ -527,3 +527,56 @@ class SchemaResolutionAwayFromRepoRoot(unittest.TestCase):
                 self.assertTrue(facts["core_sha256"])
         finally:
             os.chdir(cwd)
+
+
+class BackfillSpecTest(unittest.TestCase):
+    """#772: a spec is attached only when re-rendering it reproduces the
+    recorded request hash; anything else is refused, not guessed."""
+
+    def _record(self, tmp, condition, provider="Anthropic", run_date="2026-08-28", with_hash=True):
+        import hashlib
+        import yaml
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.cli.api import ARMS
+        core = Path(tmp) / "d4d_concatenated/claudecode_agent_core/L"
+        core.mkdir(parents=True)
+        bundle = Path(tmp) / "P_preprocessed.txt"; bundle.write_text("x\n")
+        spec = RunSpec(project="CHORUS", arm=ARMS["baseline"][0], method="claudecode_agent", bundle=bundle,
+                       label="L", condition=condition, runtime="Claude Code", provider=provider, run_date=run_date)
+        sha = hashlib.sha256(resolve_prompt(spec).encode("utf-8")).hexdigest()
+        rec = {"record_generated_at": "2026-08-29T04:00:00+00:00", "run": {"label": "L", "project": "CHORUS", "method": "claudecode_agent"},
+               "model": {"provider": provider}, "inputs": {"bundle_path": str(bundle)},
+               "prompts": {"request": {"sha256": sha} if with_hash else {}}}
+        (core / "CHORUS_provenance.yaml").write_text(yaml.safe_dump(rec))
+        return core / "CHORUS_provenance.yaml"
+
+    def _run(self, tmp, *args):
+        import data_sheets_schema.provenance as pv
+        from data_sheets_schema.cli.provenance import provenance
+        old = pv.CONCAT_DIR; pv.CONCAT_DIR = Path(tmp) / "d4d_concatenated"
+        try:
+            return CliRunner().invoke(provenance, ["backfill-spec", "--project", "CHORUS", "--label", "L", *args])
+        finally:
+            pv.CONCAT_DIR = old
+
+    def test_a_matching_spec_is_written_and_a_mismatching_one_refused(self):
+        import tempfile
+        import yaml
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._record(tmp, "generic_v6")
+            r = self._run(tmp, "--condition", "generic_v6")
+            self.assertEqual(r.exit_code, 0, r.output); self.assertIn("re-renders to the recorded hash", r.output)
+            self.assertNotIn("spec", yaml.safe_load(path.read_text())["prompts"]["request"])   # report only
+            r = self._run(tmp, "--condition", "generic_v6", "--execute")
+            self.assertEqual(r.exit_code, 0, r.output)
+            req = yaml.safe_load(path.read_text())["prompts"]["request"]
+            self.assertEqual(req["spec"]["condition"], "generic_v6"); self.assertEqual(req["spec"]["run_date"], "2026-08-28")
+            self.assertIn("backfilled", req["spec_basis"])
+        with tempfile.TemporaryDirectory() as tmp:
+            self._record(tmp, "generic_v6")
+            r = self._run(tmp, "--condition", "generic_v5", "--execute")    # the wrong condition
+            self.assertNotEqual(r.exit_code, 0); self.assertIn("not written", r.output)
+        with tempfile.TemporaryDirectory() as tmp:
+            self._record(tmp, "generic_v6", with_hash=False)
+            r = self._run(tmp, "--condition", "generic_v6", "--execute")
+            self.assertNotEqual(r.exit_code, 0); self.assertIn("no request hash", r.output)
