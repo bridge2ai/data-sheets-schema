@@ -1,0 +1,551 @@
+bundle_md5: 9b2ef4b65d67957f79362266cab0bc7a
+slots:
+  acquisition_methods[0].acquisition_details:
+    receipts:
+    - chunk: c003
+      snippet: Retrospective data collection
+    core_path: acquisition_methods[0].acquisition_details
+  addressing_gaps[0].response:
+    receipts:
+    - chunk: c002
+      snippet: There is an urgent need for infrastructure to support artificial intelligence
+        and machine learning (AI/ML) in critical care. Developing high-resolution
+        multi-center data sets is a critical first step towards actionable and trustworthy
+        AI.
+    core_path: addressing_gaps[0].response
+  cleaning_strategies[0].cleaning_details:
+    receipts:
+    - chunk: c008
+      snippet: This repo is dedicated to producing characterization reports to return
+        to sites following their ... data submissions
+    core_path: cleaning_strategies[0].cleaning_details
+  collection_mechanisms[0].mechanism_details:
+    receipts:
+    - chunk: c002
+      snippet: develop capabilities across a multi-center network to acquire, standardize,
+        tokenize, store, visualize, and label data such as structured electronic health
+        record data, tokenized unstructured electronic health record data, telemetry
+        and EEG waveforms, imaging, and social determinants of health
+    - chunk: c006
+      snippet: The CHoRUS project is the collection of multi-modal data across 14
+        different hospitals. The data utilizes ongoing and new standardization practices.
+        The team creates tools to support the cloud enclave.
+    core_path: collection_mechanisms[0].mechanism_details
+  collection_mechanisms[1].description:
+    receipts:
+    - chunk: c007
+      snippet: an interactive workflow diagram describing the step-by-step process
+        for ... extracting and contributing clinical data to CHoRUS
+    - chunk: c008
+      snippet: Repository with tools to create and upload a CHoRUS Data Extract
+    core_path: collection_mechanisms[1].description
+  collection_mechanisms[1].mechanism_details:
+    receipts:
+    - chunk: c007
+      snippet: Standard operating protocols (SOPs) to instruct data contributing sites
+        about best ... practices for curating and delivering interoperable datasets
+    core_path: collection_mechanisms[1].mechanism_details
+  collection_timeframes[0].start_date:
+    receipts:
+    - chunk: c002
+      snippet: 'Project start: 2022-09-01T00:00:00 Project end: 2026-11-30T00:00:00'
+    core_path: collection_timeframes[0].start_date
+  conforms_to:
+    receipts:
+    - chunk: c003
+      snippet: Yes (open source EDF+ and Persyst schema)
+    core_path: conforms_to
+  conforms_to_standard:
+    receipts:
+    - chunk: c002
+      snippet: standardize data to the OMOP Common Data Model
+    core_path: conforms_to_standard
+  creators[0].description:
+    receipts:
+    - chunk: c006
+      snippet: 60+ CHoRUS consortium members across 20 different institutions
+    core_path: creators[0].description
+  creators[1]:
+    receipts:
+    - chunk: c003
+      snippet: Eric Rosenthal Massachusetts General Hospital
+    core_path: creators[1]
+  creators[1].affiliations[0].name:
+    receipts:
+    - chunk: c002
+      snippet: 'Organization: MASSACHUSETTS GENERAL HOSPITAL'
+    core_path: creators[1].affiliations[0].name
+  creators[1].description:
+    receipts:
+    - chunk: c003
+      snippet: Bridge2AI CHoRUS Leadership Team
+    core_path: creators[1].description
+  creators[1].name:
+    receipts:
+    - chunk: c002
+      snippet: 'Principal investigator: ROSENTHAL, ERIC S.'
+    core_path: creators[1].name
+  creators[2]:
+    receipts:
+    - chunk: c003
+      snippet: Azra Bihorac University of Florida
+    core_path: creators[2]
+  creators[3]:
+    receipts:
+    - chunk: c003
+      snippet: Xiaoqian Jiang UTHealth Houston
+    core_path: creators[3]
+  creators[4]:
+    receipts:
+    - chunk: c003
+      snippet: Yulia Strekalova University of Florida
+    core_path: creators[4]
+  creators[5]:
+    receipts:
+    - chunk: c003
+      snippet: Parisa Rashidi University of Florida
+    core_path: creators[5]
+  creators[6]:
+    receipts:
+    - chunk: c003
+      snippet: Manlik Kwong Tufts University
+    core_path: creators[6]
+  data_collectors[0].collector_details:
+    receipts:
+    - chunk: c007
+      snippet: This collaboration spans 20 academic centers, of which 14 will contribute
+        as Data ... Acquisition centers.
+    core_path: data_collectors[0].collector_details
+  data_governance.access_review_process:
+    receipts:
+    - chunk: c003
+      snippet: Participants will ﬁll out a registration form with name, email, and
+        institution
+    - chunk: c004
+      snippet: '*This requirement is not a barrier to acceptance into the program.
+        Program administrators will assist with this access if needed.'
+    - chunk: c007
+      snippet: 'Request access: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org'
+    core_path: data_governance.access_review_process
+  data_governance.description:
+    receipts:
+    - chunk: c002
+      snippet: establish a legal framework for collecting data at scale, sampling
+        to ensure comprehensive sets of patient conditions and clinical treatment
+        strategies
+    core_path: data_governance.description
+  data_governance.stewardship_roles[0]:
+    receipts:
+    - chunk: c007
+      snippet: The starting reference for data managers at data contributing sites
+        is the Chorus_SOP page.
+    core_path: data_governance.stewardship_roles[0]
+  description:
+    receipts:
+    - chunk: c002
+      snippet: will develop the necessary network, tools, standards, data, and education
+        to build machine-learning (ML) and artificial intelligence (AI)-derived models
+        to improve the care and outcomes of patients requiring critical care
+    - chunk: c006
+      snippet: The CHoRUS project is one data generation project of four in the National
+        Institute of Health (NIH) funded Bridge2AI consortium.
+    - chunk: c006
+      snippet: 23 Tb Waveform data
+    - chunk: c006
+      snippet: 9 Different data modalities 14 Data contributing hospitals
+    - chunk: c007
+      snippet: Collaborating with Bridge2AI and 3 other data generation projects,
+        the CHoRUS Network will ... help us cross the Bridge2AI network together.
+    core_path: description
+  ethical_reviews[0].review_details:
+    receipts:
+    - chunk: c002
+      snippet: perform community-facing ethics focus groups to determine what data
+        is appropriate for public sharing
+    - chunk: c006
+      snippet: The CHoRUS consortium evaluates community perspectives on clinical
+        care AI to find ways to increase trustworthiness of provenance and privacy
+        in AI. New approaches are being created as existing legal and regulatory landscape
+        is analyzed.
+    - chunk: c007
+      snippet: Patient-focused efforts will determine the ethical and legal approaches
+        to manage privacy ... and bias, while accounting for Social Determinants of
+        Health.
+    core_path: ethical_reviews[0].review_details
+  existing_uses[0].examples[0]:
+    receipts:
+    - chunk: c003
+      snippet: Datasets are being used for training activities and publications
+    core_path: existing_uses[0].examples[0]
+  existing_uses[1].examples[0]:
+    receipts:
+    - chunk: c003
+      snippet: expands access to Bridge2AI CHoRUS data through engagement, AI training,
+        and mentorship
+    core_path: existing_uses[1].examples[0]
+  existing_uses[1].examples[1]:
+    receipts:
+    - chunk: c006
+      snippet: Learn of different opportunities to gain hands-on training using the
+        CHoRUS dataset to support the development of transnational AI in clinical
+        care.
+    core_path: existing_uses[1].examples[1]
+  external_resources[0].description:
+    receipts:
+    - chunk: c004
+      snippet: leverage the data and tools to create practical use cases
+    - chunk: c007
+      snippet: Set of dockerized container applications and associated configurations
+        to be deployed to support CHoRUS ... services on Azure
+    core_path: external_resources[0].description
+  external_resources[0].name:
+    receipts:
+    - chunk: c004
+      snippet: The Bridge2AI AI/ML for Clinical Care Collaborative Cloud.
+    core_path: external_resources[0].name
+  external_resources[0].restrictions[1]:
+    receipts:
+    - chunk: c003
+      snippet: Once access is granted and compute is provisioned, an email will be
+        sent
+    core_path: external_resources[0].restrictions[1]
+  external_resources[0].restrictions[2]:
+    receipts:
+    - chunk: c005
+      snippet: In order to gain access to the dataset, you will need to have a “.edu”
+        email address.
+    core_path: external_resources[0].restrictions[2]
+  external_resources[1].description:
+    receipts:
+    - chunk: c007
+      snippet: 'The CHoRUS GitHub organization houses active repositories that provide:
+        ... Software and tooling to interact with and extract insight from clinical
+        data in diverse'
+    - chunk: c007
+      snippet: We have created a web guide for both contributors and users of the
+        CHoRUS ... software packages that compiles documentation in the chorus-developer
+        repository.
+    core_path: external_resources[1].description
+  external_resources[1].id:
+    receipts:
+    - chunk: c007
+      snippet: https://github.com/chorus-ai
+    core_path: external_resources[1].id
+  funders[0].description:
+    receipts:
+    - chunk: c002
+      snippet: 'Fiscal year: 2022 Award amount: 5880300'
+    - chunk: c006
+      snippet: This project is funded by the NIH under award number OT2OD032701.
+    core_path: funders[0].description
+  funders[0].grantor:
+    receipts:
+    - chunk: c002
+      snippet: As part of the NIH Common Fund’s Bridge2AI program
+    core_path: funders[0].grantor
+  funders[0].grants[0].description:
+    receipts:
+    - chunk: c002
+      snippet: 'Application ID: 10472824'
+    core_path: funders[0].grants[0].description
+  funders[0].grants[0].grant_number:
+    receipts:
+    - chunk: c002
+      snippet: 'Core project number: OT2OD032701'
+    core_path: funders[0].grants[0].grant_number
+  funders[0].grants[0].name:
+    receipts:
+    - chunk: c002
+      snippet: 'Project number: 1OT2OD032701-01'
+    core_path: funders[0].grants[0].name
+  id:
+    receipts:
+    - chunk: c006
+      snippet: 'Source URL: https://chorus4ai.org/'
+    core_path: id
+  instances[0].counts:
+    receipts:
+    - chunk: c006
+      snippet: Current Released Dataset 50,000 Patient admissions from ICU, PICU,
+        and NICU
+    core_path: instances[0].counts
+  instances[0].description:
+    receipts:
+    - chunk: c002
+      snippet: acquiring an AI-ready data set from more than 100,000 critically ill
+        patients
+    core_path: instances[0].description
+  instances[0].source_caveats:
+    receipts:
+    - chunk: c003
+      snippet: As of August 2025, covers 14 different hospitals with over 45K unique
+        admissions
+    core_path: instances[0].source_caveats
+  instances[10].name:
+    receipts:
+    - chunk: c003
+      snippet: Waveform EEG (hospital database)
+    core_path: instances[10].name
+  instances[1].counts:
+    receipts:
+    - chunk: c006
+      snippet: 1.6 Billion Rows of EHR OMOP data
+    core_path: instances[1].counts
+  instances[2].name:
+    receipts:
+    - chunk: c003
+      snippet: Demographics OMOP
+    core_path: instances[2].name
+  instances[3].name:
+    receipts:
+    - chunk: c003
+      snippet: Medication administration (dosing time-stamped upon each infusion change
+        or dose administration)
+    core_path: instances[3].name
+  instances[4].name:
+    receipts:
+    - chunk: c003
+      snippet: Procedures (documentation by providers)
+    core_path: instances[4].name
+  instances[5].name:
+    receipts:
+    - chunk: c003
+      snippet: Nursing flowsheets (high-frequency documentation)
+    core_path: instances[5].name
+  instances[6].name:
+    receipts:
+    - chunk: c003
+      snippet: Diagnoses (documentation by providers)
+    core_path: instances[6].name
+  instances[7].name:
+    receipts:
+    - chunk: c003
+      snippet: Clinical notes (extracted and tokenized using OHNLP toolkit)
+    core_path: instances[7].name
+  instances[8].description:
+    receipts:
+    - chunk: c003
+      snippet: Yes (DICOM schema)
+    - chunk: c006
+      snippet: 7,642 Admissions with Radiology Data
+    core_path: instances[8].description
+  instances[8].name:
+    receipts:
+    - chunk: c003
+      snippet: Imaging (from PACS)
+    core_path: instances[8].name
+  instances[8].source_caveats:
+    receipts:
+    - chunk: c003
+      snippet: Imaging – currently 1000 images available
+    core_path: instances[8].source_caveats
+  instances[9].description:
+    receipts:
+    - chunk: c003
+      snippet: Yes (PhysioNet schema extended)
+    core_path: instances[9].description
+  instances[9].name:
+    receipts:
+    - chunk: c003
+      snippet: Waveform telemetry (bedside monitors, gateway/middleware)
+    core_path: instances[9].name
+  intended_uses[0].examples[1]:
+    receipts:
+    - chunk: c003
+      snippet: innovative  research  at  the ... intersection  of  healthcare  challenges  and  AI/ML  using  multi-modal
+        ... datasets from a broad range of cohort participants.
+    core_path: intended_uses[0].examples[1]
+  intended_uses[1].examples[0]:
+    receipts:
+    - chunk: c002
+      snippet: sequestering holdout datasets for external validation
+    core_path: intended_uses[1].examples[0]
+  intended_uses[2].examples[1]:
+    receipts:
+    - chunk: c002
+      snippet: cultivate expertise in the lay and scientific community to improve
+        AI literacy
+    core_path: intended_uses[2].examples[1]
+  is_deidentified.deidentification_details:
+    receipts:
+    - chunk: c003
+      snippet: with de-id in process for larger cohort
+    core_path: is_deidentified.deidentification_details
+  is_deidentified.method:
+    receipts:
+    - chunk: c002
+      snippet: transform data using approaches that limit re-identification
+    - chunk: c008
+      snippet: CTP-deid Public
+    core_path: is_deidentified.method
+  keywords:
+    receipts:
+    - chunk: c002
+      snippet: Critical Care;Critical Illness;Data;Data Element;Data Set
+    core_path: keywords
+  known_limitations[1].limitation_description:
+    receipts:
+    - chunk: c006
+      snippet: Anticipated Final Dataset 100,000 Patient admissions
+    core_path: known_limitations[1].limitation_description
+  labeling_strategies[0].labeling_details:
+    receipts:
+    - chunk: c007
+      snippet: A visualization and annotation environment will label data with targets
+        important for ... prediction.
+    core_path: labeling_strategies[0].labeling_details
+  license_and_use_terms.license_terms:
+    receipts:
+    - chunk: c003
+      snippet: All participants must sign a licensing agreement included in the registration
+        form before gaining
+    core_path: license_and_use_terms.license_terms
+  license_and_use_terms.source_caveats:
+    receipts:
+    - chunk: c007
+      snippet: This project is licensed under the MIT License. See the LICENSE file
+        for more details.
+    - chunk: c008
+      snippet: chorus_waveform Public ... CHoRUS waveform documentation and various
+        waveform conversion scripts
+    core_path: license_and_use_terms.source_caveats
+  maintainers[0].maintainer_details:
+    receipts:
+    - chunk: c006
+      snippet: Ciera McCrary, MGH, Program Manager
+    core_path: maintainers[0].maintainer_details
+  missing_data_documentation[0].missing_data_patterns:
+    receipts:
+    - chunk: c003
+      snippet: EEG – extraction in process at this point
+    core_path: missing_data_documentation[0].missing_data_patterns
+  name:
+    receipts:
+    - chunk: c006
+      snippet: Creating a patient-focused collaborative hospital repository uniting
+        standards for clinical care AI
+    core_path: name
+  page:
+    receipts:
+    - chunk: c007
+      snippet: 'Website: www.bridge2ai.org/chorus'
+    core_path: page
+  participant_privacy[0].privacy_techniques:
+    receipts:
+    - chunk: c007
+      snippet: privacy_scan_tool ... A Privacy Scan tools for medical records
+    core_path: participant_privacy[0].privacy_techniques
+  preprocessing_strategies[0].preprocessing_details:
+    receipts:
+    - chunk: c002
+      snippet: acquire data, standardize data to the OMOP Common Data Model
+    core_path: preprocessing_strategies[0].preprocessing_details
+  preprocessing_strategies[1].description:
+    receipts:
+    - chunk: c007
+      snippet: CHoRUS waveform documentation and various waveform conversion scripts
+    - chunk: c008
+      snippet: Resources which support the preparation and release of waveforms
+    core_path: preprocessing_strategies[1].description
+  preprocessing_strategies[1].preprocessing_details:
+    receipts:
+    - chunk: c007
+      snippet: Unified standards will harmonize multi-modal EHR, waveform, imaging,
+        and text data.
+    core_path: preprocessing_strategies[1].preprocessing_details
+  preprocessing_strategies[2].description:
+    receipts:
+    - chunk: c007
+      snippet: established a chorus-mapping repository with documentation and pooled
+        tabular mappings ... along with an associated clinical validation SOP for
+        contributing to mapping efforts.
+    core_path: preprocessing_strategies[2].description
+  preprocessing_strategies[2].preprocessing_details:
+    receipts:
+    - chunk: c007
+      snippet: Validated semantic mappings for connecting clinical data in various
+        source formats to ... international standards
+    core_path: preprocessing_strategies[2].preprocessing_details
+  preprocessing_strategies[3].preprocessing_details:
+    receipts:
+    - chunk: c008
+      snippet: Open source code to geocode OMOP Location entities via DeGauss
+    core_path: preprocessing_strategies[3].preprocessing_details
+  purposes[0].response:
+    receipts:
+    - chunk: c002
+      snippet: The project’s overarching goal is to develop a publicly available,
+        AI-ready critical care dataset, while ensuring the methods promote privacy,
+        accountability, and clinical benefit
+    core_path: purposes[0].response
+  purposes[1].response:
+    receipts:
+    - chunk: c006
+      snippet: The goal is to work with projects to create ethically sourced datasets
+        and tools around Artificial Intelligence and to create best practices for
+        AI in health.
+    core_path: purposes[1].response
+  purposes[2].response:
+    receipts:
+    - chunk: c007
+      snippet: The goal of the CHoRUS Network is to develop the most diverse, high-resolution,
+        ethically ... sourced, AI-ready data set to answer the grand challenge of
+        improving recovery from acute
+    core_path: purposes[2].response
+  raw_sources[0].raw_data_details:
+    receipts:
+    - chunk: c003
+      snippet: 'OMOP and telemetry in enclave except: Clinical notes – stored locally
+        except tokens'
+    core_path: raw_sources[0].raw_data_details
+  sampling_strategies[0].strategies:
+    receipts:
+    - chunk: c007
+      snippet: Federated access will enable sampling methods to ensure a balanced
+        and diverse cohort.
+    core_path: sampling_strategies[0].strategies
+  sensitive_elements[0].sensitivity_details:
+    receipts:
+    - chunk: c002
+      snippet: data elements feature appropriate contextual factors such as geographic
+        distance to the nearest hospital
+    core_path: sensitive_elements[0].sensitivity_details
+  splits[0].split_details:
+    receipts:
+    - chunk: c002
+      snippet: The dataset will also provision a holdout test set, accessible for
+        model external validation to aid marketplace adoption of AI-developed models
+        for implementation in acute and critical care.
+    core_path: splits[0].split_details
+  status:
+    receipts:
+    - chunk: c006
+      snippet: under review for potential modification in compliance with Administration
+        directives
+    core_path: status
+  subpopulations[0].identification:
+    receipts:
+    - chunk: c006
+      snippet: Patient admissions from ICU, PICU, and NICU
+    core_path: subpopulations[0].identification
+  tasks[0].response:
+    receipts:
+    - chunk: c002
+      snippet: aimed at characterizing acute and critical care illness, predicting
+        complications, and measuring treatment response among patients with acute
+        or critical illness
+    core_path: tasks[0].response
+  title:
+    receipts:
+    - chunk: c002
+      snippet: Patient-Focused Collaborative Hospital Repository Uniting Standards
+        (CHoRUS) for Equitable AI
+    core_path: title
+  updates.update_details:
+    receipts:
+    - chunk: c007
+      snippet: We have asked data contributing sites to provide regular status updates
+        with regard to their ... progress in creating and curating a CHoRUS-specific
+        clinical data extract. Sites can submit ... updates either using the GitHub
+        interface directly, or by submitting a Google Form
+    core_path: updates.update_details
