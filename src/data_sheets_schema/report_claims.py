@@ -75,8 +75,10 @@ _NEGATED = re.compile(r"\b(?:neither|nor|not|never|no)\b[^.]{0,40}"
 # without that guard it made the v7 API canary's only report finding (#757).
 _ABSENT_FROM_SCHEMA = re.compile(
     r"\bnot declared\b|\bno such slot\b|"
-    r"\bdoes not (?:exist|appear) (?:in|on) (?:the |this |that )?"
-    r"(?:schema|class|inventory|digest|`)|"
+    # up to a short adjective run before the noun: "in the supplied schema
+    # digest", "in the declared `Dataset` slot inventory" (#760)
+    r"\bdoes not (?:exist|appear) (?:in|on) (?:[\w`\-]+ ){0,6}?"
+    r"(?:schema|class|inventory|digest)\b|"
     r"\bnot a (?:declared|valid|recognised|recognized) slot\b|"
     r"\bnot in the (?:inventory|schema)\b|\bnot attested (?:keys?|slots?)\b|"
     r"\bappears? to have been invented\b", re.I)

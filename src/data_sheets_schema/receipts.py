@@ -474,14 +474,24 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                 "reason": "bundle drifted since the run; the receipt's chunks are not today's bytes"}
     texts = dict(zip([c["id"] for c in m["chunks"]], _texts(raw.decode("utf-8"), m["chunks"])))
     full = (yaml.safe_load(full_path.read_text(encoding="utf-8")) or {}) if full_path.exists() else {}
-    # The record as the receipt saw it: the API runner's phase-1 snapshot,
-    # beside the receipt under intermediate/ (#758). Absent on the agentic
-    # path, whose Phase 3 re-receipts what it changes.
+    # The record as the `full` phase wrote it: the API runner's phase-1
+    # snapshot beside the receipt under intermediate/ (#758) — written after
+    # the runner's value normalisation, so shapes match the record at the
+    # path level while the receipt itself came from the raw text. A same-
+    # label re-run appends _2, _3 to the snapshot names while the top-level
+    # receipt is overwritten, so the contemporary snapshot is the highest-
+    # numbered one (#761). Absent on the agentic path, whose Phase 3
+    # re-receipts what it changes. A reshaped path is kept out of the
+    # findings and is *not* credited for coverage: its leaves show under
+    # `without_receipt` until something re-receipts them.
     original = None
-    snap = receipt.parent / "intermediate" / receipt.name.replace("_coverage_receipt.yaml", "_full.yaml")
-    if snap.exists():
+    stem = receipt.name.replace("_coverage_receipt.yaml", "_full")
+    snaps = sorted((receipt.parent / "intermediate").glob(f"{stem}.yaml")) + sorted(
+        (receipt.parent / "intermediate").glob(f"{stem}_[0-9]*.yaml"),
+        key=lambda p: int(p.stem.rsplit("_", 1)[1]))
+    if snaps:
         try:
-            original = yaml.safe_load(snap.read_text(encoding="utf-8")) or None
+            original = yaml.safe_load(snaps[-1].read_text(encoding="utf-8")) or None
         except yaml.YAMLError:
             original = None
     block = check(rec, m, texts, full, record_bundle_md5, original)
