@@ -225,10 +225,21 @@ def _subjects(body: str) -> list[str]:
 #: A removal whose subject is a bare noun — "the block was removed". Its slot
 #: is named in the section heading and nowhere else, which is how AI_READI
 #: rep1's false removal escaped a first version that only read the sentence.
+# `object`/`objects`/`entries` are not here (#782): "the second object was
+# removed" removes an element of the heading's slot, not the slot, and the
+# slot's presence afterwards proves nothing about the claim.
 _BARE_SUBJECT = re.compile(r"\b(?:the|this|these|those|that)\s+(?:\w+\s+){0,2}"
-                           r"(?:block|slot|slots|object|objects|entries|array|"
+                           r"(?:block|slot|slots|array|"
                            r"list)\s+(?:was|were|have been|has been)\s+"
                            r"(?:removed|deleted|dropped)\b", re.I)
+#: A removal *from inside* a slot's entries — "`description` was removed
+#: from all eleven objects" — removes a nested field the checker cannot
+#: resolve without knowing the parent; counted as unnamed, never tested at
+#: the root (#782).
+_ELEMENT_REMOVAL = re.compile(
+    r"\b(?:removed|deleted|dropped)\s+from\s+(?:all|each|every|both|the|its|their|\w+\s+of\s+the|\d+|"
+    r"(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b)?[^.;]{0,40}?"
+    r"\b(?:objects?|entries|entry|items?|elements?)\b", re.I)
 
 
 def _heading_fallback(body: str, heading_slots: list[str]) -> list[str]:
@@ -271,6 +282,9 @@ def check_report(report: Path, full: dict, core: dict,
         nonlocal claims, unnamed
         if not names:
             unnamed += 1
+            return
+        if _ELEMENT_REMOVAL.search(claim):
+            unnamed += 1                     # a nested field of the entries (#782)
             return
         claims += 1
         where = _target(context)
