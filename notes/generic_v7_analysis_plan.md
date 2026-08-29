@@ -71,7 +71,12 @@ chunk other than the one cited is `adjacent` or `elsewhere` — reported
 under "snippets in another chunk", never gated — and the floor of 0 stays
 for text found nowhere in the bundle. The fan-out proceeds under the
 revised gate with the canary records re-checked offline, not with a third
-run: the instrument changed, the procedure did not.
+run. **This is an interpretation of the canary rule, not something it
+grants**: the rule says a fixed canary is re-run and names no instrument
+exception. The reading taken is that the checker is not on the generation
+path — nothing the model receives or does changed — so re-running would
+produce a third record of the same procedure and test nothing the two
+existing records, re-checked with every floor held, do not already test.
 
 ## Canary rule
 

@@ -73,8 +73,12 @@ EXEMPT_LEAVES = frozenset({"conforms_to_class", "conforms_to_schema", "notes", "
 #: Summed over the `...`-parts, each of which must carry MIN_PART_CHARS: the
 #: second v7 canary receipted "50,000...Patient admissions from ICU" and a
 #: per-part minimum of 8 rejected the number that anchored it (#763).
-MIN_SNIPPET_CHARS = 8
-MIN_PART_CHARS = 3
+MIN_SNIPPET_CHARS = 8          # at least one part carries this much
+MIN_PART_CHARS = 3             # every part carries this much
+MIN_MULTIPART_CHARS = 12       # a multi-part snippet carries this much in all
+# "the ... and ... for" verified in 25 of 28 AI_READI chunks under a
+# parts>=3/total>=8 rule (#765); one part of 8 is what pins a snippet to
+# a passage, and the numeric anchor rides beside it.
 
 NON_CHECKS = (
     "that a chunk marked nothing_relevant truly held nothing for the record — a "
@@ -101,19 +105,21 @@ def normalise(text: str) -> str:
     return _WS.sub(" ", t).strip()
 
 
-def snippet_in(snippet: str, chunk_text: str) -> tuple[bool, str]:
+def snippet_in(snippet: str, chunk_text: str, hay: str | None = None) -> tuple[bool, str]:
     """(verified, reason). `...` (or `[...]`) splits the snippet into parts
-    matched independently, in order; every part must be at least
-    MIN_SNIPPET_CHARS after normalisation."""
-    hay = normalise(chunk_text)
+    matched independently, in order. `hay` is the chunk already normalised,
+    for a caller checking many snippets against one chunk (#766)."""
+    hay = normalise(chunk_text) if hay is None else hay
     parts = [normalise(p) for p in _ELLIPSIS.split(snippet)]
     parts = [p for p in parts if p]
     if not parts:
         return False, "empty after normalisation"
     short = [p for p in parts if len(p) < MIN_PART_CHARS]
-    if short or sum(len(p) for p in parts) < MIN_SNIPPET_CHARS:
+    if (short or max(len(p) for p in parts) < MIN_SNIPPET_CHARS
+            or (len(parts) > 1 and sum(len(p) for p in parts) < MIN_MULTIPART_CHARS)):
         return False, (f"too short to attest anything: {(short or parts)[0]!r} "
-                       f"(parts < {MIN_PART_CHARS} chars, or < {MIN_SNIPPET_CHARS} in all)")
+                       f"(every part >= {MIN_PART_CHARS}, one part >= {MIN_SNIPPET_CHARS}, "
+                       f"a multi-part snippet >= {MIN_MULTIPART_CHARS} in all)")
     pos = 0
     for p in parts:
         i = hay.find(p, pos)
@@ -376,6 +382,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     snippets = {"total": 0, "verified": 0, "adjacent": 0, "elsewhere": 0,
                 "mismatched": 0, "unchecked": 0}
     order = {cid: i for i, cid in enumerate(manifest_ids)}
+    hays = {cid: normalise(t) for cid, t in chunk_texts.items()}      # once per chunk (#766)
     for e in entries:
         if e.get("status") != "extracted":
             continue
@@ -393,12 +400,15 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             if text is None:
                 snippets["unchecked"] += 1
                 continue
-            ok, why = snippet_in(snippet, text)
+            ok, why = snippet_in(snippet, text, hays.get(e.get("id")))
             if ok:
                 snippets["verified"] += 1
                 continue
-            where = [cid for cid, t in chunk_texts.items() if cid != e.get("id") and snippet_in(snippet, t)[0]]
-            if where and not why.startswith("too short"):
+            # Shortness is decided before any haystack, so a too-short
+            # snippet is found nowhere and stays `mismatched`.
+            where = [] if why.startswith("too short") else [
+                cid for cid, h in hays.items() if cid != e.get("id") and snippet_in(snippet, "", h)[0]]
+            if where:
                 near = any(abs(order.get(cid, -9) - order.get(e.get("id"), 9)) == 1 for cid in where)
                 kind = "adjacent" if near else "elsewhere"
                 snippets[kind] += 1

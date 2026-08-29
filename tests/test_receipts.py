@@ -63,9 +63,13 @@ class Normalisation(unittest.TestCase):
         for short in ("a", "the", "…a…", "Fund", "Bridge2AI ... a"):
             ok, why = rc.snippet_in(short, text)
             self.assertFalse(ok, short); self.assertIn("short", why)
-        # #763: a short numeric part anchors a phrase; the minimum is over all parts
-        self.assertTrue(rc.snippet_in("2024", "in 2024 the program")[0] is False)
+        # #763: a short numeric part anchors a phrase — one part of 8 pins it
+        self.assertFalse(rc.snippet_in("2024", "in 2024 the program")[0])
         self.assertTrue(rc.snippet_in("50,000...admissions from ICU", "50,000\nPatient admissions from ICU, PICU")[0])
+        # #765: three common words do not, however many parts they are split into
+        ok, why = rc.snippet_in("the ... and ... for", "the cat and the dog for a walk")
+        self.assertFalse(ok); self.assertIn("short", why)
+        self.assertFalse(rc.snippet_in("the cat ... dog for", "the cat and the dog for a walk")[0])   # no part of 8, total 12
 
 
 class Validator(unittest.TestCase):
