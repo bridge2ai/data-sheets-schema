@@ -453,8 +453,10 @@ def backfill_spec(project, method, label, condition, runtime, arm, execute):
                 click.echo(f"     written to {path}")
             return
     raise click.ClickException(
-        f"{label}/{project}: no spec under {condition}/{runtime}/{arm} re-renders to the recorded "
-        f"hash {req['sha256'][:12]}… on {base}±2 days; not written")
+        f"{label}/{project}: no spec under {condition}/{runtime}/{arm}/provider {provider!r} "
+        f"(from the record's model.provider) re-renders to the recorded hash "
+        f"{req['sha256'][:12]}… on {base}±2 days; not written. A run under another arm "
+        f"needs its --method too (the {{METHOD}} substitution differs).")
 
 
 @provenance.command('annotate-observed')
