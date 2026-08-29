@@ -106,7 +106,9 @@ REPORTED_ONLY = (
     # an unchecked block prints — (#727).
     ("chunks unreviewed", "receipts", lambda b: receipt_floors(b)["chunks unreviewed"]),
     ("snippets unverified", "receipts", lambda b: receipt_floors(b)["snippets unverified"]),
-    ("snippets in another chunk", "receipts",
+    # Adjacent, elsewhere and boundary-spanning together: verbatim in the
+    # bundle, not wholly inside the chunk cited (#786).
+    ("snippets not in the chunk cited", "receipts",
      lambda b: int((b.get("snippets") or {}).get("adjacent") or 0) + int((b.get("snippets") or {}).get("elsewhere") or 0)
      + int((b.get("snippets") or {}).get("spans_boundary") or 0)),
 )

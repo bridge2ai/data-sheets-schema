@@ -71,6 +71,12 @@ class Normalisation(unittest.TestCase):
         self.assertTrue(rc.snippet_in("3.82 TB", "size 3.82 TB in all")[0])
         self.assertFalse(rc.snippet_in("2024", "in 2024 the program")[0])
         self.assertFalse(rc.snippet_in("v1.0", "in v1.0 the program")[0])
+        # #784: version strings and figure labels pin nothing
+        for weak in ("3.0.0", "v3.0.0", "Table 1", "Fig. 1", "10 days", "1,000"):
+            self.assertFalse(rc.snippet_in(weak, f"see {weak} here")[0], weak)
+        # #786: a JSON-escaped newline in the bundle is whitespace
+        self.assertTrue(rc.snippet_in("from the\nAI-READI Project (3.0.0) [Data set].",
+                                      '"citation": "Diabetes from the\\nAI-READI Project (3.0.0) [Data set]. FAIRhub."')[0])
         # #765: three common words do not, however many parts they are split into
         ok, why = rc.snippet_in("the ... and ... for", "the cat and the dog for a walk")
         self.assertFalse(ok); self.assertIn("short", why)
