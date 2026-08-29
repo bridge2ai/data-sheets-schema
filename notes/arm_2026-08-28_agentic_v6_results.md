@@ -51,21 +51,37 @@ touches the receipt.
 
 - **Coverage:** every manifest chunk reviewed on every run — 12/12 at 100%,
   where the 2026-08-24 arm never opened roughly a fifth of AI_READI, CM4AI and
-  VOICE (#700). `bundle_lines_read` is 100% on eleven runs; AI_READI rep1 read
-  two chunks (c019, c026) through `sed -n` — honest, but invisible to the
-  file-tool detector, which reports them `unopened` (2). The playbook forbids
-  the shell path for exactly this reason and the wave-2/3 launch text repeated
-  it; no later run did it.
+  VOICE (#700). `bundle_lines_read` is 100% on eleven runs. AI_READI rep1 is
+  the exception and the detector caught it: it opened c019 with 200 of 400
+  lines and c026 with 150 of 296, receipted both as reviewed (c019
+  `extracted`, 40 snippets — all from the read half; c026 `nothing_relevant`,
+  and the unread half is indeed more of the same blank IRB form), and its
+  report says all 28 chunks were read in full. `bundle_lines_read` 7030/7376
+  is exactly the two missing halves, and `receipt_chunks_unopened: 2` is the
+  receipt claiming what the transcript does not show (#775). No snippet rests
+  on an unread line, so the record is not wrong; the claim of coverage is.
+  Its one `sed -n` read was of c023/c024, both also opened in full, and is
+  irrelevant to the two.
 - **Support:** 3,400 of 3,400 snippets verify verbatim against the chunk
   cited. Zero mismatched, zero in another chunk. The API arm's v7 canaries
   cite the neighbouring chunk for ~2% (#763); the agentic arm, which reads a
-  chunk and writes its entry before the next, does not.
+  chunk and writes its entry before the next, does not — with one protocol
+  deviation the transcripts show: CM4AI rep3 added and removed receipt
+  entries by script after running the check, rather than only as it read
+  (#776). Two runs (AI_READI rep2, CM4AI rep3) also ran the validator's own
+  functions against their receipt from a shell — verification, not
+  extraction.
 - **Slots with a receipt:** 45–95% of receiptable leaves, highly variable
   (CM4AI rep3 724/763; CHORUS rep1 86/190). The residue is mostly nested
   leaves under entries the agent receipted at the leaf it copied rather than
   at the entry — a reporting convention, not a coverage gap, and the first
   number to read per slot when comparing arms (#708's prediction 5 on the API
   side).
+
+- **Report claims:** `claims_checked` is 0 on 10 of 12 reports (VOICE rep2
+  and CM4AI rep3 have 1), so the arm's "report findings 0" is the #684
+  vacuity, not a measured clean — as on the 2026-08-24 arm. Pair warnings
+  (`semantic-review-required`, 1) on 7 of 12; errors 0 on all.
 
 ## Predictions of `notes/generic_v6_analysis_plan.md`
 

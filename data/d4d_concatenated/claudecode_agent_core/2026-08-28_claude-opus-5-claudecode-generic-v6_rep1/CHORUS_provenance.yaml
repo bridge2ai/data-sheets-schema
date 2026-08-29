@@ -305,6 +305,8 @@ receipts:
   snippets:
     total: 106
     verified: 106
+    adjacent: 0
+    elsewhere: 0
     mismatched: 0
     unchecked: 0
   slots:
@@ -366,6 +368,7 @@ receipts:
     without_receipt_truncated: 54
     receipt_paths: 89
     unresolved: []
+    reshaped_by_reconcile: []
   findings: []
   findings_truncated: null
   summary: chunks 8/8 reviewed · snippets 106/106 verified · slots 86/190 with a receipt
